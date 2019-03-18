@@ -1,5 +1,7 @@
 # Code FREAK
 
+[![Build Status](https://travis-ci.com/code-freak/code-freak.svg?branch=master)](https://travis-ci.com/code-freak/code-freak)
+
 Code Feedback Review & Evaluation Kit | Educational Online IDE
 
 ## Development environment setup
