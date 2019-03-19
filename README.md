@@ -25,6 +25,9 @@ Please keep this in mind when testing the application.
    ```
 3) Run the command `./gradlew bootRun`. The application is started at http://localhost:8080.
 
+### Fix linting issues
+    ./gradlew spotlessApply
+
 ## License
     Code FREAK | Code Feedback Review & Evaluation Kit
     Copyright (C) 2019 Kiel University of Applied Sciences
