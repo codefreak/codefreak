@@ -10,5 +10,4 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity?) {
     http?.authorizeRequests()?.anyRequest()?.permitAll()
   }
-
 }
