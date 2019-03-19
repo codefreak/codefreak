@@ -1,6 +1,7 @@
 # Code FREAK
 
 [![Build Status](https://travis-ci.com/code-freak/code-freak.svg?branch=master)](https://travis-ci.com/code-freak/code-freak)
+[![Known Vulnerabilities](https://snyk.io/test/github/code-freak/code-freak/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/code-freak/code-freak?targetFile=build.gradle)
 
 Code Feedback Review & Evaluation Kit | Educational Online IDE
 
