@@ -1,4 +1,4 @@
-Code FREAK<br><small>╰ Code Feedback Review & Evaluation Kit</small>
+Code FREAK<br><small>╰ Code Feedback, Review & Evaluation Kit</small>
 ======
 
 [![Build Status](https://travis-ci.com/code-freak/code-freak.svg?branch=master)](https://travis-ci.com/code-freak/code-freak)
@@ -8,6 +8,10 @@ Code FREAK<br><small>╰ Code Feedback Review & Evaluation Kit</small>
 Code FREAK is an online IDE for educational purposes that allows teachers to create and enroll programming tasks
 allows students to programm and execute their code without leaving the browser. Submissions can be evaluated
 automatically by various testing-methods like unit tests or code smell detection.
+
+## ⚠️ WORK IN PROGRESS ⚠️
+Code FREAK is currently under heavy development. This means things can break without any further notice.
+Please keep this in mind when testing the application.
 
 ## Development environment setup
 
