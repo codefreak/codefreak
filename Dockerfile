@@ -8,7 +8,8 @@ RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean c
     && rm -r $HOME/.gradle \
     && mv build/libs /app \
     && mv /app/code-freak-*.jar /app/code-freak.jar \
-    && rm -r /build /tmp/*
+    && rm -r /build /tmp/* \
+    && exit 1
 
 WORKDIR /app
 CMD ["java", "-jar", "/app/code-freak.jar"]
