@@ -32,6 +32,7 @@ dependencies {
   implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
   implementation 'com.bertramlabs.plugins:asset-pipeline-spring-boot:3.0.10'
   implementation 'com.bertramlabs.plugins:sass-asset-pipeline:3.0.9'
+  implementation 'org.webjars:bootstrap:4.3.1'
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.hsqldb:hsqldb'
