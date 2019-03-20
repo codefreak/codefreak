@@ -1,0 +1,8 @@
+#
+# Used for automated testing on Docker Cloud
+# This will trigger on each pull request
+#
+# https://docs.docker.com/docker-hub/builds/automated-testing/
+#
+sut:
+  build: .
