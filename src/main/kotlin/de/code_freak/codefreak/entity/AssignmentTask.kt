@@ -6,8 +6,6 @@ import javax.persistence.ManyToOne
 
 @Entity
 class AssignmentTask(
-  id: Long? = null,
-
   /**
    * Related assignment this task belongs to
    */
@@ -44,7 +42,7 @@ class AssignmentTask(
    */
   @Column(nullable = false)
   var weight: Int? = null
-) : JpaPersistable<Long>(id) {
+) : JpaPersistable() {
 
   /**
    * Same like position but one-based index

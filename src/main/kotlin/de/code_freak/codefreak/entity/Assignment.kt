@@ -8,8 +8,6 @@ import javax.persistence.OrderBy
 
 @Entity
 class Assignment(
-  id: Long? = null,
-
   /**
    * A title for this assignment
    * e.g. "Java Threads and Runnable"
@@ -36,4 +34,4 @@ class Assignment(
   @OneToMany
   @OrderBy("position ASC")
   var tasks: List<AssignmentTask>
-) : JpaPersistable<Long>(id)
+) : JpaPersistable()

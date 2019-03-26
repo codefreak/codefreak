@@ -5,8 +5,6 @@ import javax.persistence.ManyToOne
 
 @Entity
 class TaskEvaluation(
-  id: Long? = null,
-
   /**
    * The task that should be evaluated
    */
@@ -19,4 +17,4 @@ class TaskEvaluation(
    * TODO: Create a enum/registry that holds all possible evaluators – see #12
    */
   var adapter: String? = null
-) : JpaPersistable<Long>(id)
+) : JpaPersistable()

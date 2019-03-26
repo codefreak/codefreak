@@ -5,8 +5,6 @@ import javax.persistence.ManyToOne
 
 @Entity
 class Submission(
-  id: Long? = null,
-
   /**
    * The user that handed in this submissions
    */
@@ -18,4 +16,4 @@ class Submission(
    */
   @ManyToOne
   var assignment: Assignment? = null
-) : JpaPersistable<Long>(id)
+) : JpaPersistable()

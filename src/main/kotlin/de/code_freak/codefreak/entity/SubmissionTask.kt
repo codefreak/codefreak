@@ -5,8 +5,6 @@ import javax.persistence.ManyToOne
 
 @Entity
 class SubmissionTask(
-  id: Long? = null,
-
   /**
    * The submission of which this task is part of
    */
@@ -17,4 +15,4 @@ class SubmissionTask(
    * A tar archive of files that have been submitted
    */
   var files: ByteArray? = null
-) : JpaPersistable<Long>(id)
+) : JpaPersistable()

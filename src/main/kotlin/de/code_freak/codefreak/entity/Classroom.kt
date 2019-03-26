@@ -6,8 +6,6 @@ import javax.persistence.OneToMany
 
 @Entity
 class Classroom(
-  id: Long? = null,
-
   /**
    * Name of this course
    */
@@ -19,4 +17,4 @@ class Classroom(
    */
   @OneToMany(mappedBy = "classroom")
   var assignments: List<Assignment>
-) : JpaPersistable<Long>(id)
+) : JpaPersistable()

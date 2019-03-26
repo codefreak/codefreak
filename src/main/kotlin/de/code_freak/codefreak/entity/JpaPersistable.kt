@@ -1,15 +1,13 @@
 package de.code_freak.codefreak.entity
 
-import java.io.Serializable
-import javax.persistence.GeneratedValue
+import java.util.UUID
 import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
-abstract class JpaPersistable<T : Serializable>(
+abstract class JpaPersistable(
   @Id
-  @GeneratedValue
-  var id: T? = null
+  var id: UUID = UUID.randomUUID()
 ) {
 
   override fun equals(other: Any?): Boolean {
@@ -19,7 +17,11 @@ abstract class JpaPersistable<T : Serializable>(
 
     if (this::class != other::class) return false
 
-    other as JpaPersistable<*>
-    return if (null == this.id) false else this.id == other.id
+    other as JpaPersistable
+    return this.id == other.id
+  }
+
+  override fun hashCode(): Int {
+    return this.id.hashCode()
   }
 }
