@@ -2,6 +2,7 @@ package de.code_freak.codefreak.entity
 
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 
@@ -28,13 +29,15 @@ class AssignmentTask(
   /**
    * The task body/description of what to do
    */
-  @Column(nullable = false, columnDefinition = "text")
+  @Lob
+  @Column(nullable = false)
   var body: String? = null,
 
   /**
    * A tar archive of files that act as boilerplate code
    */
   @Column(nullable = false)
+  @Lob
   var files: ByteArray? = null,
 
   /**
