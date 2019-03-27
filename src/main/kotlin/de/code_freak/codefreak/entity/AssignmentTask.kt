@@ -42,17 +42,17 @@ class AssignmentTask(
    * The total weight of all tasks should not be > 100
    */
   @Column(nullable = false)
-  var weight: Int? = null
-) : JpaPersistable() {
-
-  /**
-   * Same like position but one-based index
-   */
-  val number get() = this.position?.plus(1L)
+  var weight: Int? = null,
 
   /**
    * Evaluations that will be applied to this task
    */
   @OneToMany(mappedBy = "task")
   var evaluation: List<TaskEvaluation>? = ArrayList()
+) : JpaPersistable() {
+
+  /**
+   * Same like position but one-based index
+   */
+  val number get() = this.position?.plus(1L)
 }
