@@ -16,5 +16,5 @@ class Classroom(
    * Assignments in this course
    */
   @OneToMany(mappedBy = "classroom")
-  var assignments: List<Assignment>
+  var assignments: List<Assignment> = ArrayList()
 ) : JpaPersistable()

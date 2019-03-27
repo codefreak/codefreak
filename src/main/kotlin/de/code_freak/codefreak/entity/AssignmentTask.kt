@@ -3,6 +3,7 @@ package de.code_freak.codefreak.entity
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 
 @Entity
 class AssignmentTask(
@@ -48,4 +49,10 @@ class AssignmentTask(
    * Same like position but one-based index
    */
   val number get() = this.position?.plus(1L)
+
+  /**
+   * Evaluations that will be applied to this task
+   */
+  @OneToMany(mappedBy = "task")
+  var evaluation: List<TaskEvaluation>? = ArrayList()
 }
