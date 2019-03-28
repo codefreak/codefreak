@@ -10,9 +10,12 @@ import de.code_freak.codefreak.repository.AssignmentTaskRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.TaskEvaluationRepository
 import de.code_freak.codefreak.repository.UserRepository
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Profile
+import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.core.Ordered
 import org.springframework.stereotype.Service
 
 /**
@@ -21,7 +24,8 @@ import org.springframework.stereotype.Service
  */
 @Service
 @Profile("dev")
-class SeedDatabase : InitializingBean {
+class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
+
   @Autowired
   lateinit var userRepository: UserRepository
 
@@ -37,7 +41,14 @@ class SeedDatabase : InitializingBean {
   @Autowired
   lateinit var taskEvaluationRepository: TaskEvaluationRepository
 
-  override fun afterPropertiesSet() {
+  @Value("\${spring.jpa.hibernate.ddl-auto:''}")
+  private lateinit var schemaExport: String
+
+  override fun onApplicationEvent(event: ContextRefreshedEvent) {
+    if (!schemaExport.startsWith("create")) {
+      return
+    }
+
     val user1 = User()
     val user2 = User()
     userRepository.saveAll(listOf(user1, user2))
@@ -57,5 +68,9 @@ class SeedDatabase : InitializingBean {
     val eval1 = TaskEvaluation(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
     val eval2 = TaskEvaluation(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))
     taskEvaluationRepository.saveAll(listOf(eval1, eval2))
+  }
+
+  override fun getOrder(): Int {
+    return Ordered.LOWEST_PRECEDENCE
   }
 }
