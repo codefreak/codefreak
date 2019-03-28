@@ -10,8 +10,8 @@ class ContainerService {
     val docker = DefaultDockerClient.builder().uri("http://localhost:2375").build()
 
     val containerConfig = ContainerConfig.builder()
-      .image("theiaide/theia")
-      .build()
+        .image("theiaide/theia")
+        .build()
 
     val container = docker.createContainer(containerConfig)
 
