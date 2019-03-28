@@ -10,6 +10,7 @@ import de.code_freak.codefreak.repository.AssignmentTaskRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.TaskEvaluationRepository
 import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.service.ContainerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationListener
@@ -44,7 +45,12 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
   @Value("\${spring.jpa.hibernate.ddl-auto:''}")
   private lateinit var schemaExport: String
 
+  @Autowired
+  private lateinit var containerService: ContainerService
+
   override fun onApplicationEvent(event: ContextRefreshedEvent) {
+    containerService.startIdeContainer()
+
     if (!schemaExport.startsWith("create")) {
       return
     }
