@@ -11,6 +11,8 @@ Vagrant.configure("2") do |config|
   # Create a private network and give VM a static IP
   config.vm.network "private_network", ip: "10.12.12.100"
 
+  config.vm.network "forwarded_port", guest: 2375, host: 2735
+
   # Enable the automatic install of docker and make it available via TCP
   # We bind to 0.0.0.0 because the VM and Host are on a private network
   # The Docker daemon is then available at 10.12.12.100:2375
