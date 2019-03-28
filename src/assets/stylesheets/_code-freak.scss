@@ -1,0 +1,112 @@
+// app styles
+
+body, html {
+  overflow-x: hidden;
+}
+
+table {
+  @extend .table;
+}
+
+.post-content p {
+  text-align: justify;
+}
+
+.mh-100vh {
+  min-height: 100vh;
+}
+
+.bg-primary {
+  a {
+    color: inherit;
+  }
+}
+
+.bg-white-transparent {
+  background: rgba(255, 255, 255, .5);
+}
+
+.github-corner {
+  position: absolute;
+  z-index: 1000;
+  right: 0;
+  top: 0;
+}
+
+.off-canvas {
+  width: 300px;
+  position: absolute;
+  z-index: 0;
+  display: block;
+
+  &.collapse,
+  &.collapsing {
+    display: block;
+    transition-duration: unset;
+    transition-property: none;
+  }
+
+  & + div {
+    transition: transform 200ms;
+    transform: translateX(0);
+  }
+
+  &.show + div,
+  &.collapsing + div {
+    transform: translateX(300px);
+  }
+}
+
+@media (max-width: 1440px) {
+  .navbar-toggler {
+    display: inline-block !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .off-canvas {
+    position: relative;
+    height: auto;
+
+    &.show + div,
+    &.collapsing + div {
+      transform: translateX(0);
+    }
+  }
+}
+
+.highlighter-rouge {
+  margin-bottom: 1em;
+
+  > .highlight {
+    padding: 4px;
+  }
+
+  pre {
+    margin-bottom: 0;
+  }
+}
+
+.navbar {
+  padding-top: .825rem;
+  padding-bottom: .825rem;
+
+  .container {
+    padding-left: 0;
+    padding-right: 0;
+
+    @media (min-width: 1440px) {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+}
+
+.navbar-brand svg {
+  height: 30px;
+  width: auto;
+  color: white;
+  path {
+    fill: white;
+  }
+}

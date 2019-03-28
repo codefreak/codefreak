@@ -26,3 +26,4 @@
 /.nb-gradle/
 
 src/main/resources/application-dev.properties
+.asscache
