@@ -12,14 +12,14 @@ class TaskEvaluation(
    * The task that should be evaluated
    */
   @ManyToOne
-  var task: AssignmentTask? = null,
+  var task: AssignmentTask,
 
   /**
    * The adapter that is responsible for evaluation
    *
    * TODO: Create a enum/registry that holds all possible evaluators – see #12
    */
-  var adapter: String? = null,
+  var adapter: String,
 
   /**
    * Configuration for the adapter as key-value pairs

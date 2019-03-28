@@ -13,20 +13,20 @@ class Assignment(
    * e.g. "Java Threads and Runnable"
    */
   @Column(nullable = false)
-  var title: String? = null,
+  var title: String,
 
   /**
    * The lecturer who created this assignment
    */
   @ManyToOne
-  var owner: User? = null,
+  var owner: User,
 
   /**
    * The classroom this assignment belongs to
    * This can be null for assignments that are shared via link
    */
   @ManyToOne(optional = true)
-  var classroom: Classroom? = null,
+  var classroom: Classroom?,
 
   /**
    * A list of tasks in this assignment ordered by their position

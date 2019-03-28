@@ -9,11 +9,11 @@ class Submission(
    * The user that handed in this submissions
    */
   @ManyToOne
-  var user: User? = null,
+  var user: User,
 
   /**
    * The assignment this submission belongs to
    */
   @ManyToOne
-  var assignment: Assignment? = null
+  var assignment: Assignment
 ) : JpaPersistable()

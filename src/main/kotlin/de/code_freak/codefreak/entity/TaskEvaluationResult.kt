@@ -9,16 +9,16 @@ class TaskEvaluationResult(
    * The submission of which this task is part of
    */
   @ManyToOne
-  var submissionTask: SubmissionTask? = null,
+  var submissionTask: SubmissionTask,
 
   /**
    * Link to the evaluation that has been used to create the result
    */
   @ManyToOne
-  var evaluation: TaskEvaluation? = null,
+  var evaluation: TaskEvaluation,
 
   /**
-   * A tar archive of files that have been submitted
+   * The result value that was determined by the evaluation
    */
-  var result: Long? = null
+  var result: Long
 ) : JpaPersistable()

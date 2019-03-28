@@ -12,50 +12,47 @@ class AssignmentTask(
    * Related assignment this task belongs to
    */
   @ManyToOne
-  var assignment: Assignment? = null,
+  var assignment: Assignment,
 
   /**
    * Position/Index in the assignment (zero-based)
    */
   @Column(nullable = false)
-  var position: Long? = null,
+  var position: Long,
 
   /**
    * Title of the task
    */
   @Column(nullable = false)
-  var title: String? = null,
+  var title: String,
 
   /**
    * The task body/description of what to do
    */
   @Lob
-  @Column(nullable = false)
-  var body: String? = null,
+  var body: String?,
 
   /**
    * A tar archive of files that act as boilerplate code
    */
-  @Column(nullable = false)
   @Lob
-  var files: ByteArray? = null,
+  var files: ByteArray?,
 
   /**
    * A weight >=0, <=100 how the task is weighted
    * The total weight of all tasks should not be > 100
    */
-  @Column(nullable = false)
-  var weight: Int? = null,
+  var weight: Int?,
 
   /**
    * Evaluations that will be applied to this task
    */
   @OneToMany(mappedBy = "task")
-  var evaluation: List<TaskEvaluation>? = ArrayList()
+  var evaluation: List<TaskEvaluation> = ArrayList()
 ) : JpaPersistable() {
 
   /**
    * Same like position but one-based index
    */
-  val number get() = this.position?.plus(1L)
+  val number get() = this.position.plus(1L)
 }

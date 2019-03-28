@@ -10,11 +10,11 @@ class SubmissionTask(
    * The submission of which this task is part of
    */
   @ManyToOne
-  var submission: Submission? = null,
+  var submission: Submission,
 
   /**
    * A tar archive of files that have been submitted
    */
   @Lob
-  var files: ByteArray? = null
+  var files: ByteArray
 ) : JpaPersistable()

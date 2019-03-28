@@ -10,7 +10,7 @@ class Classroom(
    * Name of this course
    */
   @Column(nullable = false)
-  var name: String? = null,
+  var name: String,
 
   /**
    * Assignments in this course
