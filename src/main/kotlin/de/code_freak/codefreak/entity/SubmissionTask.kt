@@ -1,7 +1,7 @@
 package de.code_freak.codefreak.entity
 
+import org.hibernate.annotations.Type
 import javax.persistence.Entity
-import javax.persistence.Lob
 import javax.persistence.ManyToOne
 
 @Entity
@@ -15,6 +15,6 @@ class SubmissionTask(
   /**
    * A tar archive of files that have been submitted
    */
-  @Lob
+  @Type( type = "binary" )
   var files: ByteArray
 ) : JpaPersistable()

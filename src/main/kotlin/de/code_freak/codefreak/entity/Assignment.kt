@@ -31,7 +31,7 @@ class Assignment(
   /**
    * A list of tasks in this assignment ordered by their position
    */
-  @OneToMany
+  @OneToMany(mappedBy = "assignment")
   @OrderBy("position ASC")
   var tasks: List<AssignmentTask> = ArrayList()
 ) : JpaPersistable()
