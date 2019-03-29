@@ -34,6 +34,7 @@ dependencies {
   implementation 'org.webjars:jquery:3.3.1'
   implementation 'org.webjars:popper.js:1.14.6'
   implementation 'org.webjars:bootstrap:4.3.1'
+  implementation 'org.webjars:font-awesome:5.8.1'
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.hsqldb:hsqldb'
