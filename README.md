@@ -5,6 +5,7 @@ Code FREAK<br><small>╰ Code Feedback, Review & Evaluation Kit</small>
 [![Known Vulnerabilities](https://snyk.io/test/github/code-freak/code-freak/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/code-freak/code-freak?targetFile=build.gradle)
 [![Docker Image](https://img.shields.io/docker/cloud/build/cfreak/code-freak.svg)](https://hub.docker.com/r/cfreak/code-freak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcode-freak%2Fcode-freak.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcode-freak%2Fcode-freak?ref=badge_shield)
 
 Code FREAK is an online IDE for educational purposes that allows teachers to create and enroll programming tasks
 allows students to programm and execute their code without leaving the browser. Submissions can be evaluated
@@ -45,3 +46,6 @@ Please keep this in mind when testing the application.
     
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcode-freak%2Fcode-freak.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fcode-freak%2Fcode-freak?ref=badge_large)
