@@ -31,6 +31,7 @@ dependencies {
   implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
   implementation 'com.bertramlabs.plugins:asset-pipeline-spring-boot:3.0.10'
   implementation 'com.bertramlabs.plugins:sass-asset-pipeline:3.0.9'
+  implementation 'com.vladsch.flexmark:flexmark-all:0.40.32'
   implementation 'org.webjars:jquery:3.3.1'
   implementation 'org.webjars:popper.js:1.14.6'
   implementation 'org.webjars:bootstrap:4.3.1'
