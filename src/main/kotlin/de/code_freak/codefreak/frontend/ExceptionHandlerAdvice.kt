@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import java.util.UUID
 
-
 /**
  * Global exception handler for the frontend (is applied to all controllers).
  */
@@ -26,14 +25,18 @@ class ExceptionHandlerAdvice : ResponseEntityExceptionHandler() {
   }
 
   @ExceptionHandler(IllegalArgumentException::class)
-  fun handleIllegalArgumentException(ex: IllegalArgumentException,
-                                     controllerMethod: HandlerMethod): Any {
+  fun handleIllegalArgumentException(
+    ex: IllegalArgumentException,
+    controllerMethod: HandlerMethod
+  ): Any {
     return getResponse(ex.message, controllerMethod, HttpStatus.BAD_REQUEST)
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
-  fun handleMethodArgumentTypeMismatchException(ex: MethodArgumentTypeMismatchException,
-                                                controllerMethod: HandlerMethod): Any {
+  fun handleMethodArgumentTypeMismatchException(
+    ex: MethodArgumentTypeMismatchException,
+    controllerMethod: HandlerMethod
+  ): Any {
     return if (ex.parameter.parameterType == UUID::class.java) {
       getResponse(null, controllerMethod, HttpStatus.NOT_FOUND)
     } else {
@@ -48,17 +51,17 @@ class ExceptionHandlerAdvice : ResponseEntityExceptionHandler() {
    */
   protected fun getResponse(message: Any?, controllerMethod: HandlerMethod, status: HttpStatus): Any {
 
-    val isRestController = (controllerMethod.hasMethodAnnotation(ResponseBody::class.java)
-      || controllerMethod.beanType.isAnnotationPresent(ResponseBody::class.java)
-      || controllerMethod.beanType.isAnnotationPresent(RestController::class.java))
+    val isRestController = (controllerMethod.hasMethodAnnotation(ResponseBody::class.java) ||
+        controllerMethod.beanType.isAnnotationPresent(ResponseBody::class.java) ||
+        controllerMethod.beanType.isAnnotationPresent(RestController::class.java))
 
     return if (isRestController) {
       ResponseEntity(message, status)
     } else {
       val model = mapOf(
-        "message" to (message ?: "No message available"),
-        "status" to status.value(),
-        "error" to status.reasonPhrase
+          "message" to (message ?: "No message available"),
+          "status" to status.value(),
+          "error" to status.reasonPhrase
       )
       ModelAndView("error", model, status)
     }

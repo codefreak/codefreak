@@ -14,5 +14,5 @@ class AssignmentService {
 
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
-    .orElseThrow { EntityNotFoundException("Assignment not found") }
+      .orElseThrow { EntityNotFoundException("Assignment not found") }
 }
