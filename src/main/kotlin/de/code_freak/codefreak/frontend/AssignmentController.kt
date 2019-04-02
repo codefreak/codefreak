@@ -1,6 +1,5 @@
 package de.code_freak.codefreak.frontend
 
-import de.code_freak.codefreak.http.NotFoundException
 import de.code_freak.codefreak.service.AssignmentManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
@@ -19,11 +18,7 @@ class AssignmentController : BaseController() {
     @PathVariable("id") assignmentId: UUID,
     model: Model
   ): String {
-    val assignment = assignmentManager.findAssignment(assignmentId).orElseThrow {
-      NotFoundException("Assignment not found")
-    }
-
-    model.addAttribute("assignment", assignment)
+    model.addAttribute("assignment", assignmentManager.findAssignment(assignmentId))
     return "assignment"
   }
 }
