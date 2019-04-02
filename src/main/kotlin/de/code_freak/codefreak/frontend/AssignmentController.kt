@@ -1,6 +1,6 @@
 package de.code_freak.codefreak.frontend
 
-import de.code_freak.codefreak.service.AssignmentManager
+import de.code_freak.codefreak.service.AssignmentService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -11,14 +11,14 @@ import java.util.UUID
 @Controller
 class AssignmentController : BaseController() {
   @Autowired
-  lateinit var assignmentManager: AssignmentManager
+  lateinit var assignmentService: AssignmentService
 
   @GetMapping("/assignments/{id}")
   fun getAssignment(
     @PathVariable("id") assignmentId: UUID,
     model: Model
   ): String {
-    model.addAttribute("assignment", assignmentManager.findAssignment(assignmentId))
+    model.addAttribute("assignment", assignmentService.findAssignment(assignmentId))
     return "assignment"
   }
 }

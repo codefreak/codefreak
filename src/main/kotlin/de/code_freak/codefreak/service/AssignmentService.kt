@@ -8,7 +8,7 @@ import java.util.UUID
 import javax.transaction.Transactional
 
 @Service
-class AssignmentManager {
+class AssignmentService {
   @Autowired
   lateinit var assignmentRepository: AssignmentRepository
 
