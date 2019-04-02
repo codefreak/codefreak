@@ -5,6 +5,8 @@ plugins {
   id 'org.jetbrains.kotlin.plugin.spring' version '1.3.21'
   id 'com.diffplug.gradle.spotless' version '3.19.0'
   id "com.bertramlabs.asset-pipeline" version "3.0.8"
+  id 'jacoco'
+  id 'com.github.kt3k.coveralls' version '2.8.2'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -61,4 +63,15 @@ spotless {
   kotlin {
     ktlint().userData(['indent_size': '2'])
   }
+}
+
+jacocoTestReport {
+  reports {
+    xml.enabled = true
+    html.enabled = true
+  }
+}
+
+coveralls {
+  sourceDirs += ['src/main/kotlin']
 }

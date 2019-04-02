@@ -2,6 +2,7 @@ Code FREAK<br><small>╰ Code Feedback, Review & Evaluation Kit</small>
 ======
 
 [![Build Status](https://travis-ci.com/code-freak/code-freak.svg?branch=master)](https://travis-ci.com/code-freak/code-freak)
+[![Coverage Status](https://coveralls.io/repos/github/code-freak/code-freak/badge.svg?branch=master)](https://coveralls.io/github/code-freak/code-freak?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/code-freak/code-freak/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/code-freak/code-freak?targetFile=build.gradle)
 [![Docker Image](https://img.shields.io/docker/cloud/build/cfreak/code-freak.svg)](https://hub.docker.com/r/cfreak/code-freak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
