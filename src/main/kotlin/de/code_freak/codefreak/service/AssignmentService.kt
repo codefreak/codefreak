@@ -13,5 +13,6 @@ class AssignmentService {
   lateinit var assignmentRepository: AssignmentRepository
 
   @Transactional
-  fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id).orElseThrow { EntityNotFoundException() }
+  fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
+    .orElseThrow { EntityNotFoundException("Assignment not found") }
 }
