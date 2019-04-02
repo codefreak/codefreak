@@ -1,4 +1,4 @@
-package de.code_freak.codefreak.service
+package de.code_freak.codefreak.frontend
 
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.ext.tables.TablesExtension
