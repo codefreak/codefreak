@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner
 @SpringBootTest
 @ActiveProfiles("dev")
 @TestPropertySource(locations = ["/application-test.properties"])
-internal class CodeFreakApplicationTests {
+internal class SeedDatabaseTest {
 
   @Autowired
   private lateinit var assignmentRepository: AssignmentRepository
