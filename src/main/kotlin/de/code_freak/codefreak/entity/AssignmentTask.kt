@@ -35,7 +35,7 @@ class AssignmentTask(
   /**
    * A tar archive of files that act as boilerplate code
    */
-  @Type( type = "binary" )
+  @Type( type = "image" )
   var files: ByteArray?,
 
   /**
