@@ -49,8 +49,6 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
   private lateinit var containerService: ContainerService
 
   override fun onApplicationEvent(event: ContextRefreshedEvent) {
-    containerService.startIdeContainer()
-
     if (!schemaExport.startsWith("create")) {
       return
     }

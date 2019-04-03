@@ -13,8 +13,14 @@ class SubmissionTask(
   var submission: Submission,
 
   /**
+   * The task this submission refers to
+   */
+  @ManyToOne
+  var task: AssignmentTask,
+
+  /**
    * A tar archive of files that have been submitted
    */
-  @Type( type = "binary" )
-  var files: ByteArray
+  @Type(type = "binary")
+  var files: ByteArray?
 ) : JpaPersistable()
