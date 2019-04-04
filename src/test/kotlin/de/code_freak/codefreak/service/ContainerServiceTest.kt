@@ -4,16 +4,12 @@ import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
 import de.code_freak.codefreak.config.DockerConfiguration
 import de.code_freak.codefreak.entity.TaskSubmission
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.BDDMockito
-import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,7 +31,7 @@ internal class ContainerServiceTest {
 
   val taskSubmission by lazy {
     val mock = mock(TaskSubmission::class.java)
-    `when`(mock.id).thenReturn(UUID(0,0))
+    `when`(mock.id).thenReturn(UUID(0, 0))
     mock
   }
 
@@ -66,6 +62,6 @@ internal class ContainerServiceTest {
   }
 
   private fun listIdeContainer() = docker.listContainers(
-    ListContainersParam.withLabel(ContainerService.LABEL_TASK_SUBMISSION_ID)
+      ListContainersParam.withLabel(ContainerService.LABEL_TASK_SUBMISSION_ID)
   )
 }

@@ -2,7 +2,6 @@ package de.code_freak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.messages.ContainerConfig
-import com.spotify.docker.client.messages.ContainerState
 import com.spotify.docker.client.messages.HostConfig
 import com.spotify.docker.client.messages.PortBinding
 import de.code_freak.codefreak.entity.TaskSubmission
@@ -21,7 +20,7 @@ class ContainerService(
   companion object {
     const val IDE_DOCKER_IMAGE = "theiaide/theia:next"
     val DOCKER_IMAGES = listOf(
-      IDE_DOCKER_IMAGE
+        IDE_DOCKER_IMAGE
     )
     const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_TASK_SUBMISSION_ID = LABEL_PREFIX + "task-submission-id"
@@ -74,8 +73,8 @@ class ContainerService(
    */
   protected fun getIdeContainer(taskSubmission: TaskSubmission): String? {
     return docker.listContainers(
-      DockerClient.ListContainersParam.withLabel(LABEL_TASK_SUBMISSION_ID, taskSubmission.id.toString()),
-      DockerClient.ListContainersParam.limitContainers(1)
+        DockerClient.ListContainersParam.withLabel(LABEL_TASK_SUBMISSION_ID, taskSubmission.id.toString()),
+        DockerClient.ListContainersParam.limitContainers(1)
     ).firstOrNull()?.id()
   }
 
@@ -90,21 +89,21 @@ class ContainerService(
     val theiaPort = Random.nextInt(49152, 65535).toString()
 
     val labelMap = mapOf(
-      LABEL_TASK_SUBMISSION_ID to id,
-      LABEL_THEIA_PORT to theiaPort
+        LABEL_TASK_SUBMISSION_ID to id,
+        LABEL_THEIA_PORT to theiaPort
     )
 
     val publishedPorts = mapOf(
-      "3000" to listOf(PortBinding.of("0.0.0.0", theiaPort))
+        "3000" to listOf(PortBinding.of("0.0.0.0", theiaPort))
     )
     val hostConfig = HostConfig.builder().portBindings(publishedPorts).build()
 
     val containerConfig = ContainerConfig.builder()
-      .image(IDE_DOCKER_IMAGE)
-      .labels(labelMap)
-      .hostConfig(hostConfig)
-      .exposedPorts(publishedPorts.keys)
-      .build()
+        .image(IDE_DOCKER_IMAGE)
+        .labels(labelMap)
+        .hostConfig(hostConfig)
+        .exposedPorts(publishedPorts.keys)
+        .build()
 
     val container = docker.createContainer(containerConfig)
     return container.id()!!
@@ -120,7 +119,6 @@ class ContainerService(
     }
   }
 
-  protected fun isContainerRunning(containerId: String) =
-    docker.inspectContainer(containerId).state().running()
-
+  protected fun isContainerRunning(containerId: String): Boolean =
+      docker.inspectContainer(containerId).state().running()
 }
