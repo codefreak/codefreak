@@ -44,8 +44,11 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
   @Value("\${spring.jpa.hibernate.ddl-auto:''}")
   private lateinit var schemaExport: String
 
+  @Value("\${spring.jpa.database:''}")
+  private lateinit var database: String
+
   override fun onApplicationEvent(event: ContextRefreshedEvent) {
-    if (!schemaExport.startsWith("create")) {
+    if (!schemaExport.startsWith("create") && database != "HSQL") {
       return
     }
 
