@@ -2,7 +2,7 @@ package de.code_freak.codefreak.service
 
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Submission
-import de.code_freak.codefreak.entity.SubmissionTask
+import de.code_freak.codefreak.entity.TaskSubmission
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.SubmissionRepository
 import de.code_freak.codefreak.repository.SubmissionTaskRepository
@@ -37,7 +37,7 @@ class AssignmentService {
 
     // create a submission for every task in this assignment
     assignment.tasks.forEach {
-      val submissionTask = SubmissionTask(submission, it, it.files)
+      val submissionTask = TaskSubmission(submission, it, it.files)
       submissionTaskRepository.save(submissionTask)
     }
 

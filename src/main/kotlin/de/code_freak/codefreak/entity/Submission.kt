@@ -23,5 +23,5 @@ class Submission(
    * List of submissions for this task
    */
   @OneToMany(mappedBy = "submission")
-  var submissionTasks: List<SubmissionTask> = ArrayList()
+  var taskSubmissions: List<TaskSubmission> = ArrayList()
 ) : JpaPersistable()

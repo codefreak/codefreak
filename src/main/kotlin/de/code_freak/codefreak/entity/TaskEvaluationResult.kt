@@ -9,7 +9,7 @@ class TaskEvaluationResult(
    * The submission of which this task is part of
    */
   @ManyToOne
-  var submissionTask: SubmissionTask,
+  var taskSubmission: TaskSubmission,
 
   /**
    * Link to the evaluation that has been used to create the result

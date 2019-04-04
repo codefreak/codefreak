@@ -72,7 +72,7 @@ class AssignmentController : BaseController() {
 
     // start a container based on the submission for the current task
     val containerInfo = containerService.startIdeContainer(
-        submission.submissionTasks.first { submissionTask -> submissionTask.task.id == taskId }
+        submission.taskSubmissions.first { submissionTask -> submissionTask.task.id == taskId }
     )
 
     // redirect to IDE

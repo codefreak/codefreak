@@ -5,7 +5,7 @@ import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.ContainerInfo
 import com.spotify.docker.client.messages.HostConfig
 import com.spotify.docker.client.messages.PortBinding
-import de.code_freak.codefreak.entity.SubmissionTask
+import de.code_freak.codefreak.entity.TaskSubmission
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import kotlin.random.Random
@@ -23,12 +23,12 @@ class ContainerService {
   /**
    * Start an IDE container for the given submission
    */
-  fun startIdeContainer(submissionTask: SubmissionTask): ContainerInfo {
+  fun startIdeContainer(taskSubmission: TaskSubmission): ContainerInfo {
     // TODO: Pull only on boot and then periodically
     docker.pull(DOCKER_IMAGE)
 
     // TODO: find existing container with label set and make sure it is running before creating a new one
-    val id = submissionTask.id.toString()
+    val id = taskSubmission.id.toString()
 
     // 49152-65535 is the private port range
     val theiaPort = Random.nextInt(49152, 65535).toString()
@@ -53,7 +53,7 @@ class ContainerService {
     val container = docker.createContainer(containerConfig)
     docker.startContainer(container.id())
 
-    submissionTask.files?.let {
+    taskSubmission.files?.let {
       docker.copyToContainer(it.inputStream(), container.id(), "/home/project")
     }
 

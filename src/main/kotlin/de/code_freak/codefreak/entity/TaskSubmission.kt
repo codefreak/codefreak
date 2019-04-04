@@ -5,7 +5,7 @@ import javax.persistence.Entity
 import javax.persistence.ManyToOne
 
 @Entity
-class SubmissionTask(
+class TaskSubmission(
   /**
    * The submission of which this task is part of
    */
