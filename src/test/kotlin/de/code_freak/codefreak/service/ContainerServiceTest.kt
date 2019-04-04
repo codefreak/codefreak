@@ -8,6 +8,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
@@ -33,6 +34,11 @@ internal class ContainerServiceTest {
     val mock = mock(TaskSubmission::class.java)
     `when`(mock.id).thenReturn(UUID(0, 0))
     mock
+  }
+
+  @Before
+  fun setUp() {
+    containerService.pullDockerImages()
   }
 
   @After
