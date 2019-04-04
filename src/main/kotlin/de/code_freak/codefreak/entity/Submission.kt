@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.entity
 
+import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -24,4 +25,10 @@ class Submission(
    */
   @OneToMany(mappedBy = "submission")
   var taskSubmissions: List<TaskSubmission> = ArrayList()
-) : JpaPersistable()
+) : JpaPersistable() {
+
+  /**
+   * Get the submission for the given task id or null if there is no submission (yet)
+   */
+  fun forTask(taskId: UUID) = taskSubmissions.firstOrNull { taskSubmission -> taskSubmission.task.id == taskId }
+}

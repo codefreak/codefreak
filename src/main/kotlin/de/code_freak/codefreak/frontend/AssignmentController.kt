@@ -71,12 +71,10 @@ class AssignmentController : BaseController() {
     response.addCookie(cookie)
 
     // start a container based on the submission for the current task
-    val containerInfo = containerService.startIdeContainer(
-        submission.taskSubmissions.first { submissionTask -> submissionTask.task.id == taskId }
-    )
+    val containerId = containerService.startIdeContainer(submission.forTask(taskId)!!)
 
     // redirect to IDE
     // TODO: this could take some time until the container has booted and lead to connection issues
-    return "redirect:" + containerService.getIdeUrl(containerInfo)
+    return "redirect:" + containerService.getIdeUrl(containerId)
   }
 }

@@ -12,7 +12,6 @@ class DockerConfiguration {
   fun dockerClient(
     @Value("\${code-freak.docker.host:unix:///var/run/docker.sock}") uri: String
   ): DockerClient {
-    // TODO: Pull required docker images during boot
     return DefaultDockerClient.builder()
         .uri(uri)
         .build()
