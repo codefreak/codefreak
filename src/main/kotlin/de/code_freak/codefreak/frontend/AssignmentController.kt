@@ -37,7 +37,8 @@ class AssignmentController : BaseController() {
     @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     request: HttpServletRequest,
-    response: HttpServletResponse
+    response: HttpServletResponse,
+    model: Model
   ): String {
     val assignment = assignmentService.findAssignment(assignmentId)
 
@@ -67,14 +68,15 @@ class AssignmentController : BaseController() {
     val submissionId = submission.id.toString()
     if (cookie == null) {
       cookie = Cookie(cookieId, submissionId)
+      cookie.maxAge = 3600 * 60
     }
     response.addCookie(cookie)
 
     // start a container based on the submission for the current task
     val containerId = containerService.startIdeContainer(submission.forTask(taskId)!!)
+    val containerUrl = containerService.getIdeUrl(containerId)
 
-    // redirect to IDE
-    // TODO: this could take some time until the container has booted and lead to connection issues
-    return "redirect:" + containerService.getIdeUrl(containerId)
+    model.addAttribute("ide_url", containerUrl)
+    return "ide-redirect"
   }
 }
