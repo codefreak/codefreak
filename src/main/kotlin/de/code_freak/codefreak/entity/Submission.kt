@@ -18,14 +18,13 @@ class Submission(
    * The assignment this submission belongs to
    */
   @ManyToOne
-  var assignment: Assignment,
-
+  var assignment: Assignment
+) : JpaPersistable() {
   /**
    * List of submissions for this task
    */
   @OneToMany(mappedBy = "submission")
-  var taskSubmissions: List<TaskSubmission> = ArrayList()
-) : JpaPersistable() {
+  var taskSubmissions: MutableList<TaskSubmission> = ArrayList()
 
   /**
    * Get the submission for the given task id or null if there is no submission (yet)
