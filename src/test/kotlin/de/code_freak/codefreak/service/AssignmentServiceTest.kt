@@ -47,25 +47,25 @@ class AssignmentServiceTest {
   @Test
   fun `findAssignment by ID`() {
     `when`(assignmentRepository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(assignment))
-    assertThat(assignmentService.findAssignment(UUID(0,0)), equalTo(assignment))
+    assertThat(assignmentService.findAssignment(UUID(0, 0)), equalTo(assignment))
   }
 
   @Test(expected = EntityNotFoundException::class)
   fun `findAssignment throws for no results`() {
     `when`(assignmentRepository.findById(ArgumentMatchers.any())).thenReturn(Optional.empty())
-    assignmentService.findAssignment(UUID(0,0))
+    assignmentService.findAssignment(UUID(0, 0))
   }
 
   @Test
   fun `findSubmission by ID`() {
     `when`(submissionRepository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(submission))
-    assertThat(assignmentService.findSubmission(UUID(0,0)), equalTo(submission))
+    assertThat(assignmentService.findSubmission(UUID(0, 0)), equalTo(submission))
   }
 
   @Test(expected = EntityNotFoundException::class)
   fun `findSubmission throws for no results`() {
     `when`(submissionRepository.findById(ArgumentMatchers.any())).thenReturn(Optional.empty())
-    assignmentService.findSubmission(UUID(0,0))
+    assignmentService.findSubmission(UUID(0, 0))
   }
 
   @Test

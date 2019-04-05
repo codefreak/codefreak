@@ -25,7 +25,7 @@ class TaskSubmission(
   var files: ByteArray?
 ) : JpaPersistable() {
   init {
-    if(!submission.taskSubmissions.contains(this)) {
+    if (!submission.taskSubmissions.contains(this)) {
       submission.taskSubmissions.add(this)
     }
   }
