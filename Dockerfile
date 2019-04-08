@@ -3,7 +3,7 @@ FROM openjdk:8-alpine
 COPY . /build
 
 WORKDIR /build
-RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean check bootJar \
+RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean bootJar \
     && ./gradlew --stop \
     && rm -r $HOME/.gradle \
     && mv build/libs /app \

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <title>Redirect</title>
+</head>
+<body>
+  <div style="text-align: center;">Waiting for IDE…</div>
+
+  <script th:inline="javascript">
+  /*<![CDATA[*/
+      let ide_url = /*[[${ide_url}]]*/
+
+      function tryRedirect() {
+        fetch(ide_url, { mode: "no-cors" }).then(function() {
+          window.location.href = ide_url
+        }).catch(function() {
+          setTimeout(tryRedirect, 1000)
+        });
+      }
+
+      tryRedirect()
+  /*]]>*/
+  </script>
+</body>
+</html>
