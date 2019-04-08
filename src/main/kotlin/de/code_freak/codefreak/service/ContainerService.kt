@@ -18,7 +18,7 @@ class ContainerService(
   val docker: DockerClient
 ) {
   companion object {
-    const val IDE_DOCKER_IMAGE = "theiaide/theia:next"
+    const val IDE_DOCKER_IMAGE = "theiaide/theia-full:next"
     val DOCKER_IMAGES = listOf(
         IDE_DOCKER_IMAGE
     )
