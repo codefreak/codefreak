@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
   # $ docker ps -a
   #
   config.vm.provision "docker" do |d|
-    d.pull_images "theiaide/theia"
+    d.pull_images "theiaide/theia-full"
     # Make daemon accessible via tcp and restart to apply changes
     d.post_install_provision "shell", inline: <<-eol
       sed -i '/ExecStart=/c\ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375 --containerd=/run/containerd/containerd.sock' /lib/systemd/system/docker.service \
