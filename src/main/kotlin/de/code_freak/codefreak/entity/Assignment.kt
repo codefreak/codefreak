@@ -26,12 +26,12 @@ class Assignment(
    * This can be null for assignments that are shared via link
    */
   @ManyToOne(optional = true)
-  var classroom: Classroom?,
-
+  var classroom: Classroom?
+) : JpaPersistable() {
   /**
    * A list of tasks in this assignment ordered by their position
    */
   @OneToMany(mappedBy = "assignment")
   @OrderBy("position ASC")
-  var tasks: List<AssignmentTask> = ArrayList()
-) : JpaPersistable()
+  var tasks: MutableList<AssignmentTask> = ArrayList()
+}

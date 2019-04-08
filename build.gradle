@@ -4,9 +4,10 @@ plugins {
   id 'org.jetbrains.kotlin.jvm' version '1.3.21'
   id 'org.jetbrains.kotlin.plugin.spring' version '1.3.21'
   id 'com.diffplug.gradle.spotless' version '3.19.0'
-  id "com.bertramlabs.asset-pipeline" version "3.0.8"
+  id 'com.bertramlabs.asset-pipeline' version '3.0.8'
   id 'jacoco'
   id 'com.github.kt3k.coveralls' version '2.8.2'
+  id 'ua.eshepelyuk.ManifestClasspath' version '1.0.0'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -38,11 +39,16 @@ dependencies {
   implementation 'org.webjars:popper.js:1.14.6'
   implementation 'org.webjars:bootstrap:4.3.1'
   implementation 'org.webjars:font-awesome:5.8.1'
+  implementation 'com.spotify:docker-client:8.15.1'
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.hsqldb:hsqldb'
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
+
+  // workaround for https://github.com/spotify/docker-client/issues/1030
+  implementation 'org.glassfish.jersey.inject:jersey-hk2:2.26'
+  implementation 'org.glassfish.jersey.bundles.repackaged:jersey-guava:2.25.1'
 }
 
 compileKotlin {
@@ -74,4 +80,8 @@ jacocoTestReport {
 
 coveralls {
   sourceDirs += ['src/main/kotlin']
+}
+
+bootRun {
+  main = 'de.code_freak.codefreak.CodeFreakApplicationKt'
 }
