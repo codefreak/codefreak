@@ -23,6 +23,12 @@ class AssignmentController : BaseController() {
   @Autowired
   lateinit var containerService: ContainerService
 
+  @GetMapping("/assignments")
+  fun getAssignment(model: Model): String {
+    model.addAttribute("assignments", assignmentService.findAllAssignments())
+    return "assignments"
+  }
+
   @GetMapping("/assignments/{id}")
   fun getAssignment(
     @PathVariable("id") assignmentId: UUID,

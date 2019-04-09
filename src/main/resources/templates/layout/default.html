@@ -29,7 +29,14 @@
     </header>
     <ul class="nav nav-pills flex-column">
       <li class="nav-item">
-        <a class="nav-link py-3 text-white" th:href="@{'/'}">Home</a>
+        <a class="nav-link py-3 text-white"
+           th:classappend="${#httpServletRequest.getRequestURI() == '/' ? 'active' : ''}"
+           th:href="@{'/'}">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link py-3 text-white"
+           th:classappend="${#httpServletRequest.getRequestURI() == '/assignments' ? 'active' : ''}"
+           th:href="@{'/assignments'}">Assignments</a>
       </li>
     </ul>
   </nav>
