@@ -16,19 +16,45 @@ Code FREAK is currently under heavy development. This means things can break wit
 Please keep this in mind when testing the application.
 
 ## Development environment setup
+Create a file `src/main/resources/application-dev.properties`. For documentation on how to configure the
+server see [application.properties](https://github.com/code-freak/code-freak/blob/master/src/main/resources/application.properties)
+in the same directory. Minimum configuration that uses the in-memory database:
+```properties
+spring.jpa.database=HSQL
+spring.jpa.hibernate.ddl-auto=create
+```
 
-1) Set up a database (optional). Currently, drivers for PostgreSQL are included. You can also use the embedded in-memory database.
-2) Create a file `src/main/resources/application-dev.properties`. For documentation on how to configure the
-   server see [application.properties](https://github.com/code-freak/code-freak/blob/master/src/main/resources/application.properties)
-   in the same directory. Minimum configuration that uses the in-memory database:
-   ```
-   spring.jpa.database=HSQL
-   spring.jpa.hibernate.ddl-auto=create
-   ```
-3) Run the command `./gradlew bootRun`. The application is started at http://localhost:8080.
+### Database
+You can either use the embedded HSQL storage or a PostgreSQL database. Data from the HSQL database will get lost when
+the application shuts down. For Postgres create at least a dedicated database and adjust the configuration accordingly:
+```properties
+spring.datasource.url=jdbc:postgresql://host:port/database
+spring.datasource.username=user
+spring.datasource.pasword=supersecure
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+```
+
+### Docker
+For many parts of the application we need connection to a (dedicated) Docker daemon. By default the socket at
+`/var/run/docker.sock` will be tried. If you are on Linux please follow the installation guidelines for your distribution.
+For Windows, MacOS and other OS that cannot run Docker natively you will either need the official Docker for Windows/MacOS
+software stacks or use the Vagrant machine that is included in this repository. The Vagrant machine will make the Docker
+daemon available at `127.0.0.1:2375` (the official Docker port). If you setup Docker for Windows/MacOS the Daemon should
+be reachable on the same address. So if you are on Windows or MacOS adjust your `application-dev.properties` file so it points
+at a Docker daemon.
+```properties
+code-freak.docker.host = tcp://127.0.0.1:2375
+```
+
+### Run
+Run the command `./gradlew bootRun`. The application is started at `http://localhost:8080`.
 
 ### Fix linting issues
-    ./gradlew spotlessApply
+```console
+$ ./gradlew spotlessApply
+```
 
 ## License
     Code FREAK | Code Feedback Review & Evaluation Kit
