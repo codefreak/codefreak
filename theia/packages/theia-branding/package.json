@@ -1,0 +1,31 @@
+{
+  "name": "@code-freak/theia-branding",
+  "license": "AGPL-3.0-or-later",
+  "keywords": [
+    "theia-extension"
+  ],
+  "version": "0.0.0",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@theia/core": "latest",
+    "@theia/filesystem": "latest"
+  },
+  "devDependencies": {
+    "rimraf": "latest",
+    "typescript": "^3.1.3"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/theia-branding-frontend-module"
+    }
+  ]
+}
