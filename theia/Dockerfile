@@ -147,19 +147,20 @@ RUN adduser --disabled-password --gecos '' theia && \
     adduser theia sudo && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers;
 
+#Theia
+##Needed for node-gyp, nsfw build
+RUN apt-get update && apt-get install -y python build-essential
+
+WORKDIR /home/theia
+ADD package.json yarn.lock ./
+ADD packages packages
+
 RUN chmod g+rw /home && \
     mkdir -p /home/project && \
     chown -R theia:theia /home/theia && \
     chown -R theia:theia /home/project;
 
-#Theia
-##Needed for node-gyp, nsfw build
-RUN apt-get update && apt-get install -y python build-essential
-
 USER theia
-WORKDIR /home/theia
-ADD package.json yarn.lock ./
-ADD packages packages
 ARG GITHUB_TOKEN
 # using "NODE_OPTIONS=..." to avoid out-of-memory problem in CI
 RUN yarn --cache-folder ./ycache && rm -rf ./ycache && \
