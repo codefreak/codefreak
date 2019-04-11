@@ -43,4 +43,7 @@ class AssignmentService {
 
     return submission
   }
+
+  @Transactional
+  fun findAllAssignments(): Iterable<Assignment> = assignmentRepository.findAll()
 }
