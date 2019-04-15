@@ -10,8 +10,8 @@
     "src"
   ],
   "dependencies": {
-    "@theia/core": "latest",
-    "@theia/filesystem": "latest"
+    "@theia/core": "next",
+    "@theia/filesystem": "next"
   },
   "devDependencies": {
     "rimraf": "latest",
