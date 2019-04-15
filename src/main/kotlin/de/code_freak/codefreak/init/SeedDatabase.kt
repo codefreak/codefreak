@@ -1,9 +1,9 @@
 package de.code_freak.codefreak.init
 
 import de.code_freak.codefreak.entity.Assignment
-import de.code_freak.codefreak.entity.AssignmentTask
 import de.code_freak.codefreak.entity.Classroom
-import de.code_freak.codefreak.entity.TaskEvaluation
+import de.code_freak.codefreak.entity.Requirement
+import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.AssignmentTaskRepository
@@ -64,12 +64,12 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
     val assignment2 = Assignment("Java Assignment", user2, classroom2)
     assignmentRepository.saveAll(listOf(assignment1, assignment2))
 
-    val task1 = AssignmentTask(assignment1, 0, "Program in C", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", this::class.java.classLoader.getResource("init/c-task.tar").readBytes(), 100)
-    val task2 = AssignmentTask(assignment2, 0, "Program in Java", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", this::class.java.classLoader.getResource("init/java-task.tar").readBytes(), 100)
+    val task1 = Task(assignment1, 0, "Program in C", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", this::class.java.classLoader.getResource("init/c-task.tar").readBytes(), 100)
+    val task2 = Task(assignment2, 0, "Program in Java", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", this::class.java.classLoader.getResource("init/java-task.tar").readBytes(), 100)
     assignmentTaskRepository.saveAll(listOf(task1, task2))
 
-    val eval1 = TaskEvaluation(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
-    val eval2 = TaskEvaluation(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))
+    val eval1 = Requirement(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
+    val eval2 = Requirement(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))
     taskEvaluationRepository.saveAll(listOf(eval1, eval2))
   }
 

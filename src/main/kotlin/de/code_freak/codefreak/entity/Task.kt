@@ -7,7 +7,7 @@ import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 
 @Entity
-class AssignmentTask(
+class Task(
   /**
    * Related assignment this task belongs to
    */
@@ -43,15 +43,17 @@ class AssignmentTask(
    * The total weight of all tasks should not be > 100
    */
   var weight: Int?
-) : JpaPersistable() {
+) : BaseEntity(), Comparable<Task> {
   /**
    * Evaluations that will be applied to this task
    */
   @OneToMany(mappedBy = "task")
-  var evaluation: MutableList<TaskEvaluation> = ArrayList()
+  var requirements: MutableSet<Requirement> = mutableSetOf()
 
   /**
    * Same like position but one-based index
    */
   val number get() = this.position.plus(1L)
+
+  override fun compareTo(other: Task) = position.compareTo(other.position)
 }

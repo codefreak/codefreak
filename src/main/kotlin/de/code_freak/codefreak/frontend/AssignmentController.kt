@@ -79,7 +79,7 @@ class AssignmentController : BaseController() {
     response.addCookie(cookie)
 
     // start a container based on the submission for the current task
-    val containerId = containerService.startIdeContainer(submission.forTask(taskId)!!)
+    val containerId = containerService.startIdeContainer(submission.getAnswerForTask(taskId)!!)
     val containerUrl = containerService.getIdeUrl(containerId)
 
     model.addAttribute("ide_url", containerUrl)

@@ -5,7 +5,7 @@ import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
-abstract class JpaPersistable(
+abstract class BaseEntity(
   @Id
   var id: UUID = UUID.randomUUID()
 ) {
@@ -17,7 +17,7 @@ abstract class JpaPersistable(
 
     if (this::class != other::class) return false
 
-    other as JpaPersistable
+    other as BaseEntity
     return this.id == other.id
   }
 

@@ -7,15 +7,15 @@ import javax.persistence.ManyToOne
 import javax.persistence.MapKeyColumn
 
 @Entity
-class TaskEvaluation(
+class Requirement(
   /**
    * The task that should be evaluated
    */
   @ManyToOne
-  var task: AssignmentTask,
+  var task: Task,
 
   /**
-   * The adapter that is responsible for evaluation
+   * The adapter that is responsible for requirements
    *
    * TODO: Create a enum/registry that holds all possible evaluators – see #12
    */
@@ -28,4 +28,4 @@ class TaskEvaluation(
   @MapKeyColumn(name = "option")
   @Column(name = "value")
   var adapterConfig: Map<String, String> = HashMap()
-) : JpaPersistable()
+) : BaseEntity()
