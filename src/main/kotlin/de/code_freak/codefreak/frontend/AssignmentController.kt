@@ -9,9 +9,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.util.WebUtils
 import java.util.UUID
-import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -46,37 +44,33 @@ class AssignmentController : BaseController() {
     response: HttpServletResponse,
     model: Model
   ): String {
-    val assignment = assignmentService.findAssignment(assignmentId)
+    // TODO: fetch submission by logged-in user and not from session
+    val session = request.session
+    val sessionKey = "assignment-$assignmentId-submission"
+    var submissionId = session.getAttribute(sessionKey) as String?
 
-    // TODO: fetch submission by logged-in user
-    val cookieId = "assignment-$assignmentId-submission"
     val submission: Submission
-    var cookie = WebUtils.getCookie(request, cookieId)
     try {
-      submission = if (cookie != null) {
-        assignmentService.findSubmission(UUID.fromString(cookie.value))
+      submission = if (submissionId != null) {
+        assignmentService.findSubmission(UUID.fromString(submissionId))
       } else {
-        assignmentService.createNewSubmission(assignment)
+        assignmentService.createNewSubmission(
+            assignmentService.findAssignment(assignmentId)
+        )
       }
     } catch (e: IllegalArgumentException) {
-      // invalid UUID: delete cookie and try again
-      cookie!!.maxAge = 0
-      response.addCookie(cookie)
+      // invalid UUID: delete submission and try again
+      session.removeAttribute(sessionKey)
       return "redirect:/assignments/$assignmentId"
     } catch (e: EntityNotFoundException) {
       // submission has been deleted. We have to create a new one
-      cookie!!.maxAge = 0
-      response.addCookie(cookie)
+      session.removeAttribute(sessionKey)
       return "redirect:/assignments/$assignmentId"
     }
 
-    // send a cookie with the submission-id
-    val submissionId = submission.id.toString()
-    if (cookie == null) {
-      cookie = Cookie(cookieId, submissionId)
-      cookie.maxAge = 3600 * 60
-    }
-    response.addCookie(cookie)
+    // store submission id for this task in session
+    submissionId = submission.id.toString()
+    session.setAttribute(sessionKey, submissionId)
 
     // start a container based on the submission for the current task
     val containerId = containerService.startIdeContainer(submission.getAnswerForTask(taskId)!!)
