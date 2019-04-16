@@ -6,6 +6,7 @@ import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.SubmissionRepository
+import de.code_freak.codefreak.repository.TaskSubmissionRepository
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
@@ -34,6 +35,8 @@ class AssignmentServiceTest {
   lateinit var submission: Submission
   @Mock
   lateinit var submissionRepository: SubmissionRepository
+  @Mock
+  lateinit var taskSubmissionRepository: TaskSubmissionRepository
   @InjectMocks
   val assignmentService = AssignmentService()
 
@@ -70,7 +73,8 @@ class AssignmentServiceTest {
   fun createNewSubmission() {
     val files = ByteArray(0)
     `when`(task.files).thenReturn(files)
-    `when`(assignment.tasks).thenReturn(sortedSetOf(task))
+    val tasks = sortedSetOf(task)
+    `when`(assignment.tasks).thenReturn(tasks)
     val submission = assignmentService.createNewSubmission(assignment)
     assertThat(submission.answers, hasSize(1))
     assertThat(submission.answers.first(), instanceOf(Answer::class.java))
