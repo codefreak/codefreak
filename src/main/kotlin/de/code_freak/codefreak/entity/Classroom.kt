@@ -11,10 +11,10 @@ class Classroom(
    */
   @Column(nullable = false)
   var name: String
-) : JpaPersistable() {
+) : BaseEntity() {
   /**
    * Assignments in this course
    */
   @OneToMany(mappedBy = "classroom")
-  var assignments: MutableList<Assignment> = ArrayList()
+  var assignments: MutableSet<Assignment> = mutableSetOf()
 }

@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.entity
 
+import java.util.SortedSet
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -27,11 +28,11 @@ class Assignment(
    */
   @ManyToOne(optional = true)
   var classroom: Classroom?
-) : JpaPersistable() {
+) : BaseEntity() {
   /**
    * A list of tasks in this assignment ordered by their position
    */
   @OneToMany(mappedBy = "assignment")
   @OrderBy("position ASC")
-  var tasks: MutableList<AssignmentTask> = ArrayList()
+  var tasks: SortedSet<Task> = sortedSetOf()
 }

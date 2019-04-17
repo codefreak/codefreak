@@ -4,21 +4,21 @@ import javax.persistence.Entity
 import javax.persistence.ManyToOne
 
 @Entity
-class TaskEvaluationResult(
+class Evaluation(
   /**
    * The submission of which this task is part of
    */
   @ManyToOne
-  var taskSubmission: TaskSubmission,
+  var answer: Answer,
 
   /**
-   * Link to the evaluation that has been used to create the result
+   * Link to the requirement that has been used to evaluate the answer
    */
   @ManyToOne
-  var evaluation: TaskEvaluation,
+  var requirement: Requirement,
 
   /**
-   * The result value that was determined by the evaluation
+   * The result value that was determined by checking the requirements
    */
   var result: Long
-) : JpaPersistable()
+) : BaseEntity()

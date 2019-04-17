@@ -10,8 +10,8 @@ import java.util.UUID
 val ID1 = UUID(0, 0)
 val ID2 = UUID(0, 1)
 
-internal class JpaPersistableTest {
-  class StubEntity(id: UUID) : JpaPersistable(id)
+internal class BaseEntityTest {
+  class StubEntity(id: UUID) : BaseEntity(id)
 
   val entity = StubEntity(ID1)
 

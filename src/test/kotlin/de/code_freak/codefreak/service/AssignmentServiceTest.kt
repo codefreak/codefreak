@@ -1,9 +1,9 @@
 package de.code_freak.codefreak.service
 
+import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Assignment
-import de.code_freak.codefreak.entity.AssignmentTask
 import de.code_freak.codefreak.entity.Submission
-import de.code_freak.codefreak.entity.TaskSubmission
+import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.SubmissionRepository
 import de.code_freak.codefreak.repository.TaskSubmissionRepository
@@ -20,14 +20,15 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.Spy
 import java.util.Optional
 import java.util.UUID
 
 class AssignmentServiceTest {
   @Mock
   lateinit var assignment: Assignment
-  @Mock
-  lateinit var assignmentTask: AssignmentTask
+  @Spy
+  lateinit var task: Task
   @Mock
   lateinit var assignmentRepository: AssignmentRepository
   @Mock
@@ -71,12 +72,13 @@ class AssignmentServiceTest {
   @Test
   fun createNewSubmission() {
     val files = ByteArray(0)
-    `when`(assignmentTask.files).thenReturn(files)
-    `when`(assignment.tasks).thenReturn(mutableListOf(assignmentTask))
+    `when`(task.files).thenReturn(files)
+    val tasks = sortedSetOf(task)
+    `when`(assignment.tasks).thenReturn(tasks)
     val submission = assignmentService.createNewSubmission(assignment)
-    assertThat(submission.taskSubmissions, hasSize(1))
-    assertThat(submission.taskSubmissions[0], instanceOf(TaskSubmission::class.java))
-    assertThat(submission.taskSubmissions[0].files, instanceOf(ByteArray::class.java))
-    assertThat(submission.taskSubmissions[0].files, not(sameInstance(files)))
+    assertThat(submission.answers, hasSize(1))
+    assertThat(submission.answers.first(), instanceOf(Answer::class.java))
+    assertThat(submission.answers.first().files, instanceOf(ByteArray::class.java))
+    assertThat(submission.answers.first().files, not(sameInstance(files)))
   }
 }

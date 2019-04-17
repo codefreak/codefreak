@@ -3,7 +3,7 @@ package de.code_freak.codefreak.service
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
 import de.code_freak.codefreak.config.DockerConfiguration
-import de.code_freak.codefreak.entity.TaskSubmission
+import de.code_freak.codefreak.entity.Answer
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
@@ -32,7 +32,7 @@ internal class ContainerServiceTest {
   lateinit var containerService: ContainerService
 
   val taskSubmission by lazy {
-    val mock = mock(TaskSubmission::class.java)
+    val mock = mock(Answer::class.java)
     `when`(mock.id).thenReturn(UUID(0, 0))
     mock
   }
