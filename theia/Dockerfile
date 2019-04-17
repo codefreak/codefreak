@@ -152,7 +152,7 @@ RUN adduser --disabled-password --gecos '' theia && \
 RUN apt-get update && apt-get install -y python build-essential
 
 WORKDIR /home/theia
-ADD package.json yarn.lock ./
+ADD package.json ./
 ADD packages packages
 
 RUN chmod g+rw /home && \

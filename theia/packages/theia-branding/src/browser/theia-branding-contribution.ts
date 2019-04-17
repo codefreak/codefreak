@@ -14,7 +14,7 @@ import {FileStat} from "@theia/filesystem/lib/common";
 // the order is important if more than one file is found
 const DEFAULT_FILES = [
   /^README\.md$/,
-  /(^index|main)\.(md|js|ts|c|cpp|java|py|rb|php|htm|html)$/i
+  /^(index|main)\.(md|js|ts|c|cpp|java|py|rb|php|htm|html)$/i
 ];
 
 /**
