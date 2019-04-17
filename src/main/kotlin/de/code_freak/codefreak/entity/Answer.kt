@@ -21,7 +21,7 @@ class Answer(
   /**
    * A tar archive of files that have been submitted
    */
-  @Type(type = "binary")
+  @Type(type = "image")
   var files: ByteArray?
 ) : BaseEntity() {
   init {
