@@ -46,6 +46,7 @@ dependencies {
   runtimeOnly 'org.hsqldb:hsqldb'
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.springframework.security:spring-security-test'
+  testImplementation 'org.hamcrest:hamcrest:2.1'
 
   // workaround for https://github.com/spotify/docker-client/issues/1030
   implementation 'org.glassfish.jersey.inject:jersey-hk2:2.26'
