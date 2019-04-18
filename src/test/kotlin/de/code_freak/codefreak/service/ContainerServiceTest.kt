@@ -4,6 +4,7 @@ import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
 import de.code_freak.codefreak.config.DockerConfiguration
 import de.code_freak.codefreak.entity.Answer
+import de.code_freak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
@@ -15,6 +16,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
@@ -70,7 +72,7 @@ internal class ContainerServiceTest {
 
   @Test
   fun `files are extracted to project directory`() {
-    `when`(taskSubmission.files).thenReturn(this::class.java.classLoader.getResource("tar/c-task.tar").readBytes())
+    `when`(taskSubmission.files).thenReturn(TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file))
     val containerId = containerService.startIdeContainer(taskSubmission)
     val dirContent = exec(containerId, arrayOf("ls", "/home/project"))
     assertThat(dirContent, containsString("main.c"))
