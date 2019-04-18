@@ -40,6 +40,7 @@ dependencies {
   implementation 'org.webjars:bootstrap:4.3.1'
   implementation 'org.webjars:font-awesome:5.8.1'
   implementation 'com.spotify:docker-client:8.15.1'
+  implementation 'org.apache.commons:commons-compress:1.18'
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.hsqldb:hsqldb'
@@ -82,6 +83,6 @@ coveralls {
   sourceDirs += ['src/main/kotlin']
 }
 
-bootRun {
-  main = 'de.code_freak.codefreak.CodeFreakApplicationKt'
+springBoot {
+  mainClassName = 'de.code_freak.codefreak.CodeFreakApplicationKt'
 }

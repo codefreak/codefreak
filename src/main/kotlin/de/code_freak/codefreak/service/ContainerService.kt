@@ -38,6 +38,7 @@ class ContainerService(
     DOCKER_IMAGES.parallelStream().forEach {
       docker.pull(it)
     }
+    log.info("Finished pulling images")
   }
 
   /**
