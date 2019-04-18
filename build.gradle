@@ -86,3 +86,10 @@ coveralls {
 springBoot {
   mainClassName = 'de.code_freak.codefreak.CodeFreakApplicationKt'
 }
+
+test {
+  testLogging {
+    events "failed"
+    exceptionFormat "full"
+  }
+}
