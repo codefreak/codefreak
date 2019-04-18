@@ -9,7 +9,6 @@ import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.IllegalArgumentException
 
-
 object TarUtil {
   fun createTarFromDirectory(file: File): ByteArray {
     if (!file.isDirectory) {
