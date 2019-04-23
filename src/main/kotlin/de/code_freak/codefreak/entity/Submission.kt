@@ -19,15 +19,15 @@ class Submission(
    */
   @ManyToOne
   var assignment: Assignment
-) : JpaPersistable() {
+) : BaseEntity() {
   /**
    * List of submissions for this task
    */
   @OneToMany(mappedBy = "submission")
-  var taskSubmissions: MutableList<TaskSubmission> = ArrayList()
+  var answers: MutableSet<Answer> = mutableSetOf()
 
   /**
-   * Get the submission for the given task id or null if there is no submission (yet)
+   * Get the answer for the given task id or null if there is no submission (yet)
    */
-  fun forTask(taskId: UUID) = taskSubmissions.firstOrNull { taskSubmission -> taskSubmission.task.id == taskId }
+  fun getAnswerForTask(taskId: UUID) = answers.firstOrNull { answer -> answer.task.id == taskId }
 }

@@ -5,7 +5,7 @@ import javax.persistence.Entity
 import javax.persistence.ManyToOne
 
 @Entity
-class TaskSubmission(
+class Answer(
   /**
    * The submission of which this task is part of
    */
@@ -16,17 +16,17 @@ class TaskSubmission(
    * The task this submission refers to
    */
   @ManyToOne
-  var task: AssignmentTask,
+  var task: Task,
 
   /**
    * A tar archive of files that have been submitted
    */
-  @Type(type = "binary")
+  @Type(type = "image")
   var files: ByteArray?
-) : JpaPersistable() {
+) : BaseEntity() {
   init {
-    if (!submission.taskSubmissions.contains(this)) {
-      submission.taskSubmissions.add(this)
+    if (!submission.answers.contains(this)) {
+      submission.answers.add(this)
     }
   }
 }

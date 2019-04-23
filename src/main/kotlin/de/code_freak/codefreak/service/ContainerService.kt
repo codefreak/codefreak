@@ -4,7 +4,7 @@ import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
 import com.spotify.docker.client.messages.PortBinding
-import de.code_freak.codefreak.entity.TaskSubmission
+import de.code_freak.codefreak.entity.Answer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -38,21 +38,22 @@ class ContainerService(
     DOCKER_IMAGES.parallelStream().forEach {
       docker.pull(it)
     }
+    log.info("Finished pulling images")
   }
 
   /**
    * Start an IDE container for the given submission and returns the container ID
    * If there is already a container for the submission it will be used instead
    */
-  fun startIdeContainer(taskSubmission: TaskSubmission): String {
+  fun startIdeContainer(answer: Answer): String {
     // either take existing container or create a new one
-    val containerId = this.getIdeContainer(taskSubmission) ?: this.createIdeContainer(taskSubmission)
+    val containerId = this.getIdeContainer(answer) ?: this.createIdeContainer(answer)
     // make sure the container is running. Also existing ones could have been stopped
     if (!isContainerRunning(containerId)) {
       docker.startContainer(containerId)
     }
     // prepare the environment after the container has started
-    this.prepareIdeContainer(containerId, taskSubmission)
+    this.prepareIdeContainer(containerId, answer)
 
     return containerId
   }
@@ -71,9 +72,9 @@ class ContainerService(
   /**
    * Try to find an existing container for the given submission
    */
-  protected fun getIdeContainer(taskSubmission: TaskSubmission): String? {
+  protected fun getIdeContainer(answer: Answer): String? {
     return docker.listContainers(
-        DockerClient.ListContainersParam.withLabel(LABEL_TASK_SUBMISSION_ID, taskSubmission.id.toString()),
+        DockerClient.ListContainersParam.withLabel(LABEL_TASK_SUBMISSION_ID, answer.id.toString()),
         DockerClient.ListContainersParam.limitContainers(1)
     ).firstOrNull()?.id()
   }
@@ -82,8 +83,8 @@ class ContainerService(
    * Configure and create a new IDE container.
    * Returns the ID of the created container
    */
-  protected fun createIdeContainer(taskSubmission: TaskSubmission): String {
-    val id = taskSubmission.id.toString()
+  protected fun createIdeContainer(answer: Answer): String {
+    val id = answer.id.toString()
 
     // 49152-65535 is the private port range
     val theiaPort = Random.nextInt(49152, 65535).toString()
@@ -112,9 +113,9 @@ class ContainerService(
   /**
    * Prepare a running container with files and other commands like chmod, etc.
    */
-  protected fun prepareIdeContainer(containerId: String, taskSubmission: TaskSubmission) {
+  protected fun prepareIdeContainer(containerId: String, answer: Answer) {
     // extract possible existing files of the current submission into /home/project
-    taskSubmission.files?.let {
+    answer.files?.let {
       docker.copyToContainer(it.inputStream(), containerId, "/home/project")
     }
   }

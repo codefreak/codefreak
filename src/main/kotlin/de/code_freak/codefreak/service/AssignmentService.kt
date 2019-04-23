@@ -1,8 +1,8 @@
 package de.code_freak.codefreak.service
 
+import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Submission
-import de.code_freak.codefreak.entity.TaskSubmission
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.SubmissionRepository
 import de.code_freak.codefreak.repository.TaskSubmissionRepository
@@ -37,10 +37,13 @@ class AssignmentService {
 
     // create a submission for every task in this assignment
     assignment.tasks.forEach {
-      val taskSubmission = TaskSubmission(submission, it, it.files?.clone())
+      val taskSubmission = Answer(submission, it, it.files?.clone())
       taskSubmissionRepository.save(taskSubmission)
     }
 
     return submission
   }
+
+  @Transactional
+  fun findAllAssignments(): Iterable<Assignment> = assignmentRepository.findAll()
 }
