@@ -59,6 +59,22 @@ class ContainerService(
   }
 
   /**
+   * Run a command as root inside container and return the result as string
+   */
+  fun exec(containerId: String, cmd: Array<String>): String {
+    val exec = docker.execCreate(
+        containerId, cmd,
+        DockerClient.ExecCreateParam.attachStdin(), // this is not needed but a workaround for spotify/docker-client#513
+        DockerClient.ExecCreateParam.attachStdout(),
+        DockerClient.ExecCreateParam.attachStderr(),
+        DockerClient.ExecCreateParam.user("root")
+    )
+    val output = docker.execStart(exec.id())
+    return output.readFully()
+  }
+
+
+  /**
    * Get the URL for an IDE container
    * TODO: make this configurable for different types of hosting/reverse proxies/etc
    */
@@ -118,6 +134,8 @@ class ContainerService(
     answer.files?.let {
       docker.copyToContainer(it.inputStream(), containerId, "/home/project")
     }
+    // change owner from root to theia so we can edit our project files
+    exec(containerId, arrayOf("chown", "-R", "theia:theia", "/home/project"))
   }
 
   protected fun isContainerRunning(containerId: String): Boolean =
