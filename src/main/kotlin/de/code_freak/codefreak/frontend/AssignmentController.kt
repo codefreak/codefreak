@@ -54,10 +54,10 @@ class AssignmentController : BaseController() {
 
   @PostMapping("/assignments/{assignmentId}/tasks/{taskId}/answers")
   fun createAnswer(
-      @PathVariable("assignmentId") assignmentId: UUID,
-      @PathVariable("taskId") taskId: UUID,
-      request: HttpServletRequest,
-      model: Model
+    @PathVariable("assignmentId") assignmentId: UUID,
+    @PathVariable("taskId") taskId: UUID,
+    request: HttpServletRequest,
+    model: Model
   ): String {
     val submission = getSubmission(request, assignmentId)
     containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)

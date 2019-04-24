@@ -19,7 +19,7 @@ import kotlin.random.Random
 class ContainerService(
   @Autowired
   val docker: DockerClient
-): BaseService() {
+) : BaseService() {
   companion object {
     const val IDE_DOCKER_IMAGE = "theiaide/theia-full:next"
     val DOCKER_IMAGES = listOf(
