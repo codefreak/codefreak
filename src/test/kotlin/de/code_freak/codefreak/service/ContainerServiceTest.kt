@@ -2,7 +2,7 @@ package de.code_freak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
-import de.code_freak.codefreak.config.DockerConfiguration
+import de.code_freak.codefreak.SpringTest
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
@@ -13,20 +13,13 @@ import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import java.util.UUID
 
-@RunWith(SpringJUnit4ClassRunner::class)
-@ContextConfiguration(classes = [DockerConfiguration::class, ContainerService::class])
-@ActiveProfiles("test")
-internal class ContainerServiceTest {
+internal class ContainerServiceTest : SpringTest() {
 
   @Autowired
   lateinit var docker: DockerClient

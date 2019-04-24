@@ -5,18 +5,21 @@ import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
 import com.spotify.docker.client.messages.PortBinding
 import de.code_freak.codefreak.entity.Answer
+import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import java.lang.IllegalArgumentException
+import javax.transaction.Transactional
 import kotlin.random.Random
 
 @Service
 class ContainerService(
   @Autowired
   val docker: DockerClient
-) {
+) : BaseService() {
   companion object {
     const val IDE_DOCKER_IMAGE = "cfreak/theia:latest"
     val DOCKER_IMAGES = listOf(
@@ -92,6 +95,15 @@ class ContainerService(
         DockerClient.ListContainersParam.withLabel(LABEL_TASK_SUBMISSION_ID, answer.id.toString()),
         DockerClient.ListContainersParam.limitContainers(1)
     ).firstOrNull()?.id()
+  }
+
+  @Transactional
+  fun saveAnswerFiles(answer: Answer) {
+    val containerId = getIdeContainer(answer) ?: throw IllegalArgumentException()
+    val files = docker.archiveContainer(containerId, "/home/project/.")
+    answer.files = IOUtils.toByteArray(files)
+    entityManager.merge(answer)
+    log.info("Saved files of container with id: $containerId")
   }
 
   /**

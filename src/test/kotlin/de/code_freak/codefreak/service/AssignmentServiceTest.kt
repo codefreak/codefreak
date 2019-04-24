@@ -6,7 +6,7 @@ import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.SubmissionRepository
-import de.code_freak.codefreak.repository.TaskSubmissionRepository
+import de.code_freak.codefreak.repository.AnswerRepository
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
@@ -36,7 +36,7 @@ class AssignmentServiceTest {
   @Mock
   lateinit var submissionRepository: SubmissionRepository
   @Mock
-  lateinit var taskSubmissionRepository: TaskSubmissionRepository
+  lateinit var answerRepository: AnswerRepository
   @InjectMocks
   val assignmentService = AssignmentService()
 
