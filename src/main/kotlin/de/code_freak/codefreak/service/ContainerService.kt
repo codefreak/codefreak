@@ -73,7 +73,6 @@ class ContainerService(
     return output.readFully()
   }
 
-
   /**
    * Get the URL for an IDE container
    * TODO: make this configurable for different types of hosting/reverse proxies/etc
