@@ -9,6 +9,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
+import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -40,13 +41,14 @@ internal class ContainerServiceTest {
   }
 
   @Before
-  fun setUp() {
+  fun pullImages() {
     containerService.pullDockerImages()
   }
 
+  @Before
   @After
   fun tearDown() {
-    // delete all containers after each run
+    // delete all containers before and after each run
     listIdeContainer().parallelStream().forEach {
       docker.killContainer(it.id())
       docker.removeContainer(it.id())
@@ -74,19 +76,10 @@ internal class ContainerServiceTest {
   fun `files are extracted to project directory`() {
     `when`(taskSubmission.files).thenReturn(TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file))
     val containerId = containerService.startIdeContainer(taskSubmission)
-    val dirContent = exec(containerId, arrayOf("ls", "/home/project"))
+    // assert that file is existing and nothing is owned by root
+    val dirContent = containerService.exec(containerId, arrayOf("ls", "-l", "/home/project"))
     assertThat(dirContent, containsString("main.c"))
-  }
-
-  private fun exec(containerId: String, cmd: Array<String>): String {
-    val exec = docker.execCreate(
-        containerId, cmd,
-        DockerClient.ExecCreateParam.attachStdin(), // this is not needed but a workaround for spotify/docker-client#513
-        DockerClient.ExecCreateParam.attachStdout(),
-        DockerClient.ExecCreateParam.attachStderr()
-    )
-    val output = docker.execStart(exec.id())
-    return output.readFully()
+    assertThat(dirContent, not(containsString("root")))
   }
 
   private fun listIdeContainer() = docker.listContainers(

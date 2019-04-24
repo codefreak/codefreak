@@ -18,7 +18,7 @@ class ContainerService(
   val docker: DockerClient
 ) {
   companion object {
-    const val IDE_DOCKER_IMAGE = "theiaide/theia-full:next"
+    const val IDE_DOCKER_IMAGE = "cfreak/theia:latest"
     val DOCKER_IMAGES = listOf(
         IDE_DOCKER_IMAGE
     )
@@ -56,6 +56,21 @@ class ContainerService(
     this.prepareIdeContainer(containerId, answer)
 
     return containerId
+  }
+
+  /**
+   * Run a command as root inside container and return the result as string
+   */
+  fun exec(containerId: String, cmd: Array<String>): String {
+    val exec = docker.execCreate(
+        containerId, cmd,
+        DockerClient.ExecCreateParam.attachStdin(), // this is not needed but a workaround for spotify/docker-client#513
+        DockerClient.ExecCreateParam.attachStdout(),
+        DockerClient.ExecCreateParam.attachStderr(),
+        DockerClient.ExecCreateParam.user("root")
+    )
+    val output = docker.execStart(exec.id())
+    return output.readFully()
   }
 
   /**
@@ -118,6 +133,8 @@ class ContainerService(
     answer.files?.let {
       docker.copyToContainer(it.inputStream(), containerId, "/home/project")
     }
+    // change owner from root to theia so we can edit our project files
+    exec(containerId, arrayOf("chown", "-R", "theia:theia", "/home/project"))
   }
 
   protected fun isContainerRunning(containerId: String): Boolean =
