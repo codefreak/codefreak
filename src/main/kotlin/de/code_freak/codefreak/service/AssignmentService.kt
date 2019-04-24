@@ -5,7 +5,7 @@ import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.SubmissionRepository
-import de.code_freak.codefreak.repository.TaskSubmissionRepository
+import de.code_freak.codefreak.repository.AnswerRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -20,7 +20,7 @@ class AssignmentService {
   lateinit var submissionRepository: SubmissionRepository
 
   @Autowired
-  lateinit var taskSubmissionRepository: TaskSubmissionRepository
+  lateinit var answerRepository: AnswerRepository
 
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
@@ -38,7 +38,7 @@ class AssignmentService {
     // create a submission for every task in this assignment
     assignment.tasks.forEach {
       val taskSubmission = Answer(submission, it, it.files?.clone())
-      taskSubmissionRepository.save(taskSubmission)
+      answerRepository.save(taskSubmission)
     }
 
     return submission
