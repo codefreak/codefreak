@@ -12,6 +12,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "private_network", ip: "10.12.12.100"
 
   config.vm.network "forwarded_port", guest: 2375, host: 2375
+  config.vm.network "forwarded_port", guest: 80, host: 8081
 
   # Enable the automatic install of docker and make it available via TCP
   # We bind to 0.0.0.0 because the VM and Host are on a private network
@@ -22,6 +23,11 @@ Vagrant.configure("2") do |config|
   # $ docker ps -a
   #
   config.vm.provision "docker" do |d|
+    # Run Traefik as reverse proxy inside the VM
+    # It is available on port 8081 on the host
+    d.run "traefik",
+      cmd: "--loglevel=info --docker=true --docker.exposedbydefault=false",
+      args: "-p 80:80 -v /var/run/docker.sock:/var/run/docker.sock"
     # Make daemon accessible via tcp and restart to apply changes
     d.post_install_provision "shell", inline: <<-eol
       sed -i '/ExecStart=/c\ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375 --containerd=/run/containerd/containerd.sock' /lib/systemd/system/docker.service \
