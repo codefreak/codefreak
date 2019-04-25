@@ -67,6 +67,13 @@ compileTestKotlin {
   }
 }
 
+bootJar {
+  // include assets so they can be served dynamically in production
+  from (fileTree("src/assets").files) {
+    into 'META-INF/assets'
+  }
+}
+
 spotless {
   kotlin {
     ktlint().userData(['indent_size': '2'])
