@@ -28,6 +28,9 @@ Vagrant.configure("2") do |config|
     d.run "traefik",
       cmd: "--loglevel=info --docker=true --docker.exposedbydefault=false",
       args: "-p 80:80 -v /var/run/docker.sock:/var/run/docker.sock"
+    d.run "portainer/portainer", # credentials admin:admin
+      cmd: "-H unix:///var/run/docker.sock --admin-password='$2y$05$n8b3wSfBtMdMY1ei4FBx..qbvqlHx7Rpln7Wd61HQYcIJ7pWgGH7q'",
+      args: '-v /var/run/docker.sock:/var/run/docker.sock -l="traefik.enable=true" -l="traefik.frontend.rule=PathPrefixStrip: /portainer/" -l="traefik.port=9000" --name portainer'
     # Make daemon accessible via tcp and restart to apply changes
     d.post_install_provision "shell", inline: <<-eol
       sed -i '/ExecStart=/c\ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375 --containerd=/run/containerd/containerd.sock' /lib/systemd/system/docker.service \
