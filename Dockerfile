@@ -10,5 +10,7 @@ RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean b
     && mv /app/code-freak-*.jar /app/code-freak.jar \
     && rm -r /build /tmp/*
 
+EXPOSE 8080
+
 WORKDIR /app
 CMD ["java", "-jar", "/app/code-freak.jar"]

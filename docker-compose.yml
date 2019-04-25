@@ -1,0 +1,36 @@
+# This is a sample docker-compose file to deploy Code FREAK
+# Please adapt it to your needs but do not copy this to production without any changes
+# The application and database services should be fine but you should not use docker in docker in production
+
+version: "3"
+services:
+  app:
+    image: cfreak/code-freak:latest
+    restart: always
+    ports:
+      - "80:8080"
+    networks:
+      - private
+    environment:
+      # Please point this do a dedicated docker host
+      DOCKER_HOST: "http://docker:2375"
+      # Configure database for PostgreSQL
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/postgres"
+      SPRING_DATASOURCE_USERNAME: "postgres"
+      SPRING_DATASOURCE_DRIVERCLASSNAME: "org.postgresql.Driver"
+      SPRING_JPA_DATABASEPLATFORM: "org.hibernate.dialect.PostgreSQLDialect"
+  postgres:
+    image: postgres
+    restart: always
+    networks:
+      - private
+  # WARNING: Do not use Docker-in-Docker in production!
+  docker:
+    image: docker:dind
+    privileged: true
+    restart: always
+    networks:
+      - private
+
+networks:
+  private: {}
