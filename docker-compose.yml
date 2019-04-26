@@ -19,6 +19,8 @@ services:
       SPRING_DATASOURCE_USERNAME: "postgres"
       SPRING_DATASOURCE_DRIVERCLASSNAME: "org.postgresql.Driver"
       SPRING_JPA_DATABASEPLATFORM: "org.hibernate.dialect.PostgreSQLDialect"
+      # automatically update the database schema until we have a migration tool
+      SPRING_JPA_HIBERNATE_DDLAUTO: "update"
   postgres:
     image: postgres
     restart: always
