@@ -110,7 +110,8 @@ class ContainerService(
         LABEL_ANSWER_ID to answerId,
         "traefik.enable" to "true",
         "traefik.frontend.rule" to "PathPrefixStrip: /ide/$answerId/",
-        "traefik.port" to "3000"
+        "traefik.port" to "3000",
+        "traefik.frontend.headers.customResponseHeaders" to "Access-Control-Allow-Origin:*"
     )
 
     val hostConfig = HostConfig.builder().build()

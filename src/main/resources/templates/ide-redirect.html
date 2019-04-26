@@ -11,8 +11,12 @@
       let ide_url = /*[[${ide_url}]]*/
 
       function tryRedirect() {
-        fetch(ide_url, { mode: "no-cors" }).then(function() {
-          window.location.href = ide_url
+        fetch(ide_url).then(function(res) {
+          if (res.ok) {
+            window.location.href = ide_url
+          } else {
+            throw new Error()
+          }
         }).catch(function() {
           setTimeout(tryRedirect, 1000)
         });
