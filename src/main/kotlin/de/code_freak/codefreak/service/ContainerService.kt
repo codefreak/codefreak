@@ -7,6 +7,7 @@ import de.code_freak.codefreak.entity.Answer
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
@@ -29,6 +30,9 @@ class ContainerService(
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
+
+  @Value("\${code-freak.traefik.url}")
+  private lateinit var traefikUrl: String
 
   /**
    * Pull all required docker images on startup
@@ -77,7 +81,7 @@ class ContainerService(
    * TODO: make this configurable for different types of hosting/reverse proxies/etc
    */
   fun getIdeUrl(answerId: UUID): String {
-    return "http://localhost:8081/ide/$answerId/"
+    return "$traefikUrl/ide/$answerId/"
   }
 
   /**

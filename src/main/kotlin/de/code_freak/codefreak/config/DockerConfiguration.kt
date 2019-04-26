@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration
 class DockerConfiguration {
   @Bean(destroyMethod = "close")
   fun dockerClient(
-    @Value("\${code-freak.docker.host:unix:///var/run/docker.sock}") uri: String
+    @Value("\${code-freak.docker.host}") uri: String
   ): DockerClient {
     return DefaultDockerClient.builder()
         .uri(uri)
