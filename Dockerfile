@@ -1,5 +1,9 @@
 FROM openjdk:8-alpine
 
+# Add some system dependecies required by libraries
+# - gcompat for jsass
+RUN apk add --no-cache gcompat
+
 COPY . /build
 
 WORKDIR /build
@@ -9,6 +13,8 @@ RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean b
     && mv build/libs /app \
     && mv /app/code-freak-*.jar /app/code-freak.jar \
     && rm -r /build /tmp/*
+
+EXPOSE 8080
 
 WORKDIR /app
 CMD ["java", "-jar", "/app/code-freak.jar"]
