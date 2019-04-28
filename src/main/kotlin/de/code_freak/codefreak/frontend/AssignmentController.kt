@@ -45,8 +45,9 @@ class AssignmentController : BaseController() {
     val submission = getSubmission(request, assignmentId)
 
     // start a container based on the submission for the current task
-    val containerId = containerService.startIdeContainer(submission.getAnswerForTask(taskId)!!)
-    val containerUrl = containerService.getIdeUrl(containerId)
+    val answer = submission.getAnswerForTask(taskId)!!
+    containerService.startIdeContainer(answer)
+    val containerUrl = containerService.getIdeUrl(answer.id)
 
     model.addAttribute("ide_url", containerUrl)
     return "ide-redirect"

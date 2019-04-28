@@ -3,17 +3,17 @@ package de.code_freak.codefreak.service
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
-import com.spotify.docker.client.messages.PortBinding
 import de.code_freak.codefreak.entity.Answer
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
+import java.util.UUID
 import javax.transaction.Transactional
-import kotlin.random.Random
 
 @Service
 class ContainerService(
@@ -25,12 +25,14 @@ class ContainerService(
     val DOCKER_IMAGES = listOf(
         IDE_DOCKER_IMAGE
     )
-    const val LABEL_PREFIX = "de.code-freak."
-    const val LABEL_TASK_SUBMISSION_ID = LABEL_PREFIX + "task-submission-id"
-    const val LABEL_THEIA_PORT = LABEL_PREFIX + "theia-port"
+    private const val LABEL_PREFIX = "de.code-freak."
+    const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
+
+  @Value("\${code-freak.traefik.url}")
+  private lateinit var traefikUrl: String
 
   /**
    * Pull all required docker images on startup
@@ -48,7 +50,7 @@ class ContainerService(
    * Start an IDE container for the given submission and returns the container ID
    * If there is already a container for the submission it will be used instead
    */
-  fun startIdeContainer(answer: Answer): String {
+  fun startIdeContainer(answer: Answer) {
     // either take existing container or create a new one
     val containerId = this.getIdeContainer(answer) ?: this.createIdeContainer(answer)
     // make sure the container is running. Also existing ones could have been stopped
@@ -57,8 +59,6 @@ class ContainerService(
     }
     // prepare the environment after the container has started
     this.prepareIdeContainer(containerId, answer)
-
-    return containerId
   }
 
   /**
@@ -80,11 +80,8 @@ class ContainerService(
    * Get the URL for an IDE container
    * TODO: make this configurable for different types of hosting/reverse proxies/etc
    */
-  fun getIdeUrl(containerId: String): String {
-    val containerInfo = docker.inspectContainer(containerId)
-    val port = containerInfo.config().labels()!![LABEL_THEIA_PORT]
-
-    return "http://localhost:$port"
+  fun getIdeUrl(answerId: UUID): String {
+    return "$traefikUrl/ide/$answerId/"
   }
 
   /**
@@ -92,7 +89,7 @@ class ContainerService(
    */
   protected fun getIdeContainer(answer: Answer): String? {
     return docker.listContainers(
-        DockerClient.ListContainersParam.withLabel(LABEL_TASK_SUBMISSION_ID, answer.id.toString()),
+        DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID, answer.id.toString()),
         DockerClient.ListContainersParam.limitContainers(1)
     ).firstOrNull()?.id()
   }
@@ -111,26 +108,22 @@ class ContainerService(
    * Returns the ID of the created container
    */
   protected fun createIdeContainer(answer: Answer): String {
-    val id = answer.id.toString()
+    val answerId = answer.id.toString()
 
-    // 49152-65535 is the private port range
-    val theiaPort = Random.nextInt(49152, 65535).toString()
-
-    val labelMap = mapOf(
-        LABEL_TASK_SUBMISSION_ID to id,
-        LABEL_THEIA_PORT to theiaPort
+    val labels = mapOf(
+        LABEL_ANSWER_ID to answerId,
+        "traefik.enable" to "true",
+        "traefik.frontend.rule" to "PathPrefixStrip: /ide/$answerId/",
+        "traefik.port" to "3000",
+        "traefik.frontend.headers.customResponseHeaders" to "Access-Control-Allow-Origin:*"
     )
 
-    val publishedPorts = mapOf(
-        "3000" to listOf(PortBinding.of("0.0.0.0", theiaPort))
-    )
-    val hostConfig = HostConfig.builder().portBindings(publishedPorts).build()
+    val hostConfig = HostConfig.builder().build()
 
     val containerConfig = ContainerConfig.builder()
         .image(IDE_DOCKER_IMAGE)
-        .labels(labelMap)
+        .labels(labels)
         .hostConfig(hostConfig)
-        .exposedPorts(publishedPorts.keys)
         .build()
 
     val container = docker.createContainer(containerConfig)

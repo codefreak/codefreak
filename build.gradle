@@ -101,3 +101,7 @@ test {
     exceptionFormat "full"
   }
 }
+
+task vagrantTest(type: Test) {
+  systemProperty "code-freak.docker.host", "http://localhost:2375"
+}
