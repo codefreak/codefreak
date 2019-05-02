@@ -162,7 +162,6 @@ class ContainerService(
         .forEach {
           val containerId = it.id()
           val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).trim()
-          log.info(connections)
           if (connections == "0") {
             val idleTime = idleContainers[containerId] ?: 0
             log.debug("Container $containerId has been idle for more than $idleTime ms")
