@@ -5,7 +5,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND noninteractive
 
 #Common deps
-RUN apt-get update && apt-get -y install curl xz-utils wget gpg
+RUN apt-get update && apt-get -y install curl xz-utils wget gpg unzip
 
 #Install node and yarn
 #From: https://github.com/nodejs/docker-node/blob/6b8d86d6ad59e0d1e7a94cec2e909cad137a028f/8/Dockerfile
@@ -114,8 +114,15 @@ RUN curl -sS https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar
     go get -u -v github.com/davidrjenni/reftools/cmd/fillstruct
 
 #Java
-RUN apt-get update && apt-get -y install openjdk-8-jdk maven gradle
+RUN apt-get update && apt-get -y install openjdk-11-jdk maven
 
+# Install Gradle manually because official Ubuntu repo only contains Gradle 4
+ENV GRADLE_VERSION 5.4
+ENV GRADLE_HOME /opt/gradle-${GRADLE_VERSION}
+RUN curl -sLo /tmp/gradle-${GRADLE_VERSION}-bin.zip https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip \
+    && unzip /tmp/gradle-${GRADLE_VERSION}-bin.zip -d $(dirname $GRADLE_HOME) \
+    && rm /tmp/gradle-${GRADLE_VERSION}-bin.zip \
+    && ln -s ${GRADLE_HOME}/bin/gradle /usr/local/bin/
 
 #C/C++
 # public LLVM PPA, development version of LLVM
@@ -168,4 +175,5 @@ RUN yarn --cache-folder ./ycache && rm -rf ./ycache && \
 EXPOSE 3000
 ENV SHELL /bin/bash
 
+ENV GRADLE_HOME ~/.gradle
 ENTRYPOINT [ "yarn", "start", "/home/project", "--hostname=0.0.0.0" ]
