@@ -27,8 +27,8 @@ class ContainerService(
     )
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
-    const val SHUTDOWN_TASK_RATE = 1000L * 30
-    const val SHUTDOWN_IDLE_THRESHOLD = 1000L * 60 * 2
+    const val SHUTDOWN_TASK_RATE = 1000L * 60
+    const val SHUTDOWN_IDLE_THRESHOLD = 1000L * 60 * 10
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -75,7 +75,8 @@ class ContainerService(
         DockerClient.ExecCreateParam.attachStdin(), // this is not needed but a workaround for spotify/docker-client#513
         DockerClient.ExecCreateParam.attachStdout(),
         DockerClient.ExecCreateParam.attachStderr(),
-        DockerClient.ExecCreateParam.user("root")
+        DockerClient.ExecCreateParam.user("root"),
+        DockerClient.ExecCreateParam.privileged()
     )
     val output = docker.execStart(exec.id())
     return output.readFully()
@@ -153,8 +154,7 @@ class ContainerService(
   @Transactional
   @Scheduled(fixedRate = SHUTDOWN_TASK_RATE, initialDelay = SHUTDOWN_TASK_RATE)
   protected fun shutdownIdleIdeContainers() {
-    // docker exec -it foo lsof -a -i4 -i6 -itcp | grep :3000 | grep ESTABLISHED | wc -l
-    log.info("Checking for idle containers")
+    log.debug("Checking for idle containers")
     // create a new map to not leak memory if containers disappear in another way
     val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
     docker.listContainers(DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID))
@@ -164,8 +164,8 @@ class ContainerService(
           val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).trim()
           log.info(connections)
           if (connections == "0") {
-            val idleTime = (idleContainers[containerId] ?: 0) + SHUTDOWN_TASK_RATE
-            log.info("Container $containerId has been idle for $idleTime ms")
+            val idleTime = idleContainers[containerId] ?: 0
+            log.debug("Container $containerId has been idle for more than $idleTime ms")
             if (idleTime >= SHUTDOWN_IDLE_THRESHOLD) {
               val answerId = it.labels()!![LABEL_ANSWER_ID]
               log.info("Shutting down container $containerId of answer $answerId")
@@ -178,7 +178,7 @@ class ContainerService(
               docker.stopContainer(containerId, 5)
               docker.removeContainer(containerId)
             } else {
-              newIdleContainers[containerId] = idleTime
+              newIdleContainers[containerId] = idleTime + SHUTDOWN_TASK_RATE
             }
           }
         }
