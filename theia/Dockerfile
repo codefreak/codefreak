@@ -5,7 +5,7 @@ FROM ubuntu:18.04
 ENV DEBIAN_FRONTEND noninteractive
 
 #Common deps
-RUN apt-get update && apt-get -y install curl xz-utils wget gpg
+RUN apt-get update && apt-get -y install curl xz-utils wget gpg lsof
 
 #Install node and yarn
 #From: https://github.com/nodejs/docker-node/blob/6b8d86d6ad59e0d1e7a94cec2e909cad137a028f/8/Dockerfile
@@ -154,6 +154,7 @@ RUN apt-get update && apt-get install -y python build-essential
 WORKDIR /home/theia
 ADD package.json ./
 ADD packages packages
+ADD scripts /opt/code-freak
 
 RUN chmod g+rw /home && \
     mkdir -p /home/project && \

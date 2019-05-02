@@ -4,12 +4,12 @@ import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
 import de.code_freak.codefreak.entity.Answer
+import de.code_freak.codefreak.repository.AnswerRepository
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
 import java.util.UUID
@@ -27,17 +27,22 @@ class ContainerService(
     )
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
+    const val SHUTDOWN_TASK_RATE = 1000L * 30
+    const val SHUTDOWN_IDLE_THRESHOLD = 1000L * 60 * 2
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
+  private var idleContainers: Map<String, Long> = mapOf()
 
   @Value("\${code-freak.traefik.url}")
   private lateinit var traefikUrl: String
 
+  @Autowired
+  private lateinit var answerRepository: AnswerRepository
+
   /**
-   * Pull all required docker images on startup
+   * Pull all required docker images
    */
-  @EventListener(ApplicationReadyEvent::class)
   fun pullDockerImages() {
     log.info("Pulling latest image for: " + DOCKER_IMAGES.joinToString())
     DOCKER_IMAGES.parallelStream().forEach {
@@ -144,4 +149,39 @@ class ContainerService(
 
   protected fun isContainerRunning(containerId: String): Boolean =
       docker.inspectContainer(containerId).state().running()
+
+  @Transactional
+  @Scheduled(fixedRate = SHUTDOWN_TASK_RATE, initialDelay = SHUTDOWN_TASK_RATE)
+  protected fun shutdownIdleIdeContainers() {
+    // docker exec -it foo lsof -a -i4 -i6 -itcp | grep :3000 | grep ESTABLISHED | wc -l
+    log.info("Checking for idle containers")
+    // create a new map to not leak memory if containers disappear in another way
+    val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
+    docker.listContainers(DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID))
+        .filter { isContainerRunning(it.id()) }
+        .forEach {
+          val containerId = it.id()
+          val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).trim()
+          log.info(connections)
+          if (connections == "0") {
+            val idleTime = (idleContainers[containerId] ?: 0) + SHUTDOWN_TASK_RATE
+            log.info("Container $containerId has been idle for $idleTime ms")
+            if (idleTime >= SHUTDOWN_IDLE_THRESHOLD) {
+              val answerId = it.labels()!![LABEL_ANSWER_ID]
+              log.info("Shutting down container $containerId of answer $answerId")
+              val answer = answerRepository.findById(UUID.fromString(answerId))
+              if (answer.isPresent) {
+                saveAnswerFiles(answer.get())
+              } else {
+                log.warn("Answer $answerId not found. Files are not saved!")
+              }
+              docker.stopContainer(containerId, 5)
+              docker.removeContainer(containerId)
+            } else {
+              newIdleContainers[containerId] = idleTime
+            }
+          }
+        }
+    idleContainers = newIdleContainers
+  }
 }

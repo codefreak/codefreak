@@ -38,4 +38,12 @@ Vagrant.configure("2") do |config|
       && systemctl restart docker.service
       eol
   end
+
+  # Build IDE container image
+  config.vm.provision "shell",
+    inline: "docker build -t cfreak/theia:latest /vagrant/theia"
+
+  config.vm.provider "virtualbox" do |vb|
+   vb.memory = "4096"
+  end
 end
