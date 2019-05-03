@@ -75,8 +75,7 @@ class ContainerService(
         DockerClient.ExecCreateParam.attachStdin(), // this is not needed but a workaround for spotify/docker-client#513
         DockerClient.ExecCreateParam.attachStdout(),
         DockerClient.ExecCreateParam.attachStderr(),
-        DockerClient.ExecCreateParam.user("root"),
-        DockerClient.ExecCreateParam.privileged()
+        DockerClient.ExecCreateParam.user("root")
     )
     val output = docker.execStart(exec.id())
     return output.readFully()
