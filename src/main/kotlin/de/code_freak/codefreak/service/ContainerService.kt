@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.lang.IllegalArgumentException
 import java.util.UUID
 import javax.transaction.Transactional
 
@@ -123,7 +122,9 @@ class ContainerService(
         "traefik.frontend.headers.customResponseHeaders" to "Access-Control-Allow-Origin:*"
     )
 
-    val hostConfig = HostConfig.builder().build()
+    val hostConfig = HostConfig.builder()
+        .capAdd("SYS_PTRACE") // required for lsof
+        .build()
 
     val containerConfig = ContainerConfig.builder()
         .image(IDE_DOCKER_IMAGE)
@@ -161,6 +162,7 @@ class ContainerService(
         DockerClient.ListContainersParam.withStatusRunning())
         .forEach {
           val containerId = it.id()
+          // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
           val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).trim()
           if (connections == "0") {
             val idleTime = idleContainers[containerId] ?: 0
