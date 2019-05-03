@@ -34,11 +34,6 @@ internal class ContainerServiceTest : SpringTest() {
   }
 
   @Before
-  fun pullImages() {
-    containerService.pullDockerImages()
-  }
-
-  @Before
   @After
   fun tearDown() {
     // delete all containers before and after each run
