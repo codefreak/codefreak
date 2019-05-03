@@ -4,7 +4,7 @@ services:
   - docker
 
 before_script:
-  - docker build -t cfreak/theia:latest $HOME/theia
+  - docker build -t cfreak/theia:latest $TRAVIS_BUILD_DIR/theia
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
