@@ -68,6 +68,13 @@ internal class ContainerServiceTest : SpringTest() {
     assertThat(dirContent, not(containsString("root")))
   }
 
+  @Test
+  fun `idle containers are shut down automatically`() {
+    containerService.startIdeContainer(answer)
+    Thread.sleep(10000)
+    assertThat(getIdeContainers(answer), hasSize(0))
+  }
+
   private fun getAllIdeContainers() = docker.listContainers(
       ListContainersParam.withLabel(ContainerService.LABEL_ANSWER_ID)
   )
