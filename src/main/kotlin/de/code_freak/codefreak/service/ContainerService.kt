@@ -157,8 +157,9 @@ class ContainerService(
     log.debug("Checking for idle containers")
     // create a new map to not leak memory if containers disappear in another way
     val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
-    docker.listContainers(DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID))
-        .filter { isContainerRunning(it.id()) }
+    docker.listContainers(
+        DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID),
+        DockerClient.ListContainersParam.withStatusRunning())
         .forEach {
           val containerId = it.id()
           val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).trim()
