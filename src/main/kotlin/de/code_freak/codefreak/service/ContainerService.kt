@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.UUID
+import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
 @Service
@@ -21,13 +22,8 @@ class ContainerService(
 ) : BaseService() {
   companion object {
     const val IDE_DOCKER_IMAGE = "cfreak/theia:latest"
-    val DOCKER_IMAGES = listOf(
-        IDE_DOCKER_IMAGE
-    )
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
-    const val SHUTDOWN_TASK_RATE = 1000L * 60
-    const val SHUTDOWN_IDLE_THRESHOLD = 1000L * 60 * 10
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -36,18 +32,15 @@ class ContainerService(
   @Value("\${code-freak.traefik.url}")
   private lateinit var traefikUrl: String
 
+  @Value("\${code-freak.ide.idle-shutdown-threshold}")
+  private lateinit var idleShutdownThreshold: String
+
   @Autowired
   private lateinit var answerRepository: AnswerRepository
 
-  /**
-   * Pull all required docker images
-   */
-  fun pullDockerImages() {
-    log.info("Pulling latest image for: " + DOCKER_IMAGES.joinToString())
-    DOCKER_IMAGES.parallelStream().forEach {
-      docker.pull(it)
-    }
-    log.info("Finished pulling images")
+  @PostConstruct
+  protected fun init() {
+    idleShutdownThreshold.toLong() // fail fast if format is not valid
   }
 
   /**
@@ -152,7 +145,7 @@ class ContainerService(
       docker.inspectContainer(containerId).state().running()
 
   @Transactional
-  @Scheduled(fixedRate = SHUTDOWN_TASK_RATE, initialDelay = SHUTDOWN_TASK_RATE)
+  @Scheduled(fixedRateString = "\${code-freak.ide.idle-check-rate}", initialDelayString = "\${code-freak.ide.idle-check-rate}")
   protected fun shutdownIdleIdeContainers() {
     log.debug("Checking for idle containers")
     // create a new map to not leak memory if containers disappear in another way
@@ -165,9 +158,11 @@ class ContainerService(
           // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
           val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).trim()
           if (connections == "0") {
-            val idleTime = idleContainers[containerId] ?: 0
-            log.debug("Container $containerId has been idle for more than $idleTime ms")
-            if (idleTime >= SHUTDOWN_IDLE_THRESHOLD) {
+            val now = System.currentTimeMillis()
+            val idleSince = idleContainers[containerId] ?: now
+            val idleFor = now - idleSince
+            log.debug("Container $containerId has been idle for more than $idleFor ms")
+            if (idleFor >= idleShutdownThreshold.toLong()) {
               val answerId = it.labels()!![LABEL_ANSWER_ID]
               log.info("Shutting down container $containerId of answer $answerId")
               val answer = answerRepository.findById(UUID.fromString(answerId))
@@ -179,7 +174,7 @@ class ContainerService(
               docker.stopContainer(containerId, 5)
               docker.removeContainer(containerId)
             } else {
-              newIdleContainers[containerId] = idleTime + SHUTDOWN_TASK_RATE
+              newIdleContainers[containerId] = idleSince
             }
           }
         }
