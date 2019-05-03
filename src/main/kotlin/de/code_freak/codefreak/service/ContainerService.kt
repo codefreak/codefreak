@@ -38,6 +38,9 @@ class ContainerService(
   @Autowired
   private lateinit var answerRepository: AnswerRepository
 
+  @Autowired
+  private lateinit var containerService: ContainerService
+
   @PostConstruct
   protected fun init() {
     idleShutdownThreshold.toLong() // fail fast if format is not valid
@@ -144,7 +147,6 @@ class ContainerService(
   protected fun isContainerRunning(containerId: String): Boolean =
       docker.inspectContainer(containerId).state().running()
 
-  @Transactional
   @Scheduled(fixedRateString = "\${code-freak.ide.idle-check-rate}", initialDelayString = "\${code-freak.ide.idle-check-rate}")
   protected fun shutdownIdleIdeContainers() {
     log.debug("Checking for idle containers")
@@ -164,13 +166,13 @@ class ContainerService(
             log.debug("Container $containerId has been idle for more than $idleFor ms")
             if (idleFor >= idleShutdownThreshold.toLong()) {
               val answerId = it.labels()!![LABEL_ANSWER_ID]
-              log.info("Shutting down container $containerId of answer $answerId")
               val answer = answerRepository.findById(UUID.fromString(answerId))
               if (answer.isPresent) {
-                saveAnswerFiles(answer.get())
+                containerService.saveAnswerFiles(answer.get())
               } else {
                 log.warn("Answer $answerId not found. Files are not saved!")
               }
+              log.info("Shutting down container $containerId of answer $answerId")
               docker.stopContainer(containerId, 5)
               docker.removeContainer(containerId)
             } else {
