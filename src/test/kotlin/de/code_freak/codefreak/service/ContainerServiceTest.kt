@@ -34,11 +34,6 @@ internal class ContainerServiceTest : SpringTest() {
   }
 
   @Before
-  fun pullImages() {
-    containerService.pullDockerImages()
-  }
-
-  @Before
   @After
   fun tearDown() {
     // delete all containers before and after each run
@@ -71,6 +66,13 @@ internal class ContainerServiceTest : SpringTest() {
     val dirContent = containerService.exec(containerId, arrayOf("ls", "-l", "/home/project"))
     assertThat(dirContent, containsString("main.c"))
     assertThat(dirContent, not(containsString("root")))
+  }
+
+  @Test
+  fun `idle containers are shut down automatically`() {
+    containerService.startIdeContainer(answer)
+    Thread.sleep(10000)
+    assertThat(getIdeContainers(answer), hasSize(0))
   }
 
   private fun getAllIdeContainers() = docker.listContainers(

@@ -3,6 +3,10 @@ language: java
 services:
   - docker
 
+before_script:
+  - docker pull cfreak/theia:latest
+  - docker build --build-arg GITHUB_TOKEN -t cfreak/theia:latest --cache-from cfreak/theia:latest $TRAVIS_BUILD_DIR/theia
+
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
