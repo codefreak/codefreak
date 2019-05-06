@@ -3,11 +3,10 @@ package de.code_freak.codefreak.util
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
-import java.io.File
-import java.io.FileInputStream
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
-import java.lang.IllegalArgumentException
+import java.io.File
+import java.io.FileInputStream
 
 object TarUtil {
   fun createTarFromDirectory(file: File): ByteArray {
@@ -24,7 +23,14 @@ object TarUtil {
   }
 
   private fun addFileToTar(tar: TarArchiveOutputStream, file: File, name: String) {
-    tar.putArchiveEntry(TarArchiveEntry(file, name))
+    val entry = TarArchiveEntry(file, name)
+    // add the executable bit for user. Default mode is 0644
+    // 0644 + 0100 = 0744
+    if (file.isFile && file.canExecute()) {
+      entry.mode += 64 // 0100
+    }
+
+    tar.putArchiveEntry(entry)
 
     if (file.isFile) {
       BufferedInputStream(FileInputStream(file)).use {
