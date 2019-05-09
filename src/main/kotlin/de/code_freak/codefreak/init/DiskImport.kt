@@ -43,14 +43,14 @@ class DiskImport {
   private lateinit var classroomRepository: ClassroomRepository
 
   private var importInCurrentIteration = mutableListOf<String>()
-  private val user = User()
-  private val classroom = Classroom("Import Classroom")
+  private var user = User()
+  private var classroom = Classroom("Import Classroom")
 
   @PostConstruct
   protected fun init() {
     log.info("Assignment import from disk is enabled. Root directory: $rootDirectoryPath")
-    userRepository.save(user)
-    classroomRepository.save(classroom)
+    user = userRepository.save(user)
+    classroom = classroomRepository.save(classroom)
   }
 
   @Scheduled(initialDelay = 1000*60*3, fixedDelay = 1000*60*3)
