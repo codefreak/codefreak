@@ -1,6 +1,7 @@
 FROM ubuntu:19.04
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
+    lsof \
     gpg \
     curl \
     dumb-init \
