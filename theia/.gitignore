@@ -1,6 +1,0 @@
-node_modules
-/src-gen
-lib
-.browser_modules
-webpack.config.js
-yarn.lock

@@ -21,9 +21,10 @@ class ContainerService(
   val docker: DockerClient
 ) : BaseService() {
   companion object {
-    const val IDE_DOCKER_IMAGE = "cfreak/theia:latest"
+    const val IDE_DOCKER_IMAGE = "cfreak/ide:latest"
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
+    const val PROJECT_PATH = "/home/coder/project"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -97,7 +98,7 @@ class ContainerService(
   @Transactional
   fun saveAnswerFiles(answer: Answer) {
     val containerId = getIdeContainer(answer) ?: throw IllegalArgumentException()
-    val files = docker.archiveContainer(containerId, "/home/project/.")
+    val files = docker.archiveContainer(containerId, PROJECT_PATH + "/.")
     answer.files = IOUtils.toByteArray(files)
     entityManager.merge(answer)
     log.info("Saved files of container with id: $containerId")
@@ -136,12 +137,12 @@ class ContainerService(
    * Prepare a running container with files and other commands like chmod, etc.
    */
   protected fun prepareIdeContainer(containerId: String, answer: Answer) {
-    // extract possible existing files of the current submission into /home/project
+    // extract possible existing files of the current submission into project dir
     answer.files?.let {
-      docker.copyToContainer(it.inputStream(), containerId, "/home/project")
+      docker.copyToContainer(it.inputStream(), containerId, PROJECT_PATH)
     }
-    // change owner from root to theia so we can edit our project files
-    exec(containerId, arrayOf("chown", "-R", "theia:theia", "/home/project"))
+    // change owner from root to coder so we can edit our project files
+    exec(containerId, arrayOf("chown", "-R", "coder:coder", PROJECT_PATH))
   }
 
   protected fun isContainerRunning(containerId: String): Boolean =
