@@ -6,9 +6,9 @@ import de.code_freak.codefreak.entity.Requirement
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
-import de.code_freak.codefreak.repository.AssignmentTaskRepository
+import de.code_freak.codefreak.repository.TaskRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
-import de.code_freak.codefreak.repository.TaskEvaluationRepository
+import de.code_freak.codefreak.repository.RequirementRepository
 import de.code_freak.codefreak.repository.UserRepository
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,13 +35,13 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
   lateinit var assignmentRepository: AssignmentRepository
 
   @Autowired
-  lateinit var assignmentTaskRepository: AssignmentTaskRepository
+  lateinit var taskRepository: TaskRepository
 
   @Autowired
   lateinit var classroomRepository: ClassroomRepository
 
   @Autowired
-  lateinit var taskEvaluationRepository: TaskEvaluationRepository
+  lateinit var requirementRepository: RequirementRepository
 
   @Value("\${spring.jpa.hibernate.ddl-auto:''}")
   private lateinit var schemaExport: String
@@ -70,11 +70,11 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
     val javaTar = TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file)
     val task1 = Task(assignment1, 0, "Program in C", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", cTar, 100)
     val task2 = Task(assignment2, 0, "Program in Java", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", javaTar, 100)
-    assignmentTaskRepository.saveAll(listOf(task1, task2))
+    taskRepository.saveAll(listOf(task1, task2))
 
     val eval1 = Requirement(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
     val eval2 = Requirement(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))
-    taskEvaluationRepository.saveAll(listOf(eval1, eval2))
+    requirementRepository.saveAll(listOf(eval1, eval2))
   }
 
   override fun getOrder(): Int {
