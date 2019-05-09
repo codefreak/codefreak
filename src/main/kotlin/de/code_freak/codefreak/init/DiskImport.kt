@@ -53,7 +53,7 @@ class DiskImport {
     classroomRepository.save(classroom)
   }
 
-  @Scheduled(initialDelay = 1000*60*1, fixedDelay = 1000*60*1)
+  @Scheduled(initialDelay = 1000*60*3, fixedDelay = 1000*60*3)
   fun importAssignmentFromDisk() {
     val rootDirectory = File(rootDirectoryPath)
     val importInNextIteration = mutableListOf<String>()
