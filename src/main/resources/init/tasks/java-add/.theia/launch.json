@@ -8,7 +8,7 @@
       "name": "Run",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
+      "console": "internalConsole",
       "stopOnEntry": false,
       "mainClass": "",
       "args": ""
