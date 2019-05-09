@@ -41,7 +41,7 @@ Vagrant.configure("2") do |config|
 
   # Build IDE container image
   config.vm.provision "shell",
-    inline: "docker build -t cfreak/theia:latest /vagrant/theia"
+    inline: "docker build -t cfreak/ide:latest /vagrant/ide"
 
   config.vm.provider "virtualbox" do |vb|
    vb.memory = "4096"
