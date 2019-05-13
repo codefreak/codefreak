@@ -30,6 +30,30 @@ class ContainerService(
   private val log = LoggerFactory.getLogger(this::class.java)
   private var idleContainers: Map<String, Long> = mapOf()
 
+  /**
+   * Memory limit in bytes
+   * Equal to --memory-swap in docker run
+   * Default is 512MB
+   * Less than 512MB might cause the IDE to crash
+   */
+  @Value("\${code-freak.docker.memory:536870912}")
+  var memory = 0L
+
+  /**
+   * Number of CPUs per container
+   * Equal to --cpus in docker run
+   * Default is 1
+   */
+  @Value("\${code-freak.docker.cpus:1}")
+  var cpus = 0L
+
+  /**
+   * Name of the network the container will be attached to
+   * Default is the "bridge" network (Docker default)
+   */
+  @Value("\${code-freak.docker.network:bridge}")
+  lateinit var network: String
+
   @Value("\${code-freak.traefik.url}")
   private lateinit var traefikUrl: String
 
@@ -121,6 +145,9 @@ class ContainerService(
 
     val hostConfig = HostConfig.builder()
         .capAdd("SYS_PTRACE") // required for lsof
+        .memory(memory)
+        .memorySwap(memory) // memory+swap = memory ==> 0 swap
+        .nanoCpus(cpus * 1000000000L)
         .build()
 
     val containerConfig = ContainerConfig.builder()
@@ -130,6 +157,10 @@ class ContainerService(
         .build()
 
     val container = docker.createContainer(containerConfig)
+
+    // attach to network
+    docker.connectToNetwork(container.id(), network)
+
     return container.id()!!
   }
 
