@@ -6,4 +6,4 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface TaskEvaluationRepository : CrudRepository<Requirement, UUID>
+interface RequirementRepository : CrudRepository<Requirement, UUID>
