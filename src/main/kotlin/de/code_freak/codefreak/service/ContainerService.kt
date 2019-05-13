@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
+import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
 import de.code_freak.codefreak.entity.Answer
@@ -9,6 +10,8 @@ import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -53,6 +56,15 @@ class ContainerService(
   @Value("\${code-freak.docker.network:bridge}")
   lateinit var network: String
 
+  /**
+   * Define how images will be pulled on application startup (inspired by Gitlab Runner)
+   * - never = Images must be already present on the docker daemon or container creation will fail
+   * - if-not-present = Pull images if no version is available
+   * - always = Always pull image (may override existing ones)
+   */
+  @Value("\${code-freak.docker.pull-policy:never}")
+  lateinit var pullPolicy: String
+
   @Value("\${code-freak.traefik.url}")
   private lateinit var traefikUrl: String
 
@@ -64,6 +76,32 @@ class ContainerService(
 
   @Autowired
   private lateinit var containerService: ContainerService
+
+  /**
+   * Pull all required docker images on startup
+   */
+  @EventListener(ContextRefreshedEvent::class)
+  fun pullDockerImages() {
+    val imageInfo = try {
+      docker.inspectImage(IDE_DOCKER_IMAGE)
+    } catch (e: ImageNotFoundException) {
+      null
+    }
+
+    val pullRequired = pullPolicy == "always" || (pullPolicy == "if-not-present" && imageInfo == null)
+    if (!pullRequired) {
+      if (imageInfo == null) {
+        log.warn("Image pulling is disabled but $IDE_DOCKER_IMAGE is not available on the daemon!")
+      } else {
+        log.info("Image present: $IDE_DOCKER_IMAGE ${imageInfo.id()}")
+      }
+      return
+    }
+
+    log.info("Pulling latest image for: $IDE_DOCKER_IMAGE")
+    docker.pull(IDE_DOCKER_IMAGE)
+    log.info("Updated docker image $IDE_DOCKER_IMAGE to ${docker.inspectImage(IDE_DOCKER_IMAGE).id()}")
+  }
 
   @PostConstruct
   protected fun init() {
