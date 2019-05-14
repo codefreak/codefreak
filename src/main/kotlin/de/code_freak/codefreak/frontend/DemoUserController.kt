@@ -7,13 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.ui.set
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import java.util.*
+import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 
 @Controller
-class DemoUserController: BaseController() {
+class DemoUserController : BaseController() {
 
   @Autowired
   private lateinit var demoUserRepository: DemoUserRepository
@@ -42,5 +45,4 @@ class DemoUserController: BaseController() {
     model["email"] = demoUser.email
     return "demo-login"
   }
-
 }

@@ -4,6 +4,6 @@ import javax.persistence.Entity
 
 @Entity
 class DemoUser(
-    var email: String,
-    var group: String
+  var email: String,
+  var group: String
 ) : BaseEntity()
