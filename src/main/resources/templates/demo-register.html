@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default}">
+<head>
+  <title>Home</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <h1>Register</h1>
+  <form action="#" th:action="@{/register}" th:object="${demoUser}" method="post">
+      <p>Email: <input type="text" th:field="*{email}" /></p>
+      <p>Lab Group: <input type="text" th:field="*{group}" /></p>
+      <p><input type="submit" value="Register" /></p>
+  </form>
+</div>
+</body>
+</html>

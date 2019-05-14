@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.entity.Submission
+import de.code_freak.codefreak.repository.SubmissionRepository
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.ContainerService
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,6 +20,9 @@ class AssignmentController : BaseController() {
 
   @Autowired
   lateinit var containerService: ContainerService
+
+  @Autowired
+  lateinit var submissionRepository: SubmissionRepository
 
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
@@ -66,23 +70,14 @@ class AssignmentController : BaseController() {
   }
 
   private fun getSubmission(request: HttpServletRequest, assignmentId: UUID): Submission {
-    // TODO: fetch submission by logged-in user and not from session
+    // TODO: fetch submission by logged-in demoUser and not from session
     val session = request.session
-    val sessionKey = "assignment-$assignmentId-submission"
-    var submissionId = session.getAttribute(sessionKey) as String?
+    val sessionKey = "demo-user-id"
+    val demoUserId = session.getAttribute(sessionKey) as UUID? ?: throw NoDemoUserFoundException()
+    //val demoUserId = UUID.fromString(demoUserIdString)
 
-    val submission = if (submissionId != null) {
-        assignmentService.findSubmission(UUID.fromString(submissionId))
-      } else {
-        assignmentService.createNewSubmission(
-            assignmentService.findAssignment(assignmentId)
-        )
-      }
-
-    // store submission id for this task in session
-    submissionId = submission.id.toString()
-    session.setAttribute(sessionKey, submissionId)
-
-    return submission
+    return submissionRepository.findByAssignmentIdAndDemoUserId(assignmentId, demoUserId).orElseGet {
+      assignmentService.createNewSubmission(assignmentService.findAssignment(assignmentId), demoUserId)
+    }
   }
 }

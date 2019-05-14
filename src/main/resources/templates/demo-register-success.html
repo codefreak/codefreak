@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default}">
+<head>
+  <title>Home</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="alert alert-success">
+    <p>Registration successful. You can now log in using the following link:<p>
+    <p><a th:href="${url}" th:text="${url}"></a></p>
+    <p>Save this link to log in with other devices. If you work in a team, share this link to collaborate on the same submission.
+    It will also be sent to <span th:text="${email}"></span> via email.</p>
+  </div>
+</div>
+</body>
+</html>
