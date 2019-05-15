@@ -31,7 +31,7 @@ class DemoUserController : BaseController() {
     return "demo-register"
   }
 
-  @PostMapping
+  @PostMapping("/register")
   fun registerSubmit(@ModelAttribute demoUserInput: DemoUser, model: Model): String {
     val demoUser = demoUserRepository.save(demoUserInput)
     model["email"] = demoUser.email
