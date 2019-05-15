@@ -3,6 +3,7 @@ package de.code_freak.codefreak.frontend
 import de.code_freak.codefreak.entity.DemoUser
 import de.code_freak.codefreak.repository.DemoUserRepository
 import de.code_freak.codefreak.service.EntityNotFoundException
+import de.code_freak.codefreak.service.MailService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -19,6 +20,9 @@ import javax.servlet.http.HttpServletRequest
 class DemoUserController : BaseController() {
 
   @Autowired
+  lateinit var mailService: MailService
+
+  @Autowired
   private lateinit var demoUserRepository: DemoUserRepository
 
   @GetMapping("/register")
@@ -33,7 +37,16 @@ class DemoUserController : BaseController() {
     model["email"] = demoUser.email
     val baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
     val loginUrl = baseUrl + "/login/" + demoUser.id
-    // TODO: send email
+
+    mailService.send(demoUser.email, "Your registration on Code FREAK", """
+        Dear Student,
+
+        use the following link to access your code:
+        $loginUrl
+
+        Your Code FREAK Team
+    """.trimIndent())
+
     model["url"] = loginUrl
     return "demo-register-success"
   }
