@@ -8,17 +8,17 @@ import javax.persistence.OneToMany
 @Entity
 class Submission(
   /**
-   * The user that handed in this submissions
-   * TODO: remove optional if authentication is implemented
-   */
-  @ManyToOne(optional = true)
-  var user: User? = null,
+ * The demoUser that handed in this submissions
+ * TODO: remove optional if authentication is implemented
+ */
+@ManyToOne()
+var demoUser: DemoUser,
 
   /**
-   * The assignment this submission belongs to
-   */
-  @ManyToOne
-  var assignment: Assignment
+ * The assignment this submission belongs to
+ */
+@ManyToOne
+var assignment: Assignment
 ) : BaseEntity() {
   /**
    * List of submissions for this task

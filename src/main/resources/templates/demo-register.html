@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default}">
+<head>
+  <title>Home</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <h1>Register</h1>
+  <form action="#" th:action="@{/register}" th:object="${demoUser}" method="post">
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input id="email" type="email" class="form-control" th:field="*{email}" placeholder="john.doe@student.fh-kiel.de" />
+      <small class="form-text text-muted">
+        You will receive an email with a link to login again.
+      </small>
+    </div>
+    <div class="form-group">
+      <label for="group">Lab Group:</label>
+      <input id="group" type="text" class="form-control" th:field="*{group}" />
+    </div>
+    <div class="form-group">
+      <input type="submit" value="Register" class="btn btn-primary" />
+    </div>
+  </form>
+</div>
+</body>
+</html>

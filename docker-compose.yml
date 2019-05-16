@@ -21,6 +21,7 @@ services:
       SPRING_JPA_DATABASEPLATFORM: "org.hibernate.dialect.PostgreSQLDialect"
       # automatically update the database schema until we have a migration tool
       SPRING_JPA_HIBERNATE_DDLAUTO: "update"
+      CODEFREAK_DOCKER_PULLPOLICY: "always"
   postgres:
     image: postgres
     restart: always

@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true,
+        "**/.vscode": true,
+        "**/.gradle": true,
+        "**/.sonarlint": true
+    },
+    "java.jdt.ls.vmargs": "-noverify -Xmx512m -XX:+UseG1GC -XX:+UseStringDeduplication",
+    "sonarlint.ls.vmargs": "-Xmx512m"
+}

@@ -44,6 +44,11 @@ class ExceptionHandlerAdvice : ResponseEntityExceptionHandler() {
     }
   }
 
+  @ExceptionHandler(NoDemoUserFoundException::class)
+  fun handleNoDemoUserFoundException(): String {
+    return "redirect:/register"
+  }
+
   /**
    * Generates a response depending on the current controller. For normal controllers the "error"
    * template is returned and supplied with the usual model, for REST controllers the

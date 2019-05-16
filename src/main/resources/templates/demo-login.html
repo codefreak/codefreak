@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/default}">
+<head>
+  <title>Home</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="alert alert-success">
+    <p>Login successful: <span th:text="${email}"></span></p>
+    <a class="btn btn-primary btn-lg" th:href="@{'/assignments'}">See assignments</a>
+  </div>
+</div>
+</body>
+</html>

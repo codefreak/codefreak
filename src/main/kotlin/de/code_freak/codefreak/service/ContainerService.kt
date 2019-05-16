@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
+import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
 import de.code_freak.codefreak.entity.Answer
@@ -9,6 +10,8 @@ import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -21,9 +24,10 @@ class ContainerService(
   val docker: DockerClient
 ) : BaseService() {
   companion object {
-    const val IDE_DOCKER_IMAGE = "cfreak/theia:latest"
+    const val IDE_DOCKER_IMAGE = "cfreak/ide:latest"
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
+    const val PROJECT_PATH = "/home/coder/project"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -32,18 +36,18 @@ class ContainerService(
   /**
    * Memory limit in bytes
    * Equal to --memory-swap in docker run
-   * Default is 512MB
+   * Default is unlimited
    * Less than 512MB might cause the IDE to crash
    */
-  @Value("\${code-freak.docker.memory:536870912}")
+  @Value("\${code-freak.docker.memory:0}")
   var memory = 0L
 
   /**
    * Number of CPUs per container
    * Equal to --cpus in docker run
-   * Default is 1
+   * Default is unlimited
    */
-  @Value("\${code-freak.docker.cpus:1}")
+  @Value("\${code-freak.docker.cpus:0}")
   var cpus = 0L
 
   /**
@@ -52,6 +56,15 @@ class ContainerService(
    */
   @Value("\${code-freak.docker.network:bridge}")
   lateinit var network: String
+
+  /**
+   * Define how images will be pulled on application startup (inspired by Gitlab Runner)
+   * - never = Images must be already present on the docker daemon or container creation will fail
+   * - if-not-present = Pull images if no version is available
+   * - always = Always pull image (may override existing ones)
+   */
+  @Value("\${code-freak.docker.pull-policy:never}")
+  lateinit var pullPolicy: String
 
   @Value("\${code-freak.traefik.url}")
   private lateinit var traefikUrl: String
@@ -64,6 +77,32 @@ class ContainerService(
 
   @Autowired
   private lateinit var containerService: ContainerService
+
+  /**
+   * Pull all required docker images on startup
+   */
+  @EventListener(ContextRefreshedEvent::class)
+  fun pullDockerImages() {
+    val imageInfo = try {
+      docker.inspectImage(IDE_DOCKER_IMAGE)
+    } catch (e: ImageNotFoundException) {
+      null
+    }
+
+    val pullRequired = pullPolicy == "always" || (pullPolicy == "if-not-present" && imageInfo == null)
+    if (!pullRequired) {
+      if (imageInfo == null) {
+        log.warn("Image pulling is disabled but $IDE_DOCKER_IMAGE is not available on the daemon!")
+      } else {
+        log.info("Image present: $IDE_DOCKER_IMAGE ${imageInfo.id()}")
+      }
+      return
+    }
+
+    log.info("Pulling latest image for: $IDE_DOCKER_IMAGE")
+    docker.pull(IDE_DOCKER_IMAGE)
+    log.info("Updated docker image $IDE_DOCKER_IMAGE to ${docker.inspectImage(IDE_DOCKER_IMAGE).id()}")
+  }
 
   @PostConstruct
   protected fun init() {
@@ -121,7 +160,7 @@ class ContainerService(
   @Transactional
   fun saveAnswerFiles(answer: Answer) {
     val containerId = getIdeContainer(answer) ?: throw IllegalArgumentException()
-    val files = docker.archiveContainer(containerId, "/home/project/.")
+    val files = docker.archiveContainer(containerId, PROJECT_PATH + "/.")
     answer.files = IOUtils.toByteArray(files)
     entityManager.merge(answer)
     log.info("Saved files of container with id: $containerId")
@@ -167,12 +206,12 @@ class ContainerService(
    * Prepare a running container with files and other commands like chmod, etc.
    */
   protected fun prepareIdeContainer(containerId: String, answer: Answer) {
-    // extract possible existing files of the current submission into /home/project
+    // extract possible existing files of the current submission into project dir
     answer.files?.let {
-      docker.copyToContainer(it.inputStream(), containerId, "/home/project")
+      docker.copyToContainer(it.inputStream(), containerId, PROJECT_PATH)
     }
-    // change owner from root to theia so we can edit our project files
-    exec(containerId, arrayOf("chown", "-R", "theia:theia", "/home/project"))
+    // change owner from root to coder so we can edit our project files
+    exec(containerId, arrayOf("chown", "-R", "coder:coder", PROJECT_PATH))
   }
 
   protected fun isContainerRunning(containerId: String): Boolean =
