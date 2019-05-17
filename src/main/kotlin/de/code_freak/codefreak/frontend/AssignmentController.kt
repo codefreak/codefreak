@@ -66,7 +66,7 @@ class AssignmentController : BaseController() {
   ): String {
     val submission = getSubmission(request, assignmentId)
     containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
-    return "redirect:/assignments/$assignmentId"
+    return "redirect:/assignments/$assignmentId?saved"
   }
 
   private fun getSubmission(request: HttpServletRequest, assignmentId: UUID): Submission {

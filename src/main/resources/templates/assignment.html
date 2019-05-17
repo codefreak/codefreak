@@ -9,6 +9,9 @@
 <div layout:fragment="content">
   <h1 th:text="${assignment.title}" />
   <div class="lead text-muted" th:text="|by User #${#strings.substring(assignment.owner.id, 30, 36)}|"/>
+  <div th:if="${param.saved}" class="alert alert-success" style="margin-top: 1em">
+    Your answer has been submitted successfully. It can be updated at any time until the assignment is due.
+  </div>
 
   <div class="card mt-4" th:each="task : ${assignment.tasks}">
     <div class="card-body">
