@@ -17,7 +17,9 @@ RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean b
 EXPOSE 8080
 
 # Run everything as unprivileged user
-RUN adduser --uid 1000 --gid 1000 code-freak
+RUN addgroup -g 1000 code-freak \
+    && adduser -Su 1000 -G code-freak code-freak \
+    && chown -R code-freak:code-freak /app
 USER code-freak
 
 WORKDIR /app
