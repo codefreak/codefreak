@@ -52,14 +52,18 @@ RUN mkdir -p $VSCODE_USER $VSCODE_EXTENSIONS
 COPY  --chown=coder:coder settings/ $VSCODE_USER
 
 # Java Extensions
+ARG VSCODE_JAVA_VERSION=0.45.0
+ARG VSCODE_JAVA_DEBUG_VERSION=0.18.0
+ARG VSCODE_JAVA_TEST_VERSION=0.16.0
+
 RUN mkdir -p ${VSCODE_EXTENSIONS}/java \
-    && curl -JLs --retry 5 https://marketplace.visualstudio.com/_apis/public/gallery/publishers/redhat/vsextensions/java/latest/vspackage | bsdtar --strip-components=1 -xf - -C ${VSCODE_EXTENSIONS}/java extension
+    && curl -JLs --retry 5 https://github.com/redhat-developer/vscode-java/releases/download/v${VSCODE_JAVA_VERSION}/redhat.java-${VSCODE_JAVA_VERSION}.vsix | bsdtar --strip-components=1 -xf - -C ${VSCODE_EXTENSIONS}/java extension
 
 RUN mkdir -p ${VSCODE_EXTENSIONS}/java-debugger \
-    && curl -JLs --retry 5 https://marketplace.visualstudio.com/_apis/public/gallery/publishers/vscjava/vsextensions/vscode-java-debug/latest/vspackage | bsdtar --strip-components=1 -xf - -C ${VSCODE_EXTENSIONS}/java-debugger extension
+    && curl -JLs --retry 5 https://github.com/microsoft/vscode-java-debug/releases/download/${VSCODE_JAVA_DEBUG_VERSION}/vscode-java-debug-${VSCODE_JAVA_DEBUG_VERSION}.vsix | bsdtar --strip-components=1 -xf - -C ${VSCODE_EXTENSIONS}/java-debugger extension
 
 RUN mkdir -p ${VSCODE_EXTENSIONS}/java-test \
-    && curl -JLs --retry 5 https://marketplace.visualstudio.com/_apis/public/gallery/publishers/vscjava/vsextensions/vscode-java-test/latest/vspackage | bsdtar --strip-components=1 -xf - -C ${VSCODE_EXTENSIONS}/java-test extension
+    && curl -JLs --retry 5 https://github.com/microsoft/vscode-java-test/releases/download/${VSCODE_JAVA_TEST_VERSION}/vscjava.vscode-java-test-${VSCODE_JAVA_TEST_VERSION}.vsix | bsdtar --strip-components=1 -xf - -C ${VSCODE_EXTENSIONS}/java-test extension
 
 # Custom Sonar lint with Java support
 COPY --chown=coder:coder sonarlint-vscode-1.7.0-SNAPSHOT.vsix .
