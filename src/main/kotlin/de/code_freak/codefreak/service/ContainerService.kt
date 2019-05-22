@@ -36,11 +36,11 @@ class ContainerService(
   /**
    * Memory limit in bytes
    * Equal to --memory-swap in docker run
-   * Default is unlimited
-   * Less than 512MB might cause the IDE to crash
+   * Default is 2GB
+   * Less than 1.5GB might cause the IDE to crash
    */
-  @Value("\${code-freak.docker.memory:0}")
-  var memory = 0L
+  @Value("\${code-freak.docker.memory:2147483648}")
+  var memory = 2147483648L
 
   /**
    * Number of CPUs per container

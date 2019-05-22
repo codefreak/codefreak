@@ -8,6 +8,6 @@
         "**/.gradle": true,
         "**/.sonarlint": true
     },
-    "java.jdt.ls.vmargs": "-noverify -Xmx512m -XX:+UseG1GC -XX:+UseStringDeduplication",
-    "sonarlint.ls.vmargs": "-Xmx512m"
+    "java.jdt.ls.vmargs": "-Xmx128m",
+    "sonarlint.ls.vmargs": "-Xmx128m"
 }
