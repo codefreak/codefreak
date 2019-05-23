@@ -3,14 +3,18 @@ package de.code_freak.codefreak.frontend
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.ContainerService
+import de.code_freak.codefreak.service.EntityNotFoundException
+import de.code_freak.codefreak.service.TaskService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.ResponseBody
 import java.util.UUID
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Controller
 class AssignmentController : BaseController() {
@@ -19,6 +23,9 @@ class AssignmentController : BaseController() {
 
   @Autowired
   lateinit var containerService: ContainerService
+
+  @Autowired
+  lateinit var taskService: TaskService
 
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
@@ -84,5 +91,19 @@ class AssignmentController : BaseController() {
     session.setAttribute(sessionKey, submissionId)
 
     return submission
+  }
+
+  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/source.tar", produces = ["application/tar"])
+  @ResponseBody
+  fun getSourceTar(
+      @PathVariable("assignmentId") assignmentId: UUID,
+      @PathVariable("taskId") taskId: UUID,
+      request: HttpServletRequest,
+      response: HttpServletResponse
+  ): ByteArray {
+    val submission = getSubmission(request, assignmentId)
+    val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
+    response.setHeader("Content-Disposition", "attachment; filename=source.tar")
+    return answer.files ?: taskService.findTask(taskId).files ?: throw EntityNotFoundException()
   }
 }
