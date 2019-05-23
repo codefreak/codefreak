@@ -54,7 +54,6 @@ class AssignmentService {
   fun findAllAssignments(): Iterable<Assignment> = assignmentRepository.findAll()
 
   fun createTarArchiveOfSubmissions(assignmentId: UUID): ByteArray {
-    val assignment = findAssignment(assignmentId)
     val submissions = findSubmissionsOfAssignment(assignmentId)
     val tmpDir = createTempDir()
     // extract all submissions and answers into a temporary directory
