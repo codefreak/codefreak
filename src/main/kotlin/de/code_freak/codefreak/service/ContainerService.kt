@@ -182,6 +182,7 @@ class ContainerService(
     )
 
     val hostConfig = HostConfig.builder()
+        .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
         .capAdd("SYS_PTRACE") // required for lsof
         .memory(memory)
         .memorySwap(memory) // memory+swap = memory ==> 0 swap
