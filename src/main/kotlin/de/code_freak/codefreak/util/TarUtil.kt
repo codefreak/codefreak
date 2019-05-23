@@ -1,14 +1,30 @@
 package de.code_freak.codefreak.util
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
 
 object TarUtil {
+  fun extractTarToDirectory(tar: ByteArray, destination: File) {
+    if (!destination.exists()) {
+      destination.mkdirs()
+    } else if (!destination.isDirectory) {
+      throw IOException("${destination.absolutePath} already exists and is no directory")
+    }
+    val tarInputStream = TarArchiveInputStream(tar.inputStream())
+    for (entry in generateSequence { tarInputStream.nextTarEntry }.filter { !it.isDirectory }) {
+      val outFile = File(destination, entry.name)
+      outFile.parentFile.mkdirs()
+      IOUtils.copy(tarInputStream, outFile.outputStream())
+    }
+  }
+
   fun createTarFromDirectory(file: File): ByteArray {
     if (!file.isDirectory) {
       throw IllegalArgumentException("File must be a directory")

@@ -21,7 +21,7 @@ class Submission(
   var assignment: Assignment
 ) : BaseEntity() {
   /**
-   * List of submissions for this task
+   * List of answers in this submission
    */
   @OneToMany(mappedBy = "submission")
   var answers: MutableSet<Answer> = mutableSetOf()

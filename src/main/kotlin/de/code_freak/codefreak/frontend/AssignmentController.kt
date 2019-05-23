@@ -9,8 +9,10 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.ResponseBody
 import java.util.UUID
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Controller
 class AssignmentController : BaseController() {
@@ -63,6 +65,15 @@ class AssignmentController : BaseController() {
     val submission = getSubmission(request, assignmentId)
     containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
     return "redirect:/assignments/$assignmentId"
+  }
+
+  @GetMapping("/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
+  @ResponseBody
+  fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): ByteArray {
+    val assignment = assignmentService.findAssignment(assignmentId)
+    val filename = assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
+    response.setHeader("Content-Disposition", "attachment; filename=$filename-submissions.tar")
+    return assignmentService.createTarArchiveOfSubmissions(assignmentId)
   }
 
   private fun getSubmission(request: HttpServletRequest, assignmentId: UUID): Submission {
