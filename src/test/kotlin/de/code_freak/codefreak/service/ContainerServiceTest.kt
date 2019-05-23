@@ -70,7 +70,7 @@ internal class ContainerServiceTest : SpringTest() {
   }
 
   @Test
-  fun `files are not extracted if container is started again`() {
+  fun `files are not overridden in existing IDE containers`() {
     `when`(answer.files).thenReturn(TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file))
     containerService.startIdeContainer(answer)
     val containerId = getIdeContainer(answer).id()
