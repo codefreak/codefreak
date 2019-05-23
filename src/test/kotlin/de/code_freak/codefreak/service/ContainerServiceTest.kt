@@ -6,6 +6,7 @@ import de.code_freak.codefreak.SpringTest
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.not
@@ -66,6 +67,18 @@ internal class ContainerServiceTest : SpringTest() {
     val dirContent = containerService.exec(containerId, arrayOf("ls", "-l", ContainerService.PROJECT_PATH))
     assertThat(dirContent, containsString("main.c"))
     assertThat(dirContent, not(containsString("root")))
+  }
+
+  @Test
+  fun `files are not overridden in existing IDE containers`() {
+    `when`(answer.files).thenReturn(TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file))
+    containerService.startIdeContainer(answer)
+    val containerId = getIdeContainer(answer).id()
+    containerService.exec(containerId, arrayOf("sh", "-c", "echo 'foo' >> main.c"))
+    val fileContentBefore = containerService.exec(containerId, arrayOf("cat", "main.c"))
+    containerService.startIdeContainer(answer)
+    val fileContentAfter = containerService.exec(containerId, arrayOf("cat", "main.c"))
+    assertThat(fileContentAfter, `is`(fileContentBefore))
   }
 
   @Test

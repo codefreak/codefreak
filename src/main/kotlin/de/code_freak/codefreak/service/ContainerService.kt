@@ -115,13 +115,16 @@ class ContainerService(
    */
   fun startIdeContainer(answer: Answer) {
     // either take existing container or create a new one
-    val containerId = this.getIdeContainer(answer) ?: this.createIdeContainer(answer)
-    // make sure the container is running. Also existing ones could have been stopped
-    if (!isContainerRunning(containerId)) {
+    var containerId = this.getIdeContainer(answer)
+    if (containerId == null) {
+      containerId = this.createIdeContainer(answer)
+      docker.startContainer(containerId)
+      // prepare the environment after the container has started
+      this.prepareIdeContainer(containerId, answer)
+    } else if (!isContainerRunning(containerId)) {
+      // make sure the container is running. Also existing ones could have been stopped
       docker.startContainer(containerId)
     }
-    // prepare the environment after the container has started
-    this.prepareIdeContainer(containerId, answer)
   }
 
   /**
