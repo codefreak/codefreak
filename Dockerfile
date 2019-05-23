@@ -22,5 +22,8 @@ RUN addgroup -g 1000 code-freak \
     && chown -R code-freak:code-freak /app
 USER code-freak
 
+# Override this when running the container with -e SPRING_PROFILES_ACTIVE="dev"
+ENV SPRING_PROFILES_ACTIVE "prod"
+
 WORKDIR /app
 CMD ["java", "-jar", "/app/code-freak.jar"]
