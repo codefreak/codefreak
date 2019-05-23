@@ -67,7 +67,7 @@ class AssignmentController : BaseController() {
     return "redirect:/assignments/$assignmentId"
   }
 
-  @GetMapping("/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
+  @GetMapping("/admin/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
   @ResponseBody
   fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): ByteArray {
     val assignment = assignmentService.findAssignment(assignmentId)
