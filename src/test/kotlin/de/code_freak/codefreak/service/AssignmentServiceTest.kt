@@ -80,9 +80,6 @@ class AssignmentServiceTest {
 
   @Test
   fun createNewSubmission() {
-    `when`(task.files).thenReturn(files)
-    val tasks = sortedSetOf(task)
-    `when`(assignment.tasks).thenReturn(tasks)
     val submission = assignmentService.createNewSubmission(assignment)
     assertThat(submission.answers, hasSize(1))
     assertThat(submission.answers.first(), instanceOf(Answer::class.java))
