@@ -3,6 +3,8 @@ package de.code_freak.codefreak.frontend
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.ContainerService
+import de.code_freak.codefreak.service.EntityNotFoundException
+import de.code_freak.codefreak.service.LatexService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -75,6 +77,23 @@ class AssignmentController : BaseController() {
     response.setHeader("Content-Disposition", "attachment; filename=$filename-submissions.tar")
     return assignmentService.createTarArchiveOfSubmissions(assignmentId)
   }
+
+
+  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/answer.pdf", produces = ["application/pdf"])
+  @ResponseBody
+  fun pdfExport(
+    @PathVariable("assignmentId") assignmentId: UUID,
+    @PathVariable("taskId") taskId: UUID,
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    texService: LatexService): ByteArray {
+    val submission = getSubmission(request, assignmentId)
+    val answer = submission.getAnswerForTask(taskId) ?: throw EntityNotFoundException("Answer not found")
+    val filename = answer.task.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
+    response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
+    return texService.answerToPdf(answer)
+  }
+
 
   private fun getSubmission(request: HttpServletRequest, assignmentId: UUID): Submission {
     // TODO: fetch submission by logged-in user and not from session
