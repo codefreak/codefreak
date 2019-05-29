@@ -24,6 +24,9 @@ class AssignmentController : BaseController() {
   @Autowired
   lateinit var containerService: ContainerService
 
+  @Autowired
+  lateinit var latexService: LatexService
+
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
     model.addAttribute("assignments", assignmentService.findAllAssignments())
@@ -85,13 +88,12 @@ class AssignmentController : BaseController() {
     @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     request: HttpServletRequest,
-    response: HttpServletResponse,
-    texService: LatexService): ByteArray {
+    response: HttpServletResponse): ByteArray {
     val submission = getSubmission(request, assignmentId)
     val answer = submission.getAnswerForTask(taskId) ?: throw EntityNotFoundException("Answer not found")
     val filename = answer.task.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
     response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
-    return texService.answerToPdf(answer)
+    return latexService.answerToPdf(answer)
   }
 
 
