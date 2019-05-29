@@ -81,21 +81,20 @@ class AssignmentController : BaseController() {
     return assignmentService.createTarArchiveOfSubmissions(assignmentId)
   }
 
-
   @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/answer.pdf", produces = ["application/pdf"])
   @ResponseBody
   fun pdfExport(
     @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     request: HttpServletRequest,
-    response: HttpServletResponse): ByteArray {
+    response: HttpServletResponse
+  ): ByteArray {
     val submission = getSubmission(request, assignmentId)
     val answer = submission.getAnswerForTask(taskId) ?: throw EntityNotFoundException("Answer not found")
     val filename = answer.task.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
     response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
     return latexService.answerToPdf(answer)
   }
-
 
   private fun getSubmission(request: HttpServletRequest, assignmentId: UUID): Submission {
     // TODO: fetch submission by logged-in user and not from session

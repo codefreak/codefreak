@@ -44,6 +44,9 @@ class LatexService {
   @Qualifier("latexTemplate")
   lateinit var latexTemplateEngine: TemplateEngine
 
+  @Autowired
+  lateinit var containerService: ContainerService
+
   fun answerToPdf(answer: Answer): ByteArray {
     val tmpDir = createTempDir()
     TarUtil.extractTarToDirectory(answer.files!!, tmpDir)
@@ -64,19 +67,9 @@ class LatexService {
     tmpDir.mkdirs()
     val texFile = File(tmpDir, "document.tex")
     texFile.writeText(texSource)
-    val proc =
-      ProcessBuilder("/usr/bin/xelatex -synctex=1 -interaction=nonstopmode document.tex".split("\\s+".toRegex()))
-          .directory(tmpDir)
-          .redirectOutput(ProcessBuilder.Redirect.PIPE)
-          .redirectError(ProcessBuilder.Redirect.PIPE)
-          .start()
-
-    val exit = proc.waitFor()
-    if (exit == 1) {
-      val errorText = proc.inputStream.bufferedReader().readText()
-      throw Exception("Failed to tex pdf in ${tmpDir.path}:\n" + errorText)
-    }
-
+    val inputArchive = TarUtil.createTarFromDirectory(tmpDir)
+    val outputArchive = containerService.latexConvert(inputArchive, texFile.name)
+    TarUtil.extractTarToDirectory(outputArchive, tmpDir)
     val pdfContent = File(tmpDir, "document.pdf").readBytes()
     tmpDir.deleteRecursively()
     return pdfContent

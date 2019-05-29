@@ -25,8 +25,10 @@ class ContainerService(
 ) : BaseService() {
   companion object {
     const val IDE_DOCKER_IMAGE = "cfreak/ide:latest"
+    const val LATEX_DOCKER_IMAGE = "blang/latex:latest"
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
+    const val LABEL_LATEX_CONTAINER = "{$LABEL_PREFIX}latex-service"
     const val PROJECT_PATH = "/home/coder/project"
   }
 
@@ -83,30 +85,68 @@ class ContainerService(
    */
   @EventListener(ContextRefreshedEvent::class)
   fun pullDockerImages() {
-    val imageInfo = try {
-      docker.inspectImage(IDE_DOCKER_IMAGE)
-    } catch (e: ImageNotFoundException) {
-      null
-    }
-
-    val pullRequired = pullPolicy == "always" || (pullPolicy == "if-not-present" && imageInfo == null)
-    if (!pullRequired) {
-      if (imageInfo == null) {
-        log.warn("Image pulling is disabled but $IDE_DOCKER_IMAGE is not available on the daemon!")
-      } else {
-        log.info("Image present: $IDE_DOCKER_IMAGE ${imageInfo.id()}")
+    val images = listOf(IDE_DOCKER_IMAGE, LATEX_DOCKER_IMAGE)
+    for (image in images) {
+      val imageInfo = try {
+        docker.inspectImage(image)
+      } catch (e: ImageNotFoundException) {
+        null
       }
-      return
-    }
 
-    log.info("Pulling latest image for: $IDE_DOCKER_IMAGE")
-    docker.pull(IDE_DOCKER_IMAGE)
-    log.info("Updated docker image $IDE_DOCKER_IMAGE to ${docker.inspectImage(IDE_DOCKER_IMAGE).id()}")
+      val pullRequired = pullPolicy == "always" || (pullPolicy == "if-not-present" && imageInfo == null)
+      if (!pullRequired) {
+        if (imageInfo == null) {
+          log.warn("Image pulling is disabled but $image is not available on the daemon!")
+        } else {
+          log.info("Image present: $image ${imageInfo.id()}")
+        }
+        continue
+      }
+
+      log.info("Pulling latest image for: $image")
+      docker.pull(image)
+      log.info("Updated docker image $image to ${docker.inspectImage(image).id()}")
+    }
   }
 
   @PostConstruct
   protected fun init() {
     idleShutdownThreshold.toLong() // fail fast if format is not valid
+  }
+
+  fun getLatexContainer() = getContainerWithLabel(LABEL_LATEX_CONTAINER, "true")
+
+  fun createLatexContainer(): String {
+    val hostConfig = HostConfig.builder()
+        .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
+        .build()
+
+    val containerConfig = ContainerConfig.builder()
+        .image(LATEX_DOCKER_IMAGE)
+        // keep the container running by tailing /dev/null
+        .cmd("tail", "-f", "/dev/null")
+        .labels(
+            mapOf(LABEL_LATEX_CONTAINER to "true")
+        )
+        .hostConfig(hostConfig)
+        .build()
+
+    val containerId = docker.createContainer(containerConfig).id()!!
+    docker.startContainer(containerId)
+    return containerId
+  }
+
+  /**
+   * Convert the latex file in the given archive to pdf and return the directory after pdflatex has been run
+   */
+  fun latexConvert(inputTar: ByteArray, file: String): ByteArray {
+    val latexContainer = getLatexContainer() ?: createLatexContainer()
+    val jobPath = exec(latexContainer, arrayOf("mktemp", "-d")).trim()
+    docker.copyToContainer(inputTar.inputStream(), latexContainer, jobPath)
+    exec(latexContainer, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
+    val output = docker.archiveContainer(latexContainer, "$jobPath/.").readBytes()
+    exec(latexContainer, arrayOf("rm", "-rf", jobPath))
+    return output
   }
 
   /**
@@ -154,8 +194,12 @@ class ContainerService(
    * Try to find an existing container for the given submission
    */
   protected fun getIdeContainer(answer: Answer): String? {
+    return getContainerWithLabel(LABEL_ANSWER_ID, answer.id.toString())
+  }
+
+  protected fun getContainerWithLabel(label: String, value: String): String? {
     return docker.listContainers(
-        DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID, answer.id.toString()),
+        DockerClient.ListContainersParam.withLabel(label, value),
         DockerClient.ListContainersParam.limitContainers(1)
     ).firstOrNull()?.id()
   }
@@ -218,17 +262,20 @@ class ContainerService(
     exec(containerId, arrayOf("chown", "-R", "coder:coder", PROJECT_PATH))
   }
 
-  protected fun isContainerRunning(containerId: String): Boolean =
-      docker.inspectContainer(containerId).state().running()
+  protected fun isContainerRunning(containerId: String): Boolean = docker.inspectContainer(containerId).state().running()
 
-  @Scheduled(fixedRateString = "\${code-freak.ide.idle-check-rate}", initialDelayString = "\${code-freak.ide.idle-check-rate}")
+  @Scheduled(
+      fixedRateString = "\${code-freak.ide.idle-check-rate}",
+      initialDelayString = "\${code-freak.ide.idle-check-rate}"
+  )
   protected fun shutdownIdleIdeContainers() {
     log.debug("Checking for idle containers")
     // create a new map to not leak memory if containers disappear in another way
     val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
     docker.listContainers(
         DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID),
-        DockerClient.ListContainersParam.withStatusRunning())
+        DockerClient.ListContainersParam.withStatusRunning()
+    )
         .forEach {
           val containerId = it.id()
           // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
