@@ -15,7 +15,7 @@ internal class TarUtilTest {
     val tar = TarUtil.createTarFromDirectory(ClassPathResource("util/tar-sample").file)
     TarArchiveInputStream(ByteArrayInputStream(tar)).use {
       val result = generateSequence { it.nextTarEntry }.map { it.name }.toList()
-      assertThat(result, containsInAnyOrder("./", "./executable.sh", "./foo.txt", "./subdir/", "./subdir/bar.txt"))
+      assertThat(result, containsInAnyOrder("/", "executable.sh", "foo.txt", "subdir/", "subdir/bar.txt"))
     }
   }
 
