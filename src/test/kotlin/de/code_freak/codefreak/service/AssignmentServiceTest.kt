@@ -41,6 +41,8 @@ class AssignmentServiceTest {
   }
 
   @Mock
+  lateinit var latexService: LatexService
+  @Mock
   lateinit var assignmentRepository: AssignmentRepository
   @Mock
   lateinit var submissionRepository: SubmissionRepository
@@ -91,6 +93,7 @@ class AssignmentServiceTest {
   fun createTarArchiveOfSubmissions() {
     `when`(assignmentRepository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(assignment))
     `when`(submissionRepository.findByAssignmentId(anyOrNull())).thenReturn(listOf(submission))
+    `when`(latexService.submissionToPdf(anyOrNull())).thenReturn(ByteArray(0))
     val archive = assignmentService.createTarArchiveOfSubmissions(assignment.id)
     val tmpDir = createTempDir()
     TarUtil.extractTarToDirectory(archive, tmpDir)
