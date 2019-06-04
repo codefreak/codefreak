@@ -25,6 +25,10 @@ object TarUtil {
       val outFile = File(destination, entry.name)
       outFile.parentFile.mkdirs()
       IOUtils.copy(tarInputStream, outFile.outputStream())
+      outFile.setLastModified(entry.lastModifiedDate.time)
+      // check if executable bit for user is set
+      // octal 100 = dec 64
+      outFile.setExecutable((entry.mode and 64) == 64)
     }
   }
 
