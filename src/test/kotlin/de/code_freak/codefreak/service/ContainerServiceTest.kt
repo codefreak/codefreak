@@ -22,7 +22,6 @@ import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import java.util.UUID
-import org.hamcrest.Matchers.any as any1
 
 internal class ContainerServiceTest : SpringTest() {
 
