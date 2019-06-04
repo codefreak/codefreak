@@ -15,7 +15,7 @@ internal class TarUtilTest {
     val tar = TarUtil.createTarFromDirectory(ClassPathResource("util/tar-sample").file)
     TarArchiveInputStream(ByteArrayInputStream(tar)).use {
       val result = generateSequence { it.nextTarEntry }.map { it.name }.toList()
-      assertThat(result, containsInAnyOrder("./", "./executable.sh", "./foo.txt", "./subdir/", "./subdir/bar.txt"))
+      assertThat(result, containsInAnyOrder("/", "executable.sh", "foo.txt", "subdir/", "subdir/bar.txt"))
     }
   }
 
@@ -23,7 +23,7 @@ internal class TarUtilTest {
   fun `tar persists execute permissions`() {
     val tar = TarUtil.createTarFromDirectory(ClassPathResource("util/tar-sample").file)
     TarArchiveInputStream(ByteArrayInputStream(tar)).use {
-      val result = generateSequence { it.nextTarEntry }.filter { it.name == "./executable.sh" }.first()
+      val result = generateSequence { it.nextTarEntry }.filter { it.name == "executable.sh" }.first()
       // octal 100744 = int 33252
       assertThat(result.mode, `is`(33252))
     }
