@@ -25,6 +25,9 @@ class AssignmentService {
   @Autowired
   lateinit var answerRepository: AnswerRepository
 
+  @Autowired
+  lateinit var latexService: LatexService
+
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Assignment not found") }
@@ -72,6 +75,9 @@ class AssignmentService {
       // write a meta-file with information about user
       val metaFile = File(submissionDir, "freak.json")
       metaFile.writeText(Klaxon().toJsonString(it.user))
+      // write pdf with submission
+      val pdfFile = File(submissionDir, "submission.pdf")
+      pdfFile.writeBytes(latexService.submissionToPdf(it))
     }
 
     val archive = TarUtil.createTarFromDirectory(tmpDir)

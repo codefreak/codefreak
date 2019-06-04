@@ -1,0 +1,56 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+	extendedchars=true,
+	showstringspaces=false,
+	aboveskip=10pt,
+	showspaces=false,
+	numbers=left,
+	numbersep=9pt,
+	tabsize=2,
+	breaklines=true,
+	showtabs=false,
+	captionpos=b,
+	escapeinside={\%(*}{*)},
+	numberstyle=\footnotesize,
+	basicstyle=\footnotesize\ttfamily,
+	backgroundcolor=\color{white},
+	commentstyle=\color{olive},
+	keywordstyle=\color{blue},
+	stringstyle=\color{magenta},
+}
+
+\title{[( ${submission.assignment.title} )]}
+\author{Add author here}
+
+\begin{document}
+	\maketitle
+	\pagebreak
+
+  [# th:each="task : ${submission.assignment.tasks}"]
+    [# th:with="answer = ${submission.getAnswerForTask(task.id)}"]
+      \section*{[( ${answer.task.title} )]}
+      [# th:each="file : ${files.get(answer.id)}"]
+        \begin{table}[h]
+        \begin{tabularx}{\textwidth}{rX}
+          \textbf{Filename} & \texttt{[( ${file.escapedFilename} )]} \\
+          \textbf{Last modified} & [( ${#dates.format(file.lastModified, 'dd.MM.yyyy HH:mm:ss')} )] \\
+          \hline
+        \end{tabularx}
+        \end{table}
+        \begin{lstlisting}[# th:if="${file.syntax}" )][language=[( ${file.syntax} )]][/]
+    [( ${file.content} )]
+        \end{lstlisting}
+        [# th:if="${last}"]
+        \pagebreak
+        [/]
+      [/]
+      \pagebreak
+    [/]
+  [/]
+\end{document}
