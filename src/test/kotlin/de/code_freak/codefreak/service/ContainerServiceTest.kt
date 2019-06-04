@@ -14,11 +14,15 @@ import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import java.util.UUID
+import org.hamcrest.Matchers.any as any1
 
 internal class ContainerServiceTest : SpringTest() {
 
@@ -67,6 +71,15 @@ internal class ContainerServiceTest : SpringTest() {
     val dirContent = containerService.exec(containerId, arrayOf("ls", "-l", ContainerService.PROJECT_PATH))
     assertThat(dirContent, containsString("main.c"))
     assertThat(dirContent, not(containsString("root")))
+  }
+
+  @Test
+  fun `files in the container are saved back to the database`() {
+    val files = TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file)
+    `when`(answer.files).thenReturn(files)
+    containerService.startIdeContainer(answer)
+    containerService.saveAnswerFiles(answer)
+    verify(answer, times(1)).files = any()
   }
 
   @Test
