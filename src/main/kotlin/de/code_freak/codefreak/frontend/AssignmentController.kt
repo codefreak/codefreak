@@ -81,9 +81,22 @@ class AssignmentController : BaseController() {
     return assignmentService.createTarArchiveOfSubmissions(assignmentId)
   }
 
+  @GetMapping("/assignments/{assignmentId}/submission.pdf", produces = ["application/pdf"])
+  @ResponseBody
+  fun pdfExportSubmission(
+    @PathVariable("assignmentId") assignmentId: UUID,
+    request: HttpServletRequest,
+    response: HttpServletResponse
+  ): ByteArray {
+    val submission = getSubmission(request, assignmentId)
+    val filename = submission.assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
+    response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
+    return latexService.submissionToPdf(submission)
+  }
+
   @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/answer.pdf", produces = ["application/pdf"])
   @ResponseBody
-  fun pdfExport(
+  fun pdfExportAnswer(
     @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     request: HttpServletRequest,

@@ -25,6 +25,9 @@ class AssignmentService {
   @Autowired
   lateinit var answerRepository: AnswerRepository
 
+  @Autowired
+  lateinit var latexService: LatexService
+
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Assignment not found") }
