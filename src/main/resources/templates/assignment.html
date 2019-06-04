@@ -18,9 +18,20 @@
       <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
 
       <a class="btn btn-primary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/ide'}" target="_blank">
-        <i class="far fa-edit"></i> Open in Editor</a>
-      <a class="btn btn-primary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/answer.pdf'}" target="_blank">
-        <i class="far fa-file-pdf"></i> Download answer as PDF</a>
+        <i class="far fa-edit"></i> Open in Editor
+      </a>
+      <div style="display: inline-block;">
+        <div class="input-group" style="top: 2px; left: 3px;">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Download source as</span>
+          </div>
+          <div class="input-group-append">
+            <a class="btn btn-outline-secondary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/source.zip'}">.zip</a>
+            <a class="btn btn-outline-secondary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/source.tar'}">.tar</a>
+            <a class="btn btn-outline-secondary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/answer.pdf'}">.pdf</a>
+          </div>
+        </div>
+      </div>
       <br><br>
       <form th:action="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/answers'}" method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
