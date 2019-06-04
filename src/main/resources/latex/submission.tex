@@ -32,23 +32,25 @@
 	\maketitle
 	\pagebreak
 
-  [# th:each="answer : ${submission.answers}"]
-    \section*{[( ${answer.task.title} )]}
-    [# th:each="file : ${files.get(answer.id)}"]
-      \begin{table}[h]
-      \begin{tabularx}{\textwidth}{rX}
-        \textbf{Filename} & \texttt{[( ${file.escapedFilename} )]} \\
-        \textbf{Last modified} & [( ${#dates.format(file.lastModified, 'dd.MM.yyyy HH:mm:ss')} )] \\
-        \hline
-      \end{tabularx}
-      \end{table}
-      \begin{lstlisting}[# th:if="${file.syntax}" )][language=[( ${file.syntax} )]][/]
-  [( ${file.content} )]
-      \end{lstlisting}
-      [# th:if="${last}"]
-      \pagebreak
+  [# th:each="task : ${submission.assignment.tasks}"]
+    [# th:with="answer = ${submission.getAnswerForTask(task.id)}"]
+      \section*{[( ${answer.task.title} )]}
+      [# th:each="file : ${files.get(answer.id)}"]
+        \begin{table}[h]
+        \begin{tabularx}{\textwidth}{rX}
+          \textbf{Filename} & \texttt{[( ${file.escapedFilename} )]} \\
+          \textbf{Last modified} & [( ${#dates.format(file.lastModified, 'dd.MM.yyyy HH:mm:ss')} )] \\
+          \hline
+        \end{tabularx}
+        \end{table}
+        \begin{lstlisting}[# th:if="${file.syntax}" )][language=[( ${file.syntax} )]][/]
+    [( ${file.content} )]
+        \end{lstlisting}
+        [# th:if="${last}"]
+        \pagebreak
+        [/]
       [/]
+      \pagebreak
     [/]
-    \pagebreak
   [/]
 \end{document}
