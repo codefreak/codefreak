@@ -207,8 +207,9 @@ class ContainerService(
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
     val containerId = getIdeContainer(answer) ?: throw IllegalArgumentException()
-    val files = docker.archiveContainer(containerId, "$PROJECT_PATH/.")
-    answer.files = IOUtils.toByteArray(files)
+    docker.archiveContainer(containerId, "$PROJECT_PATH/.").use {
+      answer.files = IOUtils.toByteArray(it)
+    }
     log.info("Saved files of container with id: $containerId")
     return entityManager.merge(answer)
   }
