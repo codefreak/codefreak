@@ -43,6 +43,7 @@ dependencies {
   implementation 'com.spotify:docker-client:8.15.1'
   implementation 'org.apache.commons:commons-compress:1.18'
   implementation 'com.beust:klaxon:5.0.1'
+  implementation 'io.sentry:sentry-logback:1.7.16'
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.hsqldb:hsqldb'
