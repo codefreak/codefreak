@@ -29,6 +29,7 @@ class ContainerService(
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
     const val LABEL_LATEX_CONTAINER = "{$LABEL_PREFIX}latex-service"
+    const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance"
     const val PROJECT_PATH = "/home/coder/project"
   }
 
@@ -70,6 +71,9 @@ class ContainerService(
 
   @Value("\${code-freak.traefik.url}")
   private lateinit var traefikUrl: String
+
+  @Value("\${code-freak.instance}")
+  private lateinit var instanceId: String
 
   @Value("\${code-freak.ide.idle-shutdown-threshold}")
   private lateinit var idleShutdownThreshold: String
@@ -126,7 +130,7 @@ class ContainerService(
         // keep the container running by tailing /dev/null
         .cmd("tail", "-f", "/dev/null")
         .labels(
-            mapOf(LABEL_LATEX_CONTAINER to "true")
+            mapOf(LABEL_INSTANCE_ID to instanceId, LABEL_LATEX_CONTAINER to "true")
         )
         .hostConfig(hostConfig)
         .build()
@@ -200,6 +204,7 @@ class ContainerService(
   protected fun getContainerWithLabel(label: String, value: String): String? {
     return docker.listContainers(
         DockerClient.ListContainersParam.withLabel(label, value),
+        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, instanceId),
         DockerClient.ListContainersParam.limitContainers(1)
     ).firstOrNull()?.id()
   }
@@ -222,6 +227,7 @@ class ContainerService(
     val answerId = answer.id.toString()
 
     val labels = mapOf(
+        LABEL_INSTANCE_ID to instanceId,
         LABEL_ANSWER_ID to answerId,
         "traefik.enable" to "true",
         "traefik.frontend.rule" to "PathPrefixStrip: /ide/$answerId/",
