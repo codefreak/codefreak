@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
 @Service
-class ContainerService: BaseService() {
+class ContainerService : BaseService() {
   companion object {
     const val IDE_DOCKER_IMAGE = "cfreak/ide:latest"
     const val LATEX_DOCKER_IMAGE = "blang/latex:latest"
