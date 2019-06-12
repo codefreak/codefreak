@@ -4,6 +4,7 @@ import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
+import de.code_freak.codefreak.config.DockerConfiguration
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.repository.AnswerRepository
 import org.apache.commons.io.IOUtils
@@ -19,10 +20,7 @@ import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
 @Service
-class ContainerService(
-  @Autowired
-  val docker: DockerClient
-) : BaseService() {
+class ContainerService: BaseService() {
   companion object {
     const val IDE_DOCKER_IMAGE = "cfreak/ide:latest"
     const val LATEX_DOCKER_IMAGE = "blang/latex:latest"
@@ -36,37 +34,11 @@ class ContainerService(
   private val log = LoggerFactory.getLogger(this::class.java)
   private var idleContainers: Map<String, Long> = mapOf()
 
-  /**
-   * Memory limit in bytes
-   * Equal to --memory-swap in docker run
-   * 0 means no limit
-   */
-  @Value("\${code-freak.docker.memory}")
-  var memory = 0L
+  @Autowired
+  lateinit var docker: DockerClient
 
-  /**
-   * Number of CPUs per container
-   * Equal to --cpus in docker run
-   * 0 means no limit
-   */
-  @Value("\${code-freak.docker.cpus}")
-  var cpus = 0L
-
-  /**
-   * Name of the network the container will be attached to
-   * Default is the "bridge" network (Docker default)
-   */
-  @Value("\${code-freak.docker.network}")
-  lateinit var network: String
-
-  /**
-   * Define how images will be pulled on application startup (inspired by Gitlab Runner)
-   * - never = Images must be already present on the docker daemon or container creation will fail
-   * - if-not-present = Pull images if no version is available
-   * - always = Always pull image (may override existing ones)
-   */
-  @Value("\${code-freak.docker.pull-policy}")
-  lateinit var pullPolicy: String
+  @Autowired
+  lateinit var config: DockerConfiguration
 
   @Value("\${code-freak.traefik.url}")
   private lateinit var traefikUrl: String
@@ -96,7 +68,7 @@ class ContainerService(
         null
       }
 
-      val pullRequired = pullPolicy == "always" || (pullPolicy == "if-not-present" && imageInfo == null)
+      val pullRequired = config.pullPolicy == "always" || (config.pullPolicy == "if-not-present" && imageInfo == null)
       if (!pullRequired) {
         if (imageInfo == null) {
           log.warn("Image pulling is disabled but $image is not available on the daemon!")
@@ -237,9 +209,9 @@ class ContainerService(
     val hostConfig = HostConfig.builder()
         .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
         .capAdd("SYS_PTRACE") // required for lsof
-        .memory(memory)
-        .memorySwap(memory) // memory+swap = memory ==> 0 swap
-        .nanoCpus(cpus * 1000000000L)
+        .memory(config.memory)
+        .memorySwap(config.memory) // memory+swap = memory ==> 0 swap
+        .nanoCpus(config.cpus * 1000000000L)
         .build()
 
     val containerConfig = ContainerConfig.builder()
@@ -251,7 +223,7 @@ class ContainerService(
     val container = docker.createContainer(containerConfig)
 
     // attach to network
-    docker.connectToNetwork(container.id(), network)
+    docker.connectToNetwork(container.id(), config.network)
 
     return container.id()!!
   }

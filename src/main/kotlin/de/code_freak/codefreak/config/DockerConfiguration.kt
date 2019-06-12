@@ -5,7 +5,7 @@ import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerCertificates
 import com.spotify.docker.client.DockerCertificatesStore
 import com.spotify.docker.client.DockerClient
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.nio.file.Paths
@@ -28,27 +28,51 @@ import java.nio.file.Paths
  * - code-freak.docker.clientCertPath:  path to client certificate in .pem format
  */
 @Configuration
+@ConfigurationProperties(prefix = "code-freak.docker")
 class DockerConfiguration {
-  @Value("\${code-freak.docker.host}")
-  private var host: String? = null
+  lateinit var host: String
 
-  @Value("\${code-freak.docker.certPath}")
-  private var certPath: String? = null
+  lateinit var certPath: String
 
-  @Value("\${code-freak.docker.caCertPath}")
-  private var caCertPath: String? = null
+  lateinit var caCertPath: String
 
-  @Value("\${code-freak.docker.clientKeyPath}")
-  private var clientKeyPath: String? = null
+  lateinit var clientKeyPath: String
 
-  @Value("\${code-freak.docker.clientCertPath}")
-  private var clientCertPath: String? = null
+  lateinit var clientCertPath: String
+
+  /**
+   * Memory limit in bytes
+   * Equal to --memory-swap in docker run
+   * 0 means no limit
+   */
+  var memory = 0L
+
+  /**
+   * Number of CPUs per container
+   * Equal to --cpus in docker run
+   * 0 means no limit
+   */
+  var cpus = 0L
+
+  /**
+   * Name of the network the container will be attached to
+   * Default is the "bridge" network (Docker default)
+   */
+  lateinit var network: String
+
+  /**
+   * Define how images will be pulled on application startup (inspired by Gitlab Runner)
+   * - never = Images must be already present on the docker daemon or container creation will fail
+   * - if-not-present = Pull images if no version is available
+   * - always = Always pull image (may override existing ones)
+   */
+  lateinit var pullPolicy: String
 
   @Bean(destroyMethod = "close")
   fun dockerClient(): DockerClient {
     val builder = DefaultDockerClient.fromEnv()
 
-    if (!host.isNullOrBlank()) {
+    if (!host.isBlank()) {
       builder.uri(host)
     }
 
@@ -65,7 +89,7 @@ class DockerConfiguration {
    * - key.pem
    */
   private fun getCertificatesFromPath(): Optional<DockerCertificatesStore> {
-    if (certPath.isNullOrBlank()) {
+    if (certPath.isBlank()) {
       return Optional.absent()
     }
     return DockerCertificates.Builder().dockerCertPath(Paths.get(certPath)).build()
@@ -75,7 +99,7 @@ class DockerConfiguration {
    * Get certificate store based on individual paths for ca cert, client cert and client key
    */
   private fun getCertificatesFromFiles(): Optional<DockerCertificatesStore> {
-    if (caCertPath.isNullOrBlank() || clientCertPath.isNullOrBlank() || clientKeyPath.isNullOrBlank()) {
+    if (caCertPath.isBlank() || clientCertPath.isBlank() || clientKeyPath.isBlank()) {
       return Optional.absent()
     }
     return DockerCertificates.Builder()
