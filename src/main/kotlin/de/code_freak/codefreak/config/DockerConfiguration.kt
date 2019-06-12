@@ -29,26 +29,28 @@ import java.nio.file.Paths
  */
 @Configuration
 class DockerConfiguration {
-  @Value("\${code-freak.docker.host:#{null}}")
+  @Value("\${code-freak.docker.host}")
   private var host: String? = null
 
-  @Value("\${code-freak.docker.certPath:#{null}}")
+  @Value("\${code-freak.docker.certPath}")
   private var certPath: String? = null
 
-  @Value("\${code-freak.docker.caCertPath:#{null}}")
+  @Value("\${code-freak.docker.caCertPath}")
   private var caCertPath: String? = null
 
-  @Value("\${code-freak.docker.clientKeyPath:#{null}}")
+  @Value("\${code-freak.docker.clientKeyPath}")
   private var clientKeyPath: String? = null
 
-  @Value("\${code-freak.docker.clientCertPath:#{null}}")
+  @Value("\${code-freak.docker.clientCertPath}")
   private var clientCertPath: String? = null
 
   @Bean(destroyMethod = "close")
   fun dockerClient(): DockerClient {
     val builder = DefaultDockerClient.fromEnv()
 
-    host?.let(builder::uri)
+    if (!host.isNullOrBlank()) {
+      builder.uri(host)
+    }
 
     val certificatesStore = getCertificatesFromPath().or(getCertificatesFromFiles()).orNull()
     certificatesStore?.let(builder::dockerCertificates)
@@ -63,7 +65,7 @@ class DockerConfiguration {
    * - key.pem
    */
   private fun getCertificatesFromPath(): Optional<DockerCertificatesStore> {
-    if (certPath == null) {
+    if (certPath.isNullOrBlank()) {
       return Optional.absent()
     }
     return DockerCertificates.Builder().dockerCertPath(Paths.get(certPath)).build()
@@ -73,7 +75,7 @@ class DockerConfiguration {
    * Get certificate store based on individual paths for ca cert, client cert and client key
    */
   private fun getCertificatesFromFiles(): Optional<DockerCertificatesStore> {
-    if (caCertPath == null || clientCertPath == null || clientKeyPath == null) {
+    if (caCertPath.isNullOrBlank() || clientCertPath.isNullOrBlank() || clientKeyPath.isNullOrBlank()) {
       return Optional.absent()
     }
     return DockerCertificates.Builder()

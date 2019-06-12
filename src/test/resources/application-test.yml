@@ -1,0 +1,10 @@
+code-freak:
+  instance: test
+  idle-check-rate: 1000
+  idle-shutdown-threshold: 5000
+
+spring:
+  jpa:
+    database: HSQL
+  hibernate:
+    ddl-auto: update

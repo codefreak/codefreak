@@ -39,25 +39,24 @@ class ContainerService(
   /**
    * Memory limit in bytes
    * Equal to --memory-swap in docker run
-   * Default is 2GB
-   * Less than 1.5GB might cause the IDE to crash
+   * 0 means no limit
    */
-  @Value("\${code-freak.docker.memory:2147483648}")
-  var memory = 2147483648L
+  @Value("\${code-freak.docker.memory}")
+  var memory = 0L
 
   /**
    * Number of CPUs per container
    * Equal to --cpus in docker run
-   * Default is unlimited
+   * 0 means no limit
    */
-  @Value("\${code-freak.docker.cpus:0}")
+  @Value("\${code-freak.docker.cpus}")
   var cpus = 0L
 
   /**
    * Name of the network the container will be attached to
    * Default is the "bridge" network (Docker default)
    */
-  @Value("\${code-freak.docker.network:bridge}")
+  @Value("\${code-freak.docker.network}")
   lateinit var network: String
 
   /**
@@ -66,7 +65,7 @@ class ContainerService(
    * - if-not-present = Pull images if no version is available
    * - always = Always pull image (may override existing ones)
    */
-  @Value("\${code-freak.docker.pull-policy:never}")
+  @Value("\${code-freak.docker.pull-policy}")
   lateinit var pullPolicy: String
 
   @Value("\${code-freak.traefik.url}")
