@@ -16,7 +16,8 @@ table {
   min-height: 100vh;
 }
 
-.bg-primary {
+.bg-primary,
+.bg-gray-700 {
   a {
     color: inherit;
   }
@@ -34,14 +35,15 @@ table {
 }
 
 .off-canvas {
+  display: flex;
+  flex-direction: column;
   width: 300px;
   position: absolute;
   z-index: 0;
-  display: block;
 
   &.collapse,
   &.collapsing {
-    display: block;
+    display: flex;
     transition-duration: unset;
     transition-property: none;
   }

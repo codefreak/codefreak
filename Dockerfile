@@ -1,5 +1,8 @@
 FROM openjdk:8-alpine
 
+ARG GIT_COMMIT=""
+ARG GIT_TAG=""
+
 # Add some system dependecies required by libraries
 # - gcompat for jsass
 RUN apk add --no-cache gcompat
@@ -11,7 +14,6 @@ RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean b
     && ./gradlew --stop \
     && rm -r $HOME/.gradle \
     && mv build/libs /app \
-    && mv /app/code-freak-*.jar /app/code-freak.jar \
     && rm -r /build /tmp/*
 
 EXPOSE 8080
@@ -24,6 +26,8 @@ USER code-freak
 
 # Override this when running the container with -e SPRING_PROFILES_ACTIVE="dev"
 ENV SPRING_PROFILES_ACTIVE "prod"
+ENV SENTRY_ENVIRONMENT "prod"
+ENV SENTRY_RELEASE "${GIT_TAG}"
 
 WORKDIR /app
 CMD ["java", "-jar", "/app/code-freak.jar"]

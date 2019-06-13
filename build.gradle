@@ -8,12 +8,12 @@ plugins {
   id 'jacoco'
   id 'com.github.kt3k.coveralls' version '2.8.2'
   id 'ua.eshepelyuk.ManifestClasspath' version '1.0.0'
+  id "com.gorylenko.gradle-git-properties" version "2.0.0"
 }
 
 apply plugin: 'io.spring.dependency-management'
 
 group = 'de.code_freak'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
