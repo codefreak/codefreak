@@ -1,13 +1,19 @@
 language: java
-
+dist: xenial
 services:
   - docker
+
+addons:
+  apt:
+    packages:
+      - python3
 
 # The commands are in order how they are executed in a job lifecycle
 # https://docs.travis-ci.com/user/job-lifecycle#the-job-lifecycle
 
 before_install:
   # https://github.com/praekeltfoundation/docker-ci-deploy
+  - pip install --upgrade pip
   - pip install docker-ci-deploy
   - docker pull cfreak/ide:latest
 
