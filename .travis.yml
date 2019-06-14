@@ -11,10 +11,10 @@ before_install:
 
 before_script:
   # Build images we depend on before running the tests
-  - docker build \
-    --build-arg GITHUB_TOKEN \
-    --build-arg GIT_COMMIT="$TRAVIS_COMMIT" \
-    --build-arg GIT_TAG="$TRAVIS_TAG" \
+  - docker build
+    --build-arg GITHUB_TOKEN
+    --build-arg GIT_COMMIT="$TRAVIS_COMMIT"
+    --build-arg GIT_TAG="$TRAVIS_TAG"
     -t cfreak/ide:latest --cache-from cfreak/ide:latest $TRAVIS_BUILD_DIR/ide
 
 # Run gradle checks and try to build the Docker image as latest
@@ -49,15 +49,15 @@ deploy:
   - provider: script
     on:
       tags: true
-    script: docker tag cfreak/ide:latest cfreak/ide:$TRAVIS_TAG \
-            && docker tag cfreak/code-freak:latest cfreak/code-freak:$TRAVIS_TAG \
-            && docker push cfreak/ide:$TRAVIS_TAG \
+    script: docker tag cfreak/ide:latest cfreak/ide:$TRAVIS_TAG
+            && docker tag cfreak/code-freak:latest cfreak/code-freak:$TRAVIS_TAG
+            && docker push cfreak/ide:$TRAVIS_TAG
             && docker push cfreak/code-freak:$TRAVIS_TAG
   # deploy demo branch
   - provider: script
     on:
       branch: demo
-    script: docker tag cfreak/ide:latest cfreak/ide:demo \
-            && docker tag cfreak/code-freak:latest cfreak/code-freak:demo \
-            && docker push cfreak/ide:demo \
+    script: docker tag cfreak/ide:latest cfreak/ide:demo
+            && docker tag cfreak/code-freak:latest cfreak/code-freak:demo
+            && docker push cfreak/ide:demo
             && docker push cfreak/code-freak:demo
