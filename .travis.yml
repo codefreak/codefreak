@@ -7,6 +7,8 @@ services:
 # https://docs.travis-ci.com/user/job-lifecycle#the-job-lifecycle
 
 before_install:
+  # https://github.com/praekeltfoundation/docker-ci-deploy
+  - pip install docker-ci-deploy
   - docker pull cfreak/ide:latest
 
 before_script:
@@ -45,21 +47,18 @@ deploy:
   - provider: script
     on:
       branch: master
-    script: docker push cfreak/ide:latest && docker push cfreak/code-freak:latest
+    script: docker-ci-deploy cfreak/ide
+            && docker-ci-deploy cfreak/code-freak
   # deploy tags
-  # TODO: also tag and deploy minor and major version (1.2.3 as 1.2 and 1)
   - provider: script
     on:
       tags: true
-    script: docker tag cfreak/ide:latest cfreak/ide:$TRAVIS_TAG
-            && docker tag cfreak/code-freak:latest cfreak/code-freak:$TRAVIS_TAG
-            && docker push cfreak/ide:$TRAVIS_TAG
-            && docker push cfreak/code-freak:$TRAVIS_TAG
+    # This will also tag and deploy minor and major version (1.2.3 as 1.2 and 1)
+    script: docker-ci-deploy --version $TRAVIS_TAG --version-semver cfreak/ide
+            && docker-ci-deploy --version $TRAVIS_TAG --version-semver cfreak/code-freak
   # deploy demo branch
   - provider: script
     on:
       branch: demo
-    script: docker tag cfreak/ide:latest cfreak/ide:demo
-            && docker tag cfreak/code-freak:latest cfreak/code-freak:demo
-            && docker push cfreak/ide:demo
-            && docker push cfreak/code-freak:demo
+    script: docker-ci-deploy --tag demo cfreak/ide
+            && docker-ci-deploy --tag demo cfreak/code-freak
