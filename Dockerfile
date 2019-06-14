@@ -12,9 +12,9 @@ COPY . /build
 WORKDIR /build
 RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean bootJar \
     && ./gradlew --stop \
-    && rm -r $HOME/.gradle \
+    && rm -rf $HOME/.gradle \
     && mv build/libs /app \
-    && rm -r /build /tmp/*
+    && rm -rf /build /tmp/*
 
 EXPOSE 8080
 
