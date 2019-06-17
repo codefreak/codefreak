@@ -54,15 +54,15 @@ deploy:
   - provider: script
     on:
       branch: master
-    script: docker-ci-deploy cfreak/ide
-            && docker-ci-deploy cfreak/code-freak
+    script: docker-ci-deploy --tag canary cfreak/ide
+            && docker-ci-deploy --tag canary cfreak/code-freak
   # deploy tags
   - provider: script
     on:
       tags: true
     # This will also tag and deploy minor and major version (1.2.3 as 1.2 and 1)
-    script: docker-ci-deploy --version $TRAVIS_TAG --version-semver cfreak/ide
-            && docker-ci-deploy --version $TRAVIS_TAG --version-semver cfreak/code-freak
+    script: docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/ide
+            && docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/code-freak
   # deploy demo branch
   - provider: script
     on:

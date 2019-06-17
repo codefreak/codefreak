@@ -9,7 +9,7 @@ import org.springframework.context.annotation.PropertySource
 class ApplicationConfiguration {
   @Value("\${git.closest.tag.name:}")
   var version: String = ""
-    get() = if (field.isBlank()) "SNAPSHOT" else field
+    get() = if (field.isBlank()) "canary" else field
 
   @Value("\${git.commit.id:}")
   lateinit var gitHash: String
