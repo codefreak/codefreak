@@ -1,22 +1,22 @@
-FROM openjdk:8-alpine
+FROM gradle:jdk8 AS build
 
 ARG GIT_COMMIT=""
 ARG GIT_TAG=""
+
+COPY . /build
+
+WORKDIR /build
+RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean bootJar
+
+FROM openjdk:8-alpine
 
 # Add some system dependecies required by libraries
 # - gcompat for jsass
 RUN apk add --no-cache gcompat
 
-COPY . /build
-
-WORKDIR /build
-RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean bootJar \
-    && ./gradlew --stop \
-    && rm -rf $HOME/.gradle \
-    && mv build/libs /app \
-    && rm -rf /build /tmp/*
-
 EXPOSE 8080
+
+COPY --from=build /build/build/libs/ /app
 
 # Run everything as unprivileged user
 RUN addgroup -g 1000 code-freak \
