@@ -39,6 +39,15 @@
            th:href="@{'/assignments'}">Assignments</a>
       </li>
     </ul>
+    <footer class="text-muted text-center small mt-auto p-2">
+      <span th:text="${@app.getVersion()}"></span>
+      <a target="_blank"
+         th:if="${@app.getGitHash() != ''}"
+         th:href="'https://github.com/code-freak/code-freak/commit/' + ${@app.getGitHash()}"><abbr
+          class="text-monospace text-decoration-none"
+          th:title="${@app.getGitHash()}"
+          th:text="'(' + ${@app.getGitHashAbbr()} + ')'"></abbr></a>
+    </footer>
   </nav>
   <div class="flex-fill bg-white">
 
@@ -62,22 +71,6 @@
       <div class="flex-fill">
         <div layout:fragment="content" class="container py-4">Page content will be placed here.</div>
       </div>
-
-      <footer class="bg-gray-800 text-white small py-4">
-        <div class="container">
-          <div class="row">
-            <div class="col-12 col-lg-4">
-              Footer
-            </div>
-            <div class="col-12 col-lg-4">
-              content
-            </div>
-            <div class="col-12 col-lg-4">
-              here
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
 
   </div>
