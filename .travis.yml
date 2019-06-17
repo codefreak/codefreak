@@ -34,7 +34,8 @@ script:
     -t cfreak/code-freak:latest $TRAVIS_BUILD_DIR
 
 after_success:
-  - ./gradlew jacocoTestReport coveralls
+  # Disable TLS 1.3: https://bugs.openjdk.java.net/browse/JDK-8221253
+  - ./gradlew -Djdk.tls.client.protocols="TLSv1,TLSv1.1,TLSv1.2" jacocoTestReport coveralls
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
