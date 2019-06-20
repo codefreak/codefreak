@@ -1,5 +1,5 @@
 code-freak:
-  instance: test
+  instanceId: test
   ide:
     idle-check-rate: 1000
     idle-shutdown-threshold: 5000

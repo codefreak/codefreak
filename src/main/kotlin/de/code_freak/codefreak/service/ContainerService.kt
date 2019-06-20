@@ -4,19 +4,17 @@ import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
-import de.code_freak.codefreak.config.DockerConfiguration
+import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.repository.AnswerRepository
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.UUID
-import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
 @Service
@@ -27,7 +25,7 @@ class ContainerService : BaseService() {
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
     const val LABEL_LATEX_CONTAINER = "{$LABEL_PREFIX}latex-service"
-    const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance"
+    const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instanceId"
     const val PROJECT_PATH = "/home/coder/project"
   }
 
@@ -38,16 +36,7 @@ class ContainerService : BaseService() {
   lateinit var docker: DockerClient
 
   @Autowired
-  lateinit var config: DockerConfiguration
-
-  @Value("\${code-freak.traefik.url}")
-  private lateinit var traefikUrl: String
-
-  @Value("\${code-freak.instance}")
-  private lateinit var instanceId: String
-
-  @Value("\${code-freak.ide.idle-shutdown-threshold}")
-  private lateinit var idleShutdownThreshold: String
+  lateinit var config: AppConfiguration
 
   @Autowired
   private lateinit var answerRepository: AnswerRepository
@@ -68,7 +57,7 @@ class ContainerService : BaseService() {
         null
       }
 
-      val pullRequired = config.pullPolicy == "always" || (config.pullPolicy == "if-not-present" && imageInfo == null)
+      val pullRequired = config.docker.pullPolicy == "always" || (config.docker.pullPolicy == "if-not-present" && imageInfo == null)
       if (!pullRequired) {
         if (imageInfo == null) {
           log.warn("Image pulling is disabled but $image is not available on the daemon!")
@@ -84,11 +73,6 @@ class ContainerService : BaseService() {
     }
   }
 
-  @PostConstruct
-  protected fun init() {
-    idleShutdownThreshold.toLong() // fail fast if format is not valid
-  }
-
   fun getLatexContainer() = getContainerWithLabel(LABEL_LATEX_CONTAINER, "true")
 
   fun createLatexContainer(): String {
@@ -101,7 +85,7 @@ class ContainerService : BaseService() {
         // keep the container running by tailing /dev/null
         .cmd("tail", "-f", "/dev/null")
         .labels(
-            mapOf(LABEL_INSTANCE_ID to instanceId, LABEL_LATEX_CONTAINER to "true")
+            mapOf(LABEL_INSTANCE_ID to config.instanceId, LABEL_LATEX_CONTAINER to "true")
         )
         .hostConfig(hostConfig)
         .build()
@@ -162,7 +146,7 @@ class ContainerService : BaseService() {
    * TODO: make this configurable for different types of hosting/reverse proxies/etc
    */
   fun getIdeUrl(answerId: UUID): String {
-    return "$traefikUrl/ide/$answerId/"
+    return "${config.traefik.url}/ide/$answerId/"
   }
 
   /**
@@ -175,7 +159,7 @@ class ContainerService : BaseService() {
   protected fun getContainerWithLabel(label: String, value: String): String? {
     return docker.listContainers(
         DockerClient.ListContainersParam.withLabel(label, value),
-        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, instanceId),
+        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, config.instanceId),
         DockerClient.ListContainersParam.limitContainers(1)
     ).firstOrNull()?.id()
   }
@@ -198,7 +182,7 @@ class ContainerService : BaseService() {
     val answerId = answer.id.toString()
 
     val labels = mapOf(
-        LABEL_INSTANCE_ID to instanceId,
+        LABEL_INSTANCE_ID to config.instanceId,
         LABEL_ANSWER_ID to answerId,
         "traefik.enable" to "true",
         "traefik.frontend.rule" to "PathPrefixStrip: /ide/$answerId/",
@@ -209,9 +193,9 @@ class ContainerService : BaseService() {
     val hostConfig = HostConfig.builder()
         .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
         .capAdd("SYS_PTRACE") // required for lsof
-        .memory(config.memory)
-        .memorySwap(config.memory) // memory+swap = memory ==> 0 swap
-        .nanoCpus(config.cpus * 1000000000L)
+        .memory(config.docker.memory)
+        .memorySwap(config.docker.memory) // memory+swap = memory ==> 0 swap
+        .nanoCpus(config.docker.cpus * 1000000000L)
         .build()
 
     val containerConfig = ContainerConfig.builder()
@@ -223,7 +207,7 @@ class ContainerService : BaseService() {
     val container = docker.createContainer(containerConfig)
 
     // attach to network
-    docker.connectToNetwork(container.id(), config.network)
+    docker.connectToNetwork(container.id(), config.docker.network)
 
     return container.id()!!
   }
@@ -263,7 +247,7 @@ class ContainerService : BaseService() {
             val idleSince = idleContainers[containerId] ?: now
             val idleFor = now - idleSince
             log.debug("Container $containerId has been idle for more than $idleFor ms")
-            if (idleFor >= idleShutdownThreshold.toLong()) {
+            if (idleFor >= config.ide.idleShutdownThreshold) {
               val answerId = it.labels()!![LABEL_ANSWER_ID]
               val answer = answerRepository.findById(UUID.fromString(answerId))
               if (answer.isPresent) {

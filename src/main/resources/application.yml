@@ -31,7 +31,7 @@ server:
       timeout: 24h
 
 code-freak:
-  instance: default
+  instanceId: default
   docker:
     # All of the docker settings below will fall back to a system-depended default value if unset
     host: ~

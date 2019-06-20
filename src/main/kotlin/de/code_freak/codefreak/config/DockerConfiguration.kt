@@ -5,7 +5,7 @@ import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerCertificates
 import com.spotify.docker.client.DockerCertificatesStore
 import com.spotify.docker.client.DockerClient
-import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.nio.file.Paths
@@ -28,52 +28,17 @@ import java.nio.file.Paths
  * - code-freak.docker.clientCertPath:  path to client certificate in .pem format
  */
 @Configuration
-@ConfigurationProperties(prefix = "code-freak.docker")
 class DockerConfiguration {
-  lateinit var host: String
 
-  lateinit var certPath: String
-
-  lateinit var caCertPath: String
-
-  lateinit var clientKeyPath: String
-
-  lateinit var clientCertPath: String
-
-  /**
-   * Memory limit in bytes
-   * Equal to --memory-swap in docker run
-   * 0 means no limit
-   */
-  var memory = 0L
-
-  /**
-   * Number of CPUs per container
-   * Equal to --cpus in docker run
-   * 0 means no limit
-   */
-  var cpus = 0L
-
-  /**
-   * Name of the network the container will be attached to
-   * Default is the "bridge" network (Docker default)
-   */
-  lateinit var network: String
-
-  /**
-   * Define how images will be pulled on application startup (inspired by Gitlab Runner)
-   * - never = Images must be already present on the docker daemon or container creation will fail
-   * - if-not-present = Pull images if no version is available
-   * - always = Always pull image (may override existing ones)
-   */
-  lateinit var pullPolicy: String
+  @Autowired
+  lateinit var config: AppConfiguration
 
   @Bean(destroyMethod = "close")
   fun dockerClient(): DockerClient {
     val builder = DefaultDockerClient.fromEnv()
 
-    if (!host.isBlank()) {
-      builder.uri(host)
+    if (!config.docker.host.isBlank()) {
+      builder.uri(config.docker.host)
     }
 
     val certificatesStore = getCertificatesFromPath().or(getCertificatesFromFiles()).orNull()
@@ -89,23 +54,23 @@ class DockerConfiguration {
    * - key.pem
    */
   private fun getCertificatesFromPath(): Optional<DockerCertificatesStore> {
-    if (certPath.isBlank()) {
+    if (config.docker.certPath.isBlank()) {
       return Optional.absent()
     }
-    return DockerCertificates.Builder().dockerCertPath(Paths.get(certPath)).build()
+    return DockerCertificates.Builder().dockerCertPath(Paths.get(config.docker.certPath)).build()
   }
 
   /**
    * Get certificate store based on individual paths for ca cert, client cert and client key
    */
   private fun getCertificatesFromFiles(): Optional<DockerCertificatesStore> {
-    if (caCertPath.isBlank() || clientCertPath.isBlank() || clientKeyPath.isBlank()) {
+    if (config.docker.caCertPath.isBlank() || config.docker.clientCertPath.isBlank() || config.docker.clientKeyPath.isBlank()) {
       return Optional.absent()
     }
     return DockerCertificates.Builder()
-        .caCertPath(Paths.get(caCertPath))
-        .clientCertPath(Paths.get(clientCertPath))
-        .clientKeyPath(Paths.get(clientKeyPath))
+        .caCertPath(Paths.get(config.docker.caCertPath))
+        .clientCertPath(Paths.get(config.docker.clientCertPath))
+        .clientKeyPath(Paths.get(config.docker.clientKeyPath))
         .build()
   }
 }
