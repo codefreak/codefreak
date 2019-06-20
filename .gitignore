@@ -26,5 +26,6 @@
 /.nb-gradle/
 
 src/main/resources/application-dev.properties
+src/main/resources/git.properties
 .asscache
 .vagrant
