@@ -25,7 +25,7 @@ class ContainerService : BaseService() {
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
     const val LABEL_LATEX_CONTAINER = "{$LABEL_PREFIX}latex-service"
-    const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instanceId"
+    const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance-id"
     const val PROJECT_PATH = "/home/coder/project"
   }
 
