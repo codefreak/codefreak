@@ -4,79 +4,39 @@ import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
+import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.repository.AnswerRepository
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.UUID
-import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
 @Service
-class ContainerService(
-  @Autowired
-  val docker: DockerClient
-) : BaseService() {
+class ContainerService : BaseService() {
   companion object {
     const val IDE_DOCKER_IMAGE = "cfreak/ide:latest"
     const val LATEX_DOCKER_IMAGE = "blang/latex:latest"
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
     const val LABEL_LATEX_CONTAINER = "{$LABEL_PREFIX}latex-service"
-    const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance"
+    const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance-id"
     const val PROJECT_PATH = "/home/coder/project"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
   private var idleContainers: Map<String, Long> = mapOf()
 
-  /**
-   * Memory limit in bytes
-   * Equal to --memory-swap in docker run
-   * Default is 2GB
-   * Less than 1.5GB might cause the IDE to crash
-   */
-  @Value("\${code-freak.docker.memory:2147483648}")
-  var memory = 2147483648L
+  @Autowired
+  lateinit var docker: DockerClient
 
-  /**
-   * Number of CPUs per container
-   * Equal to --cpus in docker run
-   * Default is unlimited
-   */
-  @Value("\${code-freak.docker.cpus:0}")
-  var cpus = 0L
-
-  /**
-   * Name of the network the container will be attached to
-   * Default is the "bridge" network (Docker default)
-   */
-  @Value("\${code-freak.docker.network:bridge}")
-  lateinit var network: String
-
-  /**
-   * Define how images will be pulled on application startup (inspired by Gitlab Runner)
-   * - never = Images must be already present on the docker daemon or container creation will fail
-   * - if-not-present = Pull images if no version is available
-   * - always = Always pull image (may override existing ones)
-   */
-  @Value("\${code-freak.docker.pull-policy:never}")
-  lateinit var pullPolicy: String
-
-  @Value("\${code-freak.traefik.url}")
-  private lateinit var traefikUrl: String
-
-  @Value("\${code-freak.instance}")
-  private lateinit var instanceId: String
-
-  @Value("\${code-freak.ide.idle-shutdown-threshold}")
-  private lateinit var idleShutdownThreshold: String
+  @Autowired
+  lateinit var config: AppConfiguration
 
   @Autowired
   private lateinit var answerRepository: AnswerRepository
@@ -97,7 +57,7 @@ class ContainerService(
         null
       }
 
-      val pullRequired = pullPolicy == "always" || (pullPolicy == "if-not-present" && imageInfo == null)
+      val pullRequired = config.docker.pullPolicy == "always" || (config.docker.pullPolicy == "if-not-present" && imageInfo == null)
       if (!pullRequired) {
         if (imageInfo == null) {
           log.warn("Image pulling is disabled but $image is not available on the daemon!")
@@ -113,11 +73,6 @@ class ContainerService(
     }
   }
 
-  @PostConstruct
-  protected fun init() {
-    idleShutdownThreshold.toLong() // fail fast if format is not valid
-  }
-
   fun getLatexContainer() = getContainerWithLabel(LABEL_LATEX_CONTAINER, "true")
 
   fun createLatexContainer(): String {
@@ -130,7 +85,7 @@ class ContainerService(
         // keep the container running by tailing /dev/null
         .cmd("tail", "-f", "/dev/null")
         .labels(
-            mapOf(LABEL_INSTANCE_ID to instanceId, LABEL_LATEX_CONTAINER to "true")
+            mapOf(LABEL_INSTANCE_ID to config.instanceId, LABEL_LATEX_CONTAINER to "true")
         )
         .hostConfig(hostConfig)
         .build()
@@ -191,7 +146,7 @@ class ContainerService(
    * TODO: make this configurable for different types of hosting/reverse proxies/etc
    */
   fun getIdeUrl(answerId: UUID): String {
-    return "$traefikUrl/ide/$answerId/"
+    return "${config.traefik.url}/ide/$answerId/"
   }
 
   /**
@@ -204,7 +159,7 @@ class ContainerService(
   protected fun getContainerWithLabel(label: String, value: String): String? {
     return docker.listContainers(
         DockerClient.ListContainersParam.withLabel(label, value),
-        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, instanceId),
+        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, config.instanceId),
         DockerClient.ListContainersParam.limitContainers(1)
     ).firstOrNull()?.id()
   }
@@ -227,7 +182,7 @@ class ContainerService(
     val answerId = answer.id.toString()
 
     val labels = mapOf(
-        LABEL_INSTANCE_ID to instanceId,
+        LABEL_INSTANCE_ID to config.instanceId,
         LABEL_ANSWER_ID to answerId,
         "traefik.enable" to "true",
         "traefik.frontend.rule" to "PathPrefixStrip: /ide/$answerId/",
@@ -238,9 +193,9 @@ class ContainerService(
     val hostConfig = HostConfig.builder()
         .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
         .capAdd("SYS_PTRACE") // required for lsof
-        .memory(memory)
-        .memorySwap(memory) // memory+swap = memory ==> 0 swap
-        .nanoCpus(cpus * 1000000000L)
+        .memory(config.docker.memory)
+        .memorySwap(config.docker.memory) // memory+swap = memory ==> 0 swap
+        .nanoCpus(config.docker.cpus * 1000000000L)
         .build()
 
     val containerConfig = ContainerConfig.builder()
@@ -252,7 +207,7 @@ class ContainerService(
     val container = docker.createContainer(containerConfig)
 
     // attach to network
-    docker.connectToNetwork(container.id(), network)
+    docker.connectToNetwork(container.id(), config.docker.network)
 
     return container.id()!!
   }
@@ -292,7 +247,7 @@ class ContainerService(
             val idleSince = idleContainers[containerId] ?: now
             val idleFor = now - idleSince
             log.debug("Container $containerId has been idle for more than $idleFor ms")
-            if (idleFor >= idleShutdownThreshold.toLong()) {
+            if (idleFor >= config.ide.idleShutdownThreshold) {
               val answerId = it.labels()!![LABEL_ANSWER_ID]
               val answer = answerRepository.findById(UUID.fromString(answerId))
               if (answer.isPresent) {

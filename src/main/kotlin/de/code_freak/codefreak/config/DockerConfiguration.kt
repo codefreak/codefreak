@@ -5,7 +5,7 @@ import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerCertificates
 import com.spotify.docker.client.DockerCertificatesStore
 import com.spotify.docker.client.DockerClient
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.nio.file.Paths
@@ -29,26 +29,17 @@ import java.nio.file.Paths
  */
 @Configuration
 class DockerConfiguration {
-  @Value("\${code-freak.docker.host:#{null}}")
-  private var host: String? = null
 
-  @Value("\${code-freak.docker.certPath:#{null}}")
-  private var certPath: String? = null
-
-  @Value("\${code-freak.docker.caCertPath:#{null}}")
-  private var caCertPath: String? = null
-
-  @Value("\${code-freak.docker.clientKeyPath:#{null}}")
-  private var clientKeyPath: String? = null
-
-  @Value("\${code-freak.docker.clientCertPath:#{null}}")
-  private var clientCertPath: String? = null
+  @Autowired
+  lateinit var config: AppConfiguration
 
   @Bean(destroyMethod = "close")
   fun dockerClient(): DockerClient {
     val builder = DefaultDockerClient.fromEnv()
 
-    host?.let(builder::uri)
+    if (!config.docker.host.isBlank()) {
+      builder.uri(config.docker.host)
+    }
 
     val certificatesStore = getCertificatesFromPath().or(getCertificatesFromFiles()).orNull()
     certificatesStore?.let(builder::dockerCertificates)
@@ -63,23 +54,23 @@ class DockerConfiguration {
    * - key.pem
    */
   private fun getCertificatesFromPath(): Optional<DockerCertificatesStore> {
-    if (certPath == null) {
+    if (config.docker.certPath.isBlank()) {
       return Optional.absent()
     }
-    return DockerCertificates.Builder().dockerCertPath(Paths.get(certPath)).build()
+    return DockerCertificates.Builder().dockerCertPath(Paths.get(config.docker.certPath)).build()
   }
 
   /**
    * Get certificate store based on individual paths for ca cert, client cert and client key
    */
   private fun getCertificatesFromFiles(): Optional<DockerCertificatesStore> {
-    if (caCertPath == null || clientCertPath == null || clientKeyPath == null) {
+    if (config.docker.caCertPath.isBlank() || config.docker.clientCertPath.isBlank() || config.docker.clientKeyPath.isBlank()) {
       return Optional.absent()
     }
     return DockerCertificates.Builder()
-        .caCertPath(Paths.get(caCertPath))
-        .clientCertPath(Paths.get(clientCertPath))
-        .clientKeyPath(Paths.get(clientKeyPath))
+        .caCertPath(Paths.get(config.docker.caCertPath))
+        .clientCertPath(Paths.get(config.docker.clientCertPath))
+        .clientKeyPath(Paths.get(config.docker.clientKeyPath))
         .build()
   }
 }

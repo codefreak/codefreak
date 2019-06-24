@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 
 @ActiveProfiles("dev")
-@TestPropertySource(locations = ["/application-test.properties"])
+@TestPropertySource(locations = ["/application-test.yml"])
 internal class SeedDatabaseTest : SpringTest() {
 
   @Autowired

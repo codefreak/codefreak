@@ -40,13 +40,13 @@
       </li>
     </ul>
     <footer class="text-muted text-center small mt-auto p-2">
-      <span th:text="${@app.getVersion()}"></span>
+      <span th:text="${@gitInfo.version}"></span>
       <a target="_blank"
-         th:if="${@app.getGitHash() != ''}"
-         th:href="'https://github.com/code-freak/code-freak/commit/' + ${@app.getGitHash()}"><abbr
+         th:if="${@gitInfo.hash != ''}"
+         th:href="'https://github.com/code-freak/code-freak/commit/' + ${@gitInfo.hash}"><abbr
           class="text-monospace text-decoration-none"
-          th:title="${@app.getGitHash()}"
-          th:text="'(' + ${@app.getGitHashAbbr()} + ')'"></abbr></a>
+          th:title="${@gitInfo.hash}"
+          th:text="'(' + ${@gitInfo.hashAbbr} + ')'"></abbr></a>
     </footer>
   </nav>
   <div class="flex-fill bg-white">

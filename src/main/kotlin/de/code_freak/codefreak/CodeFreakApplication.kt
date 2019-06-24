@@ -1,7 +1,8 @@
 package de.code_freak.codefreak
 
+import de.code_freak.codefreak.config.AppConfiguration
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -15,11 +16,11 @@ class CodeFreakApplication : CommandLineRunner {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @Value("\${code-freak.instance}")
-  private lateinit var instanceId: String
+  @Autowired
+  private lateinit var config: AppConfiguration
 
   override fun run(vararg args: String?) {
-    log.info("Code FREAK instance id: $instanceId")
+    log.info("Code FREAK instance id: ${config.instanceId}")
   }
 }
 
