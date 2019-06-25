@@ -39,7 +39,7 @@
            th:href="@{'/assignments'}">Assignments</a>
       </li>
     </ul>
-    <footer class="text-muted text-center small mt-auto p-2">
+    <footer class="text-muted text-center small mt-auto p-2 stealth-link">
       <span th:text="${@gitInfo.version}"></span>
       <a target="_blank"
          th:if="${@gitInfo.hash != ''}"

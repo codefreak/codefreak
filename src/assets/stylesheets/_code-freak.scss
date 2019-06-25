@@ -16,11 +16,8 @@ table {
   min-height: 100vh;
 }
 
-.bg-primary,
-.bg-gray-700 {
-  a {
-    color: inherit;
-  }
+a.stealth-link, .stealth-link a {
+  color: inherit;
 }
 
 .bg-white-transparent {
