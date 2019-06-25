@@ -13,6 +13,7 @@ class AppConfiguration {
   val docker = Docker()
   val ide = Ide()
   val traefik = Traefik()
+  val latex = Latex()
   val frontend = Frontend()
 
   class Frontend {
@@ -27,7 +28,15 @@ class AppConfiguration {
     lateinit var url: String
   }
 
+  class Latex {
+    /** The Docker image name (and tag) to be used for the latex container. */
+    lateinit var image: String
+  }
+
   class Ide {
+    /** The Docker image name (and tag) to be used for the IDE containers. */
+    lateinit var image: String
+
     /** Interval for checking for idle containers in ms. Default 1 minute. */
     var idleCheckRate = 60000L
 

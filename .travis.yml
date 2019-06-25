@@ -18,12 +18,6 @@ before_install:
   - pip3 install --user docker-ci-deploy
   - docker pull cfreak/ide:latest
 
-before_script:
-  # Build images we depend on before running the tests
-  - docker build
-    --build-arg GITHUB_TOKEN
-    -t cfreak/ide:latest --cache-from cfreak/ide:latest $TRAVIS_BUILD_DIR/ide
-
 # Run gradle checks and try to build the Docker image as latest
 script:
   - ./gradlew check
@@ -55,18 +49,15 @@ deploy:
   - provider: script
     on:
       branch: master
-    script: docker-ci-deploy --tag canary -- cfreak/ide
-            && docker-ci-deploy --tag canary -- cfreak/code-freak
+    script: docker-ci-deploy --tag canary -- cfreak/code-freak
   # deploy tags
   - provider: script
     on:
       tags: true
     # This will also tag and deploy minor and major version (1.2.3 as 1.2 and 1)
-    script: docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/ide
-            && docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/code-freak
+    script: docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/code-freak
   # deploy demo branch
   - provider: script
     on:
       branch: demo
-    script: docker-ci-deploy --tag demo -- cfreak/ide
-            && docker-ci-deploy --tag demo -- cfreak/code-freak
+    script: docker-ci-deploy --tag demo -- cfreak/code-freak

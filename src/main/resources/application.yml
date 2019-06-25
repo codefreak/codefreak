@@ -49,7 +49,10 @@ code-freak:
     network: bridge
   traefik:
     url: "http://localhost:8081"
+  latex:
+    image: "blang/latex:latest"
   ide:
+    image: "cfreak/ide:latest"
     # Interval for checking for idle containers in ms. Default 1 minute.
     idle-check-rate: 60000
     # Time span after which an idle container is shut down. Default 10 minutes.

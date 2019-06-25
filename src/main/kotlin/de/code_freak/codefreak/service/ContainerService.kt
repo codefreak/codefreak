@@ -20,8 +20,6 @@ import javax.transaction.Transactional
 @Service
 class ContainerService : BaseService() {
   companion object {
-    const val IDE_DOCKER_IMAGE = "cfreak/ide:latest"
-    const val LATEX_DOCKER_IMAGE = "blang/latex:latest"
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
     const val LABEL_LATEX_CONTAINER = "{$LABEL_PREFIX}latex-service"
@@ -49,7 +47,7 @@ class ContainerService : BaseService() {
    */
   @EventListener(ContextRefreshedEvent::class)
   fun pullDockerImages() {
-    val images = listOf(IDE_DOCKER_IMAGE, LATEX_DOCKER_IMAGE)
+    val images = listOf(config.ide.image, config.latex.image)
     for (image in images) {
       val imageInfo = try {
         docker.inspectImage(image)
@@ -81,7 +79,7 @@ class ContainerService : BaseService() {
         .build()
 
     val containerConfig = ContainerConfig.builder()
-        .image(LATEX_DOCKER_IMAGE)
+        .image(config.latex.image)
         // keep the container running by tailing /dev/null
         .cmd("tail", "-f", "/dev/null")
         .labels(
@@ -199,7 +197,7 @@ class ContainerService : BaseService() {
         .build()
 
     val containerConfig = ContainerConfig.builder()
-        .image(IDE_DOCKER_IMAGE)
+        .image(config.ide.image)
         .labels(labels)
         .hostConfig(hostConfig)
         .build()
