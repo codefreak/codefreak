@@ -16,6 +16,7 @@ WARNING: Code FREAK is under heavy development. Things might break between updat
 If you are new to Code FREAK here are some links that may help you to understand the basic concepts of the system:
 
 * link:architecture.adoc[Architecture of Code FREAK]
+* link:development.adoc[Development Setup]
 * More resources coming soon...
 
 == Security

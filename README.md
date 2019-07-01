@@ -15,55 +15,9 @@ automatically by various testing-methods like unit tests or code smell detection
 Code FREAK is currently under heavy development. This means things can break without any further notice.
 Please keep this in mind when testing the application.
 
-## Development environment setup
-Create a file `src/main/resources/application-dev.yml`. For documentation on how to configure the
-server see [application.yml](https://github.com/code-freak/code-freak/blob/master/src/main/resources/application.yml)
-in the same directory. Minimum configuration that uses the in-memory database:
-```yaml
-spring:
-  jpa:
-    database: HSQL
-    hibernate:
-      ddl-auto: create
-```
-
-### Database
-You can either use the embedded HSQL storage or a PostgreSQL database. Data from the HSQL database will get lost when
-the application shuts down. For Postgres create at least a dedicated database and adjust the configuration accordingly:
-```yaml
-spring:
-  datasource:
-    url: "jdbc:postgresql://[host]:[port]/database"
-    username: user
-    pasword: supersecure
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-```
-
-### Docker
-For many parts of the application we need connection to a (dedicated) Docker daemon. By default we use the default
-socket for your platform. If you are on Linux please follow the installation guidelines for your distribution.
-For Windows, MacOS and other OS that cannot run Docker natively you will either need the official Docker for Windows/MacOS
-software stacks or use the Vagrant machine that is included in this repository. The Vagrant machine will make the Docker
-daemon available at `127.0.0.1:2375` (the official Docker port). If you setup Docker for Windows/MacOS the Daemon should
-be reachable on the same address. So if you are on Windows or MacOS adjust your `application-dev.properties` file so it points
-at a Docker daemon.
-```yaml
-code-freak:
-  docker:
-    host: "tcp://127.0.0.1:2375"
-```
-
-### Run
-Run the command `./gradlew bootRun`. The application is started at `http://localhost:8080`.
-
-### Fix linting issues
-```console
-$ ./gradlew spotlessApply
-```
+## Documentation
+For instructions how to run, configure and use the application please find the documentation in the
+[`/docs`](./docs/index.adoc) directory.
 
 ## License
     Code FREAK | Code Feedback Review & Evaluation Kit
