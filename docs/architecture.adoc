@@ -1,0 +1,44 @@
+= System Architecture
+:sectnums:
+:toc: left
+:toclevels: 3
+
+== High level overview
+Currently there are three major components of the system:
+
+1. The backend application based on Spring Boot
+2. Many Development Environments (IDE) for each user
+3. A Docker daemon controlled by the backend application
+
+image::img/Code FREAK Overview.png[Code FREAK Overview, 600]
+
+== Backend Application
+The Backend Application (app) is the main component of Code FREAK and is written in Java based on Spring Boot. It is
+responsible for storing all kind of data including users, tasks and results. The app keeps a connection to a dedicated
+Docker daemon to spin up new containers and pushing/pulling files from that containers. Currently there is no direct
+communication between the app and containers. All messages are send over the Docker daemon.
+
+It is not required but highly recommended to run the application using the official Docker image.
+
+== IDE
+The Integrated Development Environments (IDE) are used by the users to work on the programming tasks. Because each IDE
+runs in its own container they are isolated environments that offer both flexibility and security. Currently we use
+Visual Studio Code as IDE based on https://github.com/cdr/code-server[code-server]. The IDE runs directly in the browser
+of the user and do not require any local setup. Beside the IDE itself the containers contain all required runtimes
+and toolchains (Java, Gradle, nodejs, npm, …) to execute and debug the code directly on the server. Because containers
+can be limited in RAM and CPU-usage users cannot steal resources from other users.
+
+The files are synced between the browser and the container in real time. The backend application will monitor the IDE
+container and pull the files from it periodically to store it in a database.
+
+== Docker Daemon
+The Docker daemon is currently used for starting IDE instances (and testing code in the near future). Docker containers
+allow a good isolation between individual environments by using standard Linux kernel features. The backend app connects
+via the standard socket or HTTP API the Docker daemon.
+
+If you run the Code FREAK application itself on Docker you should use different daemons for the app and for IDE. Even
+if the IDE containers are resource-limited, too many IDE containers could consume all available resources on the host
+and crash the backend application.
+
+Because a single Docker host does not scale very well we plan to support other container orchestration systems in the
+future.
