@@ -43,7 +43,7 @@ class DiskImport {
   private lateinit var classroomRepository: ClassroomRepository
 
   private var importInCurrentIteration = mutableListOf<String>()
-  private var user = User()
+  private var user = User("disk-import")
   private var classroom = Classroom("Import Classroom")
 
   @PostConstruct
