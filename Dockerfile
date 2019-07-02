@@ -16,12 +16,14 @@ RUN apk add --no-cache gcompat
 
 EXPOSE 8080
 
-COPY --from=build /build/build/libs/ /app
-
 # Run everything as unprivileged user
 RUN addgroup -g 1000 code-freak \
     && adduser -Su 1000 -G code-freak code-freak \
+    && mkdir /app \
     && chown -R code-freak:code-freak /app
+
+COPY --from=build --chown=1000:1000 /build/build/libs/ /app
+
 USER code-freak
 
 # Override this when running the container with -e SPRING_PROFILES_ACTIVE="dev"
