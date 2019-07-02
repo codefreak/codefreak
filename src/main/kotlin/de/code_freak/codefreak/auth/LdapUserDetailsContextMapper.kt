@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper
 import java.lang.UnsupportedOperationException
 
-class LdapUserDetailsContextMapper(private val userRepository: UserRepository): UserDetailsContextMapper {
+class LdapUserDetailsContextMapper(private val userRepository: UserRepository) : UserDetailsContextMapper {
   override fun mapUserToContext(user: UserDetails?, ctx: DirContextAdapter?) {
     throw UnsupportedOperationException()
   }
