@@ -14,6 +14,7 @@ spring:
       hibernate:
         # Escape all table names to avoid issues with reserved keywords like "user"
         globally_quoted_identifiers: true
+  data.ldap.repositories.enabled: false
 
 logging:
   level:
