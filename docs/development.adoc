@@ -49,6 +49,26 @@ code-freak:
 If you use IntelliJ simply start the `CodeFreakApplication` Spring Boot application.
 For Gradle run the command `./gradlew bootRun`. The application is started at `http://localhost:8080`.
 
+== Authentication
+The following sample users are pre-configured for development.
+
+.Sample Users
+|===
+|Username |Password |Role
+
+|admin
+|123
+|ADMIN
+
+|teacher
+|123
+|TEACHER
+
+|student
+|123
+|STUDENT
+|===
+
 == Running tests
 To run the tests you need a working Docker connection. It is also possible to use the Vagrant machine for Testing:
 ```shell
