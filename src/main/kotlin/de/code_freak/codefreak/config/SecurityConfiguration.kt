@@ -39,7 +39,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   @Bean
   override fun userDetailsService(): UserDetailsService {
     return when (config.authenticationMethod) {
-      AuthenticationMethod.SIMPLE -> when (env.acceptsProfiles(Profiles.of("dev"))) {
+      AuthenticationMethod.SIMPLE -> when (env.acceptsProfiles(Profiles.of("dev", "test"))) {
         true -> DevUserDetailsService()
         false -> throw NotImplementedError("Simple authentication is currently only supported in dev mode.")
       }

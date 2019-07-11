@@ -30,7 +30,7 @@ import java.util.UUID
 
 class AssignmentServiceTest {
   val files = TarUtil.createTarFromDirectory(ClassPathResource("util/tar-sample").file)
-  val assignment = Assignment("Assignment 1", User(), null)
+  val assignment = Assignment("Assignment 1", User("user"), null)
   val task = Task(assignment, position = 0L, title = "Task 1", body = "Do stuff", files = files, weight = 100)
   val submission = Submission(null, assignment)
   val answer = Answer(submission, task, files)
