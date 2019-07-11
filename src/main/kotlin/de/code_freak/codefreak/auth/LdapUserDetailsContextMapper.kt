@@ -26,7 +26,7 @@ class LdapUserDetailsContextMapper(private val userRepository: UserRepository) :
       }
     }
 
-    val user = userRepository.findByUsernameIgnoreCase(username!!).orElse(userRepository.save(User(username)))
+    val user = userRepository.findByUsernameIgnoreCase(username!!).orElseGet { userRepository.save(User(username)) }
     return AppUser(user, roles)
   }
 }
