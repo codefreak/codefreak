@@ -56,6 +56,10 @@ class DiskImport {
   @Scheduled(initialDelay = 1000*60*3, fixedDelay = 1000*60*3)
   fun importAssignmentFromDisk() {
     val rootDirectory = File(rootDirectoryPath)
+    if (!rootDirectory.exists() || !rootDirectory.isDirectory) {
+      log.debug("Skipping disk import because directory does not exist.")
+      return
+    }
     val importInNextIteration = mutableListOf<String>()
     for (assignmentDirectory in rootDirectory.listFiles()) {
       if (!assignmentDirectory.isDirectory) continue
