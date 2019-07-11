@@ -8,10 +8,6 @@ enum class Role(private val auth: String, private vararg val inheritedRoles: Rol
   TEACHER(Authority.ROLE_TEACHER, STUDENT),
   ADMIN(Authority.ROLE_ADMIN, TEACHER, STUDENT);
 
-  companion object {
-    fun fromString(authority: String): Role = values().first { it.authority == authority }
-  }
-
   override fun getAuthority(): String = auth
 
   val allAuthorities get() = listOf(this, *inheritedRoles).map { it.auth }

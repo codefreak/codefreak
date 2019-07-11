@@ -56,12 +56,12 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
   private fun configureLdapAuthentication(auth: AuthenticationManagerBuilder?) {
     auth?.ldapAuthentication()
-        ?.userDetailsContextMapper(LdapUserDetailsContextMapper(userRepository))
-        ?.userSearchBase("ou=people")
-        ?.userSearchFilter("(uid={0})")
-        ?.groupSearchBase("ou=people")
-        ?.groupSearchFilter("member={0}")
+        ?.userDetailsContextMapper(LdapUserDetailsContextMapper(userRepository, config.ldap.roleMappings))
+        ?.userSearchBase(config.ldap.userSearchBase)
+        ?.userSearchFilter(config.ldap.userSearchFilter)
+        ?.groupSearchBase(config.ldap.groupSearchBase)
+        ?.groupSearchFilter(config.ldap.groupSearchFilter)
         ?.contextSource()
-            ?.url("ldap://10.12.12.100:389/dc=planetexpress,dc=com")
+            ?.url(config.ldap.url ?: throw IllegalStateException("LDAP URL has not been configured"))
   }
 }
