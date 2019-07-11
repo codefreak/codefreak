@@ -11,8 +11,9 @@ Vagrant.configure("2") do |config|
   # Create a private network and give VM a static IP
   config.vm.network "private_network", ip: "10.12.12.100"
 
-  config.vm.network "forwarded_port", guest: 2375, host: 2375
-  config.vm.network "forwarded_port", guest: 80, host: 8081
+  config.vm.network "forwarded_port", guest: 2375, host: 2375 # Docker daemon
+  config.vm.network "forwarded_port", guest: 80, host: 8081 # IDE containers (traefik)
+  config.vm.network "forwarded_port", guest: 389, host: 389 # LDAP server
 
   # Enable the automatic install of docker and make it available via TCP
   # We bind to 0.0.0.0 because the VM and Host are on a private network
@@ -38,10 +39,6 @@ Vagrant.configure("2") do |config|
       && systemctl restart docker.service
       eol
   end
-
-  # Build IDE container image
-  config.vm.provision "shell",
-    inline: "docker build -t cfreak/ide:latest /vagrant/ide"
 
   config.vm.provider "virtualbox" do |vb|
    vb.memory = "4096"
