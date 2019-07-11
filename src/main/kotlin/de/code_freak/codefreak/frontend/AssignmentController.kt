@@ -1,5 +1,7 @@
 package de.code_freak.codefreak.frontend
 
+import de.code_freak.codefreak.auth.AllowRoles
+import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.ContainerService
@@ -79,6 +81,7 @@ class AssignmentController : BaseController() {
 
   @GetMapping("/admin/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
   @ResponseBody
+  @AllowRoles(Role.ADMIN)
   fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): ByteArray {
     val assignment = assignmentService.findAssignment(assignmentId)
     val filename = assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
