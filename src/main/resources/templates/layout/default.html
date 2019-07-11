@@ -16,7 +16,7 @@
 <body>
 <div class="mh-100vh bg-gray-700 d-flex flex-row">
   <nav class="off-canvas collapse" id="navbarToggle">
-    <header class="navbar navbar-expand-lg navbar-dark bg-dark mb-3" role="banner">
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark" role="banner">
       <a class="navbar-brand" rel="author" th:href="@{'/'}">
         <svg xmlns="http://www.w3.org/2000/svg" width="354.016" height="123.268" viewBox="0 0 93.667 32.615">
           <path
@@ -27,6 +27,17 @@
         </svg>
       </a>
     </header>
+    <div class="d-flex p-2 m-2 bg-gray-500 align-items-center">
+      <div class="mr-2">
+        <i class="fas fa-user" style="font-size: 2.5em;"></i>
+      </div>
+      <div>
+        <span sec:authentication="name">username</span><br>
+        <form th:action="@{/logout}" method="post">
+          <input type="submit" value="Sign Out" class="btn btn-link p-0" />
+        </form>
+      </div>
+    </div>
     <ul class="nav nav-pills flex-column">
       <li class="nav-item">
         <a class="nav-link py-3 text-white"

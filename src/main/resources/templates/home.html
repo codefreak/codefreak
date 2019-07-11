@@ -5,14 +5,7 @@
 </head>
 <body>
 <div layout:fragment="content">
-  <h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
-  This is the home page<br />
-  User: <span sec:authentication="name">NONE</span><br />
-  Roles: <span sec:authentication="principal.authorities">NONE</span><br />
-  Id: <span sec:authentication="principal.entity.id">NONE</span>
-  <form th:action="@{/logout}" method="post">
-    <input type="submit" value="Sign Out"/>
-  </form>
+  This is the home page
 </div>
 </body>
 </html>
