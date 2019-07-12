@@ -28,12 +28,13 @@ import org.springframework.core.io.ClassPathResource
 import java.util.Optional
 import java.util.UUID
 
-class AssignmentServiceTest {
-  val files = TarUtil.createTarFromDirectory(ClassPathResource("util/tar-sample").file)
-  val assignment = Assignment("Assignment 1", User("user"), null)
-  val task = Task(assignment, position = 0L, title = "Task 1", body = "Do stuff", files = files, weight = 100)
-  val submission = Submission(null, assignment)
-  val answer = Answer(submission, task, files)
+class AssignmentAndSubmissionServiceTest {
+  private val files = TarUtil.createTarFromDirectory(ClassPathResource("util/tar-sample").file)
+  private val assignment = Assignment("Assignment 1", User("user"), null)
+  private val task = Task(assignment, position = 0L, title = "Task 1", body = "Do stuff", files = files, weight = 100)
+  private val user = User("user")
+  private val submission = Submission(user, assignment)
+  private val answer = Answer(submission, task, files)
 
   init {
     assignment.tasks = sortedSetOf(task)
@@ -50,6 +51,8 @@ class AssignmentServiceTest {
   lateinit var answerRepository: AnswerRepository
   @InjectMocks
   val assignmentService = AssignmentService()
+  @InjectMocks
+  val submissionService = SubmissionService()
 
   @Before
   fun init() {
@@ -71,18 +74,18 @@ class AssignmentServiceTest {
   @Test
   fun `findSubmission by ID`() {
     `when`(submissionRepository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(submission))
-    assertThat(assignmentService.findSubmission(UUID(0, 0)), equalTo(submission))
+    assertThat(submissionService.findSubmission(UUID(0, 0)), equalTo(submission))
   }
 
   @Test(expected = EntityNotFoundException::class)
   fun `findSubmission throws for no results`() {
     `when`(submissionRepository.findById(ArgumentMatchers.any())).thenReturn(Optional.empty())
-    assignmentService.findSubmission(UUID(0, 0))
+    submissionService.findSubmission(UUID(0, 0))
   }
 
   @Test
   fun createNewSubmission() {
-    val submission = assignmentService.createNewSubmission(assignment)
+    val submission = submissionService.createNewSubmission(assignment, user)
     assertThat(submission.answers, hasSize(1))
     assertThat(submission.answers.first(), instanceOf(Answer::class.java))
     assertThat(submission.answers.first().files, instanceOf(ByteArray::class.java))
@@ -94,7 +97,7 @@ class AssignmentServiceTest {
     `when`(assignmentRepository.findById(ArgumentMatchers.any())).thenReturn(Optional.of(assignment))
     `when`(submissionRepository.findByAssignmentId(anyOrNull())).thenReturn(listOf(submission))
     `when`(latexService.submissionToPdf(anyOrNull())).thenReturn(ByteArray(0))
-    val archive = assignmentService.createTarArchiveOfSubmissions(assignment.id)
+    val archive = submissionService.createTarArchiveOfSubmissions(assignment.id)
     val tmpDir = createTempDir()
     TarUtil.extractTarToDirectory(archive, tmpDir)
     assertThat(tmpDir.listFiles().first(), FileMatchers.aFileNamed(equalTo(submission.id.toString())))

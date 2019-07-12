@@ -8,5 +8,5 @@ import org.springframework.web.context.request.ServletRequestAttributes
 object FrontendUtil {
   fun getRequest() = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
 
-  fun getUser() = SecurityContextHolder.getContext().authentication.principal as AppUser
+  fun getCurrentUser() = SecurityContextHolder.getContext().authentication.principal as AppUser
 }

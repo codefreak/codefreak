@@ -9,10 +9,9 @@ import javax.persistence.OneToMany
 class Submission(
   /**
    * The user that handed in this submissions
-   * TODO: remove optional if authentication is implemented
    */
-  @ManyToOne(optional = true)
-  var user: User? = null,
+  @ManyToOne
+  var user: User,
 
   /**
    * The assignment this submission belongs to
