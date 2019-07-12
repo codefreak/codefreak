@@ -1,7 +1,6 @@
 package de.code_freak.codefreak.frontend
 
-import de.code_freak.codefreak.auth.AllowRoles
-import de.code_freak.codefreak.auth.Role
+import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.ContainerService
@@ -10,6 +9,7 @@ import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -81,7 +81,7 @@ class AssignmentController : BaseController() {
 
   @GetMapping("/admin/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
   @ResponseBody
-  @AllowRoles(Role.ADMIN)
+  @Secured(Authority.ROLE_ADMIN)
   fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): ByteArray {
     val assignment = assignmentService.findAssignment(assignmentId)
     val filename = assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()

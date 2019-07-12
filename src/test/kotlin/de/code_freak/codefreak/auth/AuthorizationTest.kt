@@ -3,6 +3,7 @@ package de.code_freak.codefreak.auth
 import de.code_freak.codefreak.SpringFrontendTest
 import de.code_freak.codefreak.frontend.BaseController
 import org.junit.Test
+import org.springframework.security.access.annotation.Secured
 import org.springframework.security.test.context.support.WithUserDetails
 import org.springframework.stereotype.Controller
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -14,15 +15,15 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Controller
 @ResponseBody
 @RequestMapping("/allowRolesTest")
-class AllowRolesTestController : BaseController() {
+class AuthorizationTestController : BaseController() {
 
-  @AllowRoles(Role.ADMIN)
+  @Secured(Authority.ROLE_ADMIN)
   @GetMapping("/allowAdmin")
   fun allowAdmin(): String {
     return "OK"
   }
 
-  @AllowRoles(Role.TEACHER)
+  @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/allowTeacher")
   fun allowTeacher(): String {
     return "OK"
@@ -34,7 +35,7 @@ class AllowRolesTestController : BaseController() {
   }
 }
 
-class AllowRolesTest : SpringFrontendTest() {
+class AuthorizationTest : SpringFrontendTest() {
 
   @Test
   @WithUserDetails("admin")
