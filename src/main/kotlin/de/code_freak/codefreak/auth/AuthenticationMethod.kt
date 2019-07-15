@@ -2,5 +2,6 @@ package de.code_freak.codefreak.auth
 
 enum class AuthenticationMethod {
   SIMPLE,
-  LDAP
+  LDAP,
+  LDAP_AD
 }

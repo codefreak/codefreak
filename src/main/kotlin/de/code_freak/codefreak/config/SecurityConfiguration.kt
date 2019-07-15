@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider
 
 @Configuration
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
@@ -50,8 +51,15 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   override fun configure(auth: AuthenticationManagerBuilder?) {
     when (config.authenticationMethod) {
       AuthenticationMethod.LDAP -> configureLdapAuthentication(auth)
+      AuthenticationMethod.LDAP_AD -> configureActiveDirectoryAuthentication(auth)
       else -> super.configure(auth)
     }
+  }
+
+  private fun configureActiveDirectoryAuthentication(auth: AuthenticationManagerBuilder?) {
+    val adProvider = ActiveDirectoryLdapAuthenticationProvider(null, config.ldap.url, config.ldap.rootDn)
+    adProvider.setUserDetailsContextMapper(LdapUserDetailsContextMapper(userRepository, config.ldap.roleMappings))
+    auth?.authenticationProvider(adProvider)
   }
 
   private fun configureLdapAuthentication(auth: AuthenticationManagerBuilder?) {
