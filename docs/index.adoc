@@ -98,10 +98,12 @@ As an example, you can find an LDAP test server https://github.com/rroemhild/doc
 code-freak:
   authentication-method: ldap
   ldap:
-    url: ldap://127.0.0.1:389/dc=planetexpress,dc=com
+    url: ldap://127.0.0.1:389
+    root-dn: dc=planetexpress,dc=com
     group-search-base: ou=people
     role-mappings.admin_staff: admin
     role-mappings.ship_crew: student
+    #active-directory: true (set this if you are using an Active Directory server)
 ```
 
 == Development / Contribution

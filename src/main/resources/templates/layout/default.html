@@ -32,7 +32,7 @@
         <i class="fas fa-user" style="font-size: 2.5em;"></i>
       </div>
       <div>
-        <span sec:authentication="name">username</span><br>
+        <span sec:authentication="principal.displayName">username</span><br>
         <form th:action="@{/logout}" method="post">
           <input type="submit" value="Sign Out" class="btn btn-link p-0" />
         </form>

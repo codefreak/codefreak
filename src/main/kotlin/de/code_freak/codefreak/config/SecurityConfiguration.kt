@@ -3,7 +3,7 @@ package de.code_freak.codefreak.config
 import de.code_freak.codefreak.auth.AuthenticationMethod
 import de.code_freak.codefreak.auth.DevUserDetailsService
 import de.code_freak.codefreak.auth.LdapUserDetailsContextMapper
-import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.util.withTrailingSlash
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,8 +24,8 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   @Autowired
   lateinit var env: Environment
 
-  @Autowired
-  lateinit var userRepository: UserRepository
+  @Autowired(required = false)
+  var ldapUserDetailsContextMapper: LdapUserDetailsContextMapper? = null
 
   override fun configure(http: HttpSecurity?) {
     http
@@ -51,25 +51,25 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   override fun configure(auth: AuthenticationManagerBuilder?) {
     when (config.authenticationMethod) {
       AuthenticationMethod.LDAP -> configureLdapAuthentication(auth)
-      AuthenticationMethod.LDAP_AD -> configureActiveDirectoryAuthentication(auth)
       else -> super.configure(auth)
     }
   }
 
-  private fun configureActiveDirectoryAuthentication(auth: AuthenticationManagerBuilder?) {
-    val adProvider = ActiveDirectoryLdapAuthenticationProvider(null, config.ldap.url, config.ldap.rootDn)
-    adProvider.setUserDetailsContextMapper(LdapUserDetailsContextMapper(userRepository, config.ldap.roleMappings))
-    auth?.authenticationProvider(adProvider)
-  }
-
   private fun configureLdapAuthentication(auth: AuthenticationManagerBuilder?) {
+    val url = config.ldap.url ?: throw IllegalStateException("LDAP URL has not been configured")
+    if (config.ldap.activeDirectory) {
+      val authenticationProvider = ActiveDirectoryLdapAuthenticationProvider(null, url, config.ldap.rootDn)
+      authenticationProvider.setUserDetailsContextMapper(ldapUserDetailsContextMapper)
+      auth?.authenticationProvider(authenticationProvider)
+      return
+    }
     auth?.ldapAuthentication()
-        ?.userDetailsContextMapper(LdapUserDetailsContextMapper(userRepository, config.ldap.roleMappings))
+        ?.userDetailsContextMapper(ldapUserDetailsContextMapper)
         ?.userSearchBase(config.ldap.userSearchBase)
         ?.userSearchFilter(config.ldap.userSearchFilter)
         ?.groupSearchBase(config.ldap.groupSearchBase)
         ?.groupSearchFilter(config.ldap.groupSearchFilter)
         ?.contextSource()
-            ?.url(config.ldap.url ?: throw IllegalStateException("LDAP URL has not been configured"))
+            ?.url(url.withTrailingSlash() + config.ldap.rootDn)
   }
 }

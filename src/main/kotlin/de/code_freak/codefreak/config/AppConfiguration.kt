@@ -87,6 +87,9 @@ class AppConfiguration {
   class Ldap {
     var url: String? = null
     var rootDn: String? = null
+    var activeDirectory = false
+    var firstNameAttribute: String? = "sn"
+    var lastNameAttribute: String? = "givenName"
     var roleMappings: Map<String, Role> = mapOf()
     var userSearchBase = "ou=people"
     var userSearchFilter = "(uid={0})"
