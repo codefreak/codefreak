@@ -30,8 +30,8 @@ class TaskController : BaseController() {
 
   @GetMapping("/tasks/{taskId}/ide")
   fun getAssignmentIde(
-      @PathVariable("taskId") taskId: UUID,
-      model: Model
+    @PathVariable("taskId") taskId: UUID,
+    model: Model
   ): String {
     val submission = getSubmissionForTask(taskId)
     // start a container based on the submission for the current task
@@ -45,7 +45,7 @@ class TaskController : BaseController() {
 
   @PostMapping("/tasks/{taskId}/answers")
   fun createAnswer(
-      @PathVariable("taskId") taskId: UUID
+    @PathVariable("taskId") taskId: UUID
   ): String {
     val submission = getSubmissionForTask(taskId)
     containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
@@ -56,8 +56,8 @@ class TaskController : BaseController() {
   @GetMapping("/tasks/{taskId}/source.tar", produces = ["application/tar"])
   @ResponseBody
   fun getSourceTar(
-      @PathVariable("taskId") taskId: UUID,
-      response: HttpServletResponse
+    @PathVariable("taskId") taskId: UUID,
+    response: HttpServletResponse
   ): ByteArray {
     val submission = getSubmissionForTask(taskId)
     val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
@@ -68,8 +68,8 @@ class TaskController : BaseController() {
   @GetMapping("/tasks/{taskId}/source.zip", produces = ["application/zip"])
   @ResponseBody
   fun getSourceZip(
-      @PathVariable("taskId") taskId: UUID,
-      response: HttpServletResponse
+    @PathVariable("taskId") taskId: UUID,
+    response: HttpServletResponse
   ): ByteArray {
     val submission = getSubmissionForTask(taskId)
     val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
@@ -81,8 +81,8 @@ class TaskController : BaseController() {
   @GetMapping("/tasks/{taskId}/answer.pdf", produces = ["application/pdf"])
   @ResponseBody
   fun pdfExportAnswer(
-      @PathVariable("taskId") taskId: UUID,
-      response: HttpServletResponse
+    @PathVariable("taskId") taskId: UUID,
+    response: HttpServletResponse
   ): ByteArray {
     val submission = getSubmissionForTask(taskId)
     val answer = submission.getAnswerForTask(taskId) ?: throw EntityNotFoundException("Answer not found")
