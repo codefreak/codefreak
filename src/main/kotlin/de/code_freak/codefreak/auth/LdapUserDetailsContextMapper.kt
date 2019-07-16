@@ -11,7 +11,6 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.ldap.userdetails.UserDetailsContextMapper
 import org.springframework.stereotype.Component
-import java.lang.UnsupportedOperationException
 
 @Component
 class LdapUserDetailsContextMapper : UserDetailsContextMapper {
@@ -23,7 +22,15 @@ class LdapUserDetailsContextMapper : UserDetailsContextMapper {
   private lateinit var config: AppConfiguration
 
   private val log = LoggerFactory.getLogger(this::class.java)
-  private val mappings by lazy { config.ldap.roleMappings.mapKeys { "ROLE_" + it.key.toUpperCase() } }
+  private val mappings by lazy {
+    // DefaultLdapAuthoritiesPopulator converts roles to uppercase and prefixes them with ROLE_
+    // this does not happen in the active directory provider
+    if (config.ldap.activeDirectory) {
+      config.ldap.roleMappings
+    } else {
+      config.ldap.roleMappings.mapKeys { "ROLE_" + it.key.toUpperCase() }
+    }
+  }
 
   override fun mapUserToContext(user: UserDetails?, ctx: DirContextAdapter?) {
     throw UnsupportedOperationException()
