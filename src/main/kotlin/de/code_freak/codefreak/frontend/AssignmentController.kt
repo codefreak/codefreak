@@ -52,13 +52,12 @@ class AssignmentController : BaseController() {
     return "assignment"
   }
 
-  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/ide")
+  @GetMapping("/tasks/{taskId}/ide")
   fun getAssignmentIde(
-    @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     model: Model
   ): String {
-    val submission = getSubmission(assignmentId)
+    val submission = getSubmission(taskId)
     // start a container based on the submission for the current task
     val answer = submission.getAnswerForTask(taskId)!!
     containerService.startIdeContainer(answer)
@@ -68,13 +67,13 @@ class AssignmentController : BaseController() {
     return "ide-redirect"
   }
 
-  @PostMapping("/assignments/{assignmentId}/tasks/{taskId}/answers")
+  @PostMapping("/tasks/{taskId}/answers")
   fun createAnswer(
-    @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID
   ): String {
-    val submission = getSubmission(assignmentId)
+    val submission = getSubmission(taskId)
     containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
+    val assignmentId = taskService.findTask(taskId).id
     return "redirect:/assignments/$assignmentId"
   }
 
@@ -100,14 +99,13 @@ class AssignmentController : BaseController() {
     return latexService.submissionToPdf(submission)
   }
 
-  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/answer.pdf", produces = ["application/pdf"])
+  @GetMapping("/tasks/{taskId}/answer.pdf", produces = ["application/pdf"])
   @ResponseBody
   fun pdfExportAnswer(
-    @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
   ): ByteArray {
-    val submission = getSubmission(assignmentId)
+    val submission = getSubmission(taskId)
     val answer = submission.getAnswerForTask(taskId) ?: throw EntityNotFoundException("Answer not found")
     val filename = answer.task.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
     response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
@@ -115,35 +113,34 @@ class AssignmentController : BaseController() {
   }
 
   /**
-   * Returns the submission for the given assignment or creates one if there is none already.
+   * Returns the submission for the given task or creates one if there is none already.
    */
-  private fun getSubmission(assignmentId: UUID): Submission {
+  private fun getSubmission(taskId: UUID): Submission {
+    val assignmentId = taskService.findTask(taskId).assignment.id
     return submissionService.findSubmission(assignmentId, user.id).orElseGet {
       submissionService.createNewSubmission(assignmentService.findAssignment(assignmentId), user)
     }
   }
 
-  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/source.tar", produces = ["application/tar"])
+  @GetMapping("/tasks/{taskId}/source.tar", produces = ["application/tar"])
   @ResponseBody
   fun getSourceTar(
-    @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
   ): ByteArray {
-    val submission = getSubmission( assignmentId)
+    val submission = getSubmission(taskId)
     val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
     response.setHeader("Content-Disposition", "attachment; filename=source.tar")
     return answer.files ?: taskService.findTask(taskId).files ?: throw EntityNotFoundException()
   }
 
-  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/source.zip", produces = ["application/zip"])
+  @GetMapping("/tasks/{taskId}/source.zip", produces = ["application/zip"])
   @ResponseBody
   fun getSourceZip(
-    @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
   ): ByteArray {
-    val submission = getSubmission(assignmentId)
+    val submission = getSubmission(taskId)
     val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
     response.setHeader("Content-Disposition", "attachment; filename=source.zip")
     val tar = answer.files ?: taskService.findTask(taskId).files ?: throw EntityNotFoundException()

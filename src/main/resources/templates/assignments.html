@@ -14,7 +14,7 @@
       <h3 class="card-title" th:text="${assignment.title}"/>
       <p class="card-text" th:text="|${#lists.size(assignment.tasks)} task(s)|"/>
 
-      <a class="btn btn-primary" th:href="@{'/assignments/' + ${assignment.id}}">
+      <a class="btn btn-primary" th:href="@{${@urls.get(assignment)}}">
         <i class="fas fa-file-alt"></i> Details</a>
     </div>
   </div>
