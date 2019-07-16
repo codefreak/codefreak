@@ -7,11 +7,13 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
 @ComponentScan("de.code_freak.codefreak", "asset.pipeline.springboot")
 @EnableScheduling
+@EnableAspectJAutoProxy
 class CodeFreakApplication : CommandLineRunner {
 
   private val log = LoggerFactory.getLogger(this::class.java)

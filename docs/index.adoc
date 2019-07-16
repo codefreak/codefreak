@@ -74,7 +74,37 @@ services:
 ```
 
 == Configuration
-`TODO`
+`TODO explain most simple way to provide a configuration file for the Docker container`
+
+For more details refer to the https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-application-property-files[Spring documentation].
+
+=== Authentication
+Code FREAK provides multiple ways to authenticate users. You can choose one of the following methods to integrate the application with your existing infrastructure.
+
+==== Simple Authentication
+Simple authentication means that users are managed by Code FREAK itself. Accounts are created by administrators and saved to the database.
+
+WARNING: Simple authentication has not been implemented yet! It only works in `dev` mode with preconfigured users. See https://github.com/code-freak/code-freak/issues/122[#122] for progress.
+
+```yaml
+code-freak.authentication-method: simple # this is the default
+```
+
+==== LDAP
+Code FREAK can connect to an LDAP server and use it for authentication. A minimal configuration requires the URL of the server and a mapping from LDAP groups to Code FREAK roles.
+
+As an example, you can find an LDAP test server https://github.com/rroemhild/docker-test-openldap[here]. It can be used with the following configuration.
+```yaml
+code-freak:
+  authentication-method: ldap
+  ldap:
+    url: ldap://127.0.0.1:389
+    root-dn: dc=planetexpress,dc=com
+    group-search-base: ou=people
+    role-mappings.admin_staff: admin
+    role-mappings.ship_crew: student
+    #active-directory: true (set this if you are using an Active Directory server)
+```
 
 == Development / Contribution
 `TODO`

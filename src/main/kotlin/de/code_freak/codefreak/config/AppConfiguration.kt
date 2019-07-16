@@ -1,5 +1,7 @@
 package de.code_freak.codefreak.config
 
+import de.code_freak.codefreak.auth.AuthenticationMethod
+import de.code_freak.codefreak.auth.Role
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 
@@ -9,12 +11,14 @@ class AppConfiguration {
 
   /** Identifier of the Code FREAK instanceId. Set this if you run multiple instances on the same Docker host. */
   lateinit var instanceId: String
+  var authenticationMethod = AuthenticationMethod.SIMPLE
 
   val docker = Docker()
   val ide = Ide()
   val traefik = Traefik()
   val latex = Latex()
   val frontend = Frontend()
+  val ldap = Ldap()
 
   class Frontend {
     /**
@@ -78,5 +82,18 @@ class AppConfiguration {
      * - always = Always pull image (may override existing ones)
      */
     lateinit var pullPolicy: String
+  }
+
+  class Ldap {
+    var url: String? = null
+    var rootDn: String? = null
+    var activeDirectory = false
+    var firstNameAttribute: String? = "sn"
+    var lastNameAttribute: String? = "givenName"
+    var roleMappings: Map<String, Role> = mapOf()
+    var userSearchBase = "ou=people"
+    var userSearchFilter = "(uid={0})"
+    var groupSearchBase = "ou=groups"
+    var groupSearchFilter = "member={0}"
   }
 }

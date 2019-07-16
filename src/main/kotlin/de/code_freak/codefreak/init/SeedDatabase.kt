@@ -28,20 +28,11 @@ import org.springframework.stereotype.Service
 @Profile("dev")
 class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
 
-  @Autowired
-  lateinit var userRepository: UserRepository
-
-  @Autowired
-  lateinit var assignmentRepository: AssignmentRepository
-
-  @Autowired
-  lateinit var taskRepository: TaskRepository
-
-  @Autowired
-  lateinit var classroomRepository: ClassroomRepository
-
-  @Autowired
-  lateinit var requirementRepository: RequirementRepository
+  @Autowired lateinit var userRepository: UserRepository
+  @Autowired lateinit var assignmentRepository: AssignmentRepository
+  @Autowired lateinit var taskRepository: TaskRepository
+  @Autowired lateinit var classroomRepository: ClassroomRepository
+  @Autowired lateinit var requirementRepository: RequirementRepository
 
   @Value("\${spring.jpa.hibernate.ddl-auto:''}")
   private lateinit var schemaExport: String
@@ -49,21 +40,25 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
   @Value("\${spring.jpa.database:''}")
   private lateinit var database: String
 
+  companion object {
+    val admin = User("admin")
+    val teacher = User("teacher")
+    val student = User("student")
+  }
+
   override fun onApplicationEvent(event: ContextRefreshedEvent) {
     if (!schemaExport.startsWith("create") && database != "HSQL") {
       return
     }
 
-    val user1 = User()
-    val user2 = User()
-    userRepository.saveAll(listOf(user1, user2))
+    userRepository.saveAll(listOf(admin, teacher, student))
 
     val classroom1 = Classroom("Classroom 1")
     val classroom2 = Classroom("Classroom 2")
     classroomRepository.saveAll(listOf(classroom1, classroom2))
 
-    val assignment1 = Assignment("C Assignment", user1, classroom1)
-    val assignment2 = Assignment("Java Assignment", user2, classroom2)
+    val assignment1 = Assignment("C Assignment", teacher, classroom1)
+    val assignment2 = Assignment("Java Assignment", teacher, classroom2)
     assignmentRepository.saveAll(listOf(assignment1, assignment2))
 
     val cTar = TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file)
