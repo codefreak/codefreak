@@ -4,11 +4,11 @@ import de.code_freak.codefreak.entity.User
 import org.springframework.security.core.userdetails.User as SpringUser
 
 class AppUser(
-    val entity: User,
-    roles: Collection<Role>,
-    password: String = "",
-    firstName: String? = null,
-    lastName: String? = null
+  val entity: User,
+  roles: Collection<Role>,
+  password: String = "",
+  firstName: String? = null,
+  lastName: String? = null
 ) : SpringUser(
     entity.username,
     password,
