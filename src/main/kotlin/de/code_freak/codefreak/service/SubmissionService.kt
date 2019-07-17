@@ -38,6 +38,7 @@ class SubmissionService : BaseService() {
   @Transactional
   fun findSubmissionsOfAssignment(assignmentId: UUID) = submissionRepository.findByAssignmentId(assignmentId)
 
+  @Transactional
   fun createNewSubmission(assignment: Assignment, user: User): Submission {
     val submission = Submission(assignment = assignment, user = user)
     submissionRepository.save(submission)
