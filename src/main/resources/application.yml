@@ -33,6 +33,8 @@ server:
 
 code-freak:
   instanceId: default
+  files:
+    adapter: jpa
   docker:
     # All of the docker settings below will fall back to a system-depended default value if unset
     host: ~

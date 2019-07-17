@@ -19,6 +19,7 @@ class AppConfiguration {
   val latex = Latex()
   val frontend = Frontend()
   val ldap = Ldap()
+  val files = Files()
 
   class Frontend {
     /**
@@ -95,5 +96,13 @@ class AppConfiguration {
     var userSearchFilter = "(uid={0})"
     var groupSearchBase = "ou=groups"
     var groupSearchFilter = "member={0}"
+  }
+
+  class Files {
+    var adapter = FileAdapter.JPA
+
+    enum class FileAdapter {
+      JPA
+    }
   }
 }

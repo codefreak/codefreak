@@ -4,6 +4,7 @@ import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
 import de.code_freak.codefreak.SpringTest
 import de.code_freak.codefreak.entity.Answer
+import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -14,16 +15,20 @@ import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
+import java.io.ByteArrayOutputStream
 import java.util.UUID
+import com.nhaarman.mockitokotlin2.eq
+import org.hamcrest.Matchers.greaterThan
+import org.springframework.boot.test.mock.mockito.MockBean
 
 internal class ContainerServiceTest : SpringTest() {
+
+  @MockBean
+  lateinit var fileService: FileService
 
   @Autowired
   lateinit var docker: DockerClient
@@ -31,10 +36,14 @@ internal class ContainerServiceTest : SpringTest() {
   @Autowired
   lateinit var containerService: ContainerService
 
-  val answer by lazy {
+  val answer: Answer by lazy {
     val mock = mock(Answer::class.java)
     `when`(mock.id).thenReturn(UUID(0, 0))
     mock
+  }
+
+  private val files = ByteArrayOutputStream().use {
+    TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file, it); it.toByteArray()
   }
 
   @Before
@@ -63,7 +72,8 @@ internal class ContainerServiceTest : SpringTest() {
 
   @Test
   fun `files are extracted to project directory`() {
-    `when`(answer.files).thenReturn(TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file))
+    `when`(fileService.readCollectionTar(eq(answer.id))).thenReturn(files.inputStream())
+    `when`(fileService.collectionExists(eq(answer.id))).thenReturn(true)
     containerService.startIdeContainer(answer)
     val containerId = getIdeContainer(answer).id()
     // assert that file is existing and nothing is owned by root
@@ -74,16 +84,20 @@ internal class ContainerServiceTest : SpringTest() {
 
   @Test
   fun `files in the container are saved back to the database`() {
-    val files = TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file)
-    `when`(answer.files).thenReturn(files)
+    val out = ByteArrayOutputStream()
+    `when`(fileService.readCollectionTar(eq(answer.id))).thenReturn(files.inputStream())
+    `when`(fileService.collectionExists(eq(answer.id))).thenReturn(true)
+    `when`(fileService.writeCollectionTar(eq(answer.id))).thenReturn(out)
     containerService.startIdeContainer(answer)
     containerService.saveAnswerFiles(answer)
-    verify(answer, times(1)).files = any()
+    //verify(fileService, times(1)).writeCollectionTar(answer.id)
+    assertThat(out.toByteArray().size, greaterThan(0))
   }
 
   @Test
   fun `files are not overridden in existing IDE containers`() {
-    `when`(answer.files).thenReturn(TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file))
+    `when`(fileService.readCollectionTar(eq(answer.id))).thenReturn(files.inputStream())
+    `when`(fileService.collectionExists(eq(answer.id))).thenReturn(true)
     containerService.startIdeContainer(answer)
     val containerId = getIdeContainer(answer).id()
     containerService.exec(containerId, arrayOf("sh", "-c", "echo 'foo' >> main.c"))

@@ -9,6 +9,7 @@ import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.TaskRepository
 import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
@@ -41,6 +42,9 @@ class DiskImport {
 
   @Autowired
   private lateinit var classroomRepository: ClassroomRepository
+
+  @Autowired
+  private lateinit var fileService: FileService
 
   private var importInCurrentIteration = mutableListOf<String>()
   private var user = User("disk-import")
@@ -79,9 +83,11 @@ class DiskImport {
         var nextPosition = 0L
         for (taskDefinition in assignmentDefinition.tasks) {
           log.info("Importing task $nextPosition: ${taskDefinition.title}")
-          val files = TarUtil.createTarFromDirectory(assignmentDirectory.resolve(taskDefinition.directory))
-          val task = Task(assignment, nextPosition++, taskDefinition.title, taskDefinition.description, files, 100)
-          taskRepository.save(task)
+          var task = Task(assignment, nextPosition++, taskDefinition.title, taskDefinition.description, 100)
+          task = taskRepository.save(task)
+          fileService.writeCollectionTar(task.id).use {
+            TarUtil.createTarFromDirectory(assignmentDirectory.resolve(taskDefinition.directory), it)
+          }
         }
       } catch (e: Exception) {
         log.error("Assignment could not be imported", e)
