@@ -9,7 +9,7 @@
 <div layout:fragment="content">
   <h1 th:text="${assignment.title}" />
   <div class="lead text-muted" th:text="|by User #${#strings.substring(assignment.owner.id, 30, 36)}|"/>
-  <a class="btn btn-primary" th:href="@{'/assignments/' + ${assignment.id} + '/submission.pdf'}" target="_blank">
+  <a class="btn btn-primary" th:href="@{${@urls.get(assignment)} + '/submission.pdf'}" target="_blank">
     <i class="far fa-file-pdf"></i> Download all your answers as PDF</a>
 
   <div class="card mt-4" th:each="task : ${assignment.tasks}">
@@ -17,7 +17,7 @@
       <h3 class="card-title" th:text="|${task.number}. ${task.title}|"/>
       <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
 
-      <a class="btn btn-primary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/ide'}" target="_blank">
+      <a class="btn btn-primary" th:href="@{${@urls.get(task)} + '/ide'}" target="_blank">
         <i class="far fa-edit"></i> Open in Editor
       </a>
       <div style="display: inline-block;">
@@ -26,14 +26,14 @@
             <span class="input-group-text">Download source as</span>
           </div>
           <div class="input-group-append">
-            <a class="btn btn-outline-secondary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/source.zip'}">.zip</a>
-            <a class="btn btn-outline-secondary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/source.tar'}">.tar</a>
-            <a class="btn btn-outline-secondary" th:href="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/answer.pdf'}">.pdf</a>
+            <a class="btn btn-outline-secondary" th:href="@{${@urls.get(task)} + '/source.zip'}">.zip</a>
+            <a class="btn btn-outline-secondary" th:href="@{${@urls.get(task)} + '/source.tar'}">.tar</a>
+            <a class="btn btn-outline-secondary" th:href="@{${@urls.get(task)} + '/answer.pdf'}">.pdf</a>
           </div>
         </div>
       </div>
       <br><br>
-      <form th:action="@{'/assignments/' + ${assignment.id} + '/tasks/' + ${task.id} + '/answers'}" method="post">
+      <form th:action="@{${@urls.get(task)} + '/answers'}" method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
         <button class="btn btn-primary"><i class="far fa-save"></i> Save Answer</a></button>
       </form>
