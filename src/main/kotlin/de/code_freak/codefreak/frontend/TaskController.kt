@@ -34,6 +34,9 @@ class TaskController : BaseController() {
   @Autowired
   lateinit var fileService: FileService
 
+  @Autowired
+  lateinit var urls: Urls
+
   @GetMapping("/tasks/{taskId}/ide")
   fun getAssignmentIde(
     @PathVariable("taskId") taskId: UUID,
@@ -55,8 +58,8 @@ class TaskController : BaseController() {
   ): String {
     val submission = getSubmissionForTask(taskId)
     containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
-    val assignmentId = taskService.findTask(taskId).id
-    return "redirect:/assignments/$assignmentId"
+    val assignment = taskService.findTask(taskId).assignment
+    return "redirect:${urls.get(assignment)}"
   }
 
   @GetMapping("/tasks/{taskId}/source.tar", produces = ["application/tar"])
