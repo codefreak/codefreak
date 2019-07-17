@@ -9,14 +9,20 @@ fun String.withTrailingSlash(): String = if (endsWith("/")) this else "$this/"
 
 fun OutputStream.afterClose(callback: () -> Any?) = object : ProxyOutputStream(this) {
   override fun close() {
-    super.close()
-    callback()
+    try {
+      super.close()
+    } finally {
+      callback()
+    }
   }
 }
 
 fun InputStream.afterClose(callback: () -> Any?) = object : ProxyInputStream(this) {
   override fun close() {
-    super.close()
-    callback()
+    try {
+      super.close()
+    } finally {
+      callback()
+    }
   }
 }
