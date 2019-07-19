@@ -71,9 +71,13 @@ class ContainerService : BaseService() {
     }
   }
 
-  fun getLatexContainer() = getContainerWithLabel(LABEL_LATEX_CONTAINER, "true")
+  @Synchronized
+  fun getOrCreateLatexContainer(): String {
+    var containerId = getContainerWithLabel(LABEL_LATEX_CONTAINER, "true")
+    if (containerId !== null) {
+      return containerId
+    }
 
-  fun createLatexContainer(): String {
     val hostConfig = HostConfig.builder()
         .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
         .build()
@@ -88,7 +92,7 @@ class ContainerService : BaseService() {
         .hostConfig(hostConfig)
         .build()
 
-    val containerId = docker.createContainer(containerConfig).id()!!
+    containerId = docker.createContainer(containerConfig).id()!!
     docker.startContainer(containerId)
     return containerId
   }
@@ -97,12 +101,12 @@ class ContainerService : BaseService() {
    * Convert the latex file in the given archive to pdf and return the directory after pdflatex has been run
    */
   fun latexConvert(inputTar: ByteArray, file: String): ByteArray {
-    val latexContainer = getLatexContainer() ?: createLatexContainer()
-    val jobPath = exec(latexContainer, arrayOf("mktemp", "-d")).trim()
-    docker.copyToContainer(inputTar.inputStream(), latexContainer, jobPath)
-    exec(latexContainer, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
-    val output = docker.archiveContainer(latexContainer, "$jobPath/.").readBytes()
-    exec(latexContainer, arrayOf("rm", "-rf", jobPath))
+    val latexContainerId = getOrCreateLatexContainer()
+    val jobPath = exec(latexContainerId, arrayOf("mktemp", "-d")).trim()
+    docker.copyToContainer(inputTar.inputStream(), latexContainerId, jobPath)
+    exec(latexContainerId, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
+    val output = docker.archiveContainer(latexContainerId, "$jobPath/.").readBytes()
+    exec(latexContainerId, arrayOf("rm", "-rf", jobPath))
     return output
   }
 
