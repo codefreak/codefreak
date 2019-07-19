@@ -94,7 +94,7 @@ class LatexService {
       TarUtil.extractTarToDirectory(outputArchive, tmpDir)
       val pdfFile = File(tmpDir, "document.pdf")
       // If the PDF would be empty LaTeX does not create any files but also exits with 0
-      return if(pdfFile.exists()) {
+      return if (pdfFile.exists()) {
         pdfFile.readBytes()
       } else {
         ByteArray(0)
