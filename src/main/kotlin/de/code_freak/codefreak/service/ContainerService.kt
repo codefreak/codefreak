@@ -76,9 +76,13 @@ class ContainerService : BaseService() {
     }
   }
 
-  fun getLatexContainer() = getContainerWithLabel(LABEL_LATEX_CONTAINER, "true")
+  @Synchronized
+  fun getOrCreateLatexContainer(): String {
+    var containerId = getContainerWithLabel(LABEL_LATEX_CONTAINER, "true")
+    if (containerId !== null) {
+      return containerId
+    }
 
-  fun createLatexContainer(): String {
     val hostConfig = HostConfig.builder()
         .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
         .build()
@@ -93,7 +97,7 @@ class ContainerService : BaseService() {
         .hostConfig(hostConfig)
         .build()
 
-    val containerId = docker.createContainer(containerConfig).id()!!
+    containerId = docker.createContainer(containerConfig).id()!!
     docker.startContainer(containerId)
     return containerId
   }
@@ -102,12 +106,12 @@ class ContainerService : BaseService() {
    * Convert the latex file in the given archive to pdf and return the directory after pdflatex has been run
    */
   fun latexConvert(inputTar: InputStream, file: String): InputStream {
-    val latexContainer = getLatexContainer() ?: createLatexContainer()
-    val jobPath = exec(latexContainer, arrayOf("mktemp", "-d")).trim()
-    docker.copyToContainer(inputTar, latexContainer, jobPath)
-    exec(latexContainer, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
-    val out = docker.archiveContainer(latexContainer, "$jobPath/.")
-    exec(latexContainer, arrayOf("rm", "-rf", jobPath))
+    val latexContainerId = getOrCreateLatexContainer()
+    val jobPath = exec(latexContainerId, arrayOf("mktemp", "-d")).trim()
+    docker.copyToContainer(inputTar, latexContainerId, jobPath)
+    exec(latexContainerId, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
+    val out = docker.archiveContainer(latexContainerId, "$jobPath/.")
+    exec(latexContainerId, arrayOf("rm", "-rf", jobPath))
     return out
   }
 
