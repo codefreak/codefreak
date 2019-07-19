@@ -3,6 +3,7 @@ package de.code_freak.codefreak.service
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.ContainerConfig
+import com.spotify.docker.client.messages.ExecState
 import com.spotify.docker.client.messages.HostConfig
 import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
@@ -19,6 +20,10 @@ import javax.transaction.Transactional
 
 @Service
 class ContainerService : BaseService() {
+  class ExecException(val execState: ExecState, val output: String) : RuntimeException(
+      """Command ${execState.processConfig().arguments().joinToString(" ")} failed with non-zero exit code (${execState.exitCode()})"""
+  )
+
   companion object {
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
@@ -100,10 +105,17 @@ class ContainerService : BaseService() {
     val latexContainer = getLatexContainer() ?: createLatexContainer()
     val jobPath = exec(latexContainer, arrayOf("mktemp", "-d")).trim()
     docker.copyToContainer(inputTar.inputStream(), latexContainer, jobPath)
-    exec(latexContainer, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
-    val output = docker.archiveContainer(latexContainer, "$jobPath/.").readBytes()
-    exec(latexContainer, arrayOf("rm", "-rf", jobPath))
-    return output
+    try {
+      exec(
+          latexContainer,
+          arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"),
+          true
+      )
+      return docker.archiveContainer(latexContainer, "$jobPath/.").readBytes()
+    } finally {
+      // cleanup but throw the error
+      exec(latexContainer, arrayOf("rm", "-rf", jobPath))
+    }
   }
 
   /**
@@ -127,7 +139,7 @@ class ContainerService : BaseService() {
   /**
    * Run a command as root inside container and return the result as string
    */
-  fun exec(containerId: String, cmd: Array<String>): String {
+  fun exec(containerId: String, cmd: Array<String>, throwOnNonZero: Boolean = false): String {
     val exec = docker.execCreate(
         containerId, cmd,
         DockerClient.ExecCreateParam.attachStdin(), // this is not needed but a workaround for spotify/docker-client#513
@@ -135,8 +147,14 @@ class ContainerService : BaseService() {
         DockerClient.ExecCreateParam.attachStderr(),
         DockerClient.ExecCreateParam.user("root")
     )
-    val output = docker.execStart(exec.id())
-    return output.readFully()
+    val output = docker.execStart(exec.id()).readFully()
+    if (throwOnNonZero) {
+      val status = docker.execInspect(exec.id())
+      if (status.exitCode()?.equals(0L) != true) {
+        throw ExecException(status, output)
+      }
+    }
+    return output
   }
 
   /**

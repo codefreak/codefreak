@@ -10,6 +10,9 @@ import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -78,40 +81,33 @@ class AssignmentController : BaseController() {
     return "redirect:/assignments/$assignmentId"
   }
 
-  @GetMapping("/admin/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
+  @GetMapping("/admin/assignments/{assignmentId}/submissions.tar")
   @ResponseBody
   @Secured(Authority.ROLE_ADMIN)
-  fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): ByteArray {
+  fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): ResponseEntity<ByteArray> {
     val assignment = assignmentService.findAssignment(assignmentId)
-    val filename = assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
-    response.setHeader("Content-Disposition", "attachment; filename=$filename-submissions.tar")
-    return submissionService.createTarArchiveOfSubmissions(assignmentId)
+    return createTarDownload("${assignment.title}-submissions", submissionService.createTarArchiveOfSubmissions(assignmentId))
   }
 
-  @GetMapping("/assignments/{assignmentId}/submission.pdf", produces = ["application/pdf"])
+  @GetMapping("/assignments/{assignmentId}/submission.pdf")
   @ResponseBody
   fun pdfExportSubmission(
     @PathVariable("assignmentId") assignmentId: UUID,
     response: HttpServletResponse
-  ): ByteArray {
+  ): ResponseEntity<ByteArray> {
     val submission = getSubmission(assignmentId)
-    val filename = submission.assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
-    response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
-    return latexService.submissionToPdf(submission)
+    return createPdfDownload(submission.assignment.title, latexService.submissionToPdf(submission))
   }
 
-  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/answer.pdf", produces = ["application/pdf"])
+  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/answer.pdf")
   @ResponseBody
   fun pdfExportAnswer(
     @PathVariable("assignmentId") assignmentId: UUID,
-    @PathVariable("taskId") taskId: UUID,
-    response: HttpServletResponse
-  ): ByteArray {
+    @PathVariable("taskId") taskId: UUID
+  ): ResponseEntity<ByteArray> {
     val submission = getSubmission(assignmentId)
     val answer = submission.getAnswerForTask(taskId) ?: throw EntityNotFoundException("Answer not found")
-    val filename = answer.task.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
-    response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
-    return latexService.answerToPdf(answer)
+    return createPdfDownload(answer.task.title, latexService.answerToPdf(answer))
   }
 
   /**
@@ -123,30 +119,41 @@ class AssignmentController : BaseController() {
     }
   }
 
-  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/source.tar", produces = ["application/tar"])
+  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/source.tar")
   @ResponseBody
   fun getSourceTar(
     @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
-  ): ByteArray {
+  ): ResponseEntity<ByteArray> {
     val submission = getSubmission( assignmentId)
     val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
-    response.setHeader("Content-Disposition", "attachment; filename=source.tar")
-    return answer.files ?: taskService.findTask(taskId).files ?: throw EntityNotFoundException()
+    val binary = answer.files ?: taskService.findTask(taskId).files ?: throw EntityNotFoundException()
+    return createTarDownload("source", binary)
   }
 
-  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/source.zip", produces = ["application/zip"])
+  @GetMapping("/assignments/{assignmentId}/tasks/{taskId}/source.zip")
   @ResponseBody
   fun getSourceZip(
     @PathVariable("assignmentId") assignmentId: UUID,
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
-  ): ByteArray {
+  ): ResponseEntity<ByteArray> {
     val submission = getSubmission(assignmentId)
     val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
-    response.setHeader("Content-Disposition", "attachment; filename=source.zip")
     val tar = answer.files ?: taskService.findTask(taskId).files ?: throw EntityNotFoundException()
-    return TarUtil.tarToZip(tar)
+    return createZipDownload("source", TarUtil.tarToZip(tar))
   }
+
+  private fun createDownload(mimeType: String, filename: String, binary: ByteArray): ResponseEntity<ByteArray> {
+    val safeFilename = filename.trim().replace("[^\\w.]+".toRegex(), "-").toLowerCase()
+    val headers = HttpHeaders()
+    headers.add("Content-Type", mimeType)
+    headers.add("Content-Disposition", "attachment; filename=$safeFilename")
+    return ResponseEntity(binary, headers, HttpStatus.OK)
+  }
+
+  private fun createPdfDownload(filename: String, binary: ByteArray) = createDownload("application/pdf", "$filename.pdf", binary)
+  private fun createTarDownload(filename: String, binary: ByteArray) = createDownload("application/tar", "$filename.tar", binary)
+  private fun createZipDownload(filename: String, binary: ByteArray) = createDownload("application/zip", "$filename.zip", binary)
 }

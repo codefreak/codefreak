@@ -13,6 +13,10 @@ import java.util.Date
 
 @Service
 class LatexService {
+  class CompilerException(val documentContent: String, val output: String) : RuntimeException(
+      "Compilation of the LaTeX document failed:\n$output"
+  )
+
   class SourceCodeView(
     val filename: String,
     val lastModified: Date,
@@ -51,29 +55,28 @@ class LatexService {
   fun submissionToPdf(submission: Submission): ByteArray {
     // map of answer-uuid to SCV of answers files
     val files = submission.answers.map {
-      it.id to getSourceCodeFilesFromTar(it.files!!, setOf("java"))
+      it.id to getSourceCodeFilesFromTar(it.files!!)
     }.toMap()
     val ctx = Context()
     ctx.setVariable("files", files)
     ctx.setVariable("submission", submission)
     val tex = latexTemplateEngine.process("submission", ctx)
-    val pdf = getPdf(tex)
-    return pdf
+    return getPdf(tex)
   }
 
   fun answerToPdf(answer: Answer): ByteArray {
     val answerFiles = answer.files ?: throw IllegalArgumentException("Answer has no files")
     val ctx = Context()
-    ctx.setVariable("files", getSourceCodeFilesFromTar(answerFiles, setOf("java")))
+    ctx.setVariable("files", getSourceCodeFilesFromTar(answerFiles))
     val tex = latexTemplateEngine.process("source-code-listings", ctx)
-    val pdf = getPdf(tex)
-    return pdf
+    return getPdf(tex)
   }
 
-  fun getSourceCodeFilesFromTar(tar: ByteArray, extensions: Set<String>): List<SourceCodeView> {
+  fun getSourceCodeFilesFromTar(tar: ByteArray): List<SourceCodeView> {
     val tmpDir = createTempDir()
     TarUtil.extractTarToDirectory(tar, tmpDir)
-    val files = tmpDir.walkTopDown().filter { file -> extensions.contains(file.extension) }
+    // remove all dot-files or dot-directories
+    val files = tmpDir.walkTopDown().filter { file -> file.isFile && !file.path.contains("/.") }
         .toList()
         .map { file -> SourceCodeView.fromFile(file, tmpDir) }
     tmpDir.deleteRecursively()
@@ -86,10 +89,20 @@ class LatexService {
     val texFile = File(tmpDir, "document.tex")
     texFile.writeText(texSource)
     val inputArchive = TarUtil.createTarFromDirectory(tmpDir)
-    val outputArchive = containerService.latexConvert(inputArchive, texFile.name)
-    TarUtil.extractTarToDirectory(outputArchive, tmpDir)
-    val pdfContent = File(tmpDir, "document.pdf").readBytes()
-    tmpDir.deleteRecursively()
-    return pdfContent
+    try {
+      val outputArchive = containerService.latexConvert(inputArchive, texFile.name)
+      TarUtil.extractTarToDirectory(outputArchive, tmpDir)
+      val pdfFile = File(tmpDir, "document.pdf")
+      // If the PDF would be empty LaTeX does not create any files but also exits with 0
+      return if(pdfFile.exists()) {
+        pdfFile.readBytes()
+      } else {
+        ByteArray(0)
+      }
+    } catch (e: ContainerService.ExecException) {
+      throw CompilerException(texSource, e.output)
+    } finally {
+      tmpDir.deleteRecursively()
+    }
   }
 }

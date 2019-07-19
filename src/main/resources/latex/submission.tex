@@ -35,6 +35,11 @@
   [# th:each="task : ${submission.assignment.tasks}"]
     [# th:with="answer = ${submission.getAnswerForTask(task.id)}"]
       \section*{[( ${answer.task.title} )]}
+      [# th:if="${files.get(answer.id).isEmpty()}"]
+        \begin{center}
+          \texttt{No files have been created, yet.}
+        \end{center}
+      [/]
       [# th:each="file : ${files.get(answer.id)}"]
         \begin{table}[h]
         \begin{tabularx}{\textwidth}{rX}

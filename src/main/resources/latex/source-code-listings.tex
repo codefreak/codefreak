@@ -26,6 +26,11 @@
 }
 
 \begin{document}
+  [# th:if="${files.isEmpty()}"]
+    \begin{center}
+      \texttt{No files have been created, yet.}
+    \end{center}
+  [/]
   [# th:each="file : ${files}"]
     \begin{table}[h]
     \begin{tabularx}{\textwidth}{rX}
