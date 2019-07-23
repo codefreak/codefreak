@@ -7,13 +7,15 @@ import com.spotify.docker.client.messages.HostConfig
 import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.repository.AnswerRepository
-import org.apache.commons.io.IOUtils
+import de.code_freak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import org.springframework.util.StreamUtils
+import java.io.InputStream
 import java.util.UUID
 import javax.transaction.Transactional
 
@@ -41,6 +43,9 @@ class ContainerService : BaseService() {
 
   @Autowired
   private lateinit var containerService: ContainerService
+
+  @Autowired
+  private lateinit var fileService: FileService
 
   /**
    * Pull all required docker images on startup
@@ -100,14 +105,14 @@ class ContainerService : BaseService() {
   /**
    * Convert the latex file in the given archive to pdf and return the directory after pdflatex has been run
    */
-  fun latexConvert(inputTar: ByteArray, file: String): ByteArray {
+  fun latexConvert(inputTar: InputStream, file: String): InputStream {
     val latexContainerId = getOrCreateLatexContainer()
     val jobPath = exec(latexContainerId, arrayOf("mktemp", "-d")).trim()
-    docker.copyToContainer(inputTar.inputStream(), latexContainerId, jobPath)
+    docker.copyToContainer(inputTar, latexContainerId, jobPath)
     exec(latexContainerId, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
-    val output = docker.archiveContainer(latexContainerId, "$jobPath/.").readBytes()
+    val out = docker.archiveContainer(latexContainerId, "$jobPath/.")
     exec(latexContainerId, arrayOf("rm", "-rf", jobPath))
-    return output
+    return out
   }
 
   /**
@@ -169,8 +174,8 @@ class ContainerService : BaseService() {
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
     val containerId = getIdeContainer(answer) ?: throw IllegalArgumentException()
-    docker.archiveContainer(containerId, "$PROJECT_PATH/.").use {
-      answer.files = IOUtils.toByteArray(it)
+    docker.archiveContainer(containerId, "$PROJECT_PATH/.").use { tar ->
+      fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
     }
     log.info("Saved files of container with id: $containerId")
     return entityManager.merge(answer)
@@ -219,9 +224,10 @@ class ContainerService : BaseService() {
    */
   protected fun prepareIdeContainer(containerId: String, answer: Answer) {
     // extract possible existing files of the current submission into project dir
-    answer.files?.let {
-      docker.copyToContainer(it.inputStream(), containerId, PROJECT_PATH)
+    if (fileService.collectionExists(answer.id)) {
+      fileService.readCollectionTar(answer.id).use { docker.copyToContainer(it, containerId, PROJECT_PATH) }
     }
+
     // change owner from root to coder so we can edit our project files
     exec(containerId, arrayOf("chown", "-R", "coder:coder", PROJECT_PATH))
   }

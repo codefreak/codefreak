@@ -7,24 +7,24 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
 import java.io.BufferedInputStream
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 object TarUtil {
-  fun extractTarToDirectory(tar: ByteArray, destination: File) {
+  fun extractTarToDirectory(`in`: InputStream, destination: File) {
     if (!destination.exists()) {
       destination.mkdirs()
     } else if (!destination.isDirectory) {
       throw IOException("${destination.absolutePath} already exists and is no directory")
     }
-    val tarInputStream = TarArchiveInputStream(tar.inputStream())
-    for (entry in generateSequence { tarInputStream.nextTarEntry }.filter { !it.isDirectory }) {
+    val tar = TarArchiveInputStream(`in`)
+    for (entry in generateSequence { tar.nextTarEntry }.filter { !it.isDirectory }) {
       val outFile = File(destination, entry.name)
       outFile.parentFile.mkdirs()
-      IOUtils.copy(tarInputStream, outFile.outputStream())
+      outFile.outputStream().use { IOUtils.copy(tar, it) }
       outFile.setLastModified(entry.lastModifiedDate.time)
       // check if executable bit for user is set
       // octal 100 = dec 64
@@ -32,17 +32,15 @@ object TarUtil {
     }
   }
 
-  fun createTarFromDirectory(file: File): ByteArray {
+  fun createTarFromDirectory(file: File, out: OutputStream) {
+    val tar = TarArchiveOutputStream(out)
     if (!file.isDirectory) {
-      throw IllegalArgumentException("File must be a directory")
+      throw IllegalArgumentException("FileCollection must be a directory")
     }
-    val outputStream = ByteArrayOutputStream()
-    val tar = TarArchiveOutputStream(outputStream)
     tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR)
     tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
     addFileToTar(tar, file, ".")
-    tar.close()
-    return outputStream.toByteArray()
+    tar.finish()
   }
 
   private fun addFileToTar(tar: TarArchiveOutputStream, file: File, name: String) {
@@ -68,10 +66,9 @@ object TarUtil {
     }
   }
 
-  fun tarToZip(tarContent: ByteArray): ByteArray {
-    val tar = TarArchiveInputStream(ByteArrayInputStream(tarContent))
-    val zipContent = ByteArrayOutputStream()
-    val zip = ZipArchiveOutputStream(zipContent)
+  fun tarToZip(`in`: InputStream, out: OutputStream) {
+    val tar = TarArchiveInputStream(`in`)
+    val zip = ZipArchiveOutputStream(out)
     generateSequence { tar.nextTarEntry }.forEach { tarEntry ->
       val zipEntry = ZipArchiveEntry(normalizeEntryName(tarEntry.name))
       if (tarEntry.isFile) {
@@ -84,7 +81,6 @@ object TarUtil {
       zip.closeArchiveEntry()
     }
     zip.finish()
-    return zipContent.toByteArray()
   }
 
   private fun normalizeEntryName(name: String): String {

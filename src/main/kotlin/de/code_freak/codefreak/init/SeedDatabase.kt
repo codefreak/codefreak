@@ -10,6 +10,7 @@ import de.code_freak.codefreak.repository.TaskRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.RequirementRepository
 import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -33,6 +34,7 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
   @Autowired lateinit var taskRepository: TaskRepository
   @Autowired lateinit var classroomRepository: ClassroomRepository
   @Autowired lateinit var requirementRepository: RequirementRepository
+  @Autowired lateinit var fileService: FileService
 
   @Value("\${spring.jpa.hibernate.ddl-auto:''}")
   private lateinit var schemaExport: String
@@ -61,11 +63,11 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
     val assignment2 = Assignment("Java Assignment", teacher, classroom2)
     assignmentRepository.saveAll(listOf(assignment1, assignment2))
 
-    val cTar = TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file)
-    val javaTar = TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file)
-    val task1 = Task(assignment1, 0, "Program in C", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", cTar, 100)
-    val task2 = Task(assignment2, 0, "Program in Java", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", javaTar, 100)
+    val task1 = Task(assignment1, 0, "Program in C", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", 100)
+    val task2 = Task(assignment2, 0, "Program in Java", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", 100)
     taskRepository.saveAll(listOf(task1, task2))
+    fileService.writeCollectionTar(task1.id).use { TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it) }
+    fileService.writeCollectionTar(task2.id).use { TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it) }
 
     val eval1 = Requirement(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
     val eval2 = Requirement(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))

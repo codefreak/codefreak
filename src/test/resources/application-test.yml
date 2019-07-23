@@ -4,8 +4,5 @@ code-freak:
     idle-check-rate: 1000
     idle-shutdown-threshold: 5000
 
-spring:
-  jpa:
-    database: HSQL
-  hibernate:
-    ddl-auto: update
+spring.jpa.database: HSQL
+spring.jpa.hibernate.ddl-auto: update

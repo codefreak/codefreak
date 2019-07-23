@@ -9,6 +9,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.util.UUID
 import javax.servlet.http.HttpServletResponse
 
@@ -36,11 +37,11 @@ class AssignmentController : BaseController() {
   @GetMapping("/admin/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
   @ResponseBody
   @Secured(Authority.ROLE_ADMIN)
-  fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): ByteArray {
+  fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): StreamingResponseBody {
     val assignment = assignmentService.findAssignment(assignmentId)
     val filename = assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
     response.setHeader("Content-Disposition", "attachment; filename=$filename-submissions.tar")
-    return submissionService.createTarArchiveOfSubmissions(assignmentId)
+    return StreamingResponseBody { submissionService.createTarArchiveOfSubmissions(assignmentId, it) }
   }
 
   @GetMapping("/assignments/{assignmentId}/submission.pdf", produces = ["application/pdf"])
@@ -48,10 +49,10 @@ class AssignmentController : BaseController() {
   fun pdfExportSubmission(
     @PathVariable("assignmentId") assignmentId: UUID,
     response: HttpServletResponse
-  ): ByteArray {
+  ): StreamingResponseBody {
     val submission = getSubmission(assignmentId)
     val filename = submission.assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
     response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
-    return latexService.submissionToPdf(submission)
+    return StreamingResponseBody { latexService.submissionToPdf(submission, it) }
   }
 }

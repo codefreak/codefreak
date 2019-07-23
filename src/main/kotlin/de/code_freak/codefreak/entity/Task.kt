@@ -33,12 +33,6 @@ class Task(
   var body: String?,
 
   /**
-   * A tar archive of files that act as boilerplate code
-   */
-  @Type( type = "image" )
-  var files: ByteArray?,
-
-  /**
    * A weight >=0, <=100 how the task is weighted
    * The total weight of all tasks should not be > 100
    */
