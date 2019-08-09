@@ -20,6 +20,7 @@ class AppConfiguration {
   val frontend = Frontend()
   val ldap = Ldap()
   val files = Files()
+  val evalutaion = Evaluation()
 
   class Frontend {
     /**
@@ -104,5 +105,10 @@ class AppConfiguration {
     enum class FileAdapter {
       JPA
     }
+  }
+
+  class Evaluation {
+    var maxConcurrentExecutions = 5
+    var maxQueueSize = 1000
   }
 }

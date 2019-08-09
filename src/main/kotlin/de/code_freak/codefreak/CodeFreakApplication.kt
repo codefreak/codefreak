@@ -2,6 +2,7 @@ package de.code_freak.codefreak
 
 import de.code_freak.codefreak.config.AppConfiguration
 import org.slf4j.LoggerFactory
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -16,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableScheduling
 @EnableAsync
 @EnableAspectJAutoProxy
+@EnableBatchProcessing
 class CodeFreakApplication : CommandLineRunner {
 
   private val log = LoggerFactory.getLogger(this::class.java)

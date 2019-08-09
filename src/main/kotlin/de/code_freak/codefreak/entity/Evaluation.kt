@@ -12,13 +12,7 @@ class Evaluation(
   var answer: Answer,
 
   /**
-   * Link to the requirement that has been used to evaluate the answer
-   */
-  @ManyToOne
-  var requirement: Requirement,
-
-  /**
    * The result value that was determined by checking the requirements
    */
-  var result: Long
+  var result: Long?
 ) : BaseEntity()
