@@ -36,7 +36,6 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         ?.and()
             ?.logout()
   }
-
   @Bean
   override fun userDetailsService(): UserDetailsService {
     return when (config.authenticationMethod) {
