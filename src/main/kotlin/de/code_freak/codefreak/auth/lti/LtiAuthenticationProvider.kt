@@ -37,7 +37,8 @@ class LtiAuthenticationProvider : OIDCAuthenticationProvider() {
     return LtiAuthenticationToken(
         buildAppUser(claims, roles),
         authentication.accessTokenValue,
-        roles
+        roles,
+        claims
     )
   }
 

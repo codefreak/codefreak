@@ -282,6 +282,11 @@ class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
           )
         }
 
+        // remove stored redirect URI so we can decide on a redirect URL in our own success handler
+        // {@link OIDCAuthenticationFilter} imposes a success handler that cannot be overridden otherwise but delegates
+        // the handling to a default handler if the "TARGET_SESSION_VARIABLE" is missing in the session
+        session.removeAttribute(TARGET_SESSION_VARIABLE)
+
         val token = PendingLtiAuthenticationToken(
             idClaims.subject, idClaims.issuer,
             serverConfig,

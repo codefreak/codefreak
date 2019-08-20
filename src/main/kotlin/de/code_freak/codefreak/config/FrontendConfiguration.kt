@@ -8,9 +8,7 @@ import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.format.FormatterRegistry
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.springframework.web.servlet.resource.PathResourceResolver
 import java.util.concurrent.Executors
 
 @Configuration

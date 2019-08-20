@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.JWK
 import de.code_freak.codefreak.auth.lti.IdCodeAuthRequestBuilder
 import de.code_freak.codefreak.auth.lti.LtiAuthenticationFilter
 import de.code_freak.codefreak.auth.lti.LtiAuthenticationProvider
+import de.code_freak.codefreak.auth.lti.LtiAuthenticationSuccessHandler
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService
 import org.mitre.jwt.signer.service.impl.DefaultJWTSigningAndValidationService
 import org.mitre.oauth2.model.ClientDetailsEntity
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
 import java.security.KeyStore
 
@@ -68,8 +70,14 @@ class LtiSecurityConfiguration(
       this.clientConfigurationService = staticClientConfigurationService()
       this.authRequestOptionsService = staticAuthRequestOptionsService()
       this.authRequestUrlBuilder = authRequestUrlBuilder()
+      this.setAuthenticationSuccessHandler(ltiAuthSuccessHandler())
       this.setFilterProcessesUrl("/lti/login")
     }
+  }
+
+  @Bean
+  fun ltiAuthSuccessHandler(): AuthenticationSuccessHandler {
+    return LtiAuthenticationSuccessHandler("/lti/launch")
   }
 
   @Bean
@@ -79,6 +87,7 @@ class LtiSecurityConfiguration(
       throw RuntimeException("Provided keystore does not exist: ${keyStore.description}")
     }
 
+    // construct a key store from configuration that contains all public and private keys
     val ks = KeyStore.getInstance(config.keyStoreType)
     ks.load(keyStore.inputStream, config.keyStorePassword?.toCharArray())
     return DefaultJWTSigningAndValidationService(config.providers.map {
