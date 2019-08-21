@@ -15,4 +15,6 @@ class Urls {
   fun get(task: Task) = "/tasks/" + task.shortId
 
   fun get(assignment: Assignment) = "/assignments/" + assignment.shortId
+
+  fun getLtiLaunch(assignment: Assignment) = "/lti/launch/${assignment.shortId}"
 }

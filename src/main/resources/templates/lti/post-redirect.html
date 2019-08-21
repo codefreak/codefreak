@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/embedded}">
+<head>
+  <title>Redirecting...</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <form th:action="${redirect_url}" method="post" id="redirect-form">
+    <input type="hidden" th:each="field : ${fields}" th:name="${field.key}" th:value="${field.value}">
+    <noscript>
+      <input type="submit" value="Click here to continue" class="btn btn-primary">
+    </noscript>
+  </form>
+</div>
+<div layout:fragment="scripts">
+  <script>
+      document.getElementById("redirect-form").submit();
+  </script>
+</div>
+</body>
+</html>

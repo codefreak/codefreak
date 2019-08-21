@@ -94,6 +94,7 @@ class LtiSecurityConfiguration(
       it.issuer to JWK.load(ks, it.keyStoreEntryName, it.keyStoreEntryPin.toCharArray())
     }.toMap()).apply {
       this.defaultSignerKeyId = config.providers.first().issuer
+      this.defaultSigningAlgorithmName = "RS256"
     }
   }
 
