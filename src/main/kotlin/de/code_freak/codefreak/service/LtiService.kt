@@ -36,7 +36,7 @@ class LtiService {
   fun findCachedJwtClaimsSet(id: UUID) = cachedJwtClaimsSetRepository.findById(id)
       .orElseThrow {
         EntityNotFoundException("JWT could not be found")
-      }.jwtClaimSet
+      }.jwtClaimsSet
 
   fun cacheJwtClaimsSet(claimsSet: JWTClaimsSet): UUID = cachedJwtClaimsSetRepository.save(
       CachedJwtClaimsSet(claimsSet)

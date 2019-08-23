@@ -36,7 +36,7 @@ class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
   @Autowired(required = false)
   var httpClient: HttpClient? = null
 
-  private lateinit var restClient: RestTemplate
+  lateinit var restClient: RestTemplate
 
   @Autowired
   lateinit var authenticationSignerService: JWTSigningAndValidationService
