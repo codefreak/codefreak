@@ -42,7 +42,7 @@ class TaskController : BaseController() {
     @PathVariable("taskId") taskId: UUID,
     model: Model
   ): String {
-    val submission = getSubmissionForTask(taskId)
+    val submission = getOrCreateSubmissionForTask(taskId)
     // start a container based on the submission for the current task
     val answer = submission.getAnswerForTask(taskId)!!
     containerService.startIdeContainer(answer)
@@ -56,7 +56,7 @@ class TaskController : BaseController() {
   fun createAnswer(
     @PathVariable("taskId") taskId: UUID
   ): String {
-    val submission = getSubmissionForTask(taskId)
+    val submission = getOrCreateSubmissionForTask(taskId)
     containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
     val assignment = taskService.findTask(taskId).assignment
     return "redirect:${urls.get(assignment)}"
@@ -68,7 +68,7 @@ class TaskController : BaseController() {
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
   ): StreamingResponseBody {
-    val submission = getSubmissionForTask(taskId)
+    val submission = getOrCreateSubmissionForTask(taskId)
     val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
     response.setHeader("Content-Disposition", "attachment; filename=source.tar")
     if (fileService.collectionExists(answer.id)) {
@@ -83,7 +83,7 @@ class TaskController : BaseController() {
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
   ): StreamingResponseBody {
-    val submission = getSubmissionForTask(taskId)
+    val submission = getOrCreateSubmissionForTask(taskId)
     val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId)!!)
     response.setHeader("Content-Disposition", "attachment; filename=source.zip")
     val tar = fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId)
@@ -96,7 +96,7 @@ class TaskController : BaseController() {
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
   ): StreamingResponseBody {
-    val submission = getSubmissionForTask(taskId)
+    val submission = getOrCreateSubmissionForTask(taskId)
     val answer = submission.getAnswerForTask(taskId) ?: throw EntityNotFoundException("Answer not found")
     val filename = answer.task.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
     response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
@@ -106,8 +106,8 @@ class TaskController : BaseController() {
   /**
    * Returns the submission for the given task or creates one if there is none already.
    */
-  fun getSubmissionForTask(taskId: UUID): Submission {
+  fun getOrCreateSubmissionForTask(taskId: UUID): Submission {
     val assignmentId = taskService.findTask(taskId).assignment.id
-    return super.getSubmission(assignmentId)
+    return super.getOrCreateSubmission(assignmentId)
   }
 }

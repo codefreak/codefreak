@@ -22,7 +22,7 @@ abstract class BaseController {
   /**
    * Returns the submission for the given assignment or creates one if there is none already.
    */
-  protected fun getSubmission(assignmentId: UUID): Submission {
+  protected fun getOrCreateSubmission(assignmentId: UUID): Submission {
     return submissionService.findSubmission(assignmentId, user.id).orElseGet {
       submissionService.createNewSubmission(assignmentService.findAssignment(assignmentId), user)
     }

@@ -18,6 +18,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.core.task.TaskExecutor
 import org.springframework.core.task.SimpleAsyncTaskExecutor
 import org.springframework.batch.core.launch.support.SimpleJobLauncher
+import org.springframework.batch.core.repository.JobRepository
 
 @Configuration
 class EvaluationConfiguration {
@@ -36,9 +37,10 @@ class EvaluationConfiguration {
 
   @Bean
   @EvaluationQualifier
-  fun evaluationJobLauncher(): JobLauncher {
+  fun evaluationJobLauncher(jobRepository: JobRepository): JobLauncher {
     val jobLauncher = SimpleJobLauncher()
     jobLauncher.setTaskExecutor(SimpleAsyncTaskExecutor())
+    jobLauncher.setJobRepository(jobRepository)
     jobLauncher.afterPropertiesSet()
     return jobLauncher
   }
