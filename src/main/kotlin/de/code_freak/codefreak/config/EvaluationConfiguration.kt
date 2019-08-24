@@ -22,6 +22,12 @@ import org.springframework.batch.core.repository.JobRepository
 
 @Configuration
 class EvaluationConfiguration {
+
+  companion object {
+    const val JOB_NAME = "evaluation"
+    const val PARAM_ANSWER_ID = "answerId"
+  }
+
   @Autowired
   lateinit var config: AppConfiguration
 
@@ -62,7 +68,7 @@ class EvaluationConfiguration {
         .writer(writer)
         .build()
 
-    return jobBuilderFactory.get("evaluation")
+    return jobBuilderFactory.get(JOB_NAME)
         .incrementer(RunIdIncrementer())
         .start(step)
         .build()

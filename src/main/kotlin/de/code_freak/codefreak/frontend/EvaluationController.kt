@@ -21,6 +21,6 @@ class EvaluationController : BaseController() {
   @PostMapping("/evaluations")
   fun startEvaluation(@RequestParam("taskId") taskId: UUID) {
     val answerId = answerService.getAnswerIdForTaskId(taskId, user.id)
-    evaluationService.queueEvaluation(answerId)
+    evaluationService.startEvaluation(answerId)
   }
 }

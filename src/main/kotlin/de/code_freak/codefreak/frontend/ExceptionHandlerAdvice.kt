@@ -5,12 +5,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.http.HttpStatus
 import org.springframework.web.method.HandlerMethod
 import de.code_freak.codefreak.service.EntityNotFoundException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import java.lang.Exception
+import java.lang.IllegalStateException
 import java.util.UUID
 
 /**
@@ -24,9 +25,9 @@ class ExceptionHandlerAdvice : ResponseEntityExceptionHandler() {
     return getResponse(throwable.message, controllerMethod, HttpStatus.NOT_FOUND)
   }
 
-  @ExceptionHandler(IllegalArgumentException::class)
-  fun handleIllegalArgumentException(
-    ex: IllegalArgumentException,
+  @ExceptionHandler(IllegalArgumentException::class, IllegalStateException::class)
+  fun handleIllegalArgumentOrStateException(
+    ex: Exception,
     controllerMethod: HandlerMethod
   ): Any {
     return getResponse(ex.message, controllerMethod, HttpStatus.BAD_REQUEST)
@@ -51,11 +52,10 @@ class ExceptionHandlerAdvice : ResponseEntityExceptionHandler() {
    */
   protected fun getResponse(message: Any?, controllerMethod: HandlerMethod, status: HttpStatus): Any {
 
-    val isRestController = (controllerMethod.hasMethodAnnotation(ResponseBody::class.java) ||
-        controllerMethod.beanType.isAnnotationPresent(ResponseBody::class.java) ||
-        controllerMethod.beanType.isAnnotationPresent(RestController::class.java))
+    val isRestHandler = controllerMethod.hasMethodAnnotation(RestHandler::class.java) ||
+        controllerMethod.beanType.isAnnotationPresent(RestController::class.java)
 
-    return if (isRestController) {
+    return if (isRestHandler) {
       ResponseEntity(message, status)
     } else {
       val model = mapOf(
