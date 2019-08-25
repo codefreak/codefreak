@@ -4,10 +4,8 @@ import de.code_freak.codefreak.config.EvaluationConfiguration
 import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.repository.EvaluationRepository
 import de.code_freak.codefreak.service.BaseService
-import de.code_freak.codefreak.service.EntityNotFoundException
 import de.code_freak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
-import org.springframework.batch.core.ExitStatus
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobParameter
 import org.springframework.batch.core.JobParameters
@@ -63,7 +61,7 @@ class EvaluationService : BaseService() {
 
   fun isEvaluationRunning(answerId: UUID): Boolean {
     val id = answerId.toString()
-    for(execution in jobExplorer.findRunningJobExecutions(EvaluationConfiguration.JOB_NAME)) {
+    for (execution in jobExplorer.findRunningJobExecutions(EvaluationConfiguration.JOB_NAME)) {
       if (id == execution.jobParameters.getString(EvaluationConfiguration.PARAM_ANSWER_ID)) {
         return true
       }
