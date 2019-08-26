@@ -6,4 +6,4 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface CachedJwtClaimsSetRepository: CrudRepository<CachedJwtClaimsSet, UUID>
+interface CachedJwtClaimsSetRepository : CrudRepository<CachedJwtClaimsSet, UUID>
