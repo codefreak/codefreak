@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <!-- The above 2 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-  <meta th:name="_csrf" th:content="${_csrf.token}"/>
-  <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+  <meta th:if="${_csrf != null}" th:name="_csrf" th:content="${_csrf.token}"/>
+  <meta th:if="${_csrf != null}" th:name="_csrf_header" th:content="${_csrf.headerName}"/>
 
   <title layout:title-pattern="$LAYOUT_TITLE - $CONTENT_TITLE">Code FREAK</title>
 

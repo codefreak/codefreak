@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
 import java.util.UUID
 
 @Controller
@@ -55,8 +54,11 @@ class LtiController : BaseController() {
   }
 
   @RequestMapping("/launch/{id}")
-  @ResponseBody
-  fun launchRequest(@PathVariable("id") assignmentId: UUID): String {
-    return "TODO: Show instructions for assignment ${assignmentId}"
+  fun launchRequest(
+    @PathVariable("id") assignmentId: UUID,
+    model: Model
+  ): String {
+    model.addAttribute("assignment", assignmentService.findAssignment(assignmentId))
+    return "assignment"
   }
 }
