@@ -37,6 +37,7 @@ class LtiSecurityConfiguration(
   @Autowired appConfiguration: AppConfiguration
 ) : WebSecurityConfigurerAdapter() {
   val config = appConfiguration.lti
+  private val ltiLoginPath = "/lti/login"
 
   /**
    * Specific security configuration for the LTI part of the application
@@ -45,13 +46,15 @@ class LtiSecurityConfiguration(
     // @formatter:off
     http?.antMatcher("/lti/**")
         ?.authorizeRequests()
-            ?.antMatchers("/lti/login")?.permitAll()
+            ?.antMatchers(ltiLoginPath)?.permitAll()
             ?.anyRequest()?.authenticated()
             ?.and()
         ?.headers()?.frameOptions()?.disable()
             ?.and()
-        // LTI standards sends some POST requests from foreign sites that will not have a CSRF token
-        ?.csrf()?.disable()
+        // LTI 1.3 posts signed JWT from the LMS to Code FREAK on login which is okay
+        ?.csrf()
+            ?.ignoringAntMatchers(ltiLoginPath)
+            ?.and()
         ?.addFilterBefore(ltiAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter::class.java)
     // @formatter:on
   }
@@ -71,7 +74,7 @@ class LtiSecurityConfiguration(
       this.authRequestOptionsService = staticAuthRequestOptionsService()
       this.authRequestUrlBuilder = authRequestUrlBuilder()
       this.setAuthenticationSuccessHandler(ltiAuthSuccessHandler())
-      this.setFilterProcessesUrl("/lti/login")
+      this.setFilterProcessesUrl(ltiLoginPath)
     }
   }
 
