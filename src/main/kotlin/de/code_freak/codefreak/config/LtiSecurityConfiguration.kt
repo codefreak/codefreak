@@ -49,7 +49,12 @@ class LtiSecurityConfiguration(
             ?.antMatchers(ltiLoginPath)?.permitAll()
             ?.anyRequest()?.authenticated()
             ?.and()
-        ?.headers()?.frameOptions()?.disable()
+        // Allow all LTI platforms to embed our content via CSP
+        ?.headers()
+            ?.frameOptions()?.disable()
+            ?.contentSecurityPolicy(
+                "frame-ancestors 'self' " + config.providers.map { provider -> provider.issuer }.joinToString(" ")
+            )?.and()
             ?.and()
         // LTI 1.3 posts signed JWT from the LMS to Code FREAK on login which is okay
         ?.csrf()
