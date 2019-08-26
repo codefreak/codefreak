@@ -23,7 +23,7 @@ spring:
   datasource:
     url: "jdbc:postgresql://[host]:[port]/database"
     username: user
-    pasword: supersecure
+    password: supersecure
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

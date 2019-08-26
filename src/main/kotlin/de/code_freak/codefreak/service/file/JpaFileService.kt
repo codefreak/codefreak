@@ -6,6 +6,7 @@ import de.code_freak.codefreak.service.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
+import org.springframework.util.DigestUtils
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -29,10 +30,11 @@ class JpaFileService : FileService {
     }
   }
 
+  protected fun getCollection(collectionId: UUID): FileCollection = fileCollectionRepository.findById(collectionId)
+      .orElseThrow { EntityNotFoundException("File not found") }
+
   override fun readCollectionTar(collectionId: UUID): InputStream {
-    val collection = fileCollectionRepository.findById(collectionId)
-        .orElseThrow { EntityNotFoundException("File not found") }
-    return ByteArrayInputStream(collection.tar)
+    return ByteArrayInputStream(getCollection(collectionId).tar)
   }
 
   override fun collectionExists(collectionId: UUID): Boolean {
@@ -41,5 +43,9 @@ class JpaFileService : FileService {
 
   override fun deleteCollection(collectionId: UUID) {
     fileCollectionRepository.deleteById(collectionId)
+  }
+
+  override fun getCollectionMd5Digest(collectionId: UUID): ByteArray {
+    return DigestUtils.md5Digest(getCollection(collectionId).tar)
   }
 }

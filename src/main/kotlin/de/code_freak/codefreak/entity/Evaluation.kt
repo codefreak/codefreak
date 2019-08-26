@@ -1,5 +1,8 @@
 package de.code_freak.codefreak.entity
 
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.Type
+import java.time.Instant
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 
@@ -11,14 +14,15 @@ class Evaluation(
   @ManyToOne
   var answer: Answer,
 
-  /**
-   * Link to the requirement that has been used to evaluate the answer
-   */
-  @ManyToOne
-  var requirement: Requirement,
+  @Type(type = "image")
+  var filesDigest: ByteArray,
 
   /**
    * The result value that was determined by checking the requirements
    */
-  var result: Long
-) : BaseEntity()
+  var result: Long?
+) : BaseEntity() {
+
+  @CreationTimestamp
+  var createdAt: Instant = Instant.now()
+}

@@ -1,7 +1,9 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.LatexService
+import de.code_freak.codefreak.service.evaluation.EvaluationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
@@ -19,6 +21,12 @@ class AssignmentController : BaseController() {
   @Autowired
   lateinit var latexService: LatexService
 
+  @Autowired
+  lateinit var answerService: AnswerService
+
+  @Autowired
+  lateinit var evaluationService: EvaluationService
+
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
     model.addAttribute("assignments", assignmentService.findAllAssignments())
@@ -30,7 +38,11 @@ class AssignmentController : BaseController() {
     @PathVariable("id") assignmentId: UUID,
     model: Model
   ): String {
-    model.addAttribute("assignment", assignmentService.findAssignment(assignmentId))
+    val assignment = assignmentService.findAssignment(assignmentId)
+    val answerIds = answerService.getAnswerIdsForTaskIds(assignment.tasks.map { it.id }, user.id)
+    val latestEvaluations = evaluationService.getLatestEvaluations(answerIds.values)
+    model.addAttribute("assignment", assignment)
+    model.addAttribute("latestEvaluations", answerIds.mapValues { latestEvaluations[it.value] })
     return "assignment"
   }
 
@@ -50,7 +62,7 @@ class AssignmentController : BaseController() {
     @PathVariable("assignmentId") assignmentId: UUID,
     response: HttpServletResponse
   ): StreamingResponseBody {
-    val submission = getSubmission(assignmentId)
+    val submission = getOrCreateSubmission(assignmentId)
     val filename = submission.assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
     response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
     return StreamingResponseBody { latexService.submissionToPdf(submission, it) }
