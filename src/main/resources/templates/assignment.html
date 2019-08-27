@@ -12,12 +12,16 @@
   <a class="btn btn-primary" th:href="@{${@urls.get(assignment)} + '/submission.pdf'}" target="_blank">
     <i class="far fa-file-pdf"></i> Download all your answers as PDF</a>
 
-  <div class="card mt-4" th:each="task : ${assignment.tasks}" th:with="latestEvaluation=${latestEvaluations.get(task.id)}">
+  <div class="alert alert-warning mt-4" th:if="${!canStartNewIdeContainer}">
+    Currently, no new online IDEs can be started because of server capacity limits.
+  </div>
+
+  <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task},noIde=${!taskInfo.ideRunning && !canStartNewIdeContainer}">
     <div class="card-body">
       <h3 class="card-title" th:text="|${task.number}. ${task.title}|"/>
       <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
 
-      <a class="btn btn-primary" th:href="@{${@urls.get(task)} + '/ide'}" target="_blank">
+      <a class="btn btn-primary" th:href="@{${@urls.get(task)} + '/ide'}" target="_blank" th:classappend="${!taskInfo.ideRunning && !canStartNewIdeContainer ? 'disabled' : ''}">
         <i class="far fa-edit"></i> Open in Editor
       </a>
       <div style="display: inline-block;">
@@ -38,7 +42,7 @@
         <button class="btn btn-primary"><i class="far fa-save"></i> Save Answer</a></button>
       </form>
       <br>
-      Last evaluation: <span th:text="${latestEvaluation != null && latestEvaluation.isPresent() ? latestEvaluation.get().createdAt : '(none)'}"></span>
+      Last evaluation: <span th:text="${taskInfo.latestEvaluation != null ? taskInfo.latestEvaluation.createdAt : '(none)'}"></span>
       <button class="btn btn-primary start-evaluation" th:attr="data-task-id=${@urls.getShortId(task.id)}"><i class="fas fa-play"></i> Start Evaluation</a></button>
     </div>
   </div>

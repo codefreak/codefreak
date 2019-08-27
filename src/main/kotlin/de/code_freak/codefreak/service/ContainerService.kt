@@ -119,19 +119,31 @@ class ContainerService : BaseService() {
    * Start an IDE container for the given submission and returns the container ID
    * If there is already a container for the submission it will be used instead
    */
+  @Synchronized
   fun startIdeContainer(answer: Answer) {
     // either take existing container or create a new one
     var containerId = this.getIdeContainer(answer)
+    if (containerId != null && isContainerRunning(containerId)) {
+      return
+    }
+
+    if (!canStartNewIdeContainer()) {
+      throw IllegalStateException("Cannot start new IDE. Maximum capacity reached.")
+    }
+
     if (containerId == null) {
       containerId = this.createIdeContainer(answer)
       docker.startContainer(containerId)
       // prepare the environment after the container has started
       this.prepareIdeContainer(containerId, answer)
-    } else if (!isContainerRunning(containerId)) {
+    } else {
       // make sure the container is running. Also existing ones could have been stopped
       docker.startContainer(containerId)
     }
   }
+
+  fun canStartNewIdeContainer(): Boolean = config.ide.maxContainers < 0
+      || getContainersWithLabel(LABEL_ANSWER_ID).size <  config.ide.maxContainers
 
   /**
    * Run a command as root inside container and return the result as string
@@ -156,19 +168,28 @@ class ContainerService : BaseService() {
     return "${config.traefik.url}/ide/$answerId/"
   }
 
-  /**
-   * Try to find an existing container for the given submission
-   */
-  protected fun getIdeContainer(answer: Answer): String? {
-    return getContainerWithLabel(LABEL_ANSWER_ID, answer.id.toString())
+  fun isIdeContainerRunning(answerId: UUID): Boolean {
+    return getIdeContainer(answerId)?.let { isContainerRunning(it) } ?: false
   }
 
-  protected fun getContainerWithLabel(label: String, value: String): String? {
+  protected fun getIdeContainer(answer: Answer): String? {
+    return getIdeContainer(answer.id)
+  }
+
+  protected fun getIdeContainer(answerId: UUID): String? {
+    return getContainerWithLabel(LABEL_ANSWER_ID, answerId.toString())
+  }
+
+  protected fun getContainerWithLabel(label: String, value: String? = null): String? {
+    return getContainersWithLabel(label, value).firstOrNull()
+  }
+
+  protected fun getContainersWithLabel(label: String, value: String? = null): List<String> {
     return docker.listContainers(
         DockerClient.ListContainersParam.withLabel(label, value),
         DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, config.instanceId),
         DockerClient.ListContainersParam.limitContainers(1)
-    ).firstOrNull()?.id()
+    ).map { it.id() }
   }
 
   @Transactional
