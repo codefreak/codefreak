@@ -13,7 +13,7 @@
     <i class="far fa-file-pdf"></i> Download all your answers as PDF</a>
 
   <div class="alert alert-warning mt-4" th:if="${!canStartNewIdeContainer}">
-    Currently, no new online IDEs can be started because of server capacity limits.
+    Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
   </div>
 
   <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task},noIde=${!taskInfo.ideRunning && !canStartNewIdeContainer}">
