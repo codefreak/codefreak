@@ -30,6 +30,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity?) {
     http
         ?.authorizeRequests()
+            ?.antMatchers("/static/**")?.permitAll()
             ?.anyRequest()?.authenticated()
         ?.and()
             ?.formLogin()

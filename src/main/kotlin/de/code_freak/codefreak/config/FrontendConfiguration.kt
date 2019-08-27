@@ -8,7 +8,9 @@ import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.format.FormatterRegistry
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.servlet.resource.PathResourceResolver
 import java.util.concurrent.Executors
 
 @Configuration
@@ -31,5 +33,14 @@ class FrontendConfiguration : WebMvcConfigurer {
   @Bean
   fun asyncTaskExecutor(): AsyncTaskExecutor {
     return ConcurrentTaskExecutor(Executors.newFixedThreadPool(5))
+  }
+
+  override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+    registry
+        .addResourceHandler("/static/**")
+        .addResourceLocations("classpath:/static/")
+        .setCachePeriod(3600)
+        .resourceChain(true)
+        .addResolver(PathResourceResolver())
   }
 }
