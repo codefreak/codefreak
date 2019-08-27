@@ -142,8 +142,8 @@ class ContainerService : BaseService() {
     }
   }
 
-  fun canStartNewIdeContainer(): Boolean = config.ide.maxContainers < 0
-      || getContainersWithLabel(LABEL_ANSWER_ID).size <  config.ide.maxContainers
+  fun canStartNewIdeContainer(): Boolean = config.ide.maxContainers < 0 ||
+      getContainersWithLabel(LABEL_ANSWER_ID).size < config.ide.maxContainers
 
   /**
    * Run a command as root inside container and return the result as string

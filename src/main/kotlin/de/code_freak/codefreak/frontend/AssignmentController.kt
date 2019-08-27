@@ -52,9 +52,9 @@ class AssignmentController : BaseController() {
     val taskInfos = assignment.tasks.map {
       val answerId = answerIds[it.id]
       TaskInfo(
-        task = it,
-        latestEvaluation = if (answerId == null) null else latestEvaluations[answerId]?.orElse(null),
-        ideRunning = answerId != null && containerService.isIdeContainerRunning(answerId)
+          task = it,
+          latestEvaluation = if (answerId == null) null else latestEvaluations[answerId]?.orElse(null),
+          ideRunning = answerId != null && containerService.isIdeContainerRunning(answerId)
       ) }
     model.addAttribute("assignment", assignment)
     model.addAttribute("taskInfos", taskInfos)
