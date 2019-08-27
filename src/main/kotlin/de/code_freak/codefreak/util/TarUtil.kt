@@ -36,7 +36,7 @@ object TarUtil {
   @Throws(IOException::class)
   fun checkValidTar(`in`: InputStream) {
     val tar = TarArchiveInputStream(`in`)
-    generateSequence { tar.nextTarEntry }.forEach {_ -> /** Do nothing, just throw on error. */ }
+    generateSequence { tar.nextTarEntry }.forEach { _ -> /** Do nothing, just throw on error. */ }
   }
 
   fun createTarFromDirectory(file: File, out: OutputStream) {

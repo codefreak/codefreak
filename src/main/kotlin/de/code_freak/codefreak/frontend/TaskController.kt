@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.io.IOException
 import java.lang.IllegalArgumentException
 import java.util.UUID
@@ -95,24 +96,29 @@ class TaskController : BaseController() {
   }
 
   @PostMapping("/tasks/{taskId}/source")
-  fun uploadSource(@PathVariable("taskId") taskId: UUID, @RequestParam("file") file: MultipartFile): String {
+  fun uploadSource(
+    @PathVariable("taskId") taskId: UUID,
+    @RequestParam("file") file: MultipartFile,
+    model: RedirectAttributes
+  ): String {
     val submission = getOrCreateSubmissionForTask(taskId)
-    val answerId = submission.getAnswerForTask(taskId).id
+    val answer = submission.getAnswerForTask(taskId)
     val filename = file.originalFilename ?: ""
     try {
       when {
         filename.endsWith(".tar", true) -> {
           file.inputStream.use { TarUtil.checkValidTar(it) }
-          file.inputStream.use { fileService.writeCollectionTar(answerId).use { out -> StreamUtils.copy(it, out) } }
+          file.inputStream.use { fileService.writeCollectionTar(answer.id).use { out -> StreamUtils.copy(it, out) } }
         }
         filename.endsWith(".zip", true) -> {
-          file.inputStream.use { fileService.writeCollectionTar(answerId).use { out -> TarUtil.zipToTar(it, out) } }
+          file.inputStream.use { fileService.writeCollectionTar(answer.id).use { out -> TarUtil.zipToTar(it, out) } }
         }
         else -> throw IllegalArgumentException("Unsupported file format")
       }
     } catch (e: IOException) {
       throw IllegalArgumentException("File could not be processed")
     }
+    model.addFlashAttribute("successMessage", "Successfully uploaded source for task '${answer.task.title}'.")
     return "redirect:" + urls.get(submission.assignment)
   }
 
