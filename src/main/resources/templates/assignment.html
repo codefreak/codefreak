@@ -35,7 +35,14 @@
       <br><br>
       <form th:action="@{${@urls.get(task)} + '/answers'}" method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <button class="btn btn-primary"><i class="far fa-save"></i> Save Answer</a></button>
+        <button class="btn btn-primary"><i class="far fa-save"></i> Save Answer</button>
+      </form>
+      <br>
+      <form th:action="@{${@urls.get(task)} + '/source'}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="file" name="file" />
+        <button class="btn btn-primary"><i class="fas fa-upload"></i> Upload Source</button>
+        (Supported formats: .tar, .zip)
       </form>
       <br>
       Last evaluation: <span th:text="${latestEvaluation != null && latestEvaluation.isPresent() ? latestEvaluation.get().createdAt : '(none)'}"></span>

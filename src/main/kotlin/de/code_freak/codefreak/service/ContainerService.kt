@@ -173,7 +173,7 @@ class ContainerService : BaseService() {
 
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
-    val containerId = getIdeContainer(answer) ?: throw IllegalArgumentException()
+    val containerId = getIdeContainer(answer) ?: return answer
     docker.archiveContainer(containerId, "$PROJECT_PATH/.").use { tar ->
       fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
     }
