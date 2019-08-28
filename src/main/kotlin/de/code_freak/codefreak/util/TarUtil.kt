@@ -4,6 +4,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
 import java.io.BufferedInputStream
@@ -30,6 +31,12 @@ object TarUtil {
       // octal 100 = dec 64
       outFile.setExecutable((entry.mode and 64) == 64)
     }
+  }
+
+  @Throws(IOException::class)
+  fun checkValidTar(`in`: InputStream) {
+    val tar = TarArchiveInputStream(`in`)
+    generateSequence { tar.nextTarEntry }.forEach { _ -> /** Do nothing, just throw on error. */ }
   }
 
   fun createTarFromDirectory(file: File, out: OutputStream) {
@@ -81,6 +88,23 @@ object TarUtil {
       zip.closeArchiveEntry()
     }
     zip.finish()
+  }
+
+  fun zipToTar(`in`: InputStream, out: OutputStream) {
+    val zip = ZipArchiveInputStream(`in`)
+    val tar = TarArchiveOutputStream(out)
+    generateSequence { zip.nextZipEntry }.forEach { zipEntry ->
+      val tarEntry = TarArchiveEntry(normalizeEntryName(zipEntry.name))
+      if (zipEntry.isDirectory) {
+        tar.putArchiveEntry(tarEntry)
+      } else {
+        tarEntry.size = zipEntry.size
+        tar.putArchiveEntry(tarEntry)
+        IOUtils.copy(zip, tar)
+      }
+      tar.closeArchiveEntry()
+    }
+    tar.finish()
   }
 
   private fun normalizeEntryName(name: String): String {
