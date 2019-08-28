@@ -132,10 +132,10 @@ class AppConfiguration {
       @NotBlank var keyStoreEntryName: String? = null
       var keyStoreEntryPin = ""
     }
+  }
 
   class Evaluation {
     var maxConcurrentExecutions = 5
     var maxQueueSize = 1000
-
   }
 }
