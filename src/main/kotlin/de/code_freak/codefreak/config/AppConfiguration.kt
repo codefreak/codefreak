@@ -29,7 +29,6 @@ class AppConfiguration {
   val lti = Lti()
   val evalutaion = Evaluation()
 
-
   class Frontend {
     /**
      * This can be used to inject custom javascript code (needs to include script tags).
