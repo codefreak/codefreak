@@ -15,8 +15,9 @@
   <div class="alert alert-warning mt-4" th:if="${!canStartNewIdeContainer}">
     Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
   </div>
+  <div class="alert alert-success mt-4" th:if="${successMessage != null}" th:text="${successMessage}"></div>
 
-  <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task},noIde=${!taskInfo.ideRunning && !canStartNewIdeContainer}">
+  <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task}">
     <div class="card-body">
       <h3 class="card-title" th:text="|${task.number}. ${task.title}|"/>
       <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
@@ -39,7 +40,14 @@
       <br><br>
       <form th:action="@{${@urls.get(task)} + '/answers'}" method="post">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <button class="btn btn-primary"><i class="far fa-save"></i> Save Answer</a></button>
+        <button class="btn btn-primary"><i class="far fa-save"></i> Save Answer</button>
+      </form>
+      <br>
+      <form th:action="@{${@urls.get(task)} + '/source'}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="file" name="file" />
+        <button class="btn btn-primary"><i class="fas fa-upload"></i> Upload Source</button>
+        (Supported formats: .tar, .zip)
       </form>
       <br>
       Last evaluation: <span th:text="${taskInfo.latestEvaluation != null ? taskInfo.latestEvaluation.createdAt : '(none)'}"></span>
