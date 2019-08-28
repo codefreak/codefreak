@@ -33,6 +33,7 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-security'
   implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
   implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-batch'
   implementation 'org.springframework.security:spring-security-ldap'
   implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:2.3.0'
   implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
@@ -57,9 +58,10 @@ dependencies {
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.hsqldb:hsqldb'
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'org.springframework.batch:spring-batch-test'
   testImplementation 'org.springframework.security:spring-security-test'
   testImplementation 'org.hamcrest:hamcrest:2.1'
-  testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
+  testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0'
 
   // workaround for https://github.com/spotify/docker-client/issues/1030
   implementation 'org.glassfish.jersey.inject:jersey-hk2:2.26'

@@ -27,6 +27,8 @@ class AppConfiguration {
   val ldap = Ldap()
   val files = Files()
   val lti = Lti()
+  val evalutaion = Evaluation()
+
 
   class Frontend {
     /**
@@ -130,5 +132,10 @@ class AppConfiguration {
       @NotBlank var keyStoreEntryName: String? = null
       var keyStoreEntryPin = ""
     }
+
+  class Evaluation {
+    var maxConcurrentExecutions = 5
+    var maxQueueSize = 1000
+
   }
 }
