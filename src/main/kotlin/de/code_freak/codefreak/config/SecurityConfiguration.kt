@@ -5,6 +5,7 @@ import de.code_freak.codefreak.auth.DevUserDetailsService
 import de.code_freak.codefreak.auth.LdapUserDetailsContextMapper
 import de.code_freak.codefreak.util.withTrailingSlash
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
@@ -30,7 +31,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity?) {
     http
         ?.authorizeRequests()
-            ?.antMatchers("/static/**")?.permitAll()
+            ?.requestMatchers(PathRequest.toStaticResources().atCommonLocations())?.permitAll()
             ?.anyRequest()?.authenticated()
         ?.and()
             ?.formLogin()

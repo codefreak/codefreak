@@ -177,7 +177,7 @@ Please replace `[code-freak-url]` with the public accessible URL of your Code FR
 |`[code-freak-url]/lti/select-content`
 
 |Icon URL
-|`[code-freak-url]/static/img/lti-code-icon.png`
+|`[code-freak-url]/images/lti-code-icon.png`
 |===
 
 The LMS should generate a Client ID for you. Please write it down for the next step.
