@@ -3,6 +3,7 @@ package de.code_freak.codefreak.frontend
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.LatexService
+import de.code_freak.codefreak.service.ResourceLimitException
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.FrontendUtil
@@ -43,14 +44,20 @@ class TaskController : BaseController() {
   lateinit var urls: Urls
 
   @GetMapping("/tasks/{taskId}/ide")
-  fun getAssignmentIde(
+  fun getOrStartIde(
     @PathVariable("taskId") taskId: UUID,
+    redirectAttributes: RedirectAttributes,
     model: Model
   ): String {
     val submission = getOrCreateSubmissionForTask(taskId)
     // start a container based on the submission for the current task
     val answer = submission.getAnswerForTask(taskId)
-    containerService.startIdeContainer(answer)
+    try {
+      containerService.startIdeContainer(answer)
+    } catch (e: ResourceLimitException) {
+      redirectAttributes.addFlashAttribute("ideCouldNotBeStarted", true)
+      return "redirect:" + urls.get(submission.assignment)
+    }
     val containerUrl = containerService.getIdeUrl(answer.id)
 
     model.addAttribute("ide_url", containerUrl)

@@ -12,7 +12,7 @@
   <a class="btn btn-primary" th:href="@{${@urls.get(assignment)} + '/submission.pdf'}" target="_blank">
     <i class="far fa-file-pdf"></i> Download all your answers as PDF</a>
 
-  <div class="alert alert-warning mt-4" th:if="${!canStartNewIdeContainer}">
+  <div class="alert alert-warning mt-4" th:if="${#bools.isTrue(ideCouldNotBeStarted) || !canStartNewIdeContainer}">
     Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
   </div>
   <div class="alert alert-success mt-4" th:if="${successMessage != null}" th:text="${successMessage}"></div>

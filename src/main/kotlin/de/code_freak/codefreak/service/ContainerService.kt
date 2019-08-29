@@ -120,6 +120,7 @@ class ContainerService : BaseService() {
    * If there is already a container for the submission it will be used instead
    */
   @Synchronized
+  @Throws(ResourceLimitException::class)
   fun startIdeContainer(answer: Answer) {
     // either take existing container or create a new one
     var containerId = this.getIdeContainer(answer)
@@ -128,7 +129,7 @@ class ContainerService : BaseService() {
     }
 
     if (!canStartNewIdeContainer()) {
-      throw IllegalStateException("Cannot start new IDE. Maximum capacity reached.")
+      throw ResourceLimitException("Cannot start new IDE. Maximum capacity reached.")
     }
 
     if (containerId == null) {
