@@ -233,7 +233,10 @@ class ContainerService : BaseService() {
   }
 
   fun answerFilesUpdated(answerId: UUID) {
-    getIdeContainer(answerId)?.let { copyFilesToIde(it, answerId) }
+    getIdeContainer(answerId)?.let {
+      exec(it, arrayOf("rm", "-rf", "$PROJECT_PATH/{*,.*}"))
+      copyFilesToIde(it, answerId)
+    }
   }
 
   protected fun isContainerRunning(containerId: String): Boolean = docker.inspectContainer(containerId).state().running()
