@@ -6,7 +6,6 @@ import de.code_freak.codefreak.util.afterClose
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.util.StreamUtils
-import sun.misc.IOUtils
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
