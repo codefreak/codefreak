@@ -5,14 +5,12 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.CachedJwtClaimsSet
-import de.code_freak.codefreak.frontend.Urls
 import de.code_freak.codefreak.repository.CachedJwtClaimsSetRepository
 import net.minidev.json.JSONArray
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.Date
 import java.util.UUID
 
@@ -32,9 +30,6 @@ class LtiService {
   @Autowired
   lateinit var cachedJwtClaimsSetRepository: CachedJwtClaimsSetRepository
 
-  @Autowired
-  lateinit var frontendUrls: Urls
-
   fun findCachedJwtClaimsSet(id: UUID) = cachedJwtClaimsSetRepository.findById(id)
       .orElseThrow {
         EntityNotFoundException("JWT could not be found")
@@ -49,17 +44,14 @@ class LtiService {
   /**
    * Create a LTIDeepLinkingResponse JWT that links to an assignment
    */
-  fun buildDeepLinkingResponse(requestJwt: JWTClaimsSet, assignment: Assignment): SignedJWT {
+  fun buildDeepLinkingResponse(requestJwt: JWTClaimsSet, assignment: Assignment, launchUrl: String): SignedJWT {
     val jwsAlgorithm = signingAndValidationService.defaultSigningAlgorithm
     val contentItems = JSONArray()
-    val contentItemUrl = ServletUriComponentsBuilder.fromCurrentRequestUri()
-        .replacePath(frontendUrls.getLtiLaunch(assignment))
-        .toUriString()
     contentItems.appendElement(
         mapOf(
             "type" to "link",
             "title" to "${assignment.title} (Code FREAK)",
-            "url" to contentItemUrl,
+            "launchUrl" to launchUrl,
             "window" to mapOf(
                 "targetName" to "code-freak-${assignment.id}"
             )

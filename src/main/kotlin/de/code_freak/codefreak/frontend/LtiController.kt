@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.UUID
 
 @Controller
@@ -18,6 +19,9 @@ import java.util.UUID
 class LtiController : BaseController() {
   @Autowired
   lateinit var ltiService: LtiService
+
+  @Autowired
+  lateinit var urls: Urls
 
   /**
    * Responsible for LTI Deep Linking requests
@@ -43,7 +47,10 @@ class LtiController : BaseController() {
   ): String {
     val requestJwt = ltiService.findCachedJwtClaimsSet(cachedJwtId)
     val assignment = assignmentService.findAssignment(selectedAssignmentId)
-    val responseJwt = ltiService.buildDeepLinkingResponse(requestJwt, assignment)
+    val launchUrl = ServletUriComponentsBuilder.fromCurrentRequestUri()
+        .replacePath(urls.getLtiLaunch(assignment))
+        .toUriString()
+    val responseJwt = ltiService.buildDeepLinkingResponse(requestJwt, assignment, launchUrl)
     ltiService.removeCachedJwtClaimSet(cachedJwtId)
     model.addAttribute(
         "redirect_url",
