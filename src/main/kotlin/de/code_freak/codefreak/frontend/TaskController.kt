@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.entity.Submission
+import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.ResourceLimitException
@@ -11,7 +12,6 @@ import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.util.StreamUtils
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -30,6 +30,9 @@ class TaskController : BaseController() {
 
   @Autowired
   lateinit var taskService: TaskService
+
+  @Autowired
+  lateinit var answerService: AnswerService
 
   @Autowired
   lateinit var containerService: ContainerService
@@ -115,10 +118,10 @@ class TaskController : BaseController() {
       when {
         filename.endsWith(".tar", true) -> {
           file.inputStream.use { TarUtil.checkValidTar(it) }
-          file.inputStream.use { fileService.writeCollectionTar(answer.id).use { out -> StreamUtils.copy(it, out) } }
+          file.inputStream.use { answerService.setFiles(answer.id, it) }
         }
         filename.endsWith(".zip", true) -> {
-          file.inputStream.use { fileService.writeCollectionTar(answer.id).use { out -> TarUtil.zipToTar(it, out) } }
+          file.inputStream.use { answerService.setFiles(answer.id).use { out -> TarUtil.zipToTar(it, out) } }
         }
         else -> throw IllegalArgumentException("Unsupported file format")
       }
