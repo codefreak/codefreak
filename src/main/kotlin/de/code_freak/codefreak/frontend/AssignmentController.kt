@@ -1,7 +1,10 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.entity.Evaluation
+import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.service.AnswerService
+import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +30,11 @@ class AssignmentController : BaseController() {
   @Autowired
   lateinit var evaluationService: EvaluationService
 
+  @Autowired
+  lateinit var containerService: ContainerService
+
+  data class TaskInfo(val task: Task, val latestEvaluation: Evaluation?, val ideRunning: Boolean)
+
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
     model.addAttribute("assignments", assignmentService.findAllAssignments())
@@ -41,8 +49,17 @@ class AssignmentController : BaseController() {
     val assignment = assignmentService.findAssignment(assignmentId)
     val answerIds = answerService.getAnswerIdsForTaskIds(assignment.tasks.map { it.id }, user.id)
     val latestEvaluations = evaluationService.getLatestEvaluations(answerIds.values)
+    val taskInfos = assignment.tasks.map {
+      val answerId = answerIds[it.id]
+      TaskInfo(
+          task = it,
+          latestEvaluation = if (answerId == null) null else latestEvaluations[answerId]?.orElse(null),
+          ideRunning = answerId != null && containerService.isIdeContainerRunning(answerId)
+      ) }
     model.addAttribute("assignment", assignment)
-    model.addAttribute("latestEvaluations", answerIds.mapValues { latestEvaluations[it.value] })
+    model.addAttribute("taskInfos", taskInfos)
+    model.addAttribute("canStartNewIdeContainer", containerService.canStartNewIdeContainer())
+    model.addAttribute("needsNewIdeContainer", taskInfos.any { taskInfo -> !taskInfo.ideRunning })
     return "assignment"
   }
 

@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream
 import java.util.UUID
 import com.nhaarman.mockitokotlin2.eq
 import org.hamcrest.Matchers.greaterThan
+import org.junit.Ignore
 import org.springframework.boot.test.mock.mockito.MockBean
 
 internal class ContainerServiceTest : SpringTest() {
@@ -108,6 +109,7 @@ internal class ContainerServiceTest : SpringTest() {
   }
 
   @Test
+  @Ignore("Disabled until #138 is fixed")
   fun `idle containers are shut down automatically`() {
     containerService.startIdeContainer(answer)
     Thread.sleep(10000)

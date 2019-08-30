@@ -26,7 +26,7 @@ class Submission(
   var answers: MutableSet<Answer> = mutableSetOf()
 
   /**
-   * Get the answer for the given task id or null if there is no submission (yet)
+   * Get the answer for the given task id
    */
-  fun getAnswerForTask(taskId: UUID) = answers.firstOrNull { answer -> answer.task.id == taskId }
+  fun getAnswerForTask(taskId: UUID) = answers.first { answer -> answer.task.id == taskId }
 }
