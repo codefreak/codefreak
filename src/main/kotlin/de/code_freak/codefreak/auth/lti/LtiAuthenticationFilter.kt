@@ -271,15 +271,10 @@ class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
 
         val storedNonce = getStoredNonce(session)
         if (nonce != storedNonce) {
-          logger.error(
-              "Possible replay attack detected! The comparison of the nonce in the returned " +
-                  "ID Token to the session " + NONCE_SESSION_VARIABLE + " failed. Expected " + storedNonce + " got " + nonce + "."
-          )
-
-          throw AuthenticationServiceException(
-              ("Possible replay attack detected! The comparison of the nonce in the returned " +
-                  "ID Token to the session " + NONCE_SESSION_VARIABLE + " failed. Expected " + storedNonce + " got " + nonce + ".")
-          )
+          val message = "Possible replay attack detected! The comparison of the nonce in the returned ID Token to the session " +
+              "$NONCE_SESSION_VARIABLE failed. Expected $storedNonce got $nonce."
+          logger.warn(message)
+          throw AuthenticationServiceException(message)
         }
 
         // remove stored redirect URI so we can decide on a redirect URL in our own success handler
