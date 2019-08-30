@@ -19,6 +19,10 @@ spring:
       enabled: false
     initialize-schema: always
   data.ldap.repositories.enabled: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 logging:
   level:
@@ -26,7 +30,6 @@ logging:
     org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: WARN
     # Hide log spam of docker pull progress
     com.spotify.docker.client.LoggingPullHandler: WARN
-
 
 server:
   servlet:
