@@ -59,6 +59,7 @@ class AssignmentController : BaseController() {
     model.addAttribute("assignment", assignment)
     model.addAttribute("taskInfos", taskInfos)
     model.addAttribute("canStartNewIdeContainer", containerService.canStartNewIdeContainer())
+    model.addAttribute("needsNewIdeContainer", taskInfos.any { taskInfo -> !taskInfo.ideRunning })
     return "assignment"
   }
 
