@@ -121,12 +121,12 @@ class ContainerService : BaseService() {
    */
   fun startIdeContainer(answer: Answer) {
     // either take existing container or create a new one
-    var containerId = this.getIdeContainer(answer)
+    var containerId = this.getIdeContainer(answer.id)
     if (containerId == null) {
       containerId = this.createIdeContainer(answer)
       docker.startContainer(containerId)
       // prepare the environment after the container has started
-      this.prepareIdeContainer(containerId, answer)
+      this.copyFilesToIde(containerId, answer.id)
     } else if (!isContainerRunning(containerId)) {
       // make sure the container is running. Also existing ones could have been stopped
       docker.startContainer(containerId)
@@ -159,8 +159,8 @@ class ContainerService : BaseService() {
   /**
    * Try to find an existing container for the given submission
    */
-  protected fun getIdeContainer(answer: Answer): String? {
-    return getContainerWithLabel(LABEL_ANSWER_ID, answer.id.toString())
+  protected fun getIdeContainer(answerId: UUID): String? {
+    return getContainerWithLabel(LABEL_ANSWER_ID, answerId.toString())
   }
 
   protected fun getContainerWithLabel(label: String, value: String): String? {
@@ -173,7 +173,7 @@ class ContainerService : BaseService() {
 
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
-    val containerId = getIdeContainer(answer) ?: return answer
+    val containerId = getIdeContainer(answer.id) ?: return answer
     docker.archiveContainer(containerId, "$PROJECT_PATH/.").use { tar ->
       fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
     }
@@ -222,14 +222,23 @@ class ContainerService : BaseService() {
   /**
    * Prepare a running container with files and other commands like chmod, etc.
    */
-  protected fun prepareIdeContainer(containerId: String, answer: Answer) {
+  protected fun copyFilesToIde(containerId: String, answerId: UUID) {
     // extract possible existing files of the current submission into project dir
-    if (fileService.collectionExists(answer.id)) {
-      fileService.readCollectionTar(answer.id).use { docker.copyToContainer(it, containerId, PROJECT_PATH) }
+    if (fileService.collectionExists(answerId)) {
+      fileService.readCollectionTar(answerId).use { docker.copyToContainer(it, containerId, PROJECT_PATH) }
     }
 
     // change owner from root to coder so we can edit our project files
     exec(containerId, arrayOf("chown", "-R", "coder:coder", PROJECT_PATH))
+  }
+
+  fun answerFilesUpdated(answerId: UUID) {
+    getIdeContainer(answerId)?.let {
+      // use sh to make globbing work
+      // two globs: one for regular files and one for hidden files/dirs except . and ..
+      exec(it, arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*"))
+      copyFilesToIde(it, answerId)
+    }
   }
 
   protected fun isContainerRunning(containerId: String): Boolean = docker.inspectContainer(containerId).state().running()
