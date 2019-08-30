@@ -48,6 +48,9 @@ class AppConfiguration {
 
     /** Time span after which an idle container is shut down. Default 10 minutes. */
     var idleShutdownThreshold = 600000L
+
+    /** Maximum number of IDE containers that are started at the same time. Negative = unlimited. */
+    var maxContainers = -1
   }
 
   class Docker {
