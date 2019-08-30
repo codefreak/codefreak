@@ -23,7 +23,7 @@
       <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
 
       <a class="btn btn-primary" th:href="@{${@urls.get(task)} + '/ide'}" target="_blank" th:classappend="${!taskInfo.ideRunning && !canStartNewIdeContainer ? 'disabled' : ''}">
-        <i class="far fa-edit"></i> Open in Editor
+        <i class="far fa-edit"></i> Open in Editor <span th:if="${taskInfo.ideRunning}">(running)</span>
       </a>
       <div style="display: inline-block;">
         <div class="input-group" style="top: 2px; left: 3px;">
