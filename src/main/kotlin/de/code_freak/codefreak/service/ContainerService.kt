@@ -188,8 +188,7 @@ class ContainerService : BaseService() {
   protected fun getContainersWithLabel(label: String, value: String? = null): List<String> {
     return docker.listContainers(
         DockerClient.ListContainersParam.withLabel(label, value),
-        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, config.instanceId),
-        DockerClient.ListContainersParam.limitContainers(1)
+        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, config.instanceId)
     ).map { it.id() }
   }
 
