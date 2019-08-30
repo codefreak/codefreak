@@ -2,11 +2,17 @@ package de.code_freak.codefreak.config
 
 import de.code_freak.codefreak.auth.AuthenticationMethod
 import de.code_freak.codefreak.auth.Role
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
+import org.jetbrains.annotations.NotNull
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.io.Resource
+import org.springframework.validation.annotation.Validated
 
 @Configuration("config")
 @ConfigurationProperties(prefix = "code-freak")
+@Validated
 class AppConfiguration {
 
   /** Identifier of the Code FREAK instanceId. Set this if you run multiple instances on the same Docker host. */
@@ -20,6 +26,7 @@ class AppConfiguration {
   val frontend = Frontend()
   val ldap = Ldap()
   val files = Files()
+  val lti = Lti()
   val evalutaion = Evaluation()
 
   class Frontend {
@@ -107,6 +114,25 @@ class AppConfiguration {
 
     enum class FileAdapter {
       JPA
+    }
+  }
+
+  class Lti {
+    var enabled: Boolean = false
+    @NotNull var keyStore: Resource? = null
+    var keyStorePassword: String? = null
+    var keyStoreType = "jceks"
+    @NotEmpty var providers = arrayListOf<LtiProvider>()
+
+    class LtiProvider {
+      var name: String? = null
+      @NotBlank var issuer: String? = null
+      @NotBlank var clientId: String? = null
+      @NotBlank var authUrl: String? = null
+      @NotBlank var tokenUrl: String? = null
+      @NotBlank var jwkUrl: String? = null
+      @NotBlank var keyStoreEntryName: String? = null
+      var keyStoreEntryPin = ""
     }
   }
 

@@ -17,5 +17,7 @@ class Urls {
 
   fun get(assignment: Assignment) = "/assignments/" + assignment.shortId
 
+  fun getLtiLaunch(assignment: Assignment) = "/lti/launch/${assignment.shortId}"
+
   fun getShortId(id: UUID) = shortUuidBuilder.build(id).toString()
 }

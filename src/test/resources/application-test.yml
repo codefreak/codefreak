@@ -3,6 +3,18 @@ code-freak:
   ide:
     idle-check-rate: 1000
     idle-shutdown-threshold: 5000
+  lti:
+    enabled: true
+    key-store: classpath:jwt-store.jks
+    key-store-password: password
+    providers:
+      - name: LMS
+        issuer: "https://lms.example.org"
+        client-id: YDbL98xf9KDRtey
+        auth-url: "https://lms.example.org/auth"
+        token-url: "https://lms.example.org/token"
+        jwk-url: "https://lms.example.org/certs"
+        key-store-entry-name: codefreak
 
 spring.jpa.database: HSQL
 spring.jpa.hibernate.ddl-auto: update
