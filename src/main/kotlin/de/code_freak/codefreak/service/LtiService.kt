@@ -10,12 +10,14 @@ import de.code_freak.codefreak.repository.CachedJwtClaimsSetRepository
 import net.minidev.json.JSONArray
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.Date
 import java.util.UUID
 
 @Service
+@ConditionalOnProperty("code-freak.lti.enabled")
 class LtiService {
   companion object {
     const val CLAIM_DEPLOYMENT_ID = "https://purl.imsglobal.org/spec/lti/claim/deployment_id"

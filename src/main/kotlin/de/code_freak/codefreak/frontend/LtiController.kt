@@ -2,6 +2,7 @@ package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.service.LtiService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,6 +14,7 @@ import java.util.UUID
 
 @Controller
 @RequestMapping("/lti")
+@ConditionalOnProperty("code-freak.lti.enabled")
 class LtiController : BaseController() {
   @Autowired
   lateinit var ltiService: LtiService
