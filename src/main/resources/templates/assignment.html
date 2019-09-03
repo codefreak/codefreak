@@ -58,7 +58,11 @@
           <h4>Import from Git</h4>
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <div class="form-group">
-            <input type="text" name="remoteUrl" class="form-control" placeholder="ssh://git@example.org:1234/path/to/project.git">
+            <input type="text" name="remoteUrl" class="form-control"
+                   placeholder="ssh://git@example.org:1234/path/to/project.git"
+                   required
+                   pattern="^ssh://.+$">
+            <div class="form-text text-muted small">Use the Git clone URL and please make sure your link starts with <code>ssh://</code></div>
             <div class="form-text text-muted small" th:text="'Supported services: ' + ${#strings.listJoin(supportedGitRemotes, ', ')}"></div>
           </div>
           <input type="submit" class="btn btn-primary" value="Import from Git">

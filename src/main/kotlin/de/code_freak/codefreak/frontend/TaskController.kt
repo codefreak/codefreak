@@ -149,6 +149,8 @@ class TaskController : BaseController() {
           "successMessage",
           "Successfully imported source for task '${answer.task.title}' from $remoteUrl."
       )
+    } catch (e: IllegalArgumentException) {
+      model.addFlashAttribute("errorMessage", e.message)
     } catch (e: Exception) {
       model.addFlashAttribute(
           "errorMessage",
