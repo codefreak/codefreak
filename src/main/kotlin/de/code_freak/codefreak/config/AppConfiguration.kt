@@ -2,13 +2,13 @@ package de.code_freak.codefreak.config
 
 import de.code_freak.codefreak.auth.AuthenticationMethod
 import de.code_freak.codefreak.auth.Role
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
 import org.jetbrains.annotations.NotNull
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
 import org.springframework.validation.annotation.Validated
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
 
 @Configuration("config")
 @ConfigurationProperties(prefix = "code-freak")
@@ -28,6 +28,7 @@ class AppConfiguration {
   val files = Files()
   val lti = Lti()
   val evalutaion = Evaluation()
+  val gitImport = GitImport()
 
   class Frontend {
     /**
@@ -139,5 +140,17 @@ class AppConfiguration {
   class Evaluation {
     var maxConcurrentExecutions = 5
     var maxQueueSize = 1000
+  }
+
+  class GitImport {
+    var enabled = false
+    var remotes = arrayOf<GitRemote>()
+
+    class GitRemote {
+      var host = ""
+      var sshBaseUrl = ""
+      var sshKey = ""
+      var sshKeyPass: String? = null
+    }
   }
 }

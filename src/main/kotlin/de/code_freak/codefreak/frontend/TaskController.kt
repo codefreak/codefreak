@@ -3,6 +3,7 @@ package de.code_freak.codefreak.frontend
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
+import de.code_freak.codefreak.service.GitService
 import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.ResourceLimitException
 import de.code_freak.codefreak.service.TaskService
@@ -21,12 +22,14 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.io.IOException
-import java.lang.IllegalArgumentException
 import java.util.UUID
 import javax.servlet.http.HttpServletResponse
 
 @Controller
 class TaskController : BaseController() {
+
+  @Autowired(required = false)
+  var gitService: GitService? = null
 
   @Autowired
   lateinit var taskService: TaskService
@@ -129,6 +132,29 @@ class TaskController : BaseController() {
       throw IllegalArgumentException("File could not be processed")
     }
     model.addFlashAttribute("successMessage", "Successfully uploaded source for task '${answer.task.title}'.")
+    return "redirect:" + urls.get(submission.assignment)
+  }
+
+  @PostMapping("/tasks/{taskId}/git-import")
+  fun gitImport(
+    @PathVariable("taskId") taskId: UUID,
+    @RequestParam remoteUrl: String,
+    model: RedirectAttributes
+  ): String {
+    val submission = getOrCreateSubmissionForTask(taskId)
+    val answer = submission.getAnswerForTask(taskId)
+    try {
+      gitService?.importFiles(remoteUrl, answer)
+      model.addFlashAttribute(
+          "successMessage",
+          "Successfully imported source for task '${answer.task.title}' from $remoteUrl."
+      )
+    } catch (e: Exception) {
+      model.addFlashAttribute(
+          "errorMessage",
+          "Could not import from $remoteUrl. Please check your Git URL."
+      )
+    }
     return "redirect:" + urls.get(submission.assignment)
   }
 

@@ -16,6 +16,7 @@
     Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
   </div>
   <div class="alert alert-success mt-4" th:if="${successMessage != null}" th:text="${successMessage}"></div>
+  <div class="alert alert-danger mt-4" th:if="${errorMessage != null}" th:text="${errorMessage}"></div>
 
   <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task}">
     <div class="card-body">
@@ -52,6 +53,17 @@
       <br>
       Last evaluation: <span th:text="${taskInfo.latestEvaluation != null ? taskInfo.latestEvaluation.createdAt : '(none)'}"></span>
       <button class="btn btn-primary start-evaluation" th:attr="data-task-id=${@urls.getShortId(task.id)}"><i class="fas fa-play"></i> Start Evaluation</a></button>
+      <div th:if="${#lists.size(supportedGitRemotes)}">
+        <form th:action="@{${@urls.get(task)} + '/git-import'}" method="post" enctype="multipart/form-data">
+          <h4>Import from Git</h4>
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <div class="form-group">
+            <input type="text" name="remoteUrl" class="form-control" placeholder="ssh://git@example.org:1234/path/to/project.git">
+            <div class="form-text text-muted small" th:text="'Supported services: ' + ${#strings.listJoin(supportedGitRemotes, ', ')}"></div>
+          </div>
+          <input type="submit" class="btn btn-primary" value="Import from Git">
+        </form>
+      </div>
     </div>
   </div>
 </div>

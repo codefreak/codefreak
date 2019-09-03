@@ -5,6 +5,7 @@ import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
+import de.code_freak.codefreak.service.GitService
 import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +21,9 @@ import javax.servlet.http.HttpServletResponse
 
 @Controller
 class AssignmentController : BaseController() {
+
+  @Autowired(required = false)
+  var gitService: GitService? = null
 
   @Autowired
   lateinit var latexService: LatexService
@@ -60,6 +64,7 @@ class AssignmentController : BaseController() {
     model.addAttribute("taskInfos", taskInfos)
     model.addAttribute("canStartNewIdeContainer", containerService.canStartNewIdeContainer())
     model.addAttribute("needsNewIdeContainer", taskInfos.any { taskInfo -> !taskInfo.ideRunning })
+    model.addAttribute("supportedGitRemotes", gitService?.getSupportedHosts() ?: listOf<String>())
     return "assignment"
   }
 
