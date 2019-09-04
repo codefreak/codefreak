@@ -36,8 +36,8 @@ class EvaluationConfiguration {
   fun evaluationTaskExecutor(): TaskExecutor {
     val taskExecutor = ThreadPoolTaskExecutor()
     taskExecutor.setThreadNamePrefix("evaluation")
-    taskExecutor.maxPoolSize = config.evalutaion.maxConcurrentExecutions
-    taskExecutor.setQueueCapacity(config.evalutaion.maxQueueSize)
+    taskExecutor.maxPoolSize = config.evaluation.maxConcurrentExecutions
+    taskExecutor.setQueueCapacity(config.evaluation.maxQueueSize)
     return taskExecutor
   }
 

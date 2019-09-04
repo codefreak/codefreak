@@ -2,7 +2,6 @@ package de.code_freak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.exceptions.ImageNotFoundException
-import com.spotify.docker.client.messages.ContainerConfig
 import com.spotify.docker.client.messages.HostConfig
 import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
@@ -21,6 +20,7 @@ import javax.transaction.Transactional
 
 @Service
 class ContainerService : BaseService() {
+
   companion object {
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
@@ -52,7 +52,7 @@ class ContainerService : BaseService() {
    */
   @EventListener(ContextRefreshedEvent::class)
   fun pullDockerImages() {
-    val images = listOf(config.ide.image, config.latex.image)
+    val images = listOf(config.ide.image, config.latex.image, config.evaluation.codeclimate.image)
     for (image in images) {
       val imageInfo = try {
         docker.inspectImage(image)
@@ -83,21 +83,12 @@ class ContainerService : BaseService() {
       return containerId
     }
 
-    val hostConfig = HostConfig.builder()
-        .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
-        .build()
+    containerId = createContainer(config.latex.image) {
+      labels = mapOf(LABEL_LATEX_CONTAINER to "true")
+      hostConfig { restartPolicy(HostConfig.RestartPolicy.unlessStopped()) }
+      doNothingAndKeepAlive()
+    }
 
-    val containerConfig = ContainerConfig.builder()
-        .image(config.latex.image)
-        // keep the container running by tailing /dev/null
-        .cmd("tail", "-f", "/dev/null")
-        .labels(
-            mapOf(LABEL_INSTANCE_ID to config.instanceId, LABEL_LATEX_CONTAINER to "true")
-        )
-        .hostConfig(hostConfig)
-        .build()
-
-    containerId = docker.createContainer(containerConfig).id()!!
     docker.startContainer(containerId)
     return containerId
   }
@@ -202,6 +193,24 @@ class ContainerService : BaseService() {
     return entityManager.merge(answer)
   }
 
+  protected fun createContainer(
+    image: String,
+    configure: ContainerBuilder.() -> Unit = {}
+  ): String {
+
+    val builder = ContainerBuilder()
+    builder.configure()
+
+    builder.containerConfig {
+      image(image)
+    }
+    builder.labels += mapOf(
+        LABEL_INSTANCE_ID to config.instanceId
+    )
+
+    return docker.createContainer(builder.build(), builder.name).id()!!
+  }
+
   /**
    * Configure and create a new IDE container.
    * Returns the ID of the created container
@@ -209,35 +218,27 @@ class ContainerService : BaseService() {
   protected fun createIdeContainer(answer: Answer): String {
     val answerId = answer.id.toString()
 
-    val labels = mapOf(
-        LABEL_INSTANCE_ID to config.instanceId,
-        LABEL_ANSWER_ID to answerId,
-        "traefik.enable" to "true",
-        "traefik.frontend.rule" to "PathPrefixStrip: /ide/$answerId/",
-        "traefik.port" to "3000",
-        "traefik.frontend.headers.customResponseHeaders" to "Access-Control-Allow-Origin:*"
-    )
-
-    val hostConfig = HostConfig.builder()
-        .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
-        .capAdd("SYS_PTRACE") // required for lsof
-        .memory(config.docker.memory)
-        .memorySwap(config.docker.memory) // memory+swap = memory ==> 0 swap
-        .nanoCpus(config.docker.cpus * 1000000000L)
-        .build()
-
-    val containerConfig = ContainerConfig.builder()
-        .image(config.ide.image)
-        .labels(labels)
-        .hostConfig(hostConfig)
-        .build()
-
-    val container = docker.createContainer(containerConfig)
+    val containerId = createContainer(config.ide.image) {
+      labels = mapOf(
+          LABEL_ANSWER_ID to answerId,
+          "traefik.enable" to "true",
+          "traefik.frontend.rule" to "PathPrefixStrip: /ide/$answerId/",
+          "traefik.port" to "3000",
+          "traefik.frontend.headers.customResponseHeaders" to "Access-Control-Allow-Origin:*"
+      )
+      hostConfig {
+        restartPolicy(HostConfig.RestartPolicy.unlessStopped())
+        capAdd("SYS_PTRACE") // required for lsof
+        memory(config.ide.memory)
+        memorySwap(config.ide.memory) // memory+swap = memory ==> 0 swap
+        nanoCpus(config.ide.cpus * 1000000000L)
+      }
+    }
 
     // attach to network
-    docker.connectToNetwork(container.id(), config.docker.network)
+    docker.connectToNetwork(containerId, config.ide.network)
 
-    return container.id()!!
+    return containerId
   }
 
   /**
@@ -302,5 +303,26 @@ class ContainerService : BaseService() {
           }
         }
     idleContainers = newIdleContainers
+  }
+
+  fun runCodeclimate(answerId: UUID): String {
+    val containerId = createContainer(config.evaluation.codeclimate.image) {
+      name = "codeclimate_orchestrator_$answerId"
+      doNothingAndKeepAlive()
+      hostConfig {
+        appendBinds("/var/run/docker.sock:/var/run/docker.sock", "/tmp/cc:/tmp/cc")
+      }
+      containerConfig {
+        env("CODECLIMATE_ORCHESTRATOR=$name", "CODECLIMATE_CODE=/code")
+      }
+    }
+    fileService.readCollectionTar(answerId).use { docker.copyToContainer(it, containerId, "/code") }
+    docker.startContainer(containerId)
+    // `analyze` would also install missing engines but may time out in the process. Also `engines:install` will update images.
+    exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "engines:install"))
+    val output = exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "analyze", "-f", "json"))
+    docker.killContainer(containerId)
+    docker.removeContainer(containerId)
+    return output
   }
 }
