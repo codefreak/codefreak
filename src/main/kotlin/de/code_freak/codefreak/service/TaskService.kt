@@ -38,6 +38,8 @@ class TaskService {
     return task
   }
 
+  fun getTaskDefinition(taskId: UUID) = fileService.readCollectionTar(taskId).use { getTaskDefinition(it) }
+
   private fun getTaskDefinition(`in`: InputStream): TaskDefinition {
     TarArchiveInputStream(`in`).let { tar -> generateSequence { tar.nextTarEntry }.forEach {
       if (it.isFile && TarUtil.normalizeEntryName(it.name) == "codefreak.yml") {
