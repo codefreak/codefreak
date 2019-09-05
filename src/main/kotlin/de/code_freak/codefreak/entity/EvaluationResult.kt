@@ -5,12 +5,12 @@ import javax.persistence.Entity
 
 @Entity
 class EvaluationResult(
-    var runnerName: String,
+  var runnerName: String,
 
-    @Type(type = "image")
-    var content: ByteArray,
+  @Type(type = "image")
+  var content: ByteArray,
 
-    var position: Int,
+  var position: Int,
 
-    var error: Boolean = false
+  var error: Boolean = false
 ) : BaseEntity()
