@@ -19,4 +19,8 @@ class CodeclimateRunner : EvaluationRunner {
   override fun run(answerId: UUID, options: Map<String, Any>): String {
     return containerService.runCodeclimate(answerId)
   }
+
+  override fun parseResultContent(content: ByteArray): Any {
+    return String(content)
+  }
 }

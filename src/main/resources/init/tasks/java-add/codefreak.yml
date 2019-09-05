@@ -7,5 +7,6 @@ protected:
   - build.gradle
 evaluation:
   - step: codeclimate
-#  - step: junit
-#    cmd: gradle test
+  - step: junit
+    options:
+      cmd: gradle test

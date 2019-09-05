@@ -4,6 +4,7 @@ import de.code_freak.codefreak.config.EvaluationConfiguration
 import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.repository.EvaluationRepository
 import de.code_freak.codefreak.service.BaseService
+import de.code_freak.codefreak.service.EntityNotFoundException
 import de.code_freak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.Job
@@ -75,6 +76,10 @@ class EvaluationService : BaseService() {
     return false
   }
 
-  fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name] ?:
-      throw IllegalArgumentException("Evaluation runner '$name' not found")
+  fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name]
+      ?: throw IllegalArgumentException("Evaluation runner '$name' not found")
+
+  fun getEvaluation(evaluationId: UUID): Evaluation {
+    return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
+  }
 }
