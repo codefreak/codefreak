@@ -107,7 +107,7 @@ object TarUtil {
     tar.finish()
   }
 
-  private fun normalizeEntryName(name: String): String {
+  fun normalizeEntryName(name: String): String {
     if (name == ".") return ""
     return if (name.startsWith("./")) name.drop(2) else name
   }

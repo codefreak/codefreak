@@ -3,13 +3,13 @@ package de.code_freak.codefreak.init
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Classroom
 import de.code_freak.codefreak.entity.Requirement
-import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.TaskRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.RequirementRepository
 import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +20,7 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.core.Ordered
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
+import java.io.ByteArrayOutputStream
 
 /**
  * Seed the database with some initial value
@@ -35,6 +36,7 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
   @Autowired lateinit var classroomRepository: ClassroomRepository
   @Autowired lateinit var requirementRepository: RequirementRepository
   @Autowired lateinit var fileService: FileService
+  @Autowired lateinit var taskService: TaskService
 
   @Value("\${spring.jpa.hibernate.ddl-auto:''}")
   private lateinit var schemaExport: String
@@ -63,11 +65,14 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
     val assignment2 = Assignment("Java Assignment", teacher, classroom2)
     assignmentRepository.saveAll(listOf(assignment1, assignment2))
 
-    val task1 = Task(assignment1, 0, "Program in C", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", 100)
-    val task2 = Task(assignment2, 0, "Program in Java", "Write a function `add(int a, int b)` that returns the sum of `a` and `b`", 100)
-    taskRepository.saveAll(listOf(task1, task2))
-    fileService.writeCollectionTar(task1.id).use { TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it) }
-    fileService.writeCollectionTar(task2.id).use { TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it) }
+    val task1 = ByteArrayOutputStream().use {
+      TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
+      taskService.createFromTar(it.toByteArray(), assignment1, 0)
+    }
+    val task2 = ByteArrayOutputStream().use {
+      TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
+      taskService.createFromTar(it.toByteArray(), assignment2, 0)
+    }
 
     val eval1 = Requirement(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
     val eval2 = Requirement(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))

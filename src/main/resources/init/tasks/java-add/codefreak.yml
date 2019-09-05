@@ -1,0 +1,11 @@
+title: Program in Java
+description: Write a function `add(int a, int b)` that returns the sum of `a` and `b`
+hidden:
+  - src/test
+  - .codeclimate.yml
+protected:
+  - build.gradle
+evaluations:
+  - type: codeclimate
+  - type: junit
+    #cmd: gradle test
