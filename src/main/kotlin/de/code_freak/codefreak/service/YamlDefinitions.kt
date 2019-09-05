@@ -5,13 +5,14 @@ data class TaskDefinition(
   val description: String? = null,
   val hidden: List<String> = emptyList(),
   val protected: List<String> = emptyList(),
-  val evaluations: List<EvaluationDefinition> = emptyList()
+  val evaluation: List<EvaluationDefinition> = emptyList()
 ) {
   private constructor() : this("")
 }
 
 data class EvaluationDefinition(
-  val type: String
+  val step: String,
+  val options: Map<String, Any> = emptyMap()
 ) {
   private constructor() : this("")
 }

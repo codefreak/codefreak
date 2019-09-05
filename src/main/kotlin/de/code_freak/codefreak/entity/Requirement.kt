@@ -15,14 +15,14 @@ class Requirement(
   var task: Task,
 
   /**
-   * The adapter that is responsible for requirements
+   * The runner that is responsible for requirements
    *
    * TODO: Create a enum/registry that holds all possible evaluators – see #12
    */
   var adapter: String,
 
   /**
-   * Configuration for the adapter as key-value pairs
+   * Configuration for the runner as key-value pairs
    */
   @ElementCollection
   @MapKeyColumn(name = "option")

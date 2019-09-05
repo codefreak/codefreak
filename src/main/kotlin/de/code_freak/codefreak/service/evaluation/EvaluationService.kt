@@ -13,6 +13,7 @@ import org.springframework.batch.core.explore.JobExplorer
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.lang.IllegalArgumentException
 import java.util.Arrays
 import java.util.Optional
 import java.util.UUID
@@ -36,6 +37,11 @@ class EvaluationService : BaseService() {
 
   @Autowired
   private lateinit var fileService: FileService
+
+  @Autowired
+  private lateinit var runners: List<EvaluationRunner>
+
+  private val runnersByName by lazy { runners.map { it.getName() to it }.toMap() }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -68,4 +74,7 @@ class EvaluationService : BaseService() {
     }
     return false
   }
+
+  fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name] ?:
+      throw IllegalArgumentException("Evaluation runner '$name' not found")
 }

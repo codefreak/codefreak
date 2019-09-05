@@ -5,7 +5,7 @@ hidden:
   - .codeclimate.yml
 protected:
   - build.gradle
-evaluations:
-  - type: codeclimate
-  - type: junit
-    #cmd: gradle test
+evaluation:
+  - step: codeclimate
+#  - step: junit
+#    cmd: gradle test
