@@ -8,6 +8,7 @@ import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.repository.AnswerRepository
 import de.code_freak.codefreak.service.file.FileService
+import org.glassfish.jersey.internal.LocalizationMessages
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
@@ -18,6 +19,7 @@ import org.springframework.util.StreamUtils
 import java.io.InputStream
 import java.util.UUID
 import javax.transaction.Transactional
+import javax.ws.rs.ProcessingException
 
 @Service
 class ContainerService : BaseService() {
@@ -195,8 +197,15 @@ class ContainerService : BaseService() {
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
     val containerId = getIdeContainer(answer.id) ?: return answer
-    docker.archiveContainer(containerId, "$PROJECT_PATH/.").use { tar ->
-      fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
+    try {
+      docker.archiveContainer(containerId, "$PROJECT_PATH/.").use { tar ->
+        fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
+      }
+    } catch (e: ProcessingException) {
+      // okay until this is fixed https://github.com/eclipse-ee4j/jersey/issues/3486
+      if (e.message != LocalizationMessages.MESSAGE_CONTENT_INPUT_STREAM_CLOSE_FAILED()) {
+        throw e
+      }
     }
     log.info("Saved files of container with id: $containerId")
     return entityManager.merge(answer)
