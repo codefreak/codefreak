@@ -1,10 +1,10 @@
 package de.code_freak.codefreak.service.evaluation.runner
 
+import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.evaluation.EvaluationRunner
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 class CodeclimateRunner : EvaluationRunner {
@@ -16,8 +16,8 @@ class CodeclimateRunner : EvaluationRunner {
     return "codeclimate"
   }
 
-  override fun run(answerId: UUID, options: Map<String, Any>): String {
-    return containerService.runCodeclimate(answerId)
+  override fun run(answer: Answer, options: Map<String, Any>): String {
+    return containerService.runCodeclimate(answer)
   }
 
   override fun parseResultContent(content: ByteArray): Any {

@@ -33,7 +33,7 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
       try {
         log.debug("Running evaluation step with runner '{}'", runnerName)
         val runner = evaluationService.getEvaluationRunner(runnerName)
-        val resultContent = runner.run(answer.id, it.options)
+        val resultContent = runner.run(answer, it.options)
         println(resultContent)
         EvaluationResult(runnerName, resultContent.toByteArray(), index)
       } catch (e: Exception) {

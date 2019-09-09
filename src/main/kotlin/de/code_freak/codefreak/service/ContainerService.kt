@@ -47,6 +47,9 @@ class ContainerService : BaseService() {
   @Autowired
   private lateinit var fileService: FileService
 
+  @Autowired
+  private lateinit var answerService: AnswerService
+
   /**
    * Pull all required docker images on startup
    */
@@ -305,9 +308,9 @@ class ContainerService : BaseService() {
     idleContainers = newIdleContainers
   }
 
-  fun runCodeclimate(answerId: UUID): String {
+  fun runCodeclimate(answer: Answer): String {
     val containerId = createContainer(config.evaluation.codeclimate.image) {
-      name = "codeclimate_orchestrator_$answerId"
+      name = "codeclimate_orchestrator_${answer.id}"
       doNothingAndKeepAlive()
       hostConfig {
         appendBinds("/var/run/docker.sock:/var/run/docker.sock", "/tmp/cc:/tmp/cc")
@@ -316,7 +319,7 @@ class ContainerService : BaseService() {
         env("CODECLIMATE_ORCHESTRATOR=$name", "CODECLIMATE_CODE=/code")
       }
     }
-    fileService.readCollectionTar(answerId).use { docker.copyToContainer(it, containerId, "/code") }
+    answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, "/code") }
     docker.startContainer(containerId)
     // `analyze` would also install missing engines but may time out in the process. Also `engines:install` will update images.
     exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "engines:install"))
