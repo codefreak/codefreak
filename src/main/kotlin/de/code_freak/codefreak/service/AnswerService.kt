@@ -35,7 +35,7 @@ class AnswerService : BaseService() {
 
   fun getAnswerIdsForTaskIds(taskIds: Iterable<UUID>, userId: UUID) = answerRepository.findIdsForTaskIds(taskIds, userId).toMap()
 
-  fun getAnswerIdForTaskId(taskId: UUID, userId: UUID): UUID = answerRepository.findIdForTaskId(taskId, userId)
+  fun getAnswerForTaskId(taskId: UUID, userId: UUID): Answer = answerRepository.findByTaskIdAndSubmissionUserId(taskId, userId)
       .orElseThrow { EntityNotFoundException("Answer not found.") }
 
   fun setFiles(answerId: UUID): OutputStream {

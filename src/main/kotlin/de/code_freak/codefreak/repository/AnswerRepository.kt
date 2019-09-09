@@ -13,6 +13,5 @@ interface AnswerRepository : CrudRepository<Answer, UUID> {
   @Query("SELECT new kotlin.Pair(a.task.id, a.id) FROM Answer a WHERE a.submission.user.id = :userId AND a.task.id IN (:taskIds)")
   fun findIdsForTaskIds(@Param("taskIds") taskIds: Iterable<UUID>, @Param("userId") userId: UUID): Collection<Pair<UUID, UUID>>
 
-  @Query("SELECT a.id FROM Answer a WHERE a.submission.user.id = :userId AND a.task.id = :taskId")
-  fun findIdForTaskId(@Param("taskId") taskId: UUID, @Param("userId") userId: UUID): Optional<UUID>
+  fun findByTaskIdAndSubmissionUserId(taskId: UUID, userId: UUID): Optional<Answer>
 }
