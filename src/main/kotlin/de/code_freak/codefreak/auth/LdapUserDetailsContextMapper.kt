@@ -39,10 +39,14 @@ class LdapUserDetailsContextMapper : UserDetailsContextMapper {
   override fun mapUserFromContext(ctx: DirContextOperations?, username: String?, authorities: MutableCollection<out GrantedAuthority>?): UserDetails {
     val roles = mutableListOf<Role>()
 
-    authorities?.forEach {
-      val role = mappings[it.authority]
-      if (role != null) {
-        roles.add(role)
+    if (config.ldap.overrideRoles.containsKey(username)) {
+      roles.addAll(config.ldap.overrideRoles[username]!!)
+    } else {
+      authorities?.forEach {
+        val role = mappings[it.authority]
+        if (role != null) {
+          roles.add(role)
+        }
       }
     }
 

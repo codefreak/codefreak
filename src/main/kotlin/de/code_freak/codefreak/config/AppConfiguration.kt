@@ -107,6 +107,8 @@ class AppConfiguration {
     var userSearchFilter = "(uid={0})"
     var groupSearchBase = "ou=groups"
     var groupSearchFilter = "member={0}"
+    /** Manually set the roles for a specific username */
+    var overrideRoles: Map<String, List<Role>> = mapOf()
   }
 
   class Files {
