@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @ConditionalOnProperty("code-freak.git-import.enabled")
-class GitConfiguration {
+class GitImportConfiguration {
   @Autowired
   lateinit var configuration: AppConfiguration
 

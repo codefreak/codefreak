@@ -3,7 +3,7 @@ package de.code_freak.codefreak.frontend
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
-import de.code_freak.codefreak.service.GitService
+import de.code_freak.codefreak.service.GitImportService
 import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.ResourceLimitException
 import de.code_freak.codefreak.service.TaskService
@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse
 class TaskController : BaseController() {
 
   @Autowired(required = false)
-  var gitService: GitService? = null
+  var gitImportService: GitImportService? = null
 
   @Autowired
   lateinit var taskService: TaskService
@@ -144,7 +144,7 @@ class TaskController : BaseController() {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = submission.getAnswerForTask(taskId)
     try {
-      gitService?.importFiles(remoteUrl, answer)
+      gitImportService?.importFiles(remoteUrl, answer)
       model.addFlashAttribute(
           "successMessage",
           "Successfully imported source for task '${answer.task.title}' from $remoteUrl."

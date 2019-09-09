@@ -13,7 +13,7 @@ import java.nio.file.Files
 
 @Service
 @ConditionalOnProperty("code-freak.git-import.enabled")
-class GitService {
+class GitImportService {
   @Autowired
   lateinit var configuration: AppConfiguration
 
