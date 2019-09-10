@@ -27,7 +27,7 @@ class AppConfiguration {
   val ldap = Ldap()
   val files = Files()
   val lti = Lti()
-  val evalutaion = Evaluation()
+  val evaluation = Evaluation()
   val gitImport = GitImport()
 
   class Frontend {
@@ -59,14 +59,6 @@ class AppConfiguration {
 
     /** Maximum number of IDE containers that are started at the same time. Negative = unlimited. */
     var maxContainers = -1
-  }
-
-  class Docker {
-    lateinit var host: String
-    lateinit var certPath: String
-    lateinit var caCertPath: String
-    lateinit var clientKeyPath: String
-    lateinit var clientCertPath: String
 
     /**
      * Memory limit in bytes
@@ -87,6 +79,14 @@ class AppConfiguration {
      * Default is the "bridge" network (Docker default)
      */
     lateinit var network: String
+  }
+
+  class Docker {
+    lateinit var host: String
+    lateinit var certPath: String
+    lateinit var caCertPath: String
+    lateinit var clientKeyPath: String
+    lateinit var clientCertPath: String
 
     /**
      * Define how images will be pulled on application startup (inspired by Gitlab Runner)
@@ -142,6 +142,12 @@ class AppConfiguration {
   class Evaluation {
     var maxConcurrentExecutions = 5
     var maxQueueSize = 1000
+
+    val codeclimate = Codeclimate()
+
+    class Codeclimate {
+      var image = "cfreak/codeclimate"
+    }
   }
 
   class GitImport {

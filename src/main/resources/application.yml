@@ -51,12 +51,6 @@ code-freak:
     clientCertPath: ~
     # Define how (and if) images will be pulled on application startup
     pull-policy: never
-    # Memory limit in bytes (2GiB)
-    memory: 2147483648
-    # Number of CPUs per container (0 means no limit)
-    cpus: 0
-    # Name of the network the container will be attached to
-    network: bridge
   traefik:
     url: "http://localhost:8081"
   latex:
@@ -67,6 +61,12 @@ code-freak:
     idle-check-rate: 60000
     # Time span after which an idle container is shut down. Default 10 minutes.
     idle-shutdown-threshold: 600000
+    # Memory limit in bytes (2GiB)
+    memory: 2147483648
+    # Number of CPUs per container (0 means no limit)
+    cpus: 0
+    # Name of the network the container will be attached to
+    network: bridge
   frontend:
     # This can be used to inject custom javascript code (needs to include script tags).
     # It is injected after dependencies (like jQuery) and before template specific scripts.

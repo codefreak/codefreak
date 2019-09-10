@@ -7,6 +7,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
+import org.springframework.util.StreamUtils
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -107,8 +108,22 @@ object TarUtil {
     tar.finish()
   }
 
-  private fun normalizeEntryName(name: String): String {
+  fun normalizeEntryName(name: String): String {
     if (name == ".") return ""
     return if (name.startsWith("./")) name.drop(2) else name
+  }
+
+  fun copyEntries(from: TarArchiveInputStream, to: TarArchiveOutputStream, filter: (TarArchiveEntry) -> Boolean = { true }) {
+    generateSequence { from.nextTarEntry }
+        .filter { filter(it) }
+        .forEach { copyEntry(from, to, it) }
+  }
+
+  fun copyEntry(from: TarArchiveInputStream, to: TarArchiveOutputStream, entry: TarArchiveEntry) {
+    to.putArchiveEntry(entry)
+    if (entry.isFile) {
+      StreamUtils.copy(from, to)
+    }
+    to.closeArchiveEntry()
   }
 }

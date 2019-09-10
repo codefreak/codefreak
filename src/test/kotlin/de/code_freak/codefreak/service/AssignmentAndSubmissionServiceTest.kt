@@ -55,6 +55,8 @@ class AssignmentAndSubmissionServiceTest {
   @Mock
   lateinit var answerRepository: AnswerRepository
   @Mock
+  lateinit var answerService: AnswerService
+  @Mock
   lateinit var fileService: FileService
   @InjectMocks
   val assignmentService = AssignmentService()
@@ -99,7 +101,7 @@ class AssignmentAndSubmissionServiceTest {
     val submission = submissionService.createNewSubmission(assignment, user)
     assertThat(submission.answers, hasSize(1))
     assertThat(submission.answers.first(), instanceOf(Answer::class.java))
-    verify(fileService, times(1)).copyCollection(task.id, submission.answers.first().id)
+    verify(answerService, times(1)).copyFilesFromTask(submission.answers.first())
   }
 
   @Test

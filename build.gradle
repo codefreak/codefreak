@@ -38,6 +38,7 @@ dependencies {
   implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:2.3.0'
   implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
   implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.9'
   implementation 'org.jetbrains.kotlin:kotlin-reflect'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
   implementation 'com.bertramlabs.plugins:asset-pipeline-spring-boot:3.0.10'

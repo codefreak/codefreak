@@ -33,6 +33,9 @@ class SubmissionService : BaseService() {
   @Autowired
   lateinit var fileService: FileService
 
+  @Autowired
+  lateinit var answerService: AnswerService
+
   @Transactional
   fun findSubmission(id: UUID): Submission = submissionRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Submission not found") }
@@ -52,7 +55,7 @@ class SubmissionService : BaseService() {
     // create an answer for every task in this assignment
     assignment.tasks.forEach { task ->
       val answer = answerRepository.save(Answer(submission, task))
-      fileService.copyCollection(task.id, answer.id)
+      answerService.copyFilesFromTask(answer)
     }
 
     return submission

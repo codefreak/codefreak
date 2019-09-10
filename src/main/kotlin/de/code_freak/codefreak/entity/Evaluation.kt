@@ -5,6 +5,7 @@ import org.hibernate.annotations.Type
 import java.time.Instant
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 
 @Entity
 class Evaluation(
@@ -17,10 +18,8 @@ class Evaluation(
   @Type(type = "image")
   var filesDigest: ByteArray,
 
-  /**
-   * The result value that was determined by checking the requirements
-   */
-  var result: Long?
+  @OneToMany
+  var results: List<EvaluationResult>
 ) : BaseEntity() {
 
   @CreationTimestamp
