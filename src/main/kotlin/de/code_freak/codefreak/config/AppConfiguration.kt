@@ -2,13 +2,13 @@ package de.code_freak.codefreak.config
 
 import de.code_freak.codefreak.auth.AuthenticationMethod
 import de.code_freak.codefreak.auth.Role
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
 import org.jetbrains.annotations.NotNull
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
 import org.springframework.validation.annotation.Validated
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
 
 @Configuration("config")
 @ConfigurationProperties(prefix = "code-freak")
@@ -28,6 +28,7 @@ class AppConfiguration {
   val files = Files()
   val lti = Lti()
   val evaluation = Evaluation()
+  val gitImport = GitImport()
 
   class Frontend {
     /**
@@ -107,6 +108,8 @@ class AppConfiguration {
     var userSearchFilter = "(uid={0})"
     var groupSearchBase = "ou=groups"
     var groupSearchFilter = "member={0}"
+    /** Manually set the roles for a specific username */
+    var overrideRoles: Map<String, List<Role>> = mapOf()
   }
 
   class Files {
@@ -144,6 +147,18 @@ class AppConfiguration {
 
     class Codeclimate {
       var image = "cfreak/codeclimate"
+    }
+  }
+
+  class GitImport {
+    var enabled = false
+    var remotes = arrayOf<GitRemote>()
+
+    class GitRemote {
+      var host = ""
+      var sshBaseUrl = ""
+      var sshKey = ""
+      var sshKeyPass: String? = null
     }
   }
 }
