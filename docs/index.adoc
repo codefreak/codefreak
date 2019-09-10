@@ -208,6 +208,22 @@ code-freak:
         key-store-entry-pin: supersecurepassword123
 ```
 
+=== Git import
+You can allow your students to import their source code from a remote Git repository. Currently, this is possible only via a
+shared SSH key that has access to all repositories on the Git server. Some Git servers allow this by using so-called
+"deplyoment keys". You can configure multiple hosts but only one SSH key per host. Students have to use the clone URL
+starting with `ssh://` when importing from the remote repository. Import via HTTP is not possible currently.
+
+```yaml
+code-freak:
+    git-import:
+      enabled: true
+      remotes:
+      - host: git.example.org
+        ssh-key: /path/to/ssh/id_rsa
+        ssh-key-pass: securepassword123
+        ssh-base-url: ssh://git@git.example.org
+```
 
 == Development / Contribution
 `TODO`
