@@ -5,8 +5,15 @@ hidden:
   - .codeclimate.yml
 protected:
   - build.gradle
+  - settings.gradle
 evaluation:
   - step: codeclimate
-  - step: junit
+  - step: commandline
     options:
-      cmd: gradle test
+      image: gradle
+      project-path: /home/gradle/project
+      commands:
+        - pwd
+        - gradle test
+        - ls build/test-results/test
+  - step: junit

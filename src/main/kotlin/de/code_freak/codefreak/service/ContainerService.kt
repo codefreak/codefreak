@@ -19,6 +19,8 @@ import java.io.InputStream
 import java.util.UUID
 import javax.transaction.Transactional
 import javax.ws.rs.ProcessingException
+import java.util.ArrayList
+import java.util.regex.Pattern
 
 @Service
 class ContainerService : BaseService() {
@@ -52,12 +54,12 @@ class ContainerService : BaseService() {
   @Autowired
   private lateinit var answerService: AnswerService
 
-  /**
-   * Pull all required docker images on startup
-   */
   @EventListener(ContextRefreshedEvent::class)
-  fun pullDockerImages() {
-    val images = listOf(config.ide.image, config.latex.image, config.evaluation.codeclimate.image)
+  fun init() {
+    pullDockerImages(listOf(config.ide.image, config.latex.image, config.evaluation.codeclimate.image))
+  }
+
+  fun pullDockerImages(images: List<String>) {
     for (image in images) {
       val imageInfo = try {
         docker.inspectImage(image)
@@ -103,7 +105,7 @@ class ContainerService : BaseService() {
    */
   fun latexConvert(inputTar: InputStream, file: String): InputStream {
     val latexContainerId = getOrCreateLatexContainer()
-    val jobPath = exec(latexContainerId, arrayOf("mktemp", "-d")).trim()
+    val jobPath = exec(latexContainerId, arrayOf("mktemp", "-d")).output.trim()
     docker.copyToContainer(inputTar, latexContainerId, jobPath)
     exec(latexContainerId, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
     val out = docker.archiveContainer(latexContainerId, "$jobPath/.")
@@ -145,7 +147,7 @@ class ContainerService : BaseService() {
   /**
    * Run a command as root inside container and return the result as string
    */
-  fun exec(containerId: String, cmd: Array<String>): String {
+  fun exec(containerId: String, cmd: Array<String>): ExecResult {
     val exec = docker.execCreate(
         containerId, cmd,
         DockerClient.ExecCreateParam.attachStdin(), // this is not needed but a workaround for spotify/docker-client#513
@@ -153,8 +155,8 @@ class ContainerService : BaseService() {
         DockerClient.ExecCreateParam.attachStderr(),
         DockerClient.ExecCreateParam.user("root")
     )
-    val output = docker.execStart(exec.id())
-    return output.readFully()
+    return ExecResult(output = docker.execStart(exec.id()).readFully(),
+        exitCode = docker.execInspect(exec.id()).exitCode() ?: -1)
   }
 
   /**
@@ -292,10 +294,10 @@ class ContainerService : BaseService() {
         .forEach {
           val containerId = it.id()
           // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
-          val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).trim()
+          val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).output.trim()
           if (connections == "0") {
-            val now = System.currentTimeMillis()
-            val idleSince = idleContainers[containerId] ?: now
+            val now: Long = System.currentTimeMillis()
+            val idleSince: Long = idleContainers[containerId] ?: now
             val idleFor = now - idleSince
             log.debug("Container $containerId has been idle for more than $idleFor ms")
             if (idleFor >= config.ide.idleShutdownThreshold) {
@@ -332,9 +334,41 @@ class ContainerService : BaseService() {
     docker.startContainer(containerId)
     // `analyze` would also install missing engines but may time out in the process. Also `engines:install` will update images.
     exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "engines:install"))
-    val output = exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "analyze", "-f", "json"))
+    val output = exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "analyze", "-f", "json")).output
     docker.killContainer(containerId)
     docker.removeContainer(containerId)
     return output
+  }
+
+  fun runCommandsForEvaluation(answer: Answer, image: String, projectPath: String, commands: List<String>): List<ExecResult> {
+    pullDockerImages(listOf(image))
+    val containerId = createContainer(image) {
+      doNothingAndKeepAlive()
+      containerConfig { workingDir(projectPath) }
+    }
+    answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
+    docker.startContainer(containerId)
+    val outputs = commands.map { exec(containerId, splitCommand(it)) }
+    docker.killContainer(containerId)
+    docker.removeContainer(containerId)
+    return outputs
+  }
+
+  private fun splitCommand(command: String): Array<String> {
+    // from https://stackoverflow.com/a/366532/5519485
+    val matchList = ArrayList<String>()
+    val regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'")
+    val regexMatcher = regex.matcher(command)
+    while (regexMatcher.find()) {
+      when {
+        regexMatcher.group(1) != null -> // Add double-quoted string without the quotes
+          matchList.add(regexMatcher.group(1))
+        regexMatcher.group(2) != null -> // Add single-quoted string without the quotes
+          matchList.add(regexMatcher.group(2))
+        else -> // Add unquoted word
+          matchList.add(regexMatcher.group())
+      }
+    }
+    return matchList.toArray(arrayOf())
   }
 }
