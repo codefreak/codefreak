@@ -53,7 +53,9 @@
       <br>
       Last evaluation: <span th:text="${taskInfo.latestEvaluation != null ? @formatter.dateTime(taskInfo.latestEvaluation.createdAt) : '(none)'}"></span>
       <a th:if="${taskInfo.latestEvaluation != null}" class="btn btn-primary" th:href="${@urls.get(taskInfo.latestEvaluation)}"><i class="fas fa-poll"></i> View Results</a>
-      <button class="btn btn-primary start-evaluation" th:attr="data-task-id=${@urls.getShortId(task.id)}"><i class="fas fa-play"></i> Start Evaluation</a></button>
+      <button class="btn btn-primary start-evaluation" th:attr="data-task-id=${@urls.getShortId(task.id)},disabled=${!taskInfo.canStartEvaluation}">
+        <i class="fas fa-play"></i> Start Evaluation
+      </button>
       <div th:if="${#lists.size(supportedGitRemotes)}">
         <form th:action="@{${@urls.get(task)} + '/git-import'}" method="post" enctype="multipart/form-data">
           <h4>Import from Git</h4>
