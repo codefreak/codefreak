@@ -25,7 +25,7 @@
     <span th:if="${issue.location.lines.begin != issue.location.lines.end}" th:text="${'-' + issue.location.lines.end}"></span>
   </p>
   <th:block th:if="${issue.content}" th:with="id = ${T(java.util.UUID).randomUUID()}">
-    <button class="btn btn-linght" type="button" data-toggle="collapse" th:attr="data-target=${'#' + id}">Show more information</button>
+    <button class="btn btn-light" type="button" data-toggle="collapse" th:attr="data-target=${'#' + id}">Show more information</button>
     <div class="collapse" th:id="${id}">
       <div class="card card-body" th:utext="${@markdown.html(issue.content.body)}"></div>
     </div>
