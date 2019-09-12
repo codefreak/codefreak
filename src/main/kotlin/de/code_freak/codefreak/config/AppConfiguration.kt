@@ -51,11 +51,11 @@ class AppConfiguration {
     /** The Docker image name (and tag) to be used for the IDE containers. */
     lateinit var image: String
 
-    /** Interval for checking for idle containers in ms. Default 1 minute. */
-    var idleCheckRate = 60000L
+    /** Interval for checking for idle containers in ms. */
+    var idleCheckRate: Long = 60000L
 
-    /** Time span after which an idle container is shut down. Default 10 minutes. */
-    var idleShutdownThreshold = 600000L
+    /** Time span after which an idle container is shut down. */
+    var idleShutdownThreshold: Long = 600000L
 
     /** Maximum number of IDE containers that are started at the same time. Negative = unlimited. */
     var maxContainers = -1
