@@ -23,7 +23,11 @@
       <h3 class="card-title" th:text="|${task.number}. ${task.title}|"/>
       <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
 
-      <a class="btn btn-primary" th:href="@{${@urls.get(task)} + '/ide'}" target="_blank" th:classappend="${!taskInfo.ideRunning && !canStartNewIdeContainer ? 'disabled' : ''}">
+      <a class="btn btn-primary"
+         th:href="@{${@urls.get(task)} + '/ide'}"
+         target="_blank"
+         th:classappend="${!taskInfo.ideRunning && !canStartNewIdeContainer ? 'disabled' : ''}"
+         onclick="setTimeout(() => location.reload(), 1000)">
         <i class="far fa-edit"></i> Open in Editor <span th:if="${taskInfo.ideRunning}">(running)</span>
       </a>
       <div style="display: inline-block;">
