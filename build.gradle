@@ -49,7 +49,7 @@ dependencies {
   implementation 'org.webjars:bootstrap:4.3.1'
   implementation 'org.webjars:font-awesome:5.8.1'
   implementation 'com.spotify:docker-client:8.15.1'
-  implementation 'org.apache.commons:commons-compress:1.18'
+  implementation 'org.apache.commons:commons-compress:1.19'
   implementation 'com.beust:klaxon:5.0.1'
   implementation 'io.sentry:sentry-logback:1.7.16'
   implementation 'com.github.hsingh:java-shortuuid:2a4d72f'
