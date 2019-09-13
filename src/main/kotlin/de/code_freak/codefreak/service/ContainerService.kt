@@ -308,7 +308,6 @@ class ContainerService : BaseService() {
               }
               log.info("Shutting down container $containerId of answer $answerId")
               docker.stopContainer(containerId, 5)
-              docker.removeContainer(containerId)
             } else {
               newIdleContainers[containerId] = idleSince
             }

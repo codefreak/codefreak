@@ -57,10 +57,10 @@ code-freak:
     image: "blang/latex:latest"
   ide:
     image: "cfreak/ide:latest"
-    # Interval for checking for idle containers in ms. Default 1 minute.
-    idle-check-rate: 60000
-    # Time span after which an idle container is shut down. Default 10 minutes.
-    idle-shutdown-threshold: 600000
+    # Interval for checking for idle containers in ms. Default 30 seconds.
+    idle-check-rate: 30000
+    # Time span after which an idle container is shut down. Default 1 minute.
+    idle-shutdown-threshold: 60000
     # Memory limit in bytes (2GiB)
     memory: 2147483648
     # Number of CPUs per container (0 means no limit)
