@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.evaluation.EvaluationRunner
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -16,8 +15,6 @@ class CodeclimateRunner : EvaluationRunner {
 
   @Autowired
   private lateinit var containerService: ContainerService
-
-  private val log = LoggerFactory.getLogger(this::class.java)
 
   override fun getName(): String {
     return "codeclimate"
@@ -28,17 +25,12 @@ class CodeclimateRunner : EvaluationRunner {
   }
 
   override fun parseResultContent(content: ByteArray): Any {
-    return try {
-      val mapper = ObjectMapper()
-      val results = mapper.readValue(content, Array<Result>::class.java)
-      Content(results.filterIsInstance<Issue>())
-    } catch (e: Exception) {
-      log.error(e.message)
-      Content(emptyList(), "Error displaying results")
-    }
+    val mapper = ObjectMapper()
+    val results = mapper.readValue(content, Array<Result>::class.java)
+    return Content(results.filterIsInstance<Issue>())
   }
 
-  private class Content(val issues: List<Issue>, val error: String? = null)
+  private class Content(val issues: List<Issue>)
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
   @JsonSubTypes(

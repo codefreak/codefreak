@@ -13,9 +13,9 @@
   <div class="alert alert-info"
        sec:authorize="!hasRole('ROLE_TEACHER')"
        th:if="${#lists.size(assignments)} == 0">
-    Seems like you have never been working on an assignment, yet.<br>
+    Seems like you have not worked on any assignment yet.<br>
     Please open an assignment via a link provided by your teacher and start working on it.<br>
-    Then you will find it in a list below.
+    You will then find it in a list below.
   </div>
 
   <div class="card mt-4" th:each="assignment : ${assignments}">

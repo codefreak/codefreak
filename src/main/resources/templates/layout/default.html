@@ -30,7 +30,7 @@
         </li>
         <li class="nav-item">
           <a class="nav-link py-3 text-white"
-             th:classappend="${#httpServletRequest.getRequestURI() == '/assignments' ? 'active' : ''}"
+             th:classappend="${#httpServletRequest.getRequestURI().startsWith('/assignments') ? 'active' : ''}"
              th:href="@{'/assignments'}">Assignments</a>
         </li>
       </ul>
@@ -59,7 +59,6 @@
           <div layout:fragment="content" class="container py-4">Page content will be placed here.</div>
         </div>
       </div>
-
     </div>
   </div>
 </div>

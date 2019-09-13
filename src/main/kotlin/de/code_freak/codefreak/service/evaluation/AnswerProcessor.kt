@@ -5,6 +5,7 @@ import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.entity.EvaluationResult
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.file.FileService
+import de.code_freak.codefreak.util.error
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,10 +35,10 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
         log.debug("Running evaluation step with runner '{}'", runnerName)
         val runner = evaluationService.getEvaluationRunner(runnerName)
         val resultContent = runner.run(answer, it.options)
-        println(resultContent)
+        log.debug(resultContent)
         EvaluationResult(runnerName, resultContent.toByteArray(), index)
       } catch (e: Exception) {
-        log.error(e.message)
+        log.error(e)
         EvaluationResult(runnerName, (e.message ?: "Unknown error").toByteArray(), index, true)
       }
     }

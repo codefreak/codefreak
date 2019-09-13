@@ -10,14 +10,13 @@ import de.code_freak.codefreak.service.EntityNotFoundException
 import de.code_freak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.Job
-import org.springframework.batch.core.JobParameter
-import org.springframework.batch.core.JobParameters
+import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.explore.JobExplorer
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
-import java.util.Arrays
+import java.util.Date
 import java.util.Optional
 import java.util.UUID
 
@@ -54,16 +53,15 @@ class EvaluationService : BaseService() {
   fun startEvaluation(answer: Answer) {
     containerService.saveAnswerFiles(answer)
     getLatestEvaluation(answer.id).ifPresent {
-      if (Arrays.equals(it.filesDigest, fileService.getCollectionMd5Digest(answer.id))) {
-        throw IllegalStateException("Evaluation is up to date")
-      }
+      check(!it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answer.id))) { "Evaluation is up to date" }
     }
-    if (isEvaluationRunning(answer.id)) {
-      throw IllegalStateException("Evaluation is already running")
-    }
+    check(!isEvaluationRunning(answer.id)) { "Evaluation is already running" }
     log.debug("Queuing evaluation for answer {}", answer.id)
-    val params = mapOf(EvaluationConfiguration.PARAM_ANSWER_ID to JobParameter(answer.id.toString()))
-    jobLauncher.run(job, JobParameters(params))
+    val params = JobParametersBuilder().apply {
+      addString(EvaluationConfiguration.PARAM_ANSWER_ID, answer.id.toString())
+      addDate("date", Date()) // we need this so that we can create a job with the same answer id multiple times
+    }.toJobParameters()
+    jobLauncher.run(job, params)
   }
 
   fun getLatestEvaluations(answerIds: Iterable<UUID>): Map<UUID, Optional<Evaluation>> {
