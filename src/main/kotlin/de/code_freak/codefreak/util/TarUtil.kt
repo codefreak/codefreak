@@ -1,5 +1,7 @@
 package de.code_freak.codefreak.util
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
@@ -41,10 +43,9 @@ object TarUtil {
   }
 
   fun createTarFromDirectory(file: File, out: OutputStream) {
+    require(file.isDirectory) { "FileCollection must be a directory" }
+
     val tar = TarArchiveOutputStream(out)
-    if (!file.isDirectory) {
-      throw IllegalArgumentException("FileCollection must be a directory")
-    }
     tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR)
     tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
     addFileToTar(tar, file, ".")
@@ -68,7 +69,7 @@ object TarUtil {
       tar.closeArchiveEntry()
     } else if (file.isDirectory) {
       tar.closeArchiveEntry()
-      for (child in file.listFiles()) {
+      for (child in file.listFiles() ?: emptyArray()) {
         addFileToTar(tar, child, "$name/${child.name}")
       }
     }
@@ -119,11 +120,34 @@ object TarUtil {
         .forEach { copyEntry(from, to, it) }
   }
 
-  fun copyEntry(from: TarArchiveInputStream, to: TarArchiveOutputStream, entry: TarArchiveEntry) {
+  private fun copyEntry(from: TarArchiveInputStream, to: TarArchiveOutputStream, entry: TarArchiveEntry) {
     to.putArchiveEntry(entry)
     if (entry.isFile) {
       StreamUtils.copy(from, to)
     }
     to.closeArchiveEntry()
+  }
+
+  inline fun <reified T> getYamlDefinition(`in`: InputStream): T {
+    TarArchiveInputStream(`in`).let { tar -> generateSequence { tar.nextTarEntry }.forEach {
+      if (it.isFile && normalizeEntryName(it.name) == "codefreak.yml") {
+        val mapper = ObjectMapper(YAMLFactory())
+        return mapper.readValue(tar, T::class.java)
+      }
+    } }
+    throw java.lang.IllegalArgumentException("codefreak.yml does not exist")
+  }
+
+  fun extractSubdirectory(`in`: InputStream, out: OutputStream, path: String) {
+    val prefix = normalizeEntryName(path).withTrailingSlash()
+    val extracted = TarArchiveOutputStream(out)
+    TarArchiveInputStream(`in`).let { tar ->
+      generateSequence { tar.nextTarEntry }.forEach {
+        if (normalizeEntryName(it.name).startsWith(prefix)) {
+          it.name = normalizeEntryName(it.name).drop(prefix.length)
+          copyEntry(tar, extracted, it)
+        }
+      }
+    }
   }
 }

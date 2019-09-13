@@ -5,10 +5,10 @@ import de.code_freak.codefreak.entity.Classroom
 import de.code_freak.codefreak.entity.Requirement
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
-import de.code_freak.codefreak.repository.TaskRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.RequirementRepository
 import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
@@ -20,6 +20,7 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.core.Ordered
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 /**
@@ -32,11 +33,11 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
 
   @Autowired lateinit var userRepository: UserRepository
   @Autowired lateinit var assignmentRepository: AssignmentRepository
-  @Autowired lateinit var taskRepository: TaskRepository
   @Autowired lateinit var classroomRepository: ClassroomRepository
   @Autowired lateinit var requirementRepository: RequirementRepository
   @Autowired lateinit var fileService: FileService
   @Autowired lateinit var taskService: TaskService
+  @Autowired lateinit var assignmentService: AssignmentService
 
   @Value("\${spring.jpa.hibernate.ddl-auto:''}")
   private lateinit var schemaExport: String
@@ -77,6 +78,15 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
     val eval1 = Requirement(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
     val eval2 = Requirement(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))
     requirementRepository.saveAll(listOf(eval1, eval2))
+
+    ByteArrayOutputStream().use {
+      TarUtil.createTarFromDirectory(ClassPathResource("init/tasks").file, it)
+      assignmentService.createFromTar(ByteArrayInputStream(it.toByteArray()), teacher).let { result ->
+        if (result.taskErrors.isNotEmpty()) {
+          throw result.taskErrors.values.first()
+        }
+      }
+    }
   }
 
   override fun getOrder(): Int {
