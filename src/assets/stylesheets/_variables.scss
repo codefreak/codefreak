@@ -5,3 +5,5 @@ $fa-font-path: '/webjars/font-awesome/5.8.1/webfonts';
 $primary: #2f3560;
 $secondary: adjust_hue($primary, 90);
 $border-radius: 0;
+
+$link-color: saturate($secondary, 25%);

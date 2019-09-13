@@ -12,10 +12,18 @@ class AssignmentService : BaseService() {
   @Autowired
   lateinit var assignmentRepository: AssignmentRepository
 
+  @Autowired
+  lateinit var submissionService: SubmissionService
+
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Assignment not found") }
 
   @Transactional
   fun findAllAssignments(): Iterable<Assignment> = assignmentRepository.findAll()
+
+  @Transactional
+  fun findAllAssignmentsForUser(userId: UUID) = submissionService.findSubmissionsOfUser(userId).map {
+    it.assignment
+  }
 }
