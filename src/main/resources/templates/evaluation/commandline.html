@@ -6,6 +6,7 @@
   <h4>
     <th:block th:switch="${execution.result.exitCode}">
       <span th:case="0" class="badge badge-success">Success</span>
+      <span th:case="-1" class="badge badge-info">Skipped</span>
       <span th:case="*" class="badge badge-danger">Failure</span>
     </th:block>
     <code th:text="${execution.command}"></code>

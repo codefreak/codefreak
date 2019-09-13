@@ -33,8 +33,9 @@ class CommandLineRunner : EvaluationRunner {
     val image = options.getRequired("image", String::class)
     val projectPath = options.getRequired("project-path", String::class)
     val commands = options.getList("commands", String::class, true)!!
+    val stopOnFail = options.get("stop-on-fail", Boolean::class) ?: true
 
-    return containerService.runCommandsForEvaluation(answer, image, projectPath, commands.toList(), processFiles)
+    return containerService.runCommandsForEvaluation(answer, image, projectPath, commands.toList(), stopOnFail, processFiles)
         .mapIndexed { index, result -> Execution(commands[index], result) }
   }
 

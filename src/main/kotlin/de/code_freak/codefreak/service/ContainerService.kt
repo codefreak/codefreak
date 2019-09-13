@@ -345,7 +345,7 @@ class ContainerService : BaseService() {
     return output
   }
 
-  fun runCommandsForEvaluation(answer: Answer, image: String, projectPath: String, commands: List<String>,
+  fun runCommandsForEvaluation(answer: Answer, image: String, projectPath: String, commands: List<String>, stopOnFail: Boolean,
                                processFiles: ((InputStream) -> Unit)? = null): List<ExecResult> {
     pullDockerImages(listOf(image))
     val containerId = createContainer(image) {
@@ -354,7 +354,14 @@ class ContainerService : BaseService() {
     }
     answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
     docker.startContainer(containerId)
-    val outputs = commands.map { exec(containerId, splitCommand(it)) }
+    val outputs = mutableListOf<ExecResult>()
+    commands.forEach {
+      if (stopOnFail && outputs.size > 0 && outputs.last().exitCode != 0L) {
+        outputs.add(ExecResult("", -1))
+      } else {
+        outputs.add(exec(containerId, splitCommand(it)))
+      }
+    }
     if (processFiles !== null) {
       archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
     }

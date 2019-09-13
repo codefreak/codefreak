@@ -36,7 +36,8 @@ class JUnitRunner : CommandLineRunner() {
     val defaultOptions = mapOf(
         "image" to "gradle",
         "project-path" to "/home/gradle/project",
-        "commands" to listOf("gradle test")
+        "stop-on-fail" to true,
+        "commands" to listOf("gradle testClasses", "gradle test")
     )
     val xmlReports = mutableListOf<ByteArray>()
     val executions = super.executeCommands(answer, defaultOptions + options) { files ->
@@ -46,7 +47,6 @@ class JUnitRunner : CommandLineRunner() {
           val out = ByteArrayOutputStream()
           StreamUtils.copy(tar, out)
           xmlReports.add(out.toByteArray())
-          println(String(xmlReports.last()))
         }
       }
     }
