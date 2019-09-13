@@ -47,7 +47,7 @@
       </li>
       <li class="nav-item">
         <a class="nav-link py-3 text-white"
-           th:classappend="${#httpServletRequest.getRequestURI() == '/assignments' ? 'active' : ''}"
+           th:classappend="${#httpServletRequest.getRequestURI().startsWith('/assignments') ? 'active' : ''}"
            th:href="@{'/assignments'}">Assignments</a>
       </li>
     </ul>

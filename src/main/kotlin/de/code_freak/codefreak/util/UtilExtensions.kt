@@ -2,6 +2,7 @@ package de.code_freak.codefreak.util
 
 import org.apache.commons.io.input.ProxyInputStream
 import org.apache.commons.io.output.ProxyOutputStream
+import org.slf4j.Logger
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -25,4 +26,9 @@ fun InputStream.afterClose(callback: () -> Any?) = object : ProxyInputStream(thi
       callback()
     }
   }
+}
+
+fun Logger.error(e: Throwable) {
+  error(e.message)
+  e.printStackTrace()
 }

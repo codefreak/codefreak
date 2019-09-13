@@ -7,14 +7,13 @@ import de.code_freak.codefreak.service.ExecResult
 import de.code_freak.codefreak.service.evaluation.EvaluationRunner
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.io.InputStream
 
 @Component
 class CommandLineRunner : EvaluationRunner {
 
-  companion object {
-    protected data class Execution(val command: String, val result: ExecResult) {
-      private constructor() : this ("", ExecResult("", 0))
-    }
+  data class Execution(val command: String, val result: ExecResult) {
+    private constructor() : this ("", ExecResult("", 0))
   }
 
   @Autowired
@@ -27,14 +26,16 @@ class CommandLineRunner : EvaluationRunner {
   }
 
   override fun run(answer: Answer, options: Map<String, Any>): String {
+    return mapper.writeValueAsString(executeCommands(answer, options, null))
+  }
+
+  protected fun executeCommands(answer: Answer, options: Map<String, Any>, processFiles: ((InputStream) -> Unit)?): List<Execution> {
     val image = options.getRequired("image", String::class)
     val projectPath = options.getRequired("project-path", String::class)
     val commands = options.getList("commands", String::class, true)!!
 
-    val results = containerService.runCommandsForEvaluation(answer, image, projectPath, commands.toList())
+    return containerService.runCommandsForEvaluation(answer, image, projectPath, commands.toList(), processFiles)
         .mapIndexed { index, result -> Execution(commands[index], result) }
-
-    return mapper.writeValueAsString(results)
   }
 
   override fun parseResultContent(content: ByteArray): Any {

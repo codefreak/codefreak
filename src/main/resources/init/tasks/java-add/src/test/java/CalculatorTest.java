@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,4 +46,11 @@ class CalculatorTest {
             calculator.add(null, null);
         });
     }
+
+    @Test
+    @Disabled
+    void skipMe() {}
+
+    @Test
+    void alwaysSucceed() {}
 }

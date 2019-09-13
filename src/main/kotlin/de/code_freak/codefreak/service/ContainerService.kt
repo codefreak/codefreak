@@ -7,6 +7,7 @@ import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.repository.AnswerRepository
 import de.code_freak.codefreak.service.file.FileService
+import de.code_freak.codefreak.util.withTrailingSlash
 import org.glassfish.jersey.internal.LocalizationMessages
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -72,7 +73,7 @@ class ContainerService : BaseService() {
         if (imageInfo == null) {
           log.warn("Image pulling is disabled but $image is not available on the daemon!")
         } else {
-          log.info("Image present: $image ${imageInfo.id()}")
+          log.debug("Image present: $image ${imageInfo.id()}")
         }
         continue
       }
@@ -193,18 +194,22 @@ class ContainerService : BaseService() {
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
     val containerId = getIdeContainer(answer.id) ?: return answer
+    archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
+      fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
+    }
+    log.info("Saved files of container with id: $containerId")
+    return entityManager.merge(answer)
+  }
+
+  protected fun archiveContainer(containerId: String, path: String, process: (InputStream) -> Unit) {
     try {
-      docker.archiveContainer(containerId, "$PROJECT_PATH/.").use { tar ->
-        fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
-      }
+      docker.archiveContainer(containerId, path).use(process)
     } catch (e: ProcessingException) {
       // okay until this is fixed https://github.com/eclipse-ee4j/jersey/issues/3486
       if (e.message != LocalizationMessages.MESSAGE_CONTENT_INPUT_STREAM_CLOSE_FAILED()) {
         throw e
       }
     }
-    log.info("Saved files of container with id: $containerId")
-    return entityManager.merge(answer)
   }
 
   protected fun createContainer(
@@ -340,7 +345,8 @@ class ContainerService : BaseService() {
     return output
   }
 
-  fun runCommandsForEvaluation(answer: Answer, image: String, projectPath: String, commands: List<String>): List<ExecResult> {
+  fun runCommandsForEvaluation(answer: Answer, image: String, projectPath: String, commands: List<String>,
+                               processFiles: ((InputStream) -> Unit)? = null): List<ExecResult> {
     pullDockerImages(listOf(image))
     val containerId = createContainer(image) {
       doNothingAndKeepAlive()
@@ -349,6 +355,9 @@ class ContainerService : BaseService() {
     answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
     docker.startContainer(containerId)
     val outputs = commands.map { exec(containerId, splitCommand(it)) }
+    if (processFiles !== null) {
+      archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
+    }
     docker.killContainer(containerId)
     docker.removeContainer(containerId)
     return outputs

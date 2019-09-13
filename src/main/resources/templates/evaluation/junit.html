@@ -2,15 +2,28 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <h3 class="card-title">JUnit</h3>
-<div class="mb-3" th:each="execution : ${content}">
+<div class="mb-3" th:each="testSuite : ${content.testSuites}">
   <h4>
-    <th:block th:switch="${execution.result.exitCode}">
-      <span th:case="0" class="badge badge-success">Success</span>
-      <span th:case="*" class="badge badge-danger">Failure</span>
-    </th:block>
-    <code th:text="${execution.command}"></code>
+    <span th:text="${testSuite.name}"></span>
+    <span th:text="${testSuite.tests - testSuite.skipped - testSuite.failures - testSuite.errors} + ' Passed'" class="badge badge-success"></span>
+    <span th:if="${testSuite.failures > 0}" th:text="${testSuite.failures} + ' Failed'" class="badge badge-danger"></span>
+    <span th:if="${testSuite.errors > 0}" th:text="${testSuite.errors} + ' Errored'" class="badge badge-danger"></span>
+    <span th:if="${testSuite.skipped > 0}" th:text="${testSuite.skipped} + ' Skipped'" class="badge badge-info"></span>
   </h4>
-  <pre th:text="${execution.result.output}"></pre>
+  <ul class="list-group">
+    <li class="list-group-item" th:each="testCase : ${testSuite.testCases}">
+      <th:block th:switch="true">
+        <i th:case="${testCase.skipped != null}" class="fas fa-forward text-info"></i>
+        <i th:case="${testCase.errors != null}" class="fas fa-exclamation-circle text-danger"></i>
+        <i th:case="${testCase.failures != null}" class="fas fa-times-circle text-danger"></i>
+        <i th:case="*" class="far fa-check-circle text-success"></i>
+      </th:block>
+      <span th:text="${testCase.name}"></span>
+      <div class="alert alert-danger mt-2 mb-1" th:each="failure : ${testCase.failures}"
+           th:text="${#strings.substring(failure.message, failure.type.length()+2)}">
+      </div>
+    </li>
+  </ul>
 </div>
 </body>
 </html>
