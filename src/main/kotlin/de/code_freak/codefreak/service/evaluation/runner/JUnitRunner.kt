@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component
 import org.springframework.util.StreamUtils
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.util.Arrays
 
 @Component
 class JUnitRunner : CommandLineRunner() {

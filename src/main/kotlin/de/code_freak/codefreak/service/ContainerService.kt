@@ -345,8 +345,14 @@ class ContainerService : BaseService() {
     return output
   }
 
-  fun runCommandsForEvaluation(answer: Answer, image: String, projectPath: String, commands: List<String>, stopOnFail: Boolean,
-                               processFiles: ((InputStream) -> Unit)? = null): List<ExecResult> {
+  fun runCommandsForEvaluation(
+    answer: Answer,
+    image: String,
+    projectPath: String,
+    commands: List<String>,
+    stopOnFail: Boolean,
+    processFiles: ((InputStream) -> Unit)? = null
+  ): List<ExecResult> {
     pullDockerImages(listOf(image))
     val containerId = createContainer(image) {
       doNothingAndKeepAlive()
