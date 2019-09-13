@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.service.AnswerService
@@ -41,7 +42,12 @@ class AssignmentController : BaseController() {
 
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
-    model.addAttribute("assignments", assignmentService.findAllAssignments())
+    val assignments = if (user.authorities.contains(Role.TEACHER)) {
+      assignmentService.findAllAssignments()
+    } else {
+      assignmentService.findAllAssignmentsForUser(user.entity.id)
+    }
+    model.addAttribute("assignments", assignments)
     return "assignments"
   }
 
@@ -51,7 +57,7 @@ class AssignmentController : BaseController() {
     model: Model
   ): String {
     val assignment = assignmentService.findAssignment(assignmentId)
-    val answerIds = answerService.getAnswerIdsForTaskIds(assignment.tasks.map { it.id }, user.id)
+    val answerIds = answerService.getAnswerIdsForTaskIds(assignment.tasks.map { it.id }, user.entity.id)
     val latestEvaluations = evaluationService.getLatestEvaluations(answerIds.values)
     val taskInfos = assignment.tasks.map {
       val answerId = answerIds[it.id]

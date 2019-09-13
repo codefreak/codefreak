@@ -26,7 +26,7 @@ class EvaluationController : BaseController() {
   @RestHandler
   @PostMapping("/evaluations")
   fun startEvaluation(@RequestParam("taskId") taskId: UUID) {
-    val answer = answerService.getAnswerForTaskId(taskId, user.id)
+    val answer = answerService.getAnswerForTaskId(taskId, user.entity.id)
     evaluationService.startEvaluation(answer)
   }
 
