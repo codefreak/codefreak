@@ -23,7 +23,11 @@
       <h3 class="card-title" th:text="|${task.number}. ${task.title}|"/>
       <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
 
-      <a class="btn btn-primary" th:href="@{${@urls.get(task)} + '/ide'}" target="_blank" th:classappend="${!taskInfo.ideRunning && !canStartNewIdeContainer ? 'disabled' : ''}">
+      <a class="btn btn-primary"
+         th:href="@{${@urls.get(task)} + '/ide'}"
+         target="_blank"
+         th:classappend="${!taskInfo.ideRunning && !canStartNewIdeContainer ? 'disabled' : ''}"
+         onclick="setTimeout(() => location.reload(), 1000)">
         <i class="far fa-edit"></i> Open in Editor <span th:if="${taskInfo.ideRunning}">(running)</span>
       </a>
       <div style="display: inline-block;">
@@ -51,9 +55,11 @@
         (Supported formats: .tar, .zip)
       </form>
       <br>
-      Last evaluation: <span th:text="${taskInfo.latestEvaluation != null ? taskInfo.latestEvaluation.createdAt : '(none)'}"></span>
+      Last evaluation: <span th:text="${taskInfo.latestEvaluation != null ? @formatter.dateTime(taskInfo.latestEvaluation.createdAt) : '(none)'}"></span>
       <a th:if="${taskInfo.latestEvaluation != null}" class="btn btn-primary" th:href="${@urls.get(taskInfo.latestEvaluation)}"><i class="fas fa-poll"></i> View Results</a>
-      <button class="btn btn-primary start-evaluation" th:attr="data-task-id=${@urls.getShortId(task.id)}"><i class="fas fa-play"></i> Start Evaluation</a></button>
+      <button class="btn btn-primary start-evaluation" th:attr="data-task-id=${@urls.getShortId(task.id)},disabled=${!taskInfo.canStartEvaluation}">
+        <i class="fas fa-play"></i> Start Evaluation
+      </button>
       <div th:if="${#lists.size(supportedGitRemotes)}">
         <form th:action="@{${@urls.get(task)} + '/git-import'}" method="post" enctype="multipart/form-data">
           <h4>Import from Git</h4>

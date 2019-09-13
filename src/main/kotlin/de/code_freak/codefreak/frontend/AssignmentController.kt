@@ -37,7 +37,7 @@ class AssignmentController : BaseController() {
   @Autowired
   lateinit var containerService: ContainerService
 
-  data class TaskInfo(val task: Task, val latestEvaluation: Evaluation?, val ideRunning: Boolean)
+  data class TaskInfo(val task: Task, val latestEvaluation: Evaluation?, val ideRunning: Boolean, val canStartEvaluation: Boolean)
 
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
@@ -58,6 +58,7 @@ class AssignmentController : BaseController() {
       TaskInfo(
           task = it,
           latestEvaluation = if (answerId == null) null else latestEvaluations[answerId]?.orElse(null),
+          canStartEvaluation = answerId != null && !evaluationService.isEvaluationRunning(answerId),
           ideRunning = answerId != null && containerService.isIdeContainerRunning(answerId)
       ) }
     model.addAttribute("assignment", assignment)

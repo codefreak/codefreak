@@ -8,7 +8,7 @@
   <h1>Evaluation Results</h1>
   <p>
     Task: <a th:href="${@urls.get(evaluation.answer.task.assignment)}" th:text="${evaluation.answer.task.title}"></a><br>
-    Date: <span th:text="${evaluation.createdAt}"></span>
+    Date: <span th:text="${@formatter.dateTime(evaluation.createdAt)}"></span>
   </p>
   <div class="card mt-4" th:each="result : ${evaluation.results}" th:with="content=${resultContents[result.id]}">
     <div class="card-body" th:insert="${'evaluation/' + resultTemplates[result.id]}"></div>
