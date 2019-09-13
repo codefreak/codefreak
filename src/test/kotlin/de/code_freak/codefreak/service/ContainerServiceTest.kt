@@ -79,8 +79,8 @@ internal class ContainerServiceTest : SpringTest() {
     val containerId = getIdeContainer(answer).id()
     // assert that file is existing and nothing is owned by root
     val dirContent = containerService.exec(containerId, arrayOf("ls", "-l", ContainerService.PROJECT_PATH))
-    assertThat(dirContent, containsString("main.c"))
-    assertThat(dirContent, not(containsString("root")))
+    assertThat(dirContent.output, containsString("main.c"))
+    assertThat(dirContent.output, not(containsString("root")))
   }
 
   @Test
