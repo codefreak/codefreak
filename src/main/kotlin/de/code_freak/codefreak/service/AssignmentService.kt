@@ -50,8 +50,10 @@ class AssignmentService : BaseService() {
       val taskContent = ByteArrayOutputStream()
       TarUtil.extractSubdirectory(ByteArrayInputStream(content), taskContent, it)
       try {
-        taskService.createFromTar(taskContent.toByteArray(), assignment, index.toLong()).let {
-          assignment.tasks.add(it)
+        self.withNewTransaction {
+          taskService.createFromTar(taskContent.toByteArray(), assignment, index.toLong()).let {
+            assignment.tasks.add(it)
+          }
         }
       } catch (e: Exception) {
         taskErrors[it] = e

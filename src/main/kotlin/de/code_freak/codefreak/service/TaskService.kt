@@ -24,7 +24,7 @@ class TaskService : BaseService() {
   fun findTask(id: UUID): Task = taskRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Task not found") }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @Transactional
   fun createFromTar(tarContent: ByteArray, assignment: Assignment, position: Long): Task {
     var task = getYamlDefinition<TaskDefinition>(tarContent.inputStream()).let {
       Task(assignment, position, it.title, it.description, 100)
