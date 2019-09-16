@@ -1,6 +1,6 @@
 package de.code_freak.codefreak.service
 
-import com.beust.klaxon.Klaxon
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Submission
@@ -83,7 +83,7 @@ class SubmissionService : BaseService() {
       }
       // write a meta-file with information about user
       val metaFile = File(submissionDir, "freak.json")
-      metaFile.writeText(Klaxon().toJsonString(submission.user))
+      ObjectMapper().writeValue(metaFile, submission.user)
       // write pdf with submission
       val pdfFile = File(submissionDir, "submission.pdf")
       pdfFile.outputStream().use { latexService.submissionToPdf(submission, it) }
