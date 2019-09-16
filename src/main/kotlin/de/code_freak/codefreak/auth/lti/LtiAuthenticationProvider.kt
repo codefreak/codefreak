@@ -8,12 +8,9 @@ import de.code_freak.codefreak.repository.UserRepository
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider
 import org.mitre.openid.connect.model.PendingOIDCAuthenticationToken
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.Authentication
 
-class LtiAuthenticationProvider : OIDCAuthenticationProvider() {
-  @Autowired
-  private lateinit var userRepository: UserRepository
+class LtiAuthenticationProvider(private val userRepository: UserRepository) : OIDCAuthenticationProvider() {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 

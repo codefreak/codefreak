@@ -70,16 +70,6 @@ class TaskController : BaseController() {
     return "ide-redirect"
   }
 
-  @PostMapping("/tasks/{taskId}/answers")
-  fun createAnswer(
-    @PathVariable("taskId") taskId: UUID
-  ): String {
-    val submission = getOrCreateSubmissionForTask(taskId)
-    containerService.saveAnswerFiles(submission.getAnswerForTask(taskId))
-    val assignment = taskService.findTask(taskId).assignment
-    return "redirect:${urls.get(assignment)}"
-  }
-
   @GetMapping("/tasks/{taskId}/source.tar", produces = ["application/tar"])
   @ResponseBody
   fun getSourceTar(
@@ -158,19 +148,6 @@ class TaskController : BaseController() {
       )
     }
     return "redirect:" + urls.get(submission.assignment)
-  }
-
-  @GetMapping("/tasks/{taskId}/answer.pdf", produces = ["application/pdf"])
-  @ResponseBody
-  fun pdfExportAnswer(
-    @PathVariable("taskId") taskId: UUID,
-    response: HttpServletResponse
-  ): StreamingResponseBody {
-    val submission = getOrCreateSubmissionForTask(taskId)
-    val answer = submission.getAnswerForTask(taskId)
-    val filename = answer.task.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
-    response.setHeader("Content-Disposition", "attachment; filename=$filename.pdf")
-    return StreamingResponseBody { latexService.answerToPdf(answer, it) }
   }
 
   /**
