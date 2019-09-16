@@ -34,7 +34,7 @@ a.stealth-link, .stealth-link a {
 .off-canvas {
   display: flex;
   flex-direction: column;
-  width: 300px;
+  width: $off-canvas-width;
   position: absolute;
   z-index: 0;
 
@@ -52,17 +52,19 @@ a.stealth-link, .stealth-link a {
 
   &.show + div,
   &.collapsing + div {
-    transform: translateX(300px);
+    transform: translateX($off-canvas-width);
   }
 }
 
-@media (max-width: 1440px) {
-  .navbar-toggler {
-    display: inline-block !important;
+.navbar-toggler {
+  display: inline-block !important;
+
+  @include media-breakpoint-up(xl) {
+    display: none !important;
   }
 }
 
-@media (min-width: 1440px) {
+@include media-breakpoint-up(xl) {
   .off-canvas {
     position: relative;
     height: auto;
@@ -89,16 +91,7 @@ a.stealth-link, .stealth-link a {
 .navbar {
   padding-top: .825rem;
   padding-bottom: .825rem;
-
-  .container {
-    padding-left: 0;
-    padding-right: 0;
-
-    @media (min-width: 1440px) {
-      padding-left: 15px;
-      padding-right: 15px;
-    }
-  }
+  min-height: 69px;
 }
 
 .navbar-brand svg {
