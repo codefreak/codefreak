@@ -10,6 +10,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
 import org.springframework.util.StreamUtils
+import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -148,6 +149,24 @@ object TarUtil {
           copyEntry(tar, extracted, it)
         }
       }
+    }
+  }
+
+  fun processUploadedArchive(file: MultipartFile, out: OutputStream) {
+    val filename = file.originalFilename ?: ""
+    try {
+      when {
+        filename.endsWith(".tar", true) -> {
+          file.inputStream.use { checkValidTar(it) }
+          file.inputStream.use { StreamUtils.copy(it, out) }
+        }
+        filename.endsWith(".zip", true) -> {
+          file.inputStream.use { zipToTar(it, out) }
+        }
+        else -> throw IllegalArgumentException("Unsupported file format")
+      }
+    } catch (e: IOException) {
+      throw IllegalArgumentException("File could not be processed")
     }
   }
 }

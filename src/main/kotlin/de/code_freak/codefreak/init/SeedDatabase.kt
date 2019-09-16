@@ -20,7 +20,6 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.core.Ordered
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
-import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 /**
@@ -81,7 +80,7 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
 
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks").file, it)
-      assignmentService.createFromTar(ByteArrayInputStream(it.toByteArray()), teacher).let { result ->
+      assignmentService.createFromTar(it.toByteArray(), teacher).let { result ->
         if (result.taskErrors.isNotEmpty()) {
           throw result.taskErrors.values.first()
         }

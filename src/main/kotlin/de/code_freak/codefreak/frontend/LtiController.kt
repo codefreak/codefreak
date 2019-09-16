@@ -20,9 +20,6 @@ class LtiController : BaseController() {
   @Autowired
   lateinit var ltiService: LtiService
 
-  @Autowired
-  lateinit var urls: Urls
-
   /**
    * Responsible for LTI Deep Linking requests
    * Shows a list of assignments that can be selected and linked in an LMS

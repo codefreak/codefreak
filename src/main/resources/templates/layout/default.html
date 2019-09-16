@@ -33,6 +33,11 @@
              th:classappend="${#httpServletRequest.getRequestURI().startsWith('/assignments') ? 'active' : ''}"
              th:href="@{'/assignments'}">Assignments</a>
         </li>
+        <li class="nav-item" sec:authorize="hasRole('ROLE_TEACHER')">
+          <a class="nav-link py-3 text-white"
+             th:classappend="${#httpServletRequest.getRequestURI().startsWith('/import') ? 'active' : ''}"
+             th:href="@{'/import'}">Import</a>
+        </li>
       </ul>
       <footer class="text-muted text-center small mt-auto p-2 stealth-link" th:insert="fragments/version-info"></footer>
     </nav>
@@ -56,7 +61,13 @@
         </header>
 
         <div class="flex-fill">
-          <div layout:fragment="content" class="container py-4">Page content will be placed here.</div>
+          <div class="container py-4">
+            <h1 th:if="${title}" th:text="${title}"></h1>
+            <div th:if="${subTitle}" class="lead text-muted" th:text="${subTitle}" />
+            <div class="alert alert-success mt-4" style="white-space: pre-wrap;" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="alert alert-danger mt-4" style="white-space: pre-wrap;" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+            <th:block layout:fragment="content"></th:block>
+          </div>
         </div>
       </div>
     </div>

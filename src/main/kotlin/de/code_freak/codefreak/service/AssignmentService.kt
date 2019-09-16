@@ -6,12 +6,11 @@ import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.lang.Exception
 import java.util.UUID
-import javax.transaction.Transactional
 
 @Service
 class AssignmentService : BaseService() {
@@ -27,6 +26,9 @@ class AssignmentService : BaseService() {
   @Autowired
   lateinit var taskService: TaskService
 
+  @Autowired
+  lateinit var self: AssignmentService
+
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Assignment not found") }
@@ -40,8 +42,7 @@ class AssignmentService : BaseService() {
   }
 
   @Transactional
-  fun createFromTar(`in`: InputStream, owner: User): AssignmentCreationResult {
-    val content = `in`.readBytes()
+  fun createFromTar(content: ByteArray, owner: User): AssignmentCreationResult {
     val definition = TarUtil.getYamlDefinition<AssignmentDefinition>(ByteArrayInputStream(content))
     val assignment = assignmentRepository.save(Assignment(definition.title, owner, null))
     val taskErrors = mutableMapOf<String, Throwable>()
@@ -49,8 +50,10 @@ class AssignmentService : BaseService() {
       val taskContent = ByteArrayOutputStream()
       TarUtil.extractSubdirectory(ByteArrayInputStream(content), taskContent, it)
       try {
-        taskService.createFromTar(taskContent.toByteArray(), assignment, index.toLong()).let {
-          assignment.tasks.add(it)
+        self.noRollbackOnError {
+          taskService.createFromTar(taskContent.toByteArray(), assignment, index.toLong()).let {
+            assignment.tasks.add(it)
+          }
         }
       } catch (e: Exception) {
         taskErrors[it] = e

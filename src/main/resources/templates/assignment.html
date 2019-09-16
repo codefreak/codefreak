@@ -5,16 +5,12 @@
 <head>
   <title th:text="${assignment.title}" />
 </head>
-<body>
+<body th:with="title=${assignment.title},subTitle=${#lists.size(taskInfos) + ' task(s)'}">
 <div layout:fragment="content">
-  <h1 th:text="${assignment.title}" />
-  <div class="lead text-muted" th:text="|${#lists.size(taskInfos)} task(s)|" />
 
   <div class="alert alert-warning mt-4" th:if="${#bools.isTrue(ideCouldNotBeStarted) || (needsNewIdeContainer && !canStartNewIdeContainer)}">
     Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
   </div>
-  <div class="alert alert-success mt-4" th:if="${successMessage != null}" th:text="${successMessage}"></div>
-  <div class="alert alert-danger mt-4" th:if="${errorMessage != null}" th:text="${errorMessage}"></div>
 
   <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task}">
     <div class="card-body">
@@ -61,25 +57,7 @@
             <div class="modal-body">
               <form class="mb-4" th:action="@{${@urls.get(task)} + '/source'}" method="post" enctype="multipart/form-data">
                 <h5>Upload files from computer</h5>
-                <div class="row">
-                  <div class="col">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text">Archive:</span>
-                      </div>
-                      <div class="custom-file">
-                        <input type="file" required name="file" class="custom-file-input" th:id="|task-file-upload-${task.position}|" accept=".tar,.zip">
-                        <label class="custom-file-label" th:for="|task-file-upload-${task.position}|">Please select an archive…</label>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-auto">
-                    <button class="btn btn-primary"><i class="fas fa-upload"></i> Upload Source</button>
-                  </div>
-                </div>
-                <div class="form-text text-muted small">
-                  Supported formats: .tar, .zip
-                </div>
+                <th:block th:replace="fragments/archive-upload" th:with="inputId=${'task-file-upload-' + task.position}"></th:block>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               </form>
               <div th:if="${#lists.size(supportedGitRemotes)}">
