@@ -44,16 +44,14 @@ class AssignmentService : BaseService() {
   @Transactional
   fun createFromTar(content: ByteArray, owner: User): AssignmentCreationResult {
     val definition = TarUtil.getYamlDefinition<AssignmentDefinition>(ByteArrayInputStream(content))
-    val assignment = assignmentRepository.save(Assignment(definition.title, owner, null))
+    val assignment = self.withNewTransaction { assignmentRepository.save(Assignment(definition.title, owner, null)) }
     val taskErrors = mutableMapOf<String, Throwable>()
     definition.tasks.forEachIndexed { index, it ->
       val taskContent = ByteArrayOutputStream()
       TarUtil.extractSubdirectory(ByteArrayInputStream(content), taskContent, it)
       try {
-        self.noRollbackOnError {
-          taskService.createFromTar(taskContent.toByteArray(), assignment, index.toLong()).let {
-            assignment.tasks.add(it)
-          }
+        taskService.createFromTar(taskContent.toByteArray(), assignment, index.toLong()).let {
+          assignment.tasks.add(it)
         }
       } catch (e: Exception) {
         taskErrors[it] = e

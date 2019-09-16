@@ -7,11 +7,12 @@ import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil.getYamlDefinition
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class TaskService {
+class TaskService : BaseService() {
 
   @Autowired
   private lateinit var taskRepository: TaskRepository
@@ -23,7 +24,7 @@ class TaskService {
   fun findTask(id: UUID): Task = taskRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Task not found") }
 
-  @Transactional(noRollbackFor = [Throwable::class])
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun createFromTar(tarContent: ByteArray, assignment: Assignment, position: Long): Task {
     var task = getYamlDefinition<TaskDefinition>(tarContent.inputStream()).let {
       Task(assignment, position, it.title, it.description, 100)
