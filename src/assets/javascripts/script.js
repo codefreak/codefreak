@@ -14,3 +14,16 @@ $('.custom-file-input').each(function () {
     $label.text(this.files.length ? this.files[0].name : originalLabel)
   });
 });
+
+// focus username and or password field if login is present
+$(function () {
+  var username = $('#username');
+  var password = $('#password');
+  if (!username.length || !password.length) {
+    return;
+  } else if (!username.val()) {
+    username.focus()
+  } else {
+    password.focus();
+  }
+});
