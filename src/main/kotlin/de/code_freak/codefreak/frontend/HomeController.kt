@@ -12,9 +12,7 @@ import javax.servlet.http.HttpSession
 class HomeController : BaseController() {
 
   @RequestMapping("/")
-  fun home(): String {
-    return "home"
-  }
+  fun home() = "redirect:/assignments"
 
   @RequestMapping("/login")
   fun login(request: HttpServletRequest, session: HttpSession, model: Model): String {
