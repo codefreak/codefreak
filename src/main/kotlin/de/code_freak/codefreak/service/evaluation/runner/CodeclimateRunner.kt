@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.service.evaluation.runner
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -37,6 +38,7 @@ class CodeclimateRunner : EvaluationRunner {
       Type(value = Issue::class, name = "issue"),
       Type(value = Measurement::class, name = "measurement")
   )
+  @JsonIgnoreProperties(ignoreUnknown = true)
   private open class Result {
     var engine_name = ""
   }
