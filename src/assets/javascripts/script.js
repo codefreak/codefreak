@@ -24,7 +24,7 @@ function showToast(title, icon, content) {
       <div class="toast-header">
         <i class="mr-1 ${icon}"></i>
         <strong class="mr-auto">${title}</strong>
-        <small class="text-muted">${now.getHours()}:${now.getMinutes()}</small>
+        <small class="text-muted">${now.getHours()}:${now.getMinutes().pad()}</small>
         <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -32,4 +32,10 @@ function showToast(title, icon, content) {
       <div class="toast-body">${content}</div>
     </div>
   `).children().last().toast('show')
+}
+
+Number.prototype.pad = function(size) {
+  let s = String(this);
+  while (s.length < (size || 2)) {s = "0" + s;}
+  return s;
 }
