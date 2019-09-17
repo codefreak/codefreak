@@ -1,5 +1,6 @@
 //= require bootstrap
 //= require jquery
+//= require assignment
 
 // fix modals by moving them to the end of <body>
 $('.modal').each(function () {
