@@ -14,3 +14,5 @@ $('.custom-file-input').each(function () {
     $label.text(this.files.length ? this.files[0].name : originalLabel)
   });
 });
+
+$('[data-toggle="tooltip"]').tooltip()
