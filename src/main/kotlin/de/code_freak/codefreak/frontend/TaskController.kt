@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse
 @Controller
 class TaskController : BaseController() {
 
-  data class EvaluationStatus(val running: Boolean, val url: String?)
+  data class EvaluationStatus(val running: Boolean, val taskTitle: String, val url: String?)
 
   @Autowired(required = false)
   var gitImportService: GitImportService? = null
@@ -149,6 +149,6 @@ class TaskController : BaseController() {
     val answer = submission.getAnswerForTask(taskId)
     val running = evaluationService.isEvaluationRunning(answer.id)
     val url = evaluationService.getLatestEvaluation(answer.id).map { urls.get(it) }.orElse(null)
-    return EvaluationStatus(running, url)
+    return EvaluationStatus(running, answer.task.title, url)
   }
 }

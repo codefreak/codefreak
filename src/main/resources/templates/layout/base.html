@@ -17,9 +17,10 @@
 <body>
 
 <div layout:fragment="body" th:remove="tag">Page body</div>
+<div id="toast-container"></div>
 
 <script src="/assets/script.js"></script>
 <div th:remove="tag" th:utext="${@environment.getProperty('code-freak.frontend.custom-script')}"></div>
-<div layout:fragment="scripts" th:remove="tag"></div>
+<th:block layout:fragment="scripts" th:remove="tag"></th:block>
 </body>
 </html>
