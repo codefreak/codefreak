@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<h3 class="card-title">JUnit</h3>
+<h3 class="card-title">Unit Tests</h3>
 <th:block th:with="error = ${content.executions.?[result.exitCode == -1].size() > 0}">
   <div th:unless="${error}" class="mb-3" th:each="testSuite : ${content.testSuites}">
     <h4>
@@ -20,9 +20,9 @@
           <i th:case="*" class="far fa-check-circle text-success"></i>
         </th:block>
         <span th:text="${testCase.name}"></span>
-        <div class="alert alert-danger mt-2 mb-1" th:each="failure : ${testCase.failures}"
-             th:text="${#strings.substring(failure.message, failure.type.length()+2)}">
-        </div>
+        <pre class="alert alert-danger mt-2 mb-1" th:each="failure : ${testCase.failures}"
+             th:text="${failure.message.startsWith(failure.type+': ') ? #strings.substring(failure.message, failure.type.length()+2) : failure.message}">
+        </pre>
       </li>
     </ul>
   </div>

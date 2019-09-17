@@ -25,7 +25,7 @@ const refreshEvaluationStatus = taskId => () => {
         .attr("href", res.url)
         .removeClass("disabled");
 
-      const message = `<p>Evaluation for Task '${res.taskTitle}' has finished.</p><a href="${res.url}" class="btn btn-sm btn-light"><i class="fas fa-poll"></i> Show Results</a>`;
+      const message = `<p>Evaluation for task '${res.taskTitle}' has finished.</p><a href="${res.url}" class="btn btn-sm btn-light"><i class="fas fa-poll"></i> Show Results</a>`;
       showToast('Evaluation finished', 'fas fa-check text-success', message);
     }
   })
