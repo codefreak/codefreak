@@ -7,7 +7,6 @@ import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil.getYamlDefinition
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
