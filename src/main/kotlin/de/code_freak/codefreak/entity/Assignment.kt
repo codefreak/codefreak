@@ -34,5 +34,5 @@ class Assignment(
    */
   @OneToMany(mappedBy = "assignment")
   @OrderBy("position ASC")
-  var tasks: SortedSet<Task> = sortedSetOf()
+  var tasks: SortedSet<Task> = sortedSetOf<Task>()
 }

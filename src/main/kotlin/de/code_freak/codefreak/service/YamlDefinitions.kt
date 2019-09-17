@@ -16,3 +16,10 @@ data class EvaluationDefinition(
 ) {
   private constructor() : this("")
 }
+
+data class AssignmentDefinition(
+  val title: String,
+  val tasks: List<String>
+) {
+  private constructor() : this("", emptyList())
+}
