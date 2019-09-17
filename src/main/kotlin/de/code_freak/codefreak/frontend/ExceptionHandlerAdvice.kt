@@ -20,8 +20,8 @@ import java.util.UUID
 @ControllerAdvice
 class ExceptionHandlerAdvice : ResponseEntityExceptionHandler() {
 
-  @ExceptionHandler(EntityNotFoundException::class)
-  fun handleEntityNotFoundException(throwable: Throwable, controllerMethod: HandlerMethod): Any {
+  @ExceptionHandler(EntityNotFoundException::class, NoSuchElementException::class)
+  fun handleNotFoundException(throwable: Throwable, controllerMethod: HandlerMethod): Any {
     return getResponse(throwable.message, controllerMethod, HttpStatus.NOT_FOUND)
   }
 

@@ -116,3 +116,15 @@ a.stealth-link, .stealth-link a {
   height: auto;
   max-width: 160px;
 }
+
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  max-width: 300px;
+  width: calc(100% - 40px);
+
+  .toast {
+    width: 100%;
+  }
+}

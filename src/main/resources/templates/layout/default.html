@@ -64,8 +64,8 @@
           <div class="container py-4">
             <h1 th:if="${title}" th:text="${title}"></h1>
             <div th:if="${subTitle}" class="lead text-muted" th:text="${subTitle}" />
-            <div class="alert alert-success mt-4" style="white-space: pre-wrap;" th:if="${successMessage}" th:text="${successMessage}"></div>
-            <div class="alert alert-danger mt-4" style="white-space: pre-wrap;" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+            <div class="alert alert-success mt-4" style="white-space: pre-line;" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="alert alert-danger mt-4" style="white-space: pre-line;" th:if="${errorMessage}" th:text="${errorMessage}"></div>
             <th:block layout:fragment="content"></th:block>
           </div>
         </div>

@@ -7,7 +7,6 @@ import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.GitImportService
-import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,9 +32,6 @@ class AssignmentController : BaseController() {
   var gitImportService: GitImportService? = null
 
   @Autowired
-  lateinit var latexService: LatexService
-
-  @Autowired
   lateinit var answerService: AnswerService
 
   @Autowired
@@ -44,7 +40,14 @@ class AssignmentController : BaseController() {
   @Autowired
   lateinit var containerService: ContainerService
 
-  data class TaskInfo(val task: Task, val latestEvaluation: Evaluation?, val ideRunning: Boolean, val canStartEvaluation: Boolean)
+  data class TaskInfo(
+    val task: Task,
+    val answerId: UUID?,
+    val latestEvaluation: Evaluation?,
+    val evaluationRunning: Boolean,
+    val ideRunning: Boolean,
+    val evaluationUpToDate: Boolean
+  )
 
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
@@ -69,8 +72,10 @@ class AssignmentController : BaseController() {
       val answerId = answerIds[it.id]
       TaskInfo(
           task = it,
+          answerId = answerId,
+          evaluationRunning = if (answerId == null) false else evaluationService.isEvaluationRunning(answerId),
           latestEvaluation = if (answerId == null) null else latestEvaluations[answerId]?.orElse(null),
-          canStartEvaluation = answerId != null && !evaluationService.isEvaluationRunning(answerId),
+          evaluationUpToDate = answerId?.let { evaluationService.isEvaluationUpToDate(answerId) } ?: false,
           ideRunning = answerId != null && containerService.isIdeContainerRunning(answerId)
       ) }
     model.addAttribute("assignment", assignment)

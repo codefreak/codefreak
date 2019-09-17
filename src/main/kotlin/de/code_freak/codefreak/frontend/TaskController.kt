@@ -6,6 +6,7 @@ import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.GitImportService
 import de.code_freak.codefreak.service.ResourceLimitException
 import de.code_freak.codefreak.service.TaskService
+import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.FrontendUtil
 import de.code_freak.codefreak.util.TarUtil
@@ -26,6 +27,8 @@ import javax.servlet.http.HttpServletResponse
 @Controller
 class TaskController : BaseController() {
 
+  data class EvaluationStatus(val running: Boolean, val taskTitle: String, val url: String?)
+
   @Autowired(required = false)
   var gitImportService: GitImportService? = null
 
@@ -40,6 +43,9 @@ class TaskController : BaseController() {
 
   @Autowired
   lateinit var fileService: FileService
+
+  @Autowired
+  lateinit var evaluationService: EvaluationService
 
   @GetMapping("/tasks/{taskId}/ide")
   fun getOrStartIde(
@@ -134,5 +140,15 @@ class TaskController : BaseController() {
   fun getOrCreateSubmissionForTask(taskId: UUID): Submission {
     val assignmentId = taskService.findTask(taskId).assignment.id
     return super.getOrCreateSubmission(assignmentId)
+  }
+
+  @RestHandler
+  @GetMapping("/tasks/{taskId}/evaluation")
+  fun getEvaluationStatus(@PathVariable("taskId") taskId: UUID): EvaluationStatus {
+    val submission = getOrCreateSubmissionForTask(taskId)
+    val answer = submission.getAnswerForTask(taskId)
+    val running = evaluationService.isEvaluationRunning(answer.id)
+    val url = evaluationService.getLatestEvaluation(answer.id).map { urls.get(it) }.orElse(null)
+    return EvaluationStatus(running, answer.task.title, url)
   }
 }

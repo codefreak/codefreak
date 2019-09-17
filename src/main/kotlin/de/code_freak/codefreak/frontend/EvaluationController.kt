@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.util.UUID
 
 @Controller
@@ -23,11 +24,16 @@ class EvaluationController : BaseController() {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @RestHandler
   @PostMapping("/evaluations")
-  fun startEvaluation(@RequestParam("taskId") taskId: UUID) {
+  fun startEvaluation(@RequestParam("taskId") taskId: UUID, model: RedirectAttributes): String {
     val answer = answerService.getAnswerForTaskId(taskId, user.entity.id)
-    evaluationService.startEvaluation(answer)
+    val assignmentPage = urls.get(answer.task.assignment)
+    return withErrorPage(assignmentPage) {
+      evaluationService.startEvaluation(answer)
+      model.successMessage("Evaluation for task '${answer.task.title}' has been placed in the queue. " +
+          "It may take some time depending on server load.")
+      "redirect:$assignmentPage"
+    }
   }
 
   @GetMapping("/evaluations/{evaluationId}")
