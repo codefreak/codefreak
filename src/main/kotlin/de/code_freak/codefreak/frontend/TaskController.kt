@@ -4,9 +4,9 @@ import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.GitImportService
-import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.ResourceLimitException
 import de.code_freak.codefreak.service.TaskService
+import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.FrontendUtil
 import de.code_freak.codefreak.util.TarUtil
@@ -21,12 +21,13 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-import java.io.IOException
 import java.util.UUID
 import javax.servlet.http.HttpServletResponse
 
 @Controller
 class TaskController : BaseController() {
+
+  data class EvaluationStatus(val running: Boolean, val taskTitle: String, val url: String?)
 
   @Autowired(required = false)
   var gitImportService: GitImportService? = null
@@ -41,13 +42,10 @@ class TaskController : BaseController() {
   lateinit var containerService: ContainerService
 
   @Autowired
-  lateinit var latexService: LatexService
-
-  @Autowired
   lateinit var fileService: FileService
 
   @Autowired
-  lateinit var urls: Urls
+  lateinit var evaluationService: EvaluationService
 
   @GetMapping("/tasks/{taskId}/ide")
   fun getOrStartIde(
@@ -106,22 +104,8 @@ class TaskController : BaseController() {
   ): String {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = submission.getAnswerForTask(taskId)
-    val filename = file.originalFilename ?: ""
-    try {
-      when {
-        filename.endsWith(".tar", true) -> {
-          file.inputStream.use { TarUtil.checkValidTar(it) }
-          file.inputStream.use { answerService.setFiles(answer.id, it) }
-        }
-        filename.endsWith(".zip", true) -> {
-          file.inputStream.use { answerService.setFiles(answer.id).use { out -> TarUtil.zipToTar(it, out) } }
-        }
-        else -> throw IllegalArgumentException("Unsupported file format")
-      }
-    } catch (e: IOException) {
-      throw IllegalArgumentException("File could not be processed")
-    }
-    model.addFlashAttribute("successMessage", "Successfully uploaded source for task '${answer.task.title}'.")
+    answerService.setFiles(answer.id).use { TarUtil.processUploadedArchive(file, it) }
+    model.successMessage("Successfully uploaded source for task '${answer.task.title}'.")
     return "redirect:" + urls.get(submission.assignment)
   }
 
@@ -156,5 +140,15 @@ class TaskController : BaseController() {
   fun getOrCreateSubmissionForTask(taskId: UUID): Submission {
     val assignmentId = taskService.findTask(taskId).assignment.id
     return super.getOrCreateSubmission(assignmentId)
+  }
+
+  @RestHandler
+  @GetMapping("/tasks/{taskId}/evaluation")
+  fun getEvaluationStatus(@PathVariable("taskId") taskId: UUID): EvaluationStatus {
+    val submission = getOrCreateSubmissionForTask(taskId)
+    val answer = submission.getAnswerForTask(taskId)
+    val running = evaluationService.isEvaluationRunning(answer.id)
+    val url = evaluationService.getLatestEvaluation(answer.id).map { urls.get(it) }.orElse(null)
+    return EvaluationStatus(running, answer.task.title, url)
   }
 }

@@ -7,6 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
 import org.springframework.validation.annotation.Validated
+import java.time.ZoneId
+import java.util.Locale
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
 
@@ -19,6 +21,7 @@ class AppConfiguration {
   lateinit var instanceId: String
   var authenticationMethod = AuthenticationMethod.SIMPLE
 
+  val l10n = L10N()
   val docker = Docker()
   val ide = Ide()
   val traefik = Traefik()
@@ -160,5 +163,11 @@ class AppConfiguration {
       var sshKey = ""
       var sshKeyPass: String? = null
     }
+  }
+
+  class L10N {
+    var dateTimeFormat = "dd.MM.yyyy HH:mm"
+    var timeZone: ZoneId = ZoneId.systemDefault()
+    var locale: Locale = Locale.getDefault()
   }
 }

@@ -1,18 +1,21 @@
 package de.code_freak.codefreak.frontend
 
+import de.code_freak.codefreak.config.AppConfiguration
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-
 import java.time.Instant
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Locale
 
 @Component
 class Formatter {
-  private val instantDateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-      .withLocale(Locale.UK)
-      .withZone(ZoneId.systemDefault())
+  @Autowired
+  lateinit var config: AppConfiguration
+
+  private val instantDateTimeFormatter by lazy {
+    DateTimeFormatter.ofPattern(config.l10n.dateTimeFormat)
+        .withLocale(config.l10n.locale)
+        .withZone(config.l10n.timeZone)
+  }
 
   fun dateTime(instant: Instant) = instantDateTimeFormatter.format(instant)
 }

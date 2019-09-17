@@ -9,6 +9,7 @@ import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.EntityNotFoundException
 import de.code_freak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
+import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.explore.JobExplorer
@@ -52,9 +53,7 @@ class EvaluationService : BaseService() {
 
   fun startEvaluation(answer: Answer) {
     containerService.saveAnswerFiles(answer)
-    getLatestEvaluation(answer.id).ifPresent {
-      check(!it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answer.id))) { "Evaluation is up to date" }
-    }
+    check(!isEvaluationUpToDate(answer.id)) { "Evaluation is up to date" }
     check(!isEvaluationRunning(answer.id)) { "Evaluation is already running" }
     log.debug("Queuing evaluation for answer {}", answer.id)
     val params = JobParametersBuilder().apply {
@@ -80,10 +79,18 @@ class EvaluationService : BaseService() {
     return false
   }
 
+  fun isEvaluationUpToDate(answerId: UUID): Boolean = getLatestEvaluation(answerId).map {
+    it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answerId))
+  }.orElse(false)
+
   fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name]
       ?: throw IllegalArgumentException("Evaluation runner '$name' not found")
 
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
+  }
+
+  fun getExecutionStatus(executionId: Long): BatchStatus {
+    return jobExplorer.findRunningJobExecutions(EvaluationConfiguration.JOB_NAME).first { it.id == executionId }.status
   }
 }

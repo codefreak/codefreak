@@ -7,16 +7,21 @@ import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.GitImportService
-import de.code_freak.codefreak.service.LatexService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
+import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 import javax.servlet.http.HttpServletResponse
 
@@ -27,9 +32,6 @@ class AssignmentController : BaseController() {
   var gitImportService: GitImportService? = null
 
   @Autowired
-  lateinit var latexService: LatexService
-
-  @Autowired
   lateinit var answerService: AnswerService
 
   @Autowired
@@ -38,7 +40,14 @@ class AssignmentController : BaseController() {
   @Autowired
   lateinit var containerService: ContainerService
 
-  data class TaskInfo(val task: Task, val latestEvaluation: Evaluation?, val ideRunning: Boolean, val canStartEvaluation: Boolean)
+  data class TaskInfo(
+    val task: Task,
+    val answerId: UUID?,
+    val latestEvaluation: Evaluation?,
+    val evaluationRunning: Boolean,
+    val ideRunning: Boolean,
+    val evaluationUpToDate: Boolean
+  )
 
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
@@ -63,8 +72,10 @@ class AssignmentController : BaseController() {
       val answerId = answerIds[it.id]
       TaskInfo(
           task = it,
+          answerId = answerId,
+          evaluationRunning = if (answerId == null) false else evaluationService.isEvaluationRunning(answerId),
           latestEvaluation = if (answerId == null) null else latestEvaluations[answerId]?.orElse(null),
-          canStartEvaluation = answerId != null && !evaluationService.isEvaluationRunning(answerId),
+          evaluationUpToDate = answerId?.let { evaluationService.isEvaluationUpToDate(answerId) } ?: false,
           ideRunning = answerId != null && containerService.isIdeContainerRunning(answerId)
       ) }
     model.addAttribute("assignment", assignment)
@@ -83,5 +94,23 @@ class AssignmentController : BaseController() {
     val filename = assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
     response.setHeader("Content-Disposition", "attachment; filename=$filename-submissions.tar")
     return StreamingResponseBody { submissionService.createTarArchiveOfSubmissions(assignmentId, it) }
+  }
+
+  @Secured(Authority.ROLE_TEACHER)
+  @PostMapping("/assignments")
+  fun createAssignment(
+    @RequestParam("file") file: MultipartFile,
+    model: RedirectAttributes
+  ) = withErrorPage("/import") {
+
+    ByteArrayOutputStream().use { out ->
+      TarUtil.processUploadedArchive(file, out)
+      val result = assignmentService.createFromTar(out.toByteArray(), user.entity)
+      model.successMessage("Assignment has been created")
+      if (result.taskErrors.isNotEmpty()) {
+        model.errorMessage("Not all tasks could be imported successfully:\n" + result.taskErrors.map { "${it.key}: ${it.value.message}" }.joinToString("\n"))
+      }
+      "redirect:" + urls.get(result.assignment)
+    }
   }
 }
