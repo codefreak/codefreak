@@ -105,7 +105,7 @@ class AssignmentController : BaseController() {
 
     ByteArrayOutputStream().use { out ->
       TarUtil.processUploadedArchive(file, out)
-      val result = assignmentService.createFromTar(out.toByteArray(), user.entity)
+      val result = assignmentService.createFromTar(out.toByteArray(), user.entity, null)
       model.successMessage("Assignment has been created")
       if (result.taskErrors.isNotEmpty()) {
         model.errorMessage("Not all tasks could be imported successfully:\n" + result.taskErrors.map { "${it.key}: ${it.value.message}" }.joinToString("\n"))

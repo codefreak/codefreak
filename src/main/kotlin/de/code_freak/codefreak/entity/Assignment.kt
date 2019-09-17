@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.entity
 
+import java.time.Instant
 import java.util.SortedSet
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -27,7 +28,9 @@ class Assignment(
    * This can be null for assignments that are shared via link
    */
   @ManyToOne(optional = true)
-  var classroom: Classroom?
+  var classroom: Classroom?,
+
+  var deadline: Instant? = null
 ) : BaseEntity() {
   /**
    * A list of tasks in this assignment ordered by their position
@@ -35,4 +38,8 @@ class Assignment(
   @OneToMany(mappedBy = "assignment")
   @OrderBy("position ASC")
   var tasks: SortedSet<Task> = sortedSetOf<Task>()
+
+  val closed get() = deadline?.let { Instant.now().isAfter(deadline) } ?: false
+
+  fun requireNotClosed() = require(!closed) { "The assignment is already closed." }
 }

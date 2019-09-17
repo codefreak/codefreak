@@ -193,11 +193,15 @@ class ContainerService : BaseService() {
 
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
+    if (answer.task.assignment.closed) {
+      log.info("Skipped saving of files from answer ${answer.id} because assignment is closed")
+      return answer
+    }
     val containerId = getIdeContainer(answer.id) ?: return answer
     archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
       fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
     }
-    log.info("Saved files of container with id: $containerId")
+    log.info("Saved files of answer ${answer.id} from container $containerId")
     return entityManager.merge(answer)
   }
 

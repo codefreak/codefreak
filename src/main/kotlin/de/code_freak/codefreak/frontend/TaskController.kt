@@ -104,7 +104,7 @@ class TaskController : BaseController() {
   ): String {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = submission.getAnswerForTask(taskId)
-    answerService.setFiles(answer.id).use { TarUtil.processUploadedArchive(file, it) }
+    answerService.setFiles(answer).use { TarUtil.processUploadedArchive(file, it) }
     model.successMessage("Successfully uploaded source for task '${answer.task.title}'.")
     return "redirect:" + urls.get(submission.assignment)
   }

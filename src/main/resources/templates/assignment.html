@@ -6,7 +6,16 @@
   <title th:text="${assignment.title}" />
 </head>
 <body th:with="title=${assignment.title},subTitle=${#lists.size(taskInfos) + ' task(s)'}">
-<div layout:fragment="content">
+<div layout:fragment="content" th:with="closed=${assignment.closed}">
+
+  <div class="alert alert-info mt-4" th:if="${!closed && assignment.deadline != null}">
+    This assignment will be closed at <strong th:text="${@formatter.dateTime(assignment.deadline)}"></strong>.
+    Make sure to submit all your solutions before the deadline. It will not be possible afterwards.
+  </div>
+
+  <div class="alert alert-warning mt-4" th:if="${closed}">
+    <i class="fas fa-lock"></i> This assignment is closed. You can still view and download your solutions.
+  </div>
 
   <div class="alert alert-warning mt-4" th:if="${#bools.isTrue(ideCouldNotBeStarted) || (needsNewIdeContainer && !canStartNewIdeContainer)}">
     Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
