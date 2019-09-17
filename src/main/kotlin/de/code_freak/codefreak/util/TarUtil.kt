@@ -101,9 +101,10 @@ object TarUtil {
       if (zipEntry.isDirectory) {
         tar.putArchiveEntry(tarEntry)
       } else {
-        tarEntry.size = zipEntry.size
+        val content = zip.readBytes()
+        tarEntry.size = content.size.toLong()
         tar.putArchiveEntry(tarEntry)
-        IOUtils.copy(zip, tar)
+        tar.write(content)
       }
       tar.closeArchiveEntry()
     }
