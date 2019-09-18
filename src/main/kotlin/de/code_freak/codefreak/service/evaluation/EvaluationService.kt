@@ -9,6 +9,7 @@ import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.EntityNotFoundException
 import de.code_freak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
+import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.explore.JobExplorer
