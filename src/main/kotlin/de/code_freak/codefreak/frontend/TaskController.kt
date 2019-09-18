@@ -1,7 +1,6 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.entity.Submission
-import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.GitImportService
 import de.code_freak.codefreak.service.ResourceLimitException
@@ -36,9 +35,6 @@ class TaskController : BaseController() {
   lateinit var taskService: TaskService
 
   @Autowired
-  lateinit var answerService: AnswerService
-
-  @Autowired
   lateinit var containerService: ContainerService
 
   @Autowired
@@ -55,7 +51,7 @@ class TaskController : BaseController() {
   ): String {
     val submission = getOrCreateSubmissionForTask(taskId)
     // start a container based on the submission for the current task
-    val answer = submission.getAnswerForTask(taskId)
+    val answer = submission.getOrCreateAnswer(taskId)
     try {
       containerService.startIdeContainer(answer)
     } catch (e: ResourceLimitException) {
@@ -75,7 +71,7 @@ class TaskController : BaseController() {
     response: HttpServletResponse
   ): StreamingResponseBody {
     val submission = getOrCreateSubmissionForTask(taskId)
-    val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId))
+    val answer = containerService.saveAnswerFiles(submission.getOrCreateAnswer(taskId))
     response.setHeader("Content-Disposition", "attachment; filename=source.tar")
     if (fileService.collectionExists(answer.id)) {
       return fileService.readCollectionTar(answer.id).use { FrontendUtil.streamResponse(it) }
@@ -90,7 +86,7 @@ class TaskController : BaseController() {
     response: HttpServletResponse
   ): StreamingResponseBody {
     val submission = getOrCreateSubmissionForTask(taskId)
-    val answer = containerService.saveAnswerFiles(submission.getAnswerForTask(taskId))
+    val answer = containerService.saveAnswerFiles(submission.getOrCreateAnswer(taskId))
     response.setHeader("Content-Disposition", "attachment; filename=source.zip")
     val tar = fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId)
     return tar.use { StreamingResponseBody { out -> TarUtil.tarToZip(it, out) } }
@@ -103,7 +99,7 @@ class TaskController : BaseController() {
     model: RedirectAttributes
   ): String {
     val submission = getOrCreateSubmissionForTask(taskId)
-    val answer = submission.getAnswerForTask(taskId)
+    val answer = submission.getOrCreateAnswer(taskId)
     answerService.setFiles(answer.id).use { TarUtil.processUploadedArchive(file, it) }
     model.successMessage("Successfully uploaded source for task '${answer.task.title}'.")
     return "redirect:" + urls.get(submission.assignment)
@@ -116,7 +112,7 @@ class TaskController : BaseController() {
     model: RedirectAttributes
   ): String {
     val submission = getOrCreateSubmissionForTask(taskId)
-    val answer = submission.getAnswerForTask(taskId)
+    val answer = submission.getOrCreateAnswer(taskId)
     try {
       gitImportService?.importFiles(remoteUrl, answer)
       model.addFlashAttribute(
@@ -146,7 +142,7 @@ class TaskController : BaseController() {
   @GetMapping("/tasks/{taskId}/evaluation")
   fun getEvaluationStatus(@PathVariable("taskId") taskId: UUID): EvaluationStatus {
     val submission = getOrCreateSubmissionForTask(taskId)
-    val answer = submission.getAnswerForTask(taskId)
+    val answer = submission.getOrCreateAnswer(taskId)
     val running = evaluationService.isEvaluationRunning(answer.id)
     val url = evaluationService.getLatestEvaluation(answer.id).map { urls.get(it) }.orElse(null)
     return EvaluationStatus(running, answer.task.title, url)
