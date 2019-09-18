@@ -14,7 +14,6 @@
   <div class="card my-4" th:each="result : ${evaluation.results}" th:with="content=${resultContents[result.id]}">
     <div class="card-body" th:insert="${'evaluation/' + resultTemplates[result.id]}"></div>
   </div>
-  <a class="btn btn-outline-dark" th:href="${@urls.get(evaluation.answer.task.assignment)}"><i class="fas fa-arrow-circle-left"></i> Back to task</a>
 </div>
 </body>
 </html>

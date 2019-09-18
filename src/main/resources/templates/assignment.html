@@ -3,13 +3,17 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default}">
 <head>
-  <title th:text="${assignment.title}" />
+  <title th:text="${assignment.title}"></title>
 </head>
 <body th:with="title=${assignment.title},subTitle=${#lists.size(taskInfos) + ' task(s)'}">
 <div layout:fragment="content">
 
   <div class="alert alert-warning mt-4" th:if="${#bools.isTrue(ideCouldNotBeStarted) || (needsNewIdeContainer && !canStartNewIdeContainer)}">
     Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
+  </div>
+
+  <div sec:authorize="hasRole('ROLE_TEACHER')" class="mt-4 d-flex flex-row-reverse">
+    <a class="btn btn-light" th:href="${@urls.get(assignment) + '/submissions'}"><i class="fas fa-table"></i> Student Submissions</a>
   </div>
 
   <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task}">
@@ -56,15 +60,7 @@
         <button class="ml-auto mr-1 btn btn-light" type="button" data-toggle="modal" th:data-target="|#modal-upload-task-${task.position}|">
           <i class="fas fa-upload"></i> Upload/import source code
         </button>
-        <div class="d-inline-block dropdown">
-          <button class="btn btn-light dropdown-toggle" type="button" data-toggle="dropdown">
-            <i class="fas fa-download"></i> Download source code
-          </button>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" th:href="@{${@urls.get(task)} + '/source.zip'}">zip-Archive (.zip)</a>
-            <a class="dropdown-item" th:href="@{${@urls.get(task)} + '/source.tar'}">tar-Archive (.tar)</a>
-          </div>
-        </div>
+        <th:block th:insert="fragments/archive-download" th:with="btnText='Download source code',url=${@urls.get(task) + '/source'}" />
       </div>
 
       <div th:id="|modal-upload-task-${task.position}|" class="modal fade" tabindex="-1" role="dialog">

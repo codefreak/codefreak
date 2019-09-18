@@ -39,7 +39,7 @@ abstract class BaseController {
     }
   }
 
-  fun Submission.getOrCreateAnswer(taskId: UUID) = answers.firstOrNull { it.task.id == taskId }
+  fun Submission.getOrCreateAnswer(taskId: UUID) = getAnswer(taskId)
       ?: answerService.createAnswer(this, taskId)
 
   protected fun withErrorPage(path: String, block: () -> String): String {

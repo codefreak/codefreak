@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}"
+      th:with="title=${'Sumissions for ' + assignment.title}">
+<head>
+  <title th:text="${title}"></title>
+</head>
+<body>
+<div layout:fragment="content">
+
+<div th:if="${submissions.isEmpty()}" class="alert alert-info mt-4">
+  There are no submissions yet.
+</div>
+
+<table th:unless="${submissions.isEmpty()}" class="table table-responsive mt-4">
+  <thead>
+    <tr>
+      <th scope="col">User</th>
+      <th scope="col" th:each="task : ${assignment.tasks}" th:text="${task.title}"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr th:each="submission : ${submissions}">
+      <td th:text="${submission.user.username}"></td>
+      <td th:each="task : ${assignment.tasks}" th:with="answer=${submission.getAnswer(task.id)}">
+        <span th:if="${answer == null}" class="text-muted">no answer</span>
+        <th:block th:if="${answer != null}" th:with="btnClass='btn-sm',url=${@urls.get(answer) + '/source'}" th:insert="fragments/archive-download" />
+        <a th:if="${answer != null}"
+           th:with="evaluation=${evaluations.get(answer.id)}"
+           class="btn btn-primary btn-sm"
+           th:classappend="${evaluation.isPresent() ? '' : 'disabled'}"
+           th:href="${evaluation.isPresent() ? @urls.get(evaluation.get()) : '#'}">
+          <i class="fas fa-poll"></i>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+</body>
+</html>
