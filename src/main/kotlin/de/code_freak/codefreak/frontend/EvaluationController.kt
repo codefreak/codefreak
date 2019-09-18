@@ -25,6 +25,7 @@ class EvaluationController : BaseController() {
     val answer = answerService.getAnswerForTaskId(taskId, user.entity.id)
     val assignmentPage = urls.get(answer.task.assignment)
     return withErrorPage(assignmentPage) {
+      answer.task.assignment.requireNotClosed()
       evaluationService.startEvaluation(answer)
       model.successMessage("Evaluation for task '${answer.task.title}' has been placed in the queue. " +
           "It may take some time depending on server load.")

@@ -21,6 +21,7 @@ import org.springframework.core.Ordered
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
+import java.time.Instant
 
 /**
  * Seed the database with some initial value
@@ -80,7 +81,7 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
 
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks").file, it)
-      assignmentService.createFromTar(it.toByteArray(), teacher).let { result ->
+      assignmentService.createFromTar(it.toByteArray(), teacher, Instant.now().plusMillis(60*1000)).let { result ->
         if (result.taskErrors.isNotEmpty()) {
           throw result.taskErrors.values.first()
         }
