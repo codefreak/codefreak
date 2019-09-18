@@ -70,9 +70,13 @@ class EvaluationService : BaseService() {
 
   fun isEvaluationRunning(answerId: UUID): Boolean {
     val id = answerId.toString()
-    for (execution in jobExplorer.findRunningJobExecutions(EvaluationConfiguration.JOB_NAME)) {
-      if (id == execution.jobParameters.getString(EvaluationConfiguration.PARAM_ANSWER_ID)) {
-        return true
+    for (jobInstance in jobExplorer.findJobInstancesByJobName(EvaluationConfiguration.JOB_NAME, 0, Int.MAX_VALUE)) {
+      jobExplorer.getJobExecutions(jobInstance).forEach {
+        if (id == it.jobParameters.getString(EvaluationConfiguration.PARAM_ANSWER_ID)) {
+          if (it.status == BatchStatus.STARTED || it.status == BatchStatus.STARTING) {
+            return true
+          }
+        }
       }
     }
     return false

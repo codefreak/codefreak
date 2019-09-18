@@ -1,6 +1,5 @@
 package de.code_freak.codefreak.entity
 
-import java.util.UUID
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -24,9 +23,4 @@ class Submission(
    */
   @OneToMany(mappedBy = "submission")
   var answers: MutableSet<Answer> = mutableSetOf()
-
-  /**
-   * Get the answer for the given task id
-   */
-  fun getAnswerForTask(taskId: UUID) = answers.first { answer -> answer.task.id == taskId }
 }

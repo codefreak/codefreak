@@ -1,5 +1,6 @@
 //= require bootstrap
 //= require jquery
+//= require assignment
 
 // fix modals by moving them to the end of <body>
 $('.modal').each(function () {
@@ -39,3 +40,16 @@ Number.prototype.pad = function(size) {
   while (s.length < (size || 2)) {s = "0" + s;}
   return s;
 }
+
+// focus username and or password field if login is present
+$(function () {
+  var username = $('#username');
+  var password = $('#password');
+  if (!username.length || !password.length) {
+    return;
+  } else if (!username.val()) {
+    username.focus()
+  } else {
+    password.focus();
+  }
+});

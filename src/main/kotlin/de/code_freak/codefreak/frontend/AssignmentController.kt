@@ -4,7 +4,6 @@ import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.entity.Task
-import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.GitImportService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
@@ -30,9 +29,6 @@ class AssignmentController : BaseController() {
 
   @Autowired(required = false)
   var gitImportService: GitImportService? = null
-
-  @Autowired
-  lateinit var answerService: AnswerService
 
   @Autowired
   lateinit var evaluationService: EvaluationService

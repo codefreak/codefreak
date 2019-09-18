@@ -1,6 +1,5 @@
 package de.code_freak.codefreak.frontend
 
-import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,9 +17,6 @@ class EvaluationController : BaseController() {
 
   @Autowired
   lateinit var evaluationService: EvaluationService
-
-  @Autowired
-  lateinit var answerService: AnswerService
 
   private val log = LoggerFactory.getLogger(this::class.java)
 

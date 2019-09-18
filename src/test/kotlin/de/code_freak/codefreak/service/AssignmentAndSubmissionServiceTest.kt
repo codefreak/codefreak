@@ -3,8 +3,6 @@ package de.code_freak.codefreak.service
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Submission
@@ -17,8 +15,6 @@ import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.hasSize
-import org.hamcrest.Matchers.instanceOf
 import org.hamcrest.io.FileMatchers
 import org.junit.Before
 import org.junit.Test
@@ -90,18 +86,6 @@ class AssignmentAndSubmissionServiceTest {
   fun `findSubmission throws for no results`() {
     `when`(submissionRepository.findById(any())).thenReturn(Optional.empty())
     submissionService.findSubmission(UUID(0, 0))
-  }
-
-  @Test
-  fun createNewSubmission() {
-    val out = ByteArrayOutputStream()
-    `when`(fileService.readCollectionTar(eq(assignment.id))).thenReturn(files.inputStream())
-    `when`(fileService.writeCollectionTar(eq(answer.id))).thenReturn(out)
-    `when`(answerRepository.save<Answer>(anyOrNull())).then { it.getArgument(0) }
-    val submission = submissionService.createNewSubmission(assignment, user)
-    assertThat(submission.answers, hasSize(1))
-    assertThat(submission.answers.first(), instanceOf(Answer::class.java))
-    verify(answerService, times(1)).copyFilesFromTask(submission.answers.first())
   }
 
   @Test
