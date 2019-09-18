@@ -73,7 +73,7 @@ class EvaluationService : BaseService() {
     val id = answerId.toString()
     for (jobInstance in jobExplorer.findJobInstancesByJobName(EvaluationConfiguration.JOB_NAME, 0, Int.MAX_VALUE)) {
       jobExplorer.getJobExecutions(jobInstance).forEach {
-        if(id == it.jobParameters.getString(EvaluationConfiguration.PARAM_ANSWER_ID)) {
+        if (id == it.jobParameters.getString(EvaluationConfiguration.PARAM_ANSWER_ID)) {
           if (it.status == BatchStatus.STARTED || it.status == BatchStatus.STARTING) {
             return true
           }

@@ -2,6 +2,7 @@ package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.auth.AppUser
 import de.code_freak.codefreak.entity.Submission
+import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.util.FrontendUtil
@@ -21,6 +22,9 @@ abstract class BaseController {
   protected lateinit var assignmentService: AssignmentService
 
   @Autowired
+  protected lateinit var answerService: AnswerService
+
+  @Autowired
   protected lateinit var urls: Urls
 
   protected val user: AppUser
@@ -31,9 +35,12 @@ abstract class BaseController {
    */
   protected fun getOrCreateSubmission(assignmentId: UUID): Submission {
     return submissionService.findSubmission(assignmentId, user.entity.id).orElseGet {
-      submissionService.createNewSubmission(assignmentService.findAssignment(assignmentId), user.entity)
+      submissionService.createSubmission(assignmentService.findAssignment(assignmentId), user.entity)
     }
   }
+
+  fun Submission.getOrCreateAnswer(taskId: UUID) = answers.firstOrNull { it.task.id == taskId }
+      ?: answerService.createAnswer(this, taskId)
 
   protected fun withErrorPage(path: String, block: () -> String): String {
     return try {

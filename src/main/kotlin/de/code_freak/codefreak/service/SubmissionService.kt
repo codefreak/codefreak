@@ -1,7 +1,6 @@
 package de.code_freak.codefreak.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.entity.User
@@ -51,17 +50,9 @@ class SubmissionService : BaseService() {
   fun findSubmissionsOfUser(userId: UUID) = submissionRepository.findAllByUserId(userId)
 
   @Transactional
-  fun createNewSubmission(assignment: Assignment, user: User): Submission {
+  fun createSubmission(assignment: Assignment, user: User): Submission {
     val submission = Submission(assignment = assignment, user = user)
-    submissionRepository.save(submission)
-
-    // create an answer for every task in this assignment
-    assignment.tasks.forEach { task ->
-      val answer = answerRepository.save(Answer(submission, task))
-      answerService.copyFilesFromTask(answer)
-    }
-
-    return submission
+    return submissionRepository.save(submission)
   }
 
   fun createTarArchiveOfSubmissions(assignmentId: UUID, out: OutputStream) {

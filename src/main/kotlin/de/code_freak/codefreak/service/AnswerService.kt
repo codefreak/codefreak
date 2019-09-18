@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.service
 
 import de.code_freak.codefreak.entity.Answer
+import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.repository.AnswerRepository
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
@@ -10,6 +11,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.AntPathMatcher
 import org.springframework.util.StreamUtils
 import java.io.ByteArrayInputStream
@@ -90,5 +92,12 @@ class AnswerService : BaseService() {
       if (matcher.match(it, path)) return true
     }
     return false
+  }
+
+  @Transactional
+  fun createAnswer(submission: Submission, taskId: UUID): Answer {
+    val answer = answerRepository.save(Answer(submission, taskService.findTask(taskId)))
+    copyFilesFromTask(answer)
+    return answer
   }
 }

@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.core.task.TaskExecutor
-import org.springframework.core.task.SimpleAsyncTaskExecutor
 import org.springframework.batch.core.launch.support.SimpleJobLauncher
 import org.springframework.batch.core.repository.JobRepository
 
