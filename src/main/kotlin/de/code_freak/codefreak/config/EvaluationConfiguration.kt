@@ -35,7 +35,8 @@ class EvaluationConfiguration {
   @EvaluationQualifier
   fun evaluationTaskExecutor(): TaskExecutor {
     val taskExecutor = ThreadPoolTaskExecutor()
-    taskExecutor.setThreadNamePrefix("evaluation")
+    taskExecutor.setThreadNamePrefix("evaluation-")
+    taskExecutor.corePoolSize = config.evaluation.maxConcurrentExecutions
     taskExecutor.maxPoolSize = config.evaluation.maxConcurrentExecutions
     taskExecutor.setQueueCapacity(config.evaluation.maxQueueSize)
     return taskExecutor
@@ -45,7 +46,7 @@ class EvaluationConfiguration {
   @EvaluationQualifier
   fun evaluationJobLauncher(jobRepository: JobRepository): JobLauncher {
     val jobLauncher = SimpleJobLauncher()
-    jobLauncher.setTaskExecutor(SimpleAsyncTaskExecutor())
+    jobLauncher.setTaskExecutor(evaluationTaskExecutor())
     jobLauncher.setJobRepository(jobRepository)
     jobLauncher.afterPropertiesSet()
     return jobLauncher
