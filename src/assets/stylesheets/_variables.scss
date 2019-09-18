@@ -7,3 +7,6 @@ $secondary: adjust_hue($primary, 90);
 $border-radius: 0;
 
 $link-color: saturate($secondary, 25%);
+
+// Custom variables
+$off-canvas-width: 300px;
