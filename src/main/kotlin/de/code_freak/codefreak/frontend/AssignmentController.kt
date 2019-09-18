@@ -100,13 +100,16 @@ class AssignmentController : BaseController() {
   @PostMapping("/assignments")
   fun createAssignment(
     @RequestParam("file") file: MultipartFile,
+    @RequestParam(name = "deadline", required = false) deadlineString: String?,
     model: RedirectAttributes
   ) = withErrorPage("/import") {
 
+    val deadline = parseLocalDateTime(deadlineString, "deadline")
+
     ByteArrayOutputStream().use { out ->
       TarUtil.processUploadedArchive(file, out)
-      val result = assignmentService.createFromTar(out.toByteArray(), user.entity, null)
-      model.successMessage("Assignment has been created")
+      val result = assignmentService.createFromTar(out.toByteArray(), user.entity, deadline)
+      model.successMessage("Assignment has been created.")
       if (result.taskErrors.isNotEmpty()) {
         model.errorMessage("Not all tasks could be imported successfully:\n" + result.taskErrors.map { "${it.key}: ${it.value.message}" }.joinToString("\n"))
       }
