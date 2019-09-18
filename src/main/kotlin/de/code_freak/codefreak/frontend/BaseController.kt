@@ -59,7 +59,7 @@ abstract class BaseController {
 
   protected fun RedirectAttributes.errorMessage(message: String) = addFlashAttribute("errorMessage", message)
 
-  protected fun parseLocalDateTime(str: String?, fieldName :String = "date"): Instant? {
+  protected fun parseLocalDateTime(str: String?, fieldName: String = "date"): Instant? {
     if (str.isNullOrEmpty()) return null
     try {
       val local = LocalDateTime.parse(str)
