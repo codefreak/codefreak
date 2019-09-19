@@ -69,3 +69,15 @@ deploy:
     on:
       branch: demo
     script: docker-ci-deploy --tag demo -- cfreak/code-freak
+
+  # publish release
+  - provider: script
+    skip_cleanup: true
+    on:
+      condition: $RELEASE_VERSION != ''
+    script: >-
+      git remote set-url origin https://${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git &&
+      git config --global user.email "${GITHUB_USER}" &&
+      git config --global user.name "Travis CI" &&
+      git checkout $TRAVIS_BRANCH &&
+      ./gradlew release -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=$RELEASE_VERSION

@@ -56,7 +56,7 @@ code-freak:
   latex:
     image: "blang/latex:latest"
   ide:
-    image: "cfreak/ide:latest"
+    image: "cfreak/ide:1"
     # Interval for checking for idle containers in ms. Default 30 seconds.
     idle-check-rate: 30000
     # Time span after which an idle container is shut down. Default 1 minute.

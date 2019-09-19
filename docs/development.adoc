@@ -1,4 +1,4 @@
-= Development environment setup
+= Development
 :sectnums:
 :toc: left
 :toclevels: 3
@@ -80,3 +80,40 @@ $ ./gradlew vagrantTest   # for testing with Vagrant Docker daemon
 ```console
 $ ./gradlew spotlessApply
 ```
+
+== Releasing a new version
+
+The project is split up into a main application and some auxiliary that have there own repositories (e.g. the IDE).
+There are different release processes depending on the project. All repositories use https://semver.org/[semantic versioning].
+
+Most projects produce a Docker image as their main artifact. The following tags are automatically created/updated by CI:
+
+* `latest` -> latest released version
+* `<major>` -> latest release with this major version
+* `<major>.<minor>` -> latest release with this major and minor version
+* `<major>.<minor>.<patch>` -> each specific release
+* `canary` -> latest build from master (not necessarily released yet)
+
+
+WARNING: If you need at least a specific version of a Docker image as a dependency, you need to create a new major release
+of the depending AND the dependent project. This is necessary event if the dependent version is downwards compatible.
+This is a limitation of the tag system introduced above.
+
+=== Advanced release process via CI
+
+NOTE: This is currently only used by the main application https://github.com/code-freak/code-freak[`code-freak/code-freak`].
+
+To release a new version, https://blog.travis-ci.com/2017-08-24-trigger-custom-build[trigger a custom CI build] with the
+following configuration (use actual version number). Run the task on the appropriate major version branch (currently
+only `master` is supported).
+
+```
+env:
+  - RELEASE_VERSION=1.0.0
+```
+
+=== Simple release process
+
+NOTE: This is used by all project that are not mentioned in the advanced release process section.
+
+To release a new version, simply create a GitHub release (tag) in the form `<major>.<minor>.<patch>` (no prefix).
