@@ -24,13 +24,13 @@ before_install:
   # https://github.com/praekeltfoundation/docker-ci-deploy
   - pip3 install --user --upgrade pip
   - pip3 install --user docker-ci-deploy
-  - docker pull cfreak/ide:latest
 
 # Run gradle checks and try to build the Docker image as latest
 script:
   - ./gradlew check sonarqube
   - docker build
     --build-arg GITHUB_TOKEN
+
     --build-arg GIT_COMMIT="$TRAVIS_COMMIT"
     --build-arg GIT_TAG="$TRAVIS_TAG"
     -t cfreak/code-freak:latest $TRAVIS_BUILD_DIR
