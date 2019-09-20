@@ -31,7 +31,6 @@ script:
   - ./gradlew check sonarqube
   - docker build
     --build-arg GITHUB_TOKEN
-
     --build-arg GIT_COMMIT="$TRAVIS_COMMIT"
     --build-arg GIT_TAG="$TRAVIS_TAG"
     -t cfreak/code-freak:latest $TRAVIS_BUILD_DIR
