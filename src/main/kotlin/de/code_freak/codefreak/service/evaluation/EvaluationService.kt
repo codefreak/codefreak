@@ -53,8 +53,8 @@ class EvaluationService : BaseService() {
 
   fun startEvaluation(answer: Answer) {
     containerService.saveAnswerFiles(answer)
-    check(!isEvaluationUpToDate(answer.id)) { "Evaluation is up to date" }
-    check(!isEvaluationRunning(answer.id)) { "Evaluation is already running" }
+    check(!isEvaluationUpToDate(answer.id)) { "Evaluation is up to date." }
+    check(!isEvaluationRunning(answer.id)) { "Evaluation is already running." }
     log.debug("Queuing evaluation for answer {}", answer.id)
     val params = JobParametersBuilder().apply {
       addString(EvaluationConfiguration.PARAM_ANSWER_ID, answer.id.toString())
@@ -92,9 +92,5 @@ class EvaluationService : BaseService() {
 
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
-  }
-
-  fun getExecutionStatus(executionId: Long): BatchStatus {
-    return jobExplorer.findRunningJobExecutions(EvaluationConfiguration.JOB_NAME).first { it.id == executionId }.status
   }
 }

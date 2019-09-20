@@ -28,7 +28,7 @@ class GitImportService {
     val uri = URI(remoteUrlString)
     val remote = getRemote(uri.host) ?: throw IllegalArgumentException("Import from '${uri.host}' is not supported.")
     val gitUri = getGitUri(remote, uri)
-    answerService.setFiles(answer.id).use {
+    answerService.setFiles(answer).use {
       createRemoteTarArchive(gitUri, it)
     }
   }

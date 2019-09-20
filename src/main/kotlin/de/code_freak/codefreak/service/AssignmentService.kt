@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
+import java.time.Instant
 import java.util.UUID
 
 @Service
@@ -42,9 +43,11 @@ class AssignmentService : BaseService() {
   }
 
   @Transactional
-  fun createFromTar(content: ByteArray, owner: User): AssignmentCreationResult {
+  fun createFromTar(content: ByteArray, owner: User, deadline: Instant?): AssignmentCreationResult {
     val definition = TarUtil.getYamlDefinition<AssignmentDefinition>(ByteArrayInputStream(content))
-    val assignment = self.withNewTransaction { assignmentRepository.save(Assignment(definition.title, owner, null)) }
+    val assignment = self.withNewTransaction {
+      assignmentRepository.save(Assignment(definition.title, owner, null, deadline))
+    }
     val taskErrors = mutableMapOf<String, Throwable>()
     definition.tasks.forEachIndexed { index, it ->
       val taskContent = ByteArrayOutputStream()

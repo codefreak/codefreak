@@ -6,7 +6,16 @@
   <title th:text="${assignment.title}"></title>
 </head>
 <body th:with="title=${assignment.title},subTitle=${#lists.size(taskInfos) + ' task(s)'}">
-<div layout:fragment="content">
+<div layout:fragment="content" th:with="closed=${assignment.closed}">
+
+  <div class="alert alert-info mt-4" th:if="${!closed && assignment.deadline != null}">
+    This assignment will be closed at <strong th:text="${@formatter.dateTime(assignment.deadline)}"></strong>.
+    Make sure to submit all your solutions before the deadline. It will not be possible afterwards.
+  </div>
+
+  <div class="alert alert-warning mt-4" th:if="${closed}">
+    <i class="fas fa-lock"></i> This assignment is closed. You can still view and download your solutions.
+  </div>
 
   <div class="alert alert-warning mt-4" th:if="${#bools.isTrue(ideCouldNotBeStarted) || (needsNewIdeContainer && !canStartNewIdeContainer)}">
     Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
@@ -38,8 +47,8 @@
             <form action="/evaluations" method="post">
               <span th:unless="${taskInfo.evaluationRunning}"
                     data-toggle="tooltip"
-                    th:title="${taskInfo.answerId == null ? 'You have worked at this task yet.' : (taskInfo.evaluationUpToDate && !taskInfo.ideRunning ? 'The evaluation is already up to date.' : '')}">
-                <button th:attr="disabled=${taskInfo.answerId == null || (taskInfo.evaluationUpToDate && !taskInfo.ideRunning)}" class="btn btn-primary" type="submit">
+                    th:title="${closed ? 'Assignment is closed.' : (taskInfo.answerId == null ? 'You have worked at this task yet.' : (taskInfo.evaluationUpToDate && !taskInfo.ideRunning ? 'The evaluation is already up to date.' : ''))}">
+                <button th:attr="disabled=${closed || taskInfo.answerId == null || (taskInfo.evaluationUpToDate && !taskInfo.ideRunning)}" class="btn btn-primary" type="submit">
                   <i class="fas fa-play"></i> Start
                 </button>
               </span>
@@ -57,7 +66,7 @@
           </div>
         </div>
 
-        <button class="ml-auto mr-1 btn btn-light" type="button" data-toggle="modal" th:data-target="|#modal-upload-task-${task.position}|">
+        <button th:attr="disabled=${closed}" class="ml-auto mr-1 btn btn-light" type="button" data-toggle="modal" th:data-target="|#modal-upload-task-${task.position}|">
           <i class="fas fa-upload"></i> Upload/import source code
         </button>
         <th:block th:insert="fragments/archive-download" th:with="btnText='Download source code',url=${@urls.get(task) + '/source'}" />

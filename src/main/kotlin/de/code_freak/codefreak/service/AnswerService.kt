@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.AntPathMatcher
-import org.springframework.util.StreamUtils
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -42,12 +41,9 @@ class AnswerService : BaseService() {
 
   fun getAnswer(answerId: UUID): Answer = answerRepository.findById(answerId).orElseThrow { EntityNotFoundException("Answer not found.") }
 
-  fun setFiles(answerId: UUID): OutputStream {
-    return fileService.writeCollectionTar(answerId).afterClose { containerService.answerFilesUpdated(answerId) }
-  }
-
-  fun setFiles(answerId: UUID, files: InputStream) {
-    setFiles(answerId).use { StreamUtils.copy(files, it) }
+  fun setFiles(answer: Answer): OutputStream {
+    answer.task.assignment.requireNotClosed()
+    return fileService.writeCollectionTar(answer.id).afterClose { containerService.answerFilesUpdated(answer.id) }
   }
 
   fun copyFilesFromTask(answer: Answer) {
