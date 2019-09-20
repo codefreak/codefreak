@@ -25,6 +25,9 @@
 
       <a class="btn btn-primary" th:href="@{${@urls.get(assignment)}}">
         <i class="fas fa-file-alt"></i> Details</a>
+      <a class="btn btn-light"
+         sec:authorize="hasRole('ROLE_TEACHER')"
+         th:href="${@urls.get(assignment) + '/submissions'}"><i class="fas fa-table"></i> Student Submissions</a>
     </div>
   </div>
 </div>
