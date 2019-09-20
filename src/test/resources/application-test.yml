@@ -15,6 +15,8 @@ code-freak:
         token-url: "https://lms.example.org/token"
         jwk-url: "https://lms.example.org/certs"
         key-store-entry-name: codefreak
+  docker:
+    pull-policy: always
 
 spring.jpa.database: HSQL
 spring.jpa.hibernate.ddl-auto: update
