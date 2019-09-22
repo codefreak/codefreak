@@ -38,6 +38,7 @@ class Assignment(
   @OneToMany(mappedBy = "assignment")
   @OrderBy("position ASC")
   var tasks: SortedSet<Task> = sortedSetOf<Task>()
+    get() = field.sortedBy { it.position }.toSortedSet()
 
   val closed get() = deadline?.let { Instant.now().isAfter(deadline) } ?: false
 

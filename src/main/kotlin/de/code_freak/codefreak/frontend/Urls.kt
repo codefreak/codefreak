@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.frontend
 
 import com.hsingh.shortuuid.ShortUuid
+import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.BaseEntity
 import de.code_freak.codefreak.entity.Evaluation
@@ -19,6 +20,8 @@ class Urls {
   fun get(assignment: Assignment) = "/assignments/" + assignment.shortId
 
   fun get(evaluation: Evaluation) = "/evaluations/" + evaluation.shortId
+
+  fun get(answer: Answer) = "/answers/" + answer.shortId
 
   fun getLtiLaunch(assignment: Assignment) = "/lti/launch/${assignment.shortId}"
 
