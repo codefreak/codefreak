@@ -24,7 +24,7 @@
   <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task}">
     <div class="card-body">
       <h3 class="card-title" th:text="${task.title}"/>
-      <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
+      <p class="card-text" th:if="${task.body}" th:utext="${@markdown.html(task.body)}"/>
 
       <div class="d-flex flex-row">
         <a class="btn btn-primary ml-1"
