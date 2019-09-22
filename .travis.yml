@@ -62,6 +62,7 @@ deploy:
   - provider: script
     on:
       tags: true
+      all_branches: true
     # This will also tag and deploy minor and major version (1.2.3 as 1.2 and 1)
     script: docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/code-freak
   # deploy demo branch
