@@ -47,7 +47,7 @@
             <form action="/evaluations" method="post">
               <span th:unless="${taskInfo.evaluationRunning}"
                     data-toggle="tooltip"
-                    th:title="${closed ? 'Assignment is closed.' : (taskInfo.answerId == null ? 'You have worked at this task yet.' : (taskInfo.evaluationUpToDate && !taskInfo.ideRunning ? 'The evaluation is already up to date.' : ''))}">
+                    th:title="${closed ? 'Assignment is closed.' : (taskInfo.answerId == null ? 'You have not worked on this task yet.' : (taskInfo.evaluationUpToDate && !taskInfo.ideRunning ? 'The evaluation is already up to date.' : ''))}">
                 <button th:attr="disabled=${closed || taskInfo.answerId == null || (taskInfo.evaluationUpToDate && !taskInfo.ideRunning)}" class="btn btn-primary" type="submit">
                   <i class="fas fa-play"></i> Start
                 </button>
