@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.frontend
 
+import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.GitImportService
@@ -10,6 +11,7 @@ import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.FrontendUtil
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 import javax.servlet.http.HttpServletResponse
 
@@ -146,5 +149,21 @@ class TaskController : BaseController() {
     val running = evaluationService.isEvaluationRunning(answer.id)
     val url = evaluationService.getLatestEvaluation(answer.id).map { urls.get(it) }.orElse(null)
     return EvaluationStatus(running, answer.task.title, url)
+  }
+
+  @Secured(Authority.ROLE_TEACHER)
+  @PostMapping("/tasks")
+  fun updateTask(
+    @RequestParam("file") file: MultipartFile,
+    @RequestParam(name = "taskId") taskId: UUID,
+    model: RedirectAttributes
+  ) = withErrorPage("/import") {
+
+    ByteArrayOutputStream().use { out ->
+      TarUtil.processUploadedArchive(file, out)
+      val task = taskService.updateFromTar(out.toByteArray(), taskId)
+      model.successMessage("Task '${task.title}' has been updated.")
+      "redirect:" + urls.get(task.assignment)
+    }
   }
 }
