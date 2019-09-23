@@ -298,6 +298,7 @@ class ContainerService : BaseService() {
     val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
     docker.listContainers(
         DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID),
+        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, config.instanceId),
         DockerClient.ListContainersParam.withStatusRunning()
     )
         .forEach {
