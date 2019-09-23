@@ -33,5 +33,17 @@ class TaskService : BaseService() {
     return task
   }
 
+  @Transactional
+  fun updateFromTar(tarContent: ByteArray, taskId: UUID): Task {
+    var task = findTask(taskId)
+    getYamlDefinition<TaskDefinition>(tarContent.inputStream()).let {
+      task.title = it.title
+      task.body = it.description
+    }
+    task = taskRepository.save(task)
+    fileService.writeCollectionTar(task.id).use { it.write(tarContent) }
+    return task
+  }
+
   fun getTaskDefinition(taskId: UUID) = fileService.readCollectionTar(taskId).use { getYamlDefinition<TaskDefinition>(it) }
 }
