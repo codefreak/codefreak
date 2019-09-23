@@ -154,9 +154,9 @@ class TaskController : BaseController() {
   @Secured(Authority.ROLE_TEACHER)
   @PostMapping("/tasks")
   fun updateTask(
-      @RequestParam("file") file: MultipartFile,
-      @RequestParam(name = "taskId") taskId: UUID,
-      model: RedirectAttributes
+    @RequestParam("file") file: MultipartFile,
+    @RequestParam(name = "taskId") taskId: UUID,
+    model: RedirectAttributes
   ) = withErrorPage("/import") {
 
     ByteArrayOutputStream().use { out ->
