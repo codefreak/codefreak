@@ -39,6 +39,8 @@ class AnswerService : BaseService() {
   fun getAnswerForTaskId(taskId: UUID, userId: UUID): Answer = answerRepository.findByTaskIdAndSubmissionUserId(taskId, userId)
       .orElseThrow { EntityNotFoundException("Answer not found.") }
 
+  fun getAnswer(answerId: UUID): Answer = answerRepository.findById(answerId).orElseThrow { EntityNotFoundException("Answer not found.") }
+
   fun setFiles(answer: Answer): OutputStream {
     answer.task.assignment.requireNotClosed()
     return fileService.writeCollectionTar(answer.id).afterClose { containerService.answerFilesUpdated(answer.id) }

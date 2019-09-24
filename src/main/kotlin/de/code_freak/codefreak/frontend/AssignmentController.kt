@@ -112,4 +112,24 @@ class AssignmentController : BaseController() {
       "redirect:" + urls.get(result.assignment)
     }
   }
+
+  @Secured(Authority.ROLE_TEACHER)
+  @GetMapping("/assignments/{id}/submissions")
+  fun getSubmissions(
+    @PathVariable("id") assignmentId: UUID,
+    model: Model
+  ): String {
+    val assignment = assignmentService.findAssignment(assignmentId)
+    val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
+    val evaluations = submissions
+        .map { submission -> submission.answers.map { it.id } }
+        .map { evaluationService.getLatestEvaluations(it) }
+        .flatMap { it.toList() }
+        .toMap()
+
+    model.addAttribute("assignment", assignment)
+    model.addAttribute("submissions", submissions)
+    model.addAttribute("evaluations", evaluations)
+    return "submissions"
+  }
 }

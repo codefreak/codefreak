@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/default}">
 <head>
-  <title th:text="${assignment.title}" />
+  <title th:text="${assignment.title}"></title>
 </head>
 <body th:with="title=${assignment.title},subTitle=${#lists.size(taskInfos) + ' task(s)'}">
 <div layout:fragment="content" th:with="closed=${assignment.closed}">
@@ -21,10 +21,14 @@
     Currently, no new online IDEs can be started because of server capacity limits. You can still download sources and upload solutions manually.
   </div>
 
+  <div sec:authorize="hasRole('ROLE_TEACHER')" class="mt-4 d-flex flex-row-reverse">
+    <a class="btn btn-light" th:href="${@urls.get(assignment) + '/submissions'}"><i class="fas fa-table"></i> Student Submissions</a>
+  </div>
+
   <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task}">
     <div class="card-body">
       <h3 class="card-title" th:text="${task.title}"/>
-      <p class="card-text" th:utext="${@markdown.html(task.body)}"/>
+      <p class="card-text" th:if="${task.body}" th:utext="${@markdown.html(task.body)}"/>
 
       <div class="d-flex flex-row">
         <a class="btn btn-primary ml-1"
@@ -43,7 +47,7 @@
             <form action="/evaluations" method="post">
               <span th:unless="${taskInfo.evaluationRunning}"
                     data-toggle="tooltip"
-                    th:title="${closed ? 'Assignment is closed.' : (taskInfo.answerId == null ? 'You have worked at this task yet.' : (taskInfo.evaluationUpToDate && !taskInfo.ideRunning ? 'The evaluation is already up to date.' : ''))}">
+                    th:title="${closed ? 'Assignment is closed.' : (taskInfo.answerId == null ? 'You have not worked on this task yet.' : (taskInfo.evaluationUpToDate && !taskInfo.ideRunning ? 'The evaluation is already up to date.' : ''))}">
                 <button th:attr="disabled=${closed || taskInfo.answerId == null || (taskInfo.evaluationUpToDate && !taskInfo.ideRunning)}" class="btn btn-primary" type="submit">
                   <i class="fas fa-play"></i> Start
                 </button>
@@ -65,15 +69,7 @@
         <button th:attr="disabled=${closed}" class="ml-auto mr-1 btn btn-light" type="button" data-toggle="modal" th:data-target="|#modal-upload-task-${task.position}|">
           <i class="fas fa-upload"></i> Upload/import source code
         </button>
-        <div class="d-inline-block dropdown">
-          <button class="btn btn-light dropdown-toggle" type="button" data-toggle="dropdown">
-            <i class="fas fa-download"></i> Download source code
-          </button>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" th:href="@{${@urls.get(task)} + '/source.zip'}">zip-Archive (.zip)</a>
-            <a class="dropdown-item" th:href="@{${@urls.get(task)} + '/source.tar'}">tar-Archive (.tar)</a>
-          </div>
-        </div>
+        <th:block th:insert="fragments/archive-download" th:with="btnText='Download source code',url=${@urls.get(task) + '/source'}" />
       </div>
 
       <div th:id="|modal-upload-task-${task.position}|" class="modal fade" tabindex="-1" role="dialog">
