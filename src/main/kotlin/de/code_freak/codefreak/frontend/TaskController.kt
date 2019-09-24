@@ -160,7 +160,7 @@ class TaskController : BaseController() {
   ) = withErrorPage("/import") {
 
     ByteArrayOutputStream().use { out ->
-      TarUtil.processUploadedArchive(file, out)
+      TarUtil.writeUploadAsTar(file, out)
       val task = taskService.updateFromTar(out.toByteArray(), taskId)
       model.successMessage("Task '${task.title}' has been updated.")
       "redirect:" + urls.get(task.assignment)
