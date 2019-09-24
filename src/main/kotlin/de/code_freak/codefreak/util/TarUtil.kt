@@ -153,7 +153,7 @@ object TarUtil {
     }
   }
 
-  fun processUploadedArchive(file: MultipartFile, out: OutputStream) {
+  fun writeUploadAsTar(file: MultipartFile, out: OutputStream) {
     val filename = file.originalFilename ?: ""
     try {
       when {
@@ -164,10 +164,21 @@ object TarUtil {
         filename.endsWith(".zip", true) -> {
           file.inputStream.use { zipToTar(it, out) }
         }
-        else -> throw IllegalArgumentException("Unsupported file format")
+        // otherwise create a new tar archive that contains only the uploaded file
+        else -> wrapUploadInTar(file, out)
       }
     } catch (e: IOException) {
       throw IllegalArgumentException("File could not be processed")
     }
+  }
+
+  private fun wrapUploadInTar(file: MultipartFile, out: OutputStream) {
+    val outputStream = TarArchiveOutputStream(out)
+    val entry = TarArchiveEntry(file.originalFilename)
+    entry.size = file.size
+    outputStream.putArchiveEntry(entry)
+    file.inputStream.use { StreamUtils.copy(it, outputStream) }
+    outputStream.closeArchiveEntry()
+    outputStream.finish()
   }
 }
