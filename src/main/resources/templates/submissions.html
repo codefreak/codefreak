@@ -23,16 +23,23 @@
   <tbody>
     <tr th:each="submission : ${submissions}">
       <td th:text="${submission.user.username}"></td>
-      <td th:each="task : ${assignment.tasks}" th:with="answer=${submission.getAnswer(task.id)}">
+      <td th:each="task : ${assignment.tasks}" th:with="answer=${submission.getAnswer(task.id)}, evaluation=${evaluations.get(answer.id)}">
         <span th:if="${answer == null}" class="text-muted">no answer</span>
         <th:block th:if="${answer != null}" th:with="btnClass='btn-sm',url=${@urls.get(answer) + '/source'}" th:insert="fragments/archive-download" />
         <a th:if="${answer != null}"
-           th:with="evaluation=${evaluations.get(answer.id)}"
            class="btn btn-primary btn-sm"
            th:classappend="${evaluation.isPresent() ? '' : 'disabled'}"
            th:href="${evaluation.isPresent() ? @urls.get(evaluation.get()) : '#'}">
           <i class="fas fa-poll"></i>
         </a>
+        <div class="d-inline-block" th:if="${evaluation.isPresent()}">
+          <th:block th:each="result : ${evaluation.get().results}" th:switch="${states.get(result.id).name()}">
+            <i th:case="'SUCCESS'" class="fas fa-check-circle text-success" th:title="${result.runnerName}" data-toggle="tooltip"></i>
+            <i th:case="'FAILURE'" class="fas fa-times-circle text-danger" th:title="${result.runnerName}" data-toggle="tooltip"></i>
+            <i th:case="'ERROR'" class="fas fa-exclamation-circle text-danger" th:title="${result.runnerName}" data-toggle="tooltip"></i>
+            <i th:case="*" class="fas fa-question-circle text-info" th:title="${result.runnerName}" data-toggle="tooltip"></i>
+          </th:block>
+        </div>
       </td>
     </tr>
   </tbody>

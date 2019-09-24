@@ -3,6 +3,7 @@ package de.code_freak.codefreak.service.evaluation
 import de.code_freak.codefreak.config.EvaluationConfiguration
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Evaluation
+import de.code_freak.codefreak.entity.EvaluationResult
 import de.code_freak.codefreak.repository.EvaluationRepository
 import de.code_freak.codefreak.service.BaseService
 import de.code_freak.codefreak.service.ContainerService
@@ -16,7 +17,6 @@ import org.springframework.batch.core.explore.JobExplorer
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.lang.IllegalArgumentException
 import java.util.Date
 import java.util.Optional
 import java.util.UUID
@@ -92,5 +92,12 @@ class EvaluationService : BaseService() {
 
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
+  }
+
+  fun getState(result: EvaluationResult): EvaluationState {
+    val runner = getEvaluationRunner(result.runnerName)
+    return runner.getState(
+        runner.parseResultContent(result.content)
+    )
   }
 }

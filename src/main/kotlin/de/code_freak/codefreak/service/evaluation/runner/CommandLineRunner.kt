@@ -5,6 +5,7 @@ import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.ExecResult
 import de.code_freak.codefreak.service.evaluation.EvaluationRunner
+import de.code_freak.codefreak.service.evaluation.EvaluationState
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.InputStream
@@ -41,5 +42,16 @@ class CommandLineRunner : EvaluationRunner {
 
   override fun parseResultContent(content: ByteArray): Any {
     return mapper.readValue(content, Array<Execution>::class.java)
+  }
+
+  override fun getState(parsedContent: Any): EvaluationState {
+    parsedContent as Array<*>
+    parsedContent.map {
+      it as Execution
+      if (it.result.exitCode != 0L) {
+        return EvaluationState.FAILURE
+      }
+    }
+    return EvaluationState.SUCCESS
   }
 }

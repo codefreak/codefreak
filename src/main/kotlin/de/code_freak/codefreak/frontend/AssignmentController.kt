@@ -127,6 +127,13 @@ class AssignmentController : BaseController() {
         .flatMap { it.toList() }
         .toMap()
 
+    val states = evaluations.filterValues { it.isPresent }.mapValues {
+      it.value.get().results.map {
+        it.id to evaluationService.getState(it)
+      }
+    }.flatMap { it.value }.toMap()
+
+    model.addAttribute("states", states)
     model.addAttribute("assignment", assignment)
     model.addAttribute("submissions", submissions)
     model.addAttribute("evaluations", evaluations)
