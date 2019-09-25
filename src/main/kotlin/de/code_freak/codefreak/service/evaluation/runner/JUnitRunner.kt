@@ -2,7 +2,7 @@ package de.code_freak.codefreak.service.evaluation.runner
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.code_freak.codefreak.entity.Answer
-import de.code_freak.codefreak.service.evaluation.EvaluationState
+import de.code_freak.codefreak.service.evaluation.ResultType
 import de.code_freak.codefreak.util.TarUtil
 import de.code_freak.codefreak.util.withTrailingSlash
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -59,25 +59,25 @@ class JUnitRunner : CommandLineRunner() {
     return RenderResults(results.executions, testSuites)
   }
 
-  override fun getState(parsedContent: Any): EvaluationState {
-    parsedContent as RenderResults
+  override fun getResultState(parsedResultContent: Any): ResultType {
+    parsedResultContent as RenderResults
     try {
-      parsedContent.executions.map {
+      parsedResultContent.executions.map {
         if (it.result.exitCode != 0L) {
-          return EvaluationState.FAILURE
+          return ResultType.FAILURE
         }
       }
-      parsedContent.testSuites.map {
+      parsedResultContent.testSuites.map {
         if (it.errors > 0) {
-          return EvaluationState.ERROR
+          return ResultType.ERROR
         }
         if (it.failures > 0) {
-          return EvaluationState.FAILURE
+          return ResultType.FAILURE
         }
       }
-      return EvaluationState.SUCCESS
+      return ResultType.SUCCESS
     } catch (e: Exception) {
-      return EvaluationState.ERROR
+      return ResultType.ERROR
     }
   }
 }
