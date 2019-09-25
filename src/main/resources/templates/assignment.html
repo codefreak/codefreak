@@ -61,7 +61,7 @@
             <span class="evaluation-view" data-toggle="tooltip" th:title="${taskInfo.latestEvaluation == null ? 'The evaluation has not been run yet.' : ''}">
               <a th:href="${taskInfo.latestEvaluation != null ? @urls.get(taskInfo.latestEvaluation) : '#'}"
                  th:classappend="${taskInfo.latestEvaluation == null || taskInfo.evaluationRunning ? 'disabled' : ''}"
-                 class="btn btn-primary" type="button"><i class="fas fa-poll"></i> View Results</a>
+                 class="btn btn-primary"><i class="fas fa-poll"></i> View Results</a>
             </span>
           </div>
         </div>
