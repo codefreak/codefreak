@@ -59,7 +59,7 @@ class JUnitRunner : CommandLineRunner() {
     return RenderResults(results.executions, testSuites)
   }
 
-  override fun getResultState(parsedResultContent: Any): ResultType {
+  override fun getResultType(parsedResultContent: Any): ResultType {
     parsedResultContent as RenderResults
     try {
       parsedResultContent.executions.map {

@@ -33,7 +33,7 @@
           <i class="fas fa-poll"></i>
         </a>
         <div class="d-inline-block" th:if="${evaluation.isPresent()}">
-          <th:block th:each="result : ${evaluation.get().results}" th:switch="${states.get(result.id).name()}">
+          <th:block th:each="result : ${evaluation.get().results}" th:switch="${resultTypes.get(result.id).name()}">
             <i th:case="'SUCCESS'" class="fas fa-check-circle text-success" th:title="${result.runnerName}" data-toggle="tooltip"></i>
             <i th:case="'FAILURE'" class="fas fa-times-circle text-danger" th:title="${result.runnerName}" data-toggle="tooltip"></i>
             <i th:case="'ERROR'" class="fas fa-exclamation-circle text-danger" th:title="${result.runnerName}" data-toggle="tooltip"></i>

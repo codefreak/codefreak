@@ -127,14 +127,14 @@ class AssignmentController : BaseController() {
         .map { evaluationService.getLatestEvaluations(it) }
         .flatMap { it.toList() }
         .toMap()
-    // map of EvaluationResult#id to EvaluationState
-    val states = evaluations.filterValues { it.isPresent }
+    // map of EvaluationResult#id to ResultType
+    val resultTypes = evaluations.filterValues { it.isPresent }
         .mapValues { it.value.get().results }
         .flatMap { it.value }
-        .map { it.id to evaluationService.getResultState(it) }
+        .map { it.id to evaluationService.getResultType(it) }
         .toMap()
 
-    model.addAttribute("states", states)
+    model.addAttribute("resultTypes", resultTypes)
     model.addAttribute("assignment", assignment)
     model.addAttribute("submissions", submissions)
     model.addAttribute("evaluations", evaluations)

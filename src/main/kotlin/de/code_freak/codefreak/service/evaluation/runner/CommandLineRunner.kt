@@ -44,7 +44,7 @@ class CommandLineRunner : EvaluationRunner {
     return mapper.readValue(content, Array<Execution>::class.java)
   }
 
-  override fun getResultState(parsedResultContent: Any): ResultType {
+  override fun getResultType(parsedResultContent: Any): ResultType {
     parsedResultContent as Array<*>
     parsedResultContent.map {
       it as Execution

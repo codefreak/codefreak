@@ -75,7 +75,7 @@ class CodeclimateRunner : EvaluationRunner {
     }
   }
 
-  override fun getResultState(parsedResultContent: Any): ResultType {
+  override fun getResultType(parsedResultContent: Any): ResultType {
     parsedResultContent as Content
     return if (parsedResultContent.issues.isNotEmpty()) {
       ResultType.FAILURE
