@@ -8,9 +8,9 @@ import de.code_freak.codefreak.service.ResourceLimitException
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.service.file.FileService
-import de.code_freak.codefreak.util.FrontendUtil
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -72,14 +72,12 @@ class TaskController : BaseController() {
   fun getSourceTar(
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
-  ): StreamingResponseBody {
+  ): ResponseEntity<StreamingResponseBody> {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = containerService.saveAnswerFiles(submission.getOrCreateAnswer(taskId))
-    response.setHeader("Content-Disposition", "attachment; filename=source.tar")
-    if (fileService.collectionExists(answer.id)) {
-      return fileService.readCollectionTar(answer.id).use { FrontendUtil.streamResponse(it) }
+    fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId).use {
+      return download("${answer.task.title}.tar", it)
     }
-    return fileService.readCollectionTar(taskId).use { FrontendUtil.streamResponse(it) }
   }
 
   @GetMapping("/tasks/{taskId}/source.zip", produces = ["application/zip"])
@@ -87,12 +85,14 @@ class TaskController : BaseController() {
   fun getSourceZip(
     @PathVariable("taskId") taskId: UUID,
     response: HttpServletResponse
-  ): StreamingResponseBody {
+  ): ResponseEntity<StreamingResponseBody> {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = containerService.saveAnswerFiles(submission.getOrCreateAnswer(taskId))
-    response.setHeader("Content-Disposition", "attachment; filename=source.zip")
-    val tar = fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId)
-    return tar.use { StreamingResponseBody { out -> TarUtil.tarToZip(it, out) } }
+    fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId).use {
+      return download("${answer.task.title}.zip") {
+        out -> TarUtil.tarToZip(it, out)
+      }
+    }
   }
 
   @PostMapping("/tasks/{taskId}/source")
