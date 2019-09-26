@@ -69,10 +69,7 @@ class TaskController : BaseController() {
 
   @GetMapping("/tasks/{taskId}/source.tar", produces = ["application/tar"])
   @ResponseBody
-  fun getSourceTar(
-    @PathVariable("taskId") taskId: UUID,
-    response: HttpServletResponse
-  ): ResponseEntity<StreamingResponseBody> {
+  fun getSourceTar(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = containerService.saveAnswerFiles(submission.getOrCreateAnswer(taskId))
     fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId).use {
@@ -82,10 +79,7 @@ class TaskController : BaseController() {
 
   @GetMapping("/tasks/{taskId}/source.zip", produces = ["application/zip"])
   @ResponseBody
-  fun getSourceZip(
-    @PathVariable("taskId") taskId: UUID,
-    response: HttpServletResponse
-  ): ResponseEntity<StreamingResponseBody> {
+  fun getSourceZip(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = containerService.saveAnswerFiles(submission.getOrCreateAnswer(taskId))
     fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId).use {

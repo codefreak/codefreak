@@ -25,10 +25,7 @@ class AnswerController : BaseController() {
   @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/{answerId}/source.zip", produces = ["application/zip"])
   @ResponseBody
-  fun getSourceZip(
-    @PathVariable("answerId") answerId: UUID,
-    response: HttpServletResponse
-  ): HttpEntity<StreamingResponseBody> {
+  fun getSourceZip(@PathVariable("answerId") answerId: UUID): HttpEntity<StreamingResponseBody> {
     val answer = answerService.getAnswer(answerId)
     fileService.readCollectionTar(answer.id).use {
       return download("${answer.submission.user.username}_${answer.task.title}.zip") { out ->
@@ -40,10 +37,7 @@ class AnswerController : BaseController() {
   @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/{answerId}/source.tar", produces = ["application/tar"])
   @ResponseBody
-  fun getSourceTar(
-    @PathVariable("answerId") answerId: UUID,
-    response: HttpServletResponse
-  ): HttpEntity<StreamingResponseBody> {
+  fun getSourceTar(@PathVariable("answerId") answerId: UUID): HttpEntity<StreamingResponseBody> {
     val answer = answerService.getAnswer(answerId)
     fileService.readCollectionTar(answer.id).use {
       return download("${answer.submission.user.username}_${answer.task.title}.tar", it)
