@@ -1,22 +1,18 @@
 package de.code_freak.codefreak.frontend
 
-import de.code_freak.codefreak.service.EntityNotFoundException
-import org.apache.tomcat.util.http.fileupload.FileUploadException
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.method.HandlerMethod
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
-import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import org.springframework.web.servlet.ModelAndView
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.web.method.HandlerMethod
+import de.code_freak.codefreak.service.EntityNotFoundException
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import java.lang.Exception
+import java.lang.IllegalStateException
 import java.util.UUID
-import kotlin.Any
-import kotlin.IllegalArgumentException
-import kotlin.NoSuchElementException
-import kotlin.Throwable
-import kotlin.to
 
 /**
  * Global exception handler for the frontend (is applied to all controllers).
