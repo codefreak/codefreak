@@ -30,7 +30,7 @@
            th:with="evaluation=${evaluations.get(answer.id)}"
            class="btn btn-primary btn-sm"
            th:classappend="${evaluation.isPresent() ? '' : 'disabled'}"
-           th:href="${evaluation.isPresent() ? @urls.get(evaluation.get()) : '#'}">
+           th:href="${evaluation.isPresent() ? @urls.get(evaluation.get(), 'submissions') : '#'}">
           <i class="fas fa-poll"></i>
         </a>
       </td>
