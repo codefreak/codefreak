@@ -24,7 +24,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.io.ByteArrayOutputStream
 import java.util.UUID
-import javax.servlet.http.HttpServletResponse
 
 @Controller
 class TaskController : BaseController() {

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.util.UUID
-import javax.servlet.http.HttpServletResponse
 
 @Controller
 @RequestMapping("/answers")
