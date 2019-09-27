@@ -40,7 +40,7 @@ class LdapUserDetailsContextMapper : UserDetailsContextMapper {
     val roles = mutableListOf<Role>()
 
     if (config.ldap.overrideRoles.containsKey(username)) {
-      roles.addAll(config.ldap.overrideRoles[username]!!)
+      roles.add(config.ldap.overrideRoles[username]!!)
     } else {
       authorities?.forEach {
         val role = mappings[it.authority]
