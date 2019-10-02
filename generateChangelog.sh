@@ -2,4 +2,4 @@
 set -e
 
 ./gradlew clean assemble liquibaseUpdate
-./gradlew liquibaseGenerateChangelog -PchangeLogFile=build/db/changelog-diff.yaml
+./gradlew liquibaseDiffChangelog -PchangeLogFile=build/db/changelog-diff.yaml
