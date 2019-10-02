@@ -1,4 +1,4 @@
 databaseChangeLog:
 - include:
-    file: changelogs/0001-initial.yaml
+    file: changelogs/20191002162627-initial.yaml
     relativeToChangelogFile: true
