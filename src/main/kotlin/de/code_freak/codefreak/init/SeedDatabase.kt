@@ -12,6 +12,7 @@ import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationListener
@@ -39,6 +40,8 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
   @Autowired lateinit var taskService: TaskService
   @Autowired lateinit var assignmentService: AssignmentService
 
+  private val log = LoggerFactory.getLogger(this::class.java)
+
   @Value("\${spring.jpa.hibernate.ddl-auto:''}")
   private lateinit var schemaExport: String
 
@@ -55,6 +58,8 @@ class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
     if (!schemaExport.startsWith("create") && database != "HSQL") {
       return
     }
+
+    log.info("Initializing database with sample data")
 
     userRepository.saveAll(listOf(admin, teacher, student))
 

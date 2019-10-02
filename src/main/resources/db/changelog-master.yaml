@@ -1,3 +1,4 @@
 databaseChangeLog:
 - include:
     file: changelogs/0001-initial.yaml
+    relativeToChangelogFile: true
