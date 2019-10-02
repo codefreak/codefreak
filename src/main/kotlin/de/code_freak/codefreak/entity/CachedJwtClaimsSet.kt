@@ -6,7 +6,7 @@ import javax.persistence.Entity
 
 @Entity
 class CachedJwtClaimsSet(
-    @Column
-    @Type(type = "text")
-    var serializedClaimSet: String
+  @Column
+  @Type(type = "text")
+  var serializedClaimSet: String
 ) : BaseEntity()
