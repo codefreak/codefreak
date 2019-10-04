@@ -82,16 +82,6 @@ class AssignmentController : BaseController() {
     return "assignment"
   }
 
-  @GetMapping("/admin/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
-  @ResponseBody
-  @Secured(Authority.ROLE_ADMIN)
-  fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): StreamingResponseBody {
-    val assignment = assignmentService.findAssignment(assignmentId)
-    val filename = assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
-    response.setHeader("Content-Disposition", "attachment; filename=$filename-submissions.tar")
-    return StreamingResponseBody { submissionService.createTarArchiveOfSubmissions(assignmentId, it) }
-  }
-
   @Secured(Authority.ROLE_TEACHER)
   @PostMapping("/assignments")
   fun createAssignment(

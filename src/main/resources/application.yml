@@ -53,8 +53,6 @@ code-freak:
     pull-policy: never
   traefik:
     url: "http://localhost:8081"
-  latex:
-    image: "blang/latex:latest"
   ide:
     image: "cfreak/ide:1"
     # Interval for checking for idle containers in ms. Default 30 seconds.

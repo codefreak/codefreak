@@ -43,8 +43,6 @@ class AssignmentAndSubmissionServiceTest {
   }
 
   @Mock
-  lateinit var latexService: LatexService
-  @Mock
   lateinit var assignmentRepository: AssignmentRepository
   @Mock
   lateinit var submissionRepository: SubmissionRepository
@@ -86,19 +84,5 @@ class AssignmentAndSubmissionServiceTest {
   fun `findSubmission throws for no results`() {
     `when`(submissionRepository.findById(any())).thenReturn(Optional.empty())
     submissionService.findSubmission(UUID(0, 0))
-  }
-
-  @Test
-  fun createTarArchiveOfSubmissions() {
-    val out = ByteArrayOutputStream()
-    `when`(assignmentRepository.findById(any())).thenReturn(Optional.of(assignment))
-    `when`(submissionRepository.findByAssignmentId(anyOrNull())).thenReturn(listOf(submission))
-    `when`(fileService.readCollectionTar(eq(assignment.id))).thenReturn(files.inputStream())
-    `when`(latexService.submissionToPdf(anyOrNull(), anyOrNull())).then { }
-    submissionService.createTarArchiveOfSubmissions(assignment.id, out)
-    val tmpDir = createTempDir()
-    TarUtil.extractTarToDirectory(out.toByteArray().inputStream(), tmpDir)
-    assertThat(tmpDir.listFiles().first(), FileMatchers.aFileNamed(equalTo(submission.id.toString())))
-    tmpDir.deleteRecursively()
   }
 }
