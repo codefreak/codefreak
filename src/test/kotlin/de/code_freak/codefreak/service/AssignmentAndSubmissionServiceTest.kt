@@ -1,8 +1,6 @@
 package de.code_freak.codefreak.service
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.eq
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Submission
@@ -15,7 +13,6 @@ import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
-import org.hamcrest.io.FileMatchers
 import org.junit.Before
 import org.junit.Test
 import org.mockito.InjectMocks

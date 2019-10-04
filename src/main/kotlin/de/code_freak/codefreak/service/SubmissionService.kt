@@ -1,18 +1,12 @@
 package de.code_freak.codefreak.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.entity.User
-import de.code_freak.codefreak.repository.AnswerRepository
 import de.code_freak.codefreak.repository.SubmissionRepository
 import de.code_freak.codefreak.service.file.FileService
-import de.code_freak.codefreak.util.TarUtil
-import de.code_freak.codefreak.util.afterClose
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.io.File
-import java.io.OutputStream
 import java.util.Optional
 import java.util.UUID
 import javax.transaction.Transactional
