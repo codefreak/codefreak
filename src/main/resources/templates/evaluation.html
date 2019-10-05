@@ -14,6 +14,12 @@
     (evaluated at <span th:text="${@formatter.dateTime(evaluation.createdAt)}" />)
   </p>
   <p sec:authorize="hasRole('ROLE_TEACHER')" class="lead" th:text="|User: ${evaluation.answer.submission.user.username}|"/>
+  <div class="lead my-2" th:unless="${isUpToDate}">
+    <span class="badge badge-warning"
+          data-toggle="tooltip"
+          title="Files have changed since this evaluation has been run. The results may differ now.">outdated</span>
+    <a th:if="${latestEvaluation} != ${evaluation}" th:href="${@urls.get(latestEvaluation)}">go to latest evaluation</a>
+  </div>
 
   <div th:if="${param.return} != null">
     <a class="btn btn-light" sec:authorize="hasRole('ROLE_TEACHER')"

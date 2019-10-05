@@ -60,6 +60,10 @@ class EvaluationController : BaseController() {
         }
       }
     }
+    val latestEvaluation = evaluationService.getLatestEvaluation(evaluation.answer.id).orElse(null)
+    model.addAttribute("latestEvaluation", latestEvaluation)
+    val isUpToDate = evaluation == latestEvaluation && evaluationService.isEvaluationUpToDate(evaluation.answer.id)
+    model.addAttribute("isUpToDate", isUpToDate)
     model.addAttribute("evaluation", evaluation)
     model.addAttribute("resultTemplates", resultTemplates)
     model.addAttribute("resultContents", resultContents)
