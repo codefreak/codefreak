@@ -15,9 +15,11 @@ class Urls {
 
   private val BaseEntity.shortId get() = getShortId(id)
 
-  fun get(task: Task) = get(task.assignment) + "#task-${task.position}"
+  fun get(task: Task) = "/tasks/" + task.shortId
 
   fun get(assignment: Assignment) = "/assignments/" + assignment.shortId
+
+  fun get(assignment: Assignment, task: Task) = get(assignment) + "#task-${task.position}"
 
   // we could you default parameters but they somehow cause a ambiguous method call exception in thymeleaf
   fun get(evaluation: Evaluation) = get(evaluation, "task")
