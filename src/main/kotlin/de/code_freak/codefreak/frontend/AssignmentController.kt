@@ -16,13 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.io.ByteArrayOutputStream
 import java.util.UUID
-import javax.servlet.http.HttpServletResponse
 
 @Controller
 class AssignmentController : BaseController() {
@@ -80,16 +77,6 @@ class AssignmentController : BaseController() {
     model.addAttribute("needsNewIdeContainer", taskInfos.any { taskInfo -> !taskInfo.ideRunning })
     model.addAttribute("supportedGitRemotes", gitImportService?.getSupportedHosts() ?: listOf<String>())
     return "assignment"
-  }
-
-  @GetMapping("/admin/assignments/{assignmentId}/submissions.tar", produces = ["application/tar"])
-  @ResponseBody
-  @Secured(Authority.ROLE_ADMIN)
-  fun downloadSubmissionsArchive(@PathVariable("assignmentId") assignmentId: UUID, response: HttpServletResponse): StreamingResponseBody {
-    val assignment = assignmentService.findAssignment(assignmentId)
-    val filename = assignment.title.trim().replace("[^\\w]+".toRegex(), "-").toLowerCase()
-    response.setHeader("Content-Disposition", "attachment; filename=$filename-submissions.tar")
-    return StreamingResponseBody { submissionService.createTarArchiveOfSubmissions(assignmentId, it) }
   }
 
   @Secured(Authority.ROLE_TEACHER)

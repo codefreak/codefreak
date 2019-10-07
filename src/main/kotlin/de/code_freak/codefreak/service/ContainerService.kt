@@ -29,7 +29,6 @@ class ContainerService : BaseService() {
   companion object {
     private const val LABEL_PREFIX = "de.code-freak."
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
-    const val LABEL_LATEX_CONTAINER = "{$LABEL_PREFIX}latex-service"
     const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance-id"
     const val PROJECT_PATH = "/home/coder/project"
   }
@@ -57,7 +56,7 @@ class ContainerService : BaseService() {
 
   @EventListener(ContextRefreshedEvent::class)
   fun init() {
-    pullDockerImages(listOf(config.ide.image, config.latex.image, config.evaluation.codeclimate.image))
+    pullDockerImages(listOf(config.ide.image, config.evaluation.codeclimate.image))
   }
 
   fun pullDockerImages(images: List<String>) {
@@ -82,36 +81,6 @@ class ContainerService : BaseService() {
       docker.pull(image)
       log.info("Updated docker image $image to ${docker.inspectImage(image).id()}")
     }
-  }
-
-  @Synchronized
-  fun getOrCreateLatexContainer(): String {
-    var containerId = getContainerWithLabel(LABEL_LATEX_CONTAINER, "true")
-    if (containerId !== null) {
-      return containerId
-    }
-
-    containerId = createContainer(config.latex.image) {
-      labels = mapOf(LABEL_LATEX_CONTAINER to "true")
-      hostConfig { restartPolicy(HostConfig.RestartPolicy.unlessStopped()) }
-      doNothingAndKeepAlive()
-    }
-
-    docker.startContainer(containerId)
-    return containerId
-  }
-
-  /**
-   * Convert the latex file in the given archive to pdf and return the directory after pdflatex has been run
-   */
-  fun latexConvert(inputTar: InputStream, file: String): InputStream {
-    val latexContainerId = getOrCreateLatexContainer()
-    val jobPath = exec(latexContainerId, arrayOf("mktemp", "-d")).output.trim()
-    docker.copyToContainer(inputTar, latexContainerId, jobPath)
-    exec(latexContainerId, arrayOf("sh", "-c", "cd $jobPath && xelatex -synctex=1 -interaction=nonstopmode $file"))
-    val out = docker.archiveContainer(latexContainerId, "$jobPath/.")
-    exec(latexContainerId, arrayOf("rm", "-rf", jobPath))
-    return out
   }
 
   /**
