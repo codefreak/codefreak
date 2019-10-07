@@ -1,0 +1,436 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1569844097273-1
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: answerPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: submission_id
+                  type: BINARY
+              - column:
+                  name: task_id
+                  type: BINARY
+            tableName: answer
+  - changeSet:
+      id: 1569844097273-2
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: assignmentPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: deadline
+                  type: TIMESTAMP
+              - column:
+                  constraints:
+                    nullable: false
+                  name: title
+                  type: VARCHAR(255)
+              - column:
+                  name: classroom_id
+                  type: BINARY
+              - column:
+                  name: owner_id
+                  type: BINARY
+            tableName: assignment
+  - changeSet:
+      id: 1569844097273-3
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: cached_jwt_claims_setPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: serialized_claim_set
+                  type: VARCHAR(2147483647)
+            tableName: cached_jwt_claims_set
+  - changeSet:
+      id: 1569844097273-4
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: classroomPK
+                  name: id
+                  type: BINARY
+              - column:
+                  constraints:
+                    nullable: false
+                  name: name
+                  type: VARCHAR(255)
+            tableName: classroom
+  - changeSet:
+      id: 1569844097273-5
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: evaluationPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+              - column:
+                  name: files_digest
+                  type: LONGVARBINARY
+              - column:
+                  name: answer_id
+                  type: BINARY
+            tableName: evaluation
+  - changeSet:
+      id: 1569844097273-6
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: evaluation_resultPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: content
+                  type: LONGVARBINARY
+              - column:
+                  constraints:
+                    nullable: false
+                  name: error
+                  type: BOOLEAN
+              - column:
+                  constraints:
+                    nullable: false
+                  name: position
+                  type: INT
+              - column:
+                  name: runner_name
+                  type: VARCHAR(255)
+            tableName: evaluation_result
+  - changeSet:
+      id: 1569844097273-7
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: evaluation_id
+                  type: BINARY
+              - column:
+                  constraints:
+                    nullable: false
+                  name: results_id
+                  type: BINARY
+            tableName: evaluation_results
+  - changeSet:
+      id: 1569844097273-8
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: file_collectionPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: tar
+                  type: LONGVARBINARY
+            tableName: file_collection
+  - changeSet:
+      id: 1569844097273-9
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: requirementPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: adapter
+                  type: VARCHAR(255)
+              - column:
+                  name: task_id
+                  type: BINARY
+            tableName: requirement
+  - changeSet:
+      id: 1569844097273-10
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: requirement_id
+                  type: BINARY
+              - column:
+                  name: value
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    primaryKey: true
+                  name: option
+                  type: VARCHAR(255)
+            tableName: requirement_adapter_config
+  - changeSet:
+      id: 1569844097273-11
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: submissionPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: assignment_id
+                  type: BINARY
+              - column:
+                  name: user_id
+                  type: BINARY
+            tableName: submission
+  - changeSet:
+      id: 1569844097273-12
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: taskPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: body
+                  type: VARCHAR(2147483647)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: position
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: title
+                  type: VARCHAR(255)
+              - column:
+                  name: weight
+                  type: INT
+              - column:
+                  name: assignment_id
+                  type: BINARY
+            tableName: task
+  - changeSet:
+      id: 1569844097273-13
+      author: erik.hofer (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: userPK
+                  name: id
+                  type: BINARY
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+            tableName: user
+  - changeSet:
+      id: 1569844097273-14
+      author: erik.hofer (generated)
+      changes:
+        - addUniqueConstraint:
+            columnNames: results_id
+            constraintName: UK_2jr2j4nm71t0ky7fb2dpfghbp
+            tableName: evaluation_results
+  - changeSet:
+      id: 1569844097273-15
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: user_id
+            baseTableName: submission
+            constraintName: FK1qgnfmncpuladr2896scialg0
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: user
+            validate: true
+  - changeSet:
+      id: 1569844097273-16
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: requirement
+            constraintName: FK2nv30j1oymkdvdwp7ccxc6352
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1569844097273-17
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: task_id
+            baseTableName: answer
+            constraintName: FK32s29gitnrc8dhk0m2qf218r3
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: task
+            validate: true
+  - changeSet:
+      id: 1569844097273-18
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: submission_id
+            baseTableName: answer
+            constraintName: FK3pnf2d6oqqkg3h496so9bsge0
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: submission
+            validate: true
+  - changeSet:
+      id: 1569844097273-19
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: assignment_id
+            baseTableName: submission
+            constraintName: FK3q8643roa73llngo64dvpvtxt
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: assignment
+            validate: true
+  - changeSet:
+      id: 1569844097273-20
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: assignment_id
+            baseTableName: task
+            constraintName: FK875lan8jdhkua2w8s9y8hsbun
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: assignment
+            validate: true
+  - changeSet:
+      id: 1569844097273-21
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: classroom_id
+            baseTableName: assignment
+            constraintName: FKem5kdulgo05wre17eg7m722nq
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: classroom
+            validate: true
+  - changeSet:
+      id: 1569844097273-22
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: results_id
+            baseTableName: evaluation_results
+            constraintName: FKguco0xagc7jgxnp6glmdsb553
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: evaluation_result
+            validate: true
+  - changeSet:
+      id: 1569844097273-23
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: requirement_id
+            baseTableName: requirement_adapter_config
+            constraintName: FKohf84ko5oe89317hv1mbhvedm
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: requirement
+            validate: true
+  - changeSet:
+      id: 1569844097273-24
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: evaluation_id
+            baseTableName: evaluation_results
+            constraintName: FKrx8eubnvjpd31w8imni1m939p
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: evaluation
+            validate: true
+  - changeSet:
+      id: 1569844097273-25
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: answer_id
+            baseTableName: evaluation
+            constraintName: FKry383rlfvg06roxajd8tot079
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: answer
+            validate: true
+  - changeSet:
+      id: 1569844097273-26
+      author: erik.hofer (generated)
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: owner_id
+            baseTableName: assignment
+            constraintName: FKshiygbkknmedxb4e4m4qetc0r
+            deferrable: false
+            initiallyDeferred: false
+            referencedColumnNames: id
+            referencedTableName: user
+            validate: true
+

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+  <springProfile name="!dev">
+    <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+      <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+        <level>WARN</level>
+      </filter>
+    </appender>
+  </springProfile>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="FILE" />
+    <springProfile name="!dev">
+      <appender-ref ref="SENTRY" />
+    </springProfile>
+  </root>
+</configuration>

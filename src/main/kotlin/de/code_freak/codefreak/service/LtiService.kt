@@ -30,13 +30,12 @@ class LtiService {
   @Autowired
   lateinit var cachedJwtClaimsSetRepository: CachedJwtClaimsSetRepository
 
-  fun findCachedJwtClaimsSet(id: UUID) = cachedJwtClaimsSetRepository.findById(id)
-      .orElseThrow {
-        EntityNotFoundException("JWT could not be found")
-      }.jwtClaimsSet
+  fun findCachedJwtClaimsSet(id: UUID): JWTClaimsSet = cachedJwtClaimsSetRepository.findById(id)
+      .map { JWTClaimsSet.parse(it.serializedClaimSet) }
+      .orElseThrow { EntityNotFoundException("JWT could not be found") }
 
   fun cacheJwtClaimsSet(claimsSet: JWTClaimsSet): UUID = cachedJwtClaimsSetRepository.save(
-      CachedJwtClaimsSet(claimsSet)
+      CachedJwtClaimsSet(claimsSet.toString())
   ).id
 
   fun removeCachedJwtClaimSet(id: UUID) = cachedJwtClaimsSetRepository.deleteById(id)
