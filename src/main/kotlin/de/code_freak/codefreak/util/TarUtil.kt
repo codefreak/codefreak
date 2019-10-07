@@ -2,12 +2,15 @@ package de.code_freak.codefreak.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import org.apache.commons.compress.archivers.ArchiveException
+import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
+import org.apache.commons.compress.compressors.CompressorException
+import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.utils.IOUtils
 import org.springframework.util.StreamUtils
 import org.springframework.web.multipart.MultipartFile
@@ -35,12 +38,6 @@ object TarUtil {
       // octal 100 = dec 64
       outFile.setExecutable((entry.mode and 64) == 64)
     }
-  }
-
-  @Throws(IOException::class)
-  fun checkValidTar(`in`: InputStream) {
-    val tar = TarArchiveInputStream(`in`)
-    generateSequence { tar.nextTarEntry }.forEach { _ -> /** Do nothing, just throw on error. */ }
   }
 
   fun createTarFromDirectory(file: File, out: OutputStream) {
@@ -93,15 +90,22 @@ object TarUtil {
     zip.finish()
   }
 
-  fun zipToTar(`in`: InputStream, out: OutputStream) {
-    val zip = ZipArchiveInputStream(`in`)
+  fun archiveToTar(`in`: InputStream, out: OutputStream) {
+    var input = BufferedInputStream(`in`)
+    try {
+      // try to read input as compressed type
+      input = BufferedInputStream(CompressorStreamFactory().createCompressorInputStream(input))
+    } catch (e: CompressorException) {
+      // input is not compressed or maybe even not an archive at all
+    }
+    val archive = ArchiveStreamFactory().createArchiveInputStream(input)
     val tar = TarArchiveOutputStream(out)
-    generateSequence { zip.nextZipEntry }.forEach { zipEntry ->
-      val tarEntry = TarArchiveEntry(normalizeEntryName(zipEntry.name))
-      if (zipEntry.isDirectory) {
+    generateSequence { archive.nextEntry }.forEach { archiveEntry ->
+      val tarEntry = TarArchiveEntry(normalizeEntryName(archiveEntry.name))
+      if (archiveEntry.isDirectory) {
         tar.putArchiveEntry(tarEntry)
       } else {
-        val content = zip.readBytes()
+        val content = archive.readBytes()
         tarEntry.size = content.size.toLong()
         tar.putArchiveEntry(tarEntry)
         tar.write(content)
@@ -153,21 +157,28 @@ object TarUtil {
     }
   }
 
-  fun processUploadedArchive(file: MultipartFile, out: OutputStream) {
-    val filename = file.originalFilename ?: ""
+  fun writeUploadAsTar(file: MultipartFile, out: OutputStream) {
     try {
-      when {
-        filename.endsWith(".tar", true) -> {
-          file.inputStream.use { checkValidTar(it) }
-          file.inputStream.use { StreamUtils.copy(it, out) }
-        }
-        filename.endsWith(".zip", true) -> {
-          file.inputStream.use { zipToTar(it, out) }
-        }
-        else -> throw IllegalArgumentException("Unsupported file format")
+      try {
+        // try to read upload as archive
+        file.inputStream.use { archiveToTar(it, out) }
+      } catch (e: ArchiveException) {
+        // unknown archive type or no archive at all
+        // create a new tar archive that contains only the uploaded file
+        wrapUploadInTar(file, out)
       }
     } catch (e: IOException) {
       throw IllegalArgumentException("File could not be processed")
     }
+  }
+
+  private fun wrapUploadInTar(file: MultipartFile, out: OutputStream) {
+    val outputStream = TarArchiveOutputStream(out)
+    val entry = TarArchiveEntry(file.originalFilename)
+    entry.size = file.size
+    outputStream.putArchiveEntry(entry)
+    file.inputStream.use { StreamUtils.copy(it, outputStream) }
+    outputStream.closeArchiveEntry()
+    outputStream.finish()
   }
 }

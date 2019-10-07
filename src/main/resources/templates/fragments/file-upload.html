@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+  <div class="row">
+    <div class="col">
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text">File/Archive:</span>
+        </div>
+        <div class="custom-file">
+          <input type="file" required name="file" class="custom-file-input" th:id="${inputId}">
+          <label class="custom-file-label"
+                 th:for="${inputId}">Please select a single file or an archive of multiple files…</label>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary"><i class="fas fa-upload"></i> Upload</button>
+    </div>
+  </div>
+  <div class="form-text text-muted small">
+    If you want to upload multiple files please create a .zip, .tar or tar.gz archive.
+  </div>
+</body>
+</html>

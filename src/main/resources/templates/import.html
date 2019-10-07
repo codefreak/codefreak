@@ -13,7 +13,7 @@
           <label>Deadline (optional)</label>
           <input class="form-control" type="datetime-local" name="deadline"/>
         </div>
-        <div th:replace="fragments/archive-upload" th:with="inputId='assignment-file-upload'"></div>
+        <div th:replace="fragments/file-upload" th:with="inputId='assignment-file-upload'"></div>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
       </form>
     </div>

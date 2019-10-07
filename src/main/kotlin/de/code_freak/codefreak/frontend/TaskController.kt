@@ -96,7 +96,7 @@ class TaskController : BaseController() {
   ): String {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = submission.getOrCreateAnswer(taskId)
-    answerService.setFiles(answer).use { TarUtil.processUploadedArchive(file, it) }
+    answerService.setFiles(answer).use { TarUtil.writeUploadAsTar(file, it) }
     model.successMessage("Successfully uploaded source for task '${answer.task.title}'.")
     return "redirect:" + urls.get(submission.assignment)
   }
@@ -153,7 +153,7 @@ class TaskController : BaseController() {
   ) = withErrorPage("/import") {
 
     ByteArrayOutputStream().use { out ->
-      TarUtil.processUploadedArchive(file, out)
+      TarUtil.writeUploadAsTar(file, out)
       val task = taskService.updateFromTar(out.toByteArray(), taskId)
       model.successMessage("Task '${task.title}' has been updated.")
       "redirect:" + urls.get(task.assignment)

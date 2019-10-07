@@ -103,7 +103,7 @@ class AssignmentController : BaseController() {
     val deadline = parseLocalDateTime(deadlineString, "deadline")
 
     ByteArrayOutputStream().use { out ->
-      TarUtil.processUploadedArchive(file, out)
+      TarUtil.writeUploadAsTar(file, out)
       val result = assignmentService.createFromTar(out.toByteArray(), user.entity, deadline)
       model.successMessage("Assignment has been created.")
       if (result.taskErrors.isNotEmpty()) {
