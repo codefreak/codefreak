@@ -2,11 +2,13 @@ package de.code_freak.codefreak.service.evaluation
 
 import de.code_freak.codefreak.config.EvaluationConfiguration
 import de.code_freak.codefreak.entity.Answer
+import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.repository.EvaluationRepository
 import de.code_freak.codefreak.service.BaseService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.EntityNotFoundException
+import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.BatchStatus
@@ -16,7 +18,6 @@ import org.springframework.batch.core.explore.JobExplorer
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.lang.IllegalArgumentException
 import java.util.Date
 import java.util.Optional
 import java.util.UUID
@@ -36,6 +37,9 @@ class EvaluationService : BaseService() {
   private lateinit var jobExplorer: JobExplorer
 
   @Autowired
+  private lateinit var submissionService: SubmissionService
+
+  @Autowired
   private lateinit var evaluationRepository: EvaluationRepository
 
   @Autowired
@@ -50,6 +54,18 @@ class EvaluationService : BaseService() {
   private val runnersByName by lazy { runners.map { it.getName() to it }.toMap() }
 
   private val log = LoggerFactory.getLogger(this::class.java)
+
+  fun startEvaluation(assignment: Assignment) {
+    val submissions = submissionService.findSubmissionsOfAssignment(assignment.id)
+    submissions.flatMap { it.answers }.map {
+      try {
+        startEvaluation(it)
+      } catch (e: IllegalStateException) {
+        // evaluation is already fresh or running
+        log.debug("Not queuing evaluation for answer ${it.id}: ${e.message}")
+      }
+    }
+  }
 
   fun startEvaluation(answer: Answer) {
     containerService.saveAnswerFiles(answer)

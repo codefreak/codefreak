@@ -114,9 +114,14 @@ class AssignmentController : BaseController() {
         .flatMap { it.toList() }
         .toMap()
 
+    val upToDate = evaluations.none { entry -> !entry.value.isPresent || !evaluationService.isEvaluationUpToDate(entry.key) }
+    val runningEvaluations = evaluations.filter { evaluationService.isEvaluationRunning(it.key) }.map { it.key }
+
+    model.addAttribute("upToDate", upToDate)
     model.addAttribute("assignment", assignment)
     model.addAttribute("submissions", submissions)
     model.addAttribute("evaluations", evaluations)
+    model.addAttribute("runningEvaluations", runningEvaluations)
     return "submissions"
   }
 }
