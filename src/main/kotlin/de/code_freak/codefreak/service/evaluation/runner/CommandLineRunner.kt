@@ -5,7 +5,6 @@ import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.ExecResult
 import de.code_freak.codefreak.service.evaluation.EvaluationRunner
-import de.code_freak.codefreak.service.evaluation.ResultType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.InputStream
@@ -42,16 +41,5 @@ class CommandLineRunner : EvaluationRunner {
 
   override fun parseResultContent(content: ByteArray): Any {
     return mapper.readValue(content, Array<Execution>::class.java)
-  }
-
-  override fun getResultType(parsedResultContent: Any): ResultType {
-    parsedResultContent as Array<*>
-    parsedResultContent.map {
-      it as Execution
-      if (it.result.exitCode != 0L) {
-        return ResultType.FAILURE
-      }
-    }
-    return ResultType.SUCCESS
   }
 }

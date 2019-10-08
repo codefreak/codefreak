@@ -93,11 +93,4 @@ class EvaluationService : BaseService() {
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
   }
-
-  fun getResultType(result: EvaluationResult): ResultType {
-    val runner = getEvaluationRunner(result.runnerName)
-    return runner.getResultType(
-        runner.parseResultContent(result.content)
-    )
-  }
 }

@@ -2,7 +2,6 @@ package de.code_freak.codefreak.service.evaluation.runner
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.code_freak.codefreak.entity.Answer
-import de.code_freak.codefreak.service.evaluation.ResultType
 import de.code_freak.codefreak.util.TarUtil
 import de.code_freak.codefreak.util.withTrailingSlash
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -57,27 +56,5 @@ class JUnitRunner : CommandLineRunner() {
     val results = mapper.readValue(content, Results::class.java)
     val testSuites = results.xmlReports.map { JUnitMarshalling.unmarshalTestSuite(ByteArrayInputStream(it)) }
     return RenderResults(results.executions, testSuites)
-  }
-
-  override fun getResultType(parsedResultContent: Any): ResultType {
-    parsedResultContent as RenderResults
-    try {
-      parsedResultContent.executions.map {
-        if (it.result.exitCode != 0L) {
-          return ResultType.FAILURE
-        }
-      }
-      parsedResultContent.testSuites.map {
-        if (it.errors > 0) {
-          return ResultType.ERROR
-        }
-        if (it.failures > 0) {
-          return ResultType.FAILURE
-        }
-      }
-      return ResultType.SUCCESS
-    } catch (e: Exception) {
-      return ResultType.ERROR
-    }
   }
 }

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.evaluation.EvaluationRunner
-import de.code_freak.codefreak.service.evaluation.ResultType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -72,15 +71,6 @@ class CodeclimateRunner : EvaluationRunner {
         var begin = 0
         var end = 0
       }
-    }
-  }
-
-  override fun getResultType(parsedResultContent: Any): ResultType {
-    parsedResultContent as Content
-    return if (parsedResultContent.issues.isNotEmpty()) {
-      ResultType.FAILURE
-    } else {
-      ResultType.SUCCESS
     }
   }
 }

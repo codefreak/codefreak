@@ -121,23 +121,18 @@ class AssignmentController : BaseController() {
   ): String {
     val assignment = assignmentService.findAssignment(assignmentId)
     val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
-    // map of Answer#id to Evaluation
-    val evaluations = submissions
+    // map of Answer#id to EvaluationViewModel
+    val evaluationViewModels = submissions
         .map { submission -> submission.answers.map { it.id } }
-        .map { evaluationService.getLatestEvaluations(it) }
+        .map { evaluationService.getLatestEvaluations(it).mapValues {
+          entry -> entry.value.map {e -> EvaluationViewModel.create(e, evaluationService) } }
+        }
         .flatMap { it.toList() }
         .toMap()
-    // map of EvaluationResult#id to ResultType
-    val resultTypes = evaluations.filterValues { it.isPresent }
-        .mapValues { it.value.get().results }
-        .flatMap { it.value }
-        .map { it.id to evaluationService.getResultType(it) }
-        .toMap()
 
-    model.addAttribute("resultTypes", resultTypes)
     model.addAttribute("assignment", assignment)
     model.addAttribute("submissions", submissions)
-    model.addAttribute("evaluations", evaluations)
+    model.addAttribute("evaluationViewModels", evaluationViewModels)
     return "submissions"
   }
 }

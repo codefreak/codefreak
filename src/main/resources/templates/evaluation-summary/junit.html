@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<h3 class="card-title">Unit Tests</h3>
+<th:block th:with="error = ${content.executions.?[result.exitCode == -1].size() > 0}">
+  <span th:unless="${error}" th:with="" th:each="testSuite : ${content.testSuites}" title="Unit tests could not be executed" data-toggle="tooltip">
+    <h4>
+      <span th:text="${testSuite.name}"></span>
+      <span th:text="${testSuite.tests - testSuite.skipped - testSuite.failures - testSuite.errors} + ' Passed'" class="badge badge-success"></span>
+      <span th:if="${testSuite.failures > 0}" th:text="${testSuite.failures} + ' Failed'" class="badge badge-danger"></span>
+      <span th:if="${testSuite.errors > 0}" th:text="${testSuite.errors} + ' Errored'" class="badge badge-danger"></span>
+      <span th:if="${testSuite.skipped > 0}" th:text="${testSuite.skipped} + ' Skipped'" class="badge badge-info"></span>
+    </h4>
+    <ul class="list-group">
+      <li class="list-group-item" th:each="testCase : ${testSuite.testCases}">
+        <th:block th:switch="true">
+          <i th:case="${testCase.skipped != null}" class="fas fa-forward text-info"></i>
+          <i th:case="${testCase.errors != null}" class="fas fa-exclamation-circle text-danger"></i>
+          <i th:case="${testCase.failures != null}" class="fas fa-times-circle text-danger"></i>
+          <i th:case="*" class="far fa-check-circle text-success"></i>
+        </th:block>
+        <span th:text="${testCase.name}"></span>
+        <pre class="alert alert-danger mt-2 mb-1" th:each="failure : ${testCase.failures}"
+             th:text="${failure.message.startsWith(failure.type+': ') ? #strings.substring(failure.message, failure.type.length()+2) : failure.message}">
+        </pre>
+      </li>
+    </ul>
+  </span>
+  <span th:if="${error}" title="Unit tests could not be executed" data-toggle="tooltip">
+    N/A <i class="fas fa-times-circle text-danger"></i>
+  </span>
+</th:block>
+</body>
+</html>
