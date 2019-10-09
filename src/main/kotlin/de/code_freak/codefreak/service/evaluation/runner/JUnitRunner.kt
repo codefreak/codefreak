@@ -23,7 +23,9 @@ class JUnitRunner : CommandLineRunner() {
     private constructor() : this(emptyList(), emptyList())
   }
 
-  private data class Summary(val error: Boolean, val total: Int, val passed: Int)
+  private data class Summary(val error: Boolean, val total: Int, val passed: Int) {
+    override fun toString() = if (error) "error" else "$passed/$total"
+  }
 
   private val mapper = ObjectMapper()
 

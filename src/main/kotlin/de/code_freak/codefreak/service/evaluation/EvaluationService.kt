@@ -3,6 +3,7 @@ package de.code_freak.codefreak.service.evaluation
 import de.code_freak.codefreak.config.EvaluationConfiguration
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Evaluation
+import de.code_freak.codefreak.entity.EvaluationResult
 import de.code_freak.codefreak.repository.EvaluationRepository
 import de.code_freak.codefreak.service.BaseService
 import de.code_freak.codefreak.service.ContainerService
@@ -80,6 +81,14 @@ class EvaluationService : BaseService() {
       }
     }
     return false
+  }
+
+  fun getSummary(evaluationResult: EvaluationResult): Any {
+    return getEvaluationRunner(evaluationResult.runnerName).let {
+      it.getSummary(
+          it.parseResultContent(evaluationResult.content)
+      )
+    }
   }
 
   fun isEvaluationUpToDate(answerId: UUID): Boolean = getLatestEvaluation(answerId).map {
