@@ -33,7 +33,7 @@
       <div class="d-flex flex-row">
         <a class="btn btn-primary ml-1"
            th:href="@{${@urls.get(task)} + '/ide'}"
-           target="_blank"
+           th:target="|ide-${task.id}|"
            th:classappend="${!taskInfo.ideRunning && !canStartNewIdeContainer ? 'disabled' : ''}"
            onclick="setTimeout(() => location.reload(), 1000)">
           <i class="far fa-edit"></i> Open in Editor <span th:if="${taskInfo.ideRunning}">(running)</span>
@@ -84,7 +84,7 @@
             <div class="modal-body">
               <form class="mb-4" th:action="@{${@urls.get(task)} + '/source'}" method="post" enctype="multipart/form-data">
                 <h5>Upload files from computer</h5>
-                <th:block th:replace="fragments/archive-upload" th:with="inputId=${'task-file-upload-' + task.position}"></th:block>
+                <th:block th:replace="fragments/file-upload" th:with="inputId=${'task-file-upload-' + task.position}"></th:block>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               </form>
               <div th:if="${#lists.size(supportedGitRemotes)}">

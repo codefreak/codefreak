@@ -25,7 +25,6 @@ class AppConfiguration {
   val docker = Docker()
   val ide = Ide()
   val traefik = Traefik()
-  val latex = Latex()
   val frontend = Frontend()
   val ldap = Ldap()
   val files = Files()
@@ -43,11 +42,6 @@ class AppConfiguration {
 
   class Traefik {
     lateinit var url: String
-  }
-
-  class Latex {
-    /** The Docker image name (and tag) to be used for the latex container. */
-    lateinit var image: String
   }
 
   class Ide {

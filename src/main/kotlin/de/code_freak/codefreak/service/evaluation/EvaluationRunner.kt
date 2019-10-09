@@ -1,7 +1,6 @@
 package de.code_freak.codefreak.service.evaluation
 
 import de.code_freak.codefreak.entity.Answer
-import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
 import kotlin.reflect.full.safeCast
 
@@ -10,6 +9,7 @@ interface EvaluationRunner {
   fun getName(): String
   fun run(answer: Answer, options: Map<String, Any>): String
   fun parseResultContent(content: ByteArray): Any
+  fun getSummary(content: Any): Any
 
   fun <T : Any> Map<String, Any>.get(key: String, type: KClass<T>): T? =
       get(key)?.let { type.safeCast(it) ?: throw IllegalArgumentException("Option '$key' has invalid format") }

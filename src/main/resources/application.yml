@@ -23,6 +23,8 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 5MB
+  liquibase:
+    change-log: classpath:db/changelog-master.yaml
 
 logging:
   level:
@@ -53,8 +55,6 @@ code-freak:
     pull-policy: never
   traefik:
     url: "http://localhost:8081"
-  latex:
-    image: "blang/latex:latest"
   ide:
     image: "cfreak/ide:1"
     # Interval for checking for idle containers in ms. Default 30 seconds.

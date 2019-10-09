@@ -8,10 +8,15 @@ import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.util.FrontendUtil
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.util.StreamUtils
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import org.springframework.web.servlet.support.RequestContextUtils
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
+import java.io.InputStream
+import java.io.OutputStream
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
@@ -74,5 +79,19 @@ abstract class BaseController {
     } catch (e: DateTimeParseException) {
       throw IllegalArgumentException("invalid $fieldName: ${e.message}")
     }
+  }
+  protected fun download(filename: String, input: InputStream): ResponseEntity<StreamingResponseBody> {
+    return download(filename) { out ->
+      StreamUtils.copy(input, out)
+    }
+  }
+
+  protected fun download(filename: String, writer: (out: OutputStream) -> Unit): ResponseEntity<StreamingResponseBody> {
+    // allow only alphanumeric characters for download name and replace everything else by dash
+    val sanitizedFilename = filename.toLowerCase().replace("[^\\w_\\-.]+".toRegex(), "-").trim('-')
+    val headers = HttpHeaders().apply {
+      add("Content-Disposition", "attachment; filename=$sanitizedFilename")
+    }
+    return ResponseEntity(StreamingResponseBody(writer), headers, HttpStatus.OK)
   }
 }

@@ -8,11 +8,8 @@ Create a file `src/main/resources/application-dev.yml`. For documentation on how
 server see https://github.com/code-freak/code-freak/blob/master/src/main/resources/application.yml[`application.yml`]
 in the same directory. Minimum configuration that uses the in-memory database:
 ```yaml
-spring:
-  jpa:
-    database: HSQL
-    hibernate:
-      ddl-auto: create
+spring.jpa.database: HSQL
+spring.jpa.hibernate.ddl-auto: update
 ```
 
 === Database
@@ -21,14 +18,12 @@ the application shuts down. For Postgres create at least a dedicated database an
 ```yaml
 spring:
   datasource:
-    url: "jdbc:postgresql://[host]:[port]/database"
-    username: user
-    password: supersecure
+    url: "jdbc:postgresql://localhost:5432/codefreak"
+    username: postgres
+    password: portgres
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
 ```
 
 === Docker
@@ -80,6 +75,17 @@ $ ./gradlew vagrantTest   # for testing with Vagrant Docker daemon
 ```console
 $ ./gradlew spotlessApply
 ```
+
+== Making changes to the database schema
+If you modify the entity layer under `de.code_freak.codefreak.entity` in a way that changes the database schema,
+you have to create a migration changelog. Code FREAK uses https://www.liquibase.org/[Liquibase] for versioning the database
+schema. After you made your changes to the JPA entities, execute the script `generateChangelog.sh` in the project directory.
+It will create a new file under `src/main/resources/db/changelogs`. It contains differences between the latest schema version
+and the JPA entities. Modify the file if needed, for example if you create a new non-null column, add a `value` that is used
+for existing records. Keep in mind that the migration will be run on existing production databases. Please refer to the
+http://www.liquibase.org/documentation[Liquibase documentation] for more information on changelogs.
+
+NOTE: If you are on Windows, the script does not work on all emulated shells. Make sure to use one that is based on `bash`.
 
 == Releasing a new version
 

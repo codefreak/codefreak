@@ -31,7 +31,7 @@
   </div>
 
   <div class="card my-4" th:each="result : ${evaluation.results}" th:with="content=${resultContents[result.id]}">
-    <div class="card-body" th:insert="${'evaluation/' + resultTemplates[result.id]}"></div>
+    <div class="card-body" th:insert="${resultTemplates[result.id]}"></div>
   </div>
 </div>
 </body>

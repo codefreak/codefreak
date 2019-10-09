@@ -41,30 +41,15 @@ class EvaluationController : BaseController() {
     if (!user.authorities.contains(Role.TEACHER) && evaluation.answer.submission.user != user.entity) {
       throw AccessDeniedException("Cannot access evaluation")
     }
-    val resultTemplates = mutableMapOf<UUID, String>()
-    val resultContents = mutableMapOf<UUID, Any>()
-    evaluation.results.forEach {
-      if (it.error) {
-        resultContents[it.id] = String(it.content)
-        resultTemplates[it.id] = "error"
-      } else {
-        try {
-          resultContents[it.id] = evaluationService.getEvaluationRunner(it.runnerName).parseResultContent(it.content)
-          resultTemplates[it.id] = it.runnerName
-        } catch (e: Exception) {
-          log.error(e.message)
-          resultContents[it.id] = "Error while displaying result"
-          resultTemplates[it.id] = "error"
-        }
-      }
-    }
     val latestEvaluation = evaluationService.getLatestEvaluation(evaluation.answer.id).orElse(null)
     model.addAttribute("latestEvaluation", latestEvaluation)
     val isUpToDate = evaluation == latestEvaluation && evaluationService.isEvaluationUpToDate(evaluation.answer.id)
     model.addAttribute("isUpToDate", isUpToDate)
+
+    val viewModel = EvaluationViewModel.create(evaluation, evaluationService)
     model.addAttribute("evaluation", evaluation)
-    model.addAttribute("resultTemplates", resultTemplates)
-    model.addAttribute("resultContents", resultContents)
+    model.addAttribute("resultTemplates", viewModel.resultTemplates)
+    model.addAttribute("resultContents", viewModel.resultContents)
     return "evaluation"
   }
 }
