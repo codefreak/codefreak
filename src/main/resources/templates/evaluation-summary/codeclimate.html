@@ -2,11 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <span th:title="|Code quality: ${content.toString()}|" data-toggle="tooltip">
-  <th:block th:text="${content.issues.size()}"></th:block>
   <th:block th:switch="${content.issues.size()}">
     <i th:case="0" class="fas fa-check-circle text-success"></i>
     <i th:case="*" class="fas fa-times-circle text-danger"></i>
   </th:block>
+  <th:block th:text="${content.issues.size()}"></th:block>
 </span>
 </body>
 </html>
