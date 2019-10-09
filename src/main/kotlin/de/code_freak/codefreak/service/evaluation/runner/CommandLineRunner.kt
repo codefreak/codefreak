@@ -16,6 +16,8 @@ class CommandLineRunner : EvaluationRunner {
     private constructor() : this ("", ExecResult("", 0))
   }
 
+  private data class Summary(val total: Int, val passed: Int)
+
   @Autowired
   private lateinit var containerService: ContainerService
 
@@ -41,5 +43,11 @@ class CommandLineRunner : EvaluationRunner {
 
   override fun parseResultContent(content: ByteArray): Any {
     return mapper.readValue(content, Array<Execution>::class.java)
+  }
+
+  override fun getSummary(content: Any): Any {
+    return (content as Array<Execution>).let { results ->
+      Summary(results.size, results.filter { it.result.exitCode == 0L }.size)
+    }
   }
 }

@@ -125,7 +125,7 @@ class AssignmentController : BaseController() {
     val evaluationViewModels = submissions
         .map { submission -> submission.answers.map { it.id } }
         .map { evaluationService.getLatestEvaluations(it).mapValues {
-          entry -> entry.value.map {e -> EvaluationViewModel.create(e, evaluationService) } }
+          entry -> entry.value.map { e -> EvaluationViewModel.create(e, evaluationService, true) } }
         }
         .flatMap { it.toList() }
         .toMap()

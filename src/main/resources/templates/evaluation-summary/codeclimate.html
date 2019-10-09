@@ -1,42 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<span
-  th:with="numIssues=${#lists.size(content.issues)}"
-  th:title="|Error determining result of ${result.runnerName} runner|" data-toggle="tooltip">
-  <th:block th:text="${numIssues}"></th:block>
-</span>
-<h3 class="card-title">Code Quality</h3>
-<div class="alert alert-success lead" th:if="${#lists.size(content.issues) == 0}">
-  <i class="far fa-check-circle text-success"></i> No code-quality issues detected!
-</div>
-<th:block th:each="issue : ${content.issues}">
-  <h4 class="mt-3" th:text="${issue.description}"></h4>
-  <p>
-    Severity:
-    <th:block th:switch="${issue.severity}">
-      <span th:case="'info'" class="badge badge-info">Info</span>
-      <span th:case="'minor'" class="badge badge-secondary">Minor</span>
-      <span th:case="'major'" class="badge badge-warning">Major</span>
-      <span th:case="'critical'" class="badge badge-danger">Critical</span>
-      <span th:case="'blocker'" class="badge badge-danger">Blocker</span>
-    </th:block>
-    Categories:
-    <th:block th:each="category : ${issue.categories}">
-      <span th:text="${category}" class="badge badge-secondary"></span>
-    </th:block>
-    <span class="text-muted">by <span th:text="${issue.engine_name}"></span></span>
-    <br>
-    File: <code th:utext="${issue.location.path}"></code> at line
-    <span th:text="${issue.location.lines.begin}"></span>
-    <span th:if="${issue.location.lines.begin != issue.location.lines.end}" th:text="${'-' + issue.location.lines.end}"></span>
-  </p>
-  <th:block th:if="${issue.content}" th:with="id=${'details-'+T(java.util.UUID).randomUUID()}">
-    <button class="btn btn-light" type="button" data-toggle="collapse" th:attr="data-target=${'#' + id}">Show more information</button>
-    <div class="collapse mt-3" th:id="${id}">
-      <div class="card card-body" th:utext="${@markdown.html(issue.content.body)}"></div>
-    </div>
+<span th:title="|Code quality: ${content.toString()}|" data-toggle="tooltip">
+  <th:block th:text="${content.issues.size()}"></th:block>
+  <th:block th:switch="${content.issues.size()}">
+    <i th:case="0" class="fas fa-check-circle text-success"></i>
+    <i th:case="*" class="fas fa-times-circle text-danger"></i>
   </th:block>
-</th:block>
+</span>
 </body>
 </html>

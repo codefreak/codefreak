@@ -34,12 +34,8 @@
         </a>
         <div class="d-inline-block" th:if="${evaluationViewModel.isPresent()}">
           <th:block th:each="result : ${evaluationViewModel.get().evaluation.results}"
-                    th:with="content=${evaluationViewModel.get().resultContents[result.id]}"
-                    th:insert="${'evaluation-summary/' + evaluationViewModel.get().resultTemplates[result.id]}">
-            <!--<i th:case="'SUCCESS'" class="fas fa-check-circle text-success" th:title="${result.runnerName}" data-toggle="tooltip"></i>
-            <i th:case="'FAILURE'" class="fas fa-times-circle text-danger" th:title="${result.runnerName}" data-toggle="tooltip"></i>
-            <i th:case="'ERROR'" class="fas fa-exclamation-circle text-danger" th:title="${result.runnerName}" data-toggle="tooltip"></i>
-            <i th:case="*" class="fas fa-question-circle text-info" th:title="${result.runnerName}" data-toggle="tooltip"></i>-->
+                    th:with="content=${evaluationViewModel.get().resultContents[result.id]}">
+            <th:block th:insert="${evaluationViewModel.get().resultTemplates[result.id]}"></th:block>
           </th:block>
         </div>
       </td>

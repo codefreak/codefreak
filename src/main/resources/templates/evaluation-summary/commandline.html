@@ -1,17 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<h3 class="card-title">Command Line</h3>
-<div class="mb-3" th:each="execution : ${content}">
-  <h4>
-    <th:block th:switch="${execution.result.exitCode}">
-      <span th:case="0" class="badge badge-success">Success</span>
-      <span th:case="-1" class="badge badge-info">Skipped</span>
-      <span th:case="*" class="badge badge-danger">Failure</span>
-    </th:block>
-    <code th:text="${execution.command}"></code>
-  </h4>
-  <pre th:text="${execution.result.output}"></pre>
-</div>
+<span th:title="|Command line: ${content.passed}/${content.total} commands executed successfully|" data-toggle="tooltip">
+  <th:block th:text="|${content.passed}/${content.total}|"></th:block>
+  <th:block th:switch="${content.passed}">
+    <i th:case="${content.total}" class="fas fa-check-circle text-success"></i>
+    <i th:case="*" class="fas fa-times-circle text-danger"></i>
+  </th:block>
+</span>
 </body>
 </html>
