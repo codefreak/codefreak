@@ -23,6 +23,8 @@ class JUnitRunner : CommandLineRunner() {
     private constructor() : this(emptyList(), emptyList())
   }
 
+  private data class Summary(val error: Boolean, val total: Int, val passed: Int)
+
   private val mapper = ObjectMapper()
 
   override fun getName(): String {
@@ -56,5 +58,14 @@ class JUnitRunner : CommandLineRunner() {
     val results = mapper.readValue(content, Results::class.java)
     val testSuites = results.xmlReports.map { JUnitMarshalling.unmarshalTestSuite(ByteArrayInputStream(it)) }
     return RenderResults(results.executions, testSuites)
+  }
+
+  override fun getSummary(content: Any): Any {
+    return (content as RenderResults).let { results ->
+      val error = results.executions.any { it.result.exitCode == -1L }
+      val passed = results.testSuites.map { it.tests - it.skipped - it.failures - it.errors }.sum()
+      val total = results.testSuites.map { it.tests - it.skipped }.sum()
+      Summary(error, total, passed)
+    }
   }
 }

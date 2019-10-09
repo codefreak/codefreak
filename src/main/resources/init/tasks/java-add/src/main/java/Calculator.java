@@ -1,7 +1,7 @@
 public class Calculator {
     /**
      * Return the sum of a and b
-     * Throws an IllegalArgumentException if a and/or b have illegal states or the result cannot be calculated
+     * Throws an IllegalArgumentException if a and/or b have illegal resultTypes or the result cannot be calculated
      *
      * @param a first addend
      * @param b second addend

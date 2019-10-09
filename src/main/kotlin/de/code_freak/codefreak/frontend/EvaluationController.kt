@@ -37,26 +37,10 @@ class EvaluationController : BaseController() {
   fun getEvaluation(@PathVariable("evaluationId") evaluationId: UUID, model: Model): String {
     val evaluation = evaluationService.getEvaluation(evaluationId)
     // TODO authorization
-    val resultTemplates = mutableMapOf<UUID, String>()
-    val resultContents = mutableMapOf<UUID, Any>()
-    evaluation.results.forEach {
-      if (it.error) {
-        resultContents[it.id] = String(it.content)
-        resultTemplates[it.id] = "error"
-      } else {
-        try {
-          resultContents[it.id] = evaluationService.getEvaluationRunner(it.runnerName).parseResultContent(it.content)
-          resultTemplates[it.id] = it.runnerName
-        } catch (e: Exception) {
-          log.error(e.message)
-          resultContents[it.id] = "Error while displaying result"
-          resultTemplates[it.id] = "error"
-        }
-      }
-    }
+    val viewModel = EvaluationViewModel.create(evaluation, evaluationService)
     model.addAttribute("evaluation", evaluation)
-    model.addAttribute("resultTemplates", resultTemplates)
-    model.addAttribute("resultContents", resultContents)
+    model.addAttribute("resultTemplates", viewModel.resultTemplates)
+    model.addAttribute("resultContents", viewModel.resultContents)
     return "evaluation"
   }
 }

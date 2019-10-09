@@ -108,15 +108,18 @@ class AssignmentController : BaseController() {
   ): String {
     val assignment = assignmentService.findAssignment(assignmentId)
     val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
-    val evaluations = submissions
+    // map of Answer#id to EvaluationViewModel
+    val evaluationViewModels = submissions
         .map { submission -> submission.answers.map { it.id } }
-        .map { evaluationService.getLatestEvaluations(it) }
+        .map { evaluationService.getLatestEvaluations(it).mapValues {
+          entry -> entry.value.map { e -> EvaluationViewModel.create(e, evaluationService, true) } }
+        }
         .flatMap { it.toList() }
         .toMap()
 
     model.addAttribute("assignment", assignment)
     model.addAttribute("submissions", submissions)
-    model.addAttribute("evaluations", evaluations)
+    model.addAttribute("evaluationViewModels", evaluationViewModels)
     return "submissions"
   }
 }
