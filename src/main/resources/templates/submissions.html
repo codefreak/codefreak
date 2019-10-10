@@ -42,7 +42,7 @@
   <tbody>
     <tr th:each="submission : ${submissions}">
       <td th:text="${submission.user.username}"></td>
-      <td th:each="task : ${assignment.tasks}" th:with="answer=${submission.getAnswer(task.id)}, evaluationViewModel=${evaluationViewModels.get(answer.id)}">
+      <td th:each="task : ${assignment.tasks}" th:with="answer=${submission.getAnswer(task.id)}, evaluationViewModel=${answer != null ? evaluationViewModels.get(answer.id) : null}">
         <span th:if="${answer == null}" class="text-muted">no answer</span>
         <div class="row" th:if="${answer != null}">
           <div class="col col-auto pr-2">
