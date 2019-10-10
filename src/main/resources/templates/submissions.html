@@ -13,6 +13,25 @@
   There are no submissions yet.
 </div>
 
+<form th:action="${@urls.get(assignment) + '/evaluations'}" method="post" th:unless="${submissions.isEmpty()}">
+  <button th:unless="${upToDate}"
+          class="btn btn-primary"><i class="fas fa-play"></i> Evaluate all submissions</button>
+  <button th:if="${upToDate}"
+          title="All evaluations are up to date"
+          disabled
+          data-toggle="tooltip"
+          class="btn btn-primary"><i class="fas fa-play"></i> Evaluate all submissions</button>
+  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+</form>
+
+<div class="alert alert-info my-4 pending-evaluations"
+     th:data-assignment-id="${assignment.id}"
+     th:if="${#lists.size(runningEvaluations)} > 0">
+  <i class="fas fa-spinner fa-pulse"></i>
+  <span class="pending-evaluations-count" th:text="${#lists.size(runningEvaluations)}"></span>
+  evaluations are pending
+</div>
+
 <table th:unless="${submissions.isEmpty()}" class="table table-responsive mt-4">
   <thead>
     <tr>
@@ -23,15 +42,17 @@
   <tbody>
     <tr th:each="submission : ${submissions}">
       <td th:text="${submission.user.username}"></td>
-      <td th:each="task : ${assignment.tasks}" th:with="answer=${submission.getAnswer(task.id)}, evaluationViewModel=${evaluationViewModels.get(answer.id)}">
+      <td th:each="task : ${assignment.tasks}" th:with="answer=${submission.getAnswer(task.id)}, evaluationViewModel=${answer != null ? evaluationViewModels.get(answer.id) : null}">
         <span th:if="${answer == null}" class="text-muted">no answer</span>
         <div class="row" th:if="${answer != null}">
           <div class="col col-auto pr-2">
             <th:block th:with="btnClass='btn-sm',url=${@urls.get(answer) + '/source'}" th:insert="fragments/archive-download" />
-            <a class="btn btn-primary btn-sm"
+            <a class="btn btn-primary btn-sm evaluation-result"
+               th:data-answer-id="${answer.id}"
                th:classappend="${evaluationViewModel.isPresent() ? '' : 'disabled'}"
                th:href="${evaluationViewModel.isPresent() ? @urls.get(evaluationViewModel.get().evaluation) : '#'}">
-              <i class="fas fa-poll"></i></a>
+              <i class="fas fa-poll" th:unless="${runningEvaluations.contains(answer.id)}"></i>
+              <i class="fas fa-spinner fa-pulse" th:if="${runningEvaluations.contains(answer.id)}"></i></a>
           </div>
           <div class="col pl-2">
             <ul class="d-inline-block list-unstyled mb-0" th:if="${evaluationViewModel.isPresent()}">
