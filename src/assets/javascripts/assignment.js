@@ -44,10 +44,12 @@ const refreshAssignmentEvaluationStatus = assignmentId => () => {
         pending += 1;
         $button.find('i').attr('class', 'fas fa-spinner fa-pulse');
       } else {
+        $button.find('i').attr('class', 'fas fa-poll');
+      }
+      if (status.url) {
         $button
           .removeClass('disabled')
-          .attr('href', status.url)
-          .find('i').attr('class', 'fas fa-poll');
+          .attr('href', status.url);
       }
     });
     if (pending <= 0) {
