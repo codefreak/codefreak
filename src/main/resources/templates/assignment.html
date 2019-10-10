@@ -33,7 +33,7 @@
       <div class="d-flex flex-row">
         <a class="btn btn-primary ml-1"
            th:href="@{${@urls.get(task)} + '/ide'}"
-           target="_blank"
+           th:target="|ide-${task.id}|"
            th:classappend="${!taskInfo.ideRunning && !canStartNewIdeContainer ? 'disabled' : ''}"
            onclick="setTimeout(() => location.reload(), 1000)">
           <i class="far fa-edit"></i> Open in Editor <span th:if="${taskInfo.ideRunning}">(running)</span>

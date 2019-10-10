@@ -31,7 +31,22 @@ class CodeclimateRunner : EvaluationRunner {
     return Content(results.filterIsInstance<Issue>())
   }
 
+  override fun getSummary(content: Any): Any {
+    return Summary((content as Content).issues)
+  }
+
   private class Content(val issues: List<Issue>)
+
+  private data class Summary(val issues: List<Issue>) {
+    override fun toString(): String {
+      return "${issues.size} issues" + if (issues.isNotEmpty()) {
+        val groups = issues.groupBy { i -> i.severity ?: "unknown" }
+            .map { "${it.value.size} ${it.key}" }
+            .joinToString (", ")
+        " ($groups)"
+      } else ""
+    }
+  }
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
   @JsonSubTypes(
