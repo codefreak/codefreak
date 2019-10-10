@@ -50,7 +50,7 @@
             <a class="btn btn-primary btn-sm evaluation-result"
                th:data-answer-id="${answer.id}"
                th:classappend="${evaluationViewModel.isPresent() ? '' : 'disabled'}"
-               th:href="${evaluationViewModel.isPresent() ? @urls.get(evaluationViewModel.get().evaluation) : '#'}">
+               th:href="${evaluationViewModel.isPresent() ? @urls.get(evaluationViewModel.get().evaluation, 'submissions') : '#'}">
               <i class="fas fa-poll" th:unless="${runningEvaluations.contains(answer.id)}"></i>
               <i class="fas fa-spinner fa-pulse" th:if="${runningEvaluations.contains(answer.id)}"></i></a>
           </div>
