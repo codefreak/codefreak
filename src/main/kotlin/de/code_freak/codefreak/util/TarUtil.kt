@@ -183,7 +183,7 @@ object TarUtil {
   }
 
   private fun basename(path: String): String {
-    path.split("[\\\\|/]".toRegex()).apply {
+    path.split("[\\\\/]".toRegex()).apply {
       return if (isEmpty()) "" else last()
     }
   }
