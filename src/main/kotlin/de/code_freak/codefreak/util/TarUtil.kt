@@ -174,11 +174,17 @@ object TarUtil {
 
   private fun wrapUploadInTar(file: MultipartFile, out: OutputStream) {
     val outputStream = TarArchiveOutputStream(out)
-    val entry = TarArchiveEntry(file.originalFilename)
+    val entry = TarArchiveEntry(basename(file.originalFilename ?: "file"))
     entry.size = file.size
     outputStream.putArchiveEntry(entry)
     file.inputStream.use { StreamUtils.copy(it, outputStream) }
     outputStream.closeArchiveEntry()
     outputStream.finish()
+  }
+
+  private fun basename(path: String): String {
+    path.split("[\\\\|/]".toRegex()).apply {
+      return if (isEmpty()) "" else last()
+    }
   }
 }
