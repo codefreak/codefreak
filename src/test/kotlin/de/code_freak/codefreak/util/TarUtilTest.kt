@@ -4,11 +4,14 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.containsInAnyOrder
+import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.notNullValue
 import org.junit.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockMultipartFile
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.nio.file.Files
 
 internal class TarUtilTest {
 
@@ -19,6 +22,20 @@ internal class TarUtilTest {
     TarArchiveInputStream(out.toByteArray().inputStream()).use {
       val result = generateSequence { it.nextTarEntry }.map { it.name }.toList()
       assertThat(result, containsInAnyOrder("/", "executable.sh", "foo.txt", "subdir/", "subdir/bar.txt"))
+    }
+  }
+
+  @Test
+  fun `tar with long file names is created correctly`() {
+    val out = ByteArrayOutputStream()
+    val veryLongName = "a".repeat(101)
+    val tmpDir = Files.createTempDirectory("very-long-test-").toFile()
+    File(tmpDir, veryLongName).createNewFile()
+    TarUtil.createTarFromDirectory(tmpDir, out)
+    tmpDir.deleteRecursively()
+    TarArchiveInputStream(out.toByteArray().inputStream()).use {
+      val result = generateSequence { it.nextTarEntry }.map { it.name }.toList()
+      assertThat(result, hasItem(veryLongName))
     }
   }
 
