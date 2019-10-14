@@ -26,7 +26,7 @@
           <label>Task ID</label>
           <input class="form-control" type="text" name="taskId" required/>
         </div>
-        <div th:replace="fragments/archive-upload" th:with="inputId='task-update-file-upload'"></div>
+        <div th:replace="fragments/file-upload" th:with="inputId='task-update-file-upload'"></div>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
       </form>
     </div>
