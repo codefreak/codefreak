@@ -65,8 +65,8 @@ class EvaluationQueue : StepExecutionListener {
       addDate("date", Date()) // we need this so that we can create a job with the same answer id multiple times
     }.toJobParameters()
     log.debug("Queuing evaluation for answer $answerId")
-    jobLauncher.run(job, params)
     queuedEvaluations.add(answerId)
+    jobLauncher.run(job, params)
   }
 
   override fun beforeStep(stepExecution: StepExecution) {
