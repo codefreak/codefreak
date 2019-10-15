@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.service
 
+import com.nhaarman.mockitokotlin2.eq
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
 import de.code_freak.codefreak.SpringTest
@@ -9,23 +10,22 @@ import de.code_freak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.greaterThan
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
+import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ClassPathResource
 import java.io.ByteArrayOutputStream
 import java.util.UUID
-import com.nhaarman.mockitokotlin2.eq
-import org.hamcrest.Matchers.greaterThan
-import org.junit.Ignore
-import org.mockito.Mockito
-import org.springframework.boot.test.mock.mockito.MockBean
 
 internal class ContainerServiceTest : SpringTest() {
 

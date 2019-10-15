@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<span th:title="|Command line: ${content.passed}/${content.total} commands executed successfully|" data-toggle="tooltip">
-  <th:block th:switch="${content.passed}">
-    <i th:case="${content.total}" class="fas fa-check-circle text-success"></i>
+<span>
+  <th:block th:switch="${content.success}">
+    <i th:case="${true}" class="fas fa-check-circle text-success"></i>
     <i th:case="*" class="fas fa-times-circle text-danger"></i>
   </th:block>
-  <th:block th:text="|${content.passed}/${content.total}|"></th:block>
 </span>
 </body>
 </html>

@@ -20,8 +20,6 @@ import java.io.InputStream
 import java.util.UUID
 import javax.transaction.Transactional
 import javax.ws.rs.ProcessingException
-import java.util.ArrayList
-import java.util.regex.Pattern
 
 @Service
 class ContainerService : BaseService() {
@@ -297,73 +295,76 @@ class ContainerService : BaseService() {
     idleContainers = newIdleContainers
   }
 
+  fun start(containerId: String): ExecResult {
+    val stdout = docker.attachContainer(
+        containerId,
+        DockerClient.AttachParameter.STREAM,
+        DockerClient.AttachParameter.STDOUT
+    )
+    val stderr = docker.attachContainer(
+        containerId,
+        DockerClient.AttachParameter.STREAM,
+        DockerClient.AttachParameter.STDERR
+    )
+    docker.startContainer(containerId)
+    docker.waitContainer(containerId).let {
+      return ExecResult(it.statusCode(), stdout.readFully(), stderr.readFully())
+    }
+  }
+
   fun runCodeclimate(answer: Answer): String {
     val containerId = createContainer(config.evaluation.codeclimate.image) {
       name = "codeclimate_orchestrator_${answer.id}"
-      doNothingAndKeepAlive()
+      shellScript("""
+        /usr/src/app/bin/codeclimate engines:install > /dev/null
+        /usr/src/app/bin/codeclimate analyze -f json
+      """.trimIndent())
       hostConfig {
         appendBinds("/var/run/docker.sock:/var/run/docker.sock", "/tmp/cc:/tmp/cc")
+        autoRemove(true)
       }
       containerConfig {
         env("CODECLIMATE_ORCHESTRATOR=$name", "CODECLIMATE_CODE=/code")
       }
     }
     answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, "/code") }
-    docker.startContainer(containerId)
-    // `analyze` would also install missing engines but may time out in the process. Also `engines:install` will update images.
-    exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "engines:install"))
-    val output = exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "analyze", "-f", "json")).output
-    docker.killContainer(containerId)
-    docker.removeContainer(containerId)
-    return output
+    val result = start(containerId)
+    // if codeclimate fails something has gone terribly wrong
+    if (!result.success) {
+      throw RuntimeException(result.stderr)
+    }
+    return result.stdout
   }
 
   fun runCommandsForEvaluation(
     answer: Answer,
     image: String,
     projectPath: String,
-    commands: List<String>,
+    script: String,
     stopOnFail: Boolean,
     processFiles: ((InputStream) -> Unit)? = null
-  ): List<ExecResult> {
+  ): ExecResult {
     pullDockerImages(listOf(image))
+    val fullScript = StringBuilder().apply {
+      if (stopOnFail) {
+        // http://www.gnu.org/software/bash/manual/bashref.html#The-Set-Builtin
+        append("set -e\n")
+        // not working on ubuntu images. need a way to detect bash-compatible shells
+        //append("set -o o pipefail\n")
+      }
+      append(script)
+    }.toString()
+
     val containerId = createContainer(image) {
-      doNothingAndKeepAlive()
+      shellScript(fullScript)
       containerConfig { workingDir(projectPath) }
     }
     answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
-    docker.startContainer(containerId)
-    val outputs = mutableListOf<ExecResult>()
-    commands.forEach {
-      if (stopOnFail && outputs.size > 0 && outputs.last().exitCode != 0L) {
-        outputs.add(ExecResult("", -1))
-      } else {
-        outputs.add(exec(containerId, splitCommand(it)))
-      }
-    }
+    val result = start(containerId)
     if (processFiles !== null) {
       archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
     }
-    docker.killContainer(containerId)
     docker.removeContainer(containerId)
-    return outputs
-  }
-
-  private fun splitCommand(command: String): Array<String> {
-    // from https://stackoverflow.com/a/366532/5519485
-    val matchList = ArrayList<String>()
-    val regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'")
-    val regexMatcher = regex.matcher(command)
-    while (regexMatcher.find()) {
-      when {
-        regexMatcher.group(1) != null -> // Add double-quoted string without the quotes
-          matchList.add(regexMatcher.group(1))
-        regexMatcher.group(2) != null -> // Add single-quoted string without the quotes
-          matchList.add(regexMatcher.group(2))
-        else -> // Add unquoted word
-          matchList.add(regexMatcher.group())
-      }
-    }
-    return matchList.toArray(arrayOf())
+    return result
   }
 }

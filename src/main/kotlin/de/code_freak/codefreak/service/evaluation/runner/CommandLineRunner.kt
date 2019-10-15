@@ -16,8 +16,6 @@ class CommandLineRunner : EvaluationRunner {
     private constructor() : this ("", ExecResult("", 0))
   }
 
-  private data class Summary(val total: Int, val passed: Int)
-
   @Autowired
   private lateinit var containerService: ContainerService
 
@@ -31,23 +29,23 @@ class CommandLineRunner : EvaluationRunner {
     return mapper.writeValueAsString(executeCommands(answer, options, null))
   }
 
-  protected fun executeCommands(answer: Answer, options: Map<String, Any>, processFiles: ((InputStream) -> Unit)?): List<Execution> {
+  protected fun executeCommands(answer: Answer, options: Map<String, Any>, processFiles: ((InputStream) -> Unit)?): Execution {
     val image = options.getRequired("image", String::class)
     val projectPath = options.getRequired("project-path", String::class)
     val commands = options.getList("commands", String::class, true)!!
     val stopOnFail = options.get("stop-on-fail", Boolean::class) ?: true
+    val command = commands.joinToString("\n")
 
-    return containerService.runCommandsForEvaluation(answer, image, projectPath, commands.toList(), stopOnFail, processFiles)
-        .mapIndexed { index, result -> Execution(commands[index], result) }
+    containerService.runCommandsForEvaluation(answer, image, projectPath, command, stopOnFail, processFiles).let {
+      return Execution(command, it)
+    }
   }
 
   override fun parseResultContent(content: ByteArray): Any {
-    return mapper.readValue(content, Array<Execution>::class.java)
+    return mapper.readValue(content, Execution::class.java)
   }
 
   override fun getSummary(content: Any): Any {
-    return (content as Array<Execution>).let { results ->
-      Summary(results.size, results.filter { it.result.exitCode == 0L }.size)
-    }
+    return content
   }
 }

@@ -2,16 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <h3 class="card-title">Command Line</h3>
-<div class="mb-3" th:each="execution : ${content}">
-  <h4>
-    <th:block th:switch="${execution.result.exitCode}">
-      <span th:case="0" class="badge badge-success">Success</span>
-      <span th:case="-1" class="badge badge-info">Skipped</span>
-      <span th:case="*" class="badge badge-danger">Failure</span>
-    </th:block>
-    <code th:text="${execution.command}"></code>
-  </h4>
-  <pre th:text="${execution.result.output}"></pre>
+<div class="lead" th:switch="${content.result.success}">
+  <span th:case="true" class="badge badge-success">Success</span>
+  <span th:case="*" class="badge badge-danger">Failure</span>
 </div>
+<h4>Command</h4>
+<code><pre th:text="${content.command}"></pre></code>
+<h4>Output</h4>
+<pre th:switch="${content.result.success}">
+<th:block th:case="true" th:text="${content.result.stdout}"/>
+<th:block th:case="*" th:text="${content.result.stderr}"/>
+</pre>
 </body>
 </html>

@@ -2,6 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <h3 class="card-title">Error for runner '<span th:text="${result.runnerName}"></span>'</h3>
-<div class="alert alert-danger" th:text="${content}"></div>
+<div class="alert alert-danger"><pre th:text="${content}"></pre></div>
 </body>
 </html>

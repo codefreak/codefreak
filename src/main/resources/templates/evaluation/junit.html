@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <h3 class="card-title">Unit Tests</h3>
-<th:block th:with="error = ${content.executions.?[result.exitCode == -1].size() > 0}">
+<th:block th:with="error = ${content.testSuites.isEmpty()}">
   <div th:unless="${error}" class="mb-3" th:each="testSuite : ${content.testSuites}">
     <h4>
       <span th:text="${testSuite.name}"></span>
@@ -28,7 +28,7 @@
   </div>
   <th:block th:if="${error}">
     <div class="alert alert-danger">Error while executing tests!</div>
-    <pre th:text="${content.executions.?[result.exitCode > 0].get(0).result.output}"></pre>
+    <pre th:text="${content.result.stderr}"></pre>
   </th:block>
 </th:block>
 </body>
