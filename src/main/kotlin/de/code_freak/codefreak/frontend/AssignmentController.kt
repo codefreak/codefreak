@@ -3,7 +3,6 @@ package de.code_freak.codefreak.frontend
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Evaluation
-import de.code_freak.codefreak.entity.Submission
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.GitImportService
@@ -22,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.io.ByteArrayOutputStream
-import java.util.Optional
 import java.util.UUID
 
 @Controller
@@ -112,22 +110,24 @@ class AssignmentController : BaseController() {
   ): String {
     val assignment = assignmentService.findAssignment(assignmentId)
     val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
-    val evaluationViewModels = getEvaluationViews(submissions)
-
-    model.addAttribute("assignment", assignment)
-    model.addAttribute("submissions", submissions)
-    model.addAttribute("evaluationViewModels", evaluationViewModels)
-    return "submissions"
-  }
-
-  private fun getEvaluationViews(submissions: List<Submission>): Map<UUID, Optional<EvaluationViewModel>> {
-    return submissions
+    // map of Answer#id to EvaluationViewModel
+    val evaluationViewModels = submissions
         .map { submission -> submission.answers.map { it.id } }
         .map { evaluationService.getLatestEvaluations(it).mapValues {
           entry -> entry.value.map { e -> EvaluationViewModel.create(e, evaluationService, true) } }
         }
         .flatMap { it.toList() }
         .toMap()
+
+    val upToDate = evaluationViewModels.none { entry -> !entry.value.isPresent || !evaluationService.isEvaluationUpToDate(entry.key) }
+    val runningEvaluations = evaluationViewModels.filter { evaluationService.isEvaluationRunning(it.key) }.map { it.key }
+
+    model.addAttribute("upToDate", upToDate)
+    model.addAttribute("assignment", assignment)
+    model.addAttribute("submissions", submissions)
+    model.addAttribute("runningEvaluations", runningEvaluations)
+    model.addAttribute("evaluationViewModels", evaluationViewModels)
+    return "submissions"
   }
 
   @Secured(Authority.ROLE_TEACHER)

@@ -19,7 +19,11 @@ class Urls {
 
   fun get(assignment: Assignment) = "/assignments/" + assignment.shortId
 
-  fun get(evaluation: Evaluation) = "/evaluations/" + evaluation.shortId
+  fun get(assignment: Assignment, task: Task) = get(assignment) + "#task-${task.position}"
+
+  // we could you default parameters but they somehow cause a ambiguous method call exception in thymeleaf
+  fun get(evaluation: Evaluation) = get(evaluation, "task")
+  fun get(evaluation: Evaluation, returnTo: String) = "/evaluations/${evaluation.shortId}?return=$returnTo"
 
   fun get(answer: Answer) = "/answers/" + answer.shortId
 

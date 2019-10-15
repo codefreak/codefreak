@@ -1,14 +1,14 @@
 FROM gradle:jdk8 AS build
 
-ARG GIT_COMMIT=""
-ARG GIT_TAG=""
-
 COPY . /build
 
 WORKDIR /build
 RUN ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false clean bootJar
 
 FROM openjdk:8-alpine
+
+ARG GIT_COMMIT=""
+ARG GIT_TAG="$GIT_COMMIT"
 
 # Add some system dependecies required by libraries
 # - gcompat for jsass
@@ -32,7 +32,7 @@ USER code-freak
 
 # Override this when running the container with -e SPRING_PROFILES_ACTIVE="dev"
 ENV SPRING_PROFILES_ACTIVE "prod"
-ENV SENTRY_ENVIRONMENT "prod"
+ENV SENTRY_ENVIRONMENT "$SPRING_PROFILES_ACTIVE"
 ENV SENTRY_RELEASE "${GIT_TAG}"
 
 WORKDIR /app

@@ -25,7 +25,7 @@
     <a class="btn btn-light" th:href="${@urls.get(assignment) + '/submissions'}"><i class="fas fa-table"></i> Student Submissions</a>
   </div>
 
-  <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task}">
+  <div class="card mt-4" th:each="taskInfo : ${taskInfos}" th:with="task=${taskInfo.task}" th:id="|task-${task.position}|">
     <div class="card-body">
       <h3 class="card-title" th:text="${task.title}"/>
       <p class="card-text" th:if="${task.body}" th:utext="${@markdown.html(task.body)}"/>

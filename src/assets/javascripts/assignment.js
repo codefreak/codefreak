@@ -6,6 +6,10 @@ $(function() {
     const taskId = $(this).attr("data-task-id");
     setTimeout(refreshEvaluationStatus(taskId), 3000)
   });
+  $('.pending-evaluations[data-assignment-id]').each(function() {
+    const assignmentId = $(this).attr("data-assignment-id");
+    setTimeout(refreshAssignmentEvaluationStatus(assignmentId), 10000)
+  })
 });
 
 const refreshEvaluationStatus = taskId => () => {
@@ -29,4 +33,30 @@ const refreshEvaluationStatus = taskId => () => {
       showToast('Evaluation finished', 'fas fa-check text-success', message);
     }
   })
+};
+
+const refreshAssignmentEvaluationStatus = assignmentId => () => {
+  $.get(`/assignments/${assignmentId}/evaluations-status`, map => {
+    let pending = 0;
+    Object.entries(map).forEach(([answerId, status]) => {
+      const $button = $(`a[data-answer-id="${answerId}"]`);
+      if (status.running) {
+        pending += 1;
+        $button.find('i').attr('class', 'fas fa-spinner fa-pulse');
+      } else {
+        $button.find('i').attr('class', 'fas fa-poll');
+      }
+      if (status.url) {
+        $button
+          .removeClass('disabled')
+          .attr('href', status.url);
+      }
+    });
+    if (pending <= 0) {
+      $('.pending-evaluations[data-assignment-id]').remove();
+    } else {
+      $('.pending-evaluations-count').text(pending);
+      setTimeout(refreshAssignmentEvaluationStatus(assignmentId), 10000);
+    }
+  });
 };

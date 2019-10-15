@@ -22,30 +22,17 @@ import java.io.InputStream
 import java.io.OutputStream
 
 object TarUtil {
-  fun extractTarToDirectory(`in`: InputStream, destination: File) {
-    if (!destination.exists()) {
-      destination.mkdirs()
-    } else if (!destination.isDirectory) {
-      throw IOException("${destination.absolutePath} already exists and is no directory")
-    }
-    val tar = TarArchiveInputStream(`in`)
-    for (entry in generateSequence { tar.nextTarEntry }.filter { !it.isDirectory }) {
-      val outFile = File(destination, entry.name)
-      outFile.parentFile.mkdirs()
-      outFile.outputStream().use { IOUtils.copy(tar, it) }
-      outFile.setLastModified(entry.lastModifiedDate.time)
-      // check if executable bit for user is set
-      // octal 100 = dec 64
-      outFile.setExecutable((entry.mode and 64) == 64)
+  class PosixTarArchiveOutputStream(out: OutputStream) : TarArchiveOutputStream(out) {
+    init {
+      setLongFileMode(LONGFILE_POSIX)
+      setBigNumberMode(BIGNUMBER_STAR)
     }
   }
 
   fun createTarFromDirectory(file: File, out: OutputStream) {
     require(file.isDirectory) { "FileCollection must be a directory" }
 
-    val tar = TarArchiveOutputStream(out)
-    tar.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR)
-    tar.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU)
+    val tar = PosixTarArchiveOutputStream(out)
     addFileToTar(tar, file, ".")
     tar.finish()
   }
@@ -99,7 +86,7 @@ object TarUtil {
       // input is not compressed or maybe even not an archive at all
     }
     val archive = ArchiveStreamFactory().createArchiveInputStream(input)
-    val tar = TarArchiveOutputStream(out)
+    val tar = PosixTarArchiveOutputStream(out)
     generateSequence { archive.nextEntry }.forEach { archiveEntry ->
       val tarEntry = TarArchiveEntry(normalizeEntryName(archiveEntry.name))
       if (archiveEntry.isDirectory) {
@@ -146,7 +133,7 @@ object TarUtil {
 
   fun extractSubdirectory(`in`: InputStream, out: OutputStream, path: String) {
     val prefix = normalizeEntryName(path).withTrailingSlash()
-    val extracted = TarArchiveOutputStream(out)
+    val extracted = PosixTarArchiveOutputStream(out)
     TarArchiveInputStream(`in`).let { tar ->
       generateSequence { tar.nextTarEntry }.forEach {
         if (normalizeEntryName(it.name).startsWith(prefix)) {
@@ -173,12 +160,18 @@ object TarUtil {
   }
 
   private fun wrapUploadInTar(file: MultipartFile, out: OutputStream) {
-    val outputStream = TarArchiveOutputStream(out)
-    val entry = TarArchiveEntry(file.originalFilename)
+    val outputStream = PosixTarArchiveOutputStream(out)
+    val entry = TarArchiveEntry(basename(file.originalFilename ?: "file"))
     entry.size = file.size
     outputStream.putArchiveEntry(entry)
     file.inputStream.use { StreamUtils.copy(it, outputStream) }
     outputStream.closeArchiveEntry()
     outputStream.finish()
+  }
+
+  private fun basename(path: String): String {
+    path.split("[\\\\/]".toRegex()).apply {
+      return if (isEmpty()) "" else last()
+    }
   }
 }

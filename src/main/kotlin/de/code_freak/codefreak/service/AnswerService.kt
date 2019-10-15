@@ -8,7 +8,6 @@ import de.code_freak.codefreak.util.TarUtil
 import de.code_freak.codefreak.util.afterClose
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -50,7 +49,7 @@ class AnswerService : BaseService() {
     val taskDefinition = taskService.getTaskDefinition(answer.task.id)
     fileService.writeCollectionTar(answer.id).use { out ->
       fileService.readCollectionTar(answer.task.id).use { `in` ->
-        TarUtil.copyEntries(TarArchiveInputStream(`in`), TarArchiveOutputStream(out)) {
+        TarUtil.copyEntries(TarArchiveInputStream(`in`), TarUtil.PosixTarArchiveOutputStream(out)) {
           !taskDefinition.isHidden(it)
         }
       }
@@ -60,7 +59,7 @@ class AnswerService : BaseService() {
   fun copyFilesForEvaluation(answer: Answer): InputStream {
     val taskDefinition = taskService.getTaskDefinition(answer.task.id)
     val out = ByteArrayOutputStream()
-    val outTar = TarArchiveOutputStream(out)
+    val outTar = TarUtil.PosixTarArchiveOutputStream(out)
     fileService.readCollectionTar(answer.id).use { answerFiles ->
       TarUtil.copyEntries(TarArchiveInputStream(answerFiles), outTar) {
         !taskDefinition.isHidden(it) && !taskDefinition.isProtected(it)
