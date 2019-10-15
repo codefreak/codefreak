@@ -24,10 +24,15 @@
   <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 </form>
 
-<a th:unless="${submissions.isEmpty()}"
-   th:href="${@urls.get(assignment) + '/submissions.csv'}"
-   target="_blank"
-   class="btn btn-primary"><i class="fas fa-file-csv"></i> Download submissions as .csv</a>
+<div class="d-inline-block dropdown" th:unless="${submissions.isEmpty()}">
+  <button class="btn btn-light dropdown-toggle" type="button" data-toggle="dropdown">
+    <i class="fas fa-download"></i> Download submissions…
+  </button>
+  <div class="dropdown-menu">
+    <a class="dropdown-item"
+       th:href="${@urls.get(assignment) + '/submissions.csv'}"><i class="fas fa-file-csv"></i> CSV Spreadsheet</a>
+  </div>
+</div>
 
 <div class="alert alert-info my-4 pending-evaluations"
      th:data-assignment-id="${assignment.id}"
