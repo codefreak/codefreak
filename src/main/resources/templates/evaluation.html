@@ -21,13 +21,21 @@
     <a th:if="${latestEvaluation} != ${evaluation}" th:href="${@urls.get(latestEvaluation)}">go to latest evaluation</a>
   </div>
 
-  <div th:if="${param.return} != null">
-    <a class="btn btn-light" sec:authorize="hasRole('ROLE_TEACHER')"
-       th:if="${param.return[0]} == 'submissions'"
-       th:href="${@urls.get(task.assignment) + '/submissions'}"><i class="fas fa-arrow-circle-left"></i> Back to submissions</a>
-    <a class="btn btn-light"
-       th:if="${param.return[0]} == 'task'"
-       th:href="${@urls.get(task.assignment, task)}"><i class="fas fa-arrow-circle-left"></i> Back to task</a>
+  <div class="row">
+    <div class="col-12 col-md-6" th:if="${param.return} != null">
+      <a class="btn btn-light" sec:authorize="hasRole('ROLE_TEACHER')"
+         th:if="${param.return[0]} == 'submissions'"
+         th:href="${@urls.get(task.assignment) + '/submissions'}"><i class="fas fa-arrow-circle-left"></i> Back to submissions</a>
+      <a class="btn btn-light"
+         th:if="${param.return[0]} == 'task'"
+         th:href="${@urls.get(task.assignment, task)}"><i class="fas fa-arrow-circle-left"></i> Back to task</a>
+    </div>
+    <div class="col-12 col-md-6 text-right">
+      <a sec:authorize="hasRole('ROLE_TEACHER')"
+         class="btn btn-primary"
+         target="_blank"
+         th:href="${@urls.get(evaluation.answer) + '/ide'}"><i class="fas fa-eye"></i> View in IDE</a>
+    </div>
   </div>
 
   <div class="card my-4" th:each="result : ${evaluation.results}" th:with="content=${resultContents[result.id]}">
