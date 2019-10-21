@@ -1,7 +1,10 @@
 package de.code_freak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
+import com.spotify.docker.client.DockerClient.ListContainersParam.withLabel
+import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusRunning
 import com.spotify.docker.client.exceptions.ImageNotFoundException
+import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.HostConfig
 import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
@@ -15,19 +18,20 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StreamUtils
 import java.io.InputStream
-import java.util.UUID
-import javax.transaction.Transactional
-import javax.ws.rs.ProcessingException
 import java.util.ArrayList
+import java.util.UUID
 import java.util.regex.Pattern
+import javax.ws.rs.ProcessingException
 
 @Service
 class ContainerService : BaseService() {
 
   companion object {
     private const val LABEL_PREFIX = "de.code-freak."
+    const val LABEL_READ_ONLY_ANSWER_ID = LABEL_PREFIX + "answer-id-read-only"
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
     const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance-id"
     const val PROJECT_PATH = "/home/coder/project"
@@ -89,9 +93,9 @@ class ContainerService : BaseService() {
    */
   @Synchronized
   @Throws(ResourceLimitException::class)
-  fun startIdeContainer(answer: Answer) {
+  fun startIdeContainer(answer: Answer, readOnly: Boolean = false) {
     // either take existing container or create a new one
-    var containerId = this.getIdeContainer(answer)
+    var containerId = this.getIdeContainer(answer.id, readOnly)
     if (containerId != null && isContainerRunning(containerId)) {
       return
     }
@@ -101,7 +105,7 @@ class ContainerService : BaseService() {
     }
 
     if (containerId == null) {
-      containerId = this.createIdeContainer(answer)
+      containerId = this.createIdeContainer(answer, readOnly)
       docker.startContainer(containerId)
       // prepare the environment after the container has started
       this.copyFilesToIde(containerId, answer.id)
@@ -111,8 +115,12 @@ class ContainerService : BaseService() {
     }
   }
 
-  fun canStartNewIdeContainer(): Boolean = config.ide.maxContainers < 0 ||
-      getContainersWithLabel(LABEL_ANSWER_ID).size < config.ide.maxContainers
+  fun canStartNewIdeContainer(): Boolean {
+    if (config.ide.maxContainers < 0) return true
+    var totalIdeContainers = getContainersWithLabel(LABEL_ANSWER_ID).size
+    totalIdeContainers += getContainersWithLabel(LABEL_READ_ONLY_ANSWER_ID).size
+    return totalIdeContainers < config.ide.maxContainers
+  }
 
   /**
    * Run a command as root inside container and return the result as string
@@ -133,31 +141,31 @@ class ContainerService : BaseService() {
    * Get the URL for an IDE container
    * TODO: make this configurable for different types of hosting/reverse proxies/etc
    */
-  fun getIdeUrl(answerId: UUID): String {
-    return "${config.traefik.url}/ide/$answerId/"
+  fun getIdeUrl(answerId: UUID, readOnly: Boolean = false): String {
+    return config.traefik.url + getIdePath(answerId, readOnly)
+  }
+
+  protected fun getIdePath(answerId: UUID, readOnly: Boolean): String {
+    return if (readOnly) "/reader/$answerId/" else "/ide/$answerId/"
   }
 
   fun isIdeContainerRunning(answerId: UUID): Boolean {
     return getIdeContainer(answerId)?.let { isContainerRunning(it) } ?: false
   }
 
-  protected fun getIdeContainer(answer: Answer): String? {
-    return getIdeContainer(answer.id)
+  protected fun getIdeContainer(answerId: UUID, readOnly: Boolean = false): String? {
+    val label = if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID
+    return getContainerWithLabel(label, answerId.toString())?.id()
   }
 
-  protected fun getIdeContainer(answerId: UUID): String? {
-    return getContainerWithLabel(LABEL_ANSWER_ID, answerId.toString())
-  }
-
-  protected fun getContainerWithLabel(label: String, value: String? = null): String? {
+  protected fun getContainerWithLabel(label: String, value: String? = null): Container? {
     return getContainersWithLabel(label, value).firstOrNull()
   }
 
-  protected fun getContainersWithLabel(label: String, value: String? = null): List<String> {
-    return docker.listContainers(
-        DockerClient.ListContainersParam.withLabel(label, value),
-        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, config.instanceId)
-    ).map { it.id() }
+  protected fun getContainersWithLabel(label: String, value: String? = null) = listContainers(withLabel(label, value))
+
+  protected fun listContainers(vararg listContainerParams: DockerClient.ListContainersParam): List<Container> {
+    return docker.listContainers(withLabel(LABEL_INSTANCE_ID, config.instanceId), *listContainerParams)
   }
 
   @Transactional
@@ -207,14 +215,15 @@ class ContainerService : BaseService() {
    * Configure and create a new IDE container.
    * Returns the ID of the created container
    */
-  protected fun createIdeContainer(answer: Answer): String {
+  protected fun createIdeContainer(answer: Answer, readOnly: Boolean = false): String {
     val answerId = answer.id.toString()
+    val answerLabel = if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID
 
     val containerId = createContainer(config.ide.image) {
       labels = mapOf(
-          LABEL_ANSWER_ID to answerId,
+          answerLabel to answerId,
           "traefik.enable" to "true",
-          "traefik.frontend.rule" to "PathPrefixStrip: /ide/$answerId/",
+          "traefik.frontend.rule" to "PathPrefixStrip: " + getIdePath(answer.id, readOnly),
           "traefik.port" to "3000",
           "traefik.frontend.headers.customResponseHeaders" to "Access-Control-Allow-Origin:*"
       )
@@ -265,35 +274,39 @@ class ContainerService : BaseService() {
     log.debug("Checking for idle containers")
     // create a new map to not leak memory if containers disappear in another way
     val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
-    docker.listContainers(
-        DockerClient.ListContainersParam.withLabel(LABEL_ANSWER_ID),
-        DockerClient.ListContainersParam.withLabel(LABEL_INSTANCE_ID, config.instanceId),
-        DockerClient.ListContainersParam.withStatusRunning()
-    )
-        .forEach {
-          val containerId = it.id()
-          // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
-          val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).output.trim()
-          if (connections == "0") {
-            val now: Long = System.currentTimeMillis()
-            val idleSince: Long = idleContainers[containerId] ?: now
-            val idleFor = now - idleSince
-            log.debug("Container $containerId has been idle for more than $idleFor ms")
-            if (idleFor >= config.ide.idleShutdownThreshold) {
-              val answerId = it.labels()!![LABEL_ANSWER_ID]
-              val answer = answerRepository.findById(UUID.fromString(answerId))
-              if (answer.isPresent) {
-                containerService.saveAnswerFiles(answer.get())
-              } else {
-                log.warn("Answer $answerId not found. Files are not saved!")
-              }
-              log.info("Shutting down container $containerId of answer $answerId")
-              docker.stopContainer(containerId, 5)
+    val containers = mutableListOf<Container>().apply {
+      addAll(listContainers(withLabel(LABEL_ANSWER_ID), withStatusRunning()))
+      addAll(listContainers(withLabel(LABEL_READ_ONLY_ANSWER_ID), withStatusRunning()))
+    }
+    containers.forEach {
+      val containerId = it.id()
+      // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
+      val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).output.trim()
+      if (connections == "0") {
+        val now: Long = System.currentTimeMillis()
+        val idleSince: Long = idleContainers[containerId] ?: now
+        val idleFor = now - idleSince
+        log.debug("Container $containerId has been idle for more than $idleFor ms")
+        if (idleFor >= config.ide.idleShutdownThreshold) {
+          val labels = it.labels()!!
+          val answerId = labels[LABEL_ANSWER_ID] ?: labels[LABEL_READ_ONLY_ANSWER_ID]
+          if (labels.containsKey(LABEL_READ_ONLY_ANSWER_ID)) {
+            log.info("Shutting down read container $containerId for answer $answerId")
+          } else {
+            val answer = answerRepository.findById(UUID.fromString(answerId))
+            if (answer.isPresent) {
+              containerService.saveAnswerFiles(answer.get())
             } else {
-              newIdleContainers[containerId] = idleSince
+              log.warn("Answer $answerId not found. Files are not saved!")
             }
+            log.info("Shutting down container $containerId of answer $answerId")
           }
+          docker.stopContainer(containerId, 5)
+        } else {
+          newIdleContainers[containerId] = idleSince
         }
+      }
+    }
     idleContainers = newIdleContainers
   }
 

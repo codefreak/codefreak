@@ -68,6 +68,7 @@ dependencies {
   testImplementation 'org.springframework.security:spring-security-test'
   testImplementation 'org.hamcrest:hamcrest:2.1'
   testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0'
+  testImplementation 'com.tngtech.archunit:archunit-junit4:0.11.0'
 
   // workaround for https://github.com/spotify/docker-client/issues/1030
   implementation 'org.glassfish.jersey.inject:jersey-hk2:2.26'
@@ -156,6 +157,10 @@ test {
 
 task vagrantTest(type: Test) {
   systemProperty "code-freak.docker.host", "http://localhost:2375"
+  testLogging {
+    events "failed"
+    exceptionFormat "full"
+  }
 }
 
 // Tests reports are required or Sonar will show 0% coverage
