@@ -5,25 +5,28 @@ import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.service.evaluation.AnswerProcessor
 import de.code_freak.codefreak.service.evaluation.AnswerReader
 import de.code_freak.codefreak.service.evaluation.EvaluationQualifier
+import de.code_freak.codefreak.service.evaluation.EvaluationQueue
 import de.code_freak.codefreak.service.evaluation.EvaluationWriter
 import org.springframework.batch.core.Job
+import org.springframework.batch.core.StepExecutionListener
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.batch.core.launch.support.RunIdIncrementer
+import org.springframework.batch.core.launch.support.SimpleJobLauncher
+import org.springframework.batch.core.repository.JobRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.core.task.TaskExecutor
-import org.springframework.batch.core.launch.support.SimpleJobLauncher
-import org.springframework.batch.core.repository.JobRepository
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 
 @Configuration
 class EvaluationConfiguration {
 
   companion object {
     const val JOB_NAME = "evaluation"
+    const val STEP_NAME = "evaluation"
     const val PARAM_ANSWER_ID = "answerId"
   }
 
@@ -58,14 +61,16 @@ class EvaluationConfiguration {
     stepBuilderFactory: StepBuilderFactory,
     reader: AnswerReader,
     processor: AnswerProcessor,
-    writer: EvaluationWriter
+    writer: EvaluationWriter,
+    queue: EvaluationQueue
   ): Job {
 
-    val step = stepBuilderFactory.get("evaluation")
+    val step = stepBuilderFactory.get(STEP_NAME)
         .chunk<Answer, Evaluation>(5)
         .reader(reader)
         .processor(processor)
         .writer(writer)
+        .listener(queue as StepExecutionListener)
         .build()
 
     return jobBuilderFactory.get(JOB_NAME)

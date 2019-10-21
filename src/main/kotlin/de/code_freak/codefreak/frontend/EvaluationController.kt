@@ -45,7 +45,7 @@ class EvaluationController : BaseController() {
     val assignment = assignmentService.findAssignment(assignmentId)
     val submissions = submissionService.findSubmissionsOfAssignment(assignment.id)
     return submissions.flatMap { it.answers }.map {
-      val running = evaluationService.isEvaluationRunning(it.id)
+      val running = evaluationService.isEvaluationRunningOrQueued(it.id)
       val url: String? = evaluationService.getLatestEvaluation(it.id)
           .map(urls::get)
           .orElse(null)
