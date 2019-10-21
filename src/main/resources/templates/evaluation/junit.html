@@ -21,6 +21,7 @@
         </th:block>
         <span th:text="${testCase.name}"></span>
         <pre class="alert alert-danger mt-2 mb-1" th:each="failure : ${testCase.failures}"
+             th:if="${failure.message} != ''"
              th:text="${failure.message.startsWith(failure.type+': ') ? #strings.substring(failure.message, failure.type.length()+2) : failure.message}">
         </pre>
       </li>
