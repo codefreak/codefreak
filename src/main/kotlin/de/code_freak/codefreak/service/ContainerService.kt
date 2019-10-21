@@ -18,12 +18,12 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StreamUtils
 import java.io.InputStream
 import java.util.ArrayList
 import java.util.UUID
 import java.util.regex.Pattern
-import javax.transaction.Transactional
 import javax.ws.rs.ProcessingException
 
 @Service

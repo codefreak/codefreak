@@ -1,4 +1,4 @@
-package de.code_freak.codefreak.init
+package de.code_freak.codefreak.service
 
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Classroom
@@ -8,8 +8,6 @@ import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.RequirementRepository
 import de.code_freak.codefreak.repository.UserRepository
-import de.code_freak.codefreak.service.AssignmentService
-import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.slf4j.LoggerFactory
@@ -29,7 +27,7 @@ import java.time.Instant
  */
 @Service
 @Profile("dev")
-class SeedDatabase : ApplicationListener<ContextRefreshedEvent>, Ordered {
+class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered {
 
   @Autowired lateinit var userRepository: UserRepository
   @Autowired lateinit var assignmentRepository: AssignmentRepository
