@@ -9,6 +9,7 @@ import de.code_freak.codefreak.service.GitImportService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import java.io.ByteArrayOutputStream
 import java.util.UUID
@@ -126,5 +128,13 @@ class AssignmentController : BaseController() {
     model.addAttribute("runningEvaluations", runningEvaluations)
     model.addAttribute("evaluationViewModels", evaluationViewModels)
     return "submissions"
+  }
+
+  @Secured(Authority.ROLE_TEACHER)
+  @GetMapping("/assignments/{id}/submissions.csv")
+  fun getSubmissionsCsv(@PathVariable("id") assignmentId: UUID): ResponseEntity<StreamingResponseBody> {
+    val assignment = assignmentService.findAssignment(assignmentId)
+    val csv = submissionService.generateSubmissionCsv(assignment)
+    return download("${assignment.title}-submissions.csv", csv.byteInputStream())
   }
 }

@@ -16,7 +16,9 @@ class CommandLineRunner : EvaluationRunner {
     private constructor() : this ("", ExecResult("", 0))
   }
 
-  private data class Summary(val total: Int, val passed: Int)
+  private data class Summary(val total: Int, val passed: Int) {
+    override fun toString() = "$passed/$total"
+  }
 
   @Autowired
   private lateinit var containerService: ContainerService
