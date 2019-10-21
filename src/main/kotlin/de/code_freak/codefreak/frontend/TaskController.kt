@@ -139,7 +139,7 @@ class TaskController : BaseController() {
   fun getEvaluationStatus(@PathVariable("taskId") taskId: UUID): EvaluationStatus {
     val submission = getOrCreateSubmissionForTask(taskId)
     val answer = submission.getOrCreateAnswer(taskId)
-    val running = evaluationService.isEvaluationRunning(answer.id)
+    val running = evaluationService.isEvaluationRunningOrQueued(answer.id)
     val url = evaluationService.getLatestEvaluation(answer.id).map { urls.get(it) }.orElse(null)
     return EvaluationStatus(running, answer.task.title, url)
   }

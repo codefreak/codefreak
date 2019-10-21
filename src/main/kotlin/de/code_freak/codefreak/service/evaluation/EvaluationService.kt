@@ -55,7 +55,7 @@ class EvaluationService : BaseService() {
   fun startEvaluation(answer: Answer) {
     containerService.saveAnswerFiles(answer)
     check(!isEvaluationUpToDate(answer.id)) { "Evaluation is up to date." }
-    check(!isEvaluationRunning(answer.id)) { "Evaluation is already running." }
+    check(!isEvaluationRunningOrQueued(answer.id)) { "Evaluation is already running or queued." }
     evaluationQueue.insert(answer.id)
   }
 
@@ -65,7 +65,7 @@ class EvaluationService : BaseService() {
 
   fun getLatestEvaluation(answerId: UUID) = evaluationRepository.findFirstByAnswerIdOrderByCreatedAtDesc(answerId)
 
-  fun isEvaluationRunning(answerId: UUID) = evaluationQueue.isQueued(answerId) || evaluationQueue.isRunning(answerId)
+  fun isEvaluationRunningOrQueued(answerId: UUID) = evaluationQueue.isQueued(answerId) || evaluationQueue.isRunning(answerId)
 
   fun isEvaluationUpToDate(answerId: UUID): Boolean = getLatestEvaluation(answerId).map {
     it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answerId))
