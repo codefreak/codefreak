@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.graphql
 
+import com.expediagroup.graphql.annotations.GraphQLID
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component
 import java.util.UUID
 
 @GraphQLName("Assignment")
-class AssignmentDto(val id: UUID, val title: String) {
+class AssignmentDto(@GraphQLID val id: UUID, val title: String) {
   constructor(assignment: Assignment) : this(assignment.id, assignment.title)
 }
 
