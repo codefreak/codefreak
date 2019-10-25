@@ -52,8 +52,9 @@ class LdapUserDetailsContextMapper : UserDetailsContextMapper {
     val user = userService.getOrCreateUser(username!!) {
       firstName = config.ldap.firstNameAttribute?.let { ctx?.getStringAttribute(it) }
       lastName = config.ldap.lastNameAttribute?.let { ctx?.getStringAttribute(it) }
+      this.roles = roles.toSet()
     }
     log.debug("Logging in ${user.username} with roles $roles")
-    return AppUser(user, roles)
+    return AppUser(user)
   }
 }

@@ -8,9 +8,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 
 class DevUserDetailsService(
   private val users: List<AppUser> = listOf(
-      AppUser(SeedDatabaseService.admin, listOf(Role.ADMIN), "{noop}123"),
-      AppUser(SeedDatabaseService.teacher, listOf(Role.TEACHER), "{noop}123"),
-      AppUser(SeedDatabaseService.student, listOf(Role.STUDENT), "{noop}123")
+      AppUser(SeedDatabaseService.admin, "{noop}123"),
+      AppUser(SeedDatabaseService.teacher, "{noop}123"),
+      AppUser(SeedDatabaseService.student, "{noop}123")
   )
 ) : InMemoryUserDetailsManager(users) {
   private val log = LoggerFactory.getLogger(this::class.java)

@@ -41,11 +41,12 @@ class LtiAuthenticationProvider(private val userService: UserService) : OIDCAuth
   private fun buildAppUser(claims: JWTClaimsSet, roles: List<Role>): AppUser {
     val username = claims.getStringClaim("email")
     val user = userService.getOrCreateUser(username) {
+      this.roles = roles.toSet()
       firstName = claims.getStringClaim("given_name")
       lastName = claims.getStringClaim("family_name")
     }
     log.debug("Logging in ${user.username} with roles $roles")
-    return AppUser(user, roles)
+    return AppUser(user)
   }
 
   private fun buildAuthorities(claims: JWTClaimsSet): List<Role> {
