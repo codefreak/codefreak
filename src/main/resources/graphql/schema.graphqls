@@ -1,0 +1,69 @@
+scalar DateTime
+
+type User {
+  id: ID!
+  username: String!
+}
+
+type Assignment {
+  id: ID!
+  title: String!
+  owner: User!
+  deadline: DateTime
+  closed: Boolean!
+  tasks: [Task!]!
+}
+
+type Task {
+  id: ID!
+  position: Int!
+  title: String!
+  body: String
+}
+
+#type Submission {
+#  id: ID!
+#  user: User!
+#  assignment: Assignment!
+#  answers: [Answer!]!
+#}
+#
+#type Answer {
+#  id: ID!
+#  submission: Submission!
+#  task: Task!
+#  evaluations: [Evaluation!]!
+#}
+#
+#type Evaluation {
+#  id: ID!
+#  answer: Answer!
+#  results: [EvaluationResult!]!
+#  createdAt: Instant!
+#}
+#
+#type EvaluationResult {
+#  runnerName: String!
+#  position: Int!
+#  error: Boolean!
+#}
+
+type Authentication {
+  user: User!
+  token: String!
+  authorities: [String!]!
+}
+
+input Foo {
+  foo: String
+  bar: Int
+}
+
+type Query {
+  assignments: [Assignment!]!
+  login(username: String!, password: String!): Authentication!
+}
+
+schema {
+  query: Query
+}

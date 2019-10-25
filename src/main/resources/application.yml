@@ -32,6 +32,11 @@ logging:
     org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: WARN
     # Hide log spam of docker pull progress
     com.spotify.docker.client.LoggingPullHandler: WARN
+    graphql.execution.SimpleDataFetcherExceptionHandler: ERROR
+
+graphql:
+  packages:
+    - "de.code_freak.codefreak.graphql"
 
 server:
   servlet:

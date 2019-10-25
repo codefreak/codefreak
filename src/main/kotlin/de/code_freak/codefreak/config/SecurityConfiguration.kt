@@ -33,6 +33,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         ?.authorizeRequests()
             ?.requestMatchers(PathRequest.toStaticResources().atCommonLocations())?.permitAll()
             ?.antMatchers("/assets/**")?.permitAll()
+            ?.antMatchers("/graphql/**")?.permitAll()
             ?.anyRequest()?.authenticated()
         ?.and()
             ?.formLogin()
@@ -41,6 +42,8 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         ?.and()
             ?.logout()
             ?.permitAll()
+        ?.and()
+            ?.csrf()?.ignoringAntMatchers("/graphql")
   }
   @Bean
   override fun userDetailsService(): UserDetailsService {
