@@ -18,5 +18,11 @@ code-freak:
   docker:
     pull-policy: always
 
+graphql:
+  servlet:
+    enabled: false
+    websocket:
+      enabled: false
+
 spring.jpa.database: HSQL
 spring.jpa.hibernate.ddl-auto: update
