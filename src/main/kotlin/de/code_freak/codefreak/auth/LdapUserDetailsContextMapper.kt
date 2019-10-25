@@ -55,6 +55,6 @@ class LdapUserDetailsContextMapper : UserDetailsContextMapper {
       this.roles = roles.toSet()
     }
     log.debug("Logging in ${user.username} with roles $roles")
-    return AppUser(user)
+    return user
   }
 }

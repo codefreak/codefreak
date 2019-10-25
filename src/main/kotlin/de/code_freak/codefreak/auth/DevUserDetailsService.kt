@@ -7,10 +7,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 
 class DevUserDetailsService(
-  private val users: List<AppUser> = listOf(
-      AppUser(SeedDatabaseService.admin, "{noop}123"),
-      AppUser(SeedDatabaseService.teacher, "{noop}123"),
-      AppUser(SeedDatabaseService.student, "{noop}123")
+  private val users: List<UserDetails> = listOf(
+      SeedDatabaseService.admin,
+      SeedDatabaseService.teacher,
+      SeedDatabaseService.student
   )
 ) : InMemoryUserDetailsManager(users) {
   private val log = LoggerFactory.getLogger(this::class.java)

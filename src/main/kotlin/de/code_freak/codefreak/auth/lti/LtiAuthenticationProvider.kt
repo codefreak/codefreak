@@ -1,8 +1,8 @@
 package de.code_freak.codefreak.auth.lti
 
 import com.nimbusds.jwt.JWTClaimsSet
-import de.code_freak.codefreak.auth.AppUser
 import de.code_freak.codefreak.auth.Role
+import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.service.UserService
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider
 import org.mitre.openid.connect.model.PendingOIDCAuthenticationToken
@@ -31,14 +31,14 @@ class LtiAuthenticationProvider(private val userService: UserService) : OIDCAuth
 
     val roles = buildAuthorities(claims)
     return LtiAuthenticationToken(
-        buildAppUser(claims, roles),
+        buildUser(claims, roles),
         authentication.accessTokenValue,
         roles,
         claims
     )
   }
 
-  private fun buildAppUser(claims: JWTClaimsSet, roles: List<Role>): AppUser {
+  private fun buildUser(claims: JWTClaimsSet, roles: List<Role>): User {
     val username = claims.getStringClaim("email")
     val user = userService.getOrCreateUser(username) {
       this.roles = roles.toSet()
@@ -46,7 +46,7 @@ class LtiAuthenticationProvider(private val userService: UserService) : OIDCAuth
       lastName = claims.getStringClaim("family_name")
     }
     log.debug("Logging in ${user.username} with roles $roles")
-    return AppUser(user)
+    return user
   }
 
   private fun buildAuthorities(claims: JWTClaimsSet): List<Role> {

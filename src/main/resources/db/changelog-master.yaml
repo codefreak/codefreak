@@ -3,8 +3,5 @@ databaseChangeLog:
     file: changelogs/20191002162627-initial.yaml
     relativeToChangelogFile: true
 - include:
-    file: changelogs/20191025095704-user-firstname-and-lastname.yaml
-    relativeToChangelogFile: true
-- include:
-    file: changelogs/20191025115400-user-roles.yaml
+    file: changelogs/20191025095704-user-properties.yaml
     relativeToChangelogFile: true

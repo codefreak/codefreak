@@ -41,9 +41,24 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
   private val log = LoggerFactory.getLogger(this::class.java)
 
   companion object {
-    val admin = User(username = "admin", roles = setOf(Role.ADMIN), firstName = "John", lastName = "Admin")
-    val teacher = User(username = "teacher", roles = setOf(Role.TEACHER), firstName = "Kim", lastName = "Teacher")
-    val student = User(username = "student", roles = setOf(Role.STUDENT), firstName = "Alice", lastName = "Student")
+    val admin = User(username = "admin").apply {
+      roles = setOf(Role.ADMIN)
+      firstName = "John"
+      lastName = "Admin"
+      password = "{noop}123"
+    }
+    val teacher = User(username = "teacher").apply {
+      roles = setOf(Role.TEACHER)
+      firstName = "Kim"
+      lastName = "Teacher"
+      password = "{noop}123"
+    }
+    val student = User(username = "student").apply {
+      roles = setOf(Role.STUDENT)
+      firstName = "Alice"
+      lastName = "Student"
+      password = "{noop}123"
+    }
   }
 
   override fun onApplicationEvent(event: ContextRefreshedEvent) {

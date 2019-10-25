@@ -1,0 +1,37 @@
+databaseChangeLog:
+- changeSet:
+    id: 1571990279058-1
+    author: hkasch
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: first_name
+            type: varchar(255)
+        - column:
+            name: last_name
+            type: varchar(255)
+        - column:
+            name: password
+            type: varchar(255)
+        tableName: user
+    - createTable:
+        columns:
+          - column:
+              constraints:
+                nullable: false
+              name: user_id
+              type: uuid
+          - column:
+              name: role
+              type: VARCHAR(255)
+        tableName: user_roles
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: user_roles
+        constraintName: fk_user_roles
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: user
+        validate: true
