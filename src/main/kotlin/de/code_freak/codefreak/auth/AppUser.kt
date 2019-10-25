@@ -6,13 +6,11 @@ import org.springframework.security.core.userdetails.User as SpringUser
 class AppUser(
   val entity: User,
   roles: Collection<Role>,
-  password: String = "",
-  firstName: String? = null,
-  lastName: String? = null
+  password: String = ""
 ) : SpringUser(
     entity.username,
     password,
     roles.flatMap { it.allGrantedAuthorities }
 ) {
-  val displayName = listOfNotNull(firstName, lastName).ifEmpty { listOf(username) }.joinToString(" ")
+  val displayName = listOfNotNull(entity.firstName, entity.lastName).ifEmpty { listOf(username) }.joinToString(" ")
 }

@@ -1,0 +1,14 @@
+databaseChangeLog:
+- changeSet:
+    id: 1571990279058-1
+    author: hkasch
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: first_name
+            type: varchar(255)
+        - column:
+            name: last_name
+            type: varchar(255)
+        tableName: user

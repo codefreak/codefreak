@@ -40,9 +40,9 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
   private val log = LoggerFactory.getLogger(this::class.java)
 
   companion object {
-    val admin = User("admin")
-    val teacher = User("teacher")
-    val student = User("student")
+    val admin = User("admin", "John", "Admin")
+    val teacher = User("teacher", "Kim", "Teacher")
+    val student = User("student", "Alice", "Student")
   }
 
   override fun onApplicationEvent(event: ContextRefreshedEvent) {
