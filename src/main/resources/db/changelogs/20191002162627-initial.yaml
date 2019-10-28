@@ -8,15 +8,15 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: answerPK
+                    primaryKeyName: answer_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: submission_id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: task_id
-                  type: BINARY
+                  type: uuid
             tableName: answer
   - changeSet:
       id: 1569844097273-2
@@ -27,23 +27,23 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: assignmentPK
+                    primaryKeyName: assignment_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: deadline
-                  type: TIMESTAMP
+                  type: timestamp
               - column:
                   constraints:
                     nullable: false
                   name: title
-                  type: VARCHAR(255)
+                  type: varchar(255)
               - column:
                   name: classroom_id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: owner_id
-                  type: BINARY
+                  type: uuid
             tableName: assignment
   - changeSet:
       id: 1569844097273-3
@@ -54,12 +54,12 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: cached_jwt_claims_setPK
+                    primaryKeyName: cached_jwt_claims_set_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: serialized_claim_set
-                  type: VARCHAR(2147483647)
+                  type: text
             tableName: cached_jwt_claims_set
   - changeSet:
       id: 1569844097273-4
@@ -70,14 +70,14 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: classroomPK
+                    primaryKeyName: classroom_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   constraints:
                     nullable: false
                   name: name
-                  type: VARCHAR(255)
+                  type: varchar(255)
             tableName: classroom
   - changeSet:
       id: 1569844097273-5
@@ -88,18 +88,18 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: evaluationPK
+                    primaryKeyName: evaluation_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: created_at
-                  type: TIMESTAMP
+                  type: timestamp
               - column:
                   name: files_digest
-                  type: LONGVARBINARY
+                  type: longblob
               - column:
                   name: answer_id
-                  type: BINARY
+                  type: uuid
             tableName: evaluation
   - changeSet:
       id: 1569844097273-6
@@ -110,25 +110,25 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: evaluation_resultPK
+                    primaryKeyName: evaluation_result_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: content
-                  type: LONGVARBINARY
+                  type: longblob
               - column:
                   constraints:
                     nullable: false
                   name: error
-                  type: BOOLEAN
+                  type: boolean
               - column:
                   constraints:
                     nullable: false
                   name: position
-                  type: INT
+                  type: int
               - column:
                   name: runner_name
-                  type: VARCHAR(255)
+                  type: varchar(255)
             tableName: evaluation_result
   - changeSet:
       id: 1569844097273-7
@@ -140,12 +140,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                   name: evaluation_id
-                  type: BINARY
+                  type: uuid
               - column:
                   constraints:
                     nullable: false
                   name: results_id
-                  type: BINARY
+                  type: uuid
             tableName: evaluation_results
   - changeSet:
       id: 1569844097273-8
@@ -156,12 +156,12 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: file_collectionPK
+                    primaryKeyName: file_collection_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: tar
-                  type: LONGVARBINARY
+                  type: longblob
             tableName: file_collection
   - changeSet:
       id: 1569844097273-9
@@ -172,15 +172,15 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: requirementPK
+                    primaryKeyName: requirement_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: adapter
-                  type: VARCHAR(255)
+                  type: varchar(255)
               - column:
                   name: task_id
-                  type: BINARY
+                  type: uuid
             tableName: requirement
   - changeSet:
       id: 1569844097273-10
@@ -192,15 +192,15 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                   name: requirement_id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: value
-                  type: VARCHAR(255)
+                  type: varchar(255)
               - column:
                   constraints:
                     primaryKey: true
                   name: option
-                  type: VARCHAR(255)
+                  type: varchar(255)
             tableName: requirement_adapter_config
   - changeSet:
       id: 1569844097273-11
@@ -211,15 +211,15 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: submissionPK
+                    primaryKeyName: submission_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: assignment_id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: user_id
-                  type: BINARY
+                  type: uuid
             tableName: submission
   - changeSet:
       id: 1569844097273-12
@@ -230,28 +230,28 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: taskPK
+                    primaryKeyName: task_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: body
-                  type: VARCHAR(2147483647)
+                  type: text
               - column:
                   constraints:
                     nullable: false
                   name: position
-                  type: BIGINT
+                  type: bigint
               - column:
                   constraints:
                     nullable: false
                   name: title
-                  type: VARCHAR(255)
+                  type: varchar(255)
               - column:
                   name: weight
-                  type: INT
+                  type: int
               - column:
                   name: assignment_id
-                  type: BINARY
+                  type: uuid
             tableName: task
   - changeSet:
       id: 1569844097273-13
@@ -262,12 +262,12 @@ databaseChangeLog:
               - column:
                   constraints:
                     primaryKey: true
-                    primaryKeyName: userPK
+                    primaryKeyName: user_pkey
                   name: id
-                  type: BINARY
+                  type: uuid
               - column:
                   name: username
-                  type: VARCHAR(255)
+                  type: varchar(255)
             tableName: user
   - changeSet:
       id: 1569844097273-14
@@ -275,7 +275,7 @@ databaseChangeLog:
       changes:
         - addUniqueConstraint:
             columnNames: results_id
-            constraintName: UK_2jr2j4nm71t0ky7fb2dpfghbp
+            constraintName: uk_2jr2j4nm71t0ky7fb2dpfghbp
             tableName: evaluation_results
   - changeSet:
       id: 1569844097273-15
@@ -284,7 +284,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: user_id
             baseTableName: submission
-            constraintName: FK1qgnfmncpuladr2896scialg0
+            constraintName: FKmroa4vyw3pcoj2kv2dq1kwebm
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -297,7 +297,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: task_id
             baseTableName: requirement
-            constraintName: FK2nv30j1oymkdvdwp7ccxc6352
+            constraintName: FKht56di1qi1nu7snq745g9ilxn
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -310,7 +310,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: task_id
             baseTableName: answer
-            constraintName: FK32s29gitnrc8dhk0m2qf218r3
+            constraintName: FKrsgiv35cq1vbdq1y4epb0i5us
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -323,7 +323,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: submission_id
             baseTableName: answer
-            constraintName: FK3pnf2d6oqqkg3h496so9bsge0
+            constraintName: FK2ain58fi2h37fd5182c75iogm
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -336,7 +336,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: assignment_id
             baseTableName: submission
-            constraintName: FK3q8643roa73llngo64dvpvtxt
+            constraintName: FKtaeaue9loonoqew3bnd3i3te
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -349,7 +349,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: assignment_id
             baseTableName: task
-            constraintName: FK875lan8jdhkua2w8s9y8hsbun
+            constraintName: FKodfemauin1syp4gu27ql27umt
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -362,7 +362,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: classroom_id
             baseTableName: assignment
-            constraintName: FKem5kdulgo05wre17eg7m722nq
+            constraintName: FK14xfsuvlt7cjpvvn5b2drs9kc
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -375,7 +375,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: results_id
             baseTableName: evaluation_results
-            constraintName: FKguco0xagc7jgxnp6glmdsb553
+            constraintName: FKn65egalaw246m7s5okokt7c1o
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -388,7 +388,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: requirement_id
             baseTableName: requirement_adapter_config
-            constraintName: FKohf84ko5oe89317hv1mbhvedm
+            constraintName: FKoku0pk2jphfp8aenheaiifc3p
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -401,7 +401,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: evaluation_id
             baseTableName: evaluation_results
-            constraintName: FKrx8eubnvjpd31w8imni1m939p
+            constraintName: FKrb1adly8d9i1a2d7xt68r0vq2
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -414,7 +414,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: answer_id
             baseTableName: evaluation
-            constraintName: FKry383rlfvg06roxajd8tot079
+            constraintName: FK4a3shyatdeshvc4o5341ey5oe
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
@@ -427,7 +427,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseColumnNames: owner_id
             baseTableName: assignment
-            constraintName: FKshiygbkknmedxb4e4m4qetc0r
+            constraintName: FKmebnwo1c5oklrxolt18de0n79
             deferrable: false
             initiallyDeferred: false
             referencedColumnNames: id
