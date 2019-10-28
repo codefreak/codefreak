@@ -3,6 +3,7 @@ package de.code_freak.codefreak.config
 import de.code_freak.codefreak.auth.AuthenticationMethod
 import de.code_freak.codefreak.auth.DevUserDetailsService
 import de.code_freak.codefreak.auth.LdapUserDetailsContextMapper
+import de.code_freak.codefreak.service.UserService
 import de.code_freak.codefreak.util.withTrailingSlash
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
@@ -25,6 +26,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   @Autowired
   lateinit var env: Environment
 
+  @Autowired
+  lateinit var userService: UserService
+
   @Autowired(required = false)
   var ldapUserDetailsContextMapper: LdapUserDetailsContextMapper? = null
 
@@ -42,11 +46,12 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             ?.logout()
             ?.permitAll()
   }
+
   @Bean
   override fun userDetailsService(): UserDetailsService {
     return when (config.authenticationMethod) {
       AuthenticationMethod.SIMPLE -> when (env.acceptsProfiles(Profiles.of("dev", "test"))) {
-        true -> DevUserDetailsService()
+        true -> DevUserDetailsService(userService)
         false -> throw NotImplementedError("Simple authentication is currently only supported in dev mode.")
       }
       else -> super.userDetailsService()

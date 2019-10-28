@@ -13,8 +13,16 @@ class UserService : BaseService() {
 
   @Transactional
   fun getOrCreateUser(username: String, patch: User.() -> Unit): User {
-    val user = userRepository.findByUsernameIgnoreCase(username).orElseGet { userRepository.save(User(username)) }
+    val user = try {
+      getUser(username)
+    } catch (e: EntityNotFoundException) {
+      userRepository.save(User(username))
+    }
     user.patch()
     return user
+  }
+
+  fun getUser(username: String): User = detached {
+    userRepository.findByUsernameIgnoreCase(username).orElseThrow { EntityNotFoundException("User cannot be found") }
   }
 }
