@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 import kotlin.reflect.KType
 
 @Component
-class CustomSchemaGeneratorHooksImpl : SchemaGeneratorHooks {
+class SchemaGeneratorHooksImpl : SchemaGeneratorHooks {
   override fun willGenerateGraphQLType(type: KType): GraphQLType? {
     return type.classifier?.let { ScalarTypes.get(it) }
   }

@@ -9,12 +9,12 @@ object ScalarTypes {
   private val scalars = mapOf(
       UUID::class to GraphQLScalarType.Builder()
           .name("ID")
-          .description("ID to java.util.UUID")
+          .description("UUID")
           .coercing(UuidConverter())
           .build(),
       Instant::class to GraphQLScalarType.Builder()
           .name("DateTime")
-          .description("DateTime to java.time.Instant")
+          .description("UTC date and time in ISO-8601 format")
           .coercing(DateTimeConverter())
           .build()
   )

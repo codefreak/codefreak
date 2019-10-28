@@ -1,4 +1,4 @@
-package de.code_freak.codefreak.graphql
+package de.code_freak.codefreak.graphql.api
 
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
