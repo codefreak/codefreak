@@ -41,23 +41,24 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
   private val log = LoggerFactory.getLogger(this::class.java)
 
   companion object {
-    val admin = User(username = "admin").apply {
+    private const val DEV_USER_PASSWORD = "{noop}123"
+    val admin = User("admin").apply {
       roles = setOf(Role.ADMIN)
       firstName = "John"
       lastName = "Admin"
-      password = "{noop}123"
+      password = DEV_USER_PASSWORD
     }
-    val teacher = User(username = "teacher").apply {
+    val teacher = User("teacher").apply {
       roles = setOf(Role.TEACHER)
       firstName = "Kim"
       lastName = "Teacher"
-      password = "{noop}123"
+      password = DEV_USER_PASSWORD
     }
-    val student = User(username = "student").apply {
+    val student = User("student").apply {
       roles = setOf(Role.STUDENT)
       firstName = "Alice"
       lastName = "Student"
-      password = "{noop}123"
+      password = DEV_USER_PASSWORD
     }
   }
 
