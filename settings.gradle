@@ -4,3 +4,4 @@ pluginManagement {
   }
 }
 rootProject.name = 'code-freak'
+include 'client'
