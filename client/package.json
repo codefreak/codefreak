@@ -10,16 +10,28 @@
     "@types/react-dom": "16.9.3",
     "antd": "^3.24.3",
     "craco-antd": "^1.14.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.18.2",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "react-scripts": "3.2.0",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-react": "^4.1.0",
     "typescript": "3.6.4"
   },
   "scripts": {
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint:tsc": "tsc --noUnusedLocals --noUnusedParameters",
+    "lint:tslint": "tslint --project . --config tslint.prod.json",
+    "fix:tslint": "tslint --project . --fix",
+    "lint:prettier": "prettier --check \"src/**/*\"",
+    "fix:prettier": "prettier --write \"src/**/*\"",
+    "lint": "npm-run-all lint:**",
+    "fix": "npm-run-all fix:**"
   },
   "eslintConfig": {
     "extends": "react-app"
