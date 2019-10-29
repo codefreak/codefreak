@@ -6,6 +6,10 @@ databaseChangeLog:
     - addColumn:
         columns:
         - column:
+            name: username_canonical
+            type: varchar(255)
+            valueComputed: "LOWER(username)"
+        - column:
             name: first_name
             type: varchar(255)
         - column:
@@ -35,3 +39,7 @@ databaseChangeLog:
         referencedColumnNames: id
         referencedTableName: user
         validate: true
+    - addUniqueConstraint:
+        columnNames: username_canonical
+        constraintName: uc_userusername_canonical
+        tableName: user

@@ -13,6 +13,9 @@ import javax.persistence.FetchType
 
 @Entity
 class User(private val username: String) : BaseEntity(), UserDetails, CredentialsContainer {
+  @Column(unique = true)
+  val usernameCanonical = username.toLowerCase()
+
   @ElementCollection(targetClass = Role::class, fetch = FetchType.EAGER)
   @CollectionTable
   @Enumerated(EnumType.STRING)

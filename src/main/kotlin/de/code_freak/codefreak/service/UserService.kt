@@ -23,6 +23,7 @@ class UserService : BaseService() {
   }
 
   fun getUser(username: String): User = detached {
-    userRepository.findByUsernameIgnoreCase(username).orElseThrow { EntityNotFoundException("User cannot be found") }
+    userRepository.findByUsernameCanonical(username.toLowerCase())
+        .orElseThrow { EntityNotFoundException("User cannot be found") }
   }
 }
