@@ -1,0 +1,6 @@
+query Assignments {
+  assignments {
+    id
+    title
+  }
+}

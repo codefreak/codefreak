@@ -12,7 +12,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, @GraphQLIgnore val serviceAccess:
   @GraphQLID
   val id = entity.id
   val title = entity.title
-  val position = entity.position
+  val position = entity.position.toInt()
   val body = entity.body
   val assignment by lazy { AssignmentDto(entity.assignment, serviceAccess) }
 }
