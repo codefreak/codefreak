@@ -2,3 +2,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20191002162627-initial.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20191025095704-user-properties.yaml
+    relativeToChangelogFile: true

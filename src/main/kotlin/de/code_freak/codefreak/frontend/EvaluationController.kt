@@ -55,7 +55,7 @@ class EvaluationController : BaseController() {
 
   @PostMapping("/evaluations")
   fun startEvaluation(@RequestParam("taskId") taskId: UUID, model: RedirectAttributes): String {
-    val answer = answerService.getAnswerForTaskId(taskId, user.entity.id)
+    val answer = answerService.getAnswerForTaskId(taskId, user.id)
     val assignmentPage = urls.get(answer.task.assignment)
     return withErrorPage(assignmentPage) {
       answer.task.assignment.requireNotClosed()
@@ -69,7 +69,7 @@ class EvaluationController : BaseController() {
   @GetMapping("/evaluations/{evaluationId}")
   fun getEvaluation(@PathVariable("evaluationId") evaluationId: UUID, model: Model): String {
     val evaluation = evaluationService.getEvaluation(evaluationId)
-    if (!user.authorities.contains(Role.TEACHER) && evaluation.answer.submission.user != user.entity) {
+    if (!user.roles.contains(Role.TEACHER) && evaluation.answer.submission.user != user) {
       throw AccessDeniedException("Cannot access evaluation")
     }
     val latestEvaluation = evaluationService.getLatestEvaluation(evaluation.answer.id).orElse(null)
