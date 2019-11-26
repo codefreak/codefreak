@@ -32,6 +32,11 @@ logging:
     org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: WARN
     # Hide log spam of docker pull progress
     com.spotify.docker.client.LoggingPullHandler: WARN
+    graphql.execution.SimpleDataFetcherExceptionHandler: ERROR
+
+graphql:
+  packages:
+    - "de.code_freak.codefreak.graphql.api"
 
 server:
   servlet:
@@ -71,3 +76,10 @@ code-freak:
     # This can be used to inject custom javascript code (needs to include script tags).
     # It is injected after dependencies (like jQuery) and before template specific scripts.
     custom-script: ~
+
+# Enable actuator health checks if needed in production
+# https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#actuator-properties
+management:
+  health:
+    defaults:
+      enabled: false

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
@@ -27,11 +29,15 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   @Autowired(required = false)
   var ldapUserDetailsContextMapper: LdapUserDetailsContextMapper? = null
 
+  @Bean(BeanIds.AUTHENTICATION_MANAGER)
+  override fun authenticationManagerBean(): AuthenticationManager = super.authenticationManagerBean()
+
   override fun configure(http: HttpSecurity?) {
     http
         ?.authorizeRequests()
             ?.requestMatchers(PathRequest.toStaticResources().atCommonLocations())?.permitAll()
             ?.antMatchers("/assets/**")?.permitAll()
+            ?.antMatchers("/graphql/**")?.permitAll()
             ?.anyRequest()?.authenticated()
         ?.and()
             ?.formLogin()
@@ -40,6 +46,8 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         ?.and()
             ?.logout()
             ?.permitAll()
+        ?.and()
+            ?.csrf()?.ignoringAntMatchers("/graphql")
   }
 
   @Bean

@@ -18,7 +18,7 @@ internal class ArchitectureTest {
   @ArchTest
   val `layer dependencies are respected` = Architectures
       .layeredArchitecture()
-      .layer("Frontend").definedBy("de.code_freak.codefreak.frontend..")
+      .layer("Frontend").definedBy("de.code_freak.codefreak.frontend..", "de.code_freak.codefreak.graphql..")
       .layer("Auth").definedBy("de.code_freak.codefreak.auth..")
       .layer("Service").definedBy("de.code_freak.codefreak.service..")
       .layer("Persistence").definedBy("de.code_freak.codefreak.repository..")

@@ -5,6 +5,7 @@ import org.apache.commons.io.output.ProxyOutputStream
 import org.slf4j.Logger
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.Optional
 
 fun String.withTrailingSlash(): String = if (endsWith("/")) this else "$this/"
 
@@ -32,3 +33,5 @@ fun Logger.error(e: Throwable) {
   error(e.message)
   e.printStackTrace()
 }
+
+fun <T> Optional<T>.orNull(): T? = orElse(null)
