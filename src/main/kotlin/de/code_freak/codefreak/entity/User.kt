@@ -20,7 +20,7 @@ class User(private val username: String) : BaseEntity(), UserDetails, Credential
   @CollectionTable
   @Enumerated(EnumType.STRING)
   @Column(name = "role")
-  var roles: Set<Role> = setOf()
+  var roles: MutableSet<Role> = mutableSetOf()
 
   var firstName: String? = null
 

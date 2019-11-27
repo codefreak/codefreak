@@ -41,10 +41,11 @@ class LtiAuthenticationProvider(private val userService: UserService) : OIDCAuth
   private fun buildUser(claims: JWTClaimsSet, roles: List<Role>): User {
     val username = claims.getStringClaim("email")
     val user = userService.getOrCreateUser(username) {
-      this.roles = roles.toSet()
       firstName = claims.getStringClaim("given_name")
       lastName = claims.getStringClaim("family_name")
     }
+    // roles from LTI should not be persisted
+    user.roles = roles.toMutableSet()
     log.debug("Logging in ${user.username} with roles $roles")
     return user
   }

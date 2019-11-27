@@ -11,8 +11,4 @@ abstract class BaseService {
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   open fun <T> withNewTransaction(block: () -> T) = block()
-
-  protected fun <T> detached(block: () -> T) = block().apply {
-    entityManager.detach(this)
-  }
 }
