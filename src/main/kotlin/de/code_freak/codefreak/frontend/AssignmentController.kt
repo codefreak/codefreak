@@ -46,10 +46,10 @@ class AssignmentController : BaseController() {
 
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
-    val assignments = if (user.authorities.contains(Role.TEACHER)) {
+    val assignments = if (user.roles.contains(Role.TEACHER)) {
       assignmentService.findAllAssignments()
     } else {
-      assignmentService.findAllAssignmentsForUser(user.entity.id)
+      assignmentService.findAllAssignmentsForUser(user.id)
     }
     model.addAttribute("assignments", assignments)
     return "assignments"
@@ -61,7 +61,7 @@ class AssignmentController : BaseController() {
     model: Model
   ): String {
     val assignment = assignmentService.findAssignment(assignmentId)
-    val answerIds = answerService.getAnswerIdsForTaskIds(assignment.tasks.map { it.id }, user.entity.id)
+    val answerIds = answerService.getAnswerIdsForTaskIds(assignment.tasks.map { it.id }, user.id)
     val latestEvaluations = evaluationService.getLatestEvaluations(answerIds.values)
     val taskInfos = assignment.tasks.map {
       val answerId = answerIds[it.id]
@@ -93,7 +93,7 @@ class AssignmentController : BaseController() {
 
     ByteArrayOutputStream().use { out ->
       TarUtil.writeUploadAsTar(file, out)
-      val result = assignmentService.createFromTar(out.toByteArray(), user.entity, deadline)
+      val result = assignmentService.createFromTar(out.toByteArray(), user, deadline)
       model.successMessage("Assignment has been created.")
       if (result.taskErrors.isNotEmpty()) {
         model.errorMessage("Not all tasks could be imported successfully:\n" + result.taskErrors.map { "${it.key}: ${it.value.message}" }.joinToString("\n"))

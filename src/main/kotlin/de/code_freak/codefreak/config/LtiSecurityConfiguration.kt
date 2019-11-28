@@ -6,7 +6,7 @@ import de.code_freak.codefreak.auth.lti.IdCodeAuthRequestBuilder
 import de.code_freak.codefreak.auth.lti.LtiAuthenticationFilter
 import de.code_freak.codefreak.auth.lti.LtiAuthenticationProvider
 import de.code_freak.codefreak.auth.lti.LtiAuthenticationSuccessHandler
-import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.service.UserService
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService
 import org.mitre.jwt.signer.service.impl.DefaultJWTSigningAndValidationService
 import org.mitre.oauth2.model.ClientDetailsEntity
@@ -37,7 +37,7 @@ import java.security.KeyStore
 @Order(1)
 class LtiSecurityConfiguration(
   @Autowired appConfiguration: AppConfiguration,
-  @Autowired val userRepository: UserRepository
+  @Autowired val userService: UserService
 ) : WebSecurityConfigurerAdapter() {
   val config = appConfiguration.lti
   private val ltiLoginPath = "/lti/login"
@@ -68,7 +68,7 @@ class LtiSecurityConfiguration(
   }
 
   override fun configure(auth: AuthenticationManagerBuilder?) {
-    auth?.authenticationProvider(LtiAuthenticationProvider(userRepository))
+    auth?.authenticationProvider(LtiAuthenticationProvider(userService))
   }
 
   @Bean

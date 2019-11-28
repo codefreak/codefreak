@@ -1,8 +1,7 @@
 package de.code_freak.codefreak.auth
 
 import de.code_freak.codefreak.config.AppConfiguration
-import de.code_freak.codefreak.entity.User
-import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.service.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.ldap.core.DirContextAdapter
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Component
 class LdapUserDetailsContextMapper : UserDetailsContextMapper {
 
   @Autowired
-  private lateinit var userRepository: UserRepository
+  private lateinit var userService: UserService
 
   @Autowired
   private lateinit var config: AppConfiguration
@@ -50,11 +49,18 @@ class LdapUserDetailsContextMapper : UserDetailsContextMapper {
       }
     }
 
-    val user = userRepository.findByUsernameIgnoreCase(username!!).orElseGet { userRepository.save(User(username)) }
+    val user = userService.getOrCreateUser(username!!) {
+      firstName = config.ldap.firstNameAttribute?.let { ctx?.getStringAttribute(it) }
+      lastName = config.ldap.lastNameAttribute?.let { ctx?.getStringAttribute(it) }
+      if (config.ldap.forceLdapRoles) {
+        // force synchronisation with LDAP roles by removing all current roles
+        this.roles.clear()
+      }
+      // merge roles from LDAP with current ones in database
+      // this allows promotion but not demotion
+      this.roles.addAll(roles)
+    }
     log.debug("Logging in ${user.username} with roles $roles")
-    return AppUser(user, roles,
-        firstName = config.ldap.firstNameAttribute?.let { ctx?.getStringAttribute(it) },
-        lastName = config.ldap.lastNameAttribute?.let { ctx?.getStringAttribute(it) }
-    )
+    return user
   }
 }

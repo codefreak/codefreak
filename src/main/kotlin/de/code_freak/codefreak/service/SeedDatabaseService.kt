@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.service
 
+import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Classroom
 import de.code_freak.codefreak.entity.Requirement
@@ -40,9 +41,25 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
   private val log = LoggerFactory.getLogger(this::class.java)
 
   companion object {
-    val admin = User("admin")
-    val teacher = User("teacher")
-    val student = User("student")
+    private const val DEV_USER_PASSWORD = "{noop}123"
+    val admin = User("admin").apply {
+      roles = mutableSetOf(Role.ADMIN)
+      firstName = "John"
+      lastName = "Admin"
+      password = DEV_USER_PASSWORD
+    }
+    val teacher = User("teacher").apply {
+      roles = mutableSetOf(Role.TEACHER)
+      firstName = "Kim"
+      lastName = "Teacher"
+      password = DEV_USER_PASSWORD
+    }
+    val student = User("student").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Alice"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD
+    }
   }
 
   override fun onApplicationEvent(event: ContextRefreshedEvent) {

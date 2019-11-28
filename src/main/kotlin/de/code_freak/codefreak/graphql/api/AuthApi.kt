@@ -11,7 +11,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.stereotype.Component
 
 @GraphQLName("Authentication")
-class AuthenticationDto(val token: String, val user: UserDto, val authorities: List<String>)
+class AuthenticationDto(val token: String, val user: UserDto)
 
 @Component
 class AuthMutation : Mutation {
@@ -25,8 +25,6 @@ class AuthMutation : Mutation {
     securityContext.authentication = auth
     val session = FrontendUtil.getRequest().getSession(true)
     session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, securityContext)
-    val user = FrontendUtil.getCurrentUser()
-
-    return AuthenticationDto(session.id, UserDto(user.entity), user.authorities.map { it.authority })
+    return AuthenticationDto(session.id, UserDto(FrontendUtil.getCurrentUser()))
   }
 }
