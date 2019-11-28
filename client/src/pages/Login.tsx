@@ -1,7 +1,7 @@
 import { useApolloClient } from '@apollo/react-hooks'
 import { Button, Card, Form, Icon, Input } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import {
   LoginDocument,
   LoginMutationResult,

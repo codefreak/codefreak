@@ -1,0 +1,16 @@
+import { createContext, useContext } from 'react'
+import { User } from '../services/codefreak-api'
+
+export const AuthenticatedUserContext = createContext<User | undefined>(
+  undefined
+)
+
+const useAuthenticatedUser = () => {
+  const authenticatedUser = useContext(AuthenticatedUserContext)
+  if (authenticatedUser === undefined) {
+    throw new Error('User is not authenticated')
+  }
+  return authenticatedUser
+}
+
+export default useAuthenticatedUser

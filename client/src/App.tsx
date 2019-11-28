@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import './App.less'
+import { AuthenticatedUserContext } from './hooks/useAuthenticatedUser'
+import AssignmentList from './pages/AssignmentList'
 import Login from './pages/Login'
 import { User } from './services/codefreak-api'
 
@@ -10,7 +12,11 @@ const App: React.FC = () => {
     return <Login setAuthenticatedUser={setAuthenticatedUser} />
   }
 
-  return <div>Hello {authenticatedUser.username}</div>
+  return (
+    <AuthenticatedUserContext.Provider value={authenticatedUser}>
+      <AssignmentList />
+    </AuthenticatedUserContext.Provider>
+  )
 }
 
 export default App
