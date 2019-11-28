@@ -1,8 +1,8 @@
 package de.code_freak.codefreak.frontend
 
-import de.code_freak.codefreak.auth.AppUser
 import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Submission
+import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.SubmissionService
@@ -39,15 +39,15 @@ abstract class BaseController {
   @Autowired
   protected lateinit var config: AppConfiguration
 
-  protected val user: AppUser
+  protected val user: User
     get() = FrontendUtil.getCurrentUser()
 
   /**
    * Returns the submission for the given assignment or creates one if there is none already.
    */
   protected fun getOrCreateSubmission(assignmentId: UUID): Submission {
-    return submissionService.findSubmission(assignmentId, user.entity.id).orElseGet {
-      submissionService.createSubmission(assignmentService.findAssignment(assignmentId), user.entity)
+    return submissionService.findSubmission(assignmentId, user.id).orElseGet {
+      submissionService.createSubmission(assignmentService.findAssignment(assignmentId), user)
     }
   }
 

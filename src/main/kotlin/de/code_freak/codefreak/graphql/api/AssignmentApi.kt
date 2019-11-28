@@ -46,10 +46,10 @@ class AssignmentQuery : Query {
   fun assignments(env: DataFetchingEnvironment): List<AssignmentDto> {
     val assignmentService = serviceAccess.getService(AssignmentService::class)
     val user = FrontendUtil.getCurrentUser()
-    val assignments = if (user.authorities.contains(Role.TEACHER)) {
+    val assignments = if (user.roles.contains(Role.TEACHER)) {
       assignmentService.findAllAssignments()
     } else {
-      assignmentService.findAllAssignmentsForUser(user.entity.id)
+      assignmentService.findAllAssignmentsForUser(user.id)
     }
     return assignments.map { AssignmentDto(it, serviceAccess) }
   }

@@ -1,16 +1,15 @@
 package de.code_freak.codefreak.auth.lti
 
 import com.nimbusds.jwt.JWTClaimsSet
-import de.code_freak.codefreak.auth.AppUser
 import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.User
-import de.code_freak.codefreak.repository.UserRepository
+import de.code_freak.codefreak.service.UserService
 import org.mitre.openid.connect.client.OIDCAuthenticationProvider
 import org.mitre.openid.connect.model.PendingOIDCAuthenticationToken
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 
-class LtiAuthenticationProvider(private val userRepository: UserRepository) : OIDCAuthenticationProvider() {
+class LtiAuthenticationProvider(private val userService: UserService) : OIDCAuthenticationProvider() {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -32,22 +31,23 @@ class LtiAuthenticationProvider(private val userRepository: UserRepository) : OI
 
     val roles = buildAuthorities(claims)
     return LtiAuthenticationToken(
-        buildAppUser(claims, roles),
+        buildUser(claims, roles),
         authentication.accessTokenValue,
         roles,
         claims
     )
   }
 
-  private fun buildAppUser(claims: JWTClaimsSet, roles: List<Role>): AppUser {
+  private fun buildUser(claims: JWTClaimsSet, roles: List<Role>): User {
     val username = claims.getStringClaim("email")
-    val user = userRepository.findByUsernameIgnoreCase(username!!).orElseGet { userRepository.save(User(username)) }
+    val user = userService.getOrCreateUser(username) {
+      firstName = claims.getStringClaim("given_name")
+      lastName = claims.getStringClaim("family_name")
+    }
+    // roles from LTI should not be persisted
+    user.roles = roles.toMutableSet()
     log.debug("Logging in ${user.username} with roles $roles")
-    return AppUser(
-        user, roles,
-        firstName = claims.getStringClaim("given_name"),
-        lastName = claims.getStringClaim("family_name")
-    )
+    return user
   }
 
   private fun buildAuthorities(claims: JWTClaimsSet): List<Role> {

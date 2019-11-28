@@ -26,6 +26,6 @@ class AuthMutation : Mutation {
     val session = FrontendUtil.getRequest().getSession(true)
     session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, securityContext)
 
-    return AuthenticationDto(session.id, UserDto(FrontendUtil.getCurrentUser().entity))
+    return AuthenticationDto(session.id, UserDto(FrontendUtil.getCurrentUser()))
   }
 }
