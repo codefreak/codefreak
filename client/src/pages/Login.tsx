@@ -1,12 +1,7 @@
-import { useApolloClient } from '@apollo/react-hooks'
 import { Button, Card, Form, Icon, Input } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
-import React from 'react'
-import {
-  LoginDocument,
-  LoginMutationResult,
-  User
-} from '../services/codefreak-api'
+import React, { useEffect } from 'react'
+import { useLoginMutation, User } from '../services/codefreak-api'
 
 interface Credentials {
   username: string
@@ -19,26 +14,25 @@ interface LoginProps extends FormComponentProps<Credentials> {
 
 const Login: React.FC<LoginProps> = props => {
   const { getFieldDecorator } = props.form
+  const { setAuthenticatedUser } = props
 
-  const apolloClient = useApolloClient()
+  const [login, { data, loading }] = useLoginMutation()
+
+  useEffect(() => {
+    if (data !== undefined) {
+      setAuthenticatedUser(data.login.user)
+    }
+  }, [setAuthenticatedUser, data])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     props.form.validateFields((err, values) => {
-      if (err) {
-        return
+      if (!err) {
+        login({ variables: values })
       }
-      apolloClient
-        .mutate({
-          mutation: LoginDocument,
-          variables: values
-        })
-        .then(res => {
-          const authentication = (res as LoginMutationResult).data!.login
-          props.setAuthenticatedUser(authentication.user)
-        })
     })
   }
+
   return (
     <div
       style={{
@@ -81,7 +75,12 @@ const Login: React.FC<LoginProps> = props => {
             )}
           </Form.Item>
           <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              style={{ width: '100%' }}
+              loading={loading}
+            >
               Log in
             </Button>
           </Form.Item>
