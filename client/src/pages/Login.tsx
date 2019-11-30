@@ -1,6 +1,7 @@
 import { Button, Card, Form, Icon, Input } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
 import React, { useEffect } from 'react'
+import Centered from '../components/Centered'
 import { useLoginMutation, User } from '../services/codefreak-api'
 
 interface Credentials {
@@ -34,15 +35,7 @@ const Login: React.FC<LoginProps> = props => {
   }
 
   return (
-    <div
-      style={{
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        background: 'grey'
-      }}
-    >
+    <Centered style={{ background: 'grey' }}>
       <Card title="Login" style={{ width: '100%', maxWidth: 300, margin: 16 }}>
         <Form onSubmit={handleSubmit}>
           <Form.Item>
@@ -86,7 +79,7 @@ const Login: React.FC<LoginProps> = props => {
           </Form.Item>
         </Form>
       </Card>
-    </div>
+    </Centered>
   )
 }
 

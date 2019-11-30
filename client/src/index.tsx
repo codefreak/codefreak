@@ -9,10 +9,13 @@ import * as serviceWorker from './serviceWorker'
 
 const apolloClient = new ApolloClient({
   uri: '/graphql',
-  onError: error =>
-    (error.graphQLErrors || []).forEach(err =>
-      messageService.error(err.message)
-    )
+  onError: error => {
+    if (!error.operation.getContext().disableGlobalErrorHandling) {
+      ;(error.graphQLErrors || []).forEach(err =>
+        messageService.error(err.message)
+      )
+    }
+  }
 })
 
 ReactDOM.render(
