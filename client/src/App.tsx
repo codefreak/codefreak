@@ -1,10 +1,14 @@
 import { Spin } from 'antd'
 import React, { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import './App.less'
 import Centered from './components/Centered'
+import DefaultLayout from './components/DefaultLayout'
 import { AuthenticatedUserContext } from './hooks/useAuthenticatedUser'
-import AssignmentList from './pages/AssignmentList'
-import Login from './pages/Login'
+import AdminPage from './pages/AdminPage'
+import AssignmentListPage from './pages/assignment/AssignmentListPage'
+import AssignmentPage from './pages/assignment/AssignmentPage'
+import LoginPage from './pages/LoginPage'
 import { useGetAuthenticatedUserQuery, User } from './services/codefreak-api'
 
 const App: React.FC = () => {
@@ -29,12 +33,26 @@ const App: React.FC = () => {
   }
 
   if (authenticatedUser === undefined) {
-    return <Login setAuthenticatedUser={setAuthenticatedUser} />
+    return <LoginPage setAuthenticatedUser={setAuthenticatedUser} />
   }
 
   return (
     <AuthenticatedUserContext.Provider value={authenticatedUser}>
-      <AssignmentList />
+      <Router>
+        <DefaultLayout>
+          <Switch>
+            <Route exact path="/assignments">
+              <AssignmentListPage />
+            </Route>
+            <Route path="/assignments/:id">
+              <AssignmentPage />
+            </Route>
+            <Route path="/admin">
+              <AdminPage />
+            </Route>
+          </Switch>
+        </DefaultLayout>
+      </Router>
     </AuthenticatedUserContext.Provider>
   )
 }

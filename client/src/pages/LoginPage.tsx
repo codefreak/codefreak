@@ -13,7 +13,7 @@ interface LoginProps extends FormComponentProps<Credentials> {
   setAuthenticatedUser: (user: User) => void
 }
 
-const Login: React.FC<LoginProps> = props => {
+const LoginPage: React.FC<LoginProps> = props => {
   const { getFieldDecorator } = props.form
   const { setAuthenticatedUser } = props
 
@@ -83,4 +83,4 @@ const Login: React.FC<LoginProps> = props => {
   )
 }
 
-export default Form.create<LoginProps>({ name: 'login' })(Login)
+export default Form.create<LoginProps>({ name: 'login' })(LoginPage)
