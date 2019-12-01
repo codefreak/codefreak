@@ -5,17 +5,12 @@ import {
   BrowserRouter as Router,
   Redirect,
   Route,
-  RouteProps,
   Switch
 } from 'react-router-dom'
 import './App.less'
 import Centered from './components/Centered'
 import DefaultLayout from './components/DefaultLayout'
 import { AuthenticatedUserContext } from './hooks/useAuthenticatedUser'
-import AdminPage from './pages/AdminPage'
-import AssignmentListPage from './pages/assignment/AssignmentListPage'
-import AssignmentPage from './pages/assignment/AssignmentPage'
-import CreateAssignmentPage from './pages/assignment/CreateAssignmentPage'
 import LoginPage from './pages/LoginPage'
 import { routerConfig } from './router.config'
 import { useGetAuthenticatedUserQuery, User } from './services/codefreak-api'

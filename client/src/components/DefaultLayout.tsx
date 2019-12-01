@@ -1,8 +1,9 @@
 import ProLayout from '@ant-design/pro-layout'
-import { MenuDataItem, Route } from '@ant-design/pro-layout/lib/typings'
+import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { routerConfig } from '../router.config'
+import Authorized, { Role } from './Authorized'
 
 const DefaultLayout: React.FC = props => {
   useLocation() // somehow this is needed for 'active navigation item' to work correctly 🤔
@@ -25,7 +26,11 @@ const menuItemRender = (
   if (menuItemProps.isUrl || menuItemProps.children) {
     return defaultDom
   }
-  return <Link to={menuItemProps.path}>{defaultDom}</Link>
+  return (
+    <Authorized role={menuItemProps.authority as Role}>
+      <Link to={menuItemProps.path}>{defaultDom}</Link>
+    </Authorized>
+  )
 }
 
 export default DefaultLayout
