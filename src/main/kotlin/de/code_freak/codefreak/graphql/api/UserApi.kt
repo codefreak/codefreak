@@ -11,8 +11,8 @@ import java.util.UUID
 
 @GraphQLName("User")
 class UserDto(@GraphQLID val id: UUID, val username: String, val roles: List<String>) {
-    // TODO: only show roles to admins and the user itself
-    constructor(user: User) : this(user.id, user.username, user.roles.map { it.toString() })
+  // TODO: only show roles to admins and the user itself
+  constructor(user: User) : this(user.id, user.username, user.roles.map { it.toString() })
 }
 
 @Component
