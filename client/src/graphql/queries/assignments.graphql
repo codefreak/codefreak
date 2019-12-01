@@ -1,4 +1,4 @@
-query Assignments {
+query GetAssignments {
   assignments {
     id
     title

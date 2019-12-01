@@ -2,14 +2,18 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button } from 'antd'
 import React from 'react'
 import { Link } from 'react-router-dom'
+import AsyncContainer from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
+import {
+  GetAssignmentsProps,
+  withGetAssignments
+} from '../../services/codefreak-api'
 
-const AssignmentListPage: React.FC = () => {
+const AssignmentListPage: React.FC<GetAssignmentsProps> = props => {
   const user = useAuthenticatedUser()
-
   return (
-    <>
+    <AsyncContainer data={props.data}>
       <PageHeaderWrapper
         extra={
           <Authorized role="TEACHER">
@@ -24,8 +28,10 @@ const AssignmentListPage: React.FC = () => {
       Hello {user.roles}
       <br />
       <Link to="/assignments/1337">Sample Assignment</Link>
-    </>
+      <br />
+      {JSON.stringify(props.data.assignments)}
+    </AsyncContainer>
   )
 }
 
-export default AssignmentListPage
+export default withGetAssignments()(AssignmentListPage)
