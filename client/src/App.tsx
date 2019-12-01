@@ -12,6 +12,7 @@ import Centered from './components/Centered'
 import DefaultLayout from './components/DefaultLayout'
 import { AuthenticatedUserContext } from './hooks/useAuthenticatedUser'
 import LoginPage from './pages/LoginPage'
+import NotFoundPage from './pages/NotFoundPage'
 import { routerConfig } from './router.config'
 import { useGetAuthenticatedUserQuery, User } from './services/codefreak-api'
 
@@ -52,6 +53,7 @@ const App: React.FC = () => {
               <Redirect to="/assignments" />
             </Route>
             {routes.map(renderRoute)}
+            <Route key="2" component={NotFoundPage} />
           </Switch>
         </DefaultLayout>
       </Router>
