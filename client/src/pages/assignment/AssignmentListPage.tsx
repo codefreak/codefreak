@@ -1,19 +1,18 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button } from 'antd'
+import { Button, Card } from 'antd'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import AsyncContainer from '../../components/AsyncContainer'
+import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
-import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
 import {
-  GetAssignmentsProps,
-  withGetAssignments
+  GetAssignmentListProps,
+  withGetAssignmentList
 } from '../../services/codefreak-api'
 
-const AssignmentListPage: React.FC<GetAssignmentsProps> = props => {
-  const user = useAuthenticatedUser()
+const AssignmentListPage: React.FC<GetAssignmentListProps> = props => {
+  const { assignments = [] } = props.data
   return (
-    <AsyncContainer data={props.data}>
+    <AsyncPlaceholder result={props.data}>
       <PageHeaderWrapper
         extra={
           <Authorized role="TEACHER">
@@ -25,13 +24,35 @@ const AssignmentListPage: React.FC<GetAssignmentsProps> = props => {
           </Authorized>
         }
       />
-      Hello {user.roles}
-      <br />
-      <Link to="/assignments/1337">Sample Assignment</Link>
-      <br />
-      {JSON.stringify(props.data.assignments)}
-    </AsyncContainer>
+      {assignments.map(renderAssignment)}
+    </AsyncPlaceholder>
   )
 }
 
-export default withGetAssignments()(AssignmentListPage)
+const renderAssignment = (
+  assignment: NonNullable<GetAssignmentListProps['data']['assignments']>[number]
+) => {
+  return (
+    <Card
+      title={assignment.title}
+      key={assignment.id}
+      style={{ marginBottom: 16 }}
+    >
+      <p>
+        {assignment.tasks.length}{' '}
+        {assignment.tasks.length === 1 ? 'task' : 'tasks'}
+      </p>
+      <Link to={`/assignments/${assignment.id}`}>
+        <Button icon="folder-open" type="primary">
+          Details
+        </Button>
+      </Link>
+      <Authorized role="TEACHER">
+        {' '}
+        <Button icon="table">Student Submissions</Button>
+      </Authorized>
+    </Card>
+  )
+}
+
+export default withGetAssignmentList()(AssignmentListPage)

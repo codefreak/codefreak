@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @GraphQLName("Assignment")
 class AssignmentDto(@GraphQLIgnore val entity: Assignment, @GraphQLIgnore val serviceAccess: ServiceAccess) {
@@ -52,5 +53,12 @@ class AssignmentQuery : Query {
       assignmentService.findAllAssignmentsForUser(user.id)
     }
     return assignments.map { AssignmentDto(it, serviceAccess) }
+  }
+
+  @Transactional
+  fun assignment(id: UUID): AssignmentDto {
+    return serviceAccess.getService(AssignmentService::class)
+        .findAssignment(id)
+        .let { AssignmentDto(it, serviceAccess) }
   }
 }

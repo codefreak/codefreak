@@ -1,15 +1,32 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
+import { Tabs } from 'antd'
 import React from 'react'
-import { useParams } from 'react-router'
+import AsyncPlaceholder from '../../components/AsyncContainer'
+import { useGetAssignmentQuery } from '../../generated/graphql'
+import useIdParam from '../../hooks/useIdParam'
+
+const { TabPane } = Tabs
 
 const AssignmentPage: React.FC = () => {
-  const { id } = useParams()
+  const result = useGetAssignmentQuery({
+    variables: { id: useIdParam() }
+  })
+
+  if (result.data === undefined) {
+    return <AsyncPlaceholder result={result} />
+  }
+
+  const { assignment } = result.data
 
   return (
-    <>
-      <PageHeaderWrapper />
-      Assignment Id: {id}
-    </>
+    <PageHeaderWrapper
+      title={assignment.title}
+      tabList={[
+        { key: 'tasks', tab: 'Tasks' },
+        { key: 'submissions', tab: 'Submissions' }
+      ]}
+      tabActiveKey="tasks"
+    />
   )
 }
 
