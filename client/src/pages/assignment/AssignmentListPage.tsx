@@ -5,14 +5,20 @@ import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import {
-  GetAssignmentListProps,
-  withGetAssignmentList
+  GetAssignmentListQueryResult,
+  useGetAssignmentListQuery
 } from '../../services/codefreak-api'
 
-const AssignmentListPage: React.FC<GetAssignmentListProps> = props => {
-  const { assignments = [] } = props.data
+const AssignmentListPage: React.FC = () => {
+  const result = useGetAssignmentListQuery()
+
+  if (result.data === undefined) {
+    return <AsyncPlaceholder result={result} />
+  }
+
+  const { assignments } = result.data
   return (
-    <AsyncPlaceholder result={props.data}>
+    <>
       <PageHeaderWrapper
         extra={
           <Authorized role="TEACHER">
@@ -25,12 +31,14 @@ const AssignmentListPage: React.FC<GetAssignmentListProps> = props => {
         }
       />
       {assignments.map(renderAssignment)}
-    </AsyncPlaceholder>
+    </>
   )
 }
 
 const renderAssignment = (
-  assignment: NonNullable<GetAssignmentListProps['data']['assignments']>[number]
+  assignment: NonNullable<
+    GetAssignmentListQueryResult['data']
+  >['assignments'][number]
 ) => {
   return (
     <Card
@@ -55,4 +63,4 @@ const renderAssignment = (
   )
 }
 
-export default withGetAssignmentList()(AssignmentListPage)
+export default AssignmentListPage

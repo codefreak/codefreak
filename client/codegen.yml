@@ -10,6 +10,6 @@ generates:
     config:
       withComponent: false
       withHooks: true
-      withHOC: true
+      withHOC: false
       scalars:
         DateTime: Date
