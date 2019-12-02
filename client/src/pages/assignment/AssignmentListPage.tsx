@@ -8,6 +8,7 @@ import {
   GetAssignmentListQueryResult,
   useGetAssignmentListQuery
 } from '../../services/codefreak-api'
+import { shorten } from '../../services/short-id'
 
 const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
@@ -50,7 +51,7 @@ const renderAssignment = (
         {assignment.tasks.length}{' '}
         {assignment.tasks.length === 1 ? 'task' : 'tasks'}
       </p>
-      <Link to={`/assignments/${assignment.id}`}>
+      <Link to={`/assignments/${shorten(assignment.id)}`}>
         <Button icon="folder-open" type="primary">
           Details
         </Button>
