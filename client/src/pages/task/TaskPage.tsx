@@ -6,13 +6,15 @@ import { createRoutes } from '../../services/custom-breadcrump'
 
 const TaskPage: React.FC = () => {
   const task = {
+    __typename: 'Task',
     id: '1337',
     title: 'Sample Task',
     assignment: {
+      __typename: 'Assignment',
       id: '42',
       title: 'Sample Assignment'
     }
-  }
+  } as any
   return (
     <>
       <SetTitle>{task.title}</SetTitle>

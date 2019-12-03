@@ -4,11 +4,11 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
+import EntityLink from '../../components/EntityLink'
 import {
   GetAssignmentListQueryResult,
   useGetAssignmentListQuery
 } from '../../services/codefreak-api'
-import { shorten } from '../../services/short-id'
 
 const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
@@ -51,11 +51,11 @@ const renderAssignment = (
         {assignment.tasks.length}{' '}
         {assignment.tasks.length === 1 ? 'task' : 'tasks'}
       </p>
-      <Link to={`/assignments/${shorten(assignment.id)}`}>
+      <EntityLink to={assignment}>
         <Button icon="folder-open" type="primary">
           Details
         </Button>
-      </Link>
+      </EntityLink>
       <Authorized role="TEACHER">
         {' '}
         <Button icon="table">Student Submissions</Button>
