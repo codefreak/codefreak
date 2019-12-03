@@ -1,9 +1,12 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import React from 'react'
+import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
+import { createBreadcrumb } from '../../components/DefaultLayout'
 import SetTitle from '../../components/SetTitle'
 import { useGetAssignmentQuery } from '../../generated/graphql'
 import useIdParam from '../../hooks/useIdParam'
+import { createRoutes } from '../../services/custom-breadcrump'
 
 const AssignmentPage: React.FC = () => {
   const result = useGetAssignmentQuery({
@@ -26,7 +29,9 @@ const AssignmentPage: React.FC = () => {
           { key: 'submissions', tab: 'Submissions' }
         ]}
         tabActiveKey="tasks"
+        breadcrumb={createBreadcrumb(createRoutes.forAssignment(assignment))}
       />
+      <Link to={`/tasks/1337`}>Sample Task</Link>
     </>
   )
 }

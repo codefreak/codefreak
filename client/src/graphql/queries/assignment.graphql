@@ -10,6 +10,7 @@ query GetAssignmentList {
 
 query GetAssignment($id: ID!) {
   assignment(id: $id) {
+    id
     title
   }
 }

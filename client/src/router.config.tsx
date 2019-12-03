@@ -4,6 +4,7 @@ import AdminPage from './pages/AdminPage'
 import AssignmentListPage from './pages/assignment/AssignmentListPage'
 import AssignmentPage from './pages/assignment/AssignmentPage'
 import CreateAssignmentPage from './pages/assignment/CreateAssignmentPage'
+import TaskPage from './pages/task/TaskPage'
 
 export const routerConfig: Route = {
   path: '/',
@@ -26,6 +27,10 @@ export const routerConfig: Route = {
           component: AssignmentPage
         }
       ]
+    },
+    {
+      path: '/tasks/:id',
+      component: TaskPage
     },
     {
       path: '/admin',
