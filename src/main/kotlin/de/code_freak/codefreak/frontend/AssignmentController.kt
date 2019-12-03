@@ -11,6 +11,7 @@ import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -46,7 +47,7 @@ class AssignmentController : BaseController() {
 
   @GetMapping("/assignments")
   fun getAssignment(model: Model): String {
-    val assignments = if (user.roles.contains(Role.TEACHER)) {
+    val assignments = if (user.authorities.contains(SimpleGrantedAuthority(Authority.ROLE_TEACHER))) {
       assignmentService.findAllAssignments()
     } else {
       assignmentService.findAllAssignmentsForUser(user.id)

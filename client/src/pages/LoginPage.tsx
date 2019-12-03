@@ -75,7 +75,7 @@ const LoginPage: React.FC<LoginProps> = props => {
               style={{ width: '100%' }}
               loading={loading}
             >
-              Log in
+              Sign in
             </Button>
           </Form.Item>
         </Form>

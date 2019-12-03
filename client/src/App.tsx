@@ -5,8 +5,7 @@ import {
   BrowserRouter as Router,
   Redirect,
   Route,
-  Switch,
-  useLocation
+  Switch
 } from 'react-router-dom'
 import './App.less'
 import Centered from './components/Centered'
