@@ -1,4 +1,5 @@
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
+import { useApolloClient } from '@apollo/react-hooks'
 import { Spin } from 'antd'
 import React, { useEffect, useState } from 'react'
 import {
@@ -33,6 +34,7 @@ const App: React.FC = () => {
   })
 
   const [logout, { data: logoutSucceeded }] = useLogoutMutation()
+  const apolloClient = useApolloClient()
 
   useEffect(() => {
     if (authResult !== undefined) {
@@ -46,6 +48,11 @@ const App: React.FC = () => {
       setAuthenticatedUser(undefined)
     }
   }, [logoutSucceeded])
+
+  // make sure to delete cached data after login/logout
+  useEffect(() => {
+    apolloClient.clearStore()
+  }, [authenticatedUser, apolloClient])
 
   if (loading) {
     return (
