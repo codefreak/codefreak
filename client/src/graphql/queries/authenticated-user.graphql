@@ -2,6 +2,6 @@ query GetAuthenticatedUser {
   me {
     id
     username
-    roles
+    authorities
   }
 }

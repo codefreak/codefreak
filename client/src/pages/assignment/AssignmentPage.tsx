@@ -5,6 +5,7 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import SetTitle from '../../components/SetTitle'
 import { useGetAssignmentQuery } from '../../generated/graphql'
+import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import { createRoutes } from '../../services/custom-breadcrump'
@@ -19,6 +20,11 @@ const AssignmentPage: React.FC = () => {
   })
   const subPath = useSubPath()
 
+  const tabs = [{ key: '', tab: 'Tasks' }]
+  if (useHasAuthority('ROLE_TEACHER')) {
+    tabs.push({ key: '/submissions', tab: 'Submissions' })
+  }
+
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
@@ -30,10 +36,7 @@ const AssignmentPage: React.FC = () => {
       <SetTitle>{assignment.title}</SetTitle>
       <PageHeaderWrapper
         title={assignment.title}
-        tabList={[
-          { key: '', tab: 'Tasks' },
-          { key: '/submissions', tab: 'Submissions' }
-        ]}
+        tabList={tabs}
         tabActiveKey={subPath.get()}
         breadcrumb={createBreadcrumb(createRoutes.forAssignment(assignment))}
         onTabChange={subPath.set}

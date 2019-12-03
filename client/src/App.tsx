@@ -10,14 +10,19 @@ import {
 import './App.less'
 import Centered from './components/Centered'
 import DefaultLayout from './components/DefaultLayout'
-import { AuthenticatedUserContext } from './hooks/useAuthenticatedUser'
+import {
+  AuthenticatedUser,
+  AuthenticatedUserContext
+} from './hooks/useAuthenticatedUser'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { routerConfig } from './router.config'
-import { useGetAuthenticatedUserQuery, User } from './services/codefreak-api'
+import { useGetAuthenticatedUserQuery } from './services/codefreak-api'
 
 const App: React.FC = () => {
-  const [authenticatedUser, setAuthenticatedUser] = useState<User>()
+  const [authenticatedUser, setAuthenticatedUser] = useState<
+    AuthenticatedUser
+  >()
 
   const { data, loading } = useGetAuthenticatedUserQuery({
     context: { disableGlobalErrorHandling: true }

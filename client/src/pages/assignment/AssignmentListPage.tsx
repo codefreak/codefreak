@@ -22,7 +22,7 @@ const AssignmentListPage: React.FC = () => {
     <>
       <PageHeaderWrapper
         extra={
-          <Authorized role="TEACHER">
+          <Authorized authority="ROLE_TEACHER">
             <Link to="/assignments/create" key="1">
               <Button type="primary" icon="plus">
                 Create
@@ -56,9 +56,11 @@ const renderAssignment = (
           Details
         </Button>
       </EntityLink>
-      <Authorized role="TEACHER">
+      <Authorized authority="ROLE_TEACHER">
         {' '}
-        <Button icon="table">Student Submissions</Button>
+        <EntityLink to={assignment} sub="/submissions">
+          <Button icon="table">Student Submissions</Button>
+        </EntityLink>
       </Authorized>
     </Card>
   )

@@ -3,8 +3,9 @@ import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
 import { Route } from 'antd/lib/breadcrumb/Breadcrumb'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { Authority } from '../hooks/useHasAuthority'
 import { routerConfig } from '../router.config'
-import Authorized, { Role } from './Authorized'
+import Authorized from './Authorized'
 
 export const appName = 'Code FREAK'
 
@@ -45,7 +46,7 @@ const menuItemRender = (
     return defaultDom
   }
   return (
-    <Authorized role={menuItemProps.authority as Role}>
+    <Authorized authority={menuItemProps.authority as Authority}>
       <Link to={menuItemProps.path}>{defaultDom}</Link>
     </Authorized>
   )

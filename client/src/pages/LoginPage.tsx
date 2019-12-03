@@ -2,7 +2,8 @@ import { Button, Card, Form, Icon, Input } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
 import React, { useEffect } from 'react'
 import Centered from '../components/Centered'
-import { useLoginMutation, User } from '../services/codefreak-api'
+import { AuthenticatedUser } from '../hooks/useAuthenticatedUser'
+import { useLoginMutation } from '../services/codefreak-api'
 
 interface Credentials {
   username: string
@@ -10,7 +11,7 @@ interface Credentials {
 }
 
 interface LoginProps extends FormComponentProps<Credentials> {
-  setAuthenticatedUser: (user: User) => void
+  setAuthenticatedUser: (user: AuthenticatedUser) => void
 }
 
 const LoginPage: React.FC<LoginProps> = props => {

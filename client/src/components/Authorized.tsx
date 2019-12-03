@@ -1,27 +1,20 @@
 import React from 'react'
 import useAuthenticatedUser from '../hooks/useAuthenticatedUser'
-
-export const ROLES = {
-  ADMIN: 'ADMIN',
-  TEACHER: 'TEACHER',
-  STUDENT: 'STUDENT'
-}
-
-export type Role = keyof typeof ROLES
+import { Authority } from '../hooks/useHasAuthority'
 
 interface AuthorizedProps {
-  role?: Role
+  authority?: Authority
   condition?: boolean
 }
 
 const Authorized: React.FC<AuthorizedProps> = ({
-  role,
+  authority,
   condition,
   children
 }) => {
   const user = useAuthenticatedUser()
 
-  if (role !== undefined && !user.roles.includes(role)) {
+  if (authority !== undefined && !user.authorities.includes(authority)) {
     return null
   }
 

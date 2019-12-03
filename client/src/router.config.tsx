@@ -1,5 +1,5 @@
 import { Route } from '@ant-design/pro-layout/lib/typings'
-import { ROLES } from './components/Authorized'
+import { AUTHORITIES } from './hooks/useHasAuthority'
 import AdminPage from './pages/AdminPage'
 import AssignmentListPage from './pages/assignment/AssignmentListPage'
 import AssignmentPage from './pages/assignment/AssignmentPage'
@@ -19,7 +19,7 @@ export const routerConfig: Route = {
         {
           path: '/assignments/create',
           name: 'Create Assignment',
-          authority: ROLES.TEACHER,
+          authority: AUTHORITIES.ROLE_TEACHER,
           component: CreateAssignmentPage
         },
         {
@@ -36,7 +36,7 @@ export const routerConfig: Route = {
       path: '/admin',
       name: 'Administration',
       icon: 'setting',
-      authority: ROLES.ADMIN,
+      authority: AUTHORITIES.ROLE_ADMIN,
       component: AdminPage
     }
   ]

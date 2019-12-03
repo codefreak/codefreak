@@ -43,7 +43,7 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
   companion object {
     private const val DEV_USER_PASSWORD = "{noop}123"
     val admin = User("admin").apply {
-      roles = mutableSetOf(Role.ADMIN, Role.TEACHER, Role.STUDENT)
+      roles = mutableSetOf(Role.ADMIN)
       firstName = "John"
       lastName = "Admin"
       password = DEV_USER_PASSWORD
