@@ -1,7 +1,6 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.auth.Authority
-import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.service.ContainerService

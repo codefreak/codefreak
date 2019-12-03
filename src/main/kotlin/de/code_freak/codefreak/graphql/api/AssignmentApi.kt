@@ -5,7 +5,6 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
-import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AssignmentService
