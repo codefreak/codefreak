@@ -74,11 +74,11 @@ const App: React.FC = () => {
       <Router>
         <DefaultLayout logout={logout}>
           <Switch>
-            <Route exact path="/" key="1">
+            <Route exact path="/">
               <Redirect to="/assignments" />
             </Route>
             {routes.map(renderRoute)}
-            <Route key="2" component={NotFoundPage} />
+            <Route component={NotFoundPage} />
           </Switch>
         </DefaultLayout>
       </Router>
