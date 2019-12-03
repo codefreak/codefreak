@@ -1,5 +1,6 @@
 import ProLayout from '@ant-design/pro-layout'
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
+import { Button, Tooltip } from 'antd'
 import { Route } from 'antd/lib/breadcrumb/Breadcrumb'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
@@ -23,8 +24,26 @@ export const createBreadcrumb = (routes: Route[]) => ({
   itemRender: breadcrumbItemRender
 })
 
-const DefaultLayout: React.FC = props => {
+interface DefaultLayoutProps {
+  logout: () => void
+}
+
+const DefaultLayout: React.FC<DefaultLayoutProps> = props => {
   useLocation() // somehow this is needed for 'active navigation item' to work correctly 🤔
+
+  const renderHeader = () => (
+    <span style={{ float: 'right' }}>
+      <Tooltip title="Sign out" placement="left">
+        <Button
+          onClick={props.logout}
+          icon="logout"
+          shape="circle"
+          style={{ marginRight: 16 }}
+        />
+      </Tooltip>
+    </span>
+  )
+
   return (
     <ProLayout
       menuItemRender={menuItemRender}
@@ -32,6 +51,7 @@ const DefaultLayout: React.FC = props => {
       title={appName}
       disableContentMargin={false}
       itemRender={breadcrumbItemRender}
+      rightContentRender={renderHeader}
     >
       {props.children}
     </ProLayout>

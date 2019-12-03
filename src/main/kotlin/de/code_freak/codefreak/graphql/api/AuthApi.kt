@@ -27,4 +27,10 @@ class AuthMutation : Mutation {
     session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, securityContext)
     return AuthenticationDto(session.id, UserDto(FrontendUtil.getCurrentUser()))
   }
+
+  fun logout(): Boolean {
+    FrontendUtil.getRequest().getSession(false)?.invalidate()
+    SecurityContextHolder.clearContext()
+    return true
+  }
 }

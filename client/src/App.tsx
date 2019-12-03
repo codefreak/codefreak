@@ -5,7 +5,8 @@ import {
   BrowserRouter as Router,
   Redirect,
   Route,
-  Switch
+  Switch,
+  useLocation
 } from 'react-router-dom'
 import './App.less'
 import Centered from './components/Centered'
@@ -17,22 +18,35 @@ import {
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { routerConfig } from './router.config'
-import { useGetAuthenticatedUserQuery } from './services/codefreak-api'
+import {
+  useGetAuthenticatedUserQuery,
+  useLogoutMutation
+} from './services/codefreak-api'
+import { messageService } from './services/message'
 
 const App: React.FC = () => {
   const [authenticatedUser, setAuthenticatedUser] = useState<
     AuthenticatedUser
   >()
 
-  const { data, loading } = useGetAuthenticatedUserQuery({
+  const { data: authResult, loading } = useGetAuthenticatedUserQuery({
     context: { disableGlobalErrorHandling: true }
   })
 
+  const [logout, { data: logoutSucceeded }] = useLogoutMutation()
+
   useEffect(() => {
-    if (data !== undefined) {
-      setAuthenticatedUser(data.me)
+    if (authResult !== undefined) {
+      setAuthenticatedUser(authResult.me)
     }
-  }, [data])
+  }, [authResult])
+
+  useEffect(() => {
+    if (logoutSucceeded) {
+      messageService.success('Successfully signed out. Goodbye 👋')
+      setAuthenticatedUser(undefined)
+    }
+  }, [logoutSucceeded])
 
   if (loading) {
     return (
@@ -52,7 +66,7 @@ const App: React.FC = () => {
   return (
     <AuthenticatedUserContext.Provider value={authenticatedUser}>
       <Router>
-        <DefaultLayout>
+        <DefaultLayout logout={logout}>
           <Switch>
             <Route exact path="/" key="1">
               <Redirect to="/assignments" />
