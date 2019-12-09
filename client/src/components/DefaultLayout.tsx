@@ -49,6 +49,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = props => {
       menuItemRender={menuItemRender}
       route={routerConfig}
       title={appName}
+      logo={process.env.PUBLIC_URL + '/codefreak-logo.svg'}
       disableContentMargin={false}
       itemRender={breadcrumbItemRender}
       rightContentRender={renderHeader}
