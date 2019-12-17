@@ -121,6 +121,10 @@ bootJar {
   from (fileTree("src/assets").files) {
     into 'META-INF/assets'
   }
+  from ('client/build') {
+    into 'BOOT-INF/classes/public/react'
+  }
+  dependsOn 'client:assemble'
 }
 
 spotless {

@@ -1,0 +1,68 @@
+{
+  "name": "code-freak",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/pro-layout": "^4.8.3",
+    "@apollo/react-common": "^3.1.3",
+    "@apollo/react-hooks": "^3.1.3",
+    "@craco/craco": "^5.5.0",
+    "@graphql-codegen/cli": "^1.8.2",
+    "@graphql-codegen/typescript": "^1.8.2",
+    "@graphql-codegen/typescript-operations": "^1.8.2",
+    "@graphql-codegen/typescript-react-apollo": "^1.8.2",
+    "@types/jest": "24.0.20",
+    "@types/node": "12.11.7",
+    "@types/react": "16.9.11",
+    "@types/react-dom": "16.9.3",
+    "@types/react-helmet": "^5.0.14",
+    "@types/react-router-dom": "^5.1.3",
+    "antd": "^3.24.3",
+    "apollo-boost": "^0.4.4",
+    "craco-antd": "^1.14.1",
+    "graphql": "^14.5.8",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.18.2",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-helmet": "^5.2.1",
+    "react-markdown": "^4.2.2",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.2.0",
+    "short-uuid": "^3.1.1",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-react": "^4.1.0",
+    "typescript": "3.6.4"
+  },
+  "scripts": {
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
+    "lint:tsc": "tsc --noUnusedLocals --noUnusedParameters",
+    "lint:tslint": "tslint --project . --config tslint.prod.json",
+    "fix:tslint": "tslint --project . --fix",
+    "lint:prettier": "prettier --check \"src/**/*\"",
+    "fix:prettier": "prettier --write \"src/**/*\"",
+    "lint": "npm-run-all lint:**",
+    "fix": "npm-run-all fix:**",
+    "generate": "graphql-codegen --config codegen.yml"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:8080"
+}

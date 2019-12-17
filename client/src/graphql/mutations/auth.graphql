@@ -1,0 +1,13 @@
+mutation Login($username: String!, $password: String!) {
+  login(username: $username, password: $password) {
+    user {
+      id
+      username
+      authorities
+    }
+  }
+}
+
+mutation Logout {
+  logout
+}
