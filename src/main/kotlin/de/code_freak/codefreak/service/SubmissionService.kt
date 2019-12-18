@@ -30,6 +30,9 @@ class SubmissionService : BaseService() {
   @Autowired
   private lateinit var spreadsheetService: SpreadsheetService
 
+  @Autowired
+  private lateinit var assignmentService: AssignmentService
+
   @Transactional
   fun findSubmission(id: UUID): Submission = submissionRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Submission not found") }
@@ -37,6 +40,11 @@ class SubmissionService : BaseService() {
   @Transactional
   fun findSubmission(assignmentId: UUID, userId: UUID): Optional<Submission> =
       submissionRepository.findByAssignmentIdAndUserId(assignmentId, userId)
+
+  @Transactional
+  fun findOrCreateSubmission(assignmentId: UUID, user: User): Submission =
+      submissionRepository.findByAssignmentIdAndUserId(assignmentId, user.id)
+          .orElseGet { createSubmission(assignmentService.findAssignment(assignmentId), user) }
 
   @Transactional
   fun findSubmissionsOfAssignment(assignmentId: UUID) = submissionRepository.findByAssignmentId(assignmentId)

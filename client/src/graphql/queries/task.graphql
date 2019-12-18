@@ -9,3 +9,24 @@ query GetTaskList($assignmentId: ID!) {
     }
   }
 }
+
+query GetTask($id: ID!, $answerUserId: ID) {
+  task(id: $id) {
+    id
+    title
+    assignment {
+      id
+      title
+    }
+    answer(userId: $answerUserId) {
+      id
+    }
+  }
+}
+
+query GetTaskDetails($id: ID!) {
+  task(id: $id) {
+    id
+    body
+  }
+}

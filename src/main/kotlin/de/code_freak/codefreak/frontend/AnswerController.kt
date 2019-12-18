@@ -30,7 +30,7 @@ class AnswerController : BaseController() {
   @GetMapping("/{answerId}/source.zip", produces = ["application/zip"])
   @ResponseBody
   fun getSourceZip(@PathVariable("answerId") answerId: UUID): HttpEntity<StreamingResponseBody> {
-    val answer = answerService.getAnswer(answerId)
+    val answer = answerService.findAnswer(answerId)
     fileService.readCollectionTar(answer.id).use {
       return download("${answer.submission.user.username}_${answer.task.title}.zip") { out ->
         TarUtil.tarToZip(it, out)
@@ -42,7 +42,7 @@ class AnswerController : BaseController() {
   @GetMapping("/{answerId}/source.tar", produces = ["application/tar"])
   @ResponseBody
   fun getSourceTar(@PathVariable("answerId") answerId: UUID): HttpEntity<StreamingResponseBody> {
-    val answer = answerService.getAnswer(answerId)
+    val answer = answerService.findAnswer(answerId)
     fileService.readCollectionTar(answer.id).use {
       return download("${answer.submission.user.username}_${answer.task.title}.tar", it)
     }
@@ -51,7 +51,7 @@ class AnswerController : BaseController() {
   @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/{answerId}/ide")
   fun teacherView(@PathVariable("answerId") answerId: UUID, model: Model): String {
-    val answer = answerService.getAnswer(answerId)
+    val answer = answerService.findAnswer(answerId)
     containerService.startIdeContainer(answer, readOnly = true)
     val containerUrl = containerService.getIdeUrl(answer.id, readOnly = true)
     model.addAttribute("ide_url", containerUrl)

@@ -2,6 +2,7 @@ package de.code_freak.codefreak.service
 
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Submission
+import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AnswerRepository
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
@@ -31,14 +32,22 @@ class AnswerService : BaseService() {
   private lateinit var containerService: ContainerService
 
   @Autowired
+  private lateinit var submissionService: SubmissionService
+
+  @Autowired
   private lateinit var taskService: TaskService
 
   fun getAnswerIdsForTaskIds(taskIds: Iterable<UUID>, userId: UUID) = answerRepository.findIdsForTaskIds(taskIds, userId).toMap()
 
-  fun getAnswerForTaskId(taskId: UUID, userId: UUID): Answer = answerRepository.findByTaskIdAndSubmissionUserId(taskId, userId)
+  fun findAnswer(taskId: UUID, userId: UUID): Answer = answerRepository.findByTaskIdAndSubmissionUserId(taskId, userId)
       .orElseThrow { EntityNotFoundException("Answer not found.") }
 
-  fun getAnswer(answerId: UUID): Answer = answerRepository.findById(answerId).orElseThrow { EntityNotFoundException("Answer not found.") }
+  fun findAnswer(answerId: UUID): Answer = answerRepository.findById(answerId).orElseThrow { EntityNotFoundException("Answer not found.") }
+
+  @Transactional
+  fun findOrCreateAnswer(taskId: UUID, user: User): Answer =
+      submissionService.findOrCreateSubmission(taskService.findTask(taskId).assignment.id, user)
+          .let { it.getAnswer(taskId) ?: createAnswer(it, taskId) }
 
   fun setFiles(answer: Answer): OutputStream {
     answer.task.assignment.requireNotClosed()

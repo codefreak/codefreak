@@ -55,7 +55,7 @@ class EvaluationController : BaseController() {
 
   @PostMapping("/evaluations")
   fun startEvaluation(@RequestParam("taskId") taskId: UUID, model: RedirectAttributes): String {
-    val answer = answerService.getAnswerForTaskId(taskId, user.id)
+    val answer = answerService.findAnswer(taskId, user.id)
     val assignmentPage = urls.get(answer.task.assignment)
     return withErrorPage(assignmentPage) {
       answer.task.assignment.requireNotClosed()
