@@ -23,6 +23,7 @@ import {
   useLogoutMutation
 } from './services/codefreak-api'
 import { messageService } from './services/message'
+import { displayName } from './services/user'
 
 const App: React.FC = () => {
   const [authenticatedUser, setAuthenticatedUser] = useState<
@@ -63,7 +64,11 @@ const App: React.FC = () => {
   }
 
   if (authenticatedUser === undefined) {
-    return <LoginPage setAuthenticatedUser={setAuthenticatedUser} />
+    const onLogin = (user: AuthenticatedUser) => {
+      messageService.success(`Welcome back, ${displayName(user)}!`)
+      setAuthenticatedUser(user)
+    }
+    return <LoginPage onSuccessfulLogin={onLogin}/>
   }
 
   const routes: MenuDataItem[] = []

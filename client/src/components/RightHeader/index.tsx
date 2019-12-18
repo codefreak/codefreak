@@ -1,19 +1,8 @@
 import { Avatar, Dropdown, Icon, Menu } from 'antd'
-import useAuthenticatedUser, { AuthenticatedUser } from '../../hooks/useAuthenticatedUser'
+import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
 import React from 'react'
 import './index.less'
-
-const displayName = (user: AuthenticatedUser) => {
-  if (user.firstName || user.lastName) {
-    return [user.firstName, user.lastName].join(' ')
-  } else {
-    return user.username
-  }
-}
-
-const initials = (user: AuthenticatedUser) => {
-  return displayName(user).replace(/(\w)\w+\s*/g, '$1')
-}
+import { displayName, initials } from '../../services/user'
 
 interface RightHeaderProps {
   logout: () => void
