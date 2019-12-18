@@ -5,7 +5,6 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
-import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AssignmentService
@@ -14,8 +13,10 @@ import de.code_freak.codefreak.util.FrontendUtil
 import graphql.schema.DataFetchingEnvironment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 @GraphQLName("Assignment")
 class AssignmentDto(@GraphQLIgnore val entity: Assignment, @GraphQLIgnore val serviceAccess: ServiceAccess) {
@@ -46,11 +47,18 @@ class AssignmentQuery : Query {
   fun assignments(env: DataFetchingEnvironment): List<AssignmentDto> {
     val assignmentService = serviceAccess.getService(AssignmentService::class)
     val user = FrontendUtil.getCurrentUser()
-    val assignments = if (user.authorities.contains(Role.TEACHER)) {
+    val assignments = if (user.authorities.contains(SimpleGrantedAuthority(Authority.ROLE_TEACHER))) {
       assignmentService.findAllAssignments()
     } else {
-      assignmentService.findAllAssignmentsForUser(user.entity.id)
+      assignmentService.findAllAssignmentsForUser(user.id)
     }
     return assignments.map { AssignmentDto(it, serviceAccess) }
+  }
+
+  @Transactional
+  fun assignment(id: UUID): AssignmentDto {
+    return serviceAccess.getService(AssignmentService::class)
+        .findAssignment(id)
+        .let { AssignmentDto(it, serviceAccess) }
   }
 }

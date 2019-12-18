@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 
-class DevUserDetailsService(private val userService: UserService) : UserDetailsService {
+class SimpleUserDetailsService(private val userService: UserService) : UserDetailsService {
   override fun loadUserByUsername(username: String): UserDetails {
     return try {
       userService.getUser(username)

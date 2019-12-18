@@ -1,7 +1,7 @@
 package de.code_freak.codefreak.config
 
 import de.code_freak.codefreak.auth.AuthenticationMethod
-import de.code_freak.codefreak.auth.DevUserDetailsService
+import de.code_freak.codefreak.auth.SimpleUserDetailsService
 import de.code_freak.codefreak.auth.LdapUserDetailsContextMapper
 import de.code_freak.codefreak.service.UserService
 import de.code_freak.codefreak.util.withTrailingSlash
@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.env.Environment
-import org.springframework.core.env.Profiles
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -24,9 +22,6 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
   @Autowired
   lateinit var config: AppConfiguration
-
-  @Autowired
-  lateinit var env: Environment
 
   @Autowired
   lateinit var userService: UserService
@@ -58,10 +53,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   @Bean
   override fun userDetailsService(): UserDetailsService {
     return when (config.authenticationMethod) {
-      AuthenticationMethod.SIMPLE -> when (env.acceptsProfiles(Profiles.of("dev", "test"))) {
-        true -> DevUserDetailsService(userService)
-        false -> throw NotImplementedError("Simple authentication is currently only supported in dev mode.")
-      }
+      AuthenticationMethod.SIMPLE -> SimpleUserDetailsService(userService)
       else -> super.userDetailsService()
     }
   }

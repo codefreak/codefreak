@@ -52,7 +52,13 @@ class LdapUserDetailsContextMapper : UserDetailsContextMapper {
     val user = userService.getOrCreateUser(username!!) {
       firstName = config.ldap.firstNameAttribute?.let { ctx?.getStringAttribute(it) }
       lastName = config.ldap.lastNameAttribute?.let { ctx?.getStringAttribute(it) }
-      this.roles = roles.toSet()
+      if (config.ldap.forceLdapRoles) {
+        // force synchronisation with LDAP roles by removing all current roles
+        this.roles.clear()
+      }
+      // merge roles from LDAP with current ones in database
+      // this allows promotion but not demotion
+      this.roles.addAll(roles)
     }
     log.debug("Logging in ${user.username} with roles $roles")
     return user

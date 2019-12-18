@@ -1,0 +1,11 @@
+query GetTaskList($assignmentId: ID!) {
+  assignment(id: $assignmentId) {
+    id
+    tasks {
+      id
+      title
+      position
+      body
+    }
+  }
+}
