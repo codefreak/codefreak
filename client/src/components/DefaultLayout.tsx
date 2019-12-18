@@ -1,12 +1,12 @@
 import ProLayout from '@ant-design/pro-layout'
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
-import { Button, Tooltip } from 'antd'
 import { Route } from 'antd/lib/breadcrumb/Breadcrumb'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Authority } from '../hooks/useHasAuthority'
 import { routerConfig } from '../router.config'
 import Authorized from './Authorized'
+import RightHeader from './RightHeader'
 
 export const appName = 'Code FREAK'
 
@@ -28,21 +28,8 @@ interface DefaultLayoutProps {
   logout: () => void
 }
 
-const DefaultLayout: React.FC<DefaultLayoutProps> = props => {
+const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
   useLocation() // somehow this is needed for 'active navigation item' to work correctly 🤔
-
-  const renderHeader = () => (
-    <span style={{ float: 'right' }}>
-      <Tooltip title="Sign out" placement="left">
-        <Button
-          onClick={props.logout}
-          icon="logout"
-          shape="circle"
-          style={{ marginRight: 16 }}
-        />
-      </Tooltip>
-    </span>
-  )
 
   return (
     <ProLayout
@@ -52,9 +39,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = props => {
       logo={process.env.PUBLIC_URL + '/codefreak-logo.svg'}
       disableContentMargin={false}
       itemRender={breadcrumbItemRender}
-      rightContentRender={renderHeader}
+      rightContentRender={() => <RightHeader logout={logout}/>}
     >
-      {props.children}
+      {children}
     </ProLayout>
   )
 }
