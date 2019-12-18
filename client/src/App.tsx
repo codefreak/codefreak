@@ -68,7 +68,7 @@ const App: React.FC = () => {
       messageService.success(`Welcome back, ${displayName(user)}!`)
       setAuthenticatedUser(user)
     }
-    return <LoginPage onSuccessfulLogin={onLogin}/>
+    return <LoginPage onSuccessfulLogin={onLogin} />
   }
 
   const routes: MenuDataItem[] = []

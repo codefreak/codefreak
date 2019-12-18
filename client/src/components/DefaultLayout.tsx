@@ -31,6 +31,8 @@ interface DefaultLayoutProps {
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
   useLocation() // somehow this is needed for 'active navigation item' to work correctly 🤔
 
+  const renderRightHeader = () => <RightHeader logout={logout} />
+
   return (
     <ProLayout
       menuItemRender={menuItemRender}
@@ -39,7 +41,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
       logo={process.env.PUBLIC_URL + '/codefreak-logo.svg'}
       disableContentMargin={false}
       itemRender={breadcrumbItemRender}
-      rightContentRender={() => <RightHeader logout={logout}/>}
+      rightContentRender={renderRightHeader}
     >
       {children}
     </ProLayout>
