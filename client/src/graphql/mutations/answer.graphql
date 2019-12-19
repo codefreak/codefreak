@@ -1,3 +1,9 @@
 mutation UploadAnswerSource($id: ID!, $files: [Upload!]!) {
   uploadAnswerSource(id: $id, files: $files)
 }
+
+mutation CreateAnswer($taskId: ID!) {
+  createAnswer(taskId: $taskId) {
+    id
+  }
+}

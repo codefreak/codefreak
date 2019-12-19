@@ -9,6 +9,7 @@ import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AnswerService
+import de.code_freak.codefreak.service.EntityNotFoundException
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.util.FrontendUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,17 +28,21 @@ class TaskDto(@GraphQLIgnore val entity: Task, @GraphQLIgnore val serviceAccess:
   val body = entity.body
   val assignment by lazy { AssignmentDto(entity.assignment, serviceAccess) }
 
-  fun answer(userId: UUID?): AnswerDto {
+  fun answer(userId: UUID?): AnswerDto? {
     val answerService = serviceAccess.getService(AnswerService::class)
 
     val answer = if (userId == null || userId == FrontendUtil.getCurrentUser().id) {
-      answerService.findOrCreateAnswer(id, FrontendUtil.getCurrentUser())
+      try {
+        answerService.findAnswer(id, FrontendUtil.getCurrentUser().id)
+      } catch (e: EntityNotFoundException) {
+        null
+      }
     } else {
       Authorization.requireAuthority(Authority.ROLE_TEACHER)
       answerService.findAnswer(id, userId)
     }
 
-    return AnswerDto(answer, serviceAccess)
+    return answer?.let { AnswerDto(it, serviceAccess) }
   }
 }
 

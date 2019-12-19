@@ -10,11 +10,13 @@ import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AnswerService
+import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.util.FrontendUtil
 import de.code_freak.codefreak.util.TarUtil
 import de.code_freak.codefreak.util.orNull
 import org.apache.catalina.core.ApplicationPart
+import org.hibernate.type.UUIDBinaryType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
@@ -52,6 +54,18 @@ class AnswerMutation : Mutation {
     Authorization.requireIsCurrentUser(answer.submission.user)
     answerService.setFiles(answer).use { TarUtil.writeUploadAsTar(files, it) }
     return true
+  }
+
+  @Secured(Authority.ROLE_STUDENT)
+  @Transactional
+  fun createAnswer(taskId: UUID): AnswerDto = serviceAccess.getService(AnswerService::class)
+      .findOrCreateAnswer(taskId, FrontendUtil.getCurrentUser())
+      .let { AnswerDto(it, serviceAccess) }
+
+  @Secured(Authority.ROLE_STUDENT)
+  @Transactional
+  fun startIde(answerId: UUID): String {
+    return "foo"
   }
 }
 
