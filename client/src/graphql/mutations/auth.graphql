@@ -3,6 +3,8 @@ mutation Login($username: String!, $password: String!) {
     user {
       id
       username
+      firstName
+      lastName
       authorities
     }
   }

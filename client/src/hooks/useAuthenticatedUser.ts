@@ -1,7 +1,10 @@
 import { createContext, useContext } from 'react'
 import { User } from '../services/codefreak-api'
 
-export type AuthenticatedUser = Pick<User, 'id' | 'username' | 'authorities'>
+export type AuthenticatedUser = Pick<
+  User,
+  'id' | 'username' | 'authorities' | 'firstName' | 'lastName'
+>
 
 export const AuthenticatedUserContext = createContext<
   AuthenticatedUser | undefined
