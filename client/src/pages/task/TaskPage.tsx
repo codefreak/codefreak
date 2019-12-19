@@ -30,20 +30,13 @@ const TaskPage: React.FC = () => {
     NonNullable<GetTaskQueryHookResult['data']>['task']['answer']
   >()
 
-  const [
-    createAnswer,
-    { loading: creatingAnswer, data: createAnswerResult }
-  ] = useCreateAnswerMutation()
+  const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
 
   useEffect(() => {
     if (result.data && result.data.task.answer) {
       setAnswer(result.data.task.answer)
     }
-    if (createAnswerResult) {
-      setAnswer(createAnswerResult.createAnswer)
-      subPath.set('/answer')
-    }
-  }, [result, createAnswerResult])
+  }, [result])
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -65,7 +58,15 @@ const TaskPage: React.FC = () => {
     }
   ]
 
-  const onCreateAnswer = () => createAnswer({ variables: { taskId: task.id } })
+  const onCreateAnswer = async () => {
+    const createAnswerResult = await createAnswer({
+      variables: { taskId: task.id }
+    })
+    if (createAnswerResult.data) {
+      setAnswer(createAnswerResult.data.createAnswer)
+      subPath.set('/answer')
+    }
+  }
 
   const extra = answer ? (
     <IdeButton answer={answer} size="large" type="primary" />

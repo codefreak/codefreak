@@ -1,0 +1,3 @@
+mutation StartIde($type: String!, $id: ID!) {
+  startIde(type: $type, id: $id)
+}

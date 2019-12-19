@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.graphql
 
+import de.code_freak.codefreak.service.ResourceLimitException
 import graphql.ErrorClassification
 import graphql.ExceptionWhileDataFetching
 import graphql.GraphQLError
@@ -25,6 +26,7 @@ class ErrorHandler : DefaultGraphQLErrorHandler() {
         when (it.exception) {
           is AccessDeniedException -> CustomError(it, "Access Denied", "403")
           is BadCredentialsException -> CustomError(it, "Bad Credentials", "422")
+          is ResourceLimitException -> CustomError(it, it.message, "503")
           else -> it
         }
       } else it

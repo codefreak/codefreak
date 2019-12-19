@@ -8,6 +8,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
 import './index.css'
+import { extractErrorMessage } from './services/codefreak-api'
 import { messageService } from './services/message'
 import * as serviceWorker from './serviceWorker'
 
@@ -15,9 +16,7 @@ const apolloClient = new ApolloClient({
   link: ApolloLink.from([
     onError(error => {
       if (!error.operation.getContext().disableGlobalErrorHandling) {
-        ;(error.graphQLErrors || []).forEach(err =>
-          messageService.error(err.message)
-        )
+        messageService.error(extractErrorMessage(error))
       }
     }),
     createUploadLink({ uri: '/graphql', credentials: 'include' })
