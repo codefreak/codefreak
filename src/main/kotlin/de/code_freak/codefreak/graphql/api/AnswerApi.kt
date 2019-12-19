@@ -6,11 +6,13 @@ import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.util.FrontendUtil
+import de.code_freak.codefreak.util.TarUtil
 import de.code_freak.codefreak.util.orNull
 import org.apache.catalina.core.ApplicationPart
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,9 +44,13 @@ class AnswerMutation : Mutation {
   @Autowired
   private lateinit var serviceAccess: ServiceAccess
 
+  @Secured(Authority.ROLE_STUDENT)
   @Transactional
   fun uploadAnswerSource(id: UUID, files: Array<ApplicationPart>): Boolean {
-    println(files.map { it.name })
+    val answerService = serviceAccess.getService(AnswerService::class)
+    val answer = answerService.findAnswer(id)
+    Authorization.requireIsCurrentUser(answer.submission.user)
+    answerService.setFiles(answer).use { TarUtil.writeUploadAsTar(files, it) }
     return true
   }
 }
@@ -59,8 +65,8 @@ class AnswerQuery : Query {
   fun answer(id: UUID): AnswerDto {
     val answerService = serviceAccess.getService(AnswerService::class)
     val answer = answerService.findAnswer(id)
-    if (answer.submission.user != FrontendUtil.getCurrentUser()) {
-      FrontendUtil.checkAuthority(Authority.ROLE_TEACHER)
+    if (Authorization.isCurrentUser(answer.submission.user)) {
+      Authorization.requireAuthority(Authority.ROLE_TEACHER)
     }
     return AnswerDto(answer, serviceAccess)
   }

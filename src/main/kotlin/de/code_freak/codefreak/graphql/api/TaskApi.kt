@@ -5,6 +5,7 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AnswerService
@@ -32,7 +33,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, @GraphQLIgnore val serviceAccess:
     val answer = if (userId == null || userId == FrontendUtil.getCurrentUser().id) {
       answerService.findOrCreateAnswer(id, FrontendUtil.getCurrentUser())
     } else {
-      FrontendUtil.checkAuthority(Authority.ROLE_TEACHER)
+      Authorization.requireAuthority(Authority.ROLE_TEACHER)
       answerService.findAnswer(id, userId)
     }
 

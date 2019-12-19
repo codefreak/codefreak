@@ -1,0 +1,3 @@
+mutation UploadAnswerSource($id: ID!, $files: [Upload!]!) {
+  uploadAnswerSource(id: $id, files: $files)
+}

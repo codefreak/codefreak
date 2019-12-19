@@ -1,14 +1,29 @@
 import { Card } from 'antd'
-import React from 'react'
+import React, { useEffect } from 'react'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
-import { useGetAnswerQuery } from '../../services/codefreak-api'
+import {
+  useGetAnswerQuery,
+  useUploadAnswerSourceMutation
+} from '../../services/codefreak-api'
+import { messageService } from '../../services/message'
 
 const AnswerPage: React.FC<{ answerId: string }> = props => {
   const result = useGetAnswerQuery({
     variables: { id: props.answerId }
   })
+
+  const [
+    upload,
+    { loading: uploading, data: uploadSuccess }
+  ] = useUploadAnswerSourceMutation()
+
+  useEffect(() => {
+    if (uploadSuccess) {
+      messageService.success('Source code submitted successfully')
+    }
+  }, [uploadSuccess])
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -16,13 +31,26 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   const { answer } = result.data
 
+  const onUpload = (files: File[]) => {
+    upload({
+      variables: {
+        files,
+        id: answer.id
+      }
+    })
+  }
+
   return (
     <>
       <Card
         title="Submit source code"
-        extra={<ArchiveDownload url={answer.sourceUrl}>Download source code</ArchiveDownload>}
+        extra={
+          <ArchiveDownload url={answer.sourceUrl}>
+            Download source code
+          </ArchiveDownload>
+        }
       >
-        <FileImport />
+        <FileImport uploading={uploading} onUpload={onUpload} />
       </Card>
     </>
   )

@@ -1,5 +1,9 @@
 import { ApolloProvider } from '@apollo/react-hooks'
-import ApolloClient from 'apollo-boost'
+import { InMemoryCache } from 'apollo-cache-inmemory'
+import ApolloClient from 'apollo-client'
+import { ApolloLink } from 'apollo-link'
+import { onError } from 'apollo-link-error'
+import { createUploadLink } from 'apollo-upload-client'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
@@ -8,14 +12,17 @@ import { messageService } from './services/message'
 import * as serviceWorker from './serviceWorker'
 
 const apolloClient = new ApolloClient({
-  uri: '/graphql',
-  onError: error => {
-    if (!error.operation.getContext().disableGlobalErrorHandling) {
-      ;(error.graphQLErrors || []).forEach(err =>
-        messageService.error(err.message)
-      )
-    }
-  }
+  link: ApolloLink.from([
+    onError(error => {
+      if (!error.operation.getContext().disableGlobalErrorHandling) {
+        ;(error.graphQLErrors || []).forEach(err =>
+          messageService.error(err.message)
+        )
+      }
+    }),
+    createUploadLink({ uri: '/graphql', credentials: 'include' })
+  ]),
+  cache: new InMemoryCache()
 })
 
 ReactDOM.render(
