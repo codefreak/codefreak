@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 object FrontendUtil {
   fun getRequest() = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
@@ -17,4 +18,6 @@ object FrontendUtil {
       throw AccessDeniedException("Access Denied")
     }
   }
+
+  fun getUriBuilder() = ServletUriComponentsBuilder.fromCurrentRequestUri().replacePath(null)
 }

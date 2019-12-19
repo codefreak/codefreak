@@ -51,7 +51,9 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path} component={TaskDetailsPage} />
-        <Route path={`${path}/answer`} component={AnswerPage} />
+        <Route path={`${path}/answer`}>
+          <AnswerPage answerId={task.answer.id}/>{' '}
+        </Route>
         <Route component={NotFoundPage} />
       </Switch>
     </>
