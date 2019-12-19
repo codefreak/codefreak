@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
+import IdeButton from '../../components/IdeButton'
 import SetTitle from '../../components/SetTitle'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
@@ -66,7 +67,9 @@ const TaskPage: React.FC = () => {
 
   const onCreateAnswer = () => createAnswer({ variables: { taskId: task.id } })
 
-  const extra = answer ? null : (
+  const extra = answer ? (
+    <IdeButton answer={answer} size="large" type="primary" />
+  ) : (
     <Button
       type="primary"
       icon="rocket"

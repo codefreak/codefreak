@@ -10,6 +10,7 @@ import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AnswerService
+import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.util.FrontendUtil
@@ -38,6 +39,11 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, @GraphQLIgnore val serviceAcc
         .map { EvaluationDto(it, serviceAccess) }
         .orNull()
   }
+
+  val ideRunning by lazy {
+    serviceAccess.getService(ContainerService::class)
+        .isIdeContainerRunning(id)
+  }
 }
 
 @Component
@@ -62,11 +68,6 @@ class AnswerMutation : Mutation {
       .findOrCreateAnswer(taskId, FrontendUtil.getCurrentUser())
       .let { AnswerDto(it, serviceAccess) }
 
-  @Secured(Authority.ROLE_STUDENT)
-  @Transactional
-  fun startIde(answerId: UUID): String {
-    return "foo"
-  }
 }
 
 @Component

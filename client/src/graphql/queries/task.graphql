@@ -20,6 +20,7 @@ query GetTask($id: ID!, $answerUserId: ID) {
     }
     answer(userId: $answerUserId) {
       id
+      ideRunning
     }
   }
 }
