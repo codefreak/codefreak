@@ -1,0 +1,12 @@
+@pro-header-hover-bg: rgba(0, 0, 0, 0.025);
+
+.ant-layout-header {
+  .ant-dropdown-trigger {
+    cursor: pointer;
+
+    &.ant-dropdown-open {
+      transition: background 0.3s;
+      background: @pro-header-hover-bg;
+    }
+  }
+}

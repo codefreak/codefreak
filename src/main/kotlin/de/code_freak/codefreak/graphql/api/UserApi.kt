@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component
 class UserDto(@GraphQLIgnore val entity: User) {
     @GraphQLID val id = entity.id
     val username = entity.username
+    val firstName = entity.firstName
+    val lastName = entity.lastName
     // TODO: only show roles/authority to admins and the user itself
     val roles by lazy { entity.roles.map { it.toString() } }
     val authorities by lazy { entity.authorities.map { it.authority } }

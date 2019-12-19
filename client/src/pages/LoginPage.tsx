@@ -11,20 +11,20 @@ interface Credentials {
 }
 
 interface LoginProps extends FormComponentProps<Credentials> {
-  setAuthenticatedUser: (user: AuthenticatedUser) => void
+  onSuccessfulLogin: (user: AuthenticatedUser) => void
 }
 
 const LoginPage: React.FC<LoginProps> = props => {
   const { getFieldDecorator } = props.form
-  const { setAuthenticatedUser } = props
+  const { onSuccessfulLogin } = props
 
   const [login, { data, loading }] = useLoginMutation()
 
   useEffect(() => {
     if (data !== undefined) {
-      setAuthenticatedUser(data.login.user)
+      onSuccessfulLogin(data.login.user)
     }
-  }, [setAuthenticatedUser, data])
+  }, [onSuccessfulLogin, data])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
