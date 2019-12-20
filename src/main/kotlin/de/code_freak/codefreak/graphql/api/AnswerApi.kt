@@ -11,6 +11,7 @@ import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.ContainerService
+import de.code_freak.codefreak.service.GitImportService
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.util.FrontendUtil
 import de.code_freak.codefreak.util.TarUtil
@@ -57,6 +58,16 @@ class AnswerMutation : Mutation {
     val answer = answerService.findAnswer(id)
     Authorization.requireIsCurrentUser(answer.submission.user)
     answerService.setFiles(answer).use { TarUtil.writeUploadAsTar(files, it) }
+    return true
+  }
+
+  @Secured(Authority.ROLE_STUDENT)
+  @Transactional
+  fun importAnswerSource(id: UUID, url: String): Boolean {
+    val answerService = serviceAccess.getService(AnswerService::class)
+    val answer = answerService.findAnswer(id)
+    Authorization.requireIsCurrentUser(answer.submission.user)
+    serviceAccess.getService(GitImportService::class).importFiles(url, answer)
     return true
   }
 

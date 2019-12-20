@@ -2,6 +2,10 @@ mutation UploadAnswerSource($id: ID!, $files: [Upload!]!) {
   uploadAnswerSource(id: $id, files: $files)
 }
 
+mutation ImportAnswerSource($id: ID!, $url: String!) {
+  importAnswerSource(id: $id, url: $url)
+}
+
 mutation CreateAnswer($taskId: ID!) {
   createAnswer(taskId: $taskId) {
     id

@@ -149,7 +149,6 @@ class AppConfiguration {
   }
 
   class GitImport {
-    var enabled = false
     var remotes = arrayOf<GitRemote>()
 
     class GitRemote {

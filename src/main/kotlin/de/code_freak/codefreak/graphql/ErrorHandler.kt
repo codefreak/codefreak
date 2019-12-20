@@ -27,6 +27,7 @@ class ErrorHandler : DefaultGraphQLErrorHandler() {
           is AccessDeniedException -> CustomError(it, "Access Denied", "403")
           is BadCredentialsException -> CustomError(it, "Bad Credentials", "422")
           is ResourceLimitException -> CustomError(it, it.message, "503")
+          is IllegalArgumentException -> CustomError(it, it.message, "422")
           else -> it
         }
       } else it

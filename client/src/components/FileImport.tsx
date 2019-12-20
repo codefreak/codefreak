@@ -1,16 +1,20 @@
-import { Col, Icon, Row, Spin, Upload } from 'antd'
+import { Button, Col, Form, Icon, Input, Row, Spin, Upload } from 'antd'
 import { RcFile } from 'antd/lib/upload/interface'
-import React from 'react'
+import React, { useState } from 'react'
+import Centered from './Centered'
 
 const { Dragger } = Upload
 
 interface FileImportProps {
   uploading: boolean
   onUpload: (files: File[]) => void
+  importing: boolean
+  onImport: (url: string) => void
 }
 
 const FileImport: React.FC<FileImportProps> = props => {
-  const { uploading, onUpload } = props
+  const { uploading, onUpload, importing, onImport } = props
+  const [url, setUrl] = useState('')
 
   const beforeUpload = (file: RcFile, fileList: RcFile[]) => {
     // this function is called for every file
@@ -19,6 +23,10 @@ const FileImport: React.FC<FileImportProps> = props => {
     }
     return false
   }
+
+  const onUrlChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setUrl(e.target.value)
+  const importSource = () => onImport(url) as void
 
   return (
     <Row gutter={16}>
@@ -42,7 +50,36 @@ const FileImport: React.FC<FileImportProps> = props => {
           </p>
         </Dragger>
       </Col>
-      <Col span={6}>TODO: Git import</Col>
+      <Col span={12}>
+        <Centered style={{ height: 150 }}>
+          <Form
+            layout="horizontal"
+            style={{ width: '100%', maxWidth: 700, marginBottom: -24 }}
+          >
+            <Form.Item
+              label="Repository URL"
+              labelCol={{ span: 6 }}
+              wrapperCol={{ span: 12 }}
+            >
+              <Input
+                onChange={onUrlChange}
+                placeholder="ssh://git@example.org:1234/path/to/project.git"
+              />
+            </Form.Item>
+            <Form.Item>
+              <div style={{ textAlign: 'center' }}>
+                <Button
+                  icon="download"
+                  loading={importing}
+                  onClick={importSource}
+                >
+                  Import source code from git
+                </Button>
+              </div>
+            </Form.Item>
+          </Form>
+        </Centered>
+      </Col>
     </Row>
   )
 }

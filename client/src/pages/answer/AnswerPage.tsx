@@ -5,6 +5,7 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
 import {
   useGetAnswerQuery,
+  useImportAnswerSourceMutation,
   useUploadAnswerSourceMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
@@ -15,15 +16,20 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
   })
 
   const [
-    upload,
+    uploadSource,
     { loading: uploading, data: uploadSuccess }
   ] = useUploadAnswerSourceMutation()
 
+  const [
+    importSource,
+    { loading: importing, data: importSucess }
+  ] = useImportAnswerSourceMutation()
+
   useEffect(() => {
-    if (uploadSuccess) {
+    if (uploadSuccess || importSucess) {
       messageService.success('Source code submitted successfully')
     }
-  }, [uploadSuccess])
+  }, [uploadSuccess, importSucess])
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -31,14 +37,11 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   const { answer } = result.data
 
-  const onUpload = (files: File[]) => {
-    upload({
-      variables: {
-        files,
-        id: answer.id
-      }
-    })
-  }
+  const onUpload = (files: File[]) =>
+    uploadSource({ variables: { files, id: answer.id } })
+
+  const onImport = (url: string) =>
+    importSource({ variables: { url, id: answer.id } })
 
   return (
     <>
@@ -50,7 +53,12 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
           </ArchiveDownload>
         }
       >
-        <FileImport uploading={uploading} onUpload={onUpload} />
+        <FileImport
+          uploading={uploading}
+          onUpload={onUpload}
+          onImport={onImport}
+          importing={importing}
+        />
       </Card>
     </>
   )
