@@ -6,6 +6,9 @@ query GetTaskList($assignmentId: ID!) {
       title
       position
       body
+      answer {
+        id
+      }
     }
   }
 }
