@@ -12,7 +12,7 @@ export default useSubscribeToGlobalEvents
 
 const useSubscribeToEvaluationFinished = () => {
   const history = useHistory()
-  const evaluationFinished = useEvaluationFinishedSubscription({
+  useEvaluationFinishedSubscription({
     onSubscriptionData: res => {
       if (res.subscriptionData.data) {
         const evaluation = res.subscriptionData.data.evaluationFinished

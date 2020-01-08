@@ -23,9 +23,9 @@ const wsLink = new WebSocketLink({
   uri: `${wsProtocol}//${window.location.host}/subscriptions`,
   options: {
     reconnect: true,
-    connectionParams: () => ({
+    connectionParams: {
       credentials: 'include'
-    })
+    }
   }
 })
 

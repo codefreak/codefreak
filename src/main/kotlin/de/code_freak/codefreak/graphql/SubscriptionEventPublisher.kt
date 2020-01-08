@@ -2,7 +2,6 @@ package de.code_freak.codefreak.graphql
 
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
-import org.springframework.stereotype.Component
 import org.springframework.util.ReflectionUtils
 import reactor.core.publisher.Flux
 import reactor.core.publisher.FluxSink
@@ -13,7 +12,7 @@ import javax.annotation.PostConstruct
 
 // Based on https://developer.okta.com/blog/2018/09/24/reactive-apis-with-spring-webflux
 
-open class SubscriptionEventPublisher<T: ApplicationEvent> : ApplicationListener<T>, Consumer<FluxSink<T>> {
+open class SubscriptionEventPublisher<T : ApplicationEvent> : ApplicationListener<T>, Consumer<FluxSink<T>> {
 
   private val executor = Executors.newSingleThreadExecutor()
   private val queue = LinkedBlockingQueue<T>()
