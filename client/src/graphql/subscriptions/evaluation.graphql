@@ -1,0 +1,16 @@
+subscription EvaluationFinished {
+  evaluationFinished {
+    id
+    answer {
+      id
+      task {
+        id
+        title
+      }
+    }
+  }
+}
+
+subscription PendingEvaluationUpdated {
+  pendingEvaluationUpdated
+}

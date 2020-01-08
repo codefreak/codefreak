@@ -26,7 +26,7 @@ import {
 import { messageService } from './services/message'
 import { displayName } from './services/user'
 
-const App: React.FC = () => {
+const App: React.FC<{ onUserChanged?: () => void }> = props => {
   const [authenticatedUser, setAuthenticatedUser] = useState<
     AuthenticatedUser
   >()
@@ -54,6 +54,9 @@ const App: React.FC = () => {
   // make sure to delete cached data after login/logout
   useEffect(() => {
     apolloClient.clearStore()
+    if (props.onUserChanged) {
+      props.onUserChanged()
+    }
   }, [authenticatedUser, apolloClient])
 
   if (loading) {

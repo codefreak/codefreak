@@ -7,6 +7,7 @@ import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.auth.Authorization
+import de.code_freak.codefreak.auth.authorized
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AnswerService
@@ -30,13 +31,21 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, @GraphQLIgnore val serviceAcc
   val id = entity.id
   val submission by lazy { SubmissionDto(entity.submission, serviceAccess) }
   val task by lazy { TaskDto(entity.task, serviceAccess) }
-  val sourceUrl = FrontendUtil.getUriBuilder().path("/answers/$id/source").build().toUriString()
+  val sourceUrl by lazy { FrontendUtil.getUriBuilder().path("/answers/$id/source").build().toUriString() }
 
   val latestEvaluation by lazy {
     serviceAccess.getService(EvaluationService::class)
         .getLatestEvaluation(id)
         .map { EvaluationDto(it, serviceAccess) }
         .orNull()
+  }
+
+  val pendingEvaluation by lazy {
+    if (serviceAccess.getService(EvaluationService::class).isEvaluationPending(id)) {
+      PendingEvaluationDto(entity, serviceAccess)
+    } else {
+      null
+    }
   }
 
   val ideRunning by lazy {

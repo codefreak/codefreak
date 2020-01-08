@@ -1,0 +1,5 @@
+mutation StartEvaluation($answerId: ID!) {
+  startEvaluation(answerId: $answerId) {
+    inQueue
+  }
+}

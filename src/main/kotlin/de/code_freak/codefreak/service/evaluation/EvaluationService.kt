@@ -56,7 +56,7 @@ class EvaluationService : BaseService() {
   fun startEvaluation(answer: Answer) {
     containerService.saveAnswerFiles(answer)
     check(!isEvaluationUpToDate(answer.id)) { "Evaluation is up to date." }
-    check(!isEvaluationRunningOrQueued(answer.id)) { "Evaluation is already running or queued." }
+    check(!isEvaluationPending(answer.id)) { "Evaluation is already running or queued." }
     evaluationQueue.insert(answer.id)
   }
 
@@ -66,7 +66,9 @@ class EvaluationService : BaseService() {
 
   fun getLatestEvaluation(answerId: UUID) = evaluationRepository.findFirstByAnswerIdOrderByCreatedAtDesc(answerId)
 
-  fun isEvaluationRunningOrQueued(answerId: UUID) = evaluationQueue.isQueued(answerId) || evaluationQueue.isRunning(answerId)
+  fun isEvaluationPending(answerId: UUID) = isEvaluationInQueue(answerId) || evaluationQueue.isRunning(answerId)
+
+  fun isEvaluationInQueue(answerId: UUID) = evaluationQueue.isQueued(answerId)
 
   fun getSummary(evaluationResult: EvaluationResult): Any {
     return getEvaluationRunner(evaluationResult.runnerName).let {

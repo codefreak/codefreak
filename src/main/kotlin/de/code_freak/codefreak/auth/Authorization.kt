@@ -26,10 +26,4 @@ class Authorization(val currentUser: User = FrontendUtil.getCurrentUser()) {
   }
 }
 
-fun <T> authorized(user: User, block: Authorization.() -> T): T {
- return Authorization(user).block()
-}
-
-fun <T> authorized(block: Authorization.() -> T): T {
-  return Authorization().block()
-}
+fun <T> authorized(block: Authorization.() -> T) = Authorization().block()

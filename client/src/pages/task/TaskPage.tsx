@@ -15,6 +15,7 @@ import {
 } from '../../services/codefreak-api'
 import { createRoutes } from '../../services/custom-breadcrump'
 import AnswerPage from '../answer/AnswerPage'
+import EvaluationPage from '../evaluation/EvaluationPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 
@@ -97,6 +98,9 @@ const TaskPage: React.FC = () => {
         <Route exact path={path} component={TaskDetailsPage} />
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
+        </Route>
+        <Route path={`${path}/evaluation`}>
+          {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route component={NotFoundPage} />
       </Switch>

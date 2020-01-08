@@ -32,6 +32,7 @@ class AuthMutation : Mutation {
     val session = FrontendUtil.getRequest().getSession(true)
     session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, securityContext)
     val user = auth.principal as User
+    // we have to register the session ourselves because we do the login manually
     serviceAccess.getService(SessionService::class).registerNewSession(session.id, user)
     return AuthenticationDto(session.id, UserDto(user))
   }
