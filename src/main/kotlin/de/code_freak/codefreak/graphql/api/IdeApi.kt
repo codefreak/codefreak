@@ -22,10 +22,10 @@ class IdeMutation : Mutation {
     if (type == "answer") {
       val answer = serviceAccess.getService(AnswerService::class).findAnswer(id)
       var readOnly = true
-      if (Authorization.isCurrentUser(answer.submission.user)) {
+      if (Authorization().isCurrentUser(answer.submission.user)) {
         readOnly = answer.task.assignment.closed
       } else {
-        Authorization.requireAuthority(Authority.ROLE_TEACHER)
+        Authorization().requireAuthority(Authority.ROLE_TEACHER)
       }
       val containerService = serviceAccess.getService(ContainerService::class)
       containerService.startIdeContainer(answer, readOnly)

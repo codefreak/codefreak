@@ -56,7 +56,7 @@ class AnswerMutation : Mutation {
   fun uploadAnswerSource(id: UUID, files: Array<ApplicationPart>): Boolean {
     val answerService = serviceAccess.getService(AnswerService::class)
     val answer = answerService.findAnswer(id)
-    Authorization.requireIsCurrentUser(answer.submission.user)
+    Authorization().requireIsCurrentUser(answer.submission.user)
     answerService.setFiles(answer).use { TarUtil.writeUploadAsTar(files, it) }
     return true
   }
@@ -66,7 +66,7 @@ class AnswerMutation : Mutation {
   fun importAnswerSource(id: UUID, url: String): Boolean {
     val answerService = serviceAccess.getService(AnswerService::class)
     val answer = answerService.findAnswer(id)
-    Authorization.requireIsCurrentUser(answer.submission.user)
+    Authorization().requireIsCurrentUser(answer.submission.user)
     serviceAccess.getService(GitImportService::class).importFiles(url, answer)
     return true
   }
@@ -86,11 +86,13 @@ class AnswerQuery : Query {
   @Transactional
   @Secured(Authority.ROLE_STUDENT)
   fun answer(id: UUID): AnswerDto {
-    val answerService = serviceAccess.getService(AnswerService::class)
-    val answer = answerService.findAnswer(id)
-    if (Authorization.isCurrentUser(answer.submission.user)) {
-      Authorization.requireAuthority(Authority.ROLE_TEACHER)
+    return authorized {
+      val answerService = serviceAccess.getService(AnswerService::class)
+      val answer = answerService.findAnswer(id)
+      if (!isCurrentUser(answer.submission.user)) {
+        requireAuthority(Authority.ROLE_TEACHER)
+      }
+      AnswerDto(answer, serviceAccess)
     }
-    return AnswerDto(answer, serviceAccess)
   }
 }

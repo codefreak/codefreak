@@ -38,7 +38,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, @GraphQLIgnore val serviceAccess:
         null
       }
     } else {
-      Authorization.requireAuthority(Authority.ROLE_TEACHER)
+      Authorization().requireAuthority(Authority.ROLE_TEACHER)
       answerService.findAnswer(id, userId)
     }
 

@@ -16,6 +16,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider
+import org.springframework.security.core.session.SessionRegistryImpl
+import org.springframework.security.core.session.SessionRegistry
+import org.springframework.security.web.session.HttpSessionEventPublisher
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+
 
 @Configuration
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
@@ -38,6 +44,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             ?.requestMatchers(PathRequest.toStaticResources().atCommonLocations())?.permitAll()
             ?.antMatchers("/assets/**")?.permitAll()
             ?.antMatchers("/graphql/**")?.permitAll()
+            ?.antMatchers("/subscriptions/**")?.permitAll()
             ?.anyRequest()?.authenticated()
         ?.and()
             ?.formLogin()
@@ -48,6 +55,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             ?.permitAll()
         ?.and()
             ?.csrf()?.ignoringAntMatchers("/graphql")
+    http?.sessionManagement()
+        ?.maximumSessions(1)
+        ?.sessionRegistry(sessionRegistry())
   }
 
   @Bean
@@ -56,6 +66,16 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
       AuthenticationMethod.SIMPLE -> SimpleUserDetailsService(userService)
       else -> super.userDetailsService()
     }
+  }
+
+  @Bean
+  fun sessionRegistry(): SessionRegistry {
+    return SessionRegistryImpl()
+  }
+
+  @Bean
+  fun httpSessionEventPublisher(): ServletListenerRegistrationBean<HttpSessionEventPublisher> {
+    return ServletListenerRegistrationBean(HttpSessionEventPublisher())
   }
 
   override fun configure(auth: AuthenticationManagerBuilder?) {

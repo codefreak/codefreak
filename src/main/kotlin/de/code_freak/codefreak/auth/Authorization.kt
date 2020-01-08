@@ -5,19 +5,31 @@ import de.code_freak.codefreak.util.FrontendUtil
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 
-object Authorization {
+class Authorization(val currentUser: User = FrontendUtil.getCurrentUser()) {
+
+  companion object {
+    fun deny(): Nothing = throw AccessDeniedException("AccessDenied")
+  }
 
   fun requireAuthority(authority: String) {
-    if (!FrontendUtil.getCurrentUser().authorities.contains(SimpleGrantedAuthority(authority))) {
-      throw AccessDeniedException("Access Denied")
+    if (!currentUser.authorities.contains(SimpleGrantedAuthority(authority))) {
+      deny()
     }
   }
 
-  fun isCurrentUser(user: User) = user == FrontendUtil.getCurrentUser()
+  fun isCurrentUser(user: User) = user == currentUser
 
   fun requireIsCurrentUser(user: User) {
     if (!isCurrentUser(user)) {
-      throw AccessDeniedException("Access Denied")
+      deny()
     }
   }
+}
+
+fun <T> authorized(user: User, block: Authorization.() -> T): T {
+ return Authorization(user).block()
+}
+
+fun <T> authorized(block: Authorization.() -> T): T {
+  return Authorization().block()
 }

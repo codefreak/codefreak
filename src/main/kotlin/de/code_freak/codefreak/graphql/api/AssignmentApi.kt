@@ -10,7 +10,6 @@ import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.util.FrontendUtil
-import graphql.schema.DataFetchingEnvironment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -44,7 +43,7 @@ class AssignmentQuery : Query {
 
   @Transactional
   @Secured(Authority.ROLE_STUDENT)
-  fun assignments(env: DataFetchingEnvironment): List<AssignmentDto> {
+  fun assignments(): List<AssignmentDto> {
     val assignmentService = serviceAccess.getService(AssignmentService::class)
     val user = FrontendUtil.getCurrentUser()
     val assignments = if (user.authorities.contains(SimpleGrantedAuthority(Authority.ROLE_TEACHER))) {
