@@ -25,10 +25,10 @@ import {
 } from './services/codefreak-api'
 import { messageService } from './services/message'
 import { displayName } from './services/user'
+import { noop } from './services/util'
 
-const App: React.FC<{ onUserChanged: () => void }> = props => {
-  const { onUserChanged } = props
-
+const App: React.FC<{ onUserChanged?: () => void }> = props => {
+  const onUserChanged = props.onUserChanged || noop
   const [authenticatedUser, setAuthenticatedUser] = useState<
     AuthenticatedUser
   >()
