@@ -1,5 +1,5 @@
 import { Button, notification } from 'antd'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { useEvaluationFinishedSubscription } from '../generated/graphql'
 import { getEntityPath } from '../services/entity-path'

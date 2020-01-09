@@ -19,11 +19,15 @@ class Authorization(val currentUser: User = FrontendUtil.getCurrentUser()) {
 
   fun isCurrentUser(user: User) = user == currentUser
 
+  fun requireAuthorityIfNotCurrentUser(user: User, authority: String) {
+    if (!isCurrentUser(user)) {
+      requireAuthority(authority)
+    }
+  }
+
   fun requireIsCurrentUser(user: User) {
     if (!isCurrentUser(user)) {
       deny()
     }
   }
 }
-
-fun <T> authorized(block: Authorization.() -> T) = Authorization().block()

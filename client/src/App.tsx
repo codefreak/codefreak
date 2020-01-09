@@ -26,7 +26,9 @@ import {
 import { messageService } from './services/message'
 import { displayName } from './services/user'
 
-const App: React.FC<{ onUserChanged?: () => void }> = props => {
+const App: React.FC<{ onUserChanged: () => void }> = props => {
+  const { onUserChanged } = props
+
   const [authenticatedUser, setAuthenticatedUser] = useState<
     AuthenticatedUser
   >()
@@ -48,15 +50,13 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
     if (logoutSucceeded) {
       messageService.success('Successfully signed out. Goodbye 👋')
       setAuthenticatedUser(undefined)
+      onUserChanged()
     }
-  }, [logoutSucceeded])
+  }, [logoutSucceeded, onUserChanged])
 
   // make sure to delete cached data after login/logout
   useEffect(() => {
     apolloClient.clearStore()
-    if (props.onUserChanged) {
-      props.onUserChanged()
-    }
   }, [authenticatedUser, apolloClient])
 
   if (loading) {
@@ -71,6 +71,7 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
     const onLogin = (user: AuthenticatedUser) => {
       messageService.success(`Welcome back, ${displayName(user)}!`)
       setAuthenticatedUser(user)
+      onUserChanged()
     }
     return <LoginPage onSuccessfulLogin={onLogin} />
   }
