@@ -15,6 +15,7 @@ import {
   AuthenticatedUser,
   AuthenticatedUserContext
 } from './hooks/useAuthenticatedUser'
+import IdePage from './pages/IdePage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { routerConfig } from './router.config'
@@ -77,15 +78,16 @@ const App: React.FC = () => {
   return (
     <AuthenticatedUserContext.Provider value={authenticatedUser}>
       <Router>
-        <DefaultLayout logout={logout}>
-          <Switch>
-            <Route exact path="/">
-              <Redirect to="/assignments" />
-            </Route>
-            {routes.map(renderRoute)}
+        <Switch>
+          <Route exact path="/">
+            <Redirect to="/assignments" />
+          </Route>
+          <Route path="/ide/:type/:id" component={IdePage} />
+          {routes.map(renderRoute(logout))}
+          <DefaultLayout logout={logout}>
             <Route component={NotFoundPage} />
-          </Switch>
-        </DefaultLayout>
+          </DefaultLayout>
+        </Switch>
       </Router>
     </AuthenticatedUserContext.Provider>
   )
@@ -99,8 +101,18 @@ const flattenRoutes = (items: MenuDataItem[], routes: MenuDataItem[]) => {
   }
 }
 
-const renderRoute = (item: MenuDataItem, index: number): React.ReactNode => {
-  return <Route key={index} {...item} />
+const renderRoute = (logout: () => {}) => (
+  item: MenuDataItem,
+  index: number
+): React.ReactNode => {
+  const { component: Component, ...props } = item
+  return (
+    <Route key={index} {...props}>
+      <DefaultLayout logout={logout}>
+        <Component />
+      </DefaultLayout>
+    </Route>
+  )
 }
 
 export default App

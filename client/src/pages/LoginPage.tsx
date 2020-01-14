@@ -36,7 +36,7 @@ const LoginPage: React.FC<LoginProps> = props => {
   }
 
   return (
-    <Centered style={{ background: 'grey' }}>
+    <Centered className="background-carbon">
       <Card title="Login" style={{ width: '100%', maxWidth: 300, margin: 16 }}>
         <Form onSubmit={handleSubmit}>
           <Form.Item>

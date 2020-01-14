@@ -6,6 +6,31 @@ query GetTaskList($assignmentId: ID!) {
       title
       position
       body
+      answer {
+        id
+      }
     }
+  }
+}
+
+query GetTask($id: ID!, $answerUserId: ID) {
+  task(id: $id) {
+    id
+    title
+    assignment {
+      id
+      title
+    }
+    answer(userId: $answerUserId) {
+      id
+      ideRunning
+    }
+  }
+}
+
+query GetTaskDetails($id: ID!) {
+  task(id: $id) {
+    id
+    body
   }
 }

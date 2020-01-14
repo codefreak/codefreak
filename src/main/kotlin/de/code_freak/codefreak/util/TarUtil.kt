@@ -20,6 +20,8 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.util.UUID
+import javax.servlet.http.Part
 
 object TarUtil {
   class PosixTarArchiveOutputStream(out: OutputStream) : TarArchiveOutputStream(out) {
@@ -159,6 +161,19 @@ object TarUtil {
     }
   }
 
+  fun writeUploadAsTar(files: Array<out Part>, out: OutputStream) {
+    if (files.size == 1) {
+      try {
+        // try to read upload as archive
+        files[0].inputStream.use { archiveToTar(it, out) }
+      } catch (e: ArchiveException) {
+        // unknown archive type or no archive at all
+        // create a new tar archive that contains only the uploaded file
+      }
+    }
+    wrapUploadInTar(files, out)
+  }
+
   private fun wrapUploadInTar(file: MultipartFile, out: OutputStream) {
     val outputStream = PosixTarArchiveOutputStream(out)
     val entry = TarArchiveEntry(basename(file.originalFilename ?: "file"))
@@ -167,6 +182,18 @@ object TarUtil {
     file.inputStream.use { StreamUtils.copy(it, outputStream) }
     outputStream.closeArchiveEntry()
     outputStream.finish()
+  }
+
+  private fun wrapUploadInTar(files: Array<out Part>, out: OutputStream) {
+    val tar = PosixTarArchiveOutputStream(out)
+    for (file in files) {
+      val entry = TarArchiveEntry(basename(file.submittedFileName ?: UUID.randomUUID().toString()))
+      entry.size = file.size
+      tar.putArchiveEntry(entry)
+      file.inputStream.use { StreamUtils.copy(it, tar) }
+      tar.closeArchiveEntry()
+    }
+    tar.finish()
   }
 
   private fun basename(path: String): String {

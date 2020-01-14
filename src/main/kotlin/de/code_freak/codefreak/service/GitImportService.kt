@@ -4,7 +4,6 @@ import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
 import org.eclipse.jgit.api.Git
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.OutputStream
@@ -12,8 +11,7 @@ import java.net.URI
 import java.nio.file.Files
 
 @Service
-@ConditionalOnProperty("code-freak.git-import.enabled")
-class GitImportService {
+class GitImportService : BaseService() {
   @Autowired
   lateinit var configuration: AppConfiguration
 
@@ -25,7 +23,11 @@ class GitImportService {
   fun getRemote(host: String) = configuration.gitImport.remotes.find { remote -> remote.host == host }
 
   fun importFiles(remoteUrlString: String, answer: Answer) {
-    val uri = URI(remoteUrlString)
+    val uri = try {
+      URI(remoteUrlString).let { it.host.length; it } // check for null
+    } catch (e: Exception) {
+      throw IllegalArgumentException("Invalid URL")
+    }
     val remote = getRemote(uri.host) ?: throw IllegalArgumentException("Import from '${uri.host}' is not supported.")
     val gitUri = getGitUri(remote, uri)
     answerService.setFiles(answer).use {

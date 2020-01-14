@@ -29,7 +29,7 @@ const renderTask = (
   return (
     <Card title={task.title} key={task.id} style={{ marginBottom: 16 }}>
       {task.body ? <ReactMarkdown source={task.body} /> : null}
-      <EntityLink to={task}>
+      <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
         <Button icon="folder-open" type="primary">
           Details
         </Button>

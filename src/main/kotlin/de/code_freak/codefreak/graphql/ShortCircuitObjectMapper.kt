@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.graphql
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.apache.catalina.core.ApplicationPart
 
 class ShortCircuitObjectMapper : ObjectMapper() {
 
@@ -8,6 +9,9 @@ class ShortCircuitObjectMapper : ObjectMapper() {
   override fun <T : Any?> convertValue(fromValue: Any?, toValueType: Class<T>?): T {
     if (fromValue?.javaClass == toValueType) {
       return fromValue as T
+    }
+    if (toValueType == Array<ApplicationPart>::class.java) {
+      return (fromValue as List<ApplicationPart>).toTypedArray() as T
     }
     return super.convertValue(fromValue, toValueType)
   }
