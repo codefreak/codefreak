@@ -1,0 +1,19 @@
+query GetSubmissionList($assignmentId: ID!) {
+  submissions(assignmentId: $assignmentId) {
+    id
+    user {
+      id
+      username
+      firstName
+      lastName
+    }
+    answers {
+      id
+      sourceUrl
+      task {
+        id
+        title
+      }
+    }
+  }
+}

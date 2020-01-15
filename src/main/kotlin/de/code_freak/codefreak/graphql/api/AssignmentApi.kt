@@ -8,7 +8,6 @@ import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AssignmentService
-import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.util.FrontendUtil
 import graphql.schema.DataFetchingEnvironment
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,12 +27,6 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, @GraphQLIgnore val se
   val deadline = entity.deadline
   val closed = entity.closed
   val tasks by lazy { entity.tasks.map { TaskDto(it, serviceAccess) } }
-
-  val submissions by lazy {
-    serviceAccess.getService(SubmissionService::class)
-        .findSubmissionsOfAssignment(id)
-        .map { SubmissionDto(it, serviceAccess) }
-  }
 }
 
 @Component

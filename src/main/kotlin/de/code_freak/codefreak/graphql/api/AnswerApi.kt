@@ -88,7 +88,7 @@ class AnswerQuery : Query {
   fun answer(id: UUID): AnswerDto {
     val answerService = serviceAccess.getService(AnswerService::class)
     val answer = answerService.findAnswer(id)
-    if (Authorization.isCurrentUser(answer.submission.user)) {
+    if (!Authorization.isCurrentUser(answer.submission.user)) {
       Authorization.requireAuthority(Authority.ROLE_TEACHER)
     }
     return AnswerDto(answer, serviceAccess)
