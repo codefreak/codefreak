@@ -3,6 +3,7 @@ package de.code_freak.codefreak.entity
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
 import java.time.Instant
+import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
@@ -17,13 +18,17 @@ class Evaluation(
   var answer: Answer,
 
   @Type(type = "image")
-  var filesDigest: ByteArray,
-
-  @OneToMany
-  @OrderBy("position ASC")
-  var results: List<EvaluationResult>
+  var filesDigest: ByteArray
 ) : BaseEntity() {
+  @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL])
+  @OrderBy("position ASC")
+  var evaluationSteps: MutableList<EvaluationStep> = mutableListOf()
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
+
+  fun addStep(step: EvaluationStep) {
+    evaluationSteps.add(step)
+    step.evaluation = this
+  }
 }

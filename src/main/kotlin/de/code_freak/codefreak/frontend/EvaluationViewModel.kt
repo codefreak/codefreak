@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.entity.Evaluation
+import de.code_freak.codefreak.entity.EvaluationStep
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -17,15 +18,13 @@ data class EvaluationViewModel(
       val resultTemplates = mutableMapOf<UUID, String>()
       val resultContents = mutableMapOf<UUID, Any>()
       val templatePrefix = if (summary) "evaluation-summary/" else "evaluation/"
-      evaluation.results.forEach {
-        if (it.error) {
-          resultContents[it.id] = String(it.content)
+      evaluation.evaluationSteps.forEach {
+        if (it.result == EvaluationStep.EvaluationStepResult.ERRORED) {
+          resultContents[it.id] = it.summary as String
           resultTemplates[it.id] = templatePrefix + "error"
         } else {
           try {
-            val runner = evaluationService.getEvaluationRunner(it.runnerName)
-            val content = runner.parseResultContent(it.content)
-            resultContents[it.id] = if (summary) runner.getSummary(content) else content
+            resultContents[it.id] = it.summary as String
             resultTemplates[it.id] = templatePrefix + it.runnerName
           } catch (e: Exception) {
             log.error(e.message)
