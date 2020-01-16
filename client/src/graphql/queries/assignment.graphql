@@ -12,6 +12,30 @@ query GetAssignment($id: ID!) {
   assignment(id: $id) {
     id
     title
+  }
+}
+
+query GetAssignmentWithSubmissions($id: ID!) {
+  assignment(id: $id) {
+    id
+    title
+    submissions {
+      id
+      user {
+        id
+        username
+        firstName
+        lastName
+      }
+      answers {
+        id
+        sourceUrl
+        task {
+          id
+          title
+        }
+      }
+    }
     tasks {
       id
       title
