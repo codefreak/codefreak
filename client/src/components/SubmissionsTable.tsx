@@ -1,5 +1,5 @@
-import { Icon, Table, Row, Col, Button, Input } from 'antd'
-import React, { useState } from 'react'
+import { Button, Col, Icon, Input, Row, Table } from 'antd'
+import React, { ChangeEvent, useState } from 'react'
 import { GetAssignmentWithSubmissionsQueryResult } from '../generated/graphql'
 import ArchiveDownload from './ArchiveDownload'
 import './SubmissionsTable.less'
@@ -21,9 +21,9 @@ const alphabeticSorter = (
   return valA.localeCompare(valB)
 }
 
-const searchSubmissions = (submissions: Submission[], criteria: string) => {
+const filterSubmissions = (submissions: Submission[], criteria: string) => {
   const needle = criteria.toLocaleLowerCase()
-  return submissions.filter((submission) => {
+  return submissions.filter(submission => {
     return submission.user.username.toLocaleLowerCase().indexOf(needle) !== -1
   })
 }
@@ -34,21 +34,31 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
   const allSubmissions = assignment.submissions
   const [submissions, setSubmissions] = useState(allSubmissions)
 
+  const submissionSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setSubmissions(filterSubmissions(allSubmissions, e.target.value))
+  }
+
   const titleFunc = () => {
-    return <Row>
-      <Col span={6}>
-        <Input.Search
-          addonBefore="Search User"
-          allowClear={true}
-          onChange={(e) => setSubmissions(searchSubmissions(allSubmissions, e.target.value))}
-        />
-      </Col>
-      <Col span={18} style={{textAlign: 'right'}}>
-        <Button type='primary'
-                href={assignment.submissionCsvUrl}
-                icon='download'>Download results as .csv</Button>
-      </Col>
-    </Row>
+    return (
+      <Row>
+        <Col span={6}>
+          <Input.Search
+            addonBefore="Search User"
+            allowClear
+            onChange={submissionSearch}
+          />
+        </Col>
+        <Col span={18} style={{ textAlign: 'right' }}>
+          <Button
+            type="primary"
+            href={assignment.submissionCsvUrl}
+            icon="download"
+          >
+            Download results as .csv
+          </Button>
+        </Col>
+      </Row>
+    )
   }
 
   const footerFunc = () => {
