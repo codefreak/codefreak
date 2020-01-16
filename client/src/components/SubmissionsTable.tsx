@@ -1,5 +1,5 @@
-import { Icon, Table } from 'antd'
-import React from 'react'
+import { Icon, Table, Row, Col, Button, Input } from 'antd'
+import React, { useState } from 'react'
 import { GetAssignmentWithSubmissionsQueryResult } from '../generated/graphql'
 import ArchiveDownload from './ArchiveDownload'
 import './SubmissionsTable.less'
@@ -21,15 +21,52 @@ const alphabeticSorter = (
   return valA.localeCompare(valB)
 }
 
+const searchSubmissions = (submissions: Submission[], criteria: string) => {
+  const needle = criteria.toLocaleLowerCase()
+  return submissions.filter((submission) => {
+    return submission.user.username.toLocaleLowerCase().indexOf(needle) !== -1
+  })
+}
+
 const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
   assignment
 }) => {
+  const allSubmissions = assignment.submissions
+  const [submissions, setSubmissions] = useState(allSubmissions)
+
+  const titleFunc = () => {
+    return <Row>
+      <Col span={6}>
+        <Input.Search
+          addonBefore="Search User"
+          allowClear={true}
+          onChange={(e) => setSubmissions(searchSubmissions(allSubmissions, e.target.value))}
+        />
+      </Col>
+      <Col span={18} style={{textAlign: 'right'}}>
+        <Button type='primary'
+                href={assignment.submissionCsvUrl}
+                icon='download'>Download results as .csv</Button>
+      </Col>
+    </Row>
+  }
+
+  const footerFunc = () => {
+    let text = `${allSubmissions.length} Submissions`
+    if (allSubmissions.length > submissions.length) {
+      text = `Showing ${submissions.length} of ` + text
+    }
+    return <div style={{ textAlign: 'right' }}>{text}</div>
+  }
+
   return (
     <Table
-      dataSource={assignment.submissions}
+      dataSource={submissions}
       bordered
       className="submissions-table"
       rowKey="id"
+      title={titleFunc}
+      footer={footerFunc}
     >
       <Column
         title="Last Name"

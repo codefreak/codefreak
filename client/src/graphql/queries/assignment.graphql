@@ -19,6 +19,7 @@ query GetAssignmentWithSubmissions($id: ID!) {
   assignment(id: $id) {
     id
     title
+    submissionCsvUrl
     submissions {
       id
       user {
