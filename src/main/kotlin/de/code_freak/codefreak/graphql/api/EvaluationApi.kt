@@ -4,7 +4,7 @@ import com.expediagroup.graphql.annotations.GraphQLID
 import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import de.code_freak.codefreak.entity.Evaluation
-import de.code_freak.codefreak.entity.EvaluationResult
+import de.code_freak.codefreak.entity.EvaluationStep
 import de.code_freak.codefreak.graphql.ServiceAccess
 
 @GraphQLName("Evaluation")
@@ -14,12 +14,12 @@ class EvaluationDto(@GraphQLIgnore val entity: Evaluation, @GraphQLIgnore val se
   val id = entity.id
   val answer by lazy { AnswerDto(entity.answer, serviceAccess) }
   val createdAt = entity.createdAt
-  val results by lazy { entity.results.map { EvaluationResultDto(it) } }
+  val results by lazy { entity.evaluationSteps.map { EvaluationResultDto(it) } }
 }
 
 @GraphQLName("EvaluationResult")
-class EvaluationResultDto(@GraphQLIgnore val entity: EvaluationResult) {
+class EvaluationResultDto(@GraphQLIgnore val entity: EvaluationStep) {
   val runnerName = entity.runnerName
   val position = entity.position
-  val error = entity.error
+  val error = entity.result == EvaluationStep.EvaluationStepResult.ERRORED
 }

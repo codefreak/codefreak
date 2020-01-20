@@ -5,3 +5,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20191025095704-user-properties.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20200114144622-rework-evaluation-model.yaml
+    relativeToChangelogFile: true
