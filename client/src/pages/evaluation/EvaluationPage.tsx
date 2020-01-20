@@ -1,12 +1,9 @@
-import { Button, Empty, Icon, Result, Steps, Tabs } from 'antd'
+import { Icon, Result, Steps, Tabs } from 'antd'
 import React from 'react'
-import { useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
+import StartEvaluationButton from '../../components/StartEvaluationButton'
 import useSubPath from '../../hooks/useSubPath'
-import {
-  useGetEvaluationOverviewQuery,
-  useStartEvaluationMutation
-} from '../../services/codefreak-api'
+import { useGetEvaluationOverviewQuery } from '../../services/codefreak-api'
 
 const { Step } = Steps
 const { TabPane } = Tabs
@@ -14,10 +11,6 @@ const { TabPane } = Tabs
 const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
   const subPath = useSubPath()
   const result = useGetEvaluationOverviewQuery({ variables: { answerId } })
-
-  const [startEvaluation, startEvaluationResult] = useStartEvaluationMutation({
-    variables: { answerId }
-  })
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -48,15 +41,11 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
               icon={<Icon type="rocket" theme="twoTone" />}
               title="Wondering if your solution is correct? ✨"
               extra={
-                <Button
+                <StartEvaluationButton
+                  answerId={answerId}
                   type="primary"
                   size="large"
-                  icon="caret-right"
-                  onClick={startEvaluation as () => void}
-                  loading={startEvaluationResult.loading}
-                >
-                  Start Evaluation
-                </Button>
+                />
               }
             />
           )}

@@ -6,6 +6,7 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import IdeButton from '../../components/IdeButton'
 import SetTitle from '../../components/SetTitle'
+import StartEvaluationButton from '../../components/StartEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import {
@@ -70,12 +71,15 @@ const TaskPage: React.FC = () => {
   }
 
   const extra = answer ? (
-    <IdeButton answer={answer} size="large" type="primary" />
+    <>
+      <IdeButton answer={answer} size="large" />
+      <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
+    </>
   ) : (
     <Button
-      type="primary"
       icon="rocket"
       size="large"
+      type="primary"
       onClick={onCreateAnswer}
       loading={creatingAnswer}
     >
