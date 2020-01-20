@@ -8,12 +8,13 @@ import com.expediagroup.graphql.spring.operations.Subscription
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Evaluation
-import de.code_freak.codefreak.entity.EvaluationResult
+import de.code_freak.codefreak.entity.EvaluationStep
 import de.code_freak.codefreak.graphql.BaseDto
 import de.code_freak.codefreak.graphql.BaseResolver
 import de.code_freak.codefreak.graphql.ResolverContext
 import de.code_freak.codefreak.graphql.SubscriptionEventPublisher
 import de.code_freak.codefreak.service.AnswerService
+import de.code_freak.codefreak.service.EvaluationDefinition
 import de.code_freak.codefreak.service.EvaluationFinishedEvent
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import graphql.schema.DataFetchingEnvironment
@@ -29,6 +30,11 @@ class PendingEvaluationDto(@GraphQLIgnore val answerEntity: Answer, ctx: Resolve
   val inQueue by lazy { serviceAccess.getService(EvaluationService::class).isEvaluationInQueue(answerEntity.id) }
 }
 
+@GraphQLName("EvaluationStepDefinition")
+class EvaluationStepDefinitionDto(val index: Int, @GraphQLIgnore val definition: EvaluationDefinition) {
+  val runnerName = definition.step
+}
+
 @GraphQLName("Evaluation")
 class EvaluationDto(@GraphQLIgnore val entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
 
@@ -36,14 +42,14 @@ class EvaluationDto(@GraphQLIgnore val entity: Evaluation, ctx: ResolverContext)
   val id = entity.id
   val answer by lazy { AnswerDto(entity.answer, ctx) }
   val createdAt = entity.createdAt
-  val results by lazy { entity.results.map { EvaluationResultDto(it, ctx) } }
+  val results by lazy { entity.evaluationSteps.map { EvaluationResultDto(it, ctx) } }
 }
 
 @GraphQLName("EvaluationResult")
-class EvaluationResultDto(@GraphQLIgnore val entity: EvaluationResult, ctx: ResolverContext) : BaseDto(ctx) {
+class EvaluationResultDto(@GraphQLIgnore val entity: EvaluationStep, ctx: ResolverContext) {
   val runnerName = entity.runnerName
   val position = entity.position
-  val error = entity.error
+  val error = entity.result == EvaluationStep.EvaluationStepResult.ERRORED
 }
 
 @Component

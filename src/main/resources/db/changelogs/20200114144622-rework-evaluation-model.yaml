@@ -1,0 +1,142 @@
+databaseChangeLog:
+- changeSet:
+    id: 1579009649623-2
+    author: hkasch (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              primaryKey: true
+              primaryKeyName: evaluation_stepPK
+            name: id
+            type: UUID
+        - column:
+            constraints:
+              nullable: false
+            name: position
+            type: INT
+        - column:
+            name: result
+            type: VARCHAR(255)
+        - column:
+            name: runner_name
+            type: VARCHAR(255)
+        - column:
+            name: summary
+            type: CLOB
+        - column:
+            constraints:
+              nullable: false
+            name: evaluation_id
+            type: UUID
+        tableName: evaluation_step
+- changeSet:
+    id: 1579009649623-3
+    author: hkasch (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              primaryKey: true
+              primaryKeyName: feedbackPK
+            name: id
+            type: UUID
+        - column:
+            name: column_end
+            type: INT
+        - column:
+            name: column_start
+            type: INT
+        - column:
+            name: line_end
+            type: INT
+        - column:
+            name: line_start
+            type: INT
+        - column:
+            name: path
+            type: CLOB
+        - column:
+            name: long_description
+            type: CLOB
+        - column:
+            name: severity
+            type: VARCHAR(255)
+        - column:
+            name: group
+            type: VARCHAR(255)
+        - column:
+            name: status
+            type: VARCHAR(255)
+        - column:
+            name: summary
+            type: CLOB
+        - column:
+            constraints:
+              nullable: false
+            name: evaluation_step_id
+            type: UUID
+        tableName: feedback
+- changeSet:
+    id: 1579009649623-4
+    author: hkasch (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: evaluation_step_id
+        baseTableName: feedback
+        constraintName: FKmuuh0729inibufcu9asa0ku3h
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: evaluation_step
+        validate: true
+- changeSet:
+    id: 1579009649623-5
+    author: hkasch (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: evaluation_id
+        baseTableName: evaluation_step
+        constraintName: FKoeri6ot04bl9lxnci3b7jodmh
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: evaluation
+        validate: true
+- changeSet:
+    id: 1579009649623-6
+    author: hkasch (generated)
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: evaluation_results
+        constraintName: FKn65egalaw246m7s5okokt7c1o
+- changeSet:
+    id: 1579009649623-7
+    author: hkasch (generated)
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: evaluation_results
+        constraintName: FKrb1adly8d9i1a2d7xt68r0vq2
+- changeSet:
+    id: 1579009649623-8
+    author: hkasch (generated)
+    changes:
+    - dropUniqueConstraint:
+        constraintName: uk_2jr2j4nm71t0ky7fb2dpfghbp
+        tableName: evaluation_results
+- changeSet:
+    id: 1579009649623-9
+    author: hkasch (generated)
+    changes:
+    - dropTable:
+        tableName: evaluation_result
+- changeSet:
+    id: 1579009649623-10
+    author: hkasch (generated)
+    changes:
+    - dropTable:
+        tableName: evaluation_results
+
+

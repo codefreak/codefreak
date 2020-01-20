@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.code_freak.codefreak.entity.Answer
+import de.code_freak.codefreak.entity.Feedback
+import de.code_freak.codefreak.entity.Feedback.FileContext
+import de.code_freak.codefreak.entity.Feedback.Severity
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.evaluation.EvaluationRunner
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,6 +16,19 @@ import org.springframework.stereotype.Component
 
 @Component
 class CodeclimateRunner : EvaluationRunner {
+  companion object {
+    /**
+     * Map from CodeClimate severities to Feedback severity
+     * https://github.com/codeclimate/spec/blob/master/SPEC.md#data-types
+     */
+    private val CODECLIMATE_SEVERITY_MAP: Map<String, Severity> = mapOf(
+        "info" to Severity.INFO,
+        "minor" to Severity.MINOR,
+        "major" to Severity.MAJOR,
+        "critical" to Severity.CRITICAL,
+        "blocker" to Severity.CRITICAL
+    )
+  }
 
   @Autowired
   private lateinit var containerService: ContainerService
@@ -21,31 +37,40 @@ class CodeclimateRunner : EvaluationRunner {
     return "codeclimate"
   }
 
-  override fun run(answer: Answer, options: Map<String, Any>): String {
-    return containerService.runCodeclimate(answer)
-  }
-
-  override fun parseResultContent(content: ByteArray): Any {
-    val mapper = ObjectMapper()
-    val results = mapper.readValue(content, Array<Result>::class.java)
-    return Content(results.filterIsInstance<Issue>())
-  }
-
-  override fun getSummary(content: Any): Any {
-    return Summary((content as Content).issues)
-  }
-
-  private class Content(val issues: List<Issue>)
-
-  private data class Summary(val issues: List<Issue>) {
-    override fun toString(): String {
-      return "${issues.size} issues" + if (issues.isNotEmpty()) {
-        val groups = issues.groupBy { i -> i.severity ?: "unknown" }
-            .map { "${it.value.size} ${it.key}" }
-            .joinToString (", ")
-        " ($groups)"
-      } else ""
+  override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
+    var codeclimateJson = containerService.runCodeclimate(answer)
+    return this.parseCodeclimateJson(codeclimateJson).map { issue ->
+      Feedback(issue.description).apply {
+        group = "${issue.engine_name}/${issue.check_name}"
+        longDescription = issue.content?.body?.toByteArray()
+        status = Feedback.Status.FAILED
+        severity = CODECLIMATE_SEVERITY_MAP[issue.severity]
+        fileContext = FileContext(
+            issue.location.path,
+            lineStart = issue.location.lines.begin,
+            lineEnd = issue.location.lines.end
+        )
+      }
     }
+  }
+
+  override fun summarize(feedbackList: List<Feedback>): String {
+    // summarize by counting items each severity group
+    val severityCount = feedbackList.groupingBy { it.severity!! }.eachCount()
+    return severityCount.toSortedMap()
+        .map { (severity, count) -> "${count}x ${severity.name.toLowerCase()}" }
+        .joinToString(" / ")
+  }
+
+  private fun parseCodeclimateJson(content: String): List<Issue> {
+    var json = content
+    // codeclimate may print a message before the actual JSON
+    if (!json.startsWith("[")) {
+      json = json.drop(content.indexOfFirst { it == '\n' } + 1)
+    }
+    val mapper = ObjectMapper()
+    val results = mapper.readValue(json, Array<Result>::class.java)
+    return results.filterIsInstance<Issue>()
   }
 
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -54,16 +79,16 @@ class CodeclimateRunner : EvaluationRunner {
       Type(value = Measurement::class, name = "measurement")
   )
   @JsonIgnoreProperties(ignoreUnknown = true)
-  private open class Result {
+  open class Result {
     var engine_name = ""
   }
 
-  private class Measurement : Result() {
+  class Measurement : Result() {
     var value = 0
     var name = ""
   }
 
-  private class Issue : Result() {
+  class Issue : Result() {
     var description = ""
     var check_name = ""
     var content: Content? = null
@@ -72,17 +97,17 @@ class CodeclimateRunner : EvaluationRunner {
     var severity: String? = null
     var fingerprint: String? = null
 
-    private class Content {
+    class Content {
       var body = ""
     }
 
     // TODO support other location formats (needs custom deserializer)
     //      see https://github.com/codeclimate/spec/blob/master/SPEC.md#locations
-    private class Location {
+    class Location {
       var path = ""
       var lines = Lines()
 
-      private class Lines {
+      class Lines {
         var begin = 0
         var end = 0
       }

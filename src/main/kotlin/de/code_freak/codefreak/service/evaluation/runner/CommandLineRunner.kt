@@ -1,7 +1,7 @@
 package de.code_freak.codefreak.service.evaluation.runner
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.code_freak.codefreak.entity.Answer
+import de.code_freak.codefreak.entity.Feedback
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.ExecResult
 import de.code_freak.codefreak.service.evaluation.EvaluationRunner
@@ -12,25 +12,28 @@ import java.io.InputStream
 @Component
 class CommandLineRunner : EvaluationRunner {
 
-  data class Execution(val command: String, val result: ExecResult) {
-    private constructor() : this ("", ExecResult("", 0))
-  }
-
-  private data class Summary(val total: Int, val passed: Int) {
-    override fun toString() = "$passed/$total"
-  }
+  data class Execution(val command: String, val result: ExecResult)
 
   @Autowired
   private lateinit var containerService: ContainerService
 
-  private val mapper = ObjectMapper()
+  override fun getName() = "commandline"
 
-  override fun getName(): String {
-    return "commandline"
+  override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
+    return executeCommands(answer, options, null).map { execution ->
+      Feedback(execution.command).apply {
+        longDescription = execution.result.output.toByteArray()
+        status = if (execution.result.exitCode == 0L) Feedback.Status.SUCCESS else Feedback.Status.FAILED
+      }
+    }
   }
 
-  override fun run(answer: Answer, options: Map<String, Any>): String {
-    return mapper.writeValueAsString(executeCommands(answer, options, null))
+  override fun summarize(feedbackList: List<Feedback>): String {
+    return if (feedbackList.any { feedback -> feedback.isFailed }) {
+      "FAILED"
+    } else {
+      "OK"
+    }
   }
 
   protected fun executeCommands(answer: Answer, options: Map<String, Any>, processFiles: ((InputStream) -> Unit)?): List<Execution> {
@@ -41,15 +44,5 @@ class CommandLineRunner : EvaluationRunner {
 
     return containerService.runCommandsForEvaluation(answer, image, projectPath, commands.toList(), stopOnFail, processFiles)
         .mapIndexed { index, result -> Execution(commands[index], result) }
-  }
-
-  override fun parseResultContent(content: ByteArray): Any {
-    return mapper.readValue(content, Array<Execution>::class.java)
-  }
-
-  override fun getSummary(content: Any): Any {
-    return (content as Array<Execution>).let { results ->
-      Summary(results.size, results.filter { it.result.exitCode == 0L }.size)
-    }
   }
 }
