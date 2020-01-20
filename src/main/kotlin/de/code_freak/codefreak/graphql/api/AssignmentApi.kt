@@ -5,6 +5,7 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.graphql.ServiceAccess
 import de.code_freak.codefreak.service.AssignmentService
@@ -29,7 +30,9 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, @GraphQLIgnore val se
   val closed = entity.closed
   val tasks by lazy { entity.tasks.map { TaskDto(it, serviceAccess) } }
 
+  val submissionCsvUrl = FrontendUtil.getUriBuilder().path("/assignments/$id/submissions.csv").build().toUriString()
   val submissions by lazy {
+    Authorization.requireAuthority(Authority.ROLE_TEACHER)
     serviceAccess.getService(SubmissionService::class)
         .findSubmissionsOfAssignment(id)
         .map { SubmissionDto(it, serviceAccess) }
