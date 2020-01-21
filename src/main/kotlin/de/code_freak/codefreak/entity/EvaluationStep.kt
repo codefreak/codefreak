@@ -1,10 +1,12 @@
 package de.code_freak.codefreak.entity
 
 import javax.persistence.CascadeType
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
+import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 
@@ -31,6 +33,8 @@ class EvaluationStep(
    * Optional summary for the step result
    * Also useful to give more information about failures
    */
+  @Column(length = 1048576)
+  @Lob()
   var summary: String? = null
 
   fun addFeedback(feedback: Feedback) {

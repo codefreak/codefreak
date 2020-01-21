@@ -22,7 +22,7 @@ class CommandLineRunner : EvaluationRunner {
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     return executeCommands(answer, options, null).map { execution ->
       Feedback(execution.command).apply {
-        longDescription = execution.result.output.toByteArray()
+        longDescription = execution.result.output
         status = if (execution.result.exitCode == 0L) Feedback.Status.SUCCESS else Feedback.Status.FAILED
       }
     }

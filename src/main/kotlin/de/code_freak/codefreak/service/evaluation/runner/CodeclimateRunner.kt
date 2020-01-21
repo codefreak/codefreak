@@ -42,7 +42,7 @@ class CodeclimateRunner : EvaluationRunner {
     return this.parseCodeclimateJson(codeclimateJson).map { issue ->
       Feedback(issue.description).apply {
         group = "${issue.engine_name}/${issue.check_name}"
-        longDescription = issue.content?.body?.toByteArray()
+        longDescription = issue.content?.body
         status = Feedback.Status.FAILED
         severity = CODECLIMATE_SEVERITY_MAP[issue.severity]
         fileContext = FileContext(

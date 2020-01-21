@@ -24,7 +24,7 @@ databaseChangeLog:
             type: VARCHAR(255)
         - column:
             name: summary
-            type: CLOB
+            type: CLOB(1048576)
         - column:
             constraints:
               nullable: false
@@ -60,7 +60,7 @@ databaseChangeLog:
             type: CLOB
         - column:
             name: long_description
-            type: CLOB
+            type: CLOB(1048576)
         - column:
             name: severity
             type: VARCHAR(255)
@@ -72,7 +72,7 @@ databaseChangeLog:
             type: VARCHAR(255)
         - column:
             name: summary
-            type: CLOB
+            type: CLOB(1048576)
         - column:
             constraints:
               nullable: false
