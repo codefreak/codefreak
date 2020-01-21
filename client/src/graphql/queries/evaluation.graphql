@@ -6,7 +6,16 @@ query GetEvaluationOverview($answerId: ID!) {
       createdAt
     }
     pendingEvaluation {
-      inQueue
+      status
+    }
+  }
+}
+
+query GetPendingEvaluation($answerId: ID!) {
+  answer(id: $answerId) {
+    id
+    pendingEvaluation {
+      status
     }
   }
 }

@@ -16,7 +16,9 @@ import de.code_freak.codefreak.graphql.SubscriptionEventPublisher
 import de.code_freak.codefreak.service.AnswerService
 import de.code_freak.codefreak.service.EvaluationDefinition
 import de.code_freak.codefreak.service.EvaluationFinishedEvent
+import de.code_freak.codefreak.service.PendingEvaluationUpdatedEvent
 import de.code_freak.codefreak.service.evaluation.EvaluationService
+import de.code_freak.codefreak.service.evaluation.PendingEvaluationStatus
 import graphql.schema.DataFetchingEnvironment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
@@ -27,7 +29,13 @@ import java.util.UUID
 @GraphQLName("PendingEvaluation")
 class PendingEvaluationDto(@GraphQLIgnore val answerEntity: Answer, ctx: ResolverContext) : BaseDto(ctx) {
   val answer by lazy { AnswerDto(answerEntity, ctx) }
-  val inQueue by lazy { serviceAccess.getService(EvaluationService::class).isEvaluationInQueue(answerEntity.id) }
+  val status by lazy {
+    if (serviceAccess.getService(EvaluationService::class).isEvaluationInQueue(answerEntity.id)) {
+      PendingEvaluationStatus.QUEUED
+    } else {
+      PendingEvaluationStatus.RUNNING
+    }
+  }
 }
 
 @GraphQLName("EvaluationStepDefinition")
@@ -52,6 +60,12 @@ class EvaluationResultDto(@GraphQLIgnore val entity: EvaluationStep, ctx: Resolv
   val error = entity.result == EvaluationStep.EvaluationStepResult.ERRORED
 }
 
+@GraphQLName("PendingEvaluationUpdatedEventDto")
+class PendingEvaluationUpdatedEventDto(event: PendingEvaluationUpdatedEvent) {
+  val answerId = event.answerId
+  val status = event.status
+}
+
 @Component
 class EvaluationMutation : BaseResolver(), Mutation {
 
@@ -68,12 +82,24 @@ class EvaluationMutation : BaseResolver(), Mutation {
 class EvaluationFinishedEventPublisher : SubscriptionEventPublisher<EvaluationFinishedEvent>()
 
 @Component
+class PendingEvaluationUpdatedEventPublisher : SubscriptionEventPublisher<PendingEvaluationUpdatedEvent>()
+
+@Component
 class EvaluationSubscription : BaseResolver(), Subscription {
 
   @Autowired
   private lateinit var evaluationFinishedEventPublisher: EvaluationFinishedEventPublisher
 
-  fun pendingEvaluationUpdated(): Flux<Int> = Flux.just(5)
+  @Autowired
+  private lateinit var pendingEvaluationUpdatedEventPublisher: PendingEvaluationUpdatedEventPublisher
+
+  fun pendingEvaluationUpdated(answerId: UUID, env: DataFetchingEnvironment): Flux<PendingEvaluationUpdatedEventDto> = context(env) {
+    val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
+    authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
+    pendingEvaluationUpdatedEventPublisher.eventStream
+        .filter { it.answerId == answerId }
+        .map { PendingEvaluationUpdatedEventDto(it) }
+  }
 
   fun evaluationFinished(env: DataFetchingEnvironment): Flux<EvaluationDto> = context(env) {
     evaluationFinishedEventPublisher.eventStream
