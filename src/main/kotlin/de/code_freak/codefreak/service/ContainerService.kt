@@ -63,8 +63,18 @@ class ContainerService : BaseService() {
     pullDockerImages(listOf(config.ide.image, config.evaluation.codeclimate.image))
   }
 
+  /**
+   * Inherit behaviour of the standard Docker CLI and fallback to :latest if no tag is given
+   */
+  fun normalizeImageName(imageName: String) =
+      if (imageName.contains(':')) {
+        imageName
+      } else {
+        "$imageName:latest"
+      }
+
   fun pullDockerImages(images: List<String>) {
-    for (image in images) {
+    for (image in images.map(this::normalizeImageName)) {
       val imageInfo = try {
         docker.inspectImage(image)
       } catch (e: ImageNotFoundException) {
@@ -202,7 +212,7 @@ class ContainerService : BaseService() {
     builder.configure()
 
     builder.containerConfig {
-      image(image)
+      image(normalizeImageName(image))
     }
     builder.labels += mapOf(
         LABEL_INSTANCE_ID to config.instanceId
