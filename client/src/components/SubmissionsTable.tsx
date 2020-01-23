@@ -1,7 +1,19 @@
-import { Button, Col, Icon, Input, Row, Table } from 'antd'
+import {
+  Button,
+  Col,
+  Dropdown,
+  Icon,
+  Input,
+  Menu,
+  Row,
+  Table,
+  Typography
+} from 'antd'
 import React, { ChangeEvent, useState } from 'react'
-import { GetAssignmentWithSubmissionsQueryResult } from '../generated/graphql'
-import ArchiveDownload from './ArchiveDownload'
+import {
+  EvaluationStepResult,
+  GetAssignmentWithSubmissionsQueryResult
+} from '../generated/graphql'
 import './SubmissionsTable.less'
 
 type Assignment = NonNullable<
@@ -12,6 +24,7 @@ type Answer = Submission['answers'][number]
 type Task = Assignment['tasks'][number]
 
 const { Column } = Table
+const { Text } = Typography
 
 const alphabeticSorter = (
   extractProperty: (x: Submission) => string | null | undefined
@@ -98,7 +111,23 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
         sorter={alphabeticSorter(submission => submission.user.username)}
       />
       {renderTaskColumnGroups(assignment.tasks)}
+      <Column render={renderActions(assignment)} />
     </Table>
+  )
+}
+
+const renderActions = (assignment: Assignment) => (submission: Submission) => {
+  const actionDropdown = (
+    <Menu>
+      {assignment.tasks.map(task => (
+        <Menu.Item key={task.id}>{task.title}</Menu.Item>
+      ))}
+    </Menu>
+  )
+  return (
+    <Dropdown overlay={actionDropdown} placement="bottomRight">
+      <Button icon="more" title="Actions" />
+    </Dropdown>
   )
 }
 
@@ -108,14 +137,61 @@ const getAnswerFromSubmission = (
 ): Answer | undefined =>
   submission.answers.find(candidate => candidate.task.id === task.id)
 
-const renderSubmissionDownload = (task: Task, submission: Submission) => {
+const renderAnswer = (task: Task, submission: Submission) => {
   const answer = getAnswerFromSubmission(submission, task)
 
   if (answer === undefined) {
-    return <Icon type="stop" title="No answer" />
+    return <Icon type="stop" title="No answer" className="no-answer" />
   }
 
-  return <ArchiveDownload url={answer.sourceUrl} />
+  if (!answer.latestEvaluation) {
+    return <Icon type="question-circle" />
+  }
+
+  if (
+    answer.latestEvaluation.stepsResultSummary === EvaluationStepResult.Success
+  ) {
+    return <Icon type="check-circle" />
+  }
+
+  // count the number of successful evaluation steps
+  const successCount = answer.latestEvaluation.steps.reduce(
+    (n, result) => (result.result === EvaluationStepResult.Success ? n + 1 : n),
+    0
+  )
+
+  return (
+    <Text type="warning">
+      <Icon type="exclamation-circle" />
+      <span className="evaluation-summary">
+        {successCount}/{task.evaluationSteps.length}
+      </span>
+    </Text>
+  )
+}
+
+// TODO: Multiple filters are not working. filterValues is always a single value
+const buildEvaluationFilter = (task: Task) => (
+  filterValue: string,
+  submission: Submission
+) => {
+  const answer = getAnswerFromSubmission(submission, task)
+  const latestEvaluation = answer ? answer.latestEvaluation : null
+  switch (filterValue) {
+    case 'successful':
+      return (
+        !!latestEvaluation &&
+        latestEvaluation.stepsResultSummary === EvaluationStepResult.Success
+      )
+    case 'failed':
+      return (
+        !!latestEvaluation &&
+        latestEvaluation.stepsResultSummary === EvaluationStepResult.Failed
+      )
+    case 'no-answer':
+    default:
+      return !answer || !latestEvaluation
+  }
 }
 
 const renderTaskColumnGroups = (tasks: Task[]) => {
@@ -124,11 +200,17 @@ const renderTaskColumnGroups = (tasks: Task[]) => {
   return tasks.map(task => {
     return (
       <Column
-        key="download"
+        key={`task-${task.id}`}
         width={`${width}%`}
         title={task.title}
         align="center"
-        render={renderSubmissionDownload.bind(undefined, task)}
+        filters={[
+          { text: 'Successful', value: 'successful' },
+          { text: 'Failed', value: 'failed' },
+          { text: 'No answer', value: 'no-answer' }
+        ]}
+        onFilter={buildEvaluationFilter(task)}
+        render={renderAnswer.bind(undefined, task)}
       />
     )
   })

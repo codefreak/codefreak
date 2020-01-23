@@ -23,10 +23,7 @@ query GetAssignmentWithSubmissions($id: ID!) {
     submissions {
       id
       user {
-        id
-        username
-        firstName
-        lastName
+        ...publicUserFields
       }
       answers {
         id
@@ -34,6 +31,18 @@ query GetAssignmentWithSubmissions($id: ID!) {
         task {
           id
           title
+        }
+        latestEvaluation {
+          id
+          createdAt
+          stepsResultSummary
+          steps {
+            id
+            position
+            runnerName
+            result
+            summary
+          }
         }
       }
     }
