@@ -38,7 +38,7 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
         result.refetch()
         break
     }
-  }, [pendingEvaluation, setStep])
+  }, [pendingEvaluation, setStep, result])
 
   useEffect(() => {
     if (result.data && !result.data.answer.latestEvaluation) {
