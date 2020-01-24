@@ -1,0 +1,18 @@
+subscription EvaluationFinished {
+  evaluationFinished {
+    id
+    answer {
+      id
+      task {
+        id
+        title
+      }
+    }
+  }
+}
+
+subscription PendingEvaluationUpdated($answerId: ID!) {
+  pendingEvaluationUpdated(answerId: $answerId) {
+    status
+  }
+}

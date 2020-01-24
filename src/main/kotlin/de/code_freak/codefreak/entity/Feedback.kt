@@ -1,14 +1,18 @@
 package de.code_freak.codefreak.entity
 
+import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.Lob
 import javax.persistence.ManyToOne
 
 @Entity
 class Feedback(
+  @Column(length = 1048576)
+  @Lob()
   var summary: String
 ) : BaseEntity() {
   @ManyToOne(optional = false)
@@ -23,7 +27,10 @@ class Feedback(
   /**
    * Longer description of the result.
    * Should be more precise than the summary or explain how to fix the problem.
+   * Limit is set to 1MiB
    */
+  @Column(length = 1048576)
+  @Lob()
   var longDescription: String? = null
 
   /**

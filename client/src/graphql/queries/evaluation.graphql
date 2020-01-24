@@ -1,0 +1,21 @@
+query GetEvaluationOverview($answerId: ID!) {
+  answer(id: $answerId) {
+    id
+    latestEvaluation {
+      id
+      createdAt
+    }
+    pendingEvaluation {
+      status
+    }
+  }
+}
+
+query GetPendingEvaluation($answerId: ID!) {
+  answer(id: $answerId) {
+    id
+    pendingEvaluation {
+      status
+    }
+  }
+}

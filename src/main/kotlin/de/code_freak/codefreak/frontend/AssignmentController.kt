@@ -68,7 +68,7 @@ class AssignmentController : BaseController() {
       TaskInfo(
           task = it,
           answerId = answerId,
-          evaluationRunning = if (answerId == null) false else evaluationService.isEvaluationRunningOrQueued(answerId),
+          evaluationRunning = if (answerId == null) false else evaluationService.isEvaluationPending(answerId),
           latestEvaluation = if (answerId == null) null else latestEvaluations[answerId]?.orElse(null),
           evaluationUpToDate = answerId?.let { evaluationService.isEvaluationUpToDate(answerId) } ?: false,
           ideRunning = answerId != null && containerService.isIdeContainerRunning(answerId)
@@ -120,7 +120,7 @@ class AssignmentController : BaseController() {
         .toMap()
 
     val upToDate = evaluationViewModels.none { entry -> !entry.value.isPresent || !evaluationService.isEvaluationUpToDate(entry.key) }
-    val runningEvaluations = evaluationViewModels.filter { evaluationService.isEvaluationRunningOrQueued(it.key) }.map { it.key }
+    val runningEvaluations = evaluationViewModels.filter { evaluationService.isEvaluationPending(it.key) }.map { it.key }
 
     model.addAttribute("upToDate", upToDate)
     model.addAttribute("assignment", assignment)

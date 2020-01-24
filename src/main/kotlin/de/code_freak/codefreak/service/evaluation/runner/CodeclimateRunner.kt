@@ -38,7 +38,7 @@ class CodeclimateRunner : EvaluationRunner {
   }
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
-    val codeclimateJson = containerService.runCodeclimate(answer)
+    var codeclimateJson = containerService.runCodeclimate(answer)
     return this.parseCodeclimateJson(codeclimateJson).map { issue ->
       Feedback(issue.description).apply {
         group = "${issue.engine_name}/${issue.check_name}"
@@ -63,8 +63,13 @@ class CodeclimateRunner : EvaluationRunner {
   }
 
   private fun parseCodeclimateJson(content: String): List<Issue> {
+    var json = content
+    // codeclimate may print a message before the actual JSON
+    if (!json.startsWith("[")) {
+      json = json.drop(content.indexOfFirst { it == '\n' } + 1)
+    }
     val mapper = ObjectMapper()
-    val results = mapper.readValue(content, Array<Result>::class.java)
+    val results = mapper.readValue(json, Array<Result>::class.java)
     return results.filterIsInstance<Issue>()
   }
 

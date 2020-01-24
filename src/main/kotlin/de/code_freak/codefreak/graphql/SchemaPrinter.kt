@@ -14,6 +14,7 @@ import org.springframework.context.annotation.ComponentScan
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
+import kotlin.system.exitProcess
 
 @ImportAutoConfiguration(SchemaAutoConfiguration::class)
 @ComponentScan("de.code_freak.codefreak.graphql")
@@ -31,6 +32,7 @@ class SchemaPrinter : CommandLineRunner {
     BufferedWriter(FileWriter(file)).use {
       it.write(schema.print())
     }
+    exitProcess(0)
   }
 }
 
