@@ -19,7 +19,7 @@ interface Task extends EntityWithTitle {
 const forTask = (task: Task) => {
   const base = task.assignment
     ? forAssignment(task.assignment)
-    : [{ path: BASE_PATHS.Task, breadcrumbName: 'Task Pool' }]
+    : [{ path: BASE_PATHS.Task + '/pool', breadcrumbName: 'Task Pool' }]
   return [...base, { path: getEntityPath(task), breadcrumbName: task.title }]
 }
 

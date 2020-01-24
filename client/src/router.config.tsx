@@ -30,15 +30,15 @@ export const routerConfig: Route = {
       ]
     },
     {
-      path: '/tasks/:id',
-      component: TaskPage
-    },
-    {
-      path: '/tasks',
+      path: '/tasks/pool',
       name: 'Task Pool',
       icon: 'file-text',
       component: TaskPoolPage,
       authority: AUTHORITIES.ROLE_TEACHER
+    },
+    {
+      path: '/tasks/:id',
+      component: TaskPage
     },
     {
       path: '/admin',
