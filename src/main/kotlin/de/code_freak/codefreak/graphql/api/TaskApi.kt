@@ -67,8 +67,8 @@ class TaskQuery : BaseResolver(), Query {
   @Transactional
   @Secured(Authority.ROLE_TEACHER)
   fun taskPool() = context {
-    serviceAccess.getService(TaskService::class).
-        getTaskPool(authorization.currentUser.id)
+    serviceAccess.getService(TaskService::class)
+        .getTaskPool(authorization.currentUser.id)
         .map { TaskDto(it, this) }
   }
 }
