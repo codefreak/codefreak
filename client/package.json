@@ -23,6 +23,7 @@
     "apollo-client": "^2.6.8",
     "apollo-link": "^1.2.13",
     "apollo-link-error": "^1.1.12",
+    "apollo-link-ws": "^1.0.19",
     "apollo-upload-client": "^12.1.0",
     "craco-antd": "^1.14.1",
     "graphql": "^14.5.8",
@@ -35,6 +36,7 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0",
     "short-uuid": "^3.1.1",
+    "subscriptions-transport-ws": "^0.9.16",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-react": "^4.1.0",
@@ -68,6 +70,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "http://localhost:8080"
+  }
 }

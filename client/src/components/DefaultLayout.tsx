@@ -4,6 +4,7 @@ import { Route } from 'antd/lib/breadcrumb/Breadcrumb'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Authority } from '../hooks/useHasAuthority'
+import useSubscribeToGlobalEvents from '../hooks/useSubscribeToGlobalEvents'
 import { routerConfig } from '../router.config'
 import Authorized from './Authorized'
 import RightHeader from './RightHeader'
@@ -30,6 +31,8 @@ interface DefaultLayoutProps {
 
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
   useLocation() // somehow this is needed for 'active navigation item' to work correctly 🤔
+
+  useSubscribeToGlobalEvents()
 
   const renderRightHeader = () => <RightHeader logout={logout} />
 

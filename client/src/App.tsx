@@ -25,8 +25,10 @@ import {
 } from './services/codefreak-api'
 import { messageService } from './services/message'
 import { displayName } from './services/user'
+import { noop } from './services/util'
 
-const App: React.FC = () => {
+const App: React.FC<{ onUserChanged?: () => void }> = props => {
+  const onUserChanged = props.onUserChanged || noop
   const [authenticatedUser, setAuthenticatedUser] = useState<
     AuthenticatedUser
   >()
@@ -48,8 +50,9 @@ const App: React.FC = () => {
     if (logoutSucceeded) {
       messageService.success('Successfully signed out. Goodbye 👋')
       setAuthenticatedUser(undefined)
+      onUserChanged()
     }
-  }, [logoutSucceeded])
+  }, [logoutSucceeded, onUserChanged])
 
   // make sure to delete cached data after login/logout
   useEffect(() => {
@@ -68,6 +71,7 @@ const App: React.FC = () => {
     const onLogin = (user: AuthenticatedUser) => {
       messageService.success(`Welcome back, ${displayName(user)}!`)
       setAuthenticatedUser(user)
+      onUserChanged()
     }
     return <LoginPage onSuccessfulLogin={onLogin} />
   }

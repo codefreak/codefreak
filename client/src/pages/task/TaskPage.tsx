@@ -6,6 +6,7 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import IdeButton from '../../components/IdeButton'
 import SetTitle from '../../components/SetTitle'
+import StartEvaluationButton from '../../components/StartEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import {
@@ -15,6 +16,7 @@ import {
 } from '../../services/codefreak-api'
 import { createRoutes } from '../../services/custom-breadcrump'
 import AnswerPage from '../answer/AnswerPage'
+import EvaluationPage from '../evaluation/EvaluationPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 
@@ -69,12 +71,15 @@ const TaskPage: React.FC = () => {
   }
 
   const extra = answer ? (
-    <IdeButton answer={answer} size="large" type="primary" />
+    <>
+      <IdeButton answer={answer} size="large" />
+      <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
+    </>
   ) : (
     <Button
-      type="primary"
       icon="rocket"
       size="large"
+      type="primary"
       onClick={onCreateAnswer}
       loading={creatingAnswer}
     >
@@ -97,6 +102,9 @@ const TaskPage: React.FC = () => {
         <Route exact path={path} component={TaskDetailsPage} />
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
+        </Route>
+        <Route path={`${path}/evaluation`}>
+          {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route component={NotFoundPage} />
       </Switch>

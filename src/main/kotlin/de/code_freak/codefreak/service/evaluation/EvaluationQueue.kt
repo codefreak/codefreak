@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.service.evaluation
 
 import de.code_freak.codefreak.config.EvaluationConfiguration
+import de.code_freak.codefreak.service.PendingEvaluationUpdatedEvent
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.ExitStatus
@@ -14,6 +15,7 @@ import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.batch.core.launch.JobOperator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationStartedEvent
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.Date
@@ -35,6 +37,9 @@ class EvaluationQueue : StepExecutionListener {
 
   @Autowired
   private lateinit var jobOperator: JobOperator
+
+  @Autowired
+  private lateinit var eventPublisher: ApplicationEventPublisher
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -67,6 +72,7 @@ class EvaluationQueue : StepExecutionListener {
     log.debug("Queuing evaluation for answer $answerId")
     queuedEvaluations.add(answerId)
     jobLauncher.run(job, params)
+    eventPublisher.publishEvent(PendingEvaluationUpdatedEvent(answerId, PendingEvaluationStatus.QUEUED))
   }
 
   override fun beforeStep(stepExecution: StepExecution) {
@@ -74,6 +80,7 @@ class EvaluationQueue : StepExecutionListener {
       stepExecution.jobParameters.answerId?.let {
         queuedEvaluations.remove(it)
         runningEvaluations.add(it)
+        eventPublisher.publishEvent(PendingEvaluationUpdatedEvent(it, PendingEvaluationStatus.RUNNING))
       }
     }
   }
@@ -82,6 +89,7 @@ class EvaluationQueue : StepExecutionListener {
     if (stepExecution.stepName == EvaluationConfiguration.STEP_NAME) {
       stepExecution.jobParameters.answerId?.let {
         runningEvaluations.remove(it)
+        eventPublisher.publishEvent(PendingEvaluationUpdatedEvent(it, PendingEvaluationStatus.FINISHED))
       }
     }
     return null
