@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.lang.IllegalArgumentException
 import java.util.UUID
 
 @Service
@@ -45,12 +46,15 @@ class AnswerService : BaseService() {
   fun findAnswer(answerId: UUID): Answer = answerRepository.findById(answerId).orElseThrow { EntityNotFoundException("Answer not found.") }
 
   @Transactional
-  fun findOrCreateAnswer(taskId: UUID, user: User): Answer =
-      submissionService.findOrCreateSubmission(taskService.findTask(taskId).assignment.id, user)
-          .let { it.getAnswer(taskId) ?: createAnswer(it, taskId) }
+  fun findOrCreateAnswer(taskId: UUID, user: User): Answer {
+    val assignmentId = taskService.findTask(taskId).assignment?.id
+            ?: throw IllegalArgumentException("Task is not part of an assignment")
+    return submissionService.findOrCreateSubmission(assignmentId, user)
+        .let { it.getAnswer(taskId) ?: createAnswer(it, taskId) }
+  }
 
   fun setFiles(answer: Answer): OutputStream {
-    answer.task.assignment.requireNotClosed()
+    answer.task.assignment?.requireNotClosed()
     return fileService.writeCollectionTar(answer.id).afterClose { containerService.answerFilesUpdated(answer.id) }
   }
 

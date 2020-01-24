@@ -54,7 +54,7 @@ class AssignmentService : BaseService() {
       TarUtil.extractSubdirectory(ByteArrayInputStream(content), taskContent, it)
       try {
         self.withNewTransaction {
-          taskService.createFromTar(taskContent.toByteArray(), assignment, index.toLong()).let {
+          taskService.createFromTar(taskContent.toByteArray(), assignment, owner, index.toLong()).let {
             assignment.tasks.add(it)
           }
         }

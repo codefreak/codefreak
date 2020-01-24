@@ -130,8 +130,9 @@ class TaskController : BaseController() {
    * Returns the submission for the given task or creates one if there is none already.
    */
   fun getOrCreateSubmissionForTask(taskId: UUID): Submission {
-    val assignmentId = taskService.findTask(taskId).assignment.id
-    return super.getOrCreateSubmission(assignmentId)
+    throw RuntimeException()
+//    val assignmentId = taskService.findTask(taskId).assignment.id
+//    return super.getOrCreateSubmission(assignmentId)
   }
 
   @RestHandler
@@ -156,7 +157,7 @@ class TaskController : BaseController() {
       TarUtil.writeUploadAsTar(file, out)
       val task = taskService.updateFromTar(out.toByteArray(), taskId)
       model.successMessage("Task '${task.title}' has been updated.")
-      "redirect:" + urls.get(task.assignment)
+      "redirect:"// + urls.get(task.assignment)
     }
   }
 }
