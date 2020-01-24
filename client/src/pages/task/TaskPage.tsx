@@ -45,10 +45,15 @@ const TaskPage: React.FC = () => {
   }
 
   const { task } = result.data
+  const pool = !task.assignment
+
+  const answerTab = pool
+    ? []
+    : [{ key: '/answer', tab: 'Answer', disabled: !answer }]
 
   const tabs = [
     { key: '', tab: 'Task' },
-    { key: '/answer', tab: 'Answer', disabled: !answer },
+    ...answerTab,
     {
       key: '/evaluation',
       disabled: !answer,
@@ -70,7 +75,7 @@ const TaskPage: React.FC = () => {
     }
   }
 
-  const extra = answer ? (
+  const extra = pool ? null : answer ? (
     <>
       <IdeButton answer={answer} size="large" />
       <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
