@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface TaskRepository : CrudRepository<Task, UUID>
+interface TaskRepository : CrudRepository<Task, UUID> {
+  fun findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(ownerId: UUID): Collection<Task>
+}

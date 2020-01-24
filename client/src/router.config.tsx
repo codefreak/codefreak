@@ -5,6 +5,7 @@ import AssignmentListPage from './pages/assignment/AssignmentListPage'
 import AssignmentPage from './pages/assignment/AssignmentPage'
 import CreateAssignmentPage from './pages/assignment/CreateAssignmentPage'
 import TaskPage from './pages/task/TaskPage'
+import TaskPoolPage from './pages/task/TaskPoolPage'
 
 export const routerConfig: Route = {
   path: '/',
@@ -31,6 +32,13 @@ export const routerConfig: Route = {
     {
       path: '/tasks/:id',
       component: TaskPage
+    },
+    {
+      path: '/tasks',
+      name: 'Task Pool',
+      icon: 'file-text',
+      component: TaskPoolPage,
+      authority: AUTHORITIES.ROLE_TEACHER
     },
     {
       path: '/admin',

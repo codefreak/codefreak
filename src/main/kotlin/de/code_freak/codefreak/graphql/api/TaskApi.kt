@@ -63,4 +63,12 @@ class TaskQuery : BaseResolver(), Query {
     val taskService = serviceAccess.getService(TaskService::class)
     TaskDto(taskService.findTask(id), this)
   }
+
+  @Transactional
+  @Secured(Authority.ROLE_TEACHER)
+  fun taskPool() = context {
+    serviceAccess.getService(TaskService::class).
+        getTaskPool(authorization.currentUser.id)
+        .map { TaskDto(it, this) }
+  }
 }

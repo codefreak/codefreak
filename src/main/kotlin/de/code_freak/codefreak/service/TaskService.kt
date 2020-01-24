@@ -47,4 +47,6 @@ class TaskService : BaseService() {
   }
 
   fun getTaskDefinition(taskId: UUID) = fileService.readCollectionTar(taskId).use { getYamlDefinition<TaskDefinition>(it) }
+
+  fun getTaskPool(userId: UUID) = taskRepository.findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(userId)
 }
