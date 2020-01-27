@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -46,15 +45,5 @@ class AnswerController : BaseController() {
     fileService.readCollectionTar(answer.id).use {
       return download("${answer.submission.user.username}_${answer.task.title}.tar", it)
     }
-  }
-
-  @Secured(Authority.ROLE_TEACHER)
-  @GetMapping("/{answerId}/ide")
-  fun teacherView(@PathVariable("answerId") answerId: UUID, model: Model): String {
-    val answer = answerService.findAnswer(answerId)
-    containerService.startIdeContainer(answer, readOnly = true)
-    val containerUrl = containerService.getIdeUrl(answer.id, readOnly = true)
-    model.addAttribute("ide_url", containerUrl)
-    return "ide-redirect"
   }
 }

@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.frontend
 
+import com.hsingh.shortuuid.ShortUuid
 import de.code_freak.codefreak.service.LtiService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -45,7 +46,7 @@ class LtiController : BaseController() {
     val requestJwt = ltiService.findCachedJwtClaimsSet(cachedJwtId)
     val assignment = assignmentService.findAssignment(selectedAssignmentId)
     val launchUrl = ServletUriComponentsBuilder.fromCurrentRequestUri()
-        .replacePath(urls.getLtiLaunch(assignment))
+        .replacePath("/lti/launch/" + ShortUuid.Builder().build(assignment.id))
         .toUriString()
     val responseJwt = ltiService.buildDeepLinkingResponse(requestJwt, assignment, launchUrl)
     ltiService.removeCachedJwtClaimSet(cachedJwtId)
