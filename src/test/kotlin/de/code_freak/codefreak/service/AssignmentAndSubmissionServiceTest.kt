@@ -10,7 +10,6 @@ import de.code_freak.codefreak.repository.AnswerRepository
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.SubmissionRepository
 import de.code_freak.codefreak.service.file.FileService
-import de.code_freak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.junit.Before
@@ -19,18 +18,13 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import org.springframework.core.io.ClassPathResource
-import java.io.ByteArrayOutputStream
 import java.util.Optional
 import java.util.UUID
 
 class AssignmentAndSubmissionServiceTest {
-  private val files = ByteArrayOutputStream().use {
-    TarUtil.createTarFromDirectory(ClassPathResource("util/tar-sample").file, it); it.toByteArray()
-  }
   private val assignment = Assignment("Assignment 1", User("user"), null)
-  private val task = Task(assignment, position = 0L, title = "Task 1", body = "Do stuff", weight = 100)
   private val user = User("user")
+  private val task = Task(assignment, user, position = 0L, title = "Task 1", body = "Do stuff", weight = 100)
   private val submission = Submission(user, assignment)
   private val answer = Answer(submission, task)
 

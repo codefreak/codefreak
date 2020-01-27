@@ -180,7 +180,7 @@ class ContainerService : BaseService() {
 
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
-    if (answer.task.assignment.closed) {
+    if (answer.task.assignment?.closed == true) {
       log.info("Skipped saving of files from answer ${answer.id} because assignment is closed")
       return answer
     }

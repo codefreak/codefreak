@@ -1,6 +1,8 @@
 package de.code_freak.codefreak.entity
 
+import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
+import java.time.Instant
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -12,7 +14,13 @@ class Task(
    * Related assignment this task belongs to
    */
   @ManyToOne
-  var assignment: Assignment,
+  var assignment: Assignment?,
+
+  /**
+   * The teacher who created this assignment
+   */
+  @ManyToOne
+  var owner: User,
 
   /**
    * Position/Index in the assignment (zero-based)
@@ -48,6 +56,9 @@ class Task(
    * Same like position but one-based index
    */
   val number get() = this.position.plus(1L)
+
+  @CreationTimestamp
+  var createdAt: Instant = Instant.now()
 
   override fun compareTo(other: Task) = position.compareTo(other.position)
 }

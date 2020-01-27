@@ -1,6 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Badge, Button } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -10,7 +10,6 @@ import StartEvaluationButton from '../../components/StartEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import {
-  GetTaskQueryHookResult,
   useCreateAnswerMutation,
   useGetTaskQuery
 } from '../../services/codefreak-api'
@@ -36,10 +35,15 @@ const TaskPage: React.FC = () => {
 
   const { task } = result.data
   const { answer } = task
+  const pool = !task.assignment
+
+  const answerTab = pool
+    ? []
+    : [{ key: '/answer', tab: 'Answer', disabled: !answer }]
 
   const tabs = [
     { key: '', tab: 'Task' },
-    { key: '/answer', tab: 'Answer', disabled: !answer },
+    ...answerTab,
     {
       key: '/evaluation',
       disabled: !answer,
@@ -61,7 +65,7 @@ const TaskPage: React.FC = () => {
     }
   }
 
-  const extra = answer ? (
+  const extra = pool ? null : answer ? (
     <>
       <IdeButton answer={answer} size="large" />
       <StartEvaluationButton answerId={answer.id} type="primary" size="large" />

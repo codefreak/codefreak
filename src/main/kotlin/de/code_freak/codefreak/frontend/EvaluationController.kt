@@ -56,14 +56,15 @@ class EvaluationController : BaseController() {
   @PostMapping("/evaluations")
   fun startEvaluation(@RequestParam("taskId") taskId: UUID, model: RedirectAttributes): String {
     val answer = answerService.findAnswer(taskId, user.id)
-    val assignmentPage = urls.get(answer.task.assignment)
-    return withErrorPage(assignmentPage) {
-      answer.task.assignment.requireNotClosed()
-      evaluationService.startEvaluation(answer)
-      model.successMessage("Evaluation for task '${answer.task.title}' has been placed in the queue. " +
-          "It may take some time depending on server load.")
-      "redirect:$assignmentPage"
-    }
+//    val assignmentPage = urls.get(answer.task.assignment)
+//    return withErrorPage(assignmentPage) {
+//      answer.task.assignment.requireNotClosed()
+//      evaluationService.startEvaluation(answer)
+//      model.successMessage("Evaluation for task '${answer.task.title}' has been placed in the queue. " +
+//          "It may take some time depending on server load.")
+//      "redirect:$assignmentPage"
+//    }
+    return ""
   }
 
   @GetMapping("/evaluations/{evaluationId}")

@@ -1,15 +1,25 @@
+fragment taskListItem on Task {
+  id
+  title
+  position
+  body
+}
+
 query GetTaskList($assignmentId: ID!) {
   assignment(id: $assignmentId) {
     id
     tasks {
-      id
-      title
-      position
-      body
+      ...taskListItem
       answer {
         id
       }
     }
+  }
+}
+
+query GetTaskPool {
+  taskPool {
+    ...taskListItem
   }
 }
 

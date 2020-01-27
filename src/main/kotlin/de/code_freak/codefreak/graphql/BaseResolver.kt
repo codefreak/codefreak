@@ -28,7 +28,9 @@ open class BaseResolver {
     val ctx = env.getContext<Any>()
     val authorization = if (ctx is GraphQLWebSocketContext) {
       val sessionId = ctx.handshakeRequest.headers["cookie"]
-          ?.first { it.startsWith(SESSION_COOKIE) }
+          ?.flatMap { it.split(";") }
+          ?.map { it.trim() }
+          ?.firstOrNull { it.startsWith(SESSION_COOKIE) }
           ?.drop(SESSION_COOKIE.length)
       val session = sessionId?.let { serviceAccess.getService(SessionService::class).getSession(it) } ?: Authorization.deny()
       Authorization(session.principal as User)

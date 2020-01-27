@@ -9,7 +9,6 @@ import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.RequirementRepository
 import de.code_freak.codefreak.repository.UserRepository
-import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,7 +33,6 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
   @Autowired lateinit var assignmentRepository: AssignmentRepository
   @Autowired lateinit var classroomRepository: ClassroomRepository
   @Autowired lateinit var requirementRepository: RequirementRepository
-  @Autowired lateinit var fileService: FileService
   @Autowired lateinit var taskService: TaskService
   @Autowired lateinit var assignmentService: AssignmentService
 
@@ -81,11 +79,21 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
 
     val task1 = ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
-      taskService.createFromTar(it.toByteArray(), assignment1, 0)
+      taskService.createFromTar(it.toByteArray(), assignment1, teacher, 0)
     }
     val task2 = ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
-      taskService.createFromTar(it.toByteArray(), assignment2, 0)
+      taskService.createFromTar(it.toByteArray(), assignment2, teacher, 0)
+    }
+
+    // task pool
+    ByteArrayOutputStream().use {
+      TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
+      taskService.createFromTar(it.toByteArray(), null, teacher, 0)
+    }
+    ByteArrayOutputStream().use {
+      TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
+      taskService.createFromTar(it.toByteArray(), null, teacher, 0)
     }
 
     val eval1 = Requirement(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
