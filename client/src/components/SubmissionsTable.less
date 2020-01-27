@@ -1,6 +1,40 @@
+@import '~antd/lib/style/index';
+
 .submissions-table {
   td,
   .ant-table-title {
     background: white;
+  }
+
+  .evaluation-summary {
+    display: inline-block;
+    margin-left: 5px;
+    vertical-align: text-bottom;
+  }
+
+  .no-answer {
+    opacity: 0.25;
+  }
+
+  .anticon-check-circle {
+    color: @success-color;
+  }
+
+  .evaluation-step-results {
+    .anticon {
+      margin: 0 2px;
+    }
+
+    svg[data-icon='exclamation-circle'] {
+      color: @warning-color;
+    }
+
+    svg[data-icon='check-circle'] {
+      color: @success-color;
+    }
+
+    svg[data-icon='close-circle'] {
+      color: @error-color;
+    }
   }
 }

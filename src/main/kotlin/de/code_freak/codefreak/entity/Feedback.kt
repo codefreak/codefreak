@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.entity
 
+import org.hibernate.annotations.Type
 import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.persistence.Embedded
@@ -13,6 +14,7 @@ import javax.persistence.ManyToOne
 class Feedback(
   @Column(length = 1048576)
   @Lob()
+  @Type(type = "org.hibernate.type.TextType")
   var summary: String
 ) : BaseEntity() {
   @ManyToOne(optional = false)
@@ -31,6 +33,7 @@ class Feedback(
    */
   @Column(length = 1048576)
   @Lob()
+  @Type(type = "org.hibernate.type.TextType")
   var longDescription: String? = null
 
   /**

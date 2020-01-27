@@ -1,7 +1,10 @@
-import { Button, Col, Icon, Input, Row, Table } from 'antd'
+import { Button, Col, Icon, Input, Popover, Row, Table, Tooltip } from 'antd'
 import React, { ChangeEvent, useState } from 'react'
-import { GetAssignmentWithSubmissionsQueryResult } from '../generated/graphql'
-import ArchiveDownload from './ArchiveDownload'
+import {
+  EvaluationStep,
+  EvaluationStepResult,
+  GetAssignmentWithSubmissionsQueryResult
+} from '../generated/graphql'
 import './SubmissionsTable.less'
 
 type Assignment = NonNullable<
@@ -108,14 +111,68 @@ const getAnswerFromSubmission = (
 ): Answer | undefined =>
   submission.answers.find(candidate => candidate.task.id === task.id)
 
-const renderSubmissionDownload = (task: Task, submission: Submission) => {
+const renderAnswer = (task: Task, submission: Submission) => {
   const answer = getAnswerFromSubmission(submission, task)
 
   if (answer === undefined) {
-    return <Icon type="stop" title="No answer" />
+    return (
+      <Tooltip title="No answer submitted">
+        <Icon type="stop" className="no-answer" />
+      </Tooltip>
+    )
   }
 
-  return <ArchiveDownload url={answer.sourceUrl} />
+  if (!answer.latestEvaluation) {
+    return <Icon type="question-circle" />
+  }
+
+  const renderEvaluationStepResult = ({
+    result,
+    runnerName,
+    summary
+  }: Pick<EvaluationStep, 'result' | 'runnerName' | 'summary'>) => {
+    let icon = <Icon type="exclamation-circle" />
+    if (result === EvaluationStepResult.Success) {
+      icon = <Icon type="check-circle" />
+    } else if (result === EvaluationStepResult.Errored) {
+      icon = <Icon type="close-circle" />
+    }
+    return (
+      <Popover title={runnerName} content={summary}>
+        {icon}
+      </Popover>
+    )
+  }
+
+  return (
+    <div className="evaluation-step-results">
+      {answer.latestEvaluation.steps.map(renderEvaluationStepResult)}
+    </div>
+  )
+}
+
+// TODO: Multiple filters are not working. filterValues is always a single value
+const buildEvaluationFilter = (task: Task) => (
+  filterValue: string,
+  submission: Submission
+) => {
+  const answer = getAnswerFromSubmission(submission, task)
+  const latestEvaluation = answer ? answer.latestEvaluation : null
+  switch (filterValue) {
+    case 'successful':
+      return (
+        !!latestEvaluation &&
+        latestEvaluation.stepsResultSummary === EvaluationStepResult.Success
+      )
+    case 'failed':
+      return (
+        !!latestEvaluation &&
+        latestEvaluation.stepsResultSummary === EvaluationStepResult.Failed
+      )
+    case 'no-answer':
+    default:
+      return !answer || !latestEvaluation
+  }
 }
 
 const renderTaskColumnGroups = (tasks: Task[]) => {
@@ -124,11 +181,17 @@ const renderTaskColumnGroups = (tasks: Task[]) => {
   return tasks.map(task => {
     return (
       <Column
-        key="download"
+        key={`task-${task.id}`}
         width={`${width}%`}
         title={task.title}
         align="center"
-        render={renderSubmissionDownload.bind(undefined, task)}
+        filters={[
+          { text: 'Successful', value: 'successful' },
+          { text: 'Failed', value: 'failed' },
+          { text: 'No answer', value: 'no-answer' }
+        ]}
+        onFilter={buildEvaluationFilter(task)}
+        render={renderAnswer.bind(undefined, task)}
       />
     )
   })

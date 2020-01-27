@@ -1,9 +1,13 @@
+fragment publicUserFields on User {
+  id
+  username
+  firstName
+  lastName
+}
+
 query GetAuthenticatedUser {
   me {
-    id
-    username
-    firstName
-    lastName
+    ...publicUserFields
     authorities
   }
 }

@@ -1,6 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Badge, Button } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -10,7 +10,6 @@ import StartEvaluationButton from '../../components/StartEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import {
-  GetTaskQueryHookResult,
   useCreateAnswerMutation,
   useGetTaskQuery
 } from '../../services/codefreak-api'
@@ -28,23 +27,14 @@ const TaskPage: React.FC = () => {
     variables: { id: useIdParam() }
   })
 
-  const [answer, setAnswer] = useState<
-    NonNullable<GetTaskQueryHookResult['data']>['task']['answer']
-  >()
-
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
-
-  useEffect(() => {
-    if (result.data && result.data.task.answer) {
-      setAnswer(result.data.task.answer)
-    }
-  }, [result])
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
   const { task } = result.data
+  const { answer } = task
   const pool = !task.assignment
 
   const answerTab = pool
@@ -70,8 +60,8 @@ const TaskPage: React.FC = () => {
       variables: { taskId: task.id }
     })
     if (createAnswerResult.data) {
-      setAnswer(createAnswerResult.data.createAnswer)
       subPath.set('/answer')
+      result.refetch()
     }
   }
 
