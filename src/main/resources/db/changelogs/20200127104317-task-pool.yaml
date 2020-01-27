@@ -1,0 +1,45 @@
+databaseChangeLog:
+- changeSet:
+    id: 1580118314851-2
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: created_at
+            type: timestamp
+        tableName: assignment
+- changeSet:
+    id: 1580118314851-3
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: created_at
+            type: timestamp
+        tableName: task
+- changeSet:
+    id: 1580118314851-4
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: owner_id
+            type: uuid
+        tableName: task
+- changeSet:
+    id: 1580118314851-5
+    author: hkasch (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: owner_id
+        baseTableName: task
+        constraintName: FKjspifx5hvv1mc7ybu4qp2wyns
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: user
+        validate: true
+
