@@ -1,16 +1,7 @@
-import {
-  Button,
-  Col,
-  Dropdown,
-  Icon,
-  Input,
-  Menu,
-  Row,
-  Table,
-  Typography
-} from 'antd'
+import { Button, Col, Icon, Input, Popover, Row, Table, Typography } from 'antd'
 import React, { ChangeEvent, useState } from 'react'
 import {
+  EvaluationStep,
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult
 } from '../generated/graphql'
@@ -111,23 +102,7 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
         sorter={alphabeticSorter(submission => submission.user.username)}
       />
       {renderTaskColumnGroups(assignment.tasks)}
-      <Column render={renderActions(assignment)} />
     </Table>
-  )
-}
-
-const renderActions = (assignment: Assignment) => (submission: Submission) => {
-  const actionDropdown = (
-    <Menu>
-      {assignment.tasks.map(task => (
-        <Menu.Item key={task.id}>{task.title}</Menu.Item>
-      ))}
-    </Menu>
-  )
-  return (
-    <Dropdown overlay={actionDropdown} placement="bottomRight">
-      <Button icon="more" title="Actions" />
-    </Dropdown>
   )
 }
 
@@ -148,25 +123,28 @@ const renderAnswer = (task: Task, submission: Submission) => {
     return <Icon type="question-circle" />
   }
 
-  if (
-    answer.latestEvaluation.stepsResultSummary === EvaluationStepResult.Success
-  ) {
-    return <Icon type="check-circle" />
+  const renderEvaluationStepResult = ({
+    result,
+    runnerName,
+    summary
+  }: Pick<EvaluationStep, 'result' | 'runnerName' | 'summary'>) => {
+    let icon = <Icon type="exclamation-circle" />
+    if (result === EvaluationStepResult.Success) {
+      icon = <Icon type="check-circle" />
+    } else if (result === EvaluationStepResult.Errored) {
+      icon = <Icon type="close-circle" />
+    }
+    return (
+      <Popover title={runnerName} content={summary}>
+        {icon}
+      </Popover>
+    )
   }
 
-  // count the number of successful evaluation steps
-  const successCount = answer.latestEvaluation.steps.reduce(
-    (n, result) => (result.result === EvaluationStepResult.Success ? n + 1 : n),
-    0
-  )
-
   return (
-    <Text type="warning">
-      <Icon type="exclamation-circle" />
-      <span className="evaluation-summary">
-        {successCount}/{task.evaluationSteps.length}
-      </span>
-    </Text>
+    <div className="evaluation-step-results">
+      {answer.latestEvaluation.steps.map(renderEvaluationStepResult)}
+    </div>
   )
 }
 
