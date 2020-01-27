@@ -28,23 +28,14 @@ const TaskPage: React.FC = () => {
     variables: { id: useIdParam() }
   })
 
-  const [answer, setAnswer] = useState<
-    NonNullable<GetTaskQueryHookResult['data']>['task']['answer']
-  >()
-
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
-
-  useEffect(() => {
-    if (result.data && result.data.task.answer) {
-      setAnswer(result.data.task.answer)
-    }
-  }, [result])
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
   const { task } = result.data
+  const { answer } = task
 
   const tabs = [
     { key: '', tab: 'Task' },
@@ -65,8 +56,8 @@ const TaskPage: React.FC = () => {
       variables: { taskId: task.id }
     })
     if (createAnswerResult.data) {
-      setAnswer(createAnswerResult.data.createAnswer)
       subPath.set('/answer')
+      result.refetch()
     }
   }
 
