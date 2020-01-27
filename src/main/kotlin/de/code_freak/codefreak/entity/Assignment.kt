@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.entity
 
+import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import java.util.SortedSet
 import javax.persistence.Column
@@ -18,7 +19,7 @@ class Assignment(
   var title: String,
 
   /**
-   * The lecturer who created this assignment
+   * The teacher who created this assignment
    */
   @ManyToOne
   var owner: User,
@@ -41,6 +42,9 @@ class Assignment(
     get() = field.sortedBy { it.position }.toSortedSet()
 
   val closed get() = deadline?.let { Instant.now().isAfter(deadline) } ?: false
+
+  @CreationTimestamp
+  var createdAt: Instant = Instant.now()
 
   fun requireNotClosed() = require(!closed) { "The assignment is already closed." }
 }

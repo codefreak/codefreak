@@ -25,6 +25,7 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
   val id = entity.id
   val title = entity.title
   val owner by lazy { UserDto(entity.owner, ctx) }
+  val createdAt = entity.createdAt
   val deadline = entity.deadline
   val closed = entity.closed
   val tasks by lazy { entity.tasks.map { TaskDto(it, ctx) } }

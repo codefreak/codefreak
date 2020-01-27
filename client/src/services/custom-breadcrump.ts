@@ -13,13 +13,15 @@ const forAssignment = (assignment: EntityWithTitle) => [
 ]
 
 interface Task extends EntityWithTitle {
-  assignment: EntityWithTitle
+  assignment?: EntityWithTitle
 }
 
-const forTask = (task: Task) => [
-  ...forAssignment(task.assignment),
-  { path: getEntityPath(task), breadcrumbName: task.title }
-]
+const forTask = (task: Task) => {
+  const base = task.assignment
+    ? forAssignment(task.assignment)
+    : [{ path: BASE_PATHS.Task + '/pool', breadcrumbName: 'Task Pool' }]
+  return [...base, { path: getEntityPath(task), breadcrumbName: task.title }]
+}
 
 export const createRoutes = {
   forAssignment,

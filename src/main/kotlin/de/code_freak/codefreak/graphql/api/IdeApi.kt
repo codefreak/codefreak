@@ -19,7 +19,7 @@ class IdeMutation : BaseResolver(), Mutation {
       val answer = serviceAccess.getService(AnswerService::class).findAnswer(id)
       var readOnly = true
       if (Authorization().isCurrentUser(answer.submission.user)) {
-        readOnly = answer.task.assignment.closed
+        readOnly = answer.task.assignment?.closed == true
       } else {
         Authorization().requireAuthority(Authority.ROLE_TEACHER)
       }

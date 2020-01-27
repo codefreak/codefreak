@@ -90,7 +90,7 @@ internal class ContainerServiceTest : SpringTest() {
     `when`(fileService.readCollectionTar(eq(answer.id))).thenReturn(files.inputStream())
     `when`(fileService.collectionExists(eq(answer.id))).thenReturn(true)
     `when`(fileService.writeCollectionTar(eq(answer.id))).thenReturn(out)
-    `when`(answer.task.assignment.closed).thenReturn(false)
+    `when`(answer.task.assignment?.closed).thenReturn(false)
     containerService.startIdeContainer(answer)
     containerService.saveAnswerFiles(answer)
     //verify(fileService, times(1)).writeCollectionTar(answer.id)

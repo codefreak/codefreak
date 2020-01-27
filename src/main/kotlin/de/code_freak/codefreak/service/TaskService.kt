@@ -2,6 +2,7 @@ package de.code_freak.codefreak.service
 
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Task
+import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.TaskRepository
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil.getYamlDefinition
@@ -24,9 +25,9 @@ class TaskService : BaseService() {
       .orElseThrow { EntityNotFoundException("Task not found") }
 
   @Transactional
-  fun createFromTar(tarContent: ByteArray, assignment: Assignment, position: Long): Task {
+  fun createFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
     var task = getYamlDefinition<TaskDefinition>(tarContent.inputStream()).let {
-      Task(assignment, position, it.title, it.description, 100)
+      Task(assignment, owner, position, it.title, it.description, 100)
     }
     task = taskRepository.save(task)
     fileService.writeCollectionTar(task.id).use { it.write(tarContent) }
@@ -46,4 +47,6 @@ class TaskService : BaseService() {
   }
 
   fun getTaskDefinition(taskId: UUID) = fileService.readCollectionTar(taskId).use { getYamlDefinition<TaskDefinition>(it) }
+
+  fun getTaskPool(userId: UUID) = taskRepository.findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(userId)
 }
