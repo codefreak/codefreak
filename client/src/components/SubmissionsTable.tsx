@@ -1,4 +1,4 @@
-import { Button, Col, Icon, Input, Popover, Row, Table, Typography } from 'antd'
+import { Button, Col, Icon, Input, Popover, Row, Table, Tooltip } from 'antd'
 import React, { ChangeEvent, useState } from 'react'
 import {
   EvaluationStep,
@@ -15,7 +15,6 @@ type Answer = Submission['answers'][number]
 type Task = Assignment['tasks'][number]
 
 const { Column } = Table
-const { Text } = Typography
 
 const alphabeticSorter = (
   extractProperty: (x: Submission) => string | null | undefined
@@ -116,7 +115,11 @@ const renderAnswer = (task: Task, submission: Submission) => {
   const answer = getAnswerFromSubmission(submission, task)
 
   if (answer === undefined) {
-    return <Icon type="stop" title="No answer" className="no-answer" />
+    return (
+      <Tooltip title="No answer submitted">
+        <Icon type="stop" className="no-answer" />
+      </Tooltip>
+    )
   }
 
   if (!answer.latestEvaluation) {
