@@ -1,10 +1,10 @@
 import { Button, Col, Icon, Input, Popover, Row, Table, Tooltip } from 'antd'
 import React, { ChangeEvent, useState } from 'react'
 import {
-  EvaluationStep,
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult
 } from '../generated/graphql'
+import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
 
 type Assignment = NonNullable<
@@ -126,27 +126,11 @@ const renderAnswer = (task: Task, submission: Submission) => {
     return <Icon type="question-circle" />
   }
 
-  const renderEvaluationStepResult = ({
-    result,
-    runnerName,
-    summary
-  }: Pick<EvaluationStep, 'result' | 'runnerName' | 'summary'>) => {
-    let icon = <Icon type="exclamation-circle" />
-    if (result === EvaluationStepResult.Success) {
-      icon = <Icon type="check-circle" />
-    } else if (result === EvaluationStepResult.Errored) {
-      icon = <Icon type="close-circle" />
-    }
-    return (
-      <Popover title={runnerName} content={summary}>
-        {icon}
-      </Popover>
-    )
-  }
-
   return (
     <div className="evaluation-step-results">
-      {answer.latestEvaluation.steps.map(renderEvaluationStepResult)}
+      {answer.latestEvaluation.steps.map(stepResult => (
+        <EvaluationStepResultIcon stepResult={stepResult} />
+      ))}
     </div>
   )
 }

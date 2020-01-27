@@ -3,6 +3,7 @@ package de.code_freak.codefreak.graphql.api
 import com.expediagroup.graphql.annotations.GraphQLID
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
+import com.expediagroup.graphql.spring.operations.Query
 import com.expediagroup.graphql.spring.operations.Subscription
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.entity.Answer
@@ -114,6 +115,17 @@ enum class StatusDto {
 class PendingEvaluationUpdatedEventDto(event: PendingEvaluationUpdatedEvent) {
   val answerId = event.answerId
   val status = event.status
+}
+
+@Component
+class EvaluationQuery : BaseResolver(), Query {
+
+  @Secured(Authority.ROLE_STUDENT)
+  fun evaluation(id: UUID) : EvaluationDto  = context{
+    val evaluation = serviceAccess.getService(EvaluationService::class).getEvaluation(id)
+    authorization.requireAuthorityIfNotCurrentUser(evaluation.answer.submission.user, Authority.ROLE_TEACHER)
+    EvaluationDto(evaluation, this)
+  }
 }
 
 @Component

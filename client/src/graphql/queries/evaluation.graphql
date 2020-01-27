@@ -19,3 +19,32 @@ query GetPendingEvaluation($answerId: ID!) {
     }
   }
 }
+
+query GetDetailedEvaluaton($evaluationId: ID!) {
+  evaluation(id: $evaluationId) {
+    id
+    stepsResultSummary
+    steps {
+      id
+      position
+      result
+      summary
+      runnerName
+      feedback {
+        id
+        summary
+        severity
+        group
+        longDescription
+        status
+        fileContext {
+          path
+          lineStart
+          lineStart
+          columnStart
+          columnEnd
+        }
+      }
+    }
+  }
+}
