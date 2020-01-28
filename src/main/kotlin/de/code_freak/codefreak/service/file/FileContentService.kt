@@ -10,7 +10,7 @@ import java.time.Instant
 import java.util.UUID
 
 @Service
-class FileContentService: BaseService() {
+class FileContentService : BaseService() {
 
   @Autowired
   lateinit var fileService: FileService

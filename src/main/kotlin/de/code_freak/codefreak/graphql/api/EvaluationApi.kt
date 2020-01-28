@@ -121,7 +121,7 @@ class PendingEvaluationUpdatedEventDto(event: PendingEvaluationUpdatedEvent) {
 class EvaluationQuery : BaseResolver(), Query {
 
   @Secured(Authority.ROLE_STUDENT)
-  fun evaluation(id: UUID) : EvaluationDto  = context{
+  fun evaluation(id: UUID): EvaluationDto = context {
     val evaluation = serviceAccess.getService(EvaluationService::class).getEvaluation(id)
     authorization.requireAuthorityIfNotCurrentUser(evaluation.answer.submission.user, Authority.ROLE_TEACHER)
     EvaluationDto(evaluation, this)
