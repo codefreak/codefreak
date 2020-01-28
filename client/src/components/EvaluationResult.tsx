@@ -11,12 +11,13 @@ import {
   useGetDetailedEvaluatonQuery
 } from '../generated/graphql'
 import AsyncPlaceholder from './AsyncContainer'
+import CodeViewer from './CodeViewer'
 import './EvaluationResult.less'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 
 const { Text } = Typography
 
-const FileContext: React.FC<{ data: FeedbackEntity['fileContext'] }> = ({
+const FileReference: React.FC<{ data: FeedbackEntity['fileContext'] }> = ({
   data
 }) => {
   if (!data) {
@@ -56,7 +57,7 @@ const FeedbackSeverityIcon: React.FC<{ severity: FeedbackSeverity }> = ({
   )
 }
 
-const renderFeedbackPanel = (feedback: Feedback) => {
+const renderFeedbackPanel = (answerId: string, feedback: Feedback) => {
   let icon = null
   // either show the success icon or the severity of failure
   switch (feedback.status) {
@@ -98,14 +99,24 @@ const renderFeedbackPanel = (feedback: Feedback) => {
     </>
   )
   let body = null
-  if (feedback.longDescription) {
+  if (feedback.fileContext) {
+    const { lineStart, lineEnd } = feedback.fileContext
+    body = (
+      <CodeViewer
+        answerId={answerId}
+        path={feedback.fileContext.path}
+        lineStart={lineStart || undefined}
+        lineEnd={lineEnd || undefined}
+      />
+    )
+  } else if (feedback.longDescription) {
     body = <ReactMarkdown source={feedback.longDescription} />
   }
 
   return (
     <Collapse.Panel
       header={title}
-      extra={<FileContext data={feedback.fileContext} />}
+      extra={<FileReference data={feedback.fileContext} />}
       key={feedback.id}
     >
       {body}
@@ -123,10 +134,16 @@ const EvaluationResult: React.FC<{ evaluationId: string }> = ({
   }
 
   const { evaluation } = result.data
-  return <>{evaluation.steps.map(renderEvaluationStep)}</>
+  return (
+    <>
+      {evaluation.steps.map(step =>
+        renderEvaluationStep(evaluation.answer.id, step)
+      )}
+    </>
+  )
 }
 
-const renderEvaluationStep = (step: EvaluationStep) => {
+const renderEvaluationStep = (answerId: string, step: EvaluationStep) => {
   const title = (
     <>
       <EvaluationStepResultIcon stepResult={step} /> {step.runnerName}
@@ -146,7 +163,11 @@ const renderEvaluationStep = (step: EvaluationStep) => {
       body = <Empty />
     }
   } else {
-    body = <Collapse>{step.feedback.map(renderFeedbackPanel)}</Collapse>
+    body = (
+      <Collapse>
+        {step.feedback.map(feedback => renderFeedbackPanel(answerId, feedback))}
+      </Collapse>
+    )
   }
   return (
     <Card

@@ -23,6 +23,10 @@ query GetPendingEvaluation($answerId: ID!) {
 query GetDetailedEvaluaton($evaluationId: ID!) {
   evaluation(id: $evaluationId) {
     id
+    answer {
+      # for referencing code
+      id
+    }
     stepsResultSummary
     steps {
       id

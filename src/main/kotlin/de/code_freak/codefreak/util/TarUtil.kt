@@ -123,14 +123,23 @@ object TarUtil {
     to.closeArchiveEntry()
   }
 
-  inline fun <reified T> getYamlDefinition(`in`: InputStream): T {
-    TarArchiveInputStream(`in`).let { tar -> generateSequence { tar.nextTarEntry }.forEach {
-      if (it.isFile && normalizeEntryName(it.name) == "codefreak.yml") {
-        val mapper = ObjectMapper(YAMLFactory())
-        return mapper.readValue(tar, T::class.java)
+  inline fun <T> findFile(`in`: InputStream, path: String, consumer: (TarArchiveEntry, TarArchiveInputStream) -> T): T {
+    TarArchiveInputStream(`in`).let { tar ->
+      generateSequence { tar.nextTarEntry }.forEach {
+        if (it.isFile && normalizeEntryName(it.name) == path) {
+          return consumer(it, tar)
+        }
       }
-    } }
-    throw java.lang.IllegalArgumentException("codefreak.yml does not exist")
+    }
+    throw IllegalArgumentException("$path does not exist")
+  }
+
+  @Throws(IllegalArgumentException::class)
+  inline fun <reified T> getYamlDefinition(`in`: InputStream): T {
+    findFile(`in`, "codefreak.yml") { _, fileStream ->
+      val mapper = ObjectMapper(YAMLFactory())
+      return mapper.readValue(fileStream, T::class.java)
+    }
   }
 
   fun extractSubdirectory(`in`: InputStream, out: OutputStream, path: String) {

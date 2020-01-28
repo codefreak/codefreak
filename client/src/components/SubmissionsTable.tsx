@@ -129,7 +129,7 @@ const renderAnswer = (task: Task, submission: Submission) => {
   return (
     <div className="evaluation-step-results">
       {answer.latestEvaluation.steps.map(stepResult => (
-        <EvaluationStepResultIcon stepResult={stepResult} />
+        <EvaluationStepResultIcon key={stepResult.id} stepResult={stepResult} />
       ))}
     </div>
   )
