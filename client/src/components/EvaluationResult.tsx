@@ -115,6 +115,8 @@ const renderFeedbackPanel = (answerId: string, feedback: Feedback) => {
 
   return (
     <Collapse.Panel
+      disabled={!body}
+      showArrow={!!body}
       header={title}
       extra={<FileReference data={feedback.fileContext} />}
       key={feedback.id}
@@ -257,7 +259,6 @@ const EvaluationStepPanel: React.FC<{
   return (
     <Card
       title={title}
-      style={{ marginBottom: 30 }}
       key={step.id}
       extra={sorter}
       className="evaluation-result-panel"

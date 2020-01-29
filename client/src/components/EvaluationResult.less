@@ -23,6 +23,18 @@
 }
 
 .evaluation-result-panel {
+  margin-bottom: @modal-body-padding;
+
+  .ant-modal-body &:last-child {
+    margin-bottom: 0;
+  }
+
+  .ant-collapse .ant-collapse-item-disabled > .ant-collapse-header,
+  .ant-collapse .ant-collapse-item-disabled > .ant-collapse-header > .arrow {
+    color: @heading-color;
+    cursor: default;
+  }
+
   .ant-result {
     padding: 20px;
     .ant-result-icon {
