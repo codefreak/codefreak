@@ -21,8 +21,26 @@
   }
 
   .evaluation-step-results {
+    position: relative;
+
     .anticon {
       margin: 0 2px;
+    }
+
+    button {
+      opacity: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-top: -15px;
+      margin-left: -48px;
+    }
+  }
+
+  td:hover,
+  td:focus {
+    .evaluation-step-results button {
+      opacity: 1;
     }
   }
 }

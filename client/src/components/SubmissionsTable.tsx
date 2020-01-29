@@ -1,9 +1,11 @@
-import { Button, Col, Icon, Input, Row, Table, Tooltip } from 'antd'
+import { Button, Col, Icon, Input, Modal, Row, Table, Tooltip } from 'antd'
 import React, { ChangeEvent, useState } from 'react'
 import {
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult
 } from '../generated/graphql'
+import { displayName } from '../services/user'
+import EvaluationResult from './EvaluationResult'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
 
@@ -123,15 +125,58 @@ const renderAnswer = (task: Task, submission: Submission) => {
   }
 
   if (!answer.latestEvaluation) {
-    return <Icon type="question-circle" />
+    return (
+      <Tooltip title="Answer has not been evaluated, yet">
+        <Icon type="question-circle" />
+      </Tooltip>
+    )
   }
 
   return (
-    <div className="evaluation-step-results">
-      {answer.latestEvaluation.steps.map(stepResult => (
-        <EvaluationStepResultIcon key={stepResult.id} stepResult={stepResult} />
-      ))}
-    </div>
+    <EvaluationStepOverview
+      task={task}
+      user={submission.user}
+      evaluation={answer.latestEvaluation}
+    />
+  )
+}
+
+const EvaluationStepOverview: React.FC<{
+  task: Task
+  user: Submission['user']
+  evaluation: NonNullable<Answer['latestEvaluation']>
+}> = ({ evaluation, task, user }) => {
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const openModal = () => setModalOpen(true)
+  const closeModal = () => setModalOpen(false)
+
+  return (
+    <>
+      <Modal
+        visible={modalOpen}
+        title={`Evaluation Results for ${task.title} of ${displayName(user)}`}
+        onCancel={closeModal}
+        footer={null}
+        width="75%"
+        bodyStyle={{ backgroundColor: '#f0f2f5' }}
+      >
+        <EvaluationResult evaluationId={evaluation.id} />
+      </Modal>
+      <div className="evaluation-step-results">
+        {evaluation.steps.map(stepResult => (
+          <EvaluationStepResultIcon
+            key={stepResult.id}
+            stepResult={stepResult}
+          />
+        ))}
+        <Tooltip title="Show evaluation result">
+          <Button type="primary" icon="bars" onClick={openModal}>
+            Details
+          </Button>
+        </Tooltip>
+      </div>
+    </>
   )
 }
 
