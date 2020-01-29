@@ -50,7 +50,11 @@ class JUnitRunner : CommandLineRunner() {
     return suite.testCases.map { testCase ->
       Feedback(testCase.name).apply {
         group = suite.name
-        longDescription = testCase.failures?.joinToString("\n")
+        longDescription = when {
+          testCase.failures != null -> testCase.failures.joinToString("\n") { it.message ?: it.value }
+          testCase.errors != null -> testCase.errors.joinToString("\n") { it.message ?: it.value }
+          else -> null
+        }
         status = when {
           testCase.isSkipped -> Feedback.Status.IGNORE
           testCase.isSuccessful -> Feedback.Status.SUCCESS
