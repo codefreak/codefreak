@@ -1,5 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Badge, Button } from 'antd'
+import { Button } from 'antd'
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'

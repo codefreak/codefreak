@@ -1,6 +1,5 @@
 import { Badge, Icon } from 'antd'
 import React from 'react'
-import { useGetLatestEvaluationStatusQuery } from '../generated/graphql'
 import useLatestEvaluation from '../hooks/useLatestEvaluation'
 import usePendingEvaluation from '../hooks/usePendingEvaluation'
 
