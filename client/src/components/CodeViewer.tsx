@@ -70,7 +70,6 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
       <AceEditor
         fontSize={14}
         className="code-viewer"
-        mode="c_cpp"
         readOnly
         showPrintMargin={false}
         maxLines={numberOfLines(value)}
