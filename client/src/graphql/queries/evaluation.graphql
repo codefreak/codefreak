@@ -19,3 +19,13 @@ query GetPendingEvaluation($answerId: ID!) {
     }
   }
 }
+
+query GetLatestEvaluationStatus($answerId: ID!) {
+  answer(id: $answerId) {
+    id
+    latestEvaluation {
+      id
+      stepsResultSummary
+    }
+  }
+}
