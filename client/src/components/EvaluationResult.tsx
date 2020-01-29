@@ -1,5 +1,5 @@
-import { Card, Collapse, Empty, Icon, Result, Typography } from 'antd'
-import React from 'react'
+import { Card, Collapse, Empty, Icon, Result, Select, Typography } from 'antd'
+import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   EvaluationStep,
@@ -136,19 +136,104 @@ const EvaluationResult: React.FC<{ evaluationId: string }> = ({
   const { evaluation } = result.data
   return (
     <>
-      {evaluation.steps.map(step =>
-        renderEvaluationStep(evaluation.answer.id, step)
-      )}
+      {evaluation.steps.map(step => (
+        <EvaluationStepPanel
+          answerId={evaluation.answer.id}
+          step={step}
+          key={step.id}
+        />
+      ))}
     </>
   )
 }
 
-const renderEvaluationStep = (answerId: string, step: EvaluationStep) => {
+enum FeedbackSortOptions {
+  SEVERITY,
+  FILE,
+  STATUS
+}
+const severityOrder: Record<FeedbackSeverity, number> = {
+  INFO: 3,
+  MINOR: 2,
+  MAJOR: 1,
+  CRITICAL: 0
+}
+const statusOrder: Record<FeedbackStatus, number> = {
+  FAILED: 0,
+  SUCCESS: 1,
+  IGNORE: 2
+}
+const sortFeedbackList = (
+  feedbackList: Feedback[],
+  by: keyof typeof FeedbackSortOptions
+) => {
+  return feedbackList.sort((a: Feedback, b: Feedback) => {
+    switch (by) {
+      case 'STATUS':
+        if (a.status && b.status) {
+          return statusOrder[a.status] - statusOrder[b.status]
+        } else if (a.status) {
+          return -1
+        } else if (b.status) {
+          return 1
+        }
+        return 0
+      case 'SEVERITY':
+        if (a.severity && b.severity) {
+          return severityOrder[a.severity] - severityOrder[b.severity]
+        } else if (a.severity) {
+          return -1
+        } else if (b.severity) {
+          return 1
+        }
+        return 0
+      case 'FILE':
+        if (a.fileContext && b.fileContext) {
+          if (a.fileContext.path === b.fileContext.path) {
+            return (
+              (a.fileContext.lineStart || 0) - (b.fileContext.lineStart || 0)
+            )
+          }
+          return a.fileContext.path.localeCompare(b.fileContext.path)
+        } else if (a.fileContext) {
+          return -1
+        } else if (b.fileContext) {
+          return 1
+        }
+        return 0
+    }
+    return 0
+  })
+}
+
+const EvaluationStepPanel: React.FC<{
+  answerId: string
+  step: EvaluationStep
+}> = ({ answerId, step }) => {
   const title = (
     <>
       <EvaluationStepResultIcon stepResult={step} /> {step.runnerName}
     </>
   )
+
+  const [sortValue, setSortValue] = useState<keyof typeof FeedbackSortOptions>(
+    'FILE'
+  )
+  const feedbackList = sortFeedbackList(step.feedback, sortValue)
+  const onSortChange = (value: keyof typeof FeedbackSortOptions) =>
+    setSortValue(value)
+  const sorter = (
+    <Select
+      defaultValue={sortValue}
+      onChange={onSortChange}
+      style={{ width: '150px' }}
+    >
+      <Select.Option value="STATUS">Sort by Status</Select.Option>
+      <Select.Option value="FILE">Sort by File</Select.Option>
+      <Select.Option value="SEVERITY">Sort by Severity</Select.Option>
+    </Select>
+  )
+
   let body = null
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
@@ -165,7 +250,7 @@ const renderEvaluationStep = (answerId: string, step: EvaluationStep) => {
   } else {
     body = (
       <Collapse>
-        {step.feedback.map(feedback => renderFeedbackPanel(answerId, feedback))}
+        {feedbackList.map(feedback => renderFeedbackPanel(answerId, feedback))}
       </Collapse>
     )
   }
@@ -174,6 +259,7 @@ const renderEvaluationStep = (answerId: string, step: EvaluationStep) => {
       title={title}
       style={{ marginBottom: 30 }}
       key={step.id}
+      extra={sorter}
       className="evaluation-result-panel"
     >
       {body}
