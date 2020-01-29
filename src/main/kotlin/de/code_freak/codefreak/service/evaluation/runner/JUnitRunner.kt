@@ -55,6 +55,10 @@ class JUnitRunner : CommandLineRunner() {
           testCase.errors != null -> testCase.errors.joinToString("\n") { it.message ?: it.value }
           else -> null
         }
+        // Make jUnit output valid markdown (code block)
+        if (longDescription != null) {
+          longDescription = "```\n$longDescription\n```"
+        }
         status = when {
           testCase.isSkipped -> Feedback.Status.IGNORE
           testCase.isSuccessful -> Feedback.Status.SUCCESS

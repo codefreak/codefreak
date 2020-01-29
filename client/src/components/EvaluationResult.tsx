@@ -236,7 +236,7 @@ const EvaluationStepPanel: React.FC<{
     </Select>
   )
 
-  let body = null
+  let body
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
       body = (
@@ -246,7 +246,6 @@ const EvaluationStepPanel: React.FC<{
         />
       )
     } else {
-      //
       body = <Empty />
     }
   } else {
