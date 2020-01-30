@@ -35,6 +35,16 @@ const FileReference: React.FC<{ data: FeedbackEntity['fileContext'] }> = ({
   return <Text code>{text}</Text>
 }
 
+const LongDescriptionMarkdown: React.FC<{ source: string }> = ({ source }) => {
+  return (
+    <ReactMarkdown
+      source={source}
+      escapeHtml={false}
+      className="feedback-long-description"
+    />
+  )
+}
+
 const severityIconMap: Record<FeedbackSeverity, string> = {
   INFO: 'info-circle',
   MINOR: 'warning',
@@ -109,8 +119,15 @@ const renderFeedbackPanel = (answerId: string, feedback: Feedback) => {
         lineEnd={lineEnd || undefined}
       />
     )
-  } else if (feedback.longDescription) {
-    body = <ReactMarkdown source={feedback.longDescription} />
+  }
+
+  if (feedback.longDescription) {
+    body = (
+      <>
+        {body}
+        <LongDescriptionMarkdown source={feedback.longDescription} />
+      </>
+    )
   }
 
   return (
