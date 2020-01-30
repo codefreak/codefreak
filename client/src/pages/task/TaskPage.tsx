@@ -1,9 +1,10 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Badge, Button } from 'antd'
+import { Button } from 'antd'
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
+import EvaluationIndicator from '../../components/EvaluationIndicator'
 import IdeButton from '../../components/IdeButton'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
@@ -49,7 +50,13 @@ const TaskPage: React.FC = () => {
       disabled: !answer,
       tab: (
         <>
-          Evaluation <Badge style={{ marginLeft: 4 }} status="processing" />
+          Evaluation
+          {answer ? (
+            <EvaluationIndicator
+              style={{ marginLeft: 8 }}
+              answerId={answer.id}
+            />
+          ) : null}
         </>
       )
     }
