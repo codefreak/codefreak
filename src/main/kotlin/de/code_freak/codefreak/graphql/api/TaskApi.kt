@@ -3,6 +3,7 @@ package de.code_freak.codefreak.graphql.api
 import com.expediagroup.graphql.annotations.GraphQLID
 import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
+import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.entity.Task
@@ -71,4 +72,21 @@ class TaskQuery : BaseResolver(), Query {
         .getTaskPool(authorization.currentUser.id)
         .map { TaskDto(it, this) }
   }
+}
+
+@Component
+class TaskMutation : BaseResolver(), Mutation {
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun createTask(): TaskDto = context {
+    serviceAccess.getService(TaskService::class).createEmptyTask(authorization.currentUser).let { TaskDto(it, this) }
+  }
+
+  fun deleteTask(id: UUID): Boolean = context {
+    val task = serviceAccess.getService(TaskService::class).findTask(id)
+    authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    serviceAccess.getService(TaskService::class).deleteTask(task.id)
+    true
+  }
+
 }

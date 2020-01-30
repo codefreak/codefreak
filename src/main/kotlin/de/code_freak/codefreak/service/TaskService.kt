@@ -5,14 +5,18 @@ import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.TaskRepository
 import de.code_freak.codefreak.service.file.FileService
+import de.code_freak.codefreak.util.TarUtil
 import de.code_freak.codefreak.util.TarUtil.getYamlDefinition
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 @Service
-class TaskService : BaseService() {
+class
+TaskService : BaseService() {
 
   @Autowired
   private lateinit var taskRepository: TaskRepository
@@ -33,6 +37,17 @@ class TaskService : BaseService() {
     fileService.writeCollectionTar(task.id).use { it.write(tarContent) }
     return task
   }
+
+  @Transactional
+  fun createEmptyTask(owner: User): Task {
+    return ByteArrayOutputStream().use {
+      TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/empty").file, it)
+      createFromTar(it.toByteArray(), null, owner, 0)
+    }
+  }
+
+  @Transactional
+  fun deleteTask(id: UUID) = taskRepository.deleteById(id)
 
   @Transactional
   fun updateFromTar(tarContent: ByteArray, taskId: UUID): Task {

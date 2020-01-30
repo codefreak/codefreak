@@ -12,7 +12,9 @@ const TaskListPage: React.FC = () => {
     return <AsyncPlaceholder result={result} />
   }
 
-  return <TaskList tasks={result.data.assignment.tasks} />
+  const update = () => result.refetch()
+
+  return <TaskList tasks={result.data.assignment.tasks} update={update} />
 }
 
 export default TaskListPage

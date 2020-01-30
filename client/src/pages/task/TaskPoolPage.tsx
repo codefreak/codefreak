@@ -13,6 +13,8 @@ const TaskPoolPage: React.FC = () => {
     return <AsyncPlaceholder result={result} />
   }
 
+  const update = () => result.refetch()
+
   return (
     <>
       <PageHeaderWrapper
@@ -24,7 +26,7 @@ const TaskPoolPage: React.FC = () => {
           </Link>
         }
       />
-      <TaskList tasks={result.data.taskPool} />
+      <TaskList tasks={result.data.taskPool} update={update} />
     </>
   )
 }
