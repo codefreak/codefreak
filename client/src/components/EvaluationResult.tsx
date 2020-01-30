@@ -72,9 +72,16 @@ const renderFeedbackPanel = (answerId: string, feedback: Feedback) => {
   // either show the success icon or the severity of failure
   switch (feedback.status) {
     case FeedbackStatus.Failed:
-      icon = feedback.severity ? (
-        <FeedbackSeverityIcon severity={feedback.severity} />
-      ) : null
+      if (feedback.severity) {
+        icon = <FeedbackSeverityIcon severity={feedback.severity} />
+      } else {
+        icon = (
+          <Icon
+            type="exclamation-circle"
+            className="feedback-icon feedback-icon-failed"
+          />
+        )
+      }
       break
     case FeedbackStatus.Success:
       icon = (
