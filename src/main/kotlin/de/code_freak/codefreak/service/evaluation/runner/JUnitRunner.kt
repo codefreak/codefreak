@@ -56,9 +56,7 @@ class JUnitRunner : CommandLineRunner() {
           else -> null
         }
         // Make jUnit output valid markdown (code block)
-        if (longDescription != null) {
-          longDescription = "```\n$longDescription\n```"
-        }
+        longDescription?.let { longDescription = wrapInMarkdownCodeBlock(it) }
         status = when {
           testCase.isSkipped -> Feedback.Status.IGNORE
           testCase.isSuccessful -> Feedback.Status.SUCCESS
