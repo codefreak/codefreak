@@ -8,7 +8,7 @@ class ReactFrontendForwardController : BaseController() {
 
   /**
    * React Router uses HTML5's history API.
-   * This controller will forward all requests to the React frontend served at /
+   * This controller will forward all requests not containing a dot to the React frontend served at /
    */
   @RequestMapping("/**/{path:[^.]*}")
   fun frontendForward() = "forward:/"
