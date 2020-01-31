@@ -22,7 +22,9 @@ class CommandLineRunner : EvaluationRunner {
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     return executeCommands(answer, options, null).map { execution ->
       Feedback(execution.command).apply {
-        longDescription = execution.result.output
+        longDescription = if (execution.result.output.isNotBlank()) {
+          wrapInMarkdownCodeBlock(execution.result.output.trim())
+        } else null
         status = if (execution.result.exitCode == 0L) Feedback.Status.SUCCESS else Feedback.Status.FAILED
       }
     }
@@ -45,4 +47,6 @@ class CommandLineRunner : EvaluationRunner {
     return containerService.runCommandsForEvaluation(answer, image, projectPath, commands.toList(), stopOnFail, processFiles)
         .mapIndexed { index, result -> Execution(commands[index], result) }
   }
+
+  protected fun wrapInMarkdownCodeBlock(value: String) = "```\n$value\n```"
 }
