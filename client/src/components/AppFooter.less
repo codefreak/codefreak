@@ -1,0 +1,26 @@
+@import '~antd/lib/style/themes/default.less';
+
+.ant-pro-basicLayout-content {
+  padding-bottom: calc(48px + 2em);
+
+  > .ant-layout-footer {
+    font-size: @font-size-sm;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    text-align: center;
+    color: lighten(@text-color, 50%);
+
+    a {
+      color: lighten(@link-color, 20%);
+
+      &:hover, &:focus {
+        color: @link-color;
+      }
+    }
+  }
+}
