@@ -1,6 +1,7 @@
 subscription EvaluationFinished {
   evaluationFinished {
     id
+    stepsResultSummary
     answer {
       id
       task {

@@ -1,6 +1,7 @@
 import { Icon, Result, Steps, Tabs } from 'antd'
 import React, { useEffect, useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
+import EvaluationResult from '../../components/EvaluationResult'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import usePendingEvaluation from '../../hooks/usePendingEvaluation'
 import useSubPath from '../../hooks/useSubPath'
@@ -95,7 +96,7 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
       <Tabs defaultActiveKey={subPath.get()} onChange={subPath.set}>
         <TabPane tab="Latest Evaluation" key="">
           {answer.latestEvaluation ? (
-            'Hier könnte Ihr Evaluationsergebis stehen'
+            <EvaluationResult evaluationId={answer.latestEvaluation.id} />
           ) : (
             <Result
               icon={<Icon type="rocket" theme="twoTone" />}

@@ -121,7 +121,7 @@ bootJar {
     into 'META-INF/assets'
   }
   from ('client/build') {
-    into 'BOOT-INF/classes/public/react'
+    into 'BOOT-INF/classes/static'
   }
   dependsOn 'client:assemble'
 }

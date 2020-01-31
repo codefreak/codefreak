@@ -4,3 +4,10 @@ query GetAnswer($id: ID!) {
     sourceUrl
   }
 }
+
+query GetAnswerFile($id: ID!, $path: String!) {
+  answerFile(answerId: $id, path: $path) {
+    path
+    content
+  }
+}

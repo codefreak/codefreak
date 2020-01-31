@@ -1,0 +1,84 @@
+@import '~antd/es/style/themes/default';
+
+.feedback-icon {
+  margin-right: 10px;
+}
+
+.feedback-icon-success {
+  color: @success-color;
+}
+
+.feedback-icon-failed {
+  color: @error-color;
+}
+
+.feedback-icon-ignore {
+  color: @info-color;
+}
+
+.feedback-icon-severity-info,
+.feedback-icon-severity-default {
+  color: @info-color;
+}
+
+.feedback-icon-severity-minor {
+  color: @warning-color;
+}
+
+.feedback-icon-severity-major,
+.feedback-icon-severity-critical {
+  color: @error-color;
+}
+
+* + .feedback-long-description {
+  margin-top: 1em;
+}
+
+.evaluation-result-panel {
+  margin-bottom: @modal-body-padding;
+
+  .ant-modal-body &:last-child {
+    margin-bottom: 0;
+  }
+
+  .ant-collapse-content-box > :last-child {
+    margin-bottom: 0;
+  }
+
+  .ant-collapse {
+    .ant-collapse-item-disabled > .ant-collapse-header,
+    .ant-collapse-item-disabled > .ant-collapse-header > .arrow {
+      color: @heading-color;
+      cursor: default;
+    }
+    .ant-collapse-item.ant-collapse-no-arrow > .ant-collapse-header {
+      // align text with no-arrow elements
+      padding-left: 40px;
+    }
+  }
+
+  .ant-result {
+    padding: 20px;
+    .ant-result-icon {
+      margin-bottom: 12px;
+      .anticon {
+        font-size: 36px;
+      }
+    }
+    .ant-result-title {
+      font-size: 18px;
+      color: rgb(125, 125, 125);
+    }
+  }
+  .ant-card-body {
+    padding: 0;
+  }
+  .ant-card-head {
+    border-bottom: 1px solid #e8e8e8;
+    margin-bottom: 0;
+  }
+  .ant-collapse {
+    border: none;
+    border-radius: 0;
+  }
+}

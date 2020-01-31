@@ -11,7 +11,8 @@ const usePendingEvaluation = (
   const [status, setStatus] = useState<PendingEvaluationStatus | null>(null)
 
   const pendingEvaluation = useGetPendingEvaluationQuery({
-    variables: { answerId }
+    variables: { answerId },
+    fetchPolicy: 'cache-and-network'
   })
 
   useEffect(() => {

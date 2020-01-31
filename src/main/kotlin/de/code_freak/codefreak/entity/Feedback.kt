@@ -27,7 +27,7 @@ class Feedback(
   var fileContext: FileContext? = null
 
   /**
-   * Longer description of the result.
+   * Longer description of the result. Supports Markdown.
    * Should be more precise than the summary or explain how to fix the problem.
    * Limit is set to 1MiB
    */

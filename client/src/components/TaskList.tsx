@@ -8,6 +8,7 @@ import {
 } from '../services/codefreak-api'
 import { messageService } from '../services/message'
 import EntityLink from './EntityLink'
+import EvaluationIndicator from './EvaluationIndicator'
 
 const { confirm } = Modal
 
@@ -31,7 +32,17 @@ const renderTask = (props: RenderProps) => (task: Task) => {
 
   return (
     <Card
-      title={task.title}
+      title={
+        <>
+          {task.title}
+          {task.answer ? (
+            <EvaluationIndicator
+              style={{ marginLeft: 8 }}
+              answerId={task.answer.id}
+            />
+          ) : null}
+        </>
+      }
       key={task.id}
       style={{ marginBottom: 16 }}
       extra={

@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.util.UUID
 
 @Controller
-@RequestMapping("/answers")
+@RequestMapping("/api/answers")
 class AnswerController : BaseController() {
 
   @Autowired

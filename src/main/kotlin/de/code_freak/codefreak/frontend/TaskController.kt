@@ -9,12 +9,13 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
-import java.lang.IllegalArgumentException
 import java.util.UUID
 
 @Controller
+@RequestMapping("/api/tasks")
 class TaskController : BaseController() {
 
   @Autowired
@@ -26,7 +27,7 @@ class TaskController : BaseController() {
   @Autowired
   lateinit var fileService: FileService
 
-  @GetMapping("/tasks/{taskId}/source.tar", produces = ["application/tar"])
+  @GetMapping("/{taskId}/source.tar", produces = ["application/tar"])
   @ResponseBody
   fun getSourceTar(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val task = taskService.findTask(taskId)
@@ -37,7 +38,7 @@ class TaskController : BaseController() {
     }
   }
 
-  @GetMapping("/tasks/{taskId}/source.zip", produces = ["application/zip"])
+  @GetMapping("/{taskId}/source.zip", produces = ["application/zip"])
   @ResponseBody
   fun getSourceZip(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val task = taskService.findTask(taskId)
