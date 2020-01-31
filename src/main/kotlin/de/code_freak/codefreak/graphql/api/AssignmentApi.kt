@@ -30,7 +30,7 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
   val closed = entity.closed
   val tasks by lazy { entity.tasks.map { TaskDto(it, ctx) } }
 
-  val submissionCsvUrl by lazy { FrontendUtil.getUriBuilder().path("/assignments/$id/submissions.csv").build().toUriString() }
+  val submissionCsvUrl by lazy { FrontendUtil.getUriBuilder().path("/api/assignments/$id/submissions.csv").build().toUriString() }
   val submissions by lazy {
     authorization.requireAuthority(Authority.ROLE_TEACHER)
     serviceAccess.getService(SubmissionService::class)

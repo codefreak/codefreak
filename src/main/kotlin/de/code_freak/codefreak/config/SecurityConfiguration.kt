@@ -51,17 +51,13 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity?) {
     http
         ?.authorizeRequests()
-            ?.antMatchers("/graphql/**")?.permitAll()
-            ?.antMatchers("/subscriptions/**")?.permitAll()
-            ?.anyRequest()?.authenticated()
+            // use /api/... for non-GraphQL API resources that require authentication
+            ?.antMatchers("/api/**")?.authenticated()
+            ?.anyRequest()?.permitAll()
         ?.and()
             ?.formLogin()
                 // force redirect to React's login page
                 ?.loginPage("/login")
-                ?.permitAll()
-        ?.and()
-            ?.logout()
-            ?.permitAll()
         ?.and()
             ?.csrf()?.ignoringAntMatchers("/graphql")
     http?.sessionManagement()

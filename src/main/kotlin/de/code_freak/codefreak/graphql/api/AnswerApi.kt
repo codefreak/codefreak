@@ -31,7 +31,7 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseD
   val id = entity.id
   val submission by lazy { SubmissionDto(entity.submission, ctx) }
   val task by lazy { TaskDto(entity.task, ctx) }
-  val sourceUrl by lazy { FrontendUtil.getUriBuilder().path("/answers/$id/source").build().toUriString() }
+  val sourceUrl by lazy { FrontendUtil.getUriBuilder().path("/api/answers/$id/source").build().toUriString() }
 
   val latestEvaluation by lazy {
     serviceAccess.getService(EvaluationService::class)

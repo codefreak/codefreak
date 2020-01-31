@@ -8,7 +8,6 @@ import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.format.FormatterRegistry
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer
-import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.util.concurrent.Executors
 
@@ -18,10 +17,6 @@ class FrontendConfiguration : WebMvcConfigurer {
   @Bean
   fun layoutDialect(): LayoutDialect {
     return LayoutDialect()
-  }
-
-  override fun configureDefaultServletHandling(configurer: DefaultServletHandlerConfigurer) {
-    configurer.enable()
   }
 
   override fun addFormatters(registry: FormatterRegistry) {
