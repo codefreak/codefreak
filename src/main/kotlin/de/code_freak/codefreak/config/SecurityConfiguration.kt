@@ -20,6 +20,7 @@ import org.springframework.security.core.session.SessionRegistryImpl
 import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.web.session.HttpSessionEventPublisher
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean
+import org.springframework.security.config.annotation.web.builders.WebSecurity
 
 @Configuration
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
@@ -36,21 +37,27 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
   @Bean(BeanIds.AUTHENTICATION_MANAGER)
   override fun authenticationManagerBean(): AuthenticationManager = super.authenticationManagerBean()
 
+  override fun configure(web: WebSecurity?) {
+    // disable web security for all static files
+    web?.ignoring()
+        ?.requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+        ?.antMatchers("/assets/**")
+        // all static files served from React – this is far from being perfect.
+        // There should be something like "all files from /static directory are allowed" but security is based
+        // on the HTTP Request and not on actual files
+        ?.antMatchers("/*.*", "/static/**")
+  }
+
   override fun configure(http: HttpSecurity?) {
     http
         ?.authorizeRequests()
-            ?.requestMatchers(PathRequest.toStaticResources().atCommonLocations())?.permitAll()
-            ?.antMatchers("/assets/**")?.permitAll()
-            ?.antMatchers("/graphql/**")?.permitAll()
-            ?.antMatchers("/subscriptions/**")?.permitAll()
-            ?.anyRequest()?.authenticated()
+            // use /api/... for non-GraphQL API resources that require authentication
+            ?.antMatchers("/api/**")?.authenticated()
+            ?.anyRequest()?.permitAll()
         ?.and()
             ?.formLogin()
+                // force redirect to React's login page
                 ?.loginPage("/login")
-                ?.permitAll()
-        ?.and()
-            ?.logout()
-            ?.permitAll()
         ?.and()
             ?.csrf()?.ignoringAntMatchers("/graphql")
     http?.sessionManagement()
