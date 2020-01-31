@@ -6,6 +6,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Authority } from '../hooks/useHasAuthority'
 import useSubscribeToGlobalEvents from '../hooks/useSubscribeToGlobalEvents'
 import { routerConfig } from '../router.config'
+import AppFooter from './AppFooter'
 import Authorized from './Authorized'
 import RightHeader from './RightHeader'
 
@@ -35,6 +36,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
   useSubscribeToGlobalEvents()
 
   const renderRightHeader = () => <RightHeader logout={logout} />
+  const renderFooter = () => <AppFooter />
 
   return (
     <ProLayout
@@ -45,6 +47,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
       disableContentMargin={false}
       itemRender={breadcrumbItemRender}
       rightContentRender={renderRightHeader}
+      footerRender={renderFooter}
     >
       {children}
     </ProLayout>
