@@ -36,6 +36,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
   useSubscribeToGlobalEvents()
 
   const renderRightHeader = () => <RightHeader logout={logout} />
+  const renderFooter = () => <AppFooter />
 
   return (
     <ProLayout
@@ -46,7 +47,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
       disableContentMargin={false}
       itemRender={breadcrumbItemRender}
       rightContentRender={renderRightHeader}
-      footerRender={() => <AppFooter/>}
+      footerRender={renderFooter}
     >
       {children}
     </ProLayout>

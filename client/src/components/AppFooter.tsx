@@ -1,7 +1,7 @@
 import { Layout, Tooltip } from 'antd'
+import preval from 'preval.macro'
 import React from 'react'
 import './AppFooter.less'
-import preval from 'preval.macro'
 
 const repoUrl = 'https://github.com/code-freak/code-freak'
 
