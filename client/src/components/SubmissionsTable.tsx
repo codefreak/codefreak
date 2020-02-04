@@ -1,9 +1,20 @@
-import { Button, Col, Icon, Input, Modal, Row, Table, Tooltip } from 'antd'
-import React, { ChangeEvent, useState } from 'react'
+import {
+  Button,
+  Col,
+  Icon,
+  Input,
+  message,
+  Modal,
+  Row,
+  Table,
+  Tooltip
+} from 'antd'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import {
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult,
-  PendingEvaluationStatus
+  PendingEvaluationStatus,
+  useStartAssignmentEvaluationMutation
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { displayName } from '../services/user'
@@ -45,6 +56,29 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     setSubmissions(filterSubmissions(allSubmissions, e.target.value))
   }
 
+  const [
+    startAssignmentEvaluation,
+    assignmentEvaluationResult
+  ] = useStartAssignmentEvaluationMutation({
+    variables: { assignmentId: assignment.id }
+  })
+
+  const onReEvaluate = () => startAssignmentEvaluation()
+
+  // show message with number of queued evaluations
+  useEffect(() => {
+    if (assignmentEvaluationResult.data) {
+      const {
+        startAssignmentEvaluation: queuedEvaluations
+      } = assignmentEvaluationResult.data
+      if (queuedEvaluations.length) {
+        message.success(`Queued ${queuedEvaluations.length} evaluation(s)`)
+      } else {
+        message.info(`No new evaluations queued`)
+      }
+    }
+  }, [assignmentEvaluationResult])
+
   const titleFunc = () => {
     return (
       <Row>
@@ -57,7 +91,15 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
         </Col>
         <Col span={18} style={{ textAlign: 'right' }}>
           <Button
-            type="primary"
+            loading={assignmentEvaluationResult.loading}
+            onClick={onReEvaluate}
+            type="default"
+            icon="reload"
+          >
+            Evaluate all submission
+          </Button>
+          <Button
+            type="default"
             href={assignment.submissionCsvUrl}
             icon="download"
           >
