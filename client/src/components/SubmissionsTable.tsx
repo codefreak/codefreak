@@ -96,7 +96,7 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
             type="default"
             icon="reload"
           >
-            Evaluate all submission
+            Evaluate all submissions
           </Button>
           <Button
             type="default"
