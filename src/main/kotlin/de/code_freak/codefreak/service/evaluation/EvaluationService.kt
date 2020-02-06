@@ -40,14 +40,16 @@ class EvaluationService : BaseService() {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  fun startEvaluation(assignment: Assignment) {
+  fun startEvaluation(assignment: Assignment): List<Answer> {
     val submissions = submissionService.findSubmissionsOfAssignment(assignment.id)
-    submissions.flatMap { it.answers }.map {
+    return submissions.flatMap { it.answers }.mapNotNull {
       try {
         startEvaluation(it)
+        it
       } catch (e: IllegalStateException) {
         // evaluation is already fresh or running
         log.debug("Not queuing evaluation for answer ${it.id}: ${e.message}")
+        null
       }
     }
   }
