@@ -3,3 +3,12 @@ mutation StartEvaluation($answerId: ID!) {
     status
   }
 }
+
+mutation StartAssignmentEvaluation($assignmentId: ID!) {
+  startAssignmentEvaluation(assignmentId: $assignmentId) {
+    answer {
+      id
+    }
+    status
+  }
+}

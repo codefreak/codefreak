@@ -1,9 +1,22 @@
-import { Button, Col, Icon, Input, Modal, Row, Table, Tooltip } from 'antd'
-import React, { ChangeEvent, useState } from 'react'
+import {
+  Button,
+  Col,
+  Icon,
+  Input,
+  message,
+  Modal,
+  Row,
+  Table,
+  Tooltip
+} from 'antd'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import {
   EvaluationStepResult,
-  GetAssignmentWithSubmissionsQueryResult
+  GetAssignmentWithSubmissionsQueryResult,
+  PendingEvaluationStatus,
+  useStartAssignmentEvaluationMutation
 } from '../generated/graphql'
+import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { displayName } from '../services/user'
 import EvaluationResult from './EvaluationResult'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
@@ -43,6 +56,29 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     setSubmissions(filterSubmissions(allSubmissions, e.target.value))
   }
 
+  const [
+    startAssignmentEvaluation,
+    assignmentEvaluationResult
+  ] = useStartAssignmentEvaluationMutation({
+    variables: { assignmentId: assignment.id }
+  })
+
+  const onReEvaluate = () => startAssignmentEvaluation()
+
+  // show message with number of queued evaluations
+  useEffect(() => {
+    if (assignmentEvaluationResult.data) {
+      const {
+        startAssignmentEvaluation: queuedEvaluations
+      } = assignmentEvaluationResult.data
+      if (queuedEvaluations.length) {
+        message.success(`Queued ${queuedEvaluations.length} evaluation(s)`)
+      } else {
+        message.info(`No new evaluations queued`)
+      }
+    }
+  }, [assignmentEvaluationResult])
+
   const titleFunc = () => {
     return (
       <Row>
@@ -55,7 +91,15 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
         </Col>
         <Col span={18} style={{ textAlign: 'right' }}>
           <Button
-            type="primary"
+            loading={assignmentEvaluationResult.loading}
+            onClick={onReEvaluate}
+            type="default"
+            icon="reload"
+          >
+            Evaluate all submissions
+          </Button>
+          <Button
+            type="default"
             href={assignment.submissionCsvUrl}
             icon="download"
           >
@@ -107,24 +151,35 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
   )
 }
 
-const getAnswerFromSubmission = (
-  submission: Submission,
+const AnswerSummary: React.FC<{
   task: Task
-): Answer | undefined =>
-  submission.answers.find(candidate => candidate.task.id === task.id)
+  user: Submission['user']
+  answer: Answer
+}> = ({ task, user, answer }) => {
+  const {
+    latestEvaluation,
+    pendingEvaluationStatus,
+    loading
+  } = useAnswerEvaluation(
+    answer.id,
+    answer.latestEvaluation,
+    answer.pendingEvaluation ? answer.pendingEvaluation.status : null
+  )
 
-const renderAnswer = (task: Task, submission: Submission) => {
-  const answer = getAnswerFromSubmission(submission, task)
-
-  if (answer === undefined) {
+  // prevent flashing of old evaluation result by also showing loading indicator for fetching new results
+  if (
+    loading ||
+    pendingEvaluationStatus === PendingEvaluationStatus.Queued ||
+    pendingEvaluationStatus === PendingEvaluationStatus.Running
+  ) {
     return (
-      <Tooltip title="No answer submitted">
-        <Icon type="stop" className="no-answer" />
+      <Tooltip title="Evaluating answer…">
+        <Icon type="loading" />
       </Tooltip>
     )
   }
 
-  if (!answer.latestEvaluation) {
+  if (!latestEvaluation) {
     return (
       <Tooltip title="Answer has not been evaluated, yet">
         <Icon type="question-circle" />
@@ -135,8 +190,8 @@ const renderAnswer = (task: Task, submission: Submission) => {
   return (
     <EvaluationStepOverview
       task={task}
-      user={submission.user}
-      evaluation={answer.latestEvaluation}
+      user={user}
+      evaluation={latestEvaluation}
     />
   )
 }
@@ -204,7 +259,27 @@ const buildEvaluationFilter = (task: Task) => (
   }
 }
 
+const getAnswerFromSubmission = (
+  submission: Submission,
+  task: Task
+): Answer | undefined =>
+  submission.answers.find(candidate => candidate.task.id === task.id)
+
 const renderTaskColumnGroups = (tasks: Task[]) => {
+  const renderAnswer = (task: Task, submission: Submission) => {
+    const answer = getAnswerFromSubmission(submission, task)
+
+    if (!answer) {
+      return (
+        <Tooltip title="No answer submitted">
+          <Icon type="stop" className="no-answer" />
+        </Tooltip>
+      )
+    }
+
+    return <AnswerSummary user={submission.user} task={task} answer={answer} />
+  }
+
   // distribute remaining 60% width over all task columns
   const width = Math.floor(60 / tasks.length)
   return tasks.map(task => {

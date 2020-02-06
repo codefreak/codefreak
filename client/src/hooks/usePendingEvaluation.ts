@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
   PendingEvaluationStatus,
-  useGetPendingEvaluationQuery,
-  usePendingEvaluationUpdatedSubscription
+  useGetPendingEvaluationQuery
 } from '../services/codefreak-api'
+import usePendingEvaluationUpdated from './usePendingEvaluationUpdated'
 
 const usePendingEvaluation = (
   answerId: string
@@ -12,7 +12,7 @@ const usePendingEvaluation = (
 
   const pendingEvaluation = useGetPendingEvaluationQuery({
     variables: { answerId },
-    fetchPolicy: 'cache-and-network'
+    fetchPolicy: 'network-only'
   })
 
   useEffect(() => {
@@ -25,14 +25,7 @@ const usePendingEvaluation = (
     }
   }, [setStatus, pendingEvaluation.data])
 
-  usePendingEvaluationUpdatedSubscription({
-    variables: { answerId },
-    onSubscriptionData: data => {
-      if (data.subscriptionData.data) {
-        setStatus(data.subscriptionData.data.pendingEvaluationUpdated.status)
-      }
-    }
-  })
+  usePendingEvaluationUpdated(answerId, setStatus)
 
   return { status, loading: pendingEvaluation.loading }
 }
