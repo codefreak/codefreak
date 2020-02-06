@@ -9,7 +9,7 @@ import TaskList from '../../components/TaskList'
 import { useGetTaskPoolQuery } from '../../generated/graphql'
 
 const TaskPoolPage: React.FC = () => {
-  const result = useGetTaskPoolQuery()
+  const result = useGetTaskPoolQuery({ fetchPolicy: 'cache-and-network' })
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
