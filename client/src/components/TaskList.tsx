@@ -1,5 +1,4 @@
-import { QueryResult } from '@apollo/react-common'
-import { Button, Card, Modal } from 'antd'
+import { Button, Card, Modal, Tooltip } from 'antd'
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
@@ -23,8 +22,10 @@ interface RenderProps {
 const renderTask = (props: RenderProps) => (task: Task) => {
   const confirmDelete = () =>
     confirm({
-      title: 'Do you want to delete this task from the task pool?',
-      content: 'This cannot be undone! The task will be lost forever.',
+      title: 'Are you sure?',
+      content: task.inPool
+        ? 'You are deleting this task from the task pool. This cannot be undone!'
+        : 'You are removing this task from the assignment. The original template will stay in the task pool. All other data (including student submissions) will be lost.',
       async onOk() {
         await props.delete(task.id)
       }
@@ -46,12 +47,19 @@ const renderTask = (props: RenderProps) => (task: Task) => {
       key={task.id}
       style={{ marginBottom: 16 }}
       extra={
-        <Button
-          onClick={confirmDelete}
-          type="dashed"
-          shape="circle"
-          icon="delete"
-        />
+        task.editable ? (
+          <Tooltip
+            title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
+            placement="left"
+          >
+            <Button
+              onClick={confirmDelete}
+              type="dashed"
+              shape="circle"
+              icon="delete"
+            />
+          </Tooltip>
+        ) : null
       }
     >
       {task.body ? <ReactMarkdown source={task.body} /> : null}
@@ -70,12 +78,12 @@ interface TaskListProps {
 }
 
 const TaskList: React.FC<TaskListProps> = props => {
-  const [deleteTask, deleteTaskResult] = useDeleteTaskMutation()
+  const [deleteTask] = useDeleteTaskMutation()
   const renderProps: RenderProps = {
     delete: async (id: string) => {
       const result = await deleteTask({ variables: { id } })
       if (result.data) {
-        messageService.success('Task deleted')
+        messageService.success('Task removed')
         props.update()
       }
     }

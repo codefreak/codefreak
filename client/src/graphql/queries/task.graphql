@@ -3,6 +3,8 @@ fragment taskListItem on Task {
   title
   position
   body
+  editable
+  inPool
 }
 
 query GetTaskList($assignmentId: ID!) {

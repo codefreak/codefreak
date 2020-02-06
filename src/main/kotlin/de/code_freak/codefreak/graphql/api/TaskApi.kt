@@ -6,6 +6,7 @@ import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.auth.hasAuthority
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.graphql.BaseDto
 import de.code_freak.codefreak.graphql.BaseResolver
@@ -29,6 +30,11 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val body = entity.body
   val createdAt = entity.createdAt
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
+  val inPool = entity.assignment == null
+  val editable by lazy {
+    authorization.isCurrentUser(entity.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
+    // TODO depend on assignment status
+  }
 
   val evaluationSteps by lazy {
     val taskDefinition = serviceAccess.getService(TaskService::class).getTaskDefinition(entity.id)
