@@ -94,5 +94,4 @@ class TaskMutation : BaseResolver(), Mutation {
     serviceAccess.getService(TaskService::class).deleteTask(task.id)
     true
   }
-
 }
