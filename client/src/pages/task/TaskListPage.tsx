@@ -1,5 +1,7 @@
+import Emoji from 'a11y-react-emoji'
 import React from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
+import EmptyListCallToAction from '../../components/EmptyListCallToAction'
 import TaskList from '../../components/TaskList'
 import useIdParam from '../../hooks/useIdParam'
 import { useGetTaskListQuery } from '../../services/codefreak-api'
@@ -12,9 +14,17 @@ const TaskListPage: React.FC = () => {
     return <AsyncPlaceholder result={result} />
   }
 
+  const { tasks } = result.data.assignment
+
   const update = () => result.refetch()
 
-  return <TaskList tasks={result.data.assignment.tasks} update={update} />
+  return tasks.length > 0 ? (
+    <TaskList tasks={tasks} update={update} />
+  ) : (
+    <EmptyListCallToAction title="This assignment does not have any tasks yet">
+      Click here to add the first task! <Emoji symbol="✨" />
+    </EmptyListCallToAction>
+  )
 }
 
 export default TaskListPage
