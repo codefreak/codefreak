@@ -14,16 +14,16 @@ const TaskListPage: React.FC = () => {
     return <AsyncPlaceholder result={result} />
   }
 
-  const { tasks } = result.data.assignment
+  const { tasks, editable } = result.data.assignment
 
   const update = () => result.refetch()
 
-  return tasks.length > 0 ? (
-    <TaskList tasks={tasks} update={update} />
-  ) : (
+  return tasks.length === 0 && editable ? (
     <EmptyListCallToAction title="This assignment does not have any tasks yet">
       Click here to add the first task! <Emoji symbol="✨" />
     </EmptyListCallToAction>
+  ) : (
+    <TaskList tasks={tasks} update={update} />
   )
 }
 

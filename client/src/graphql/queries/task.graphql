@@ -10,6 +10,7 @@ fragment taskListItem on Task {
 query GetTaskList($assignmentId: ID!) {
   assignment(id: $assignmentId) {
     id
+    editable
     tasks {
       ...taskListItem
       answer {
