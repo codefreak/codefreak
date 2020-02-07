@@ -30,9 +30,10 @@ RUN find /app -maxdepth 1 -name 'code-freak-*.jar' -exec ln -fs {} /app/code-fre
 
 USER code-freak
 
-# Override this when running the container with -e SPRING_PROFILES_ACTIVE="dev"
-ENV SPRING_PROFILES_ACTIVE "prod"
-ENV SENTRY_ENVIRONMENT "$SPRING_PROFILES_ACTIVE"
+# Override this when running the container with -e ENV="dev"
+ENV ENV "prod"
+ENV SPRING_PROFILES_ACTIVE "$ENV"
+ENV SENTRY_ENVIRONMENT "$ENV"
 ENV SENTRY_RELEASE "${GIT_TAG}"
 
 WORKDIR /app

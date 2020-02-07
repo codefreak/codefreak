@@ -1,5 +1,6 @@
 package de.code_freak.codefreak.service
 
+import de.code_freak.codefreak.Env
 import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Classroom
@@ -26,7 +27,7 @@ import java.time.Instant
  * This should only be needed until we have a UI for creation
  */
 @Service
-@Profile("dev")
+@Profile(Env.DEV)
 class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered {
 
   @Autowired lateinit var userRepository: UserRepository
