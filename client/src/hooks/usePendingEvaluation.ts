@@ -3,10 +3,12 @@ import {
   PendingEvaluationStatus,
   useGetPendingEvaluationQuery
 } from '../services/codefreak-api'
+import { noop } from '../services/util'
 import usePendingEvaluationUpdated from './usePendingEvaluationUpdated'
 
 const usePendingEvaluation = (
-  answerId: string
+  answerId: string,
+  onFinish: () => void = noop
 ): { status: PendingEvaluationStatus | null; loading: boolean } => {
   const [status, setStatus] = useState<PendingEvaluationStatus | null>(null)
 
@@ -25,7 +27,12 @@ const usePendingEvaluation = (
     }
   }, [setStatus, pendingEvaluation.data])
 
-  usePendingEvaluationUpdated(answerId, setStatus)
+  usePendingEvaluationUpdated(answerId, newStatus => {
+    if (newStatus === 'FINISHED' && status !== 'FINISHED') {
+      onFinish()
+    }
+    setStatus(newStatus)
+  })
 
   return { status, loading: pendingEvaluation.loading }
 }

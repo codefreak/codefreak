@@ -16,7 +16,7 @@ import {
 } from '../../services/codefreak-api'
 import { createRoutes } from '../../services/custom-breadcrump'
 import AnswerPage from '../answer/AnswerPage'
-import EvaluationPage from '../evaluation/EvaluationPage'
+import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 

@@ -11,6 +11,17 @@ query GetEvaluationOverview($answerId: ID!) {
   }
 }
 
+query GetEvaluationHistory($answerId: ID!) {
+  answer(id: $answerId) {
+    id
+    evaluations {
+      id
+      createdAt
+      stepsResultSummary
+    }
+  }
+}
+
 query GetPendingEvaluation($answerId: ID!) {
   answer(id: $answerId) {
     id
