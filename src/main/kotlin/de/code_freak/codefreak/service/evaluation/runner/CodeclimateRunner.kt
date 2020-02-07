@@ -38,7 +38,7 @@ class CodeclimateRunner : EvaluationRunner {
   }
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
-    var codeclimateJson = containerService.runCodeclimate(answer)
+    val codeclimateJson = containerService.runCodeclimate(answer)
     return this.parseCodeclimateJson(codeclimateJson).map { issue ->
       Feedback(issue.description).apply {
         group = "${issue.engine_name}/${issue.check_name}"

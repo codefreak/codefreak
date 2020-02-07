@@ -35,7 +35,7 @@ class EvaluationStep(
    * Also useful to give more information about failures
    */
   @Column(length = 1048576)
-  @Lob()
+  @Lob
   @Type(type = "org.hibernate.type.TextType")
   var summary: String? = null
 

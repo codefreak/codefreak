@@ -61,10 +61,6 @@ class EvaluationService : BaseService() {
     evaluationQueue.insert(answer.id)
   }
 
-  fun getLatestEvaluations(answerIds: Iterable<UUID>): Map<UUID, Optional<Evaluation>> {
-    return answerIds.map { it to getLatestEvaluation(it) }.toMap()
-  }
-
   fun getLatestEvaluation(answerId: UUID) = evaluationRepository.findFirstByAnswerIdOrderByCreatedAtDesc(answerId)
 
   fun isEvaluationPending(answerId: UUID) = isEvaluationInQueue(answerId) || evaluationQueue.isRunning(answerId)

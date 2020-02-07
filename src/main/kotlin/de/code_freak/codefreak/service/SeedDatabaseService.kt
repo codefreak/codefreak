@@ -3,11 +3,9 @@ package de.code_freak.codefreak.service
 import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Classroom
-import de.code_freak.codefreak.entity.Requirement
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
-import de.code_freak.codefreak.repository.RequirementRepository
 import de.code_freak.codefreak.repository.UserRepository
 import de.code_freak.codefreak.util.TarUtil
 import org.slf4j.LoggerFactory
@@ -32,7 +30,6 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
   @Autowired lateinit var userRepository: UserRepository
   @Autowired lateinit var assignmentRepository: AssignmentRepository
   @Autowired lateinit var classroomRepository: ClassroomRepository
-  @Autowired lateinit var requirementRepository: RequirementRepository
   @Autowired lateinit var taskService: TaskService
   @Autowired lateinit var assignmentService: AssignmentService
 
@@ -95,10 +92,6 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
       taskService.createFromTar(it.toByteArray(), null, teacher, 0)
     }
-
-    val eval1 = Requirement(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
-    val eval2 = Requirement(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))
-    requirementRepository.saveAll(listOf(eval1, eval2))
 
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks").file, it)
