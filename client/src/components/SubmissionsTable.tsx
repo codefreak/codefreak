@@ -50,10 +50,14 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
   assignment
 }) => {
   const allSubmissions = assignment.submissions
-  const [submissions, setSubmissions] = useState(allSubmissions)
+  const [filterCriteria, setFilterCriteria] = useState<string>()
+
+  const submissions = filterCriteria
+    ? filterSubmissions(allSubmissions, filterCriteria)
+    : allSubmissions
 
   const submissionSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setSubmissions(filterSubmissions(allSubmissions, e.target.value))
+    setFilterCriteria(e.target.value)
   }
 
   const [
