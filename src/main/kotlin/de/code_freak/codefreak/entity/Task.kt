@@ -3,6 +3,7 @@ package de.code_freak.codefreak.entity
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
 import java.time.Instant
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -49,8 +50,11 @@ class Task(
   /**
    * Evaluations that will be applied to this task
    */
-  @OneToMany(mappedBy = "task")
+  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
   var requirements: MutableSet<Requirement> = mutableSetOf()
+
+  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
+  var answers: MutableSet<Answer> = mutableSetOf()
 
   /**
    * Same like position but one-based index

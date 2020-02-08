@@ -1,0 +1,9 @@
+mutation DeleteTask($id: ID!) {
+  deleteTask(id: $id)
+}
+
+mutation CreateTask {
+  createTask {
+    id
+  }
+}

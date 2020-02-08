@@ -3,8 +3,10 @@ package de.code_freak.codefreak.graphql.api
 import com.expediagroup.graphql.annotations.GraphQLID
 import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
+import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.auth.hasAuthority
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.graphql.BaseDto
 import de.code_freak.codefreak.graphql.BaseResolver
@@ -28,6 +30,11 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val body = entity.body
   val createdAt = entity.createdAt
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
+  val inPool = entity.assignment == null
+  val editable by lazy {
+    authorization.isCurrentUser(entity.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
+    // TODO depend on assignment status
+  }
 
   val evaluationSteps by lazy {
     val taskDefinition = serviceAccess.getService(TaskService::class).getTaskDefinition(entity.id)
@@ -70,5 +77,21 @@ class TaskQuery : BaseResolver(), Query {
     serviceAccess.getService(TaskService::class)
         .getTaskPool(authorization.currentUser.id)
         .map { TaskDto(it, this) }
+  }
+}
+
+@Component
+class TaskMutation : BaseResolver(), Mutation {
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun createTask(): TaskDto = context {
+    serviceAccess.getService(TaskService::class).createEmptyTask(authorization.currentUser).let { TaskDto(it, this) }
+  }
+
+  fun deleteTask(id: UUID): Boolean = context {
+    val task = serviceAccess.getService(TaskService::class).findTask(id)
+    authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    serviceAccess.getService(TaskService::class).deleteTask(task.id)
+    true
   }
 }
