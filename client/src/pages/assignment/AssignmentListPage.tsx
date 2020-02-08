@@ -25,7 +25,7 @@ const AssignmentListPage: React.FC = () => {
           <Authorized authority="ROLE_TEACHER">
             <Link to="/assignments/create" key="1">
               <Button type="primary" icon="plus">
-                Create
+                Create Assignment
               </Button>
             </Link>
           </Authorized>

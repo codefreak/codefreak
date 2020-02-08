@@ -34,7 +34,8 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
   >()
 
   const { data: authResult, loading } = useGetAuthenticatedUserQuery({
-    context: { disableGlobalErrorHandling: true }
+    context: { disableGlobalErrorHandling: true },
+    fetchPolicy: 'network-only'
   })
 
   const [logout, { data: logoutSucceeded }] = useLogoutMutation()

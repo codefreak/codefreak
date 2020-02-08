@@ -56,7 +56,12 @@ const apolloClient = new ApolloClient({
       httpLink
     )
   ]),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: 'cache-and-network'
+    }
+  }
 })
 
 ReactDOM.render(
