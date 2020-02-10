@@ -1,0 +1,27 @@
+databaseChangeLog:
+- changeSet:
+    id: 1581070754125-2
+    author: hkasch (generated)
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: requirement
+        constraintName: FKht56di1qi1nu7snq745g9ilxn
+- changeSet:
+    id: 1581070754125-3
+    author: hkasch (generated)
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: requirement_adapter_config
+        constraintName: FKoku0pk2jphfp8aenheaiifc3p
+- changeSet:
+    id: 1581070754125-4
+    author: hkasch (generated)
+    changes:
+    - dropTable:
+        tableName: requirement
+- changeSet:
+    id: 1581070754125-5
+    author: hkasch (generated)
+    changes:
+    - dropTable:
+        tableName: requirement_adapter_config

@@ -13,7 +13,7 @@ import javax.persistence.ManyToOne
 @Entity
 class Feedback(
   @Column(length = 1048576)
-  @Lob()
+  @Lob
   @Type(type = "org.hibernate.type.TextType")
   var summary: String
 ) : BaseEntity() {
@@ -32,7 +32,7 @@ class Feedback(
    * Limit is set to 1MiB
    */
   @Column(length = 1048576)
-  @Lob()
+  @Lob
   @Type(type = "org.hibernate.type.TextType")
   var longDescription: String? = null
 

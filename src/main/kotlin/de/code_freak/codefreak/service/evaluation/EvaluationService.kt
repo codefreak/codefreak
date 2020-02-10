@@ -12,7 +12,6 @@ import de.code_freak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.Optional
 import java.util.UUID
 
 @Service
@@ -59,10 +58,6 @@ class EvaluationService : BaseService() {
     check(!isEvaluationUpToDate(answer.id)) { "Evaluation is up to date." }
     check(!isEvaluationPending(answer.id)) { "Evaluation is already running or queued." }
     evaluationQueue.insert(answer.id)
-  }
-
-  fun getLatestEvaluations(answerIds: Iterable<UUID>): Map<UUID, Optional<Evaluation>> {
-    return answerIds.map { it to getLatestEvaluation(it) }.toMap()
   }
 
   fun getLatestEvaluation(answerId: UUID) = evaluationRepository.findFirstByAnswerIdOrderByCreatedAtDesc(answerId)

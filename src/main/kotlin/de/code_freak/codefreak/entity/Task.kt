@@ -47,19 +47,8 @@ class Task(
    */
   var weight: Int?
 ) : BaseEntity(), Comparable<Task> {
-  /**
-   * Evaluations that will be applied to this task
-   */
-  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
-  var requirements: MutableSet<Requirement> = mutableSetOf()
-
   @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
   var answers: MutableSet<Answer> = mutableSetOf()
-
-  /**
-   * Same like position but one-based index
-   */
-  val number get() = this.position.plus(1L)
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
