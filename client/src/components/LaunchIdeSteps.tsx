@@ -18,18 +18,21 @@ const LaunchIdeSteps: React.FC<{
     onError: e => setError(extractErrorMessage(e))
   })
 
-  const checkIde = useCallback(async (url: string) => {
-    try {
-      const res = await fetch(url)
-      if (res.ok) {
-        onReady(url)
-      } else {
-        throw new Error()
+  const checkIde = useCallback(
+    async (url: string) => {
+      try {
+        const res = await fetch(url)
+        if (res.ok) {
+          onReady(url)
+        } else {
+          throw new Error()
+        }
+      } catch (e) {
+        setTimeout(checkIde.bind(null, url), 1000)
       }
-    } catch (e) {
-      setTimeout(checkIde.bind(null, url), 1000)
-    }
-  }, [])
+    },
+    [onReady]
+  )
 
   useEffect(() => {
     startIde().then(res => {
@@ -40,8 +43,8 @@ const LaunchIdeSteps: React.FC<{
     })
   }, [startIde, checkIde])
 
-  const icon = (type: string, step: number) => (
-    <Icon type={step === currentStep && !error ? 'loading' : type} />
+  const icon = (iconType: string, step: number) => (
+    <Icon type={step === currentStep && !error ? 'loading' : iconType} />
   )
 
   return (

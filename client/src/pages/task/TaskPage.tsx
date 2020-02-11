@@ -5,8 +5,6 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
-import IdeButton from '../../components/IdeButton'
-import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
@@ -16,7 +14,6 @@ import {
   useGetTaskQuery
 } from '../../services/codefreak-api'
 import { createRoutes } from '../../services/custom-breadcrump'
-import { shorten } from '../../services/short-id'
 import AnswerPage from '../answer/AnswerPage'
 import EvaluationPage from '../evaluation/EvaluationPage'
 import NotFoundPage from '../NotFoundPage'
@@ -48,10 +45,6 @@ const TaskPage: React.FC = () => {
     { key: '', tab: 'Task' },
     ...answerTab,
     {
-      key: '/edit-answer',
-      tab: 'Edit Answer'
-    },
-    {
       key: '/evaluation',
       disabled: !answer,
       tab: (
@@ -80,7 +73,6 @@ const TaskPage: React.FC = () => {
 
   const extra = pool ? null : answer ? (
     <>
-      <IdeButton answer={answer} size="large" />
       <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
     </>
   ) : (
@@ -108,13 +100,6 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path} component={TaskDetailsPage} />
-        <Route path={`${path}/edit-answer`}>
-          {answer ? (
-            <IdeIframe id={answer.id} type="answer" />
-          ) : (
-            <NotFoundPage />
-          )}
-        </Route>
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
