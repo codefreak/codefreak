@@ -75,11 +75,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
     val assignment2 = Assignment("Java Assignment", teacher, classroom2)
     assignmentRepository.saveAll(listOf(assignment1, assignment2))
 
-    val task1 = ByteArrayOutputStream().use {
+    ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
       taskService.createFromTar(it.toByteArray(), assignment1, teacher, 0)
     }
-    val task2 = ByteArrayOutputStream().use {
+    ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
       taskService.createFromTar(it.toByteArray(), assignment2, teacher, 0)
     }
