@@ -1,14 +1,4 @@
-import {
-  Button,
-  Col,
-  Icon,
-  Input,
-  message,
-  Modal,
-  Row,
-  Table,
-  Tooltip
-} from 'antd'
+import { Button, Col, Icon, Input, message, Row, Table, Tooltip } from 'antd'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import {
   EvaluationStepResult,
@@ -17,8 +7,7 @@ import {
   useStartAssignmentEvaluationMutation
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
-import { displayName } from '../services/user'
-import EvaluationResult from './EvaluationResult'
+import EvaluationResultPopover from './EvaluationResultPopover'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
 
@@ -205,35 +194,25 @@ const EvaluationStepOverview: React.FC<{
   user: Submission['user']
   evaluation: NonNullable<Answer['latestEvaluation']>
 }> = ({ evaluation, task, user }) => {
-  const [modalOpen, setModalOpen] = useState(false)
-
-  const openModal = () => setModalOpen(true)
-  const closeModal = () => setModalOpen(false)
-
   return (
     <>
-      <Modal
-        visible={modalOpen}
-        title={`Evaluation Results for ${task.title} of ${displayName(user)}`}
-        onCancel={closeModal}
-        footer={null}
-        width="75%"
-        bodyStyle={{ backgroundColor: '#f0f2f5' }}
-      >
-        <EvaluationResult evaluationId={evaluation.id} />
-      </Modal>
       <div className="evaluation-step-results">
-        {evaluation.steps.map(stepResult => (
-          <EvaluationStepResultIcon
-            key={stepResult.id}
-            stepResult={stepResult}
-          />
+        {evaluation.steps.map(step => (
+          <EvaluationStepResultIcon key={step.id} stepResult={step.result} />
         ))}
-        <Tooltip title="Show evaluation result">
-          <Button type="primary" icon="bars" onClick={openModal}>
+        <EvaluationResultPopover
+          task={task}
+          user={user}
+          steps={evaluation.steps}
+        >
+          <Button
+            type="primary"
+            icon="bars"
+            onClick={() => message.info('TODO')}
+          >
             Details
           </Button>
-        </Tooltip>
+        </EvaluationResultPopover>
       </div>
     </>
   )
