@@ -16,8 +16,8 @@ import {
 import { messageService } from '../../services/message'
 import NotFoundPage from '../NotFoundPage'
 
-const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id' | 'sourceUrl'> }> = ({
-  answer: { id, sourceUrl }
+const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
+  answer: { id }
 }) => {
   const [
     uploadSource,
