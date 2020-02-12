@@ -1,5 +1,6 @@
 import { Button, Col, Icon, Input, message, Row, Table, Tooltip } from 'antd'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import {
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult,
@@ -7,6 +8,8 @@ import {
   useStartAssignmentEvaluationMutation
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
+import { getEntityPath } from '../services/entity-path'
+import { shorten } from '../services/short-id'
 import EvaluationResultPopover from './EvaluationResultPopover'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
@@ -194,6 +197,12 @@ const EvaluationStepOverview: React.FC<{
   user: Submission['user']
   evaluation: NonNullable<Answer['latestEvaluation']>
 }> = ({ evaluation, task, user }) => {
+  const history = useHistory()
+
+  const onDetailsClick = () => {
+    history.push(getEntityPath(task) + '/evaluation?user=' + shorten(user.id))
+  }
+
   return (
     <>
       <div className="evaluation-step-results">
@@ -205,11 +214,7 @@ const EvaluationStepOverview: React.FC<{
           user={user}
           steps={evaluation.steps}
         >
-          <Button
-            type="primary"
-            icon="bars"
-            onClick={() => message.info('TODO')}
-          >
+          <Button type="primary" icon="bars" onClick={onDetailsClick}>
             Details
           </Button>
         </EvaluationResultPopover>

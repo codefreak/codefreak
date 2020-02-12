@@ -4,6 +4,7 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import EvaluationResult from '../../components/EvaluationResult'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import usePendingEvaluation from '../../hooks/usePendingEvaluation'
+import { useQueryParam } from '../../hooks/useQuery'
 import useSubPath from '../../hooks/useSubPath'
 import {
   PendingEvaluationStatus,
@@ -19,6 +20,7 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
   const [step, setStep] = useState(0)
   const [extendedSteps, setExtendedSteps] = useState(false)
   const pendingEvaluation = usePendingEvaluation(answerId)
+  const userId = useQueryParam('user')
 
   useEffect(() => {
     if (pendingEvaluation.loading) {
@@ -52,6 +54,9 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
   }
 
   const { answer } = result.data
+  const onTabChange = (activeKey: string) => {
+    subPath.set(activeKey, userId ? { user: userId } : undefined)
+  }
 
   return (
     <>
@@ -93,7 +98,7 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
           />
         </Steps>
       </div>
-      <Tabs defaultActiveKey={subPath.get()} onChange={subPath.set}>
+      <Tabs defaultActiveKey={subPath.get()} onChange={onTabChange}>
         <TabPane tab="Latest Evaluation" key="">
           {answer.latestEvaluation ? (
             <EvaluationResult evaluationId={answer.latestEvaluation.id} />
