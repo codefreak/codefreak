@@ -30,4 +30,22 @@
   border: none;
   width: 100%;
   height: 100%;
+
+  .main-content & {
+    margin: -24px -24px 0;
+    width: calc(100% + 48px);
+    height: calc(100% + 24px);
+  }
+}
+
+.main-content {
+  flex-grow: 1;
+  padding-top: 24px;
+}
+
+.ant-menu.content-submenu {
+  margin: -24px -24px 0;
+  border-top: 1px solid #1890ff;
+  background-color: rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 6px 3px -5px rgba(0, 0, 0, 0.25);
 }

@@ -70,30 +70,39 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
   }
 
   return (
-    <Row gutter={[16, 16]} type="flex" style={{ flexGrow: 1 }}>
-      <Col md={8} xl={4}>
-        <Menu onSelect={onClickMenu} selectedKeys={[subPath.get() || '/']}>
-          <Menu.Item key="/">
-            <Icon type="file" />
-            Current Answer
-          </Menu.Item>
-          <Menu.Item key="/edit">
-            <Icon type="cloud" />
-            Online IDE
-          </Menu.Item>
-          <Menu.Item key="/upload">
-            <Icon type="upload" />
-            Upload/Import Files
-          </Menu.Item>
-        </Menu>
-      </Col>
-      <Col md={16} xl={20}>
+    <>
+      <Menu
+        className="content-submenu"
+        onSelect={onClickMenu}
+        selectedKeys={[subPath.get() || '/']}
+        mode="horizontal"
+      >
+        <Menu.Item key="/">
+          <Icon type="file" />
+          Current Answer
+        </Menu.Item>
+        <Menu.Item key="/edit">
+          <Icon type="cloud" />
+          Online IDE
+        </Menu.Item>
+        <Menu.Item key="/upload">
+          <Icon type="upload" />
+          Upload/Import Files
+        </Menu.Item>
+      </Menu>
+      <div className="main-content">
         <Switch>
           <Route exact path={path}>
-            TODO
-            <ArchiveDownload url={answer.sourceUrl}>
-              Download source code
-            </ArchiveDownload>
+            <Card
+              title="Your current uploaded files"
+              extra={
+                <ArchiveDownload url={answer.sourceUrl}>
+                  Download source code
+                </ArchiveDownload>
+              }
+            >
+              WIP
+            </Card>
           </Route>
           <Route path={path + '/edit'}>
             <IdeIframe type="answer" id={answer.id} />
@@ -103,8 +112,8 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
           </Route>
           <Route component={NotFoundPage} />
         </Switch>
-      </Col>
-    </Row>
+      </div>
+    </>
   )
 }
 

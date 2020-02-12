@@ -6,7 +6,12 @@ const IdeIframe: React.FC<{ type: string; id: string }> = ({ type, id }) => {
   const [ideUrl, setIdeUrl] = useState<string | undefined>()
 
   return ideUrl ? (
-    <iframe key={`ide-iframe-${id}`} className="ide-iframe" src={ideUrl} />
+    <iframe
+      key={`ide-iframe-${id}`}
+      className="ide-iframe"
+      src={ideUrl}
+      title="Edit answer"
+    />
   ) : (
     <Centered>
       <LaunchIdeSteps type={type} id={id} onReady={setIdeUrl} />
