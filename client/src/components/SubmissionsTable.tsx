@@ -175,14 +175,6 @@ const AnswerSummary: React.FC<{
     )
   }
 
-  if (!latestEvaluation) {
-    return (
-      <Tooltip title="Answer has not been evaluated, yet">
-        <Icon type="question-circle" />
-      </Tooltip>
-    )
-  }
-
   return (
     <EvaluationStepOverview
       task={task}
@@ -195,12 +187,25 @@ const AnswerSummary: React.FC<{
 const EvaluationStepOverview: React.FC<{
   task: Task
   user: Submission['user']
-  evaluation: NonNullable<Answer['latestEvaluation']>
+  evaluation: Answer['latestEvaluation']
 }> = ({ evaluation, task, user }) => {
   const history = useHistory()
 
   const onDetailsClick = () => {
     history.push(getEntityPath(task) + '/evaluation?user=' + shorten(user.id))
+  }
+
+  if (!evaluation) {
+    return (
+      <div className="evaluation-step-results">
+        <Icon type="question-circle" />
+        <Tooltip title="Answer has not been evaluated, yet">
+          <Button type="primary" icon="bars" onClick={onDetailsClick}>
+            Details
+          </Button>
+        </Tooltip>
+      </div>
+    )
   }
 
   return (

@@ -1,6 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button } from 'antd'
-import React from 'react'
+import React, { createContext } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -14,6 +14,7 @@ import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
 import useSubPath from '../../hooks/useSubPath'
 import {
+  PublicUserFieldsFragment,
   useCreateAnswerMutation,
   useGetTaskQuery
 } from '../../services/codefreak-api'
@@ -25,6 +26,10 @@ import AnswerPage from '../answer/AnswerPage'
 import EvaluationPage from '../evaluation/EvaluationPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
+
+export const DifferentUserContext = createContext<
+  PublicUserFieldsFragment | undefined
+>(undefined)
 
 const TaskPage: React.FC = () => {
   const { path } = useRouteMatch()
@@ -48,7 +53,7 @@ const TaskPage: React.FC = () => {
 
   const { task } = result.data
   const { answer } = task
-  const foreignUser =
+  const differentUser =
     isTeacher && answer && userId ? answer.submission.user : undefined
   const pool = !task.assignment
 
@@ -90,7 +95,7 @@ const TaskPage: React.FC = () => {
   let extra
   if (pool) {
     extra = null
-  } else if (foreignUser && assignment) {
+  } else if (differentUser && assignment) {
     // Show "back to submissions" button for teachers
     const onClick = () =>
       history.push(getEntityPath(assignment) + '/submissions')
@@ -126,8 +131,8 @@ const TaskPage: React.FC = () => {
     )
   }
 
-  const title = foreignUser
-    ? `${task.title} – ${displayName(foreignUser)}`
+  const title = differentUser
+    ? `${task.title} – ${displayName(differentUser)}`
     : task.title
 
   const onTabChange = (activeKey: string) => {
@@ -135,7 +140,7 @@ const TaskPage: React.FC = () => {
   }
 
   return (
-    <>
+    <DifferentUserContext.Provider value={differentUser}>
       <SetTitle>{task.title}</SetTitle>
       <PageHeaderWrapper
         title={title}
@@ -155,7 +160,7 @@ const TaskPage: React.FC = () => {
         </Route>
         <Route component={NotFoundPage} />
       </Switch>
-    </>
+    </DifferentUserContext.Provider>
   )
 }
 

@@ -1,5 +1,5 @@
 import { Card } from 'antd'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
@@ -9,11 +9,14 @@ import {
   useUploadAnswerSourceMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
+import { displayName } from '../../services/user'
+import { DifferentUserContext } from '../task/TaskPage'
 
 const AnswerPage: React.FC<{ answerId: string }> = props => {
   const result = useGetAnswerQuery({
     variables: { id: props.answerId }
   })
+  const differentUser = useContext(DifferentUserContext)
 
   const [
     uploadSource,
@@ -42,6 +45,14 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   const onImport = (url: string) =>
     importSource({ variables: { url, id: answer.id } })
+
+  if (differentUser) {
+    return (
+      <Card title={`Files uploaded by ${displayName(differentUser)}`}>
+        TODO
+      </Card>
+    )
+  }
 
   return (
     <>
