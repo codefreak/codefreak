@@ -126,7 +126,7 @@ object TarUtil {
   inline fun <T> findFile(`in`: InputStream, path: String, consumer: (TarArchiveEntry, TarArchiveInputStream) -> T): T {
     TarArchiveInputStream(`in`).let { tar ->
       generateSequence { tar.nextTarEntry }.forEach {
-        if (it.isFile && normalizeEntryName(it.name) == path) {
+        if (it.isFile && normalizeEntryName(it.name) == normalizeEntryName(path)) {
           return consumer(it, tar)
         }
       }

@@ -1,11 +1,13 @@
-import { Card } from 'antd'
+import { Alert, Button, Card, Icon, Result } from 'antd'
 import React from 'react'
 import AceEditor from 'react-ace'
 import { IMarker } from 'react-ace/src/types'
-import { useGetAnswerFileQuery } from '../generated/graphql'
+import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
+import { basename } from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
 
 import './CodeViewer.less'
+import Centered from './Centered'
 
 interface CodeViewerProps {
   answerId: string
@@ -43,17 +45,45 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     return <AsyncPlaceholder result={result} />
   }
 
-  const { content } = result.data.answerFile
-  let value = content
+  const { content, type } = result.data.answerFile
+
+  if (type !== FileType.File) {
+    return (
+      <Centered>
+        <Result
+          title={
+            <>
+              Can only view Files. <code>${basename(path)}</code> is a $
+              {type.toLowerCase()}`
+            </>
+          }
+          icon={<Icon type="file-unknown" />}
+        />
+      </Centered>
+    )
+  }
+
+  let value = content || ''
+
+  if (/[\x00-\x08\x0E-\x1F]/.test(value)) {
+    return (
+      <Centered>
+        <Result
+          title={
+            <>
+              <code>{basename(path)}</code> is a binary file
+            </>
+          }
+          icon={<Icon type="file-unknown" />}
+        />
+      </Centered>
+    )
+  }
+
   let firstLineNumber = 1
   const markers: IMarker[] = []
   if (lineStart) {
-    value = cropToLines(
-      content,
-      lineStart,
-      lineEnd || lineStart,
-      numContextRows
-    )
+    value = cropToLines(value, lineStart, lineEnd || lineStart, numContextRows)
     firstLineNumber = Math.max(lineStart - numContextRows, 1)
     markers.push({
       startRow: lineStart - firstLineNumber,

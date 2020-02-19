@@ -1,5 +1,6 @@
 import { Card } from 'antd'
 import React, { useEffect } from 'react'
+import AnswerFileBrowser from '../../components/AnswerFileBrowser'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
@@ -45,6 +46,9 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   return (
     <>
+      <Card title="Current Files">
+        <AnswerFileBrowser answerId={answer.id} />
+      </Card>
       <Card
         title="Submit source code"
         extra={

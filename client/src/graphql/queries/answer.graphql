@@ -9,5 +9,13 @@ query GetAnswerFile($id: ID!, $path: String!) {
   answerFile(answerId: $id, path: $path) {
     path
     content
+    type
+  }
+}
+
+query getAnswerFileList($id: ID!) {
+  answerFiles(answerId: $id) {
+    path
+    type
   }
 }
