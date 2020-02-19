@@ -1,10 +1,14 @@
 import { Col, Icon, Result, Row, Tabs } from 'antd'
 import React, { useState } from 'react'
 import { FileType } from '../../services/codefreak-api'
-import { basename, FileSystemDirectoryNode, FileSystemNode } from '../../services/file'
-import AnswerFileTree from './AnswerFileTree'
+import {
+  basename,
+  FileSystemDirectoryNode,
+  FileSystemNode
+} from '../../services/file'
 import Centered from '../Centered'
 import CodeViewer from '../CodeViewer'
+import AnswerFileTree from './AnswerFileTree'
 
 import './index.less'
 
@@ -12,28 +16,15 @@ export interface AnswerFileBrowserProps {
   answerId: string
 }
 
-const renderTreeNodeContent = (
-  answerId: string,
-  file: FileSystemNode | FileSystemDirectoryNode
-) => {
-  if (file.type === FileType.File) {
-    return <CodeViewer answerId={answerId} path={file.path} />
-  }
-
-  if (file.type === FileType.Directory) {
-    return (
-      <Centered>
-        <Result title={file.path} icon={<Icon type="folder-open" />} />
-      </Centered>
-    )
-  }
-}
-
 const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
   const [openedFiles, setOpenedFiles] = useState<FileSystemNode[]>([])
   const [currentFile, setCurrentFile] = useState<FileSystemNode | undefined>()
 
   const onSelectFileInTree = (file: FileSystemNode | undefined) => {
+    if (!file || file.type !== FileType.File) {
+      return
+    }
+
     setCurrentFile(file)
     if (file && openedFiles.indexOf(file) === -1) {
       setOpenedFiles([...openedFiles, file])
@@ -44,7 +35,10 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
     setCurrentFile(openedFiles.find(file => file.path === path))
   }
 
-  const onTabEdit = (path: string | React.MouseEvent<HTMLElement>, action: 'add' | 'remove') => {
+  const onTabEdit = (
+    path: string | React.MouseEvent<HTMLElement>,
+    action: 'add' | 'remove'
+  ) => {
     if (action === 'remove') {
       const newFiles = openedFiles.filter(file => file.path !== path)
       setOpenedFiles(newFiles)
@@ -61,7 +55,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
         <Tabs
           animated={false}
           type="editable-card"
-          hideAdd={true}
+          hideAdd
           className="answer-editor-tabs"
           activeKey={currentFile ? currentFile.path : undefined}
           onTabClick={onSelectTab}
@@ -72,7 +66,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
           ))}
         </Tabs>
         {currentFile ? (
-          renderTreeNodeContent(answerId, currentFile)
+          <CodeViewer answerId={answerId} path={currentFile.path} />
         ) : (
           <Centered>
             <Result

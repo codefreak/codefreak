@@ -15,12 +15,12 @@ const renderTreeNodeRecursive = (
   node: FileSystemNode | FileSystemDirectoryNode
 ) => {
   let filename = basename(node.path)
-  if(filename === '.') {
+  if (filename === '.') {
     filename = '/'
   }
 
   if (!('children' in node) || node.children === undefined) {
-    return <TreeNode title={filename} key={node.path} isLeaf={true} />
+    return <TreeNode title={filename} key={node.path} isLeaf />
   }
 
   return (
@@ -35,7 +35,10 @@ interface AnswerFileTreeProps {
   onFileSelect?: (selectedNode: FileSystemNode | undefined) => void
 }
 
-const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({answerId, onFileSelect}) => {
+const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({
+  answerId,
+  onFileSelect
+}) => {
   const result = useGetAnswerFileListQuery({ variables: { id: answerId } })
 
   if (result.data === undefined) {
@@ -50,7 +53,7 @@ const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({answerId, onFileSelect})
 
   const onSelect = (selectedKeys: string[]) => {
     const path = selectedKeys.shift()
-    if(path && onFileSelect) {
+    if (path && onFileSelect) {
       onFileSelect(answerFiles.find(file => file.path === path))
     }
   }

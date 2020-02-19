@@ -1,5 +1,5 @@
 import { File, FileType } from '../generated/graphql'
-import { basename, fileListToTree, normalizePath, dirname } from './file'
+import { basename, dirname, fileListToTree, normalizePath } from './file'
 
 const cid = { collectionId: '123' }
 const file = { ...cid, type: FileType.File }

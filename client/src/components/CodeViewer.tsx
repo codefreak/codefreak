@@ -6,8 +6,8 @@ import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
 import { basename } from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
 
-import './CodeViewer.less'
 import Centered from './Centered'
+import './CodeViewer.less'
 
 interface CodeViewerProps {
   answerId: string
