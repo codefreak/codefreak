@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Icon, Result } from 'antd'
+import { Card, Icon, Result } from 'antd'
 import React from 'react'
 import AceEditor from 'react-ace'
 import { IMarker } from 'react-ace/src/types'
@@ -96,22 +96,30 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   }
 
   return (
+    <AceEditor
+      fontSize={14}
+      className="code-viewer"
+      readOnly
+      showPrintMargin={false}
+      maxLines={lineStart ? numberOfLines(value) : undefined}
+      value={value}
+      setOptions={{
+        firstLineNumber,
+        highlightActiveLine: false,
+        highlightGutterLine: false
+      }}
+      width="100%"
+      height="100%"
+      markers={markers}
+    />
+  )
+}
+
+export const CodeViewerCard: React.FC<CodeViewerProps> = props => {
+  const { path } = props
+  return (
     <Card title={path} size="small" className="code-viewer-card">
-      <AceEditor
-        fontSize={14}
-        className="code-viewer"
-        readOnly
-        showPrintMargin={false}
-        maxLines={numberOfLines(value)}
-        value={value}
-        setOptions={{
-          firstLineNumber,
-          highlightActiveLine: false,
-          highlightGutterLine: false
-        }}
-        width="100%"
-        markers={markers}
-      />
+      <CodeViewer {...props} />
     </Card>
   )
 }

@@ -1,13 +1,13 @@
 import { Tree } from 'antd'
 import React from 'react'
-import { File, useGetAnswerFileListQuery } from '../generated/graphql'
+import { useGetAnswerFileListQuery } from '../../services/codefreak-api'
 import {
   basename,
   fileListToTree,
   FileSystemDirectoryNode,
   FileSystemNode
-} from '../services/file'
-import AsyncPlaceholder from './AsyncContainer'
+} from '../../services/file'
+import AsyncPlaceholder from '../AsyncContainer'
 
 const { TreeNode, DirectoryTree } = Tree
 
