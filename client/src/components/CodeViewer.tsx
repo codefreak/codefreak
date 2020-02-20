@@ -1,9 +1,16 @@
+import {
+  getModeForPath,
+  modesByName
+} from 'ace-builds/src-noconflict/ext-modelist'
+// warning: webpack-resolver increases compile time by a lot!
+// an alternative is importing each mode and theme explicitly... but I am lazy
+import 'ace-builds/webpack-resolver'
 import { Card, Icon, Result } from 'antd'
 import React from 'react'
 import AceEditor from 'react-ace'
 import { IMarker } from 'react-ace/src/types'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
-import { basename } from '../services/file'
+import { basename, isBinaryContent } from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
 
 import Centered from './Centered'
@@ -32,6 +39,14 @@ const cropToLines = (
 const numberOfLines = (input: string) =>
   (input.match(/\r?\n/g) || []).length + 1
 
+const codeViewerMessage = (message: React.ReactNode) => {
+  return (
+    <Centered>
+      <Result title={message} icon={<Icon type="file-unknown" />} />
+    </Centered>
+  )
+}
+
 const CodeViewer: React.FC<CodeViewerProps> = ({
   answerId,
   path,
@@ -48,35 +63,20 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   const { content, type } = result.data.answerFile
 
   if (type !== FileType.File) {
-    return (
-      <Centered>
-        <Result
-          title={
-            <>
-              Can only view Files. <code>${basename(path)}</code> is a $
-              {type.toLowerCase()}`
-            </>
-          }
-          icon={<Icon type="file-unknown" />}
-        />
-      </Centered>
+    return codeViewerMessage(
+      <>
+        <code>${basename(path)}</code> is a {type.toLowerCase()}
+      </>
     )
   }
 
   let value = content || ''
 
-  if (/[\x00-\x08\x0E-\x1F]/.test(value)) {
-    return (
-      <Centered>
-        <Result
-          title={
-            <>
-              <code>{basename(path)}</code> is a binary file
-            </>
-          }
-          icon={<Icon type="file-unknown" />}
-        />
-      </Centered>
+  if (isBinaryContent(value)) {
+    return codeViewerMessage(
+      <>
+        <code>{basename(path)}</code> is a binary file
+      </>
     )
   }
 
@@ -95,11 +95,15 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     })
   }
 
+  const mode = getModeForPath(path) || modesByName.Text
+
   return (
     <AceEditor
       fontSize={14}
       className="code-viewer"
       readOnly
+      mode={mode.name}
+      theme="github"
       showPrintMargin={false}
       maxLines={lineStart ? numberOfLines(value) : undefined}
       value={value}

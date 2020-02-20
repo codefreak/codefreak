@@ -70,3 +70,13 @@ export const fileListToTree = (
 
   return rootNode ? mergeChildren(listCopy, rootNode) : undefined
 }
+
+/**
+ * Check value for non-printable characters
+ *
+ * @param value
+ */
+export const isBinaryContent = (value: string) => {
+  // eslint-disable-next-line no-control-regex
+  return /[\x00-\x08\x0E-\x1F]/.test(value)
+}

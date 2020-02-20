@@ -1,11 +1,7 @@
 import { Col, Icon, Result, Row, Tabs } from 'antd'
 import React, { useState } from 'react'
 import { FileType } from '../../services/codefreak-api'
-import {
-  basename,
-  FileSystemDirectoryNode,
-  FileSystemNode
-} from '../../services/file'
+import { basename, FileSystemNode } from '../../services/file'
 import Centered from '../Centered'
 import CodeViewer from '../CodeViewer'
 import AnswerFileTree from './AnswerFileTree'
@@ -21,6 +17,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
   const [currentFile, setCurrentFile] = useState<FileSystemNode | undefined>()
 
   const onSelectFileInTree = (file: FileSystemNode | undefined) => {
+    // only open files in editor
     if (!file || file.type !== FileType.File) {
       return
     }
@@ -42,6 +39,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
     if (action === 'remove') {
       const newFiles = openedFiles.filter(file => file.path !== path)
       setOpenedFiles(newFiles)
+      // switch to first tab by default after closing the current one
       setCurrentFile(newFiles.length ? newFiles[0] : undefined)
     }
   }
