@@ -1,7 +1,7 @@
 import { Col, Icon, Result, Row, Tabs } from 'antd'
 import React, { useState } from 'react'
 import { FileType } from '../../services/codefreak-api'
-import { basename, FileSystemNode } from '../../services/file'
+import { basename, FileTreeNode } from '../../services/file'
 import Centered from '../Centered'
 import CodeViewer from '../CodeViewer'
 import AnswerFileTree from './AnswerFileTree'
@@ -13,10 +13,10 @@ export interface AnswerFileBrowserProps {
 }
 
 const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
-  const [openedFiles, setOpenedFiles] = useState<FileSystemNode[]>([])
-  const [currentFile, setCurrentFile] = useState<FileSystemNode | undefined>()
+  const [openedFiles, setOpenedFiles] = useState<FileTreeNode[]>([])
+  const [currentFile, setCurrentFile] = useState<FileTreeNode | undefined>()
 
-  const onSelectFileInTree = (file: FileSystemNode | undefined) => {
+  const onSelectFileInTree = (file: FileTreeNode | undefined) => {
     // only open files in editor
     if (!file || file.type !== FileType.File) {
       return

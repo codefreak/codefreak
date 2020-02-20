@@ -1,3 +1,6 @@
+// We could also import ext-modelist after AceEditor but eslint will sort them
+// in the wrong order. This is why we import ace-builds explicitly below
+import 'ace-builds'
 import {
   getModeForPath,
   modesByName

@@ -4,15 +4,15 @@ import { useGetAnswerFileListQuery } from '../../services/codefreak-api'
 import {
   basename,
   fileListToTree,
-  FileSystemDirectoryNode,
-  FileSystemNode
+  FileTreeDirectoryNode,
+  FileTreeNode
 } from '../../services/file'
 import AsyncPlaceholder from '../AsyncContainer'
 
 const { TreeNode, DirectoryTree } = Tree
 
 const renderTreeNodeRecursive = (
-  node: FileSystemNode | FileSystemDirectoryNode
+  node: FileTreeNode | FileTreeDirectoryNode
 ) => {
   let filename = basename(node.path)
   if (filename === '.') {
@@ -32,7 +32,7 @@ const renderTreeNodeRecursive = (
 
 interface AnswerFileTreeProps {
   answerId: string
-  onFileSelect?: (selectedNode: FileSystemNode | undefined) => void
+  onFileSelect?: (selectedNode: FileTreeNode | undefined) => void
 }
 
 const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({
