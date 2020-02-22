@@ -23,7 +23,7 @@ export interface FileTreeDirectoryNode extends FileTreeNode {
 export const dirname = (path: string): string => {
   // match everything before last slash
   // remaining path will contain a trailing slash!
-  const matches = path.match(/^(\/?.*?)[^\/]*\/?$/)
+  const matches = path.match(/^(\/?.*?)[^/]*\/?$/)
   // in case the path does not contain any slashes return the original path
   if (!matches || !matches[1]) {
     return path
