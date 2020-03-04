@@ -5,7 +5,6 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
-import IdeButton from '../../components/IdeButton'
 import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
@@ -81,7 +80,6 @@ const TaskPage: React.FC = () => {
 
   const extra = pool ? null : answer ? (
     <>
-      <IdeButton size="large" answer={answer} task={task} />
       <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
     </>
   ) : (
