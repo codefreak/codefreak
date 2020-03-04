@@ -1,12 +1,8 @@
-import { Card, Icon, Menu } from 'antd'
-import { SelectParam } from 'antd/lib/menu'
+import { Card } from 'antd'
 import React, { useEffect } from 'react'
-import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
-import IdeIframe from '../../components/IdeIframe'
-import useSubPath from '../../hooks/useSubPath'
 import {
   Answer,
   useGetAnswerQuery,
@@ -14,7 +10,6 @@ import {
   useUploadAnswerSourceMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
-import NotFoundPage from '../NotFoundPage'
 
 const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
   answer: { id }
@@ -52,9 +47,6 @@ const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
 }
 
 const AnswerPage: React.FC<{ answerId: string }> = props => {
-  const { path } = useRouteMatch()
-  const subPath = useSubPath()
-
   const result = useGetAnswerQuery({
     variables: { id: props.answerId }
   })
@@ -65,54 +57,20 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   const { answer } = result.data
 
-  const onClickMenu = ({ key }: SelectParam) => {
-    subPath.set(key === '/' ? '' : key)
-  }
-
   return (
     <>
-      <Menu
-        className="content-submenu"
-        onSelect={onClickMenu}
-        selectedKeys={[subPath.get() || '/']}
-        mode="horizontal"
+      <Card
+        style={{ marginBottom: 15 }}
+        title="Your current uploaded files"
+        extra={
+          <ArchiveDownload url={answer.sourceUrl}>
+            Download source code
+          </ArchiveDownload>
+        }
       >
-        <Menu.Item key="/">
-          <Icon type="file" />
-          Current Answer
-        </Menu.Item>
-        <Menu.Item key="/edit">
-          <Icon type="cloud" />
-          Online IDE
-        </Menu.Item>
-        <Menu.Item key="/upload">
-          <Icon type="upload" />
-          Upload/Import Files
-        </Menu.Item>
-      </Menu>
-      <div className="main-content">
-        <Switch>
-          <Route exact path={path}>
-            <Card
-              title="Your current uploaded files"
-              extra={
-                <ArchiveDownload url={answer.sourceUrl}>
-                  Download source code
-                </ArchiveDownload>
-              }
-            >
-              WIP
-            </Card>
-          </Route>
-          <Route path={path + '/edit'}>
-            <IdeIframe type="answer" id={answer.id} />
-          </Route>
-          <Route path={path + '/upload'}>
-            <UploadAnswer answer={answer} />
-          </Route>
-          <Route component={NotFoundPage} />
-        </Switch>
-      </div>
+        WIP
+      </Card>
+      <UploadAnswer answer={answer} />
     </>
   )
 }
