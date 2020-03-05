@@ -4,17 +4,16 @@ import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
 import {
+  Answer,
   useGetAnswerQuery,
   useImportAnswerSourceMutation,
   useUploadAnswerSourceMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 
-const AnswerPage: React.FC<{ answerId: string }> = props => {
-  const result = useGetAnswerQuery({
-    variables: { id: props.answerId }
-  })
-
+const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
+  answer: { id }
+}) => {
   const [
     uploadSource,
     { loading: uploading, data: uploadSuccess }
@@ -25,11 +24,32 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
     { loading: importing, data: importSucess }
   ] = useImportAnswerSourceMutation()
 
+  const onUpload = (files: File[]) => uploadSource({ variables: { files, id } })
+
+  const onImport = (url: string) => importSource({ variables: { url, id } })
+
   useEffect(() => {
     if (uploadSuccess || importSucess) {
       messageService.success('Source code submitted successfully')
     }
   }, [uploadSuccess, importSucess])
+
+  return (
+    <Card title="Upload Source Code">
+      <FileImport
+        uploading={uploading}
+        onUpload={onUpload}
+        onImport={onImport}
+        importing={importing}
+      />
+    </Card>
+  )
+}
+
+const AnswerPage: React.FC<{ answerId: string }> = props => {
+  const result = useGetAnswerQuery({
+    variables: { id: props.answerId }
+  })
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -37,29 +57,20 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   const { answer } = result.data
 
-  const onUpload = (files: File[]) =>
-    uploadSource({ variables: { files, id: answer.id } })
-
-  const onImport = (url: string) =>
-    importSource({ variables: { url, id: answer.id } })
-
   return (
     <>
       <Card
-        title="Submit source code"
+        style={{ marginBottom: 15 }}
+        title="Your current uploaded files"
         extra={
           <ArchiveDownload url={answer.sourceUrl}>
             Download source code
           </ArchiveDownload>
         }
       >
-        <FileImport
-          uploading={uploading}
-          onUpload={onUpload}
-          onImport={onImport}
-          importing={importing}
-        />
+        WIP
       </Card>
+      <UploadAnswer answer={answer} />
     </>
   )
 }
