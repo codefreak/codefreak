@@ -1,13 +1,12 @@
 package de.code_freak.codefreak.service
 
+import de.code_freak.codefreak.Env
 import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Classroom
-import de.code_freak.codefreak.entity.Requirement
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.repository.ClassroomRepository
-import de.code_freak.codefreak.repository.RequirementRepository
 import de.code_freak.codefreak.repository.UserRepository
 import de.code_freak.codefreak.util.TarUtil
 import org.slf4j.LoggerFactory
@@ -26,13 +25,12 @@ import java.time.Instant
  * This should only be needed until we have a UI for creation
  */
 @Service
-@Profile("dev")
+@Profile(Env.DEV)
 class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered {
 
   @Autowired lateinit var userRepository: UserRepository
   @Autowired lateinit var assignmentRepository: AssignmentRepository
   @Autowired lateinit var classroomRepository: ClassroomRepository
-  @Autowired lateinit var requirementRepository: RequirementRepository
   @Autowired lateinit var taskService: TaskService
   @Autowired lateinit var assignmentService: AssignmentService
 
@@ -77,11 +75,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
     val assignment2 = Assignment("Java Assignment", teacher, classroom2)
     assignmentRepository.saveAll(listOf(assignment1, assignment2))
 
-    val task1 = ByteArrayOutputStream().use {
+    ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
       taskService.createFromTar(it.toByteArray(), assignment1, teacher, 0)
     }
-    val task2 = ByteArrayOutputStream().use {
+    ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
       taskService.createFromTar(it.toByteArray(), assignment2, teacher, 0)
     }
@@ -95,10 +93,6 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
       taskService.createFromTar(it.toByteArray(), null, teacher, 0)
     }
-
-    val eval1 = Requirement(task1, "exec", hashMapOf("CMD" to "gcc -o main && ./main"))
-    val eval2 = Requirement(task2, "exec", hashMapOf("CMD" to "javac Main.java && java Main"))
-    requirementRepository.saveAll(listOf(eval1, eval2))
 
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks").file, it)

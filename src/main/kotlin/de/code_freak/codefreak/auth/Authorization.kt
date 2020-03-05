@@ -12,7 +12,7 @@ class Authorization(val currentUser: User = FrontendUtil.getCurrentUser()) {
   }
 
   fun requireAuthority(authority: String) {
-    if (!currentUser.authorities.contains(SimpleGrantedAuthority(authority))) {
+    if (!currentUser.hasAuthority(authority)) {
       deny()
     }
   }
@@ -31,3 +31,5 @@ class Authorization(val currentUser: User = FrontendUtil.getCurrentUser()) {
     }
   }
 }
+
+fun User.hasAuthority(authority: String) = authorities.contains(SimpleGrantedAuthority(authority))

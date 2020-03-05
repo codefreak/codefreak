@@ -18,8 +18,6 @@ class GitImportService : BaseService() {
   @Autowired
   lateinit var answerService: AnswerService
 
-  fun getSupportedHosts() = configuration.gitImport.remotes.map { remote -> remote.host }
-
   fun getRemote(host: String) = configuration.gitImport.remotes.find { remote -> remote.host == host }
 
   fun importFiles(remoteUrlString: String, answer: Answer) {

@@ -20,13 +20,15 @@ class CommandLineRunner : EvaluationRunner {
   override fun getName() = "commandline"
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
-    return executeCommands(answer, options, null).map { execution ->
-      Feedback(execution.command).apply {
-        longDescription = if (execution.result.output.isNotBlank()) {
-          wrapInMarkdownCodeBlock(execution.result.output.trim())
-        } else null
-        status = if (execution.result.exitCode == 0L) Feedback.Status.SUCCESS else Feedback.Status.FAILED
-      }
+    return executeCommands(answer, options, null).map(this::executionToFeedback)
+  }
+
+  protected fun executionToFeedback(execution: Execution): Feedback {
+    return Feedback(execution.command).apply {
+      longDescription = if (execution.result.output.isNotBlank()) {
+        wrapInMarkdownCodeBlock(execution.result.output.trim())
+      } else null
+      status = if (execution.result.exitCode == 0L) Feedback.Status.SUCCESS else Feedback.Status.FAILED
     }
   }
 

@@ -1,13 +1,16 @@
 import ProLayout from '@ant-design/pro-layout'
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
+import { Alert } from 'antd'
 import { Route } from 'antd/lib/breadcrumb/Breadcrumb'
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Authority } from '../hooks/useHasAuthority'
 import useSubscribeToGlobalEvents from '../hooks/useSubscribeToGlobalEvents'
 import { routerConfig } from '../router.config'
+import { useGetMotdQuery } from '../services/codefreak-api'
 import AppFooter from './AppFooter'
 import Authorized from './Authorized'
+import './DefaultLayout.less'
 import RightHeader from './RightHeader'
 
 export const appName = 'Code FREAK'
@@ -35,8 +38,18 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
 
   useSubscribeToGlobalEvents()
 
+  const motd = useGetMotdQuery()
+
   const renderRightHeader = () => <RightHeader logout={logout} />
   const renderFooter = () => <AppFooter />
+  const renderHeader = (_: any, defaultDom: React.ReactNode) => (
+    <>
+      {defaultDom}
+      {motd.data && motd.data.motd ? (
+        <Alert banner message={motd.data.motd} />
+      ) : null}
+    </>
+  )
 
   return (
     <ProLayout
@@ -48,6 +61,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
       itemRender={breadcrumbItemRender}
       rightContentRender={renderRightHeader}
       footerRender={renderFooter}
+      headerRender={renderHeader}
     >
       {children}
     </ProLayout>

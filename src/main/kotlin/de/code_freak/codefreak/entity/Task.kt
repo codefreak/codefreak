@@ -3,6 +3,7 @@ package de.code_freak.codefreak.entity
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
 import java.time.Instant
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -46,16 +47,8 @@ class Task(
    */
   var weight: Int?
 ) : BaseEntity(), Comparable<Task> {
-  /**
-   * Evaluations that will be applied to this task
-   */
-  @OneToMany(mappedBy = "task")
-  var requirements: MutableSet<Requirement> = mutableSetOf()
-
-  /**
-   * Same like position but one-based index
-   */
-  val number get() = this.position.plus(1L)
+  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
+  var answers: MutableSet<Answer> = mutableSetOf()
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()

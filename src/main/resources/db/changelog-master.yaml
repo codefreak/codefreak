@@ -11,3 +11,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20200127104317-task-pool.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20200207111659-remove-requirements.yaml
+    relativeToChangelogFile: true
