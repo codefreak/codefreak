@@ -11,7 +11,7 @@ import {
   useGetDetailedEvaluatonQuery
 } from '../generated/graphql'
 import AsyncPlaceholder from './AsyncContainer'
-import CodeViewer from './CodeViewer'
+import { CodeViewerCard } from './CodeViewer'
 import './EvaluationResult.less'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 
@@ -119,7 +119,7 @@ const renderFeedbackPanel = (answerId: string, feedback: Feedback) => {
   if (feedback.fileContext) {
     const { lineStart, lineEnd } = feedback.fileContext
     body = (
-      <CodeViewer
+      <CodeViewerCard
         answerId={answerId}
         path={feedback.fileContext.path}
         lineStart={lineStart || undefined}

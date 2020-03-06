@@ -36,6 +36,12 @@ class JUnitRunner : CommandLineRunner() {
           )
         }
       }
+    }.also { execution ->
+      // no feedback means the sources failed to compile
+      // in this case we will add the exec results as feedback
+      if (feedback.isEmpty()) {
+        feedback.addAll(execution.map(this::executionToFeedback))
+      }
     }
     return feedback
   }

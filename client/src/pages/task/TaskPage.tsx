@@ -1,12 +1,12 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button } from 'antd'
+import { Button, Icon } from 'antd'
 import React, { createContext } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
-import IdeButton from '../../components/IdeButton'
+import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import useHasAuthority from '../../hooks/useHasAuthority'
@@ -30,6 +30,12 @@ import TaskDetailsPage from './TaskDetailsPage'
 export const DifferentUserContext = createContext<
   PublicUserFieldsFragment | undefined
 >(undefined)
+
+const tab = (title: string, icon: string) => (
+  <>
+    <Icon type={icon} /> {title}
+  </>
+)
 
 const TaskPage: React.FC = () => {
   const { path } = useRouteMatch()
@@ -59,27 +65,27 @@ const TaskPage: React.FC = () => {
 
   const answerTab = pool
     ? []
-    : [{ key: '/answer', tab: 'Answer', disabled: !answer }]
+    : [
+        { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
+        { key: '/ide', tab: tab('Online IDE', 'edit'), disabled: !answer },
+        {
+          key: '/evaluation',
+          disabled: !answer,
+          tab: (
+            <>
+              {tab('Evaluation', 'dashboard')}
+              {answer ? (
+                <EvaluationIndicator
+                  style={{ marginLeft: 8 }}
+                  answerId={answer.id}
+                />
+              ) : null}
+            </>
+          )
+        }
+      ]
 
-  const tabs = [
-    { key: '', tab: 'Task' },
-    ...answerTab,
-    {
-      key: '/evaluation',
-      disabled: !answer,
-      tab: (
-        <>
-          Evaluation
-          {answer ? (
-            <EvaluationIndicator
-              style={{ marginLeft: 8 }}
-              answerId={answer.id}
-            />
-          ) : null}
-        </>
-      )
-    }
-  ]
+  const tabs = [{ key: '', tab: tab('Task', 'file-text') }, ...answerTab]
 
   const onCreateAnswer = async () => {
     const createAnswerResult = await createAnswer({
@@ -108,7 +114,6 @@ const TaskPage: React.FC = () => {
     // regular buttons to work on task for students
     extra = (
       <>
-        <IdeButton answer={answer} size="large" />
         <StartEvaluationButton
           answerId={answer.id}
           type="primary"
@@ -157,6 +162,15 @@ const TaskPage: React.FC = () => {
         </Route>
         <Route path={`${path}/evaluation`}>
           {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
+        </Route>
+        <Route path={`${path}/ide`}>
+          {answer ? (
+            <div className="no-padding">
+              <IdeIframe type="answer" id={answer.id} />
+            </div>
+          ) : (
+            <NotFoundPage />
+          )}
         </Route>
         <Route component={NotFoundPage} />
       </Switch>
