@@ -112,3 +112,12 @@ export const isBinaryContent = (value: string) => {
   // eslint-disable-next-line no-control-regex
   return /[\x00-\x08\x0E-\x1F]/.test(value)
 }
+
+/**
+ * Count the number of lines in a string
+ *
+ * @param input
+ */
+export const numberOfLines = (input: string) => {
+  return (input.match(/\r?\n/g) || []).length + 1
+}

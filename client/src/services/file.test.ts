@@ -4,7 +4,8 @@ import {
   basename,
   dirname,
   fileListToTree,
-  normalizePath
+  normalizePath,
+  numberOfLines
 } from './file'
 
 const cid = { collectionId: '123' }
@@ -69,4 +70,12 @@ test('children get nested correctly', () => {
       }
     }
   }
+})
+
+test('numberOfLines', () => {
+  expect(numberOfLines('')).toBe(1)
+  expect(numberOfLines('\r')).toBe(1)
+  expect(numberOfLines('\n')).toBe(2)
+  expect(numberOfLines('\r\n')).toBe(2)
+  expect(numberOfLines('\n\r\n')).toBe(3)
 })
