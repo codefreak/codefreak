@@ -1,0 +1,43 @@
+databaseChangeLog:
+- changeSet:
+    id: 1584197999459-2
+    author: vagrant (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: active
+            type: boolean
+        tableName: assignment
+- changeSet:
+    id: 1584197999459-3
+    author: vagrant (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: open_from
+            type: timestamp
+        tableName: assignment
+- changeSet:
+    id: 1584197999459-4
+    author: vagrant (generated)
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: assignment
+        constraintName: FK14xfsuvlt7cjpvvn5b2drs9kc
+- changeSet:
+    id: 1584197999459-5
+    author: vagrant (generated)
+    changes:
+    - dropTable:
+        tableName: classroom
+- changeSet:
+    id: 1584197999459-6
+    author: vagrant (generated)
+    changes:
+    - dropColumn:
+        columnName: classroom_id
+        tableName: assignment
