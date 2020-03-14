@@ -60,19 +60,16 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   return (
     <>
-      <Card title="Current Files" style={{ marginBottom: '16px' }}>
-        <AnswerFileBrowser answerId={answer.id} />
-      </Card>
       <Card
-        style={{ marginBottom: 15 }}
-        title="Your current uploaded files"
+        title="Current Submission"
+        style={{ marginBottom: '16px' }}
         extra={
           <ArchiveDownload url={answer.sourceUrl}>
             Download source code
           </ArchiveDownload>
         }
       >
-        WIP
+        <AnswerFileBrowser answerId={answer.id} />
       </Card>
       <UploadAnswer answer={answer} />
     </>
