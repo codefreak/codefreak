@@ -38,6 +38,9 @@ class AssignmentService : BaseService() {
   fun findAllAssignments(): Iterable<Assignment> = assignmentRepository.findAll()
 
   @Transactional
+  fun findAssignmentsByOwner(owner: User): Iterable<Assignment> = assignmentRepository.findByOwnerId(owner.id)
+
+  @Transactional
   fun findAllAssignmentsForUser(userId: UUID) = submissionService.findSubmissionsOfUser(userId).map {
     it.assignment
   }

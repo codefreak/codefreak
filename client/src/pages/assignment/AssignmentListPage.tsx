@@ -76,7 +76,7 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
       key={assignment.id}
       style={{ marginBottom: 16 }}
       extra={
-        assignment.editable ? (
+        assignment.deletable ? (
           <Tooltip title={'Delete assignment'} placement="left">
             <Button
               onClick={confirmDelete}

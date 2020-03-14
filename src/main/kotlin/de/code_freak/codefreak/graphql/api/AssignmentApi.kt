@@ -16,7 +16,6 @@ import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.util.FrontendUtil
 import org.springframework.security.access.annotation.Secured
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -35,8 +34,12 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
   val openFrom = entity.openFrom
   val tasks by lazy { entity.tasks.map { TaskDto(it, ctx) } }
   val editable by lazy {
-    (authorization.isCurrentUser(entity.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)) &&
-        (status < AssignmentStatus.OPEN)
+    authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN) || (authorization.isCurrentUser(entity.owner) &&
+        (status < AssignmentStatus.OPEN))
+  }
+  val deletable by lazy {
+    authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN) || (authorization.isCurrentUser(entity.owner) &&
+        (status != AssignmentStatus.OPEN))
   }
 
   val submissionCsvUrl by lazy { FrontendUtil.getUriBuilder().path("/api/assignments/$id/submissions.csv").build().toUriString() }
@@ -56,10 +59,12 @@ class AssignmentQuery : BaseResolver(), Query {
   fun assignments(): List<AssignmentDto> = context {
     val assignmentService = serviceAccess.getService(AssignmentService::class)
     val user = FrontendUtil.getCurrentUser()
-    val assignments = if (user.authorities.contains(SimpleGrantedAuthority(Authority.ROLE_TEACHER))) {
-      assignmentService.findAllAssignments()
-    } else {
-      assignmentService.findAllAssignmentsForUser(user.id)
+    val assignments = when {
+      authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
+          -> assignmentService.findAllAssignments()
+      authorization.currentUser.hasAuthority(Authority.ROLE_TEACHER)
+          -> assignmentService.findAssignmentsByOwner(authorization.currentUser)
+      else -> assignmentService.findAllAssignmentsForUser(user.id)
     }
     assignments.map { AssignmentDto(it, this) }
   }
@@ -83,6 +88,7 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun deleteAssignment(id: UUID): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    require(assignment.status != AssignmentStatus.OPEN)
     serviceAccess.getService(AssignmentService::class).deleteAssignment(assignment.id)
     true
   }

@@ -3,6 +3,7 @@ package de.code_freak.codefreak.entity
 import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import java.util.SortedSet
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -31,7 +32,7 @@ class Assignment(
   /**
    * A list of tasks in this assignment ordered by their position
    */
-  @OneToMany(mappedBy = "assignment")
+  @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
   @OrderBy("position ASC")
   var tasks: SortedSet<Task> = sortedSetOf<Task>()
     get() = field.sortedBy { it.position }.toSortedSet()
