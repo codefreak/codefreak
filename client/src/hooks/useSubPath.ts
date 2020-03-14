@@ -1,5 +1,14 @@
 import { useHistory, useLocation, useRouteMatch } from 'react-router'
 
+interface StringMap {
+  [key: string]: string
+}
+
+const encodeQuery = (params: StringMap) =>
+  Object.entries(params)
+    .map(kv => kv.map(encodeURIComponent).join('='))
+    .join('&')
+
 /**
  * Control the path relative to the current route
  * @param replace when setting the subPath, should it be replaced or pushed in the history
@@ -14,8 +23,10 @@ const useSubPath = (replace: boolean = true, deep: boolean = false) => {
       const fullPath = pathname.substring(url.length)
       return deep || fullPath === '' ? fullPath : '/' + fullPath.split('/')[1]
     },
-    set: (path: string) =>
-      replace ? history.replace(url + path) : history.push(url + path)
+    set: (path: string, query?: StringMap) => {
+      const newUrl = url + path + (query ? '?' + encodeQuery(query) : '')
+      replace ? history.replace(newUrl) : history.push(newUrl)
+    }
   }
 }
 
