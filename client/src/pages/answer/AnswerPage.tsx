@@ -63,7 +63,7 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   const filesTitle = differentUser
     ? `Files uploaded by ${displayName(differentUser)}`
-    : 'Current Files'
+    : 'Your current submission'
 
   return (
     <>

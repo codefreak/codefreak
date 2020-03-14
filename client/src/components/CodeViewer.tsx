@@ -1,20 +1,10 @@
-// We could also import ext-modelist after AceEditor but eslint will sort them
-// in the wrong order. This is why we import ace-builds explicitly below
-import 'ace-builds'
-import {
-  getModeForPath,
-  modesByName
-} from 'ace-builds/src-noconflict/ext-modelist'
-// warning: webpack-resolver increases compile time by a lot!
-// an alternative is importing each mode and theme explicitly... but I am lazy
-import 'ace-builds/webpack-resolver'
 import { Card, Icon, Result } from 'antd'
+import { editor, Range } from 'monaco-editor'
 import React from 'react'
-import AceEditor from 'react-ace'
-import { IMarker } from 'react-ace/src/types'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
 import { basename, isBinaryContent } from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
+import Editor from './Editor'
 
 import Centered from './Centered'
 import './CodeViewer.less'
@@ -27,21 +17,6 @@ interface CodeViewerProps {
   numContextRows?: number
 }
 
-const cropToLines = (
-  content: string,
-  lineStart: number,
-  lineEnd: number,
-  additionalContextLines: number
-) => {
-  const lines = content.split(/\r?\n/g)
-  const start = Math.max(lineStart - additionalContextLines - 1, 0)
-  const end = Math.min(lineEnd + additionalContextLines, lines.length)
-  return lines.slice(start, end).join('\n')
-}
-
-const numberOfLines = (input: string) =>
-  (input.match(/\r?\n/g) || []).length + 1
-
 const codeViewerMessage = (message: React.ReactNode) => {
   return (
     <Centered>
@@ -52,18 +27,21 @@ const codeViewerMessage = (message: React.ReactNode) => {
 
 const CodeViewer: React.FC<CodeViewerProps> = ({
   answerId,
-  path,
+  path: queryPath,
   lineStart,
   lineEnd,
-  numContextRows = 2
+  numContextRows = 4
 }) => {
-  const result = useGetAnswerFileQuery({ variables: { id: answerId, path } })
+  const result = useGetAnswerFileQuery({
+    variables: { id: answerId, path: queryPath }
+  })
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
-  const { content, type } = result.data.answerFile
+  // use path from response or content and path can by out-of-sync
+  const { content, type, path } = result.data.answerFile
 
   if (type !== FileType.File) {
     return codeViewerMessage(
@@ -73,7 +51,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     )
   }
 
-  let value = content || ''
+  const value = content || ''
 
   if (isBinaryContent(value)) {
     return codeViewerMessage(
@@ -83,41 +61,27 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     )
   }
 
-  let firstLineNumber = 1
-  const markers: IMarker[] = []
+  const decorations: editor.IModelDeltaDecoration[] = []
+  let maxNumLines
   if (lineStart) {
-    value = cropToLines(value, lineStart, lineEnd || lineStart, numContextRows)
-    firstLineNumber = Math.max(lineStart - numContextRows, 1)
-    markers.push({
-      startRow: lineStart - firstLineNumber,
-      startCol: 0,
-      endRow: (lineEnd || lineStart) - firstLineNumber,
-      endCol: Infinity,
-      className: 'highlight-line',
-      type: 'background'
+    decorations.push({
+      range: new Range(lineStart, 1, lineEnd || lineStart, Infinity),
+      options: {
+        className: 'highlight-line'
+      }
     })
+    maxNumLines = numContextRows * 2
+    maxNumLines += lineEnd ? lineEnd - lineStart : 1
   }
 
-  const mode = getModeForPath(path) || modesByName.Text
-
   return (
-    <AceEditor
-      fontSize={14}
-      className="code-viewer"
+    <Editor
       readOnly
-      mode={mode.name}
-      theme="github"
-      showPrintMargin={false}
-      maxLines={lineStart ? numberOfLines(value) : undefined}
+      currentLine={lineStart}
+      maxNumLines={maxNumLines}
       value={value}
-      setOptions={{
-        firstLineNumber,
-        highlightActiveLine: false,
-        highlightGutterLine: false
-      }}
-      width="100%"
-      height="100%"
-      markers={markers}
+      path={`/${answerId}/${path}`}
+      decorations={decorations}
     />
   )
 }
