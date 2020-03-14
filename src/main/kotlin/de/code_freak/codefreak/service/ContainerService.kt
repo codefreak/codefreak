@@ -8,6 +8,7 @@ import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.HostConfig
 import de.code_freak.codefreak.config.AppConfiguration
 import de.code_freak.codefreak.entity.Answer
+import de.code_freak.codefreak.entity.AssignmentStatus
 import de.code_freak.codefreak.repository.AnswerRepository
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.withTrailingSlash
@@ -180,8 +181,8 @@ class ContainerService : BaseService() {
 
   @Transactional
   fun saveAnswerFiles(answer: Answer): Answer {
-    if (answer.task.assignment?.closed == true) {
-      log.info("Skipped saving of files from answer ${answer.id} because assignment is closed")
+    if (answer.task.assignment?.status != AssignmentStatus.OPEN) {
+      log.info("Skipped saving of files from answer ${answer.id} because assignment is bot open")
       return answer
     }
     val containerId = getIdeContainer(answer.id) ?: return answer

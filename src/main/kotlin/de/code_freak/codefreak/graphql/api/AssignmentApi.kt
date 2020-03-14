@@ -7,6 +7,7 @@ import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.auth.hasAuthority
 import de.code_freak.codefreak.entity.Assignment
+import de.code_freak.codefreak.entity.AssignmentStatus
 import de.code_freak.codefreak.graphql.BaseDto
 import de.code_freak.codefreak.graphql.BaseResolver
 import de.code_freak.codefreak.graphql.ResolverContext
@@ -28,11 +29,13 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
   val owner by lazy { UserDto(entity.owner, ctx) }
   val createdAt = entity.createdAt
   val deadline = entity.deadline
-  val closed = entity.closed
+  val status by lazy { entity.status }
+  val active = entity.active
+  val openFrom = entity.openFrom
   val tasks by lazy { entity.tasks.map { TaskDto(it, ctx) } }
   val editable by lazy {
-    authorization.isCurrentUser(entity.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
-    // TODO depend on assignment status
+    (authorization.isCurrentUser(entity.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)) &&
+        (status < AssignmentStatus.OPEN)
   }
 
   val submissionCsvUrl by lazy { FrontendUtil.getUriBuilder().path("/api/assignments/$id/submissions.csv").build().toUriString() }

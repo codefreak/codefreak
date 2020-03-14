@@ -3,10 +3,8 @@ package de.code_freak.codefreak.service
 import de.code_freak.codefreak.Env
 import de.code_freak.codefreak.auth.Role
 import de.code_freak.codefreak.entity.Assignment
-import de.code_freak.codefreak.entity.Classroom
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
-import de.code_freak.codefreak.repository.ClassroomRepository
 import de.code_freak.codefreak.repository.UserRepository
 import de.code_freak.codefreak.util.TarUtil
 import org.slf4j.LoggerFactory
@@ -30,7 +28,6 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
 
   @Autowired lateinit var userRepository: UserRepository
   @Autowired lateinit var assignmentRepository: AssignmentRepository
-  @Autowired lateinit var classroomRepository: ClassroomRepository
   @Autowired lateinit var taskService: TaskService
   @Autowired lateinit var assignmentService: AssignmentService
 
@@ -67,12 +64,8 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
 
     userRepository.saveAll(listOf(admin, teacher, student))
 
-    val classroom1 = Classroom("Classroom 1")
-    val classroom2 = Classroom("Classroom 2")
-    classroomRepository.saveAll(listOf(classroom1, classroom2))
-
-    val assignment1 = Assignment("C Assignment", teacher, classroom1)
-    val assignment2 = Assignment("Java Assignment", teacher, classroom2)
+    val assignment1 = Assignment("C Assignment", teacher, Instant.now().plusSeconds(60), active = true)
+    val assignment2 = Assignment("Java Assignment", teacher, Instant.now(), active = true)
     assignmentRepository.saveAll(listOf(assignment1, assignment2))
 
     ByteArrayOutputStream().use {
@@ -96,7 +89,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
 
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks").file, it)
-      assignmentService.createFromTar(it.toByteArray(), teacher, Instant.now().plusMillis(60*1000)).let { result ->
+      assignmentService.createFromTar(it.toByteArray(), teacher) {
+        openFrom = Instant.now()
+        deadline = Instant.now().plusSeconds(60)
+        active = true
+      }.let { result ->
         if (result.taskErrors.isNotEmpty()) {
           throw result.taskErrors.values.first()
         }
