@@ -17,6 +17,12 @@ plugins {
 
 apply plugin: 'io.spring.dependency-management'
 
+apply from: 'https://raw.githubusercontent.com/erikhofer/autodiff/1.0.0/autodiff.gradle'
+project.autodiff.basePackage = "de.code_freak.codefreak.entity"
+project.autodiff.changeLogMaster = "src/main/resources/db/changelog-master.yaml"
+project.autodiff.changeLogDiff = project.hasProperty('changeLogDiff')
+  ? project.property('changeLogDiff') : "src/main/resources/db/changelog-diff.yaml"
+
 group = 'de.code_freak'
 sourceCompatibility = '1.8'
 
@@ -83,22 +89,6 @@ dependencies {
   liquibaseRuntime 'org.yaml:snakeyaml:1.15'
   liquibaseRuntime sourceSets.main.runtimeClasspath
   liquibaseRuntime sourceSets.main.output
-}
-
-liquibase {
-  activities {
-    main {
-      // this is a path relative to src/main/resources/
-      changeLogFile project.hasProperty('changeLogFile') ? project.property('changeLogFile') : 'db/changelog-master.yaml'
-      url 'jdbc:h2:./build/db/migration'
-      username 'sa'
-      driver 'org.h2.Driver'
-      referenceDriver 'liquibase.ext.hibernate.database.connection.HibernateDriver'
-      referenceUrl 'hibernate:spring:de.code_freak.codefreak.entity?dialect=org.hibernate.dialect.H2Dialect&' +
-        'hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&' +
-        'hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy'
-    }
-  }
 }
 
 compileKotlin {
