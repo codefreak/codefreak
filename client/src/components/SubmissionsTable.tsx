@@ -1,15 +1,6 @@
-import {
-  Button,
-  Col,
-  Icon,
-  Input,
-  message,
-  Modal,
-  Row,
-  Table,
-  Tooltip
-} from 'antd'
+import { Button, Col, Icon, Input, message, Row, Table, Tooltip } from 'antd'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import {
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult,
@@ -17,8 +8,9 @@ import {
   useStartAssignmentEvaluationMutation
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
-import { displayName } from '../services/user'
-import EvaluationResult from './EvaluationResult'
+import { getEntityPath } from '../services/entity-path'
+import { shorten } from '../services/short-id'
+import EvaluationResultPopover from './EvaluationResultPopover'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
 
@@ -183,14 +175,6 @@ const AnswerSummary: React.FC<{
     )
   }
 
-  if (!latestEvaluation) {
-    return (
-      <Tooltip title="Answer has not been evaluated, yet">
-        <Icon type="question-circle" />
-      </Tooltip>
-    )
-  }
-
   return (
     <EvaluationStepOverview
       task={task}
@@ -203,37 +187,42 @@ const AnswerSummary: React.FC<{
 const EvaluationStepOverview: React.FC<{
   task: Task
   user: Submission['user']
-  evaluation: NonNullable<Answer['latestEvaluation']>
+  evaluation: Answer['latestEvaluation']
 }> = ({ evaluation, task, user }) => {
-  const [modalOpen, setModalOpen] = useState(false)
+  const history = useHistory()
 
-  const openModal = () => setModalOpen(true)
-  const closeModal = () => setModalOpen(false)
+  const onDetailsClick = () => {
+    history.push(getEntityPath(task) + '/evaluation?user=' + shorten(user.id))
+  }
 
-  return (
-    <>
-      <Modal
-        visible={modalOpen}
-        title={`Evaluation Results for ${task.title} of ${displayName(user)}`}
-        onCancel={closeModal}
-        footer={null}
-        width="75%"
-        bodyStyle={{ backgroundColor: '#f0f2f5' }}
-      >
-        <EvaluationResult evaluationId={evaluation.id} />
-      </Modal>
+  if (!evaluation) {
+    return (
       <div className="evaluation-step-results">
-        {evaluation.steps.map(stepResult => (
-          <EvaluationStepResultIcon
-            key={stepResult.id}
-            stepResult={stepResult}
-          />
-        ))}
-        <Tooltip title="Show evaluation result">
-          <Button type="primary" icon="bars" onClick={openModal}>
+        <Icon type="question-circle" />
+        <Tooltip title="Answer has not been evaluated, yet">
+          <Button type="primary" icon="bars" onClick={onDetailsClick}>
             Details
           </Button>
         </Tooltip>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="evaluation-step-results">
+        {evaluation.steps.map(step => (
+          <EvaluationStepResultIcon key={step.id} stepResult={step.result} />
+        ))}
+        <EvaluationResultPopover
+          task={task}
+          user={user}
+          steps={evaluation.steps}
+        >
+          <Button type="primary" icon="bars" onClick={onDetailsClick}>
+            Details
+          </Button>
+        </EvaluationResultPopover>
       </div>
     </>
   )
