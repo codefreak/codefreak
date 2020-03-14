@@ -1,30 +1,20 @@
-import { Icon, Popover } from 'antd'
+import { Icon } from 'antd'
 import React from 'react'
-import {
-  EvaluationStep,
-  EvaluationStepResult as Result
-} from '../generated/graphql'
+import { EvaluationStepResult } from '../generated/graphql'
 
 import './EvaluationStepResultIcon.less'
 
 const EvaluationStepResultIcon: React.FC<{
-  stepResult: Pick<EvaluationStep, 'result' | 'runnerName' | 'summary'>
-}> = ({ stepResult: { result, runnerName, summary } }) => {
-  let icon = <Icon type="exclamation-circle" />
-  if (result === Result.Success) {
-    icon = <Icon type="check-circle" />
-  } else if (result === Result.Errored) {
-    icon = <Icon type="close-circle" />
+  stepResult?: EvaluationStepResult | null
+}> = ({ stepResult }) => {
+  let iconType = 'exclamation-circle'
+  if (stepResult === EvaluationStepResult.Success) {
+    iconType = 'check-circle'
+  } else if (stepResult === EvaluationStepResult.Errored) {
+    iconType = 'close-circle'
   }
-  return (
-    <Popover
-      title={runnerName}
-      content={summary}
-      className="evaluation-step-result-icon"
-    >
-      {icon}
-    </Popover>
-  )
+
+  return <Icon type={iconType} className="evaluation-step-result-icon" />
 }
 
 export default EvaluationStepResultIcon

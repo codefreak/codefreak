@@ -1,5 +1,5 @@
 import { Card } from 'antd'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import AnswerFileBrowser from '../../components/AnswerFileBrowser'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -11,6 +11,8 @@ import {
   useUploadAnswerSourceMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
+import { displayName } from '../../services/user'
+import { DifferentUserContext } from '../task/TaskPage'
 
 const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
   answer: { id }
@@ -51,6 +53,7 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
   const result = useGetAnswerQuery({
     variables: { id: props.answerId }
   })
+  const differentUser = useContext(DifferentUserContext)
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -58,10 +61,14 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
 
   const { answer } = result.data
 
+  const filesTitle = differentUser
+    ? `Files uploaded by ${displayName(differentUser)}`
+    : 'Your current submission'
+
   return (
     <>
       <Card
-        title="Current Submission"
+        title={filesTitle}
         style={{ marginBottom: '16px' }}
         extra={
           <ArchiveDownload url={answer.sourceUrl}>
