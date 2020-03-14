@@ -5,6 +5,7 @@ import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -65,4 +66,15 @@ class AssignmentService : BaseService() {
     }
     return AssignmentCreationResult(assignment, taskErrors)
   }
+
+  @Transactional
+  fun createEmptyAssignment(owner: User): Assignment {
+    return ByteArrayOutputStream().use {
+      TarUtil.createTarFromDirectory(ClassPathResource("init/assignments/empty").file, it)
+      createFromTar(it.toByteArray(), owner).assignment
+    }
+  }
+
+  @Transactional
+  fun deleteAssignment(id: UUID) = assignmentRepository.deleteById(id)
 }

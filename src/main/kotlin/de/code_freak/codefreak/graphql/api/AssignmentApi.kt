@@ -3,6 +3,7 @@ package de.code_freak.codefreak.graphql.api
 import com.expediagroup.graphql.annotations.GraphQLID
 import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
+import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.auth.hasAuthority
@@ -68,5 +69,21 @@ class AssignmentQuery : BaseResolver(), Query {
     serviceAccess.getService(AssignmentService::class)
         .findAssignment(id)
         .let { AssignmentDto(it, this) }
+  }
+}
+
+@Component
+class AssignmentMutation : BaseResolver(), Mutation {
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun createAssignment(): AssignmentDto = context {
+    serviceAccess.getService(AssignmentService::class).createEmptyAssignment(authorization.currentUser).let { AssignmentDto(it, this) }
+  }
+
+  fun deleteAssignment(id: UUID): Boolean = context {
+    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
+    authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    serviceAccess.getService(AssignmentService::class).deleteAssignment(assignment.id)
+    true
   }
 }
