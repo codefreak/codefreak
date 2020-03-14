@@ -1,0 +1,9 @@
+mutation DeleteAssignment($id: ID!) {
+  deleteAssignment(id: $id)
+}
+
+mutation CreateAssignment {
+  createAssignment {
+    id
+  }
+}

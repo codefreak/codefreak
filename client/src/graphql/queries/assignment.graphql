@@ -2,6 +2,7 @@ query GetAssignmentList {
   assignments {
     id
     title
+    editable
     tasks {
       id
     }

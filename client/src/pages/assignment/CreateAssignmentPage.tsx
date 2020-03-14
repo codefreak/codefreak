@@ -1,28 +1,28 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Alert, Button, Card } from 'antd'
+import { Button, Card } from 'antd'
 import React from 'react'
 import { useHistory } from 'react-router'
 import FileImport from '../../components/FileImport'
-import { useCreateTaskMutation } from '../../generated/graphql'
+import { useCreateAssignmentMutation } from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 
 const CreateAssignmentPage: React.FC = () => {
   const [
-    createTaskMutation,
-    { loading: creatingTask }
-  ] = useCreateTaskMutation()
+    createAssignmentMutation,
+    { loading: creatingAssignment }
+  ] = useCreateAssignmentMutation()
   const history = useHistory()
 
-  const onTaskCreated = (task: Entity) => {
-    history.push(getEntityPath(task))
-    messageService.success('Task created')
+  const onAssignmentCreated = (assignment: Entity) => {
+    history.push(getEntityPath(assignment))
+    messageService.success('Assignment created')
   }
 
-  const createTask = async () => {
-    const result = await createTaskMutation()
+  const createAssignment = async () => {
+    const result = await createAssignmentMutation()
     if (result.data) {
-      onTaskCreated(result.data.createTask)
+      onAssignmentCreated(result.data.createAssignment)
     }
   }
   const noop = () => {
@@ -31,12 +31,17 @@ const CreateAssignmentPage: React.FC = () => {
   return (
     <>
       <PageHeaderWrapper />
-      <Alert
-        message="Tasks can only be created in the task pool. You can later add them to any assignment."
-        style={{ marginBottom: 16 }}
-      />
-      <Card title="From Template" style={{ marginBottom: 16 }}>
-        TODO
+      <Card title="From Scratch">
+        <div style={{ textAlign: 'center' }}>
+          <Button
+            onClick={createAssignment}
+            size="large"
+            loading={creatingAssignment}
+            block
+          >
+            Create Empty Assignment
+          </Button>
+        </div>
       </Card>
       <Card title="Import" style={{ marginBottom: 16 }}>
         <FileImport
@@ -45,18 +50,6 @@ const CreateAssignmentPage: React.FC = () => {
           importing={false}
           onImport={noop}
         />
-      </Card>
-      <Card title="From Scratch">
-        <div style={{ textAlign: 'center' }}>
-          <Button
-            onClick={createTask}
-            size="large"
-            loading={creatingTask}
-            block
-          >
-            Create Empty Task
-          </Button>
-        </div>
       </Card>
     </>
   )
