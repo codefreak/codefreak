@@ -113,11 +113,27 @@ export const isBinaryContent = (value: string) => {
   return /[\x00-\x08\x0E-\x1F]/.test(value)
 }
 
+const LINE_REGEX = /\r?\n/g
+
 /**
  * Count the number of lines in a string
  *
  * @param input
  */
 export const numberOfLines = (input: string) => {
-  return (input.match(/\r?\n/g) || []).length + 1
+  return (input.match(LINE_REGEX) || []).length + 1
+}
+
+/**
+ * Get a slice of a string between two lines
+ *
+ * @param input
+ * @param start
+ * @param end
+ */
+export const sliceLines = (input: string, start?: number, end?: number) => {
+  // lines are 1-based but for Array.slice() we need the array index
+  const idx = (num?: number) => (num ? num - 1 : undefined)
+  const split = input.split(LINE_REGEX)
+  return split.slice(idx(start), idx(end)).join('\n')
 }

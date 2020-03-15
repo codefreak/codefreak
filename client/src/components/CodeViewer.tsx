@@ -2,9 +2,14 @@ import { Card, Icon, Result } from 'antd'
 import { editor, Range } from 'monaco-editor'
 import React from 'react'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
-import { basename, isBinaryContent } from '../services/file'
+import {
+  basename,
+  isBinaryContent,
+  numberOfLines,
+  sliceLines
+} from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
-import Editor from './Editor'
+import SyntaxHighlighter from './code/SyntaxHighlighter'
 
 import Centered from './Centered'
 import './CodeViewer.less'
@@ -30,7 +35,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   path: queryPath,
   lineStart,
   lineEnd,
-  numContextRows = 4
+  numContextRows = 3
 }) => {
   const result = useGetAnswerFileQuery({
     variables: { id: answerId, path: queryPath }
@@ -51,7 +56,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     )
   }
 
-  const value = content || ''
+  let value = content || ''
 
   if (isBinaryContent(value)) {
     return codeViewerMessage(
@@ -61,28 +66,25 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     )
   }
 
-  const decorations: editor.IModelDeltaDecoration[] = []
-  let maxNumLines
+  const highlightLines = []
+  let firstLineNumber = lineStart || 1
   if (lineStart) {
-    decorations.push({
-      range: new Range(lineStart, 1, lineEnd || lineStart, Infinity),
-      options: {
-        className: 'highlight-line'
-      }
-    })
-    maxNumLines = numContextRows * 2
-    maxNumLines += lineEnd ? lineEnd - lineStart : 1
+    highlightLines.push(lineStart)
+    firstLineNumber = Math.max(lineStart - numContextRows, 1)
+    const end = Math.min(
+      (lineEnd || lineStart) + numContextRows + 1,
+      numberOfLines(value)
+    )
+    value = sliceLines(value, firstLineNumber, end)
   }
 
   return (
-    <Editor
-      readOnly
-      currentLine={lineStart}
-      maxNumLines={maxNumLines}
-      value={value}
-      path={`/${answerId}/${path}`}
-      decorations={decorations}
-    />
+    <SyntaxHighlighter
+      firstLineNumber={firstLineNumber}
+      highlightLines={highlightLines}
+    >
+      {value}
+    </SyntaxHighlighter>
   )
 }
 

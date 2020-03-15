@@ -63,16 +63,18 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
             <Tabs.TabPane key={file.path} tab={basename(file.path)} />
           ))}
         </Tabs>
-        {currentFile ? (
-          <CodeViewer answerId={answerId} path={currentFile.path} />
-        ) : (
-          <Centered>
-            <Result
-              title="Please select a file from the tree to view its content"
-              icon={<Icon type="file" twoToneColor="red" />}
-            />
-          </Centered>
-        )}
+        <div className="answer-editor-content">
+          {currentFile ? (
+            <CodeViewer answerId={answerId} path={currentFile.path} />
+          ) : (
+            <Centered>
+              <Result
+                title="Please select a file from the tree to view its content"
+                icon={<Icon type="file" twoToneColor="red" />}
+              />
+            </Centered>
+          )}
+        </div>
       </Col>
     </Row>
   )

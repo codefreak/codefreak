@@ -5,6 +5,7 @@ import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.graphql.BaseResolver
 import de.code_freak.codefreak.service.AnswerService
+import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.file.FileContentService
 import org.springframework.stereotype.Component
 import java.nio.charset.Charset
@@ -33,6 +34,7 @@ class FileDto(val collectionId: UUID, val path: String, val content: String?, va
 class FileQuery : BaseResolver(), Query {
   fun answerFiles(answerId: UUID): List<FileDto> = context {
     val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
+    serviceAccess.getService(ContainerService::class).saveAnswerFiles(answer)
     authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
     serviceAccess.getService(FileContentService::class).getFiles(answer.id).map {
       FileDto(answerId, it)
