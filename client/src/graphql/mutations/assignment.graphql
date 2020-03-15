@@ -7,3 +7,7 @@ mutation CreateAssignment {
     id
   }
 }
+
+mutation AddTasksToAssignment($assignmentId: ID!, $taskIds: [ID!]!) {
+  addTasksToAssignment(assignmentId: $assignmentId, taskIds: $taskIds)
+}

@@ -1,8 +1,10 @@
 package de.code_freak.codefreak.service
 
 import de.code_freak.codefreak.entity.Assignment
+import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
+import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
@@ -19,16 +21,19 @@ class AssignmentService : BaseService() {
   data class AssignmentCreationResult(val assignment: Assignment, val taskErrors: Map<String, Throwable>)
 
   @Autowired
-  lateinit var assignmentRepository: AssignmentRepository
+  private lateinit var assignmentRepository: AssignmentRepository
 
   @Autowired
-  lateinit var submissionService: SubmissionService
+  private lateinit var submissionService: SubmissionService
 
   @Autowired
-  lateinit var taskService: TaskService
+  private lateinit var taskService: TaskService
 
   @Autowired
-  lateinit var self: AssignmentService
+  private lateinit var self: AssignmentService
+
+  @Autowired
+  private lateinit var fileService: FileService
 
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
@@ -80,4 +85,15 @@ class AssignmentService : BaseService() {
 
   @Transactional
   fun deleteAssignment(id: UUID) = assignmentRepository.deleteById(id)
+
+  @Transactional
+  fun addTasksToAssignment(assignment: Assignment, tasks: Collection<Task>) {
+    var nextPosition = assignment.tasks.maxBy { it.position }?.let { it.position + 1 } ?: 0
+    for (task in tasks) {
+      fileService.readCollectionTar(task.id).use {
+        taskService.createFromTar(it.readBytes(), assignment, assignment.owner, nextPosition)
+      }
+      nextPosition++
+    }
+  }
 }

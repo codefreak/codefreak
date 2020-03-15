@@ -6,6 +6,7 @@ import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.auth.hasAuthority
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.AssignmentStatus
@@ -14,6 +15,7 @@ import de.code_freak.codefreak.graphql.BaseResolver
 import de.code_freak.codefreak.graphql.ResolverContext
 import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.SubmissionService
+import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.util.FrontendUtil
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
@@ -33,10 +35,7 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
   val active = entity.active
   val openFrom = entity.openFrom
   val tasks by lazy { entity.tasks.map { TaskDto(it, ctx) } }
-  val editable by lazy {
-    authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN) || (authorization.isCurrentUser(entity.owner) &&
-        (status < AssignmentStatus.OPEN))
-  }
+  val editable by lazy { entity.isEditable(authorization) }
   val deletable by lazy {
     authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN) || (authorization.isCurrentUser(entity.owner) &&
         (status != AssignmentStatus.OPEN))
@@ -88,8 +87,23 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun deleteAssignment(id: UUID): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
-    require(assignment.status != AssignmentStatus.OPEN)
+    require(assignment.status != AssignmentStatus.OPEN) { "Assignment must not be open" }
     serviceAccess.getService(AssignmentService::class).deleteAssignment(assignment.id)
     true
   }
+
+  fun addTasksToAssignment(assignmentId: UUID, taskIds: Array<UUID>): Boolean = context {
+    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(assignmentId)
+    require(assignment.isEditable(authorization)) { "Assignment is not editable" }
+    val tasks = taskIds.map { serviceAccess.getService(TaskService::class).findTask(it) }
+    tasks.forEach {
+      authorization.requireAuthorityIfNotCurrentUser(it.owner, Authority.ROLE_ADMIN)
+    }
+    serviceAccess.getService(AssignmentService::class).addTasksToAssignment(assignment, tasks)
+    true
+  }
 }
+
+fun Assignment.isEditable(authorization: Authorization) = authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN) ||
+    (authorization.isCurrentUser(owner) &&
+    (status < AssignmentStatus.OPEN))
