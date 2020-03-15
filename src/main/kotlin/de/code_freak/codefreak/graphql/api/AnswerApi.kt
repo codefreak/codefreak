@@ -73,7 +73,9 @@ class AnswerMutation : BaseResolver(), Mutation {
     val answerService = serviceAccess.getService(AnswerService::class)
     val answer = answerService.findAnswer(id)
     Authorization().requireIsCurrentUser(answer.submission.user)
-    serviceAccess.getService(GitImportService::class).importFiles(url, answer)
+    serviceAccess.getService(AnswerService::class).setFiles(answer).use {
+      serviceAccess.getService(GitImportService::class).importFiles(url, it)
+    }
     true
   }
 

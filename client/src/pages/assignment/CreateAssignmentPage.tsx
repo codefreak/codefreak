@@ -1,9 +1,14 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button, Card } from 'antd'
+import { Button, Card, Modal } from 'antd'
 import React from 'react'
 import { useHistory } from 'react-router'
 import FileImport from '../../components/FileImport'
-import { useCreateAssignmentMutation } from '../../generated/graphql'
+import {
+  UploadAssignmentMutationResult,
+  useCreateAssignmentMutation,
+  useImportAssignmentMutation,
+  useUploadAssignmentMutation
+} from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 
@@ -13,6 +18,49 @@ const CreateAssignmentPage: React.FC = () => {
     { loading: creatingAssignment }
   ] = useCreateAssignmentMutation()
   const history = useHistory()
+
+  const [
+    uploadAssignment,
+    { loading: uploading }
+  ] = useUploadAssignmentMutation()
+
+  const [
+    importAssignment,
+    { loading: importing }
+  ] = useImportAssignmentMutation()
+
+  const renderTaskError = (error: string, index: number) => (
+    <p key={index}>{error}</p>
+  )
+
+  const uploadOrImportCompleted = (
+    result:
+      | NonNullable<UploadAssignmentMutationResult['data']>['uploadAssignment']
+      | null
+  ) => {
+    if (result) {
+      history.push(getEntityPath(result.assignment))
+      if (result.taskErrors.length > 0) {
+        Modal.error({
+          title:
+            'The assigment has been created but not all tasks have been created successfully',
+          content: <>{result.taskErrors.map(renderTaskError)}</>
+        })
+      } else {
+        messageService.success('Assignment created')
+      }
+    }
+  }
+
+  const onUpload = (files: File[]) =>
+    uploadAssignment({ variables: { files } }).then(r =>
+      uploadOrImportCompleted(r.data ? r.data.uploadAssignment : null)
+    )
+
+  const onImport = (url: string) =>
+    importAssignment({ variables: { url } }).then(r =>
+      uploadOrImportCompleted(r.data ? r.data.importAssignment : null)
+    )
 
   const onAssignmentCreated = (assignment: Entity) => {
     history.push(getEntityPath(assignment))
@@ -25,9 +73,7 @@ const CreateAssignmentPage: React.FC = () => {
       onAssignmentCreated(result.data.createAssignment)
     }
   }
-  const noop = () => {
-    // todo
-  }
+
   return (
     <>
       <PageHeaderWrapper />
@@ -45,10 +91,10 @@ const CreateAssignmentPage: React.FC = () => {
       </Card>
       <Card title="Import" style={{ marginBottom: 16 }}>
         <FileImport
-          uploading={false}
-          onUpload={noop}
-          importing={false}
-          onImport={noop}
+          uploading={uploading}
+          onUpload={onUpload}
+          importing={importing}
+          onImport={onImport}
         />
       </Card>
     </>

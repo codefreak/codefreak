@@ -14,12 +14,16 @@ import de.code_freak.codefreak.graphql.BaseDto
 import de.code_freak.codefreak.graphql.BaseResolver
 import de.code_freak.codefreak.graphql.ResolverContext
 import de.code_freak.codefreak.service.AssignmentService
+import de.code_freak.codefreak.service.GitImportService
 import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.util.FrontendUtil
+import de.code_freak.codefreak.util.TarUtil
+import org.apache.catalina.core.ApplicationPart
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 @GraphQLName("Assignment")
@@ -48,6 +52,12 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
         .findSubmissionsOfAssignment(id)
         .map { SubmissionDto(it, ctx) }
   }
+}
+
+@GraphQLName("AssignmentCreationResult")
+class AssignmentCreationResultDto(@GraphQLIgnore val result: AssignmentService.AssignmentCreationResult, ctx: ResolverContext) : BaseDto(ctx) {
+  val assignment by lazy { AssignmentDto(result.assignment, ctx) }
+  val taskErrors by lazy { result.taskErrors.map { it.key + ": " + it.value.message }.toTypedArray() }
 }
 
 @Component
@@ -82,6 +92,26 @@ class AssignmentMutation : BaseResolver(), Mutation {
   @Secured(Authority.ROLE_TEACHER)
   fun createAssignment(): AssignmentDto = context {
     serviceAccess.getService(AssignmentService::class).createEmptyAssignment(authorization.currentUser).let { AssignmentDto(it, this) }
+  }
+
+  @Transactional
+  @Secured(Authority.ROLE_TEACHER)
+  fun uploadAssignment(files: Array<ApplicationPart>): AssignmentCreationResultDto = context {
+    ByteArrayOutputStream().use {
+      TarUtil.writeUploadAsTar(files, it)
+    AssignmentCreationResultDto(serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(),
+        authorization.currentUser), this)
+    }
+  }
+
+  @Transactional
+  @Secured(Authority.ROLE_TEACHER)
+  fun importAssignment(url: String): AssignmentCreationResultDto = context {
+    ByteArrayOutputStream().use {
+      serviceAccess.getService(GitImportService::class).importFiles(url, it)
+      AssignmentCreationResultDto(serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(),
+          authorization.currentUser), this)
+    }
   }
 
   fun deleteAssignment(id: UUID): Boolean = context {

@@ -11,3 +11,21 @@ mutation CreateAssignment {
 mutation AddTasksToAssignment($assignmentId: ID!, $taskIds: [ID!]!) {
   addTasksToAssignment(assignmentId: $assignmentId, taskIds: $taskIds)
 }
+
+mutation UploadAssignment($files: [Upload!]!) {
+  uploadAssignment(files: $files) {
+    assignment {
+      id
+    }
+    taskErrors
+  }
+}
+
+mutation ImportAssignment($url: String!) {
+  importAssignment(url: $url) {
+    assignment {
+      id
+    }
+    taskErrors
+  }
+}
