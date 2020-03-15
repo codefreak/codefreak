@@ -3,6 +3,7 @@ import { Button, Card, Modal } from 'antd'
 import React from 'react'
 import { useHistory } from 'react-router'
 import FileImport from '../../components/FileImport'
+import HelpButton from '../../components/HelpButton'
 import {
   UploadAssignmentMutationResult,
   useCreateAssignmentMutation,
@@ -77,7 +78,7 @@ const CreateAssignmentPage: React.FC = () => {
   return (
     <>
       <PageHeaderWrapper />
-      <Card title="From Scratch">
+      <Card title="From Scratch" style={{ marginBottom: 16 }}>
         <div style={{ textAlign: 'center' }}>
           <Button
             onClick={createAssignment}
@@ -89,7 +90,14 @@ const CreateAssignmentPage: React.FC = () => {
           </Button>
         </div>
       </Card>
-      <Card title="Import" style={{ marginBottom: 16 }}>
+      <Card
+        title="Import"
+        extra={
+          <HelpButton category="definitions" section="assignments">
+            File Format
+          </HelpButton>
+        }
+      >
         <FileImport
           uploading={uploading}
           onUpload={onUpload}
