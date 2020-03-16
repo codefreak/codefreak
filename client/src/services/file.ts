@@ -125,15 +125,14 @@ export const numberOfLines = (input: string) => {
 }
 
 /**
- * Get a slice of a string between two lines
+ * Get a slice of a string between two lines INCLUDING start and end lines
  *
- * @param input
- * @param start
- * @param end
+ * @param input The input string
+ * @param start The first line (1-based)
+ * @param end The last line (1-based)
  */
 export const sliceLines = (input: string, start?: number, end?: number) => {
-  // lines are 1-based but for Array.slice() we need the array index
-  const idx = (num?: number) => (num ? num - 1 : undefined)
   const split = input.split(LINE_REGEX)
-  return split.slice(idx(start), idx(end)).join('\n')
+  const startIndex = start ? Math.max(start - 1, 0) : undefined
+  return split.slice(startIndex, end).join('\n')
 }

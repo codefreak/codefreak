@@ -1,5 +1,4 @@
 import { Card, Icon, Result } from 'antd'
-import { editor, Range } from 'monaco-editor'
 import React from 'react'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
 import {
@@ -9,9 +8,9 @@ import {
   sliceLines
 } from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
-import SyntaxHighlighter from './code/SyntaxHighlighter'
 
 import Centered from './Centered'
+import ReviewEditor from './code/ReviewEditor'
 import './CodeViewer.less'
 
 interface CodeViewerProps {
@@ -20,6 +19,7 @@ interface CodeViewerProps {
   lineStart?: number
   lineEnd?: number
   numContextRows?: number
+  review?: boolean
 }
 
 const codeViewerMessage = (message: React.ReactNode) => {
@@ -78,14 +78,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     value = sliceLines(value, firstLineNumber, end)
   }
 
-  return (
-    <SyntaxHighlighter
-      firstLineNumber={firstLineNumber}
-      highlightLines={highlightLines}
-    >
-      {value}
-    </SyntaxHighlighter>
-  )
+  return <ReviewEditor>{value}</ReviewEditor>
 }
 
 export const CodeViewerCard: React.FC<CodeViewerProps> = props => {
