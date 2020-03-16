@@ -1,10 +1,9 @@
 import React from 'react'
 import SyntaxHighlighterComponent from 'react-syntax-highlighter'
-import { githubGist } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import 'highlight.js/styles/github-gist.css'
 import './SyntaxHighlighter.less'
 
 export interface SyntaxHighlighterProps {
-  children: string
   firstLineNumber?: number
   highlightLines?: number[]
 }
@@ -31,12 +30,12 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = props => {
 
   return (
     <SyntaxHighlighterComponent
-      className="syntax-highlighter"
       lineProps={lineHighlighter}
       wrapLines={lineHighlighter !== undefined}
       showLineNumbers
+      useInlineStyles={false}
       startingLineNumber={props.firstLineNumber || 1}
-      style={githubGist}
+      lineNumberContainerProps={{ className: 'hljs-line-numbers', style: {} }}
     >
       {props.children}
     </SyntaxHighlighterComponent>
