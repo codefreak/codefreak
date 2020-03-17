@@ -3,6 +3,8 @@ import { FormComponentProps } from 'antd/es/form'
 import TextArea from 'antd/es/input/TextArea'
 import React, { FormEvent, useState } from 'react'
 import { FeedbackSeverity } from '../../generated/graphql'
+import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
+import Avatar from '../user/Avatar'
 
 const renderSeveritySelect = () => {
   return (
@@ -36,6 +38,7 @@ export interface ReviewCommentFormProps extends FormComponentProps {
 const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
   const { getFieldDecorator } = props.form
   const [hasValue, setHasValue] = useState<boolean>(false)
+  const user = useAuthenticatedUser()
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -70,35 +73,42 @@ const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
       title={props.title}
       extra={close}
     >
-      <Form onSubmit={onSubmit} onChange={onChange}>
-        <Form.Item hasFeedback>
-          {getFieldDecorator('comment', {
-            rules: [
-              {
-                required: true,
-                message: 'Please enter a comment'
-              }
-            ]
-          })(
-            <TextArea
-              autoSize={{ minRows: 3, maxRows: 6 }}
-              placeholder={`Add a useful comment…`}
-            />
-          )}
-        </Form.Item>
-        <Row>
-          <Col span={12}>
+      <Row type="flex">
+        <Col>
+          <Avatar user={user} />
+        </Col>
+        <Col style={{ flexGrow: 1 }}>
+          <Form onSubmit={onSubmit} onChange={onChange}>
             <Form.Item hasFeedback>
-              {getFieldDecorator('severity')(renderSeveritySelect())}
+              {getFieldDecorator('comment', {
+                rules: [
+                  {
+                    required: true,
+                    message: 'Please enter a comment'
+                  }
+                ]
+              })(
+                <TextArea
+                  autoSize={{ minRows: 3, maxRows: 6 }}
+                  placeholder={`Add a useful comment…`}
+                />
+              )}
             </Form.Item>
-          </Col>
-          <Col span={12} style={{ textAlign: 'right' }}>
-            <Button type="primary" htmlType="submit">
-              Save Comment
-            </Button>
-          </Col>
-        </Row>
-      </Form>
+            <Row>
+              <Col span={12}>
+                <Form.Item hasFeedback>
+                  {getFieldDecorator('severity')(renderSeveritySelect())}
+                </Form.Item>
+              </Col>
+              <Col span={12} style={{ textAlign: 'right' }}>
+                <Button type="primary" htmlType="submit">
+                  Save Comment
+                </Button>
+              </Col>
+            </Row>
+          </Form>
+        </Col>
+      </Row>
     </Card>
   )
 }
