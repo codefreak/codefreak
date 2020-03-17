@@ -16,4 +16,6 @@ interface SubmissionRepository : CrudRepository<Submission, UUID> {
   fun findByAssignmentIdAndUserId(assignmentId: UUID, userId: UUID): Optional<Submission>
 
   fun findAllByUserId(userId: UUID): List<Submission>
+
+  fun deleteAllByAssignmentId(assignmentId: UUID)
 }
