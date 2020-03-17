@@ -1,16 +1,18 @@
 package de.code_freak.codefreak.service
 
 import de.code_freak.codefreak.entity.Assignment
+import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
+import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
-import java.time.Instant
 import java.util.UUID
 
 @Service
@@ -19,16 +21,19 @@ class AssignmentService : BaseService() {
   data class AssignmentCreationResult(val assignment: Assignment, val taskErrors: Map<String, Throwable>)
 
   @Autowired
-  lateinit var assignmentRepository: AssignmentRepository
+  private lateinit var assignmentRepository: AssignmentRepository
 
   @Autowired
-  lateinit var submissionService: SubmissionService
+  private lateinit var submissionService: SubmissionService
 
   @Autowired
-  lateinit var taskService: TaskService
+  private lateinit var taskService: TaskService
 
   @Autowired
-  lateinit var self: AssignmentService
+  private lateinit var self: AssignmentService
+
+  @Autowired
+  private lateinit var fileService: FileService
 
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
@@ -38,15 +43,20 @@ class AssignmentService : BaseService() {
   fun findAllAssignments(): Iterable<Assignment> = assignmentRepository.findAll()
 
   @Transactional
+  fun findAssignmentsByOwner(owner: User): Iterable<Assignment> = assignmentRepository.findByOwnerId(owner.id)
+
+  @Transactional
   fun findAllAssignmentsForUser(userId: UUID) = submissionService.findSubmissionsOfUser(userId).map {
     it.assignment
   }
 
   @Transactional
-  fun createFromTar(content: ByteArray, owner: User, deadline: Instant?): AssignmentCreationResult {
+  fun createFromTar(content: ByteArray, owner: User, modify: Assignment.() -> Unit = {}): AssignmentCreationResult {
     val definition = TarUtil.getYamlDefinition<AssignmentDefinition>(ByteArrayInputStream(content))
     val assignment = self.withNewTransaction {
-      assignmentRepository.save(Assignment(definition.title, owner, null, deadline))
+      val assignment = Assignment(definition.title, owner)
+      assignment.modify()
+      assignmentRepository.save(assignment)
     }
     val taskErrors = mutableMapOf<String, Throwable>()
     definition.tasks.forEachIndexed { index, it ->
@@ -63,5 +73,30 @@ class AssignmentService : BaseService() {
       }
     }
     return AssignmentCreationResult(assignment, taskErrors)
+  }
+
+  @Transactional
+  fun createEmptyAssignment(owner: User): Assignment {
+    return ByteArrayOutputStream().use {
+      TarUtil.createTarFromDirectory(ClassPathResource("init/assignments/empty").file, it)
+      createFromTar(it.toByteArray(), owner).assignment
+    }
+  }
+
+  @Transactional
+  fun deleteAssignment(id: UUID) {
+    submissionService.deleteSubmissionsOfAssignment(id)
+    assignmentRepository.deleteById(id)
+  }
+
+  @Transactional
+  fun addTasksToAssignment(assignment: Assignment, tasks: Collection<Task>) {
+    var nextPosition = assignment.tasks.maxBy { it.position }?.let { it.position + 1 } ?: 0
+    for (task in tasks) {
+      fileService.readCollectionTar(task.id).use {
+        taskService.createFromTar(it.readBytes(), assignment, assignment.owner, nextPosition)
+      }
+      nextPosition++
+    }
   }
 }

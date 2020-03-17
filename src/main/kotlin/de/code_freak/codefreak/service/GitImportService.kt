@@ -1,7 +1,6 @@
 package de.code_freak.codefreak.service
 
 import de.code_freak.codefreak.config.AppConfiguration
-import de.code_freak.codefreak.entity.Answer
 import org.eclipse.jgit.api.Git
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -20,7 +19,10 @@ class GitImportService : BaseService() {
 
   fun getRemote(host: String) = configuration.gitImport.remotes.find { remote -> remote.host == host }
 
-  fun importFiles(remoteUrlString: String, answer: Answer) {
+  /**
+   * @param out is not closed
+   */
+  fun importFiles(remoteUrlString: String, out: OutputStream) {
     val uri = try {
       URI(remoteUrlString).let { it.host.length; it } // check for null
     } catch (e: Exception) {
@@ -28,9 +30,7 @@ class GitImportService : BaseService() {
     }
     val remote = getRemote(uri.host) ?: throw IllegalArgumentException("Import from '${uri.host}' is not supported.")
     val gitUri = getGitUri(remote, uri)
-    answerService.setFiles(answer).use {
-      createRemoteTarArchive(gitUri, it)
-    }
+    createRemoteTarArchive(gitUri, out)
   }
 
   fun createRemoteTarArchive(remoteUri: URI, output: OutputStream) {

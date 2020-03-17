@@ -20,6 +20,13 @@ query GetTaskList($assignmentId: ID!) {
   }
 }
 
+query GetTaskPoolForAdding {
+  taskPool {
+    id
+    title
+  }
+}
+
 query GetTaskPool {
   taskPool {
     ...taskListItem

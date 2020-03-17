@@ -52,7 +52,7 @@ class AnswerService : BaseService() {
   }
 
   fun setFiles(answer: Answer): OutputStream {
-    answer.task.assignment?.requireNotClosed()
+    answer.task.assignment?.requireOpen()
     return fileService.writeCollectionTar(answer.id).afterClose { containerService.answerFilesUpdated(answer.id) }
   }
 
