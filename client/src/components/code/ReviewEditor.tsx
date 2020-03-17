@@ -1,5 +1,9 @@
 import { Spin } from 'antd'
 import React, { useState } from 'react'
+import {
+  FeedbackSeverity,
+  useCreateCommentMutation
+} from '../../generated/graphql'
 import { sliceLines } from '../../services/file'
 import ReviewCommentForm, { ReviewCommentValues } from './ReviewComment'
 import './ReviewEditor.less'
@@ -8,6 +12,9 @@ import SyntaxHighlighter, { SyntaxHighlighterProps } from './SyntaxHighlighter'
 export interface ReviewEditorProps {
   syntaxHighlighterProps?: SyntaxHighlighterProps
   children: string
+  answerId: string
+  path: string
+  fileCollectionDigist: string
 }
 
 const ReviewEditor: React.FC<ReviewEditorProps> = props => {
@@ -15,6 +22,7 @@ const ReviewEditor: React.FC<ReviewEditorProps> = props => {
   const [currentLineNumber, setCurrentLineNumber] = useState<
     number | undefined
   >()
+  const [createComment, { data, loading, error }] = useCreateCommentMutation()
 
   const onLineNumberClick = (lineNumber: number, element: HTMLSpanElement) => {
     setCurrentLineNumber(lineNumber)
@@ -38,7 +46,17 @@ const ReviewEditor: React.FC<ReviewEditorProps> = props => {
   }
 
   const onComment = (values: ReviewCommentValues) => {
-    setCurrentLineNumber(undefined)
+    createComment({
+      variables: {
+        answerId: props.answerId,
+        comment: values.comment,
+        digest: props.fileCollectionDigist,
+        severity: values.severity || FeedbackSeverity.Info,
+        path: props.path
+      }
+    }).then(() => {
+      setCurrentLineNumber(undefined)
+    })
   }
 
   // split the syntax highlighter into two parts if we are reviewing lines
@@ -47,7 +65,7 @@ const ReviewEditor: React.FC<ReviewEditorProps> = props => {
       <SyntaxHighlighter {...highlighterProps}>
         {sliceLines(children, 1, currentLineNumber) + '\n'}
       </SyntaxHighlighter>
-      <Spin spinning={false} tip="Creating comment…">
+      <Spin spinning={loading} tip="Creating comment…">
         <ReviewCommentForm
           onSubmit={onComment}
           onClose={onClose}

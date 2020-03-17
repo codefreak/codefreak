@@ -26,7 +26,7 @@ const renderSeveritySelect = () => {
 
 export interface ReviewCommentValues {
   comment: string
-  severity?: [keyof FeedbackSeverity]
+  severity?: FeedbackSeverity
 }
 
 export interface ReviewCommentFormProps extends FormComponentProps {

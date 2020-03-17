@@ -3,12 +3,16 @@ package de.code_freak.codefreak.service.evaluation
 import de.code_freak.codefreak.entity.Answer
 import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Evaluation
+import de.code_freak.codefreak.entity.EvaluationStep
+import de.code_freak.codefreak.entity.Feedback
 import de.code_freak.codefreak.repository.EvaluationRepository
 import de.code_freak.codefreak.service.BaseService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.EntityNotFoundException
 import de.code_freak.codefreak.service.SubmissionService
+import de.code_freak.codefreak.service.TaskService
 import de.code_freak.codefreak.service.file.FileService
+import de.code_freak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -31,6 +35,9 @@ class EvaluationService : BaseService() {
 
   @Autowired
   private lateinit var evaluationQueue: EvaluationQueue
+
+  @Autowired
+  private lateinit var taskService: TaskService
 
   @Autowired
   private lateinit var runners: List<EvaluationRunner>
@@ -65,6 +72,32 @@ class EvaluationService : BaseService() {
   fun isEvaluationPending(answerId: UUID) = isEvaluationInQueue(answerId) || evaluationQueue.isRunning(answerId)
 
   fun isEvaluationInQueue(answerId: UUID) = evaluationQueue.isQueued(answerId)
+
+  fun getEvaluationByDigest(answerId: UUID, digest: ByteArray): Evaluation? {
+    return evaluationRepository.findFirstByAnswerIdAndFilesDigest(answerId, digest).orNull()
+  }
+
+  fun createEvaluation(answer: Answer): Evaluation {
+    return evaluationRepository.save(Evaluation(answer, fileService.getCollectionMd5Digest(answer.id)))
+  }
+
+  fun addCommentFeedback(answer: Answer, digest: ByteArray, feedback: Feedback): Feedback {
+    // find out if evaluation has a comment step definition
+    val taskDefinition = taskService.getTaskDefinition(answer.task.id)
+    val stepDefinition = taskDefinition.evaluation.find { it.step == "comments" }
+        ?: throw IllegalArgumentException("Task has no 'comments' evaluation step")
+    val stepIndex = taskDefinition.evaluation.indexOf(stepDefinition)
+    val evaluation = getEvaluationByDigest(answer.id, digest) ?: createEvaluation(answer)
+
+    val evaluationStep = evaluation.evaluationSteps.find { it.position == stepIndex }
+        ?: EvaluationStep("comments", stepIndex).also {
+          evaluation.addStep(it)
+        }
+
+    evaluationStep.addFeedback(feedback)
+    evaluationRepository.save(evaluation)
+    return feedback
+  }
 
   fun isEvaluationUpToDate(answerId: UUID): Boolean = getLatestEvaluation(answerId).map {
     it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answerId))

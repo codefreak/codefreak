@@ -46,7 +46,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   }
 
   // use path from response or content and path can by out-of-sync
-  const { content, type, path } = result.data.answerFile
+  const { content, type, path, collectionDigest } = result.data.answerFile
 
   if (type !== FileType.File) {
     return codeViewerMessage(
@@ -78,7 +78,15 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     value = sliceLines(value, firstLineNumber, end)
   }
 
-  return <ReviewEditor>{value}</ReviewEditor>
+  return (
+    <ReviewEditor
+      answerId={answerId}
+      path={path}
+      fileCollectionDigist={collectionDigest}
+    >
+      {value}
+    </ReviewEditor>
+  )
 }
 
 export const CodeViewerCard: React.FC<CodeViewerProps> = props => {

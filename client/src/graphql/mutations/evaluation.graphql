@@ -12,3 +12,19 @@ mutation StartAssignmentEvaluation($assignmentId: ID!) {
     status
   }
 }
+
+mutation CreateComment(
+  $answerId: ID!
+  $digest: String!
+  $comment: String!
+  $path: String!
+  $severity: FeedbackSeverity!
+) {
+  addComment(
+    answerId: $answerId
+    digest: $digest
+    comment: $comment
+    path: $path
+    severity: $severity
+  )
+}

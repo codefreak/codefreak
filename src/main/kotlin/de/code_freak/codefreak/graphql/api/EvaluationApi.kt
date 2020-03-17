@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
+import java.util.Base64
 import java.util.UUID
 
 @GraphQLName("PendingEvaluation")
@@ -147,6 +148,22 @@ class EvaluationMutation : BaseResolver(), Mutation {
       PendingEvaluationDto(it, this)
     }
   }
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun addComment(answerId: UUID, digest: String, comment: String, severity: SeverityDto, path: String): Boolean =
+      context {
+        val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
+        val user = authorization.currentUser
+        val evaluationService = serviceAccess.getService(EvaluationService::class)
+        val digestByteArray = Base64.getDecoder().decode(digest)
+        val feedback = Feedback("Comment by ${user.getDisplayName()}").apply {
+          longDescription = comment
+          fileContext = Feedback.FileContext(path)
+          this.severity = Feedback.Severity.valueOf(severity.name)
+        }
+        evaluationService.addCommentFeedback(answer, digestByteArray, feedback)
+        true
+      }
 }
 
 @Component
@@ -164,13 +181,14 @@ class EvaluationSubscription : BaseResolver(), Subscription {
   @Autowired
   private lateinit var pendingEvaluationUpdatedEventPublisher: PendingEvaluationUpdatedEventPublisher
 
-  fun pendingEvaluationUpdated(answerId: UUID, env: DataFetchingEnvironment): Flux<PendingEvaluationUpdatedEventDto> = context(env) {
-    val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
-    authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
-    pendingEvaluationUpdatedEventPublisher.eventStream
-        .filter { it.answerId == answerId }
-        .map { PendingEvaluationUpdatedEventDto(it) }
-  }
+  fun pendingEvaluationUpdated(answerId: UUID, env: DataFetchingEnvironment): Flux<PendingEvaluationUpdatedEventDto> =
+      context(env) {
+        val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
+        authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
+        pendingEvaluationUpdatedEventPublisher.eventStream
+            .filter { it.answerId == answerId }
+            .map { PendingEvaluationUpdatedEventDto(it) }
+      }
 
   fun evaluationFinished(env: DataFetchingEnvironment): Flux<EvaluationDto> = context(env) {
     evaluationFinishedEventPublisher.eventStream
