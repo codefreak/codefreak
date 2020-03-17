@@ -1,45 +1,9 @@
-import { Button, Card, Col, Form, Icon, Row, Select } from 'antd'
-import TextArea from 'antd/es/input/TextArea'
+import { Spin } from 'antd'
 import React, { useState } from 'react'
-import { FeedbackSeverity } from '../../services/codefreak-api'
 import { sliceLines } from '../../services/file'
+import ReviewCommentForm, { ReviewCommentValues } from './ReviewComment'
 import './ReviewEditor.less'
 import SyntaxHighlighter, { SyntaxHighlighterProps } from './SyntaxHighlighter'
-
-const renderSeveritySelect = () => {
-  return (
-    <Select
-      style={{ width: '250px' }}
-      placeholder="Select a severity"
-      allowClear
-    >
-      {Object.entries(FeedbackSeverity).map(([value, key]) => {
-        return (
-          <Select.Option key={key} value={key}>
-            {value}
-          </Select.Option>
-        )
-      })}
-    </Select>
-  )
-}
-
-const CommentForm: React.FC = () => {
-  return (
-    <Form>
-      <TextArea
-        autoSize={{ minRows: 3, maxRows: 6 }}
-        placeholder={`Add a useful comment…`}
-      />
-      <Row>
-        <Col span={12}>{renderSeveritySelect()}</Col>
-        <Col span={12} style={{ textAlign: 'right' }}>
-          <Button type="primary">Save Comment</Button>
-        </Col>
-      </Row>
-    </Form>
-  )
-}
 
 export interface ReviewEditorProps {
   syntaxHighlighterProps?: SyntaxHighlighterProps
@@ -73,20 +37,23 @@ const ReviewEditor: React.FC<ReviewEditorProps> = props => {
     setCurrentLineNumber(undefined)
   }
 
+  const onComment = (values: ReviewCommentValues) => {
+    setCurrentLineNumber(undefined)
+  }
+
   // split the syntax highlighter into two parts if we are reviewing lines
   return (
     <div className="review-editor">
       <SyntaxHighlighter {...highlighterProps}>
         {sliceLines(children, 1, currentLineNumber) + '\n'}
       </SyntaxHighlighter>
-      <Card
-        size="small"
-        className="review-comment"
-        title={`Comment on line ${currentLineNumber}`}
-        extra={<Icon type="close" onClick={onClose} />}
-      >
-        <CommentForm />
-      </Card>
+      <Spin spinning={false} tip="Creating comment…">
+        <ReviewCommentForm
+          onSubmit={onComment}
+          onClose={onClose}
+          title={`Create a comment on line ${currentLineNumber}`}
+        />
+      </Spin>
       <SyntaxHighlighter
         {...highlighterProps}
         firstLineNumber={currentLineNumber + 1}

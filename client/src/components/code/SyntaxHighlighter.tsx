@@ -44,8 +44,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = props => {
     }
     const onClickListener = (e: Event) => {
       if (e.target instanceof HTMLSpanElement) {
-        const lineNumber = parseInt(e.target.innerText)
-        console.log(lineNumber)
+        const lineNumber = parseInt(e.target.innerText, 10)
         onClick(lineNumber, e.target)
       }
     }
