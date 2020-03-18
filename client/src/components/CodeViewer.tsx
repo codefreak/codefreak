@@ -11,6 +11,7 @@ import AsyncPlaceholder from './AsyncContainer'
 
 import Centered from './Centered'
 import ReviewEditor from './code/ReviewEditor'
+import SyntaxHighlighter from './code/SyntaxHighlighter'
 import './CodeViewer.less'
 
 interface CodeViewerProps {
@@ -35,7 +36,8 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   path: queryPath,
   lineStart,
   lineEnd,
-  numContextRows = 3
+  numContextRows = 3,
+  review
 }) => {
   const result = useGetAnswerFileQuery({
     variables: { id: answerId, path: queryPath }
@@ -76,6 +78,17 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
       numberOfLines(value)
     )
     value = sliceLines(value, firstLineNumber, end)
+  }
+
+  if (review !== true) {
+    return (
+      <SyntaxHighlighter
+        firstLineNumber={firstLineNumber}
+        highlightLines={highlightLines}
+      >
+        {value}
+      </SyntaxHighlighter>
+    )
   }
 
   return (
