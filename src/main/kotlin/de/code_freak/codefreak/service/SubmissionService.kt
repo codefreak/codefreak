@@ -97,4 +97,8 @@ class SubmissionService : BaseService() {
 
     return spreadsheetService.generateCsv(titleCols, rows)
   }
+
+  fun deleteSubmissionsOfAssignment(assignmentId: UUID) {
+    submissionRepository.deleteAllByAssignmentId(assignmentId)
+  }
 }

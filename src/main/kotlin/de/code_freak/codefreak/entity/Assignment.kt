@@ -3,6 +3,7 @@ package de.code_freak.codefreak.entity
 import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import java.util.SortedSet
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -24,27 +25,27 @@ class Assignment(
   @ManyToOne
   var owner: User,
 
-  /**
-   * The classroom this assignment belongs to
-   * This can be null for assignments that are shared via link
-   */
-  @ManyToOne(optional = true)
-  var classroom: Classroom?,
-
-  var deadline: Instant? = null
+  var openFrom: Instant? = null,
+  var deadline: Instant? = null,
+  var active: Boolean = false
 ) : BaseEntity() {
   /**
    * A list of tasks in this assignment ordered by their position
    */
-  @OneToMany(mappedBy = "assignment")
+  @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
   @OrderBy("position ASC")
   var tasks: SortedSet<Task> = sortedSetOf<Task>()
     get() = field.sortedBy { it.position }.toSortedSet()
 
-  val closed get() = deadline?.let { Instant.now().isAfter(deadline) } ?: false
+  val status get() = when {
+    !active -> AssignmentStatus.INACTIVE
+    openFrom == null || Instant.now().isBefore(openFrom) -> AssignmentStatus.ACTIVE
+    deadline == null || Instant.now().isBefore(deadline) -> AssignmentStatus.OPEN
+    else -> AssignmentStatus.CLOSED
+  }
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
 
-  fun requireNotClosed() = require(!closed) { "The assignment is already closed." }
+  fun requireOpen() = require(status == AssignmentStatus.OPEN) { "The assignment is not open for submissions." }
 }

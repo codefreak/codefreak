@@ -1,0 +1,31 @@
+mutation DeleteAssignment($id: ID!) {
+  deleteAssignment(id: $id)
+}
+
+mutation CreateAssignment {
+  createAssignment {
+    id
+  }
+}
+
+mutation AddTasksToAssignment($assignmentId: ID!, $taskIds: [ID!]!) {
+  addTasksToAssignment(assignmentId: $assignmentId, taskIds: $taskIds)
+}
+
+mutation UploadAssignment($files: [Upload!]!) {
+  uploadAssignment(files: $files) {
+    assignment {
+      id
+    }
+    taskErrors
+  }
+}
+
+mutation ImportAssignment($url: String!) {
+  importAssignment(url: $url) {
+    assignment {
+      id
+    }
+    taskErrors
+  }
+}
