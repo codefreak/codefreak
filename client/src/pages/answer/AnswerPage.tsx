@@ -78,7 +78,7 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
       >
         {differentUser && (
           <Alert
-            showIcon={true}
+            showIcon
             message="You can add comments inside code by clicking the + symbol next to the line numbers!"
             style={{ marginBottom: 16 }}
           />
