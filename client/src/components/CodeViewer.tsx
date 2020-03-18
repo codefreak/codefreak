@@ -1,12 +1,17 @@
 import { Card, Icon, Result } from 'antd'
-import { editor, Range } from 'monaco-editor'
 import React from 'react'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
-import { basename, isBinaryContent } from '../services/file'
+import {
+  basename,
+  isBinaryContent,
+  numberOfLines,
+  sliceLines
+} from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
-import Editor from './Editor'
 
 import Centered from './Centered'
+import ReviewEditor from './code/ReviewEditor'
+import SyntaxHighlighter from './code/SyntaxHighlighter'
 import './CodeViewer.less'
 
 interface CodeViewerProps {
@@ -15,6 +20,7 @@ interface CodeViewerProps {
   lineStart?: number
   lineEnd?: number
   numContextRows?: number
+  review?: boolean
 }
 
 const codeViewerMessage = (message: React.ReactNode) => {
@@ -30,7 +36,8 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   path: queryPath,
   lineStart,
   lineEnd,
-  numContextRows = 4
+  numContextRows = 3,
+  review
 }) => {
   const result = useGetAnswerFileQuery({
     variables: { id: answerId, path: queryPath }
@@ -41,7 +48,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   }
 
   // use path from response or content and path can by out-of-sync
-  const { content, type, path } = result.data.answerFile
+  const { content, type, path, collectionDigest } = result.data.answerFile
 
   if (type !== FileType.File) {
     return codeViewerMessage(
@@ -51,7 +58,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     )
   }
 
-  const value = content || ''
+  let value = content || ''
 
   if (isBinaryContent(value)) {
     return codeViewerMessage(
@@ -61,28 +68,37 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     )
   }
 
-  const decorations: editor.IModelDeltaDecoration[] = []
-  let maxNumLines
+  const highlightLines = []
+  let firstLineNumber = lineStart || 1
   if (lineStart) {
-    decorations.push({
-      range: new Range(lineStart, 1, lineEnd || lineStart, Infinity),
-      options: {
-        className: 'highlight-line'
-      }
-    })
-    maxNumLines = numContextRows * 2
-    maxNumLines += lineEnd ? lineEnd - lineStart : 1
+    highlightLines.push(lineStart)
+    firstLineNumber = Math.max(lineStart - numContextRows, 1)
+    const end = Math.min(
+      (lineEnd || lineStart) + numContextRows + 1,
+      numberOfLines(value)
+    )
+    value = sliceLines(value, firstLineNumber, end)
+  }
+
+  if (review !== true) {
+    return (
+      <SyntaxHighlighter
+        firstLineNumber={firstLineNumber}
+        highlightLines={highlightLines}
+      >
+        {value}
+      </SyntaxHighlighter>
+    )
   }
 
   return (
-    <Editor
-      readOnly
-      currentLine={lineStart}
-      maxNumLines={maxNumLines}
-      value={value}
-      path={`/${answerId}/${path}`}
-      decorations={decorations}
-    />
+    <ReviewEditor
+      answerId={answerId}
+      path={path}
+      fileCollectionDigest={collectionDigest}
+    >
+      {value}
+    </ReviewEditor>
   )
 }
 

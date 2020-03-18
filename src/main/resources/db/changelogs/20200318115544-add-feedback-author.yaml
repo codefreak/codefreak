@@ -1,0 +1,24 @@
+databaseChangeLog:
+- changeSet:
+    id: 1584528787824-2
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: author_id
+            type: uuid
+        tableName: feedback
+- changeSet:
+    id: 1584528787824-3
+    author: hkasch (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: author_id
+        baseTableName: feedback
+        constraintName: FKjps4bm4bk24bum79syxri4052
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: user
+        validate: true

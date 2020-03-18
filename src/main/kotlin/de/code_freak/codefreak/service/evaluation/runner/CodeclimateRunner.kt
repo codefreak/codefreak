@@ -54,14 +54,6 @@ class CodeclimateRunner : EvaluationRunner {
     }
   }
 
-  override fun summarize(feedbackList: List<Feedback>): String {
-    // summarize by counting items each severity group
-    val severityCount = feedbackList.groupingBy { it.severity!! }.eachCount()
-    return severityCount.toSortedMap()
-        .map { (severity, count) -> "${count}x ${severity.name.toLowerCase()}" }
-        .joinToString(" / ")
-  }
-
   private fun parseCodeclimateJson(content: String): List<Issue> {
     var json = content
     // codeclimate may print a message before the actual JSON

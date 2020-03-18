@@ -1,4 +1,4 @@
-import { Card } from 'antd'
+import { Alert, Card } from 'antd'
 import React, { useContext, useEffect } from 'react'
 import AnswerFileBrowser from '../../components/AnswerFileBrowser'
 import ArchiveDownload from '../../components/ArchiveDownload'
@@ -76,7 +76,14 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
           </ArchiveDownload>
         }
       >
-        <AnswerFileBrowser answerId={answer.id} />
+        {differentUser && (
+          <Alert
+            showIcon
+            message="You can add comments inside code by clicking the + symbol next to the line numbers!"
+            style={{ marginBottom: 16 }}
+          />
+        )}
+        <AnswerFileBrowser answerId={answer.id} review={!!differentUser} />
       </Card>
       <UploadAnswer answer={answer} />
     </>

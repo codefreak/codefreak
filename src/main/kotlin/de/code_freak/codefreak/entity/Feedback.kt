@@ -57,6 +57,9 @@ class Feedback(
   val isFailed
     get() = status == Status.FAILED
 
+  @ManyToOne
+  var author: User? = null
+
   /**
    * Context points to a file or more specific to a line, line-range or character range inside a file.
    *
