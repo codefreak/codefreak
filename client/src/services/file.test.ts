@@ -9,7 +9,7 @@ import {
   sliceLines
 } from './file'
 
-const cid = { collectionId: '123' }
+const cid = { collectionId: '123', collectionDigest: 'fff' }
 const file = { ...cid, type: FileType.File }
 const dir = { ...cid, type: FileType.Directory }
 

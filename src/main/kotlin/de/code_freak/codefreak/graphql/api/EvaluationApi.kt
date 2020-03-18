@@ -25,8 +25,8 @@ import graphql.schema.DataFetchingEnvironment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
+import org.springframework.util.Base64Utils
 import reactor.core.publisher.Flux
-import java.util.Base64
 import java.util.UUID
 
 @GraphQLName("PendingEvaluation")
@@ -150,20 +150,31 @@ class EvaluationMutation : BaseResolver(), Mutation {
   }
 
   @Secured(Authority.ROLE_TEACHER)
-  fun addComment(answerId: UUID, digest: String, comment: String, severity: SeverityDto, path: String): Boolean =
-      context {
-        val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
-        val user = authorization.currentUser
-        val evaluationService = serviceAccess.getService(EvaluationService::class)
-        val digestByteArray = Base64.getDecoder().decode(digest)
-        val feedback = Feedback("Comment by ${user.getDisplayName()}").apply {
-          longDescription = comment
-          fileContext = Feedback.FileContext(path)
-          this.severity = Feedback.Severity.valueOf(severity.name)
+  fun addCommentFeedback(
+    answerId: UUID,
+    digest: String,
+    comment: String,
+    severity: SeverityDto?,
+    path: String?,
+    line: Int?
+  ): Boolean = context {
+    val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
+    val user = authorization.currentUser
+    val evaluationService = serviceAccess.getService(EvaluationService::class)
+    val digestByteArray = Base64Utils.decodeFromString(digest)
+    val feedback = evaluationService.createCommentFeedback(user, comment).apply {
+      if (path != null) {
+        fileContext = Feedback.FileContext(path).apply {
+          if (line != null) {
+            lineStart = line
+          }
         }
-        evaluationService.addCommentFeedback(answer, digestByteArray, feedback)
-        true
       }
+      this.severity = if (severity != null) Feedback.Severity.valueOf(severity.name) else null
+    }
+    evaluationService.addCommentFeedback(answer, digestByteArray, feedback)
+    true
+  }
 }
 
 @Component

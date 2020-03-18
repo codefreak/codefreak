@@ -2,9 +2,10 @@ import { Spin } from 'antd'
 import React, { useState } from 'react'
 import {
   FeedbackSeverity,
-  useCreateCommentMutation
+  useCreateCommentFeedbackMutation
 } from '../../generated/graphql'
-import { sliceLines } from '../../services/file'
+import { basename, sliceLines } from '../../services/file'
+import { messageService } from '../../services/message'
 import ReviewCommentForm, { ReviewCommentValues } from './ReviewComment'
 import './ReviewEditor.less'
 import SyntaxHighlighter, { SyntaxHighlighterProps } from './SyntaxHighlighter'
@@ -14,7 +15,7 @@ export interface ReviewEditorProps {
   children: string
   answerId: string
   path: string
-  fileCollectionDigist: string
+  fileCollectionDigest: string
 }
 
 const ReviewEditor: React.FC<ReviewEditorProps> = props => {
@@ -22,14 +23,10 @@ const ReviewEditor: React.FC<ReviewEditorProps> = props => {
   const [currentLineNumber, setCurrentLineNumber] = useState<
     number | undefined
   >()
-  const [createComment, { data, loading, error }] = useCreateCommentMutation()
-
-  const onLineNumberClick = (lineNumber: number, element: HTMLSpanElement) => {
-    setCurrentLineNumber(lineNumber)
-  }
+  const [createComment, { loading }] = useCreateCommentFeedbackMutation()
 
   const highlighterProps = {
-    onLineNumberClick
+    onLineNumberClick: setCurrentLineNumber
   }
 
   // simply return the highlighted code if we are not reviewing a line currently
@@ -41,20 +38,24 @@ const ReviewEditor: React.FC<ReviewEditorProps> = props => {
     )
   }
 
-  const onClose = () => {
-    setCurrentLineNumber(undefined)
-  }
+  const onClose = () => setCurrentLineNumber(undefined)
 
   const onComment = (values: ReviewCommentValues) => {
     createComment({
       variables: {
         answerId: props.answerId,
         comment: values.comment,
-        digest: props.fileCollectionDigist,
+        digest: props.fileCollectionDigest,
         severity: values.severity || FeedbackSeverity.Info,
-        path: props.path
+        path: props.path,
+        line: currentLineNumber
       }
     }).then(() => {
+      messageService.success(
+        `Comment has been added to ${basename(
+          props.path
+        )} line ${currentLineNumber}!`
+      )
       setCurrentLineNumber(undefined)
     })
   }

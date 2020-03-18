@@ -5,6 +5,7 @@ import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.entity.EvaluationStep
 import de.code_freak.codefreak.entity.Feedback
+import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.EvaluationRepository
 import de.code_freak.codefreak.service.BaseService
 import de.code_freak.codefreak.service.ContainerService
@@ -81,6 +82,18 @@ class EvaluationService : BaseService() {
     return evaluationRepository.save(Evaluation(answer, fileService.getCollectionMd5Digest(answer.id)))
   }
 
+  fun createCommentFeedback(author: User, comment: String): Feedback {
+    // use the first 10 words of the first line or max. 100 chars as summary
+    var summary = comment.trim().replace("((?:[^ \\n]+ ?){0,10})".toRegex(), "$1").trim()
+    if (summary.length > 100) {
+      summary = summary.substring(0..100) + "..."
+    }
+    return Feedback(summary).apply {
+      longDescription = comment
+      this.author = author
+    }
+  }
+
   fun addCommentFeedback(answer: Answer, digest: ByteArray, feedback: Feedback): Feedback {
     // find out if evaluation has a comment step definition
     val taskDefinition = taskService.getTaskDefinition(answer.task.id)
@@ -89,10 +102,9 @@ class EvaluationService : BaseService() {
     val stepIndex = taskDefinition.evaluation.indexOf(stepDefinition)
     val evaluation = getEvaluationByDigest(answer.id, digest) ?: createEvaluation(answer)
 
+    // either take existing comments step on evaluation or create a new one
     val evaluationStep = evaluation.evaluationSteps.find { it.position == stepIndex }
-        ?: EvaluationStep("comments", stepIndex).also {
-          evaluation.addStep(it)
-        }
+        ?: EvaluationStep("comments", stepIndex).also { evaluation.addStep(it) }
 
     evaluationStep.addFeedback(feedback)
     evaluationRepository.save(evaluation)

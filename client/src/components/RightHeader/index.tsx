@@ -1,7 +1,7 @@
 import { Dropdown, Icon, Menu } from 'antd'
 import React from 'react'
 import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
-import { displayName, initials } from '../../services/user'
+import { displayName } from '../../services/user'
 import Avatar from '../user/Avatar'
 import './index.less'
 

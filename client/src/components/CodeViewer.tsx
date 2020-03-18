@@ -82,7 +82,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     <ReviewEditor
       answerId={answerId}
       path={path}
-      fileCollectionDigist={collectionDigest}
+      fileCollectionDigest={collectionDigest}
     >
       {value}
     </ReviewEditor>
