@@ -63,7 +63,7 @@ class EvaluationService : BaseService() {
 
   fun startEvaluation(answer: Answer) {
     containerService.saveAnswerFiles(answer)
-    check(!isEvaluationUpToDate(answer.id)) { "Evaluation is up to date." }
+    check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
     check(!isEvaluationPending(answer.id)) { "Evaluation is already running or queued." }
     evaluationQueue.insert(answer.id)
   }
@@ -111,9 +111,13 @@ class EvaluationService : BaseService() {
     return feedback
   }
 
-  fun isEvaluationUpToDate(answerId: UUID): Boolean = getLatestEvaluation(answerId).map {
-    it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answerId))
-  }.orElse(false)
+  fun isEvaluationUpToDate(answer: Answer): Boolean {
+    return getLatestEvaluation(answer.id).map {
+      // evaluation is fresh if file hash matches and all evaluation steps have been run
+      it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answer.id)) &&
+          taskService.getTaskDefinition(answer.task.id).evaluation.size == it.evaluationSteps.size
+    }.orElse(false)
+  }
 
   fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name]
       ?: throw IllegalArgumentException("Evaluation runner '$name' not found")
