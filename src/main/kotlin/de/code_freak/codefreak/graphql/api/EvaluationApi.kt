@@ -165,12 +165,17 @@ class EvaluationMutation : BaseResolver(), Mutation {
     val feedback = evaluationService.createCommentFeedback(user, comment).apply {
       if (path != null) {
         fileContext = Feedback.FileContext(path).apply {
-          if (line != null) {
-            lineStart = line
-          }
+          lineStart = line
         }
       }
-      this.severity = if (severity != null) Feedback.Severity.valueOf(severity.name) else null
+      this.severity = when {
+        severity != null -> Feedback.Severity.valueOf(severity.name)
+        else -> null
+      }
+      this.status = when {
+        severity != null -> Feedback.Status.FAILED
+        else -> null
+      }
     }
     evaluationService.addCommentFeedback(answer, digestByteArray, feedback)
     true

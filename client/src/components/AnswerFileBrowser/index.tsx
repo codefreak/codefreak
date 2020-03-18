@@ -10,9 +10,13 @@ import './index.less'
 
 export interface AnswerFileBrowserProps {
   answerId: string
+  review?: boolean
 }
 
-const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
+const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({
+  answerId,
+  review
+}) => {
   const [openedFiles, setOpenedFiles] = useState<FileTreeNode[]>([])
   const [currentFile, setCurrentFile] = useState<FileTreeNode | undefined>()
 
@@ -65,7 +69,11 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
         </Tabs>
         <div className="answer-editor-content">
           {currentFile ? (
-            <CodeViewer answerId={answerId} path={currentFile.path} />
+            <CodeViewer
+              answerId={answerId}
+              path={currentFile.path}
+              review={review === true}
+            />
           ) : (
             <Centered>
               <Result
