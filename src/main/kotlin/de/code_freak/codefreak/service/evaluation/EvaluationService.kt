@@ -1,7 +1,7 @@
 package de.code_freak.codefreak.service.evaluation
 
 import de.code_freak.codefreak.entity.Answer
-import de.code_freak.codefreak.entity.Assignment
+import de.code_freak.codefreak.entity.AssignmentStatus
 import de.code_freak.codefreak.entity.Evaluation
 import de.code_freak.codefreak.entity.EvaluationStep
 import de.code_freak.codefreak.entity.Feedback
@@ -17,13 +17,13 @@ import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationListener
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
-class EvaluationService : BaseService(), ApplicationListener<AssignmentStatusChangedEvent> {
-
+class EvaluationService : BaseService() {
   @Autowired
   private lateinit var submissionService: SubmissionService
 
@@ -49,11 +49,12 @@ class EvaluationService : BaseService(), ApplicationListener<AssignmentStatusCha
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  fun startEvaluation(assignment: Assignment): List<Answer> {
-    val submissions = submissionService.findSubmissionsOfAssignment(assignment.id)
+  fun startAssignmentEvaluation(assignmentId: UUID): List<Answer> {
+    val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
     return submissions.flatMap { it.answers }.mapNotNull {
       try {
-        startEvaluation(it)
+        // this will never be run by a student so force file saving should be safe
+        startEvaluation(it, forceSaveFiles = true)
         it
       } catch (e: IllegalStateException) {
         // evaluation is already fresh or running
@@ -63,8 +64,8 @@ class EvaluationService : BaseService(), ApplicationListener<AssignmentStatusCha
     }
   }
 
-  fun startEvaluation(answer: Answer) {
-    containerService.saveAnswerFiles(answer)
+  fun startEvaluation(answer: Answer, forceSaveFiles: Boolean = false) {
+    containerService.saveAnswerFiles(answer, forceSaveFiles)
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
     check(!isEvaluationPending(answer.id)) { "Evaluation is already running or queued." }
     evaluationQueue.insert(answer.id)
@@ -128,7 +129,13 @@ class EvaluationService : BaseService(), ApplicationListener<AssignmentStatusCha
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
   }
 
-  override fun onApplicationEvent(event: AssignmentStatusChangedEvent) {
-    println("Assignment ${event.assignmentId} status has changed: ${event.status}")
+  @EventListener
+  @Transactional
+  fun onApplicationEvent(event: AssignmentStatusChangedEvent) {
+    if (event.status != AssignmentStatus.CLOSED) {
+      return
+    }
+    log.info("Automatically trigger evaluation for answers of ${event.assignmentId}")
+    startAssignmentEvaluation(event.assignmentId)
   }
 }

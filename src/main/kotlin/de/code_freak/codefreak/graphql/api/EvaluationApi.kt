@@ -15,7 +15,6 @@ import de.code_freak.codefreak.graphql.BaseResolver
 import de.code_freak.codefreak.graphql.ResolverContext
 import de.code_freak.codefreak.graphql.SubscriptionEventPublisher
 import de.code_freak.codefreak.service.AnswerService
-import de.code_freak.codefreak.service.AssignmentService
 import de.code_freak.codefreak.service.EvaluationDefinition
 import de.code_freak.codefreak.service.EvaluationFinishedEvent
 import de.code_freak.codefreak.service.PendingEvaluationUpdatedEvent
@@ -143,8 +142,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
 
   @Secured(Authority.ROLE_TEACHER)
   fun startAssignmentEvaluation(assignmentId: UUID): List<PendingEvaluationDto> = context {
-    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(assignmentId)
-    serviceAccess.getService(EvaluationService::class).startEvaluation(assignment).map {
+    serviceAccess.getService(EvaluationService::class).startAssignmentEvaluation(assignmentId).map {
       PendingEvaluationDto(it, this)
     }
   }

@@ -11,6 +11,7 @@ import org.springframework.core.Ordered
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.util.UUID
 import java.util.concurrent.ScheduledFuture
 import javax.persistence.PostPersist
 import javax.persistence.PostRemove
@@ -27,7 +28,7 @@ class AssignmentStatusChangePublisher : ApplicationListener<ContextRefreshedEven
   @Autowired
   private lateinit var assignmentRepository: AssignmentRepository
 
-  val scheduledEvents: MutableMap<Pair<Assignment, AssignmentStatus>, ScheduledFuture<*>> = mutableMapOf()
+  val scheduledEvents: MutableMap<Pair<UUID, AssignmentStatus>, ScheduledFuture<*>> = mutableMapOf()
 
   /**
    * Schedule all future assignment statuses on application startup
@@ -41,7 +42,6 @@ class AssignmentStatusChangePublisher : ApplicationListener<ContextRefreshedEven
   fun onAssignmentChanged(assignment: Assignment) {
     cancelAssignmentEvents(assignment)
     scheduleAssignmentStatusEvents(assignment)
-    // TODO: check if active state has been changed
   }
 
   @PostRemove
@@ -57,15 +57,22 @@ class AssignmentStatusChangePublisher : ApplicationListener<ContextRefreshedEven
     assignment.deadline?.let { publishStatusDelayed(assignment, AssignmentStatus.CLOSED, it) }
   }
 
+  @Synchronized
   private fun publishStatusDelayed(assignment: Assignment, status: AssignmentStatus, date: Instant) {
-    scheduledEvents[Pair(assignment, status)] = taskScheduler.schedule({
+    if (date <= Instant.now().minusSeconds(60)) {
+      // only schedule past events if they are not older than 1min
+      // this is useful if an assignment status was just changed (a few ms ago) or if the application
+      // just crashed and possibly missed to trigger some events
+      return
+    }
+    scheduledEvents[Pair(assignment.id, status)] = taskScheduler.schedule({
       eventPublisher.publishEvent(AssignmentStatusChangedEvent(assignment.id, status))
-      scheduledEvents.remove(Pair(assignment, status))
+      scheduledEvents.remove(Pair(assignment.id, status))
     }, date)
   }
 
   private fun cancelAssignmentStatusEvents(assignment: Assignment, status: AssignmentStatus) {
-    scheduledEvents.remove(Pair(assignment, status))?.cancel(true)
+    scheduledEvents.remove(Pair(assignment.id, status))?.cancel(true)
   }
 
   override fun getOrder() = Ordered.LOWEST_PRECEDENCE

@@ -18,6 +18,8 @@ import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 import java.util.UUID
 
@@ -64,6 +66,10 @@ class EvaluationQueue : StepExecutionListener {
     }
   }
 
+  /**
+   * Mark as Propagation.NOT_SUPPORTED to prevent exceptions from JobRepository
+   */
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   fun insert(answerId: UUID) {
     val params = JobParametersBuilder().apply {
       addString(EvaluationConfiguration.PARAM_ANSWER_ID, answerId.toString())
