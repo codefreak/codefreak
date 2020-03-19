@@ -7,7 +7,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
 @Configuration
 class TaskSchedulerConfiguration {
   @Bean
-  fun threadPoolTaskScheduler(): ThreadPoolTaskScheduler? {
+  fun threadPoolTaskScheduler(): ThreadPoolTaskScheduler {
     val threadPoolTaskScheduler = ThreadPoolTaskScheduler()
     threadPoolTaskScheduler.poolSize = 5
     threadPoolTaskScheduler.isRemoveOnCancelPolicy = true

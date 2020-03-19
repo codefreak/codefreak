@@ -6,6 +6,7 @@ import de.code_freak.codefreak.repository.AssignmentRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationListener
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.core.Ordered
 import org.springframework.scheduling.TaskScheduler
@@ -25,6 +26,10 @@ class AssignmentStatusChangePublisher : ApplicationListener<ContextRefreshedEven
   @Autowired
   private lateinit var taskScheduler: TaskScheduler
 
+  /**
+   * Inject lazy because this is a cyclic dependency (sorry)
+   */
+  @Lazy
   @Autowired
   private lateinit var assignmentRepository: AssignmentRepository
 
