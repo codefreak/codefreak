@@ -7,6 +7,7 @@ import de.code_freak.codefreak.entity.EvaluationStep
 import de.code_freak.codefreak.entity.Feedback
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.EvaluationRepository
+import de.code_freak.codefreak.service.AssignmentStatusChangedEvent
 import de.code_freak.codefreak.service.BaseService
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.EntityNotFoundException
@@ -16,11 +17,12 @@ import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class EvaluationService : BaseService() {
+class EvaluationService : BaseService(), ApplicationListener<AssignmentStatusChangedEvent> {
 
   @Autowired
   private lateinit var submissionService: SubmissionService
@@ -124,5 +126,9 @@ class EvaluationService : BaseService() {
 
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
+  }
+
+  override fun onApplicationEvent(event: AssignmentStatusChangedEvent) {
+    println("Assignment ${event.assignmentId} status has changed: ${event.status}")
   }
 }
