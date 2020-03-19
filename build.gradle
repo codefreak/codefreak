@@ -17,7 +17,7 @@ plugins {
 
 apply plugin: 'io.spring.dependency-management'
 
-apply from: 'https://raw.githubusercontent.com/erikhofer/autodiff/1.0.0/autodiff.gradle'
+apply from: 'https://raw.githubusercontent.com/erikhofer/autodiff/1.0.2/autodiff.gradle'
 project.autodiff.basePackage = "de.code_freak.codefreak.entity"
 project.autodiff.changeLogMaster = "src/main/resources/db/changelog-master.yaml"
 project.autodiff.changeLogDiff = project.hasProperty('changeLogDiff')
