@@ -84,10 +84,7 @@ class AssignmentService : BaseService() {
   }
 
   @Transactional
-  fun deleteAssignment(id: UUID) {
-    submissionService.deleteSubmissionsOfAssignment(id)
-    assignmentRepository.deleteById(id)
-  }
+  fun deleteAssignment(id: UUID) = assignmentRepository.deleteById(id)
 
   @Transactional
   fun addTasksToAssignment(assignment: Assignment, tasks: Collection<Task>) {
