@@ -6,6 +6,7 @@ import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.AssignmentRepository
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
+import liquibase.util.StreamUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
@@ -78,7 +79,7 @@ class AssignmentService : BaseService() {
   @Transactional
   fun createEmptyAssignment(owner: User): Assignment {
     return ByteArrayOutputStream().use {
-      TarUtil.createTarFromDirectory(ClassPathResource("init/assignments/empty").file, it)
+      StreamUtil.copy(ClassPathResource("empty_assignment.tar").inputStream, it)
       createFromTar(it.toByteArray(), owner).assignment
     }
   }
