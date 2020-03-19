@@ -51,6 +51,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({
   return (
     <Row type="flex" className="answer-editor">
       <Col span={6} style={{ backgroundColor: '#fafafa' }}>
+        <h4 className="answer-editor-file-title"> Files </h4>
         <AnswerFileTree answerId={answerId} onFileSelect={onSelectFileInTree} />
       </Col>
       <Col span={18} className="answer-editor-code-col">
