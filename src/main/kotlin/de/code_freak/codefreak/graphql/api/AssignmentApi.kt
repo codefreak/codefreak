@@ -99,8 +99,7 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun uploadAssignment(files: Array<ApplicationPart>): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-    AssignmentCreationResultDto(serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(),
-        authorization.currentUser), this)
+      createActiveAssignmentFromTar(it.toByteArray())
     }
   }
 
@@ -109,8 +108,15 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun importAssignment(url: String): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
-      AssignmentCreationResultDto(serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(),
-          authorization.currentUser), this)
+      createActiveAssignmentFromTar(it.toByteArray())
+    }
+  }
+
+  private fun createActiveAssignmentFromTar(byteArray: ByteArray) = context {
+    serviceAccess.getService(AssignmentService::class).createFromTar(byteArray, authorization.currentUser) {
+      active = true
+    }.let {
+      AssignmentCreationResultDto(it, this)
     }
   }
 
