@@ -41,7 +41,9 @@ class AssignmentStatusChangePublisher : ApplicationListener<ContextRefreshedEven
   @PostUpdate
   fun onAssignmentChanged(assignment: Assignment) {
     cancelAssignmentEvents(assignment)
-    scheduleAssignmentStatusEvents(assignment)
+    if (assignment.status >= AssignmentStatus.ACTIVE) {
+      scheduleAssignmentStatusEvents(assignment)
+    }
   }
 
   @PostRemove
