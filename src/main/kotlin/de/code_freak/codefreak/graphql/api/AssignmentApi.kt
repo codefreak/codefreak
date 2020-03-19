@@ -125,7 +125,6 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun deleteAssignment(id: UUID): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
-    require(assignment.status != AssignmentStatus.OPEN) { "Assignment must not be open" }
     serviceAccess.getService(AssignmentService::class).deleteAssignment(assignment.id)
     true
   }
