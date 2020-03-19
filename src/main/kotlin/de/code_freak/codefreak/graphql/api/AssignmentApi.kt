@@ -24,6 +24,7 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayOutputStream
+import java.time.Instant
 import java.util.UUID
 
 @GraphQLName("Assignment")
@@ -115,6 +116,7 @@ class AssignmentMutation : BaseResolver(), Mutation {
   private fun createActiveAssignmentFromTar(byteArray: ByteArray) = context {
     serviceAccess.getService(AssignmentService::class).createFromTar(byteArray, authorization.currentUser) {
       active = true
+      openFrom = Instant.now()
     }.let {
       AssignmentCreationResultDto(it, this)
     }
@@ -123,7 +125,6 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun deleteAssignment(id: UUID): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
-    require(assignment.status != AssignmentStatus.OPEN) { "Assignment must not be open" }
     serviceAccess.getService(AssignmentService::class).deleteAssignment(assignment.id)
     true
   }
