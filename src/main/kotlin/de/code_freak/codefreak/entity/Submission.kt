@@ -23,7 +23,7 @@ class Submission(
   /**
    * List of answers in this submission
    */
-  @OneToMany(mappedBy = "submission", cascade = [CascadeType.ALL])
+  @OneToMany(mappedBy = "submission", cascade = [CascadeType.REMOVE])
   var answers: MutableSet<Answer> = mutableSetOf()
 
   fun getAnswer(taskId: UUID) = answers.firstOrNull { it.task.id == taskId }

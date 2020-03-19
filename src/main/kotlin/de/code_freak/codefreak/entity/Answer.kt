@@ -25,6 +25,6 @@ class Answer(
     }
   }
 
-  @OneToMany(mappedBy = "answer", cascade = [CascadeType.ALL])
+  @OneToMany(mappedBy = "answer", cascade = [CascadeType.REMOVE])
   var evaluations: List<Evaluation> = listOf()
 }
