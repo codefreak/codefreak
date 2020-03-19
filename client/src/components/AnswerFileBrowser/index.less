@@ -28,13 +28,39 @@
 
 .answer-editor {
   height: 500px;
+
+  .ant-tree {
+    height: calc(100% - 30px);
+    overflow: auto;
+    border-right: 1px solid #e8e8e8;
+    padding-top: 8px;
+    li {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+}
+
+.answer-editor-file-title {
+  background-color: #efefef;
+  height: 30px;
+  line-height: 30px;
+  padding-left: 8px;
+  border-bottom: 1px solid #e8e8e8;
+  border-right: 1px solid #e8e8e8;
+  margin-bottom: 0;
+  color: rgba(0, 0, 0, 0.65);
+
+  .anticon {
+    margin-right: 8px;
+  }
 }
 
 .answer-editor-content {
   height: calc(100% - 30px);
 
-  .syntax-highlighter {
-    max-height: 100%;
+  .hljs {
+    height: 100%;
     overflow: auto;
   }
 }
