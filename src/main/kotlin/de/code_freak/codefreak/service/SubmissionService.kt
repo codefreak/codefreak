@@ -81,7 +81,7 @@ class SubmissionService : BaseService() {
       val resultCols = columnDefinitions.map { (task, index, _) ->
         val answer = submission.getAnswer(task.id)
         val evaluation = answer?.id?.let { evaluationService.getLatestEvaluation(it).orElse(null) }
-        val result = evaluation?.evaluationSteps?.get(index)?.summary
+        val result = evaluation?.evaluationSteps?.firstOrNull { it.position == index }?.summary
         when {
           answer == null -> "[no answer]"
           evaluation == null -> "[no evaluation]"

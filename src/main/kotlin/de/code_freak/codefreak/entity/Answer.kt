@@ -26,5 +26,5 @@ class Answer(
   }
 
   @OneToMany(mappedBy = "answer", cascade = [CascadeType.REMOVE])
-  var evaluations: List<Evaluation> = listOf()
+  var evaluations = mutableSetOf<Evaluation>()
 }
