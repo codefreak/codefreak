@@ -10,9 +10,13 @@ import './index.less'
 
 export interface AnswerFileBrowserProps {
   answerId: string
+  review?: boolean
 }
 
-const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
+const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({
+  answerId,
+  review
+}) => {
   const [openedFiles, setOpenedFiles] = useState<FileTreeNode[]>([])
   const [currentFile, setCurrentFile] = useState<FileTreeNode | undefined>()
 
@@ -47,6 +51,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
   return (
     <Row type="flex" className="answer-editor">
       <Col span={6} style={{ backgroundColor: '#fafafa' }}>
+        <h4 className="answer-editor-file-title"> Files </h4>
         <AnswerFileTree answerId={answerId} onFileSelect={onSelectFileInTree} />
       </Col>
       <Col span={18} className="answer-editor-code-col">
@@ -63,16 +68,22 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({ answerId }) => {
             <Tabs.TabPane key={file.path} tab={basename(file.path)} />
           ))}
         </Tabs>
-        {currentFile ? (
-          <CodeViewer answerId={answerId} path={currentFile.path} />
-        ) : (
-          <Centered>
-            <Result
-              title="Please select a file from the tree to view its content"
-              icon={<Icon type="file" twoToneColor="red" />}
+        <div className="answer-editor-content">
+          {currentFile ? (
+            <CodeViewer
+              answerId={answerId}
+              path={currentFile.path}
+              review={review === true}
             />
-          </Centered>
-        )}
+          ) : (
+            <Centered>
+              <Result
+                title="Please select a file from the tree to view its content"
+                icon={<Icon type="file" twoToneColor="red" />}
+              />
+            </Centered>
+          )}
+        </div>
       </Col>
     </Row>
   )

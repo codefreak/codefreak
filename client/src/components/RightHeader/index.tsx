@@ -1,7 +1,8 @@
-import { Avatar, Dropdown, Icon, Menu } from 'antd'
+import { Dropdown, Icon, Menu } from 'antd'
 import React from 'react'
 import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
-import { displayName, initials } from '../../services/user'
+import { displayName } from '../../services/user'
+import Avatar from '../user/Avatar'
 import './index.less'
 
 interface RightHeaderProps {
@@ -23,12 +24,7 @@ const Index: React.FC<RightHeaderProps> = ({ logout }) => {
     <div style={{ float: 'right', paddingRight: 14 }}>
       <Dropdown overlay={userMenu}>
         <div style={{ padding: '0 10px' }}>
-          <Avatar
-            size="small"
-            style={{ verticalAlign: 'text-top', marginRight: 10 }}
-          >
-            {initials(user)}
-          </Avatar>
+          <Avatar size="small" user={user} />
           {displayName(user)}
         </div>
       </Dropdown>

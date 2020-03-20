@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface AssignmentRepository : CrudRepository<Assignment, UUID>
+interface AssignmentRepository : CrudRepository<Assignment, UUID> {
+  fun findByOwnerId(ownerId: UUID): Iterable<Assignment>
+}

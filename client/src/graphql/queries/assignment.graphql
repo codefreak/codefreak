@@ -2,6 +2,7 @@ query GetAssignmentList {
   assignments {
     id
     title
+    deletable
     tasks {
       id
     }
@@ -12,6 +13,7 @@ query GetAssignment($id: ID!) {
   assignment(id: $id) {
     id
     title
+    editable
   }
 }
 

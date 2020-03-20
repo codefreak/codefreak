@@ -9,7 +9,16 @@ interface EvaluationRunner {
 
   fun getName(): String
   fun run(answer: Answer, options: Map<String, Any>): List<Feedback>
-  fun summarize(feedbackList: List<Feedback>): String
+
+  /**
+   * Default feedback summary is the number of each severities
+   */
+  fun summarize(feedbackList: List<Feedback>): String {
+    val severityCount = feedbackList.groupingBy { it.severity ?: Feedback.Severity.INFO }.eachCount()
+    return severityCount.toSortedMap()
+        .map { (severity, count) -> "${count}x ${severity.name.toLowerCase()}" }
+        .joinToString(" / ")
+  }
 
   fun <T : Any> Map<String, Any>.get(key: String, type: KClass<T>): T? =
       get(key)?.let { type.safeCast(it) ?: throw IllegalArgumentException("Option '$key' has invalid format") }
