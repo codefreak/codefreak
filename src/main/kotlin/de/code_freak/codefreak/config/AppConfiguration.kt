@@ -51,8 +51,14 @@ class AppConfiguration {
     /** Interval for checking for idle containers in ms. */
     var idleCheckRate: Long = 60000L
 
-    /** Time span after which an idle container is shut down. */
+    /** Time span after which an idle container is shut down in ms. */
     var idleShutdownThreshold: Long = 600000L
+
+    /** Interval for checking shutdown containers for removal in ms. (default is 15min) */
+    var removeCheckRate: Long = 60L * 15L * 1000L
+
+    /** Time span after which a shutdown container will be removed in ms. (default is 30 days) */
+    var removeThreshold: Long = 60L * 60L * 24L * 30L * 1000L
 
     /** Maximum number of IDE containers that are started at the same time. Negative = unlimited. */
     var maxContainers = -1

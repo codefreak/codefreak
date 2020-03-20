@@ -2,7 +2,10 @@ package de.code_freak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam.withLabel
+import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusExited
 import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusRunning
+import com.spotify.docker.client.DockerClient.RemoveContainerParam.forceKill
+import com.spotify.docker.client.DockerClient.RemoveContainerParam.removeVolumes
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.HostConfig
@@ -22,7 +25,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StreamUtils
 import java.io.InputStream
-import java.util.ArrayList
+import java.time.Instant
+import java.util.Date
 import java.util.UUID
 import java.util.regex.Pattern
 import javax.ws.rs.ProcessingException
@@ -319,6 +323,30 @@ class ContainerService : BaseService() {
       }
     }
     idleContainers = newIdleContainers
+  }
+
+  @Scheduled(
+      fixedRateString = "\${code-freak.ide.remove-check-rate}",
+      initialDelayString = "\${code-freak.ide.remove-check-rate}"
+  )
+  protected fun removeShutdownContainers() {
+    val thresholdDate = Date.from(Instant.now().minusMillis(config.ide.removeThreshold))
+    log.debug("Removing IDE containers exited before $thresholdDate")
+    val containers = mutableListOf<Container>().apply {
+      addAll(listContainers(withLabel(LABEL_ANSWER_ID), withStatusExited()))
+      addAll(listContainers(withLabel(LABEL_READ_ONLY_ANSWER_ID), withStatusExited()))
+    }
+    containers.forEach { container ->
+      val containerId = container.id()
+      val inspection = docker.inspectContainer(containerId)
+      if (inspection.state().finishedAt().before(thresholdDate)) {
+        val answerId = inspection.config().labels()?.let {
+          it[LABEL_ANSWER_ID] ?: it[LABEL_READ_ONLY_ANSWER_ID]
+        }
+        log.info("Removing container $containerId of answer $answerId")
+        docker.removeContainer(containerId, forceKill(), removeVolumes())
+      }
+    }
   }
 
   fun runCodeclimate(answer: Answer): String {
