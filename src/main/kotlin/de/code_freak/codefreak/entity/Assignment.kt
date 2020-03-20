@@ -34,7 +34,7 @@ class Assignment(
    */
   @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
   @OrderBy("position ASC")
-  var tasks: SortedSet<Task> = sortedSetOf<Task>()
+  var tasks: SortedSet<Task> = sortedSetOf<Task>().toSortedSet()
     get() = field.sortedBy { it.position }.toSortedSet()
 
   val status get() = when {
@@ -50,5 +50,5 @@ class Assignment(
   fun requireOpen() = require(status == AssignmentStatus.OPEN) { "The assignment is not open for submissions." }
 
   @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
-  var submissions: List<Submission> = listOf()
+  var submissions = mutableSetOf<Submission>()
 }

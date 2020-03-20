@@ -20,9 +20,6 @@ class Answer(
   var task: Task
 ) : BaseEntity() {
 
-  @OneToMany(mappedBy = "answer")
-  var evaluations = mutableSetOf<Evaluation>()
-
   init {
     if (!submission.answers.contains(this)) {
       submission.answers.add(this)
@@ -30,5 +27,5 @@ class Answer(
   }
 
   @OneToMany(mappedBy = "answer", cascade = [CascadeType.REMOVE])
-  var evaluations: List<Evaluation> = listOf()
+  var evaluations = mutableSetOf<Evaluation>()
 }
