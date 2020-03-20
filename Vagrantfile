@@ -40,6 +40,14 @@ Vagrant.configure("2") do |config|
       eol
   end
 
+  # install Java 8
+  config.vm.provision "shell", inline: <<-SHELL
+    add-apt-repository ppa:openjdk-r/ppa -y
+    apt-get update
+    apt-get -y install openjdk-8-jdk
+    update-alternatives --config java
+  SHELL
+
   config.vm.provider "virtualbox" do |vb|
    vb.memory = "4096"
   end

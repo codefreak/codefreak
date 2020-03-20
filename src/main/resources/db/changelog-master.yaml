@@ -17,3 +17,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20200314145916-assignment-status.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20200318115544-add-feedback-author.yaml
+    relativeToChangelogFile: true

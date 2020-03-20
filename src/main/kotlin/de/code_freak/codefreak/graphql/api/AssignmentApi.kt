@@ -24,6 +24,7 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayOutputStream
+import java.time.Instant
 import java.util.UUID
 
 @GraphQLName("Assignment")
@@ -99,8 +100,7 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun uploadAssignment(files: Array<ApplicationPart>): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-    AssignmentCreationResultDto(serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(),
-        authorization.currentUser), this)
+      createActiveAssignmentFromTar(it.toByteArray())
     }
   }
 
@@ -109,15 +109,22 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun importAssignment(url: String): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
-      AssignmentCreationResultDto(serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(),
-          authorization.currentUser), this)
+      createActiveAssignmentFromTar(it.toByteArray())
+    }
+  }
+
+  private fun createActiveAssignmentFromTar(byteArray: ByteArray) = context {
+    serviceAccess.getService(AssignmentService::class).createFromTar(byteArray, authorization.currentUser) {
+      active = true
+      openFrom = Instant.now()
+    }.let {
+      AssignmentCreationResultDto(it, this)
     }
   }
 
   fun deleteAssignment(id: UUID): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
-    require(assignment.status != AssignmentStatus.OPEN) { "Assignment must not be open" }
     serviceAccess.getService(AssignmentService::class).deleteAssignment(assignment.id)
     true
   }

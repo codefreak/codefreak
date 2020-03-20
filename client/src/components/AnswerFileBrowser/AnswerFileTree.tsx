@@ -59,7 +59,11 @@ const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({
   }
 
   return (
-    <DirectoryTree onSelect={onSelect} defaultExpandedKeys={[rootNode.path]}>
+    <DirectoryTree
+      onSelect={onSelect}
+      defaultExpandedKeys={[rootNode.path]}
+      className="answer-file-tree"
+    >
       {renderTreeNodeRecursive(rootNode)}
     </DirectoryTree>
   )

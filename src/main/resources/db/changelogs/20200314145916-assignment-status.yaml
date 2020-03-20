@@ -10,6 +10,7 @@ databaseChangeLog:
               nullable: false
             name: active
             type: boolean
+            defaultValueBoolean: false
         tableName: assignment
 - changeSet:
     id: 1584197999459-3

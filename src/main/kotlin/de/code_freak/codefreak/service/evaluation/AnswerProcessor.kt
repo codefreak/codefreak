@@ -27,9 +27,15 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
 
   override fun process(answer: Answer): Evaluation {
     val taskDefinition = taskService.getTaskDefinition(answer.task.id)
+    val digest = fileService.getCollectionMd5Digest(answer.id)
+    val evaluation =
+        evaluationService.getEvaluationByDigest(answer.id, digest) ?: evaluationService.createEvaluation(answer)
     log.debug("Start evaluation of answer {} ({} steps)", answer.id, taskDefinition.evaluation.size)
-    val evaluation = Evaluation(answer, fileService.getCollectionMd5Digest(answer.id))
     taskDefinition.evaluation.forEachIndexed { index, evaluationDefinition ->
+      // step may has already been executed
+      if (evaluation.evaluationSteps.find { it.position == index } !== null) {
+        return@forEachIndexed
+      }
       val runnerName = evaluationDefinition.step
       val evaluationStep = EvaluationStep(runnerName, index)
       try {

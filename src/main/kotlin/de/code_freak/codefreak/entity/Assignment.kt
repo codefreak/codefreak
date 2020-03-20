@@ -48,4 +48,7 @@ class Assignment(
   var createdAt: Instant = Instant.now()
 
   fun requireOpen() = require(status == AssignmentStatus.OPEN) { "The assignment is not open for submissions." }
+
+  @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
+  var submissions: List<Submission> = listOf()
 }
