@@ -5,8 +5,8 @@ import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.TaskRepository
 import de.code_freak.codefreak.service.file.FileService
-import de.code_freak.codefreak.util.TarUtil
 import de.code_freak.codefreak.util.TarUtil.getYamlDefinition
+import liquibase.util.StreamUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
@@ -41,7 +41,7 @@ TaskService : BaseService() {
   @Transactional
   fun createEmptyTask(owner: User): Task {
     return ByteArrayOutputStream().use {
-      TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/empty").file, it)
+      StreamUtil.copy(ClassPathResource("empty_task.tar").inputStream, it)
       createFromTar(it.toByteArray(), null, owner, 0)
     }
   }
