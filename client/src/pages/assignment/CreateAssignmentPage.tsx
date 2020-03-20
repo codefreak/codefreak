@@ -93,7 +93,7 @@ const CreateAssignmentPage: React.FC = () => {
       <Card
         title="Import"
         extra={
-          <HelpButton category="definitions" section="assignments">
+          <HelpButton category="definitions" section="assignment">
             File Format
           </HelpButton>
         }

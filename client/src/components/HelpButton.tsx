@@ -11,7 +11,7 @@ const HelpButton: React.FC<HelpButtonProps> = props => {
   const { category, section, children, ...buttonProps } = props
   return (
     <Link
-      to={`/help/${category}${section ? '#_' + section : ''}`}
+      to={`/help/${category}${section ? '#' + section : ''}`}
       target="_blank"
     >
       <Button icon="question-circle" {...buttonProps}>

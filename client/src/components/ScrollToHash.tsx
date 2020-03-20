@@ -4,8 +4,8 @@ import { useLocation } from 'react-router-dom'
 const ScrollToHash: React.FC = () => {
   const location = useLocation()
   useEffect(() => {
-    const element = document.getElementById(location.hash.replace('#', ''))
     setTimeout(() => {
+      const element = document.getElementById(location.hash.replace('#', ''))
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' })
       } else {
@@ -14,7 +14,7 @@ const ScrollToHash: React.FC = () => {
           top: 0
         })
       }
-    }, 100)
+    }, 500)
   }, [location])
   return null
 }
