@@ -1,4 +1,6 @@
-import { Timeline } from 'antd'
+import { ApolloProvider, useApolloClient } from '@apollo/react-hooks'
+import { Button, Card, Modal, Timeline } from 'antd'
+import ApolloClient from 'apollo-client'
 import React from 'react'
 import {
   EvaluationStepResult,
@@ -7,12 +9,19 @@ import {
 } from '../generated/graphql'
 import usePendingEvaluation from '../hooks/usePendingEvaluation'
 import AsyncPlaceholder from './AsyncContainer'
+import './EvaluationHistory.less'
+import EvaluationResult from './EvaluationResult'
 import { EvaluationErrorIcon } from './Icons'
 
 const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
   const result = useGetEvaluationHistoryQuery({ variables: { answerId } })
+  const apolloClient = useApolloClient()
 
-  const pendingEvaluation = usePendingEvaluation(answerId)
+  const pendingEvaluation = usePendingEvaluation(answerId, result.refetch)
+
+  const isPending =
+    pendingEvaluation.status === 'RUNNING' ||
+    pendingEvaluation.status === 'QUEUED'
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -23,23 +32,40 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
   } = result.data
 
   return (
-    <div style={{ padding: 32 }}>
-      <Timeline reverse>{evaluations.map(renderEvaluation)}</Timeline>
-    </div>
+    <Card className="evaluation-history">
+      <Timeline reverse pending={isPending ? 'Running...' : undefined}>
+        {evaluations.map(renderEvaluation(apolloClient))}
+      </Timeline>
+    </Card>
   )
 }
 
-const renderEvaluation = (
+const renderEvaluation = (apolloClient: ApolloClient<any>) => (
   evaluation: NonNullable<
     GetEvaluationHistoryQueryResult['data']
   >['answer']['evaluations'][0]
 ) => {
+  const showDetails = () =>
+    Modal.info({
+      icon: null,
+      content: (
+        <ApolloProvider client={apolloClient}>
+          <EvaluationResult evaluationId={evaluation.id} />
+        </ApolloProvider>
+      ),
+      width: 800,
+      maskClosable: true
+    })
+
   return (
     <Timeline.Item
       key={evaluation.id}
       {...getDot(evaluation.stepsResultSummary)}
     >
-      {new Date(evaluation.createdAt).toLocaleString()}
+      {new Date(evaluation.createdAt).toLocaleString()}{' '}
+      <Button size="small" onClick={showDetails}>
+        Details
+      </Button>
     </Timeline.Item>
   )
 }
