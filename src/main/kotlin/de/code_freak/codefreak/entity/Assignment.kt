@@ -1,16 +1,19 @@
 package de.code_freak.codefreak.entity
 
+import de.code_freak.codefreak.service.AssignmentStatusChangePublisher
 import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import java.util.SortedSet
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OrderBy
 
 @Entity
+@EntityListeners(AssignmentStatusChangePublisher::class)
 class Assignment(
   /**
    * A title for this assignment

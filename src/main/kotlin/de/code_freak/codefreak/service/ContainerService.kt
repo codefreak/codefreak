@@ -184,16 +184,16 @@ class ContainerService : BaseService() {
   }
 
   @Transactional
-  fun saveAnswerFiles(answer: Answer): Answer {
-    if (answer.task.assignment?.status != AssignmentStatus.OPEN) {
-      log.info("Skipped saving of files from answer ${answer.id} because assignment is bot open")
+  fun saveAnswerFiles(answer: Answer, force: Boolean = false): Answer {
+    if (!force && answer.task.assignment?.status != AssignmentStatus.OPEN) {
+      log.info("Skipped saving of files from answer ${answer.id} because assignment is not open")
       return answer
     }
     val containerId = getIdeContainer(answer.id) ?: return answer
     archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
       fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
     }
-    log.info("Saved files of answer ${answer.id} from container $containerId")
+    log.info("Saved files of answer ${answer.id} from container $containerId (force=$force)")
     return entityManager.merge(answer)
   }
 
