@@ -22,7 +22,7 @@ class Evaluation(
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL])
   @OrderBy("position ASC")
-  var evaluationSteps: MutableList<EvaluationStep> = mutableListOf()
+  var evaluationSteps = mutableSetOf<EvaluationStep>()
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()

@@ -25,7 +25,7 @@ class EvaluationStep(
   var evaluation: Evaluation? = null
 
   @OneToMany(mappedBy = "evaluationStep", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-  var feedback: MutableList<Feedback> = mutableListOf()
+  var feedback = mutableSetOf<Feedback>()
 
   @Enumerated(EnumType.STRING)
   var result: EvaluationStepResult? = null

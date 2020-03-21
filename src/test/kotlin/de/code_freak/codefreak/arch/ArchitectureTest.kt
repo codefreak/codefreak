@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.inject.Named
 import com.tngtech.archunit.core.importer.ImportOption
+import javax.persistence.Entity
 
 @RunWith(ArchUnitRunner::class)
 @AnalyzeClasses(packages = ["de.code_freak.codefreak"], importOptions = [ImportOption.DoNotIncludeTests::class])
@@ -51,4 +52,13 @@ internal class ArchitectureTest {
       .beAnnotatedWith(javax.transaction.Transactional::class.java)
       .orShould()
       .beAnnotatedWith(Named::class.java)
+
+  @ArchTest
+  val `List is not used as type for entity properties` = ArchRuleDefinition
+      .noFields()
+      .that()
+      .areDeclaredInClassesThat()
+      .areAnnotatedWith(Entity::class.java)
+      .should()
+      .haveRawType(List::class.java)
 }
