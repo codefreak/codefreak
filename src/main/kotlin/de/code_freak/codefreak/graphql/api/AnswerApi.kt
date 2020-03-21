@@ -48,6 +48,10 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseD
     }
   }
 
+  val evaluations by lazy {
+    entity.evaluations.sortedBy { it.createdAt }.map { EvaluationDto(it, ctx) }
+  }
+
   val ideRunning by lazy {
     serviceAccess.getService(ContainerService::class)
         .isIdeContainerRunning(id)

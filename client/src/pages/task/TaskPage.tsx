@@ -23,7 +23,7 @@ import { getEntityPath } from '../../services/entity-path'
 import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
 import AnswerPage from '../answer/AnswerPage'
-import EvaluationPage from '../evaluation/EvaluationPage'
+import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 

@@ -19,6 +19,7 @@ class Answer(
   @ManyToOne
   var task: Task
 ) : BaseEntity() {
+
   init {
     if (!submission.answers.contains(this)) {
       submission.answers.add(this)

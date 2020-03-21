@@ -1,6 +1,7 @@
 import { Alert, Icon, Result, Steps, Tabs } from 'antd'
 import React, { useContext, useEffect, useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
+import EvaluationHistory from '../../components/EvaluationHistory'
 import EvaluationResult from '../../components/EvaluationResult'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import usePendingEvaluation from '../../hooks/usePendingEvaluation'
@@ -20,7 +21,7 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
   const result = useGetEvaluationOverviewQuery({ variables: { answerId } })
   const [step, setStep] = useState(0)
   const [extendedSteps, setExtendedSteps] = useState(false)
-  const pendingEvaluation = usePendingEvaluation(answerId)
+  const pendingEvaluation = usePendingEvaluation(answerId, result.refetch)
   const differentUser = useContext(DifferentUserContext)
 
   useEffect(() => {
@@ -39,7 +40,6 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
         break
       case PendingEvaluationStatus.Finished:
         setStep(3)
-        result.refetch()
         break
     }
   }, [pendingEvaluation, setStep, result])
@@ -129,7 +129,7 @@ const EvaluationPage: React.FC<{ answerId: string }> = ({ answerId }) => {
           disabled={!answer.latestEvaluation}
           key="/history"
         >
-          Content of Tab Pane 2
+          <EvaluationHistory answerId={answer.id} />
         </TabPane>
       </Tabs>
     </>

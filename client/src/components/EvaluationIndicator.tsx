@@ -1,7 +1,8 @@
-import { Badge, Icon } from 'antd'
+import { Badge } from 'antd'
 import React from 'react'
 import useLatestEvaluation from '../hooks/useLatestEvaluation'
 import usePendingEvaluation from '../hooks/usePendingEvaluation'
+import { EvaluationErrorIcon } from './Icons'
 
 interface EvaluationIndicatorProps {
   style?: React.CSSProperties
@@ -26,7 +27,7 @@ const EvaluationIndicator: React.FC<EvaluationIndicatorProps> = props => {
   }
 
   if (latest.summary === 'ERRORED') {
-    return <Icon type="exclamation-circle" style={{ color: 'red', ...style }} />
+    return <EvaluationErrorIcon style={style} />
   }
 
   return <Badge style={style} status="default" />
