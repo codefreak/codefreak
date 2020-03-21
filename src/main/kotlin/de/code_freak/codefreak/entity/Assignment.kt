@@ -34,7 +34,7 @@ class Assignment(
    */
   @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
   @OrderBy("position ASC")
-  var tasks: SortedSet<Task> = sortedSetOf<Task>().toSortedSet()
+  var tasks: SortedSet<Task> = sortedSetOf<Task>()
     get() = field.sortedBy { it.position }.toSortedSet()
 
   val status get() = when {
