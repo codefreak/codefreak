@@ -35,10 +35,6 @@ script:
     --build-arg GIT_TAG="$TRAVIS_TAG"
     -t cfreak/code-freak:latest $TRAVIS_BUILD_DIR
 
-after_success:
-  # Disable TLS 1.3: https://bugs.openjdk.java.net/browse/JDK-8221253
-  - ./gradlew -Djdk.tls.client.protocols="TLSv1,TLSv1.1,TLSv1.2" jacocoTestReport coveralls
-
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -64,11 +60,6 @@ deploy:
       tags: true
     # This will also tag and deploy minor and major version (1.2.3 as 1.2 and 1)
     script: docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/code-freak
-  # deploy demo branch
-  - provider: script
-    on:
-      branch: demo
-    script: docker-ci-deploy --tag demo -- cfreak/code-freak
 
   # publish release
   - provider: script

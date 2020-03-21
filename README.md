@@ -2,8 +2,7 @@ Code FREAK<br><small>╰ Code Feedback, Review & Evaluation Kit</small>
 ======
 
 [![Build Status](https://travis-ci.com/code-freak/code-freak.svg?branch=master)](https://travis-ci.com/code-freak/code-freak)
-[![Coverage Status](https://coveralls.io/repos/github/code-freak/code-freak/badge.svg?branch=master)](https://coveralls.io/github/code-freak/code-freak?branch=master)
-[![Known Vulnerabilities](https://snyk.io/test/github/code-freak/code-freak/badge.svg?targetFile=build.gradle)](https://snyk.io/test/github/code-freak/code-freak?targetFile=build.gradle)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=code-freak_code-freak&metric=alert_status)](https://sonarcloud.io/dashboard?id=code-freak_code-freak)
 [![Docker Image](https://images.microbadger.com/badges/version/cfreak/code-freak.svg)](https://microbadger.com/images/cfreak/code-freak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
@@ -22,16 +21,16 @@ For instructions how to run, configure and use the application please find the d
 ## License
     Code FREAK | Code Feedback Review & Evaluation Kit
     Copyright (C) 2019 Kiel University of Applied Sciences
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published
     by the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
-    
+
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
