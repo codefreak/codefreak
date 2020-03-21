@@ -326,8 +326,8 @@ class ContainerService : BaseService() {
   }
 
   @Scheduled(
-      fixedRateString = "\${code-freak.ide.remove-check-rate}",
-      initialDelayString = "\${code-freak.ide.remove-check-rate}"
+      fixedRateString = "#{@config.ide.removeCheckRate}",
+      initialDelayString = "#{@config.ide.removeCheckRate}"
   )
   protected fun removeShutdownContainers() {
     val thresholdDate = Date.from(Instant.now().minusMillis(config.ide.removeThreshold))
