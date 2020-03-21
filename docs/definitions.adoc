@@ -1,0 +1,210 @@
+= Definition Files
+:sectnums:
+:toc: left
+:toclevels: 3
+
+In Code FREAK, assignments and tasks can be defined YAML files. This includes the configuration of automated evaluation.
+
+[[assignment]]
+== Assignment
+
+An assignment is defined by a directory (or packaged archive) containing a `codefreak.yml` with the following schema.
+
+[cols="1,1,3"]
+.Assignment Object
+|===
+|Field Name |Type |Description
+
+|title
+|`string`
+|**REQUIRED.** The name of the assignment.
+
+|tasks
+|`[string]`
+|List of paths to <<task,task definitions>> (relative to the assignment).
+|===
+
+.Example
+[source,yaml]
+----
+title: My Assignment
+tasks:
+  - my-task-1
+  - my-task-2
+----
+
+.Corresponding file structure
+----
+├─ codefreak.yml
+├─ my-task-1
+│  ├─ codefreak.yml
+│  ├─ main.c
+├─ my-task-2
+│  ├─ codefreak.yml
+│  ├─ ...
+├─ ...
+----
+
+https://github.com/code-freak/code-freak/tree/master/src/main/resources/init/tasks[Complete example^]
+
+[[task]]
+== Task
+
+A task is defined by a directory (or packaged archive) containing source code files and a `codefreak.yml` with the following schema.
+
+[cols="1,1,3"]
+.Assignment Object
+|===
+|Field Name |Type |Description
+
+|title
+|`string`
+|**REQUIRED.** The name of the task.
+
+|description
+|`string`
+|Detailed instructions for students. Basic markdown is supported.
+
+|hidden
+|[`string`]
+|Globs of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation. The `codefreak.yml` file is always hidden.
+
+|protected
+|[`string`]
+|Globs of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.
+
+|evaluation
+|[<<evaluation,Evaluation Step Object>>]
+|List of automatic evaluation steps.
+|===
+
+.Example
+[source,yaml]
+----
+title: My Task
+description: Write a function `add(int a, int b)` that returns the sum of `a` and `b`
+hidden:
+  - src/test/**
+  - .codeclimate.yml
+protected:
+  - build.gradle
+  - settings.gradle
+evaluation:
+  - step: codeclimate
+  - step: junit
+----
+
+[[evaluation]]
+== Evaluation
+
+Automatic evaluation consists one or more steps. Each step is implemented by a so-called runner.
+Runners take the student submissions and execute e.g. static code analysis. They then collect the results to give feedback to the student and support the teacher's grading. The same runner can be used in multiple steps (usually with different configuration). An evaluation step is defined as follows.
+
+.Evaluation Step Object
+|===
+|Field Name |Type |Description
+
+|step
+|`string`
+|**REQUIRED.** The name of the runner. See below for supported ones.
+
+|options
+|Map[`string`, ?]
+|Runner-specific configuration. See below for details.
+|===
+
+[[commandline]]
+=== Command Line Runner
+Name: `commandline`
+
+This is the most basic runner. It executes arbitrary commands and uses the output as feedback. The evaluation result is based on exit codes of the commands.
+
+[cols="1,1,3"]
+.Command Line Runner Options
+|===
+|Key |Type |Description
+
+|image
+|`string`
+|**REQUIRED.** The name of the Docker image in which the commands are run.
+
+|project-path
+|`string`
+|**REQUIRED.** Absolute path of where the student submission is placed.
+
+|commands
+|[`string`]
+|List of commands that executed. Working directory is the `project-path`.
+
+|stop-on-fail
+|`boolean`
+|Whether to stop when the first command fails or always execute all commands. Default is `true`.
+|===
+
+.Example
+[source,yaml]
+----
+evaluation:
+  - step: commandline
+    options:
+      image: gradle
+      project-path: /home/gradle/project
+      commands:
+        - pwd
+        - gradle test
+        - ls build/test-results/test
+----
+
+=== Code Climate Runner
+Name: `codeclimate`
+
+This runner performs static code analysis via https://github.com/codeclimate/codeclimate[Code Climate^]. It is configured by including a `.codeclimate.yml` in the task files. See https://docs.codeclimate.com/docs/advanced-configuration[official documentation^] for details.
+
+.Example
+[source,yaml]
+----
+evaluation:
+  - step: codeclimate
+----
+
+.Example .codeclimate.yml
+[source,yaml]
+----
+plugins:
+  sonar-java:
+    enabled: true
+----
+
+=== JUnit Runner
+Name: `junit`
+
+This runner executes unit tests in Java projects via https://junit.org[JUnit^]. It is pre-configured to work with standard https://gradle.org/[Gradle^] projects.
+
+[cols="1,1,3"]
+.JUnit Runner Options
+|===
+|Key |Type |Description
+
+|image
+|`string`
+|Inherited from <<commandline,Command Line Runner>>. Default is `gradle`.
+
+|project-path
+|`string`
+|Inherited from <<commandline,Command Line Runner>>. Default is `/home/gradle/project`.
+
+|commands
+|[`string`]
+|Inherited from <<commandline,Command Line Runner>>. Default is `["gradle testClasses", "gradle test"]`.
+
+|stop-on-fail
+|`boolean`
+|Inherited from <<commandline,Command Line Runner>>. Default is `true`.
+|===
+
+.Example
+[source,yaml]
+----
+evaluation:
+  - step: junit
+----

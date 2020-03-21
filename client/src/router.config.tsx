@@ -4,6 +4,7 @@ import AdminPage from './pages/AdminPage'
 import AssignmentListPage from './pages/assignment/AssignmentListPage'
 import AssignmentPage from './pages/assignment/AssignmentPage'
 import CreateAssignmentPage from './pages/assignment/CreateAssignmentPage'
+import { BasicHelpPage, DefinitionsHelpPage, HelpPage } from './pages/help'
 import CreateTaskPage from './pages/task/CreateTaskPage'
 import TaskPage from './pages/task/TaskPage'
 import TaskPoolPage from './pages/task/TaskPoolPage'
@@ -49,6 +50,27 @@ export const routerConfig: Route = {
     {
       path: '/tasks/:id',
       component: TaskPage
+    },
+    {
+      name: 'Help',
+      icon: 'question-circle',
+      path: '/help',
+      hideChildrenInMenu: true,
+      component: HelpPage,
+      children: [
+        {
+          path: '/help/basics',
+          name: 'Basics',
+          component: BasicHelpPage,
+          authority: AUTHORITIES.ROLE_TEACHER
+        },
+        {
+          path: '/help/definitions',
+          name: 'Defintion Files',
+          component: DefinitionsHelpPage,
+          authority: AUTHORITIES.ROLE_TEACHER
+        }
+      ]
     },
     {
       path: '/admin',

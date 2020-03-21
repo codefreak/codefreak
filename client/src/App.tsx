@@ -11,6 +11,7 @@ import {
 import './App.less'
 import Centered from './components/Centered'
 import DefaultLayout from './components/DefaultLayout'
+import ScrollToHash from './components/ScrollToHash'
 import {
   AuthenticatedUser,
   AuthenticatedUserContext
@@ -83,6 +84,7 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
   return (
     <AuthenticatedUserContext.Provider value={authenticatedUser}>
       <Router>
+        <ScrollToHash />
         <Switch>
           <Route exact path="/">
             <Redirect to="/assignments" />
