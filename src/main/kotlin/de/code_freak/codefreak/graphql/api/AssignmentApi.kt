@@ -5,7 +5,6 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
-import com.sun.org.apache.xpath.internal.operations.Bool
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.auth.hasAuthority
@@ -135,12 +134,12 @@ class AssignmentMutation : BaseResolver(), Mutation {
   }
 
 
-  fun updateAssignment(input: AssignmentInput): Boolean = context {
-    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(input.id)
+  fun updateAssignment(id: UUID, active: Boolean, deadline: Instant?, openFrom: Instant?): Boolean = context {
+    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
-    assignment.active = input.active
-    assignment.deadline = input.deadline
-    assignment.openFrom = input.openFrom
+    assignment.active = active
+    assignment.deadline = deadline
+    assignment.openFrom = openFrom
     serviceAccess.getService(AssignmentService::class).saveAssignment(assignment)
     true
   }

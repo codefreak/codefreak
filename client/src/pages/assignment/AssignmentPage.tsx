@@ -2,7 +2,6 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import {
   Alert,
   Button,
-  Card,
   Checkbox,
   Descriptions,
   Modal,
@@ -30,6 +29,7 @@ import {
 import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
+import { makeUpdater } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
 import TaskListPage from '../task/TaskListPage'
@@ -41,7 +41,7 @@ const AssignmentPage: React.FC = () => {
   })
   const subPath = useSubPath()
   const formatter = useFormatter()
-  const [updateAssignment] = useUpdateAssignmentMutation({
+  const [updateMutation] = useUpdateAssignmentMutation({
     onCompleted: () => result.refetch()
   })
 
@@ -56,20 +56,18 @@ const AssignmentPage: React.FC = () => {
 
   const { assignment } = result.data
 
-  const update = (changes: Partial<Assignment>) =>
-    updateAssignment({
-      variables: {
-        input: {
-          id: assignment.id,
-          active: assignment.active,
-          deadline: assignment.deadline,
-          openFrom: assignment.openFrom,
-          ...changes
-        }
-      }
-    })
-
-  const setActive = (active: boolean) => update({ active })
+  const updater = makeUpdater(
+    {
+      id: assignment.id,
+      active: assignment.active,
+      deadline: assignment.deadline,
+      openFrom: assignment.openFrom
+    },
+    variables =>
+      updateMutation({ variables }).then(
+        messageService.success('Assignment updated')
+      )
+  )
 
   return (
     <>
@@ -92,7 +90,10 @@ const AssignmentPage: React.FC = () => {
             </Descriptions.Item>
             {assignment.editable ? (
               <Descriptions.Item label="Active">
-                <AntdSwitch checked={assignment.active} onChange={setActive} />
+                <AntdSwitch
+                  checked={assignment.active}
+                  onChange={updater('active')}
+                />
               </Descriptions.Item>
             ) : null}
           </Descriptions>
