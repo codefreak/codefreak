@@ -13,6 +13,7 @@ import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.EntityNotFoundException
 import de.code_freak.codefreak.service.SubmissionService
 import de.code_freak.codefreak.service.TaskService
+import de.code_freak.codefreak.service.evaluation.runner.CommentRunner
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
@@ -100,14 +101,14 @@ class EvaluationService : BaseService() {
   fun addCommentFeedback(answer: Answer, digest: ByteArray, feedback: Feedback): Feedback {
     // find out if evaluation has a comment step definition
     val taskDefinition = taskService.getTaskDefinition(answer.task.id)
-    val stepDefinition = taskDefinition.evaluation.find { it.step == "comments" }
+    val stepDefinition = taskDefinition.evaluation.find { it.step == CommentRunner.RUNNER_NAME }
         ?: throw IllegalArgumentException("Task has no 'comments' evaluation step")
     val stepIndex = taskDefinition.evaluation.indexOf(stepDefinition)
     val evaluation = getEvaluationByDigest(answer.id, digest) ?: createEvaluation(answer)
 
     // either take existing comments step on evaluation or create a new one
     val evaluationStep = evaluation.evaluationSteps.find { it.position == stepIndex }
-        ?: EvaluationStep("comments", stepIndex).also { evaluation.addStep(it) }
+        ?: EvaluationStep(CommentRunner.RUNNER_NAME, stepIndex).also { evaluation.addStep(it) }
 
     evaluationStep.addFeedback(feedback)
     evaluationRepository.save(evaluation)

@@ -4,6 +4,7 @@ import de.code_freak.codefreak.entity.Assignment
 import de.code_freak.codefreak.entity.Task
 import de.code_freak.codefreak.entity.User
 import de.code_freak.codefreak.repository.TaskRepository
+import de.code_freak.codefreak.service.evaluation.runner.CommentRunner
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil.getYamlDefinition
 import liquibase.util.StreamUtil
@@ -61,7 +62,21 @@ TaskService : BaseService() {
     return task
   }
 
-  fun getTaskDefinition(taskId: UUID) = fileService.readCollectionTar(taskId).use { getYamlDefinition<TaskDefinition>(it) }
+  fun getTaskDefinition(taskId: UUID) = applyDefaultRunners(
+      fileService.readCollectionTar(taskId).use { getYamlDefinition<TaskDefinition>(it) }
+  )
+
+  private fun applyDefaultRunners(taskDefinition: TaskDefinition): TaskDefinition {
+    // add "comments" runner by default if not defined
+    taskDefinition.run {
+      if (evaluation.find { it.step == CommentRunner.RUNNER_NAME } == null) {
+        return copy(evaluation = evaluation.toMutableList().apply {
+          add(EvaluationDefinition(CommentRunner.RUNNER_NAME))
+        })
+      }
+    }
+    return taskDefinition
+  }
 
   fun getTaskPool(userId: UUID) = taskRepository.findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(userId)
 }
