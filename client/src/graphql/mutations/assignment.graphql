@@ -29,3 +29,7 @@ mutation ImportAssignment($url: String!) {
     taskErrors
   }
 }
+
+mutation UpdateAssignment($input: AssignmentInput!) {
+  updateAssignment(input: $input)
+}

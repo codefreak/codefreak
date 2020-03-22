@@ -14,6 +14,11 @@ query GetAssignment($id: ID!) {
     id
     title
     editable
+    status
+    createdAt
+    deadline
+    openFrom
+    active
   }
 }
 

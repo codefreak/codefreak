@@ -5,6 +5,7 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
+import com.sun.org.apache.xpath.internal.operations.Bool
 import de.code_freak.codefreak.auth.Authority
 import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.auth.hasAuthority
@@ -59,6 +60,10 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
 class AssignmentCreationResultDto(@GraphQLIgnore val result: AssignmentService.AssignmentCreationResult, ctx: ResolverContext) : BaseDto(ctx) {
   val assignment by lazy { AssignmentDto(result.assignment, ctx) }
   val taskErrors by lazy { result.taskErrors.map { it.key + ": " + it.value.message }.toTypedArray() }
+}
+
+class AssignmentInput(val id: UUID, val active: Boolean, val deadline: Instant?, val openFrom: Instant?) {
+  constructor() : this(UUID.randomUUID(), true, null, null)
 }
 
 @Component
@@ -126,6 +131,17 @@ class AssignmentMutation : BaseResolver(), Mutation {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
     serviceAccess.getService(AssignmentService::class).deleteAssignment(assignment.id)
+    true
+  }
+
+
+  fun updateAssignment(input: AssignmentInput): Boolean = context {
+    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(input.id)
+    authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    assignment.active = input.active
+    assignment.deadline = input.deadline
+    assignment.openFrom = input.openFrom
+    serviceAccess.getService(AssignmentService::class).saveAssignment(assignment)
     true
   }
 

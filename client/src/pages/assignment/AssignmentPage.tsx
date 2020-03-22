@@ -1,5 +1,13 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Alert, Button, Checkbox, Modal } from 'antd'
+import {
+  Alert,
+  Button,
+  Card,
+  Checkbox,
+  Descriptions,
+  Modal,
+  Switch as AntdSwitch
+} from 'antd'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
@@ -7,6 +15,7 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import SetTitle from '../../components/SetTitle'
+import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
@@ -15,7 +24,8 @@ import {
   GetTaskListDocument,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
-  useGetTaskPoolForAddingQuery
+  useGetTaskPoolForAddingQuery,
+  useUpdateAssignmentMutation
 } from '../../services/codefreak-api'
 import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
@@ -30,6 +40,10 @@ const AssignmentPage: React.FC = () => {
     variables: { id: useIdParam() }
   })
   const subPath = useSubPath()
+  const formatter = useFormatter()
+  const [updateAssignment] = useUpdateAssignmentMutation({
+    onCompleted: () => result.refetch()
+  })
 
   const tabs = [{ key: '', tab: 'Tasks' }]
   if (useHasAuthority('ROLE_TEACHER')) {
@@ -41,6 +55,21 @@ const AssignmentPage: React.FC = () => {
   }
 
   const { assignment } = result.data
+
+  const update = (changes: Partial<Assignment>) =>
+    updateAssignment({
+      variables: {
+        input: {
+          id: assignment.id,
+          active: assignment.active,
+          deadline: assignment.deadline,
+          openFrom: assignment.openFrom,
+          ...changes
+        }
+      }
+    })
+
+  const setActive = (active: boolean) => update({ active })
 
   return (
     <>
@@ -55,6 +84,18 @@ const AssignmentPage: React.FC = () => {
           <Authorized condition={assignment.editable}>
             <AddTasksButton assignment={assignment} />
           </Authorized>
+        }
+        content={
+          <Descriptions size="small" column={3}>
+            <Descriptions.Item label="Created">
+              {formatter.dateTime(assignment.createdAt)}
+            </Descriptions.Item>
+            {assignment.editable ? (
+              <Descriptions.Item label="Active">
+                <AntdSwitch checked={assignment.active} onChange={setActive} />
+              </Descriptions.Item>
+            ) : null}
+          </Descriptions>
         }
       />
       <Switch>

@@ -97,4 +97,7 @@ class AssignmentService : BaseService() {
       nextPosition++
     }
   }
+
+  @Transactional
+  fun saveAssignment(assignment: Assignment) = assignmentRepository.save(assignment)
 }
