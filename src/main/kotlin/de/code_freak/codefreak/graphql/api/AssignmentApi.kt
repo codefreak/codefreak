@@ -147,16 +147,15 @@ class AssignmentMutation : BaseResolver(), Mutation {
 
   fun addTasksToAssignment(assignmentId: UUID, taskIds: Array<UUID>): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(assignmentId)
-    require(assignment.isEditable(authorization)) { "Assignment is not editable" }
     val tasks = taskIds.map { serviceAccess.getService(TaskService::class).findTask(it) }
     tasks.forEach {
       authorization.requireAuthorityIfNotCurrentUser(it.owner, Authority.ROLE_ADMIN)
     }
+    require(assignment.status < AssignmentStatus.OPEN) { "Open/Closed assignment is not editable" }
     serviceAccess.getService(AssignmentService::class).addTasksToAssignment(assignment, tasks)
     true
   }
 }
 
 fun Assignment.isEditable(authorization: Authorization) = authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN) ||
-    (authorization.isCurrentUser(owner) &&
-    (status < AssignmentStatus.OPEN))
+    authorization.isCurrentUser(owner)
