@@ -7,9 +7,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class CommentRunner : EvaluationRunner {
-  override fun getName(): String {
-    return "comments"
+  companion object {
+    const val RUNNER_NAME = "comments"
   }
+
+  override fun getName() = RUNNER_NAME
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     // Does nothing automatically. Comments are added via frontend.
