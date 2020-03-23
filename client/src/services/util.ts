@@ -1,3 +1,5 @@
+import { Moment } from 'moment'
+
 export const noop = () => {
   /* do nothing */
 }
@@ -15,4 +17,8 @@ export function makeUpdater<T>(
     }
     callback(newValue)
   }
+}
+
+export function momentToDate<T>(fn: (date: Date) => T) {
+  return (moment: Moment) => fn(moment.toDate())
 }

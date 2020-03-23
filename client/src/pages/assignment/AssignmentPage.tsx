@@ -3,11 +3,13 @@ import {
   Alert,
   Button,
   Checkbox,
+  DatePicker,
   Descriptions,
   Modal,
   Switch as AntdSwitch
 } from 'antd'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
+import moment from 'moment'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -29,7 +31,7 @@ import {
 import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-import { makeUpdater } from '../../services/util'
+import { makeUpdater, momentToDate, noop } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
 import TaskListPage from '../task/TaskListPage'
@@ -69,6 +71,29 @@ const AssignmentPage: React.FC = () => {
       )
   )
 
+  const renderDate = (
+    label: string,
+    onOk: (date?: Date) => any,
+    value?: Date | null
+  ) => {
+    const handleClear = (v: any) => (v === null ? onOk() : noop())
+    return assignment.editable ? (
+      <Descriptions.Item label={label}>
+        <DatePicker
+          key={'' + value}
+          showTime
+          onChange={handleClear}
+          defaultValue={value ? moment(value) : undefined}
+          onOk={momentToDate(onOk)}
+        />
+      </Descriptions.Item>
+    ) : value ? (
+      <Descriptions.Item label={label}>
+        {formatter.dateTime(value)}
+      </Descriptions.Item>
+    ) : null
+  }
+
   return (
     <>
       <SetTitle>{assignment.title}</SetTitle>
@@ -86,7 +111,7 @@ const AssignmentPage: React.FC = () => {
         content={
           <Descriptions size="small" column={3}>
             <Descriptions.Item label="Created">
-              {formatter.dateTime(assignment.createdAt)}
+              {formatter.date(assignment.createdAt)}
             </Descriptions.Item>
             {assignment.editable ? (
               <Descriptions.Item label="Active">
@@ -96,6 +121,8 @@ const AssignmentPage: React.FC = () => {
                 />
               </Descriptions.Item>
             ) : null}
+            {renderDate('Open From', updater('openFrom'), assignment.openFrom)}
+            {renderDate('Deadline', updater('deadline'), assignment.deadline)}
           </Descriptions>
         }
       />
