@@ -1,13 +1,10 @@
-import { Statistic } from 'antd'
 import React from 'react'
 import { Assignment } from '../services/codefreak-api'
-
-const { Countdown } = Statistic
 
 const AssignmentStatus: React.FC<{
   assignment: Pick<Assignment, 'status' | 'deadline' | 'openFrom'>
 }> = props => {
-  const { status, deadline, openFrom } = props.assignment
+  const { status } = props.assignment
   switch (status) {
     case 'INACTIVE':
       return <>Inactive (only you can see this)</>
