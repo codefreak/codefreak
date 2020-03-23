@@ -85,9 +85,11 @@ class AssignmentQuery : BaseResolver(), Query {
 
   @Transactional
   fun assignment(id: UUID): AssignmentDto = context {
-    serviceAccess.getService(AssignmentService::class)
-        .findAssignment(id)
-        .let { AssignmentDto(it, this) }
+    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
+    if (assignment.status == AssignmentStatus.INACTIVE) {
+      authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    }
+    AssignmentDto(assignment, this)
   }
 }
 
