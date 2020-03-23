@@ -29,3 +29,17 @@ mutation ImportAssignment($url: String!) {
     taskErrors
   }
 }
+
+mutation UpdateAssignment(
+  $id: ID!
+  $active: Boolean!
+  $deadline: DateTime
+  $openFrom: DateTime
+) {
+  updateAssignment(
+    id: $id
+    active: $active
+    deadline: $deadline
+    openFrom: $openFrom
+  )
+}

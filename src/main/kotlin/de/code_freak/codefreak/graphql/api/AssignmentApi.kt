@@ -61,6 +61,10 @@ class AssignmentCreationResultDto(@GraphQLIgnore val result: AssignmentService.A
   val taskErrors by lazy { result.taskErrors.map { it.key + ": " + it.value.message }.toTypedArray() }
 }
 
+class AssignmentInput(val id: UUID, val active: Boolean, val deadline: Instant?, val openFrom: Instant?) {
+  constructor() : this(UUID.randomUUID(), true, null, null)
+}
+
 @Component
 class AssignmentQuery : BaseResolver(), Query {
 
@@ -81,9 +85,11 @@ class AssignmentQuery : BaseResolver(), Query {
 
   @Transactional
   fun assignment(id: UUID): AssignmentDto = context {
-    serviceAccess.getService(AssignmentService::class)
-        .findAssignment(id)
-        .let { AssignmentDto(it, this) }
+    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
+    if (assignment.status == AssignmentStatus.INACTIVE) {
+      authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    }
+    AssignmentDto(assignment, this)
   }
 }
 
@@ -126,6 +132,16 @@ class AssignmentMutation : BaseResolver(), Mutation {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
     serviceAccess.getService(AssignmentService::class).deleteAssignment(assignment.id)
+    true
+  }
+
+  fun updateAssignment(id: UUID, active: Boolean, deadline: Instant?, openFrom: Instant?): Boolean = context {
+    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
+    authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    assignment.active = active
+    assignment.deadline = deadline
+    assignment.openFrom = openFrom
+    serviceAccess.getService(AssignmentService::class).saveAssignment(assignment)
     true
   }
 

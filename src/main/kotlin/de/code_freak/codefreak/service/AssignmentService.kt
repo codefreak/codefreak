@@ -49,7 +49,7 @@ class AssignmentService : BaseService() {
   @Transactional
   fun findAllAssignmentsForUser(userId: UUID) = submissionService.findSubmissionsOfUser(userId).map {
     it.assignment
-  }
+  }.filter { it.active }
 
   @Transactional
   fun createFromTar(content: ByteArray, owner: User, modify: Assignment.() -> Unit = {}): AssignmentCreationResult {
@@ -97,4 +97,7 @@ class AssignmentService : BaseService() {
       nextPosition++
     }
   }
+
+  @Transactional
+  fun saveAssignment(assignment: Assignment) = assignmentRepository.save(assignment)
 }

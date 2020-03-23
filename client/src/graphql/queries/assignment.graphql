@@ -3,6 +3,9 @@ query GetAssignmentList {
     id
     title
     deletable
+    status
+    deadline
+    openFrom
     tasks {
       id
     }
@@ -14,6 +17,11 @@ query GetAssignment($id: ID!) {
     id
     title
     editable
+    status
+    createdAt
+    deadline
+    openFrom
+    active
   }
 }
 
