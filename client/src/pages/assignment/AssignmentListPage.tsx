@@ -1,7 +1,8 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button, Card, Modal, Tooltip } from 'antd'
+import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
 import React from 'react'
 import { Link } from 'react-router-dom'
+import AssignmentStatus from '../../components/AssignmentStatus'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import EntityLink from '../../components/EntityLink'
@@ -88,10 +89,14 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
         ) : null
       }
     >
-      <p>
-        {assignment.tasks.length}{' '}
-        {assignment.tasks.length === 1 ? 'task' : 'tasks'}
-      </p>
+      <Descriptions>
+        <Descriptions.Item label="Status">
+          <AssignmentStatus assignment={assignment} />
+        </Descriptions.Item>
+        <Descriptions.Item label="Tasks">
+          {assignment.tasks.length}
+        </Descriptions.Item>
+      </Descriptions>
       <EntityLink to={assignment}>
         <Button icon="folder-open" type="primary">
           Details

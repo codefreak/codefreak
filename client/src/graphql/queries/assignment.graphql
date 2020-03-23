@@ -3,6 +3,9 @@ query GetAssignmentList {
     id
     title
     deletable
+    status
+    deadline
+    openFrom
     tasks {
       id
     }

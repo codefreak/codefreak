@@ -12,6 +12,7 @@ import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import moment from 'moment'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
+import AssignmentStatus from '../../components/AssignmentStatus'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -99,6 +100,7 @@ const AssignmentPage: React.FC = () => {
       <SetTitle>{assignment.title}</SetTitle>
       <PageHeaderWrapper
         title={assignment.title}
+        subTitle={<AssignmentStatus assignment={assignment} />}
         tabList={tabs}
         tabActiveKey={subPath.get()}
         breadcrumb={createBreadcrumb(createRoutes.forAssignment(assignment))}
