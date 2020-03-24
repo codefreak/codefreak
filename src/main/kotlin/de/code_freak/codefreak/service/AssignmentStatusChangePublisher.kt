@@ -5,10 +5,11 @@ import de.code_freak.codefreak.entity.AssignmentStatus
 import de.code_freak.codefreak.repository.AssignmentRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -19,7 +20,7 @@ import javax.persistence.PostRemove
 import javax.persistence.PostUpdate
 
 @Component
-class AssignmentStatusChangePublisher : ApplicationListener<ContextRefreshedEvent>, Ordered {
+class AssignmentStatusChangePublisher {
   @Autowired
   private lateinit var eventPublisher: ApplicationEventPublisher
 
@@ -38,7 +39,9 @@ class AssignmentStatusChangePublisher : ApplicationListener<ContextRefreshedEven
   /**
    * Schedule all future assignment statuses on application startup
    */
-  override fun onApplicationEvent(event: ContextRefreshedEvent) {
+  @EventListener(ContextRefreshedEvent::class)
+  @Order(Ordered.LOWEST_PRECEDENCE)
+  fun onApplicationStartup() {
     assignmentRepository.getByOpenFromAfterOrDeadlineAfter(Instant.now()).forEach(this::scheduleAssignmentStatusEvents)
   }
 
@@ -81,6 +84,4 @@ class AssignmentStatusChangePublisher : ApplicationListener<ContextRefreshedEven
   private fun cancelAssignmentStatusEvents(assignment: Assignment, status: AssignmentStatus) {
     scheduledEvents.remove(Pair(assignment.id, status))?.cancel(true)
   }
-
-  override fun getOrder() = Ordered.LOWEST_PRECEDENCE
 }
