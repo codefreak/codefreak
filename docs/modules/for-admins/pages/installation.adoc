@@ -1,0 +1,43 @@
+= Installation Guide
+
+There are various methods to run the application in production. We only support the Docker/docker-compose setup.
+If you plan to run the application directly on a host-system you should know what you are doing. If you are looking
+for a development setup please take a look at the <<Development / Contribution>> section.
+
+== Prerequisites
+For the backend application:
+
+* A Docker host/daemon
+* About 1-2GB RAM
+
+**For the dedicated docker daemon:**
+* Separated Docker daemon that does not run on the same host as the backend application
+* Lots of memory. You should plan 3-4GB RAM per concurrent user (depending on the
+programming language). We are working on reducing the RAM usage!
+* About 1 CPU Core / 10 concurrent users
+
+== Preparing the Docker daemon
+Docker allows to connect via HTTP/TLS to the integrated API. This requires to set up a PKI for certificate-management.
+There is an extensive documentation on how to do this in the official Docker docs.
+https://docs.docker.com/engine/security/https/[Please follow this article] carefully. As the result you should have
+a `ca.pem`, `cert.pem` and `key.pem` file that can be used on your backend application host.
+
+== Set up using Docker Compose
+We have included a sample `docker-compose.yml` in the main repository. This should work fine out-of-the-box but uses
+a Docker-in-Docker container which is not suited for development. Please remove the `docker` service and adjust the
+environment-variables of the `app` service that it points to your dedicated Docker host. Place the `ca.pem`, `cert.pem`
+and `key.pem` files in a directory `certificates` next to your `docker-compose.yml` and adjust the configuration
+accordingly:
+
+```yaml
+version: "3"
+services:
+  app:
+    # ... SNIP ...
+    volumes:
+      - "./certificates:/var/code-freak/certs"
+    environment:
+      DOCKER_HOST: "http://docker-host.at-your-company.domain.com:2376"
+      DOCKER_CERT_PATH: "/var/code-freak/certs"
+      # ... SNIP ...
+```
