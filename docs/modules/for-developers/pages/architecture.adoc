@@ -10,7 +10,7 @@ Currently there are three major components of the system:
 2. Many Development Environments (IDE) for each user
 3. A Docker daemon controlled by the backend application
 
-image::img/Code FREAK Overview.png[Code FREAK Overview, 600]
+image:for-developers:Code FREAK Overview.png[Code FREAK Overview, 600]
 
 == Backend Application
 The Backend Application (app) is the main component of Code FREAK and is written in Java based on Spring Boot. It is

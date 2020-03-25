@@ -16,7 +16,7 @@ Please keep this in mind when testing the application.
 
 ## Documentation
 For instructions how to run, configure and use the application please find the documentation in the
-[`/docs`](./docs/index.adoc) directory.
+[`/docs`](code-freak/docs/modules/ROOT/index.adoc) directory.
 
 ## License
     Code FREAK | Code Feedback Review & Evaluation Kit

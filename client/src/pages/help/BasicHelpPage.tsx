@@ -1,5 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import content from '@codefreak/docs/basics.adoc'
+import content from '@codefreak/docs/modules/ROOT/pages/basics.adoc'
 import React from 'react'
 import Asciidoc from 'react-asciidoc'
 

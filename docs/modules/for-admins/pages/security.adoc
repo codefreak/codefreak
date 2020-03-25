@@ -1,0 +1,10 @@
+= Code FREKA Security
+
+We utilize Linux containers based on Docker which allow a good logical isolation (separate process-set, resource-limits, …).
+It should be very difficult to escape from the containers and do harm to the underlying host-system but we do not guarantee
+that it is impossible. This is why we recommend to run a dedicated Docker daemon only for Code FREAK that does nothing
+else except hosting the IDE instances and running untrusted code.
+Additionally you should not run the Code FREAK application and its sidekick Docker daemon on the same host for similar
+reasons: If someone manages to escape the IDE containers they could hijack the backend application and steal sensitive
+information. Even if someone does not accomplishes to break out of the container they could spin up so many containers
+that all host system resources are exhausted.

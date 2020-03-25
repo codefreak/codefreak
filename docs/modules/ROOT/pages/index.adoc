@@ -1,0 +1,19 @@
+= Code FREAK Documentation
+:sectnums:
+
+Welcome to the Code FREAK documentation.
+Code FREAK is an online IDE for educational purposes that allows teachers to create and enroll programming tasks
+allows students to program and execute their code without leaving the browser. Submissions can be evaluated
+automatically by various testing-methods like unit tests or code smell detection.
+
+WARNING: Code FREAK is under heavy development. Things might break between updates even if we try to be backwards-compatible.
+
+== Getting started
+If you are new to Code FREAK here are some links that may help getting started:
+
+* xref:for-admins:installation.adoc[Installation]
+* xref:for-developers:development.adoc[Development]
+* xref:for-developers:architecture.adoc[Architecture]
+
+== License
+Code FREAK is licensed under the AGPLv3. For more information see the LICENSE file that comes with the source code.

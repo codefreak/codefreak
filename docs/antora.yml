@@ -1,0 +1,8 @@
+name: test123
+title: Code FREAK
+version: master
+nav:
+  - modules/ROOT/nav.adoc
+  - modules/for-admins/nav.adoc
+  - modules/for-teachers/nav.adoc
+  - modules/for-developers/nav.adoc
