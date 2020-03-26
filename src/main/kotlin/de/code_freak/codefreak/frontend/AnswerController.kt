@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.frontend
 
 import de.code_freak.codefreak.auth.Authority
+import de.code_freak.codefreak.auth.Authorization
 import de.code_freak.codefreak.service.ContainerService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
@@ -25,11 +26,11 @@ class AnswerController : BaseController() {
   @Autowired
   lateinit var fileService: FileService
 
-  @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/{answerId}/source.zip", produces = ["application/zip"])
   @ResponseBody
   fun getSourceZip(@PathVariable("answerId") answerId: UUID): HttpEntity<StreamingResponseBody> {
     val answer = answerService.findAnswer(answerId)
+    Authorization().requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
     fileService.readCollectionTar(answer.id).use {
       return download("${answer.submission.user.username}_${answer.task.title}.zip") { out ->
         TarUtil.tarToZip(it, out)
@@ -37,11 +38,11 @@ class AnswerController : BaseController() {
     }
   }
 
-  @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/{answerId}/source.tar", produces = ["application/tar"])
   @ResponseBody
   fun getSourceTar(@PathVariable("answerId") answerId: UUID): HttpEntity<StreamingResponseBody> {
     val answer = answerService.findAnswer(answerId)
+    Authorization().requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
     fileService.readCollectionTar(answer.id).use {
       return download("${answer.submission.user.username}_${answer.task.title}.tar", it)
     }
