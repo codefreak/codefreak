@@ -8,7 +8,7 @@ Code FREAK provides multiple ways to authenticate users. You can choose one of t
 === Simple Authentication
 Simple authentication means that users are managed by Code FREAK itself. Accounts are created by administrators and saved to the database.
 
-WARNING: Simple authentication has not been implemented yet! It only works in `dev` mode with preconfigured users. See https://github.com/code-freak/code-freak/issues/122[#122] for progress.
+WARNING: Simple authentication has not been implemented yet! It only works in `dev` mode with preconfigured users. See https://github.com/code-freak/code-freak/issues/122[Issue #122] for progress.
 
 [source,yaml]
 ----
@@ -36,7 +36,7 @@ code-freak:
 == Git import
 You can allow your students to import their source code from a remote Git repository. Currently, this is possible only via a
 shared SSH key that has access to all repositories on the Git server. Some Git servers allow this by using so-called
-"deplyoment keys". You can configure multiple hosts but only one SSH key per host. Students have to use the clone URL
+"deployment keys". You can configure multiple hosts but only one SSH key per host. Students have to use the clone URL
 starting with `ssh://` when importing from the remote repository. Import via HTTP is not possible currently.
 
 [source,yaml]

@@ -2,15 +2,16 @@
 
 There are various methods to run the application in production. We only support the Docker/docker-compose setup.
 If you plan to run the application directly on a host-system you should know what you are doing. If you are looking
-for a development setup please take a look at the <<Development / Contribution>> section.
+for a development setup please take a look at the xref:for-developers:development.adoc[Development] section.
 
 == Prerequisites
-For the backend application:
+=== Backend application:
 
 * A Docker host/daemon
 * About 1-2GB RAM
 
-**For the dedicated docker daemon:**
+=== Dedicated Docker host:
+
 * Separated Docker daemon that does not run on the same host as the backend application
 * Lots of memory. You should plan 3-4GB RAM per concurrent user (depending on the
 programming language). We are working on reducing the RAM usage!
@@ -29,7 +30,8 @@ environment-variables of the `app` service that it points to your dedicated Dock
 and `key.pem` files in a directory `certificates` next to your `docker-compose.yml` and adjust the configuration
 accordingly:
 
-```yaml
+[source,yaml]
+----
 version: "3"
 services:
   app:
@@ -40,4 +42,4 @@ services:
       DOCKER_HOST: "http://docker-host.at-your-company.domain.com:2376"
       DOCKER_CERT_PATH: "/var/code-freak/certs"
       # ... SNIP ...
-```
+----

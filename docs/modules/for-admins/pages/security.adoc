@@ -1,4 +1,4 @@
-= Code FREKA Security
+= Code FREAK Security
 
 We utilize Linux containers based on Docker which allow a good logical isolation (separate process-set, resource-limits, …).
 It should be very difficult to escape from the containers and do harm to the underlying host-system but we do not guarantee

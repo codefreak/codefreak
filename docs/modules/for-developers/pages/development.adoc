@@ -7,15 +7,21 @@
 Create a file `src/main/resources/application-dev.yml`. For documentation on how to configure the
 server see https://github.com/code-freak/code-freak/blob/master/src/main/resources/application.yml[`application.yml`]
 in the same directory. Minimum configuration that uses the in-memory database:
-```yaml
+
+[source,yaml]
+[source]
+-----
 spring.jpa.database: HSQL
 spring.jpa.hibernate.ddl-auto: update
-```
+-----
 
 === Database
 You can either use the embedded HSQL storage or a PostgreSQL database. Data from the HSQL database will get lost when
 the application shuts down. For Postgres create at least a dedicated database and adjust the configuration accordingly:
-```yaml
+
+[source,yaml]
+[source]
+-----
 spring:
   datasource:
     url: "jdbc:postgresql://localhost:5432/codefreak"
@@ -24,7 +30,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-```
+-----
 
 === Docker
 For many parts of the application we need connection to a (dedicated) Docker daemon. By default we use the default
@@ -34,11 +40,14 @@ software stacks or use the Vagrant machine that is included in this repository. 
 daemon available at `127.0.0.1:2375` (the official Docker port). If you setup Docker for Windows/MacOS the Daemon should
 be reachable on the same address. So if you are on Windows or MacOS adjust your `application-dev.properties` file so it points
 at a Docker daemon.
-```yaml
+
+[source,yaml]
+[source]
+-----
 code-freak:
   docker:
     host: "tcp://127.0.0.1:2375"
-```
+-----
 
 == Run the application
 If you use IntelliJ simply start the `CodeFreakApplication` Spring Boot application.
@@ -66,15 +75,21 @@ The following sample users are pre-configured for development.
 
 == Running tests
 To run the tests you need a working Docker connection. It is also possible to use the Vagrant machine for Testing:
-```shell
+
+[source,shell]
+[source]
+-----
 $ ./gradlew test          # for testing with local Docker daemon
 $ ./gradlew vagrantTest   # for testing with Vagrant Docker daemon
-```
+-----
 
 == Fix linting issues
-```console
+
+[source,console]
+[source]
+-----
 $ ./gradlew spotlessApply
-```
+-----
 
 == Making changes to the database schema
 If you modify the entity layer under `de.code_freak.codefreak.entity` in a way that changes the database schema,
@@ -113,10 +128,12 @@ To release a new version, https://blog.travis-ci.com/2017-08-24-trigger-custom-b
 following configuration (use actual version number). Run the task on the appropriate major version branch (currently
 only `master` is supported).
 
-```
+[source]
+[source]
+-----
 env:
   - RELEASE_VERSION=1.0.0
-```
+-----
 
 === Simple release process
 

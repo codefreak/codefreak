@@ -24,7 +24,7 @@ It is not required but highly recommended to run the application using the offic
 The Integrated Development Environments (IDE) are used by the users to work on the programming tasks. Because each IDE
 runs in its own container they are isolated environments that offer both flexibility and security. Currently we use
 Visual Studio Code as IDE based on https://github.com/cdr/code-server[code-server]. The IDE runs directly in the browser
-of the user and do not require any local setup. Beside the IDE itself the containers contain all required runtimes
+of the user and do not require any local setup. Beside the IDE itself the containers contain all required compilers
 and toolchains (Java, Gradle, nodejs, npm, …) to execute and debug the code directly on the server. Because containers
 can be limited in RAM and CPU-usage users cannot steal resources from other users.
 
