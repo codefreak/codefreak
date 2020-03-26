@@ -155,6 +155,7 @@ evaluation:
         - ls build/test-results/test
 ----
 
+[[codeclimate]]
 === Code Climate Runner
 Name: `codeclimate`
 

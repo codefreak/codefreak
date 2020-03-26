@@ -1,0 +1,129 @@
+= Creating assignments
+:sectnums:
+
+In this chapter you will learn how to create an assignment. We will create a simple Python application with a single function `add(a: int, b: int)`.
+
+* [x] How to create an assignment and tasks
+* [x] How to provide a basic file boilerplate to your students
+* [x] How to define evaluations for your tasks
+
+TIP: Also check out our xref:examples.adoc[Examples]!
+
+== Prepare your tasks
+Preparation is key! Don't start working with Code FREAK if you haven't thought about what to test and how to test. Before you start adding Code FREAK configuration to your tasks, make sure they are working/compiling locally on your machine! You can also test execution like Code FREAK does locally by https://docs.docker.com/install/[installing Docker]. More on this in section <<testing-locally>>.
+
+Code FREAK allows students to write and execute their code without leaving the browser. Currently, we are using a browser-port of https://code.visualstudio.com/[Microsoft's VSCode] by https://coder.com/[Coder]. We recommend you also use VSCode for creating your tasks locally.
+
+== Creating the basic directory layout
+Start by creating the following directory structure somewhere on your local machine.
+
+----
+python-assignment/ <1>
+├─ codefreak.yml <2>
+├─ task-1/ <3>
+│  ├─ codefreak.yml <4>
+│  ├─ main.py <5>
+│  ├─ main_test.py <6>
+----
+
+<1> The `python-assignment` directory is the root of your assignment. It contains only a single task.
+<2> The `codefreak.yml` directory in your project contains the definition of the assignment. See <<assignment-codefreak-yml>> for further explanation on its contents.
+<3> The `task-1` directory is the root directory of your Task. You can create as many tasks per project as you like. For this example we only have one task in our assignment.
+<4> The task-level `codefreak.yml` contains the configuration of your task, how it is evaluated, etc. See <<task-codefreak-yml>> for more information on its contents.
+<5> The `main.py` is an example of boilerplate code you give to your students. You can also create tasks without any boilerplate code at all if you want your students to create everything on their on.
+<6> The `main_test.py` file contains the tests we will run on our students code. Even if it is visible now **we will hide it from students** by using the <<task-codefreak-yml, task's `codefreak.yml`>>.
+
+[[assignment-codefreak-yml]]
+=== Assignment's `codefreak.yml`
+
+TIP: Don't worry you have never worked with YAML (`.yml`) files. The syntax is pretty straight forward and easy to read.
+
+./codefreak.yml
+[source,yaml]
+----
+title: "Python assignment"
+tasks:
+  - task-1
+----
+
+The `codefreak.yml` in your assignment root-directory is very slim. It only contains the `title` of your assignment and a list of directories that contain the individual `tasks`.
+
+[[task-codefreak-yml]]
+=== Task's `codefreak.yml`
+
+The `codefreak.yml` file in your task directory is where the magic happens. We will define two evaluation steps for our task: A static code analysis with Code Climate (because the config is super easy) and a unit test with `pytest`.
+
+./task-1/codefreak.yml
+[source,yaml]
+----
+title: Create an addition function in Python <1>
+description: |
+   Please create an `add(a: int, b: int): int` function in the
+  `main.py` file, that returns the sum of parameter `a` and `b`.
+
+   Find some useful help in the [official reference](https://docs.python.org/3.7/reference/index.html).
+hidden: <2>
+  - main_test.py
+evaluation:
+  - step: codeclimate <3>
+  - step: junit <4>
+    options:
+      image: "python:3.7"
+      project-path: /root
+      results-path: /root
+      commands:
+        - pip install pytest
+        - pytest --junitxml=TEST-report.xml main_test.py
+----
+
+<1> The first two lines will add a title and some description to our task. The weird `description` syntax is a https://yaml-multiline.info/[multi line string in YAML]. The description allows basic Markdown syntax.
+<2> In the `hidden` property we define a list of directories and/or files that will be hidden from our students. Each instruction is a glob pattern. The `codefreak.yml` file is ALWAYS hidden for students.
+<3> The first evaluation step is <<definitions.adoc#codeclimate,Code Climate>>. If you don't add any more options it will perform a basic static code analysis.
+<4> The second evaluation step is the actual unit testing. This section needs some more explanation in the following section.
+
+[[junit-evaluation-step]]
+=== The `junit` evaluation step
+In the <<task-codefreak-yml,section before>> we defined a `junit` evaluation step that runs `pytest` for testing.
+
+Let's assume the following contents of the `main.py` and the `main_test.py` file. The `main_test.py` is created by the teacher and cannot be modified by the student. The `main.py` has to be edited by the student with his/her solution.
+
+.`main.py`
+[%collapsible]
+====
+[source,python]
+----
+def add(a: int, b: int) -> int:
+    return 0
+
+if __name__ == "__main__":
+    print("2 + 3 = %s" % add(2, 3))
+----
+====
+
+.`tests/test.py`
+[%collapsible,python]
+====
+[source,python]
+----
+from main import add
+
+def test_function():
+    assert add(2, 3) == 5
+    assert add(-1, 2) == 1
+
+----
+====
+
+You can already run the tests locally to check if they behave as expected by invoking the test command `pytest --junitxml=TEST-report.xml main_test.py`.
+
+This will generate a `TEST-report.xml` file inside the main directory. Code FREAK will look for files starting with `TEST-*` inside the `results-path` directory.
+
+== (optionally) Add VSCode configuration files
+//TODO
+
+[[testing-locally]]
+== Testing locally with Docker
+// TODO
+
+== Creating and uploading an assignment
+// TODO

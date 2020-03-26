@@ -1,0 +1,17 @@
+= Code FREAK Basics for Teachers
+
+Code FREAK allows teachers to create assignments with automatic evaluation. The types of evaluations are currently:
+
+* Unit/Functional testing
+* Static Code Analysis
+* CLI commands
+* Code Comments (not automated)
+
+All of these evaluation types are language-agnostic and can be configured to some extent. To read more about the different types of runners and how they can be configured please refer to the xref:for-teachers:evaluation-types.adoc[Evaluation Types] section.
+
+== Running Evaluations
+Once configured for a task the evaluation can be run by students (and teachers) after they upload their results. Currently, we have no limits how often the evaluation can be run. This might change in the future. The evaluation is also run for all submissions after the deadline for an assignment has been reached.
+
+Evaluations are always executed in separate **Docker Container**s for each student. This makes evaluation super flexible and adds some form of isolation on top. Students will never be able to see others submissions this way and cannot tamper the host's filesystem.
+
+If you have never worked with Docker we recommend that you read at least the basics so your understand the terms _Container_, _Image_ and _Registry_. The https://docs.docker.com/engine/docker-overview/[official Docker documentation] gives a nice overview on the Docker ecosystem.
