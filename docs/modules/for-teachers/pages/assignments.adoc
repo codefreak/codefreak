@@ -14,11 +14,80 @@ Preparation is key! Don't start working with Code FREAK if you haven't thought a
 
 Code FREAK allows students to write and execute their code without leaving the browser. Currently, we are using a browser-port of https://code.visualstudio.com/[Microsoft's VSCode] by https://coder.com/[Coder]. We recommend you also use VSCode for creating your tasks locally.
 
+== Creating the student boilerplate code
+For this tutorial we use the following `main.py` Python file with a single function `add(a: int, b:int) -> int`. You can either let your student create these file or at least provide some initial template (boilerplate) to give them a fair starting point.
+
+.main.py
+[source,python,linenums]
+----
+def add(a: int, b: int) -> int:
+    # TODO: write the algorithm to add a and b
+    return 0 <1>
+
+if __name__ == "__main__":
+    print("2 + 3 = %s" % add(2, 3))
+----
+
+<1> This is the line the student has to correct to finish this task.
+
+== Writing tests
+Which form of testing you choose for your tasks heavily depends on the tasks requirements. If students have to work on algorithms you should use some form of unit or functional testing. If they create a simple I/O application you can use a library that tests input and output.
+
+In this example we will use https://pytest.org[pytest], a testing framework for Python. It is important that your testing framework supports jUnit XML output so Code FREAK is able to parse the results.
+
+Alongside the `main.py` file we will create a `main_test.py` file that will contain some assertions to verify the `add` function.
+
+.main_test.py
+[source,python,linenums]
+----
+from main import add
+
+def test_function():
+    assert add(2, 3) == 5
+    assert add(-1, 2) == 1
+----
+
+You should verify that this works as expected on you local computer before continuing. We run the tests by executing the following command in the terminal.
+
+[source]
+----
+pytest main_test.py
+----
+
+This should give some output about a **failing** test. It is important that your tests are failing. Otherwise you could not expect your students to fix the faulty source code.
+
+.Expand to see the failing `pytest` output
+[%collapsible]
+====
+[source]
+----
+==================== test session starts =====================
+platform linux -- Python 3.8.2, pytest-5.4.1, py-1.8.1, pluggy-0.13.1
+rootdir: /home/user/python-example
+collected 1 item
+
+main_test.py F                                         [100%]
+
+========================== FAILURES ==========================
+_______________________ test_function ________________________
+
+    def test_function():
+>       assert add(2, 3) == 5
+E       assert 0 == 5
+E        +  where 0 = add(2, 3)
+
+main_test.py:4: AssertionError
+================== short test summary info ===================
+FAILED main_test.py::test_function - assert 0 == 5
+===================== 1 failed in 0.04s ======================
+----
+====
+
 == Creating the basic directory layout
-Start by creating the following directory structure somewhere on your local machine.
+You should already have a `main.py` file and a `main_test.py` file. Transform your directory layout to match the following.
 
 ----
-python-assignment/ <1>
+/ <1>
 ├─ codefreak.yml <2>
 ├─ task-1/ <3>
 │  ├─ codefreak.yml <4>
@@ -26,12 +95,19 @@ python-assignment/ <1>
 │  ├─ main_test.py <6>
 ----
 
-<1> The `python-assignment` directory is the root of your assignment. It contains only a single task.
+<1> The `/` directory is the root of your assignment.
 <2> The `codefreak.yml` directory in your project contains the definition of the assignment. See <<assignment-codefreak-yml>> for further explanation on its contents.
 <3> The `task-1` directory is the root directory of your Task. You can create as many tasks per project as you like. For this example we only have one task in our assignment.
 <4> The task-level `codefreak.yml` contains the configuration of your task, how it is evaluated, etc. See <<task-codefreak-yml>> for more information on its contents.
 <5> The `main.py` is an example of boilerplate code you give to your students. You can also create tasks without any boilerplate code at all if you want your students to create everything on their on.
 <6> The `main_test.py` file contains the tests we will run on our students code. Even if it is visible now **we will hide it from students** by using the <<task-codefreak-yml, task's `codefreak.yml`>>.
+
+== Add Code FREAK configuration
+We now have to add two configuration files to the directory-layout, so Code FREAK knows how to evaluate the task. As
+explained in the previous section there are two different `codefreak.yml` files: One for your assignment and one for
+each task.
+
+TIP: Please see the xref:for-teachers:definitions.adoc[Definition Files Chapter] for a full reference of the `codefreak.yml` files.
 
 [[assignment-codefreak-yml]]
 === Assignment's `codefreak.yml`
@@ -68,62 +144,88 @@ evaluation:
   - step: codeclimate <3>
   - step: junit <4>
     options:
-      image: "python:3.7"
-      project-path: /root
-      results-path: /root
+      image: "python:3.7" <5>
+      project-path: /code <6>
+      results-path: /code <7>
       commands:
-        - pip install pytest
-        - pytest --junitxml=TEST-report.xml main_test.py
+        - pip install pytest <8>
+        - pytest --junitxml=TEST-report.xml main_test.py <9>
 ----
 
 <1> The first two lines will add a title and some description to our task. The weird `description` syntax is a https://yaml-multiline.info/[multi line string in YAML]. The description allows basic Markdown syntax.
 <2> In the `hidden` property we define a list of directories and/or files that will be hidden from our students. Each instruction is a glob pattern. The `codefreak.yml` file is ALWAYS hidden for students.
 <3> The first evaluation step is <<definitions.adoc#codeclimate,Code Climate>>. If you don't add any more options it will perform a basic static code analysis.
-<4> The second evaluation step is the actual unit testing. This section needs some more explanation in the following section.
-
-[[junit-evaluation-step]]
-=== The `junit` evaluation step
-In the <<task-codefreak-yml,section before>> we defined a `junit` evaluation step that runs `pytest` for testing.
-
-Let's assume the following contents of the `main.py` and the `main_test.py` file. The `main_test.py` is created by the teacher and cannot be modified by the student. The `main.py` has to be edited by the student with his/her solution.
-
-.`main.py`
-[%collapsible]
-====
-[source,python]
-----
-def add(a: int, b: int) -> int:
-    return 0
-
-if __name__ == "__main__":
-    print("2 + 3 = %s" % add(2, 3))
-----
-====
-
-.`tests/test.py`
-[%collapsible,python]
-====
-[source,python]
-----
-from main import add
-
-def test_function():
-    assert add(2, 3) == 5
-    assert add(-1, 2) == 1
-
-----
-====
+<4> The second evaluation step is the actual unit testing. See <<definitions.adoc#junit,the definition docs>> for a full reference of available options.
+<5> We use the official https://hub.docker.com/_/python[Python 3.7] Docker image for running the tests. This makes Code FREAK so flexible and allows you to use the Docker Image of your favorite programming language.
+<6> The `project-path` is the working directory inside your container. All commands will be executed relative to this path.
+<7> The `results-path` is a path that will contain the jUnit XML files. Code FREAK will look for `.xml` files starting with `TEST-*`.
+<8> Because the Docker container does not ship with `pytest` we have to install it first.
+<9> This is our actual `pytest` command that runs the test in our `main_test.py` file and generates a `TEST-report.xml` file for Code FREAK.
 
 You can already run the tests locally to check if they behave as expected by invoking the test command `pytest --junitxml=TEST-report.xml main_test.py`.
 
-This will generate a `TEST-report.xml` file inside the main directory. Code FREAK will look for files starting with `TEST-*` inside the `results-path` directory.
-
 == (optionally) Add VSCode configuration files
-//TODO
+Students can use Code FREAK to program in their browsers. The programming environment is currently based on VSCode. We recommend that you add debugging configuration for VSCode, so your students can execute their source code in the browser.
+Please follow the https://code.visualstudio.com/docs/editor/debugging[official documentation] on how to creating debugging/run configurations in VSCode.
+
+The result should be a `.vscode` directory with a `launch.json` file. Add this directory to you `task-1` directory.
 
 [[testing-locally]]
 == Testing locally with Docker
-// TODO
+Before you upload your assignment to Code FREAK you should try to run the tests locally with Docker. After https://docs.docker.com/install/[installing Docker] you can use the following command-template to test execution locally:
+
+[source]
+----
+docker run -it --rm \
+       -w <project-path> \
+       -v $PWD:<project-path> \
+       <image> \
+       sh -c '<command #1> && <command #2> && <command #3> && ...'
+----
+
+The `<variables>` should be replaced by the corresponding values from your task's `codefreak.yml`.
+
+TIP: If you are on **Windows** replace the `$PWD` variable with the absolute path to your `task-1` directory. On Mac OS and Linux the `$PWD` variable will be replaced accordingly.
+
+This is an example for our `task-1`. Execute the following command in the `task-1` directory:
+
+[source]
+----
+docker run -it --rm \
+       -w /code \
+       -v $PWD:/code \
+       python:3.7 \
+       sh -c 'pip install pytest && pytest --junitxml=TEST-report.xml main_test.py'
+----
 
 == Creating and uploading an assignment
-// TODO
+If your assignment is ready to be uploaded to Code FREAK you have to create a `zip` or `tar` archive.
+
+The root directory of the archive has to contain the assignment `codefreak.yml` file! So do not create a archive that contains another `assignment-123` directory. Be warned that many archive programs do this by default. The safest way is selecting the `codefreak.yml` file and all `task-*` directory and use your context menu to create an archive of these file.
+
+Good:
+[source]
+----
+/my-assignment.zip
+├─ codefreak.yml
+├─ task-1/
+│  ├─ codefreak.yml
+│  ├─ main.py
+│  ├─ main_test.py
+----
+
+Bad:
+[source]
+----
+/my-assignment.zip
+├─ my-assignment/
+│  ├─ codefreak.yml
+│  ├─ task-1/
+│  │  ├─ codefreak.yml
+│  │  ├─ main.py
+│  │  ├─ main_test.py
+----
+
+WARNING: Code FREAK executes all commands on Linux. There might be cases where the file permissions are important. Either use a `tar` archive to retain file permissions or set the correct permissions in one of your `commands`.
+
+After you created your archive go to your Code FREAK installation and create a new assignment by uploading the archive.
