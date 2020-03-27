@@ -1,1 +1,4 @@
 // nothing yet
+* Basics
+** xref:ROOT:index.adoc[Home]
+** xref:ROOT:terminology.adoc[Terminology]
