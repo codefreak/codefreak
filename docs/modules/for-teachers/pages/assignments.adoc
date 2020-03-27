@@ -3,11 +3,14 @@
 
 In this chapter you will learn how to create an assignment. We will create a simple Python application with a single function `add(a: int, b: int)`.
 
+This chapter covers the following:
+
 * [x] How to create an assignment and tasks
 * [x] How to provide a basic file boilerplate to your students
 * [x] How to define evaluations for your tasks
+* [x] Running your tests locally
 
-TIP: Also check out our xref:examples.adoc[Examples]!
+// TIP: Also check out our xref:examples.adoc[Examples]!
 
 == Prepare your tasks
 Preparation is key! Don't start working with Code FREAK if you haven't thought about what to test and how to test. Before you start adding Code FREAK configuration to your tasks, make sure they are working/compiling locally on your machine! You can also test execution like Code FREAK does locally by https://docs.docker.com/install/[installing Docker]. More on this in section <<testing-locally>>.
