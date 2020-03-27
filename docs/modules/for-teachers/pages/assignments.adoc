@@ -56,9 +56,7 @@ pytest main_test.py
 
 This should give some output about a **failing** test. It is important that your tests are failing. Otherwise you could not expect your students to fix the faulty source code.
 
-.Expand to see the failing `pytest` output
-[%collapsible]
-====
+.Failing `pytest` output
 [source]
 ----
 ==================== test session starts =====================
@@ -81,7 +79,6 @@ main_test.py:4: AssertionError
 FAILED main_test.py::test_function - assert 0 == 5
 ===================== 1 failed in 0.04s ======================
 ----
-====
 
 == Creating the basic directory layout
 You should already have a `main.py` file and a `main_test.py` file. Transform your directory layout to match the following.
