@@ -1,0 +1,4 @@
+= Example Tasks
+
+TIP: We are working on some examples for different languages and frameworks. For the meantime please take a look at our basic https://github.com/code-freak/code-freak/tree/master/src/main/resources/init/tasks[examples in our official repository].
+
