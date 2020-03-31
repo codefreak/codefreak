@@ -32,12 +32,14 @@ mutation ImportAssignment($url: String!) {
 
 mutation UpdateAssignment(
   $id: ID!
+  $title: String!
   $active: Boolean!
   $deadline: DateTime
   $openFrom: DateTime
 ) {
   updateAssignment(
     id: $id
+    title: $title
     active: $active
     deadline: $deadline
     openFrom: $openFrom
