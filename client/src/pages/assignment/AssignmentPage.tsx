@@ -5,6 +5,8 @@ import {
   Checkbox,
   DatePicker,
   Descriptions,
+  Dropdown,
+  Menu,
   Modal,
   Switch as AntdSwitch
 } from 'antd'
@@ -25,6 +27,8 @@ import useSubPath from '../../hooks/useSubPath'
 import {
   Assignment,
   GetTaskListDocument,
+  UpdateAssignmentMutation,
+  UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
   useGetTaskPoolForAddingQuery,
@@ -46,7 +50,10 @@ const AssignmentPage: React.FC = () => {
   const subPath = useSubPath()
   const formatter = useFormatter()
   const [updateMutation] = useUpdateAssignmentMutation({
-    onCompleted: () => result.refetch()
+    onCompleted: () => {
+      result.refetch()
+      messageService.success('Assignment updated')
+    }
   })
 
   const tabs = [{ key: '', tab: 'Tasks' }]
@@ -60,19 +67,32 @@ const AssignmentPage: React.FC = () => {
 
   const { assignment } = result.data
 
-  const updater = makeUpdater(
-    {
-      id: assignment.id,
-      title: assignment.title,
-      active: assignment.active,
-      deadline: assignment.deadline,
-      openFrom: assignment.openFrom
-    },
-    variables =>
-      updateMutation({ variables }).then(
-        messageService.success('Assignment updated')
-      )
+  const assignmentInput: UpdateAssignmentMutationVariables = {
+    id: assignment.id,
+    title: assignment.title,
+    active: assignment.active,
+    deadline: assignment.deadline,
+    openFrom: assignment.openFrom
+  }
+
+  const updater = makeUpdater(assignmentInput, variables =>
+    updateMutation({ variables })
   )
+
+  const openNow = () => {
+    const variables = {
+      ...assignmentInput,
+      active: true,
+      openFrom: new Date()
+    }
+    if (
+      variables.deadline &&
+      moment(variables.deadline).isBefore(variables.openFrom, 'minute')
+    ) {
+      delete variables.deadline
+    }
+    updateMutation({ variables })
+  }
 
   const renderDate = (
     label: string,
@@ -115,11 +135,26 @@ const AssignmentPage: React.FC = () => {
         onTabChange={subPath.set}
         extra={
           <Authorized condition={assignment.editable}>
+            {assignment.status === 'OPEN' ? (
+              <Button>Close Now</Button>
+            ) : (
+              <Dropdown.Button
+                style={{ marginRight: 8 }}
+                onClick={openNow}
+                overlay={
+                  <Menu>
+                    <Menu.Item key="1">Open for fixed period</Menu.Item>
+                  </Menu>
+                }
+              >
+                Open Now
+              </Dropdown.Button>
+            )}
             <AddTasksButton assignment={assignment} />
           </Authorized>
         }
         content={
-          <Descriptions size="small" column={3}>
+          <Descriptions size="small" column={4}>
             <Descriptions.Item label="Created">
               {formatter.date(assignment.createdAt)}
             </Descriptions.Item>
