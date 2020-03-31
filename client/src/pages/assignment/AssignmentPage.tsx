@@ -29,7 +29,6 @@ import useSubPath from '../../hooks/useSubPath'
 import {
   Assignment,
   GetTaskListDocument,
-  UpdateAssignmentMutation,
   UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
@@ -81,6 +80,11 @@ const AssignmentPage: React.FC = () => {
     updateMutation({ variables })
   )
 
+  const closeNow = () =>
+    updateMutation({
+      variables: { ...assignmentInput, deadline: new Date() }
+    })
+
   const renderDate = (
     label: string,
     onOk: (date?: Date) => any,
@@ -123,7 +127,7 @@ const AssignmentPage: React.FC = () => {
         extra={
           <Authorized condition={assignment.editable}>
             {assignment.status === 'OPEN' ? (
-              <Button>Close Now</Button>
+              <Button onClick={closeNow}>Close Now</Button>
             ) : (
               <OpenAssignmentButton
                 input={assignmentInput}
@@ -262,7 +266,7 @@ const OpenAssignmentButton: React.FC<{
         ...input,
         active: true,
         openFrom: from.toDate(),
-        deadline: from.add(period.minutes(), 'minutes').toDate()
+        deadline: from.add(period.seconds(), 'seconds').toDate()
       }
     })
 
@@ -289,7 +293,7 @@ const OpenAssignmentButton: React.FC<{
         overlay={
           <Menu>
             <Menu.Item key="1" onClick={showModal}>
-              Open for fixed period
+              Open for specific period
             </Menu.Item>
           </Menu>
         }
@@ -299,7 +303,7 @@ const OpenAssignmentButton: React.FC<{
       <Modal
         visible={modalVisible}
         onCancel={hideModal}
-        title={'Open submissions for fixed period of time'}
+        title={'Open submissions for specific period of time'}
         okButtonProps={{
           disabled: period.minutes() < 1
         }}
