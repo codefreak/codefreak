@@ -31,18 +31,18 @@ class FileContentService : BaseService() {
   )
 
   fun getFile(fileCollectionId: UUID, path: String): VirtualFile {
-    val collection = fileService.readCollectionTar(fileCollectionId)
-    collection.use {
-      TarUtil.findFile(it, path) { entry, fileStream ->
+    fileService.readCollectionTar(fileCollectionId).use { collectionTar ->
+      TarUtil.findFile(collectionTar, path) { entry, fileStream ->
         return tarEntryToVirtualFile(entry, fileStream)
       }
     }
   }
 
   fun getFiles(fileCollectionId: UUID): List<VirtualFile> {
-    val collection = fileService.readCollectionTar(fileCollectionId)
-    TarArchiveInputStream(collection).let { tar ->
-      return generateSequence { tar.nextTarEntry }.map { tarEntryToVirtualFile(it, tar) }.toList()
+    fileService.readCollectionTar(fileCollectionId).use { collectionTar ->
+      TarArchiveInputStream(collectionTar).let { tar ->
+        return generateSequence { tar.nextTarEntry }.map { tarEntryToVirtualFile(it, tar) }.toList()
+      }
     }
   }
 
