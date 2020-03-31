@@ -260,15 +260,22 @@ const OpenAssignmentButton: React.FC<{
     setModalVisible(true)
   }
   const hideModal = () => setModalVisible(false)
-  const submit = () =>
+  const submit = () => {
     mutation({
       variables: {
         ...input,
         active: true,
         openFrom: from.toDate(),
-        deadline: from.add(period.seconds(), 'seconds').toDate()
+        deadline: from
+          .add(
+            period.hours() * 60 * 60 + period.minutes() * 60 + period.seconds(),
+            'seconds'
+          )
+          .toDate()
       }
     })
+    hideModal()
+  }
 
   const isInPast = (date: Moment | undefined) =>
     (date && date.isBefore(moment(), 'minute')) || false
