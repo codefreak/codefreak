@@ -6,12 +6,14 @@ import {
   DatePicker,
   Descriptions,
   Dropdown,
+  Form,
   Menu,
   Modal,
-  Switch as AntdSwitch
+  Switch as AntdSwitch,
+  TimePicker
 } from 'antd'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
-import moment from 'moment'
+import moment, { Moment } from 'moment'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import AssignmentStatus from '../../components/AssignmentStatus'
@@ -79,21 +81,6 @@ const AssignmentPage: React.FC = () => {
     updateMutation({ variables })
   )
 
-  const openNow = () => {
-    const variables = {
-      ...assignmentInput,
-      active: true,
-      openFrom: new Date()
-    }
-    if (
-      variables.deadline &&
-      moment(variables.deadline).isBefore(variables.openFrom, 'minute')
-    ) {
-      delete variables.deadline
-    }
-    updateMutation({ variables })
-  }
-
   const renderDate = (
     label: string,
     onOk: (date?: Date) => any,
@@ -138,17 +125,10 @@ const AssignmentPage: React.FC = () => {
             {assignment.status === 'OPEN' ? (
               <Button>Close Now</Button>
             ) : (
-              <Dropdown.Button
-                style={{ marginRight: 8 }}
-                onClick={openNow}
-                overlay={
-                  <Menu>
-                    <Menu.Item key="1">Open for fixed period</Menu.Item>
-                  </Menu>
-                }
-              >
-                Open Now
-              </Dropdown.Button>
+              <OpenAssignmentButton
+                input={assignmentInput}
+                mutation={updateMutation}
+              />
             )}
             <AddTasksButton assignment={assignment} />
           </Authorized>
@@ -260,6 +240,91 @@ const TaskSelection: React.FC<{
       onChange={onChange}
       value={props.value}
     />
+  )
+}
+
+const OpenAssignmentButton: React.FC<{
+  input: UpdateAssignmentMutationVariables
+  mutation: (args: { variables: UpdateAssignmentMutationVariables }) => any
+}> = ({ input, mutation }) => {
+  const [modalVisible, setModalVisible] = useState(false)
+  const [from, setFrom] = useState(moment())
+  const [period, setPeriod] = useState(moment('00:30:00', 'HH:mm:ss'))
+  const showModal = () => {
+    setFrom(moment())
+    setPeriod(moment('00:30:00', 'HH:mm:ss'))
+    setModalVisible(true)
+  }
+  const hideModal = () => setModalVisible(false)
+  const submit = () =>
+    mutation({
+      variables: {
+        ...input,
+        active: true,
+        openFrom: from.toDate(),
+        deadline: from.add(period.minutes(), 'minutes').toDate()
+      }
+    })
+
+  const isInPast = (date: Moment | undefined) =>
+    (date && date.isBefore(moment(), 'minute')) || false
+
+  const openNow = () => {
+    const variables = {
+      ...input,
+      active: true,
+      openFrom: new Date()
+    }
+    if (variables.deadline && isInPast(moment(variables.deadline))) {
+      delete variables.deadline
+    }
+    mutation({ variables })
+  }
+
+  return (
+    <>
+      <Dropdown.Button
+        style={{ marginRight: 8 }}
+        onClick={openNow}
+        overlay={
+          <Menu>
+            <Menu.Item key="1" onClick={showModal}>
+              Open for fixed period
+            </Menu.Item>
+          </Menu>
+        }
+      >
+        Open Now
+      </Dropdown.Button>
+      <Modal
+        visible={modalVisible}
+        onCancel={hideModal}
+        title={'Open submissions for fixed period of time'}
+        okButtonProps={{
+          disabled: period.minutes() < 1
+        }}
+        onOk={submit}
+      >
+        <Form labelCol={{ span: 6 }}>
+          <Form.Item label="From">
+            <DatePicker
+              showTime
+              allowClear={false}
+              value={from}
+              onOk={setFrom}
+              disabledDate={isInPast}
+            />
+          </Form.Item>
+          <Form.Item style={{ marginBottom: 0 }} label="For">
+            <TimePicker
+              allowClear={false}
+              onChange={setPeriod}
+              value={period}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   )
 }
 
