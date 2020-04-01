@@ -13,7 +13,7 @@ import {
   TimePicker
 } from 'antd'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
-import moment, { Moment } from 'moment'
+import moment, { Moment, unitOfTime } from 'moment'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import AssignmentStatus from '../../components/AssignmentStatus'
@@ -208,7 +208,7 @@ const AddTasksButton: React.FC<{
       >
         <Alert
           message={
-            'When a task from the pool is added to an assignment, an independend copy is created. ' +
+            'When a task from the pool is added to an assignment, an independent copy is created. ' +
             'Editing the task in the pool will have no effect on the assignment and vice versa.'
           }
           style={{ marginBottom: 16 }}
@@ -277,8 +277,10 @@ const OpenAssignmentButton: React.FC<{
     hideModal()
   }
 
-  const isInPast = (date: Moment | undefined) =>
-    (date && date.isBefore(moment(), 'minute')) || false
+  const isInPast = (
+    date: Moment | undefined,
+    resolution?: unitOfTime.StartOf
+  ) => (date && date.isBefore(moment(), resolution)) || false
 
   const openNow = () => {
     const variables = {
@@ -292,6 +294,8 @@ const OpenAssignmentButton: React.FC<{
     mutation({ variables })
   }
 
+  const onChangeDate = (date: Moment | null) => date && setFrom(date)
+  const isBeforeToday = (date?: Moment) => isInPast(date, 'days')
   return (
     <>
       <Dropdown.Button
@@ -322,8 +326,8 @@ const OpenAssignmentButton: React.FC<{
               showTime
               allowClear={false}
               value={from}
-              onOk={setFrom}
-              disabledDate={isInPast}
+              onChange={onChangeDate}
+              disabledDate={isBeforeToday}
             />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0 }} label="For">
