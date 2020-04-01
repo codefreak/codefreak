@@ -22,3 +22,7 @@ export function makeUpdater<T>(
 export function momentToDate<T>(fn: (date: Date) => T) {
   return (moment: Moment) => fn(moment.toDate())
 }
+
+export function extractTargetValue<V, T>(fn: (value: V) => T) {
+  return (e: { target: { value: V } }) => fn(e.target.value)
+}

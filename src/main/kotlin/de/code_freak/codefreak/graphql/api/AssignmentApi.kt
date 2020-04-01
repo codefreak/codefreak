@@ -135,9 +135,10 @@ class AssignmentMutation : BaseResolver(), Mutation {
     true
   }
 
-  fun updateAssignment(id: UUID, active: Boolean, deadline: Instant?, openFrom: Instant?): Boolean = context {
+  fun updateAssignment(id: UUID, title: String, active: Boolean, deadline: Instant?, openFrom: Instant?): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    assignment.title = title
     assignment.active = active
     assignment.deadline = deadline
     assignment.openFrom = openFrom

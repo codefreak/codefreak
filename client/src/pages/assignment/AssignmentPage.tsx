@@ -5,17 +5,22 @@ import {
   Checkbox,
   DatePicker,
   Descriptions,
+  Dropdown,
+  Form,
+  Menu,
   Modal,
-  Switch as AntdSwitch
+  Switch as AntdSwitch,
+  TimePicker
 } from 'antd'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
-import moment from 'moment'
+import moment, { Moment, unitOfTime } from 'moment'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import AssignmentStatus from '../../components/AssignmentStatus'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
+import EditablePageTitle from '../../components/EditablePageTitle'
 import SetTitle from '../../components/SetTitle'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
@@ -24,6 +29,7 @@ import useSubPath from '../../hooks/useSubPath'
 import {
   Assignment,
   GetTaskListDocument,
+  UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
   useGetTaskPoolForAddingQuery,
@@ -45,7 +51,10 @@ const AssignmentPage: React.FC = () => {
   const subPath = useSubPath()
   const formatter = useFormatter()
   const [updateMutation] = useUpdateAssignmentMutation({
-    onCompleted: () => result.refetch()
+    onCompleted: () => {
+      result.refetch()
+      messageService.success('Assignment updated')
+    }
   })
 
   const tabs = [{ key: '', tab: 'Tasks' }]
@@ -59,18 +68,22 @@ const AssignmentPage: React.FC = () => {
 
   const { assignment } = result.data
 
-  const updater = makeUpdater(
-    {
-      id: assignment.id,
-      active: assignment.active,
-      deadline: assignment.deadline,
-      openFrom: assignment.openFrom
-    },
-    variables =>
-      updateMutation({ variables }).then(
-        messageService.success('Assignment updated')
-      )
+  const assignmentInput: UpdateAssignmentMutationVariables = {
+    id: assignment.id,
+    title: assignment.title,
+    active: assignment.active,
+    deadline: assignment.deadline,
+    openFrom: assignment.openFrom
+  }
+
+  const updater = makeUpdater(assignmentInput, variables =>
+    updateMutation({ variables })
   )
+
+  const closeNow = () =>
+    updateMutation({
+      variables: { ...assignmentInput, deadline: new Date() }
+    })
 
   const renderDate = (
     label: string,
@@ -99,7 +112,13 @@ const AssignmentPage: React.FC = () => {
     <>
       <SetTitle>{assignment.title}</SetTitle>
       <PageHeaderWrapper
-        title={assignment.title}
+        title={
+          <EditablePageTitle
+            editable={assignment.editable}
+            title={assignment.title}
+            onChange={updater('title')}
+          />
+        }
         subTitle={<AssignmentStatus assignment={assignment} />}
         tabList={tabs}
         tabActiveKey={subPath.get()}
@@ -107,11 +126,19 @@ const AssignmentPage: React.FC = () => {
         onTabChange={subPath.set}
         extra={
           <Authorized condition={assignment.editable}>
+            {assignment.status === 'OPEN' ? (
+              <Button onClick={closeNow}>Close Now</Button>
+            ) : (
+              <OpenAssignmentButton
+                input={assignmentInput}
+                mutation={updateMutation}
+              />
+            )}
             <AddTasksButton assignment={assignment} />
           </Authorized>
         }
         content={
-          <Descriptions size="small" column={3}>
+          <Descriptions size="small" column={4}>
             <Descriptions.Item label="Created">
               {formatter.date(assignment.createdAt)}
             </Descriptions.Item>
@@ -181,7 +208,7 @@ const AddTasksButton: React.FC<{
       >
         <Alert
           message={
-            'When a task from the pool is added to an assignment, an independend copy is created. ' +
+            'When a task from the pool is added to an assignment, an independent copy is created. ' +
             'Editing the task in the pool will have no effect on the assignment and vice versa.'
           }
           style={{ marginBottom: 16 }}
@@ -217,6 +244,102 @@ const TaskSelection: React.FC<{
       onChange={onChange}
       value={props.value}
     />
+  )
+}
+
+const OpenAssignmentButton: React.FC<{
+  input: UpdateAssignmentMutationVariables
+  mutation: (args: { variables: UpdateAssignmentMutationVariables }) => any
+}> = ({ input, mutation }) => {
+  const [modalVisible, setModalVisible] = useState(false)
+  const [from, setFrom] = useState(moment())
+  const [period, setPeriod] = useState(moment('00:30:00', 'HH:mm:ss'))
+  const showModal = () => {
+    setFrom(moment())
+    setPeriod(moment('00:30:00', 'HH:mm:ss'))
+    setModalVisible(true)
+  }
+  const hideModal = () => setModalVisible(false)
+  const submit = () => {
+    mutation({
+      variables: {
+        ...input,
+        active: true,
+        openFrom: from.toDate(),
+        deadline: from
+          .add(
+            period.hours() * 60 * 60 + period.minutes() * 60 + period.seconds(),
+            'seconds'
+          )
+          .toDate()
+      }
+    })
+    hideModal()
+  }
+
+  const isInPast = (
+    date: Moment | undefined,
+    resolution?: unitOfTime.StartOf
+  ) => (date && date.isBefore(moment(), resolution)) || false
+
+  const openNow = () => {
+    const variables = {
+      ...input,
+      active: true,
+      openFrom: new Date()
+    }
+    if (variables.deadline && isInPast(moment(variables.deadline))) {
+      delete variables.deadline
+    }
+    mutation({ variables })
+  }
+
+  const onChangeDate = (date: Moment | null) => date && setFrom(date)
+  const isBeforeToday = (date?: Moment) => isInPast(date, 'days')
+  return (
+    <>
+      <Dropdown.Button
+        style={{ marginRight: 8 }}
+        onClick={openNow}
+        overlay={
+          <Menu>
+            <Menu.Item key="1" onClick={showModal}>
+              Open for specific period
+            </Menu.Item>
+          </Menu>
+        }
+      >
+        Open Now
+      </Dropdown.Button>
+      <Modal
+        visible={modalVisible}
+        onCancel={hideModal}
+        title={'Open submissions for specific period of time'}
+        okButtonProps={{
+          disabled: period.minutes() < 1
+        }}
+        onOk={submit}
+      >
+        <Form labelCol={{ span: 6 }}>
+          <Form.Item label="From">
+            <DatePicker
+              showTime
+              allowClear={false}
+              value={from}
+              onChange={onChangeDate}
+              disabledDate={isBeforeToday}
+            />
+          </Form.Item>
+          <Form.Item style={{ marginBottom: 0 }} label="For">
+            <TimePicker
+              allowClear={false}
+              onChange={setPeriod}
+              value={period}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   )
 }
 
