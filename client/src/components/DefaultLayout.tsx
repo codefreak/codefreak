@@ -11,6 +11,7 @@ import { useGetMotdQuery } from '../services/codefreak-api'
 import AppFooter from './AppFooter'
 import Authorized from './Authorized'
 import './DefaultLayout.less'
+import Logo from './Logo'
 import RightHeader from './RightHeader'
 
 export const appName = 'Code FREAK'
@@ -56,7 +57,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
       menuItemRender={menuItemRender}
       route={routerConfig}
       title={appName}
-      logo={process.env.PUBLIC_URL + '/codefreak-logo.svg'}
+      logo={<Logo />}
       disableContentMargin={false}
       itemRender={breadcrumbItemRender}
       rightContentRender={renderRightHeader}

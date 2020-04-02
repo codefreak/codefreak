@@ -2,6 +2,7 @@ import { Button, Card, Form, Icon, Input } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
 import React, { useEffect } from 'react'
 import Centered from '../components/Centered'
+import Logo from '../components/Logo'
 import { AuthenticatedUser } from '../hooks/useAuthenticatedUser'
 import { useLoginMutation } from '../services/codefreak-api'
 
@@ -37,7 +38,20 @@ const LoginPage: React.FC<LoginProps> = props => {
 
   return (
     <Centered className="background-carbon">
-      <Card title="Login" style={{ width: '100%', maxWidth: 300, margin: 16 }}>
+      <Card
+        title={
+          <h1
+            style={{
+              marginBottom: -16,
+              textAlign: 'center'
+            }}
+          >
+            <Logo height={64} />
+          </h1>
+        }
+        style={{ width: '100%', maxWidth: 300, margin: 16 }}
+        headStyle={{ borderBottom: 'none' }}
+      >
         <Form onSubmit={handleSubmit}>
           <Form.Item>
             {getFieldDecorator('username', {
@@ -49,7 +63,9 @@ const LoginPage: React.FC<LoginProps> = props => {
                 prefix={
                   <Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />
                 }
-                placeholder="Username"
+                autoComplete="username"
+                autoFocus
+                placeholder="Username / Mail Address"
               />
             )}
           </Form.Item>
@@ -63,6 +79,7 @@ const LoginPage: React.FC<LoginProps> = props => {
                 prefix={
                   <Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />
                 }
+                autoComplete="password"
                 type="password"
                 placeholder="Password"
               />
