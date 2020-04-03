@@ -10,6 +10,16 @@ Code FREAK is an online IDE for educational purposes that allows teachers to cre
 allows students to programm and execute their code without leaving the browser. Submissions can be evaluated
 automatically by various testing-methods like unit tests or code smell detection.
 
+## Quickstart using docker-compose
+If you want to try Code FREAK locally:
+1. Clone this repository
+2. Install Docker + docker-compose
+3. Run `docker-compose up`
+4. Wait until everything compiled and is running
+5. The UI is accessible at http://localhost:8888.
+
+Please keep in mind that the `docker-compose.yml` is only meant for local testing and development.
+
 ## ⚠️ WORK IN PROGRESS ⚠️
 Code FREAK is currently under heavy development. This means things can break without any further notice.
 Please keep this in mind when testing the application.

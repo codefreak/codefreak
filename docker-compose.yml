@@ -1,39 +1,60 @@
-# This is a sample docker-compose file to deploy Code FREAK
-# Please adapt it to your needs but do not copy this to production without any changes
-# The application and database services should be fine but you should not use docker in docker in production
+# This file is meant for local development/testing and NOT meant for production!
+# The backend and frontend is built on startup so first run may take some time
+#
+# Usage:
+#   docker-compose -f dev.docker-compose.yml up
 
 version: "3"
 services:
-  app:
-    image: cfreak/code-freak:latest
-    restart: always
+  frontend:
+    image: node:13-alpine
     ports:
-      - "80:8080"
+      - "8888:3000"
+    working_dir: /app/client
     networks:
+      - default
       - private
     environment:
-      # Please point this do a dedicated docker host
-      DOCKER_HOST: "http://docker:2375"
-      # Configure database for PostgreSQL
+      NODE_PROXY_HOST: "backend"
+    command: npm start
+    volumes:
+      - .:/app
+  backend:
+    image: gradle:jdk8
+    working_dir: /home/gradle/project
+    networks:
+      - private
+    volumes:
+      - ".:/home/gradle/project"
+      - "docker_certs:/certs"
+    command: ./gradlew bootRun
+    environment:
+      DOCKER_HOST: "https://docker:2376"
+      DOCKER_CERT_PATH: /certs
       SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/postgres"
       SPRING_DATASOURCE_USERNAME: "postgres"
       SPRING_DATASOURCE_DRIVERCLASSNAME: "org.postgresql.Driver"
       SPRING_JPA_DATABASEPLATFORM: "org.hibernate.dialect.PostgreSQLDialect"
-      # automatically update the database schema until we have a migration tool
-      SPRING_JPA_HIBERNATE_DDLAUTO: "update"
-      CODEFREAK_DOCKER_PULLPOLICY: "always"
   postgres:
     image: postgres
     restart: always
     networks:
       - private
-  # WARNING: Do not use Docker-in-Docker in production!
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
   docker:
-    image: docker:dind
+    image: docker:stable-dind
     privileged: true
     restart: always
+    environment:
+      DOCKER_TLS_CERTDIR: certs
     networks:
       - private
+    volumes:
+      - docker_certs:/certs
+
+volumes:
+  docker_certs: {}
 
 networks:
   private: {}
