@@ -3,5 +3,5 @@ pluginManagement {
     gradlePluginPortal()
   }
 }
-rootProject.name = 'code-freak'
+rootProject.name = 'codefreak'
 include 'client'

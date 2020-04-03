@@ -1,7 +1,7 @@
 Code FREAK<br><small>╰ Code Feedback, Review & Evaluation Kit</small>
 ======
 
-[![Build Status](https://travis-ci.com/code-freak/code-freak.svg?branch=master)](https://travis-ci.com/code-freak/code-freak)
+[![Build Status](https://travis-ci.com/codefreak/codefreak.svg?branch=master)](https://travis-ci.com/codefreak/codefreak)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=code-freak_code-freak&metric=alert_status)](https://sonarcloud.io/dashboard?id=code-freak_code-freak)
 [![Docker Image](https://images.microbadger.com/badges/version/cfreak/code-freak.svg)](https://microbadger.com/images/cfreak/code-freak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)

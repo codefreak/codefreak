@@ -36,7 +36,7 @@ logging:
 
 graphql:
   packages:
-    - "de.code_freak.codefreak.graphql.api"
+    - "org.codefreak.codefreak.graphql.api"
 
 server:
   servlet:

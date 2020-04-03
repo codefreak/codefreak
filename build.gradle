@@ -17,12 +17,12 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 apply from: 'https://raw.githubusercontent.com/erikhofer/autodiff/1.0.2/autodiff.gradle'
-project.autodiff.basePackage = "de.code_freak.codefreak.entity"
+project.autodiff.basePackage = "org.codefreak.codefreak.entity"
 project.autodiff.changeLogMaster = "src/main/resources/db/changelog-master.yaml"
 project.autodiff.changeLogDiff = project.hasProperty('changeLogDiff')
   ? project.property('changeLogDiff') : "src/main/resources/db/changelog-diff.yaml"
 
-group = 'de.code_freak'
+group = 'org.codefreak'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -133,7 +133,7 @@ jacocoTestReport {
 }
 
 springBoot {
-  mainClassName = 'de.code_freak.codefreak.CodeFreakApplicationKt'
+  mainClassName = 'org.codefreak.codefreak.CodeFreakApplicationKt'
 }
 
 test {
@@ -162,6 +162,6 @@ sonarqube {
 
 task generateGraphqlSchema(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
-  main = "de.code_freak.codefreak.graphql.SchemaPrinterKt"
+  main = "org.codefreak.codefreak.graphql.SchemaPrinterKt"
   args 'build/generated/graphql/schema.graphqls'
 }

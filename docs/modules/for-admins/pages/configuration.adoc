@@ -8,7 +8,7 @@ Code FREAK provides multiple ways to authenticate users. You can choose one of t
 === Simple Authentication
 Simple authentication means that users are managed by Code FREAK itself. Accounts are created by administrators and saved to the database.
 
-WARNING: Simple authentication has not been implemented yet! It only works in `dev` mode with preconfigured users. See https://github.com/code-freak/code-freak/issues/122[Issue #122] for progress.
+WARNING: Simple authentication has not been implemented yet! It only works in `dev` mode with preconfigured users. See https://github.com/codefreak/codefreak/issues/122[Issue #122] for progress.
 
 [source,yaml]
 ----

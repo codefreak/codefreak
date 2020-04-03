@@ -5,7 +5,7 @@
 
 == Configuration
 Create a file `src/main/resources/application-dev.yml`. For documentation on how to configure the
-server see https://github.com/code-freak/code-freak/blob/master/src/main/resources/application.yml[`application.yml`]
+server see https://github.com/codefreak/codefreak/blob/master/src/main/resources/application.yml[`application.yml`]
 in the same directory. Minimum configuration that uses the in-memory database:
 
 [source,yaml]
@@ -92,7 +92,7 @@ $ ./gradlew spotlessApply
 -----
 
 == Making changes to the database schema
-If you modify the entity layer under `de.code_freak.codefreak.entity` in a way that changes the database schema,
+If you modify the entity layer under `org.codefreak.codefreak.entity` in a way that changes the database schema,
 you have to create a migration changelog. Code FREAK uses https://www.liquibase.org/[Liquibase] for versioning the database
 schema. After you made your changes to the JPA entities, execute the script `generateChangelog.sh` in the project directory.
 It will create a new file under `src/main/resources/db/changelogs`. It contains differences between the latest schema version
@@ -122,7 +122,7 @@ This is a limitation of the tag system introduced above.
 
 === Advanced release process via CI
 
-NOTE: This is currently only used by the main application https://github.com/code-freak/code-freak[`code-freak/code-freak`].
+NOTE: This is currently only used by the main application https://github.com/codefreak/codefreak[`codefreak/codefreak`].
 
 To release a new version, https://blog.travis-ci.com/2017-08-24-trigger-custom-build[trigger a custom CI build] with the
 following configuration (use actual version number). Run the task on the appropriate major version branch (currently
