@@ -18,8 +18,6 @@ import de.code_freak.codefreak.util.withTrailingSlash
 import org.glassfish.jersey.internal.LocalizationMessages
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.event.ContextRefreshedEvent
-import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -63,11 +61,6 @@ class ContainerService : BaseService() {
   @Autowired
   private lateinit var answerService: AnswerService
 
-  @EventListener(ContextRefreshedEvent::class)
-  fun init() {
-    pullDockerImages(listOf(config.ide.image, config.evaluation.codeclimate.image))
-  }
-
   /**
    * Inherit behaviour of the standard Docker CLI and fallback to :latest if no tag is given
    */
@@ -78,28 +71,26 @@ class ContainerService : BaseService() {
         "$imageName:latest"
       }
 
-  fun pullDockerImages(images: List<String>) {
-    for (image in images.map(this::normalizeImageName)) {
-      val imageInfo = try {
-        docker.inspectImage(image)
-      } catch (e: ImageNotFoundException) {
-        null
-      }
-
-      val pullRequired = config.docker.pullPolicy == "always" || (config.docker.pullPolicy == "if-not-present" && imageInfo == null)
-      if (!pullRequired) {
-        if (imageInfo == null) {
-          log.warn("Image pulling is disabled but $image is not available on the daemon!")
-        } else {
-          log.debug("Image present: $image ${imageInfo.id()}")
-        }
-        continue
-      }
-
-      log.info("Pulling latest image for: $image")
-      docker.pull(image)
-      log.info("Updated docker image $image to ${docker.inspectImage(image).id()}")
+  fun pullDockerImage(image: String) {
+    val imageInfo = try {
+      docker.inspectImage(image)
+    } catch (e: ImageNotFoundException) {
+      null
     }
+
+    val pullRequired = config.docker.pullPolicy == "always" || (config.docker.pullPolicy == "if-not-present" && imageInfo == null)
+    if (!pullRequired) {
+      if (imageInfo == null) {
+        log.warn("Image pulling is disabled but $image is not available on the daemon!")
+      } else {
+        log.debug("Image present: $image ${imageInfo.id()}")
+      }
+      return
+    }
+
+    log.info("Pulling latest image for: $image")
+    docker.pull(image)
+    log.info("Updated docker image $image to ${docker.inspectImage(image).id()}")
   }
 
   /**
@@ -212,12 +203,14 @@ class ContainerService : BaseService() {
     image: String,
     configure: ContainerBuilder.() -> Unit = {}
   ): String {
+    val normalizedImageName = normalizeImageName(image)
+    pullDockerImage(normalizedImageName)
 
     val builder = ContainerBuilder()
     builder.configure()
 
     builder.containerConfig {
-      image(normalizeImageName(image))
+      image(normalizedImageName)
     }
     builder.labels += mapOf(
         LABEL_INSTANCE_ID to config.instanceId
@@ -378,7 +371,6 @@ class ContainerService : BaseService() {
     stopOnFail: Boolean,
     processFiles: ((InputStream) -> Unit)? = null
   ): List<ExecResult> {
-    pullDockerImages(listOf(image))
     val containerId = createContainer(image) {
       doNothingAndKeepAlive()
       containerConfig { workingDir(projectPath) }
