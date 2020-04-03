@@ -34,7 +34,7 @@ script:
     --build-arg GITHUB_TOKEN
     --build-arg GIT_COMMIT="$TRAVIS_COMMIT"
     --build-arg GIT_TAG="$TRAVIS_TAG"
-    -t cfreak/code-freak:latest $TRAVIS_BUILD_DIR
+    -t cfreak/codefreak:latest $TRAVIS_BUILD_DIR
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -54,13 +54,13 @@ deploy:
   - provider: script
     on:
       branch: master
-    script: docker-ci-deploy --tag canary -- cfreak/code-freak
+    script: docker-ci-deploy --tag canary -- cfreak/codefreak
   # deploy tags
   - provider: script
     on:
       tags: true
     # This will also tag and deploy minor and major version (1.2.3 as 1.2 and 1)
-    script: docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/code-freak
+    script: docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/codefreak
 
   # publish release
   - provider: script

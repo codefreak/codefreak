@@ -5,7 +5,7 @@
 version: "3"
 services:
   app:
-    image: cfreak/code-freak:latest
+    image: cfreak/codefreak:latest
     restart: always
     ports:
       - "80:8080"

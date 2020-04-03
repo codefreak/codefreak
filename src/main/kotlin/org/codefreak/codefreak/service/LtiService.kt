@@ -52,7 +52,7 @@ class LtiService {
             "title" to "${assignment.title} (Code FREAK)",
             "url" to launchUrl,
             "window" to mapOf(
-                "targetName" to "code-freak-${assignment.id}"
+                "targetName" to "codefreak-${assignment.id}"
             )
         )
     )

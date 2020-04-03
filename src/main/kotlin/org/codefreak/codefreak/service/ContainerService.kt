@@ -33,7 +33,7 @@ import javax.ws.rs.ProcessingException
 class ContainerService : BaseService() {
 
   companion object {
-    private const val LABEL_PREFIX = "de.code-freak."
+    private const val LABEL_PREFIX = "org.codefreak."
     const val LABEL_READ_ONLY_ANSWER_ID = LABEL_PREFIX + "answer-id-read-only"
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
     const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance-id"
