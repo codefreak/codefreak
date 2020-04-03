@@ -275,8 +275,8 @@ class ContainerService : BaseService() {
   protected fun isContainerRunning(containerId: String): Boolean = docker.inspectContainer(containerId).state().running()
 
   @Scheduled(
-      fixedRateString = "\${code-freak.ide.idle-check-rate}",
-      initialDelayString = "\${code-freak.ide.idle-check-rate}"
+      fixedRateString = "\${codefreak.ide.idle-check-rate}",
+      initialDelayString = "\${codefreak.ide.idle-check-rate}"
   )
   protected fun shutdownIdleIdeContainers() {
     log.debug("Checking for idle containers")

@@ -15,7 +15,7 @@ import java.util.Date
 import java.util.UUID
 
 @Service
-@ConditionalOnProperty("code-freak.lti.enabled")
+@ConditionalOnProperty("codefreak.lti.enabled")
 class LtiService {
   companion object {
     const val CLAIM_DEPLOYMENT_ID = "https://purl.imsglobal.org/spec/lti/claim/deployment_id"

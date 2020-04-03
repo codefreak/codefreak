@@ -12,7 +12,7 @@ WARNING: Simple authentication has not been implemented yet! It only works in `d
 
 [source,yaml]
 ----
-code-freak.authentication-method: simple # this is the default
+codefreak.authentication-method: simple # this is the default
 ----
 
 === LDAP
@@ -22,7 +22,7 @@ As an example, you can find an LDAP test server https://github.com/rroemhild/doc
 
 [source,yaml]
 ----
-code-freak:
+codefreak:
   authentication-method: ldap
   ldap:
     url: ldap://127.0.0.1:389
@@ -41,7 +41,7 @@ starting with `ssh://` when importing from the remote repository. Import via HTT
 
 [source,yaml]
 ----
-code-freak:
+codefreak:
     git-import:
       enabled: true
       remotes:

@@ -21,11 +21,11 @@ import java.nio.file.Paths
  * - DOCKER_CERT_PATH   e.g. /path/to/certs which contains ca.pem, cert.pem, key.pem
  *
  * Otherwise the configuration can be overridden with the following properties:
- * - code-freak.docker.host:            equal to DOCKER_HOST
- * - code-freak.docker.certPath:        equal to DOCKER_CERT_PATH
- * - code-freak.docker.caCertPath:      path to server certificate in .pem format
- * - code-freak.docker.clientKeyPath:   path to client key in .pem format
- * - code-freak.docker.clientCertPath:  path to client certificate in .pem format
+ * - codefreak.docker.host:            equal to DOCKER_HOST
+ * - codefreak.docker.certPath:        equal to DOCKER_CERT_PATH
+ * - codefreak.docker.caCertPath:      path to server certificate in .pem format
+ * - codefreak.docker.clientKeyPath:   path to client key in .pem format
+ * - codefreak.docker.clientCertPath:  path to client certificate in .pem format
  */
 @Configuration
 class DockerConfiguration {

@@ -144,7 +144,7 @@ test {
 }
 
 task vagrantTest(type: Test) {
-  systemProperty "code-freak.docker.host", "http://localhost:2375"
+  systemProperty "codefreak.docker.host", "http://localhost:2375"
   testLogging {
     events "failed"
     exceptionFormat "full"

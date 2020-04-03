@@ -16,7 +16,7 @@ import java.util.UUID
 
 @Controller
 @RequestMapping("/lti")
-@ConditionalOnProperty("code-freak.lti.enabled")
+@ConditionalOnProperty("codefreak.lti.enabled")
 class LtiController : BaseController() {
   @Autowired
   lateinit var ltiService: LtiService

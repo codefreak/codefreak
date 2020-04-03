@@ -50,7 +50,7 @@ MIIBIjANBgkqhkiG9w0BAQE ...
 Please check the manual of your LMS how to register external LTI 1.3 Tools. If required please use the following
 information.
 
-Please replace `[code-freak-url]` with the public accessible URL of your Code FREAK installation including `http(s)://...`
+Please replace `[codefreak-url]` with the public accessible URL of your Code FREAK installation including `http(s)://...`
 
 
 |===
@@ -60,7 +60,7 @@ Please replace `[code-freak-url]` with the public accessible URL of your Code FR
 |Code FREAK
 
 |Tool URL
-|`[code-freak-url]`
+|`[codefreak-url]`
 
 |LTI Version
 |1.3
@@ -69,16 +69,16 @@ Please replace `[code-freak-url]` with the public accessible URL of your Code FR
 |The exported public key from the previous step
 
 |Login URL
-|`[code-freak-url]/lti/login`
+|`[codefreak-url]/lti/login`
 
 |Redirect URLs
-|`[code-freak-url]/lti/launch`
+|`[codefreak-url]/lti/launch`
 
 |Deep Linking (Content Selection) URL
-|`[code-freak-url]/lti/select-content`
+|`[codefreak-url]/lti/select-content`
 
 |Icon URL
-|`[code-freak-url]/images/lti-code-icon.png`
+|`[codefreak-url]/images/lti-code-icon.png`
 |===
 
 The LMS should generate a Client ID for you. Please write it down for the next step.
@@ -92,7 +92,7 @@ that should work with Moodle 3.7 and later:
 
 [source,yaml]
 ----
-code-freak:
+codefreak:
   lti:
     enabled: true
     key-store: file:/path/to/your/keystore/cf-keys.p12

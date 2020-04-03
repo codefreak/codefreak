@@ -32,7 +32,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
 import java.security.KeyStore
 
-@ConditionalOnProperty("code-freak.lti.enabled")
+@ConditionalOnProperty("codefreak.lti.enabled")
 @Configuration
 @Order(1)
 class LtiSecurityConfiguration(

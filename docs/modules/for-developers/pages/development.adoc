@@ -44,7 +44,7 @@ at a Docker daemon.
 [source,yaml]
 [source]
 -----
-code-freak:
+codefreak:
   docker:
     host: "tcp://127.0.0.1:2375"
 -----

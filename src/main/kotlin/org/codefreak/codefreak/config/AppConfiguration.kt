@@ -13,7 +13,7 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
 
 @Configuration("config")
-@ConfigurationProperties(prefix = "code-freak")
+@ConfigurationProperties(prefix = "codefreak")
 @Validated
 class AppConfiguration {
 

@@ -14,7 +14,7 @@ import java.io.OutputStream
 import java.util.UUID
 
 @Service
-@ConditionalOnProperty(name = ["code-freak.files.adapter"], havingValue = "JPA")
+@ConditionalOnProperty(name = ["codefreak.files.adapter"], havingValue = "JPA")
 class JpaFileService : FileService {
 
   @Autowired
