@@ -16,7 +16,7 @@ If you want to try Code FREAK locally:
 2. Install Docker + docker-compose
 3. Run `docker-compose up`
 4. Wait until everything compiled and is running
-5. The UI is accessible at http://localhost:8888.
+5. The UI is accessible at http://localhost:3000.
 6. Log in using `admin` and password `123`
 
 Please keep in mind that the `docker-compose.yml` is only meant for local testing and development.
