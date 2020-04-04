@@ -1,8 +1,5 @@
 # This file is meant for local development/testing and NOT meant for production!
 # The backend and frontend is built on startup so first run may take some time
-#
-# Usage:
-#   docker-compose -f dev.docker-compose.yml up
 
 version: "3"
 services:
