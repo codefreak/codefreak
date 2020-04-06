@@ -37,9 +37,9 @@ services:
   app:
     # ... SNIP ...
     volumes:
-      - "./certificates:/var/code-freak/certs"
+      - "./certificates:/var/codefreak/certs"
     environment:
       DOCKER_HOST: "http://docker-host.at-your-company.domain.com:2376"
-      DOCKER_CERT_PATH: "/var/code-freak/certs"
+      DOCKER_CERT_PATH: "/var/codefreak/certs"
       # ... SNIP ...
 ----

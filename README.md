@@ -1,9 +1,9 @@
 Code FREAK<br><small>╰ Code Feedback, Review & Evaluation Kit</small>
 ======
 
-[![Build Status](https://travis-ci.com/code-freak/code-freak.svg?branch=master)](https://travis-ci.com/code-freak/code-freak)
+[![Build Status](https://travis-ci.com/codefreak/codefreak.svg?branch=master)](https://travis-ci.com/codefreak/codefreak)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=code-freak_code-freak&metric=alert_status)](https://sonarcloud.io/dashboard?id=code-freak_code-freak)
-[![Docker Image](https://images.microbadger.com/badges/version/cfreak/code-freak.svg)](https://microbadger.com/images/cfreak/code-freak)
+[![Docker Image](https://images.microbadger.com/badges/version/cfreak/codefreak.svg)](https://microbadger.com/images/cfreak/codefreak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 Code FREAK is an online IDE for educational purposes that allows teachers to create and enroll programming tasks
@@ -16,7 +16,7 @@ Please keep this in mind when testing the application.
 
 ## Documentation
 For instructions how to run, configure and use the application please find the documentation in the
-[`/docs`](code-freak/docs/modules/ROOT/index.adoc) directory.
+[`/docs`](docs/README.md) directory or at [docs.codefreak.org](https://docs.codefreak.org).
 
 ## License
     Code FREAK | Code Feedback Review & Evaluation Kit

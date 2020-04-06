@@ -4,7 +4,7 @@
   <span th:text="${@gitInfo.version}"></span>
   <a target="_blank"
      th:if="${@gitInfo.hash != ''}"
-     th:href="'https://github.com/code-freak/code-freak/commit/' + ${@gitInfo.hash}"><abbr
+     th:href="'https://github.com/codefreak/codefreak/commit/' + ${@gitInfo.hash}"><abbr
     class="text-monospace text-decoration-none"
     th:title="${@gitInfo.hash}"
     th:text="'(' + ${@gitInfo.hashAbbr} + ')'"></abbr></a>

@@ -3,7 +3,7 @@ import preval from 'preval.macro'
 import React from 'react'
 import './AppFooter.less'
 
-const repoUrl = 'https://github.com/code-freak/code-freak'
+const repoUrl = 'https://github.com/codefreak/codefreak'
 
 const AppFooter: React.FC = () => {
   const buildYear = preval`module.exports = new Date().getFullYear();`
