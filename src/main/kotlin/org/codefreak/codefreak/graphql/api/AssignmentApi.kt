@@ -152,7 +152,7 @@ class AssignmentMutation : BaseResolver(), Mutation {
     tasks.forEach {
       authorization.requireAuthorityIfNotCurrentUser(it.owner, Authority.ROLE_ADMIN)
     }
-    require(assignment.status < AssignmentStatus.OPEN) { "Open/Closed assignment is not editable" }
+    require(assignment.isEditable(authorization)) { "Assignment is not editable" }
     serviceAccess.getService(AssignmentService::class).addTasksToAssignment(assignment, tasks)
     true
   }
