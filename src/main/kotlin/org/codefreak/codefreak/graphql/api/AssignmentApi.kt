@@ -101,7 +101,6 @@ class AssignmentMutation : BaseResolver(), Mutation {
     serviceAccess.getService(AssignmentService::class).createEmptyAssignment(authorization.currentUser).let { AssignmentDto(it, this) }
   }
 
-  @Transactional
   @Secured(Authority.ROLE_TEACHER)
   fun uploadAssignment(files: Array<ApplicationPart>): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
@@ -111,7 +110,6 @@ class AssignmentMutation : BaseResolver(), Mutation {
     }
   }
 
-  @Transactional
   @Secured(Authority.ROLE_TEACHER)
   fun importAssignment(url: String): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
