@@ -63,6 +63,10 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   }
 }
 
+class TaskInput(var id: UUID, var title: String, var body: String?) {
+  constructor() : this(UUID.randomUUID(), "", null)
+}
+
 @Component
 class TaskQuery : BaseResolver(), Query {
 
@@ -94,6 +98,15 @@ class TaskMutation : BaseResolver(), Mutation {
     val task = serviceAccess.getService(TaskService::class).findTask(id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     serviceAccess.getService(TaskService::class).deleteTask(task.id)
+    true
+  }
+
+  fun updateTask(input: TaskInput): Boolean = context {
+    val task = serviceAccess.getService(TaskService::class).findTask(input.id)
+    authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    task.title = input.title
+    task.body = input.body
+    serviceAccess.getService(TaskService::class).saveTask(task)
     true
   }
 }

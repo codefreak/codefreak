@@ -7,3 +7,7 @@ mutation CreateTask {
     id
   }
 }
+
+mutation UpdateTask($input: TaskInput!) {
+  updateTask(input: $input)
+}

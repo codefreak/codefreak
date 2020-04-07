@@ -78,5 +78,8 @@ TaskService : BaseService() {
     return taskDefinition
   }
 
+  @Transactional
+  fun saveTask(task: Task) = taskRepository.save(task)
+
   fun getTaskPool(userId: UUID) = taskRepository.findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(userId)
 }

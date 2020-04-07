@@ -37,6 +37,8 @@ query GetTask($id: ID!, $answerUserId: ID) {
   task(id: $id) {
     id
     title
+    body
+    editable
     assignment {
       id
       title
