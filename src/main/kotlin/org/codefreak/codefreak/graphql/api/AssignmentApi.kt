@@ -106,7 +106,8 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun uploadAssignment(files: Array<ApplicationPart>): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-      createActiveAssignmentFromTar(it.toByteArray())
+      val assignment = serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(), authorization.currentUser)
+      AssignmentCreationResultDto(assignment, this)
     }
   }
 
@@ -115,16 +116,8 @@ class AssignmentMutation : BaseResolver(), Mutation {
   fun importAssignment(url: String): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
-      createActiveAssignmentFromTar(it.toByteArray())
-    }
-  }
-
-  private fun createActiveAssignmentFromTar(byteArray: ByteArray) = context {
-    serviceAccess.getService(AssignmentService::class).createFromTar(byteArray, authorization.currentUser) {
-      active = true
-      openFrom = Instant.now()
-    }.let {
-      AssignmentCreationResultDto(it, this)
+      val assignment = serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(), authorization.currentUser)
+      AssignmentCreationResultDto(assignment, this)
     }
   }
 
