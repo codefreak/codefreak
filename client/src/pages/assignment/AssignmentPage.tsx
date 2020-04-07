@@ -168,9 +168,12 @@ const AddTasksButton: React.FC<{
   assignment: Pick<Assignment, 'id' | 'title'>
 }> = ({ assignment }) => {
   const [modalVisible, setModalVisible] = useState(false)
-  const showModal = () => setModalVisible(true)
-  const hideModal = () => setModalVisible(false)
   const [taskIds, setTaskIds] = useState<string[]>([])
+  const showModal = () => {
+    setTaskIds([])
+    setModalVisible(true)
+  }
+  const hideModal = () => setModalVisible(false)
   const [addTasks, addTasksResult] = useAddTasksToAssignmentMutation()
   const history = useHistory()
   const submit = async () => {
