@@ -184,7 +184,9 @@ const TaskPage: React.FC = () => {
         extra={extra}
       />
       <Switch>
-        <Route exact path={path} component={TaskDetailsPage} />
+        <Route exact path={path}>
+          <TaskDetailsPage editable={editable} updater={updater} />
+        </Route>
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>

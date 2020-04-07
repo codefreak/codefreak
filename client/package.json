@@ -45,6 +45,7 @@
     "react-dom": "^16.11.0",
     "react-helmet": "^5.2.1",
     "react-markdown": "^4.2.2",
+    "react-mde": "^8.2.0",
     "react-monaco-editor": "^0.34.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0",

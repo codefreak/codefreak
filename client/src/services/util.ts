@@ -4,10 +4,10 @@ export const noop = () => {
   /* do nothing */
 }
 
-export function makeUpdater<T>(
+export function makeUpdater<T, R>(
   currentValue: T,
-  callback: (newValue: T) => any
-) {
+  callback: (newValue: T) => Promise<R>
+): Updater<T, R> {
   return <P extends keyof T>(propName: P) => (propValue: T[P]) => {
     const newValue = { ...currentValue }
     if (propValue === undefined) {
@@ -15,9 +15,13 @@ export function makeUpdater<T>(
     } else {
       newValue[propName] = propValue
     }
-    callback(newValue)
+    return callback(newValue)
   }
 }
+
+export type Updater<T, R> = <P extends keyof T>(
+  propName: P
+) => (propValue: T[P]) => Promise<R>
 
 export function momentToDate<T>(fn: (date: Date) => T) {
   return (moment: Moment) => fn(moment.toDate())

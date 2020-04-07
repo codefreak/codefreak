@@ -1,11 +1,15 @@
 import { Card } from 'antd'
 import React from 'react'
-import ReactMarkdown from 'react-markdown'
 import AsyncPlaceholder from '../../components/AsyncContainer'
+import EditableMarkdown from '../../components/EditableMarkdown'
 import useIdParam from '../../hooks/useIdParam'
-import { useGetTaskDetailsQuery } from '../../services/codefreak-api'
+import { TaskInput, useGetTaskDetailsQuery } from '../../services/codefreak-api'
+import { Updater } from '../../services/util'
 
-const TaskDetailsPage: React.FC = () => {
+const TaskDetailsPage: React.FC<{
+  updater: Updater<TaskInput, any>
+  editable: boolean
+}> = ({ updater, editable }) => {
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam() }
   })
@@ -18,9 +22,13 @@ const TaskDetailsPage: React.FC = () => {
 
   return (
     <>
-      {task.body ? (
+      {task.body || editable ? (
         <Card title="Instructions">
-          <ReactMarkdown source={task.body} />
+          <EditableMarkdown
+            content={task.body}
+            editable={editable}
+            onSave={updater('body')}
+          />
         </Card>
       ) : null}
     </>
