@@ -9,14 +9,15 @@ import {
   Form,
   Menu,
   Modal,
-  Switch as AntdSwitch,
+  Steps,
   TimePicker
 } from 'antd'
+import { DropdownButtonProps } from 'antd/es/dropdown/dropdown-button'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import moment, { Moment, unitOfTime } from 'moment'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
-import AssignmentStatus from '../../components/AssignmentStatus'
+import AssignmentStatusComponent from '../../components/AssignmentStatus'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -28,6 +29,7 @@ import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import {
   Assignment,
+  AssignmentStatus,
   GetTaskListDocument,
   UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
@@ -38,10 +40,20 @@ import {
 import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-import { makeUpdater, momentToDate, noop } from '../../services/util'
+import { makeUpdater, momentToDate, noop, Updater } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
 import TaskListPage from '../task/TaskListPage'
+import './AssignmentPage.less'
+
+const { Step } = Steps
+
+const activeStep = {
+  INACTIVE: 0,
+  ACTIVE: 1,
+  OPEN: 2,
+  CLOSED: 3
+}
 
 const AssignmentPage: React.FC = () => {
   const { path } = useRouteMatch()
@@ -80,11 +92,6 @@ const AssignmentPage: React.FC = () => {
     updateMutation({ variables })
   )
 
-  const closeNow = () =>
-    updateMutation({
-      variables: { ...assignmentInput, deadline: new Date() }
-    })
-
   const renderDate = (
     label: string,
     onOk: (date?: Date) => any,
@@ -119,40 +126,38 @@ const AssignmentPage: React.FC = () => {
             onChange={updater('title')}
           />
         }
-        subTitle={<AssignmentStatus assignment={assignment} />}
+        subTitle={<AssignmentStatusComponent assignment={assignment} />}
         tabList={tabs}
         tabActiveKey={subPath.get()}
         breadcrumb={createBreadcrumb(createRoutes.forAssignment(assignment))}
         onTabChange={subPath.set}
         extra={
           <Authorized condition={assignment.editable}>
-            {assignment.status === 'OPEN' ? (
-              <Button onClick={closeNow}>Close Now</Button>
-            ) : (
-              <OpenAssignmentButton
-                input={assignmentInput}
-                mutation={updateMutation}
-              />
-            )}
             <AddTasksButton assignment={assignment} />
           </Authorized>
         }
         content={
-          <Descriptions size="small" column={4}>
-            <Descriptions.Item label="Created">
-              {formatter.date(assignment.createdAt)}
-            </Descriptions.Item>
-            {assignment.editable ? (
-              <Descriptions.Item label="Active">
-                <AntdSwitch
-                  checked={assignment.active}
-                  onChange={updater('active')}
-                />
+          <>
+            <Descriptions size="small" column={4}>
+              <Descriptions.Item label="Created">
+                {formatter.date(assignment.createdAt)}
               </Descriptions.Item>
-            ) : null}
-            {renderDate('Open From', updater('openFrom'), assignment.openFrom)}
-            {renderDate('Deadline', updater('deadline'), assignment.deadline)}
-          </Descriptions>
+              {renderDate(
+                'Open From',
+                updater('openFrom'),
+                assignment.openFrom
+              )}
+              {renderDate('Deadline', updater('deadline'), assignment.deadline)}
+            </Descriptions>
+            <Authorized condition={assignment.editable}>
+              <StatusSteps
+                input={assignmentInput}
+                mutation={updateMutation}
+                status={assignment.status}
+                updater={updater}
+              />
+            </Authorized>
+          </>
         }
       />
       <Switch>
@@ -161,6 +166,124 @@ const AssignmentPage: React.FC = () => {
         <Route component={NotFoundPage} />
       </Switch>
     </>
+  )
+}
+
+const StatusSteps: React.FC<{
+  status: AssignmentStatus
+  updater: Updater<UpdateAssignmentMutationVariables>
+  input: UpdateAssignmentMutationVariables
+  mutation: (args: { variables: UpdateAssignmentMutationVariables }) => any
+}> = props => {
+  const { status, updater, mutation, input } = props
+  const [stepsExpanded, setStepsExpanded] = useState(false)
+  const toggleStepsExpanded = () => setStepsExpanded(!stepsExpanded)
+
+  const closeNow = () =>
+    mutation({
+      variables: { ...input, deadline: new Date() }
+    })
+
+  const activate = () => updater('active')(true)
+  const deactivate = () => updater('active')(false)
+
+  return (
+    <div className="statusSteps">
+      <Button
+        onClick={toggleStepsExpanded}
+        icon={stepsExpanded ? 'caret-down' : 'caret-right'}
+        size="small"
+        style={{ marginRight: 16, marginTop: 4 }}
+      />
+      <div
+        style={{ flexGrow: 1 }}
+        className={stepsExpanded ? 'wrapper' : 'wrapper notExpanded'}
+        onClick={stepsExpanded ? undefined : toggleStepsExpanded}
+      >
+        <Steps size="small" current={activeStep[status]}>
+          <Step
+            title="Draft"
+            description={
+              stepsExpanded ? (
+                <>
+                  <p>The assignment is not public yet. Only you can see it.</p>
+                  <Button disabled={status === 'INACTIVE'} onClick={deactivate}>
+                    Deactivate
+                  </Button>
+                </>
+              ) : (
+                undefined
+              )
+            }
+          />
+          <Step
+            title="Active"
+            description={
+              stepsExpanded ? (
+                <>
+                  <p>
+                    The assignment is public. Students can see it but not work
+                    on it yet.
+                  </p>
+                  <Button
+                    type={status === 'INACTIVE' ? 'primary' : 'default'}
+                    disabled={status === 'ACTIVE'}
+                    onClick={activate}
+                  >
+                    Activate
+                  </Button>
+                </>
+              ) : (
+                undefined
+              )
+            }
+          />
+          <Step
+            title="Open"
+            description={
+              stepsExpanded ? (
+                <>
+                  <p>
+                    The assignment is open for submissions. If a deadline is
+                    set, it will be closed automatically.
+                  </p>
+                  <OpenAssignmentButton
+                    input={input}
+                    mutation={mutation}
+                    disabled={status === 'OPEN'}
+                    type={status === 'ACTIVE' ? 'primary' : undefined}
+                  />
+                </>
+              ) : (
+                undefined
+              )
+            }
+          />
+          <Step
+            title="Closed"
+            description={
+              stepsExpanded ? (
+                <>
+                  <p>
+                    The assignment is closed. Students can still see it but not
+                    change their submissions.
+                  </p>
+                  <Button
+                    onClick={closeNow}
+                    disabled={status === 'CLOSED'}
+                    type={status === 'OPEN' ? 'primary' : 'default'}
+                  >
+                    Close Now
+                  </Button>
+                </>
+              ) : (
+                undefined
+              )
+            }
+          />
+        </Steps>
+      </div>
+    </div>
   )
 }
 
@@ -247,10 +370,12 @@ const TaskSelection: React.FC<{
   )
 }
 
-const OpenAssignmentButton: React.FC<{
-  input: UpdateAssignmentMutationVariables
-  mutation: (args: { variables: UpdateAssignmentMutationVariables }) => any
-}> = ({ input, mutation }) => {
+const OpenAssignmentButton: React.FC<
+  {
+    input: UpdateAssignmentMutationVariables
+    mutation: (args: { variables: UpdateAssignmentMutationVariables }) => any
+  } & Omit<DropdownButtonProps, 'overlay'>
+> = ({ input, mutation, ...buttonProps }) => {
   const [modalVisible, setModalVisible] = useState(false)
   const [from, setFrom] = useState(moment())
   const [period, setPeriod] = useState(moment('00:30:00', 'HH:mm:ss'))
@@ -308,6 +433,7 @@ const OpenAssignmentButton: React.FC<{
             </Menu.Item>
           </Menu>
         }
+        {...buttonProps}
       >
         Open Now
       </Dropdown.Button>
