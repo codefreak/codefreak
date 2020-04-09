@@ -1,13 +1,14 @@
 package org.codefreak.codefreak.service
 
+import liquibase.util.StreamUtil
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
+import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil.getYamlDefinition
-import liquibase.util.StreamUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
@@ -21,6 +22,9 @@ TaskService : BaseService() {
 
   @Autowired
   private lateinit var taskRepository: TaskRepository
+
+  @Autowired
+  private lateinit var assignmentRepository: AssignmentRepository
 
   @Autowired
   private lateinit var fileService: FileService
@@ -80,6 +84,54 @@ TaskService : BaseService() {
 
   @Transactional
   fun saveTask(task: Task) = taskRepository.save(task)
+
+  @Transactional
+  fun setTaskPosition(task: Task, newPosition: Long) {
+    val assignment = task.assignment
+    require(assignment != null) { "Task is not part of an assignment" }
+    require(newPosition < assignment.tasks.size && newPosition >= 0) { "Invalid position" }
+
+    if (task.position == newPosition) {
+      return
+    }
+    if (task.position < newPosition) {
+      /*  0
+          1 --
+          2  |
+          3 <|
+          4
+
+          0 -> 0 // +- 0
+          1 -> 3 // = 3
+          2 -> 1 // -1
+          3 -> 2 // -1
+          4 -> 4 // +- 0
+       */
+      assignment.tasks
+          .filter { it.position > task.position && it.position <= newPosition }
+          .forEach { it.position -- }
+    } else {
+      /*  0
+          1 <|
+          2  |
+          3 --
+          4
+
+          0 -> 0 // +- 0
+          1 -> 2 // +1
+          2 -> 3 // +1
+          3 -> 1 // = 1
+          4 -> 4 // +- 0
+       */
+      assignment.tasks
+          .filter { it.position < task.position && it.position >= newPosition }
+          .forEach { it.position ++ }
+    }
+
+    task.position = newPosition
+    taskRepository.saveAll(assignment.tasks)
+    assignmentRepository.save(assignment)
+  }
 
   fun getTaskPool(userId: UUID) = taskRepository.findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(userId)
 }

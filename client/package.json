@@ -42,6 +42,7 @@
     "preval.macro": "^4.0.0",
     "react": "^16.11.0",
     "react-asciidoc": "^0.1.0",
+    "react-beautiful-dnd": "^13.0.0",
     "react-dom": "^16.11.0",
     "react-helmet": "^5.2.1",
     "react-markdown": "^4.2.2",
@@ -87,6 +88,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-beautiful-dnd": "^12.1.2",
     "craco-raw-loader": "^1.0.1"
   }
 }

@@ -109,4 +109,11 @@ class TaskMutation : BaseResolver(), Mutation {
     serviceAccess.getService(TaskService::class).saveTask(task)
     true
   }
+
+  fun setTaskPosition(id: UUID, position: Long): Boolean = context {
+    val task = serviceAccess.getService(TaskService::class).findTask(id)
+    authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    serviceAccess.getService(TaskService::class).setTaskPosition(task, position)
+    true
+  }
 }
