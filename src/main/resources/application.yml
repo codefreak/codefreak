@@ -36,7 +36,7 @@ logging:
 
 graphql:
   packages:
-    - "de.code_freak.codefreak.graphql.api"
+    - "org.codefreak.codefreak.graphql.api"
 
 server:
   servlet:
@@ -45,7 +45,7 @@ server:
       # The client session-cookie will expire on browser close by default
       timeout: 24h
 
-code-freak:
+codefreak:
   instanceId: default
   files:
     adapter: jpa

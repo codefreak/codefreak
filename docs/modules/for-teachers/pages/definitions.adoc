@@ -45,7 +45,7 @@ tasks:
 ├─ ...
 ----
 
-https://github.com/code-freak/code-freak/tree/master/src/main/resources/init/tasks[Complete example^]
+https://github.com/codefreak/codefreak/tree/master/src/main/resources/init/tasks[Complete example^]
 
 [[task]]
 == Task

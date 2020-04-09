@@ -17,18 +17,18 @@ RUN apk add --no-cache gcompat
 EXPOSE 8080
 
 # Run everything as unprivileged user
-RUN addgroup -g 1000 code-freak \
-    && adduser -Su 1000 -G code-freak code-freak \
+RUN addgroup -g 1000 codefreak \
+    && adduser -Su 1000 -G codefreak codefreak \
     && mkdir /app \
-    && chown -R code-freak:code-freak /app
+    && chown -R codefreak:codefreak /app
 
 COPY --from=build --chown=1000:1000 /build/build/libs/ /app
 
-# Create a consistent symlink to the jar file without any version suffix and make sure a code-freak.jar exists afterwards
-RUN find /app -maxdepth 1 -name 'code-freak-*.jar' -exec ln -fs {} /app/code-freak.jar \; \
-    && [ -f "/app/code-freak.jar" ]
+# Create a consistent symlink to the jar file without any version suffix and make sure a codefreak.jar exists afterwards
+RUN find /app -maxdepth 1 -name 'codefreak-*.jar' -exec ln -fs {} /app/codefreak.jar \; \
+    && [ -f "/app/codefreak.jar" ]
 
-USER code-freak
+USER codefreak
 
 # Override this when running the container with -e ENV="dev"
 ENV ENV "prod"
@@ -37,4 +37,4 @@ ENV SENTRY_ENVIRONMENT "$ENV"
 ENV SENTRY_RELEASE "${GIT_TAG}"
 
 WORKDIR /app
-CMD ["java", "-jar", "/app/code-freak.jar"]
+CMD ["java", "-jar", "/app/codefreak.jar"]

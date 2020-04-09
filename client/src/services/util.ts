@@ -7,7 +7,7 @@ export const noop = () => {
 export function makeUpdater<T>(
   currentValue: T,
   callback: (newValue: T) => any
-) {
+): Updater<T> {
   return <P extends keyof T>(propName: P) => (propValue: T[P]) => {
     const newValue = { ...currentValue }
     if (propValue === undefined) {
@@ -18,6 +18,10 @@ export function makeUpdater<T>(
     callback(newValue)
   }
 }
+
+export type Updater<T> = <P extends keyof T>(
+  propName: P
+) => (propValue: T[P]) => void
 
 export function momentToDate<T>(fn: (date: Date) => T) {
   return (moment: Moment) => fn(moment.toDate())
