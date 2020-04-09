@@ -42,8 +42,10 @@ services:
       - "docker_certs:/certs"
     command: ./gradlew generateGraphqlSchema bootRun
     environment:
-      DOCKER_HOST: "https://docker:2376"
-      DOCKER_CERT_PATH: /certs
+      CODE_FREAK_DOCKER_HOST: "https://docker:2376"
+      CODE_FREAK_DOCKER_CA_CERT_PATH: "/certs/ca/cert.pem"
+      CODE_FREAK_DOCKER_CLIENT_KEY_PATH: "/certs/client/key.pem"
+      CODE_FREAK_DOCKER_CLIENT_CERT_PATH: "/certs/client/cert.pem"
       SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/postgres"
       SPRING_DATASOURCE_USERNAME: "postgres"
       SPRING_DATASOURCE_DRIVERCLASSNAME: "org.postgresql.Driver"
