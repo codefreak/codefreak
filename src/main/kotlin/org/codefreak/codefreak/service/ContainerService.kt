@@ -146,9 +146,7 @@ class ContainerService : BaseService() {
 
   fun canStartNewIdeContainer(): Boolean {
     if (config.ide.maxContainers < 0) return true
-    var totalIdeContainers = getContainersWithLabel(LABEL_ANSWER_ID).size
-    totalIdeContainers += getContainersWithLabel(LABEL_READ_ONLY_ANSWER_ID).size
-    return totalIdeContainers < config.ide.maxContainers
+    return getAllIdeContainers().size < config.ide.maxContainers
   }
 
   /**
