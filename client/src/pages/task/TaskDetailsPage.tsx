@@ -1,4 +1,4 @@
-import { Card } from 'antd'
+import { Card, Empty } from 'antd'
 import React from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
@@ -22,15 +22,17 @@ const TaskDetailsPage: React.FC<{
 
   return (
     <>
-      {task.body || editable ? (
-        <Card title="Instructions">
+      <Card title="Instructions">
+        {task.body || editable ? (
           <EditableMarkdown
             content={task.body}
             editable={editable}
             onSave={updater('body')}
           />
-        </Card>
-      ) : null}
+        ) : (
+          <Empty description="This task has no extra instructions. Take a look at the provided files." />
+        )}
+      </Card>
     </>
   )
 }
