@@ -101,30 +101,21 @@ class AssignmentMutation : BaseResolver(), Mutation {
     serviceAccess.getService(AssignmentService::class).createEmptyAssignment(authorization.currentUser).let { AssignmentDto(it, this) }
   }
 
-  @Transactional
   @Secured(Authority.ROLE_TEACHER)
   fun uploadAssignment(files: Array<ApplicationPart>): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-      createActiveAssignmentFromTar(it.toByteArray())
+      val assignment = serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(), authorization.currentUser)
+      AssignmentCreationResultDto(assignment, this)
     }
   }
 
-  @Transactional
   @Secured(Authority.ROLE_TEACHER)
   fun importAssignment(url: String): AssignmentCreationResultDto = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
-      createActiveAssignmentFromTar(it.toByteArray())
-    }
-  }
-
-  private fun createActiveAssignmentFromTar(byteArray: ByteArray) = context {
-    serviceAccess.getService(AssignmentService::class).createFromTar(byteArray, authorization.currentUser) {
-      active = true
-      openFrom = Instant.now()
-    }.let {
-      AssignmentCreationResultDto(it, this)
+      val assignment = serviceAccess.getService(AssignmentService::class).createFromTar(it.toByteArray(), authorization.currentUser)
+      AssignmentCreationResultDto(assignment, this)
     }
   }
 
@@ -152,7 +143,7 @@ class AssignmentMutation : BaseResolver(), Mutation {
     tasks.forEach {
       authorization.requireAuthorityIfNotCurrentUser(it.owner, Authority.ROLE_ADMIN)
     }
-    require(assignment.status < AssignmentStatus.OPEN) { "Open/Closed assignment is not editable" }
+    require(assignment.isEditable(authorization)) { "Assignment is not editable" }
     serviceAccess.getService(AssignmentService::class).addTasksToAssignment(assignment, tasks)
     true
   }

@@ -3,7 +3,12 @@ import { Alert, Button, Card } from 'antd'
 import React from 'react'
 import { useHistory } from 'react-router'
 import FileImport from '../../components/FileImport'
-import { useCreateTaskMutation } from '../../generated/graphql'
+import {
+  UploadTaskMutationResult,
+  useCreateTaskMutation,
+  useImportTaskMutation,
+  useUploadTaskMutation
+} from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 
@@ -14,19 +19,39 @@ const CreateTaskPage: React.FC = () => {
   ] = useCreateTaskMutation()
   const history = useHistory()
 
+  const [uploadTask, { loading: uploading }] = useUploadTaskMutation()
+
+  const [importTask, { loading: importing }] = useImportTaskMutation()
+
   const onTaskCreated = (task: Entity) => {
     history.push(getEntityPath(task))
     messageService.success('Task created')
   }
+
+  const uploadOrImportCompleted = (
+    result: NonNullable<UploadTaskMutationResult['data']>['uploadTask'] | null
+  ) => {
+    if (result) {
+      history.push(getEntityPath(result))
+      messageService.success('Task created')
+    }
+  }
+
+  const onUpload = (files: File[]) =>
+    uploadTask({ variables: { files } }).then(r =>
+      uploadOrImportCompleted(r.data ? r.data.uploadTask : null)
+    )
+
+  const onImport = (url: string) =>
+    importTask({ variables: { url } }).then(r =>
+      uploadOrImportCompleted(r.data ? r.data.importTask : null)
+    )
 
   const createTask = async () => {
     const result = await createTaskMutation()
     if (result.data) {
       onTaskCreated(result.data.createTask)
     }
-  }
-  const noop = () => {
-    // todo
   }
   return (
     <>
@@ -40,10 +65,10 @@ const CreateTaskPage: React.FC = () => {
       </Card>
       <Card title="Import" style={{ marginBottom: 16 }}>
         <FileImport
-          uploading={false}
-          onUpload={noop}
-          importing={false}
-          onImport={noop}
+          uploading={uploading}
+          onUpload={onUpload}
+          importing={importing}
+          onImport={onImport}
         />
       </Card>
       <Card title="From Scratch">
