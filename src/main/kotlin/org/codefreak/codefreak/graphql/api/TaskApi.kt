@@ -7,6 +7,7 @@ import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
+import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.graphql.BaseDto
@@ -35,12 +36,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val createdAt = entity.createdAt
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val inPool = entity.assignment == null
-  val editable by lazy {
-    when (entity.assignment) {
-      null -> authorization.isCurrentUser(entity.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
-      else -> assignment?.editable ?: false
-    }
-  }
+  val editable by lazy { entity.isEditable(authorization) }
 
   val evaluationSteps by lazy {
     val taskDefinition = serviceAccess.getService(TaskService::class).getTaskDefinition(entity.id)
@@ -138,4 +134,9 @@ class TaskMutation : BaseResolver(), Mutation {
     serviceAccess.getService(TaskService::class).setTaskPosition(task, position)
     true
   }
+}
+
+fun Task.isEditable(authorization: Authorization) = when (assignment) {
+  null -> authorization.isCurrentUser(owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
+  else -> assignment?.isEditable(authorization) ?: false
 }
