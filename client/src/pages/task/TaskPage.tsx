@@ -89,7 +89,7 @@ const TaskPage: React.FC = () => {
     ? []
     : [
         { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
-        { key: '/ide', tab: tab('Online IDE', 'edit'), disabled: !answer },
+        { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
         {
           key: '/evaluation',
           disabled: !answer,

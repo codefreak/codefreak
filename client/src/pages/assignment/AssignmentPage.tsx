@@ -202,7 +202,7 @@ const StatusSteps: React.FC<{
       >
         <Steps size="small" current={activeStep[status]}>
           <Step
-            title="Draft"
+            title="Inactive"
             description={
               stepsExpanded ? (
                 <>
