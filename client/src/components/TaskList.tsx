@@ -22,9 +22,7 @@ interface RenderProps {
   delete: (taskId: string) => Promise<any>
 }
 
-const renderTask = (props: RenderProps, dragHandleProps?: any) => (
-  task: Task
-) => {
+const renderTask = (props: RenderProps) => (task: Task) => {
   const confirmDelete = () =>
     confirm({
       title: 'Are you sure?',

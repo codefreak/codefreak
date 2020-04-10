@@ -2,7 +2,6 @@ package org.codefreak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam.withLabel
-import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusExited
 import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusRunning
 import com.spotify.docker.client.DockerClient.RemoveContainerParam.forceKill
 import com.spotify.docker.client.DockerClient.RemoveContainerParam.removeVolumes
@@ -15,6 +14,7 @@ import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AnswerRepository
+import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.withTrailingSlash
 import org.glassfish.jersey.internal.LocalizationMessages
@@ -53,6 +53,9 @@ class ContainerService : BaseService() {
 
   @Autowired
   lateinit var config: AppConfiguration
+
+  @Autowired
+  private lateinit var taskRepository: TaskRepository
 
   @Autowired
   private lateinit var answerRepository: AnswerRepository
@@ -206,6 +209,16 @@ class ContainerService : BaseService() {
     return entityManager.merge(answer)
   }
 
+  @Transactional
+  fun saveTaskFiles(task: Task): Task {
+    val containerId = getContainerWithLabel(LABEL_TASK_ID, task.id.toString())?.id() ?: return task
+    archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
+      fileService.writeCollectionTar(task.id).use { StreamUtils.copy(tar, it) }
+    }
+    log.info("Saved files of task ${task.id} from container $containerId")
+    return entityManager.merge(task)
+  }
+
   protected fun archiveContainer(containerId: String, path: String, process: (InputStream) -> Unit) {
     try {
       docker.archiveContainer(containerId, path).use(process)
@@ -290,6 +303,12 @@ class ContainerService : BaseService() {
 
   protected fun isContainerRunning(containerId: String): Boolean = docker.inspectContainer(containerId).state().running()
 
+  protected fun getAllIdeContainers() = mutableListOf<Container>().apply {
+    addAll(listContainers(withLabel(LABEL_ANSWER_ID), withStatusRunning()))
+    addAll(listContainers(withLabel(LABEL_READ_ONLY_ANSWER_ID), withStatusRunning()))
+    addAll(listContainers(withLabel(LABEL_TASK_ID), withStatusRunning()))
+  }
+
   @Scheduled(
       fixedRateString = "\${codefreak.ide.idle-check-rate}",
       initialDelayString = "\${codefreak.ide.idle-check-rate}"
@@ -298,11 +317,7 @@ class ContainerService : BaseService() {
     log.debug("Checking for idle containers")
     // create a new map to not leak memory if containers disappear in another way
     val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
-    val containers = mutableListOf<Container>().apply {
-      addAll(listContainers(withLabel(LABEL_ANSWER_ID), withStatusRunning()))
-      addAll(listContainers(withLabel(LABEL_READ_ONLY_ANSWER_ID), withStatusRunning()))
-    }
-    containers.forEach {
+    getAllIdeContainers().forEach {
       val containerId = it.id()
       // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
       val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).output.trim()
@@ -313,17 +328,27 @@ class ContainerService : BaseService() {
         log.debug("Container $containerId has been idle for more than $idleFor ms")
         if (idleFor >= config.ide.idleShutdownThreshold) {
           val labels = it.labels()!!
-          val answerId = labels[LABEL_ANSWER_ID] ?: labels[LABEL_READ_ONLY_ANSWER_ID]
-          if (labels.containsKey(LABEL_READ_ONLY_ANSWER_ID)) {
-            log.info("Shutting down read container $containerId for answer $answerId")
-          } else {
-            val answer = answerRepository.findById(UUID.fromString(answerId))
-            if (answer.isPresent) {
-              containerService.saveAnswerFiles(answer.get())
-            } else {
-              log.warn("Answer $answerId not found. Files are not saved!")
+          when {
+            labels.containsKey(LABEL_READ_ONLY_ANSWER_ID)
+                -> log.info("Shutting down read container $containerId for answer ${labels[LABEL_READ_ONLY_ANSWER_ID]}")
+            labels.containsKey(LABEL_ANSWER_ID) -> {
+                val answer = answerRepository.findById(UUID.fromString(labels[LABEL_ANSWER_ID]))
+                if (answer.isPresent) {
+                  containerService.saveAnswerFiles(answer.get())
+                } else {
+                  log.warn("Answer ${labels[LABEL_ANSWER_ID]} not found. Files are not saved!")
+                }
+                log.info("Shutting down container $containerId of answer ${labels[LABEL_ANSWER_ID]}")
+              }
+            labels.containsKey(LABEL_TASK_ID) -> {
+              val task = taskRepository.findById(UUID.fromString(labels[LABEL_TASK_ID]))
+              if (task.isPresent) {
+                containerService.saveTaskFiles(task.get())
+              } else {
+                log.warn("Task ${labels[LABEL_TASK_ID]} not found. Files are not saved!")
+              }
+              log.info("Shutting down container $containerId of task ${labels[LABEL_TASK_ID]}")
             }
-            log.info("Shutting down container $containerId of answer $answerId")
           }
           docker.stopContainer(containerId, 5)
         } else {
@@ -341,18 +366,14 @@ class ContainerService : BaseService() {
   protected fun removeShutdownContainers() {
     val thresholdDate = Date.from(Instant.now().minusMillis(config.ide.removeThreshold))
     log.debug("Removing IDE containers exited before $thresholdDate")
-    val containers = mutableListOf<Container>().apply {
-      addAll(listContainers(withLabel(LABEL_ANSWER_ID), withStatusExited()))
-      addAll(listContainers(withLabel(LABEL_READ_ONLY_ANSWER_ID), withStatusExited()))
-    }
-    containers.forEach { container ->
+    getAllIdeContainers().forEach { container ->
       val containerId = container.id()
       val inspection = docker.inspectContainer(containerId)
       if (inspection.state().finishedAt().before(thresholdDate)) {
-        val answerId = inspection.config().labels()?.let {
-          it[LABEL_ANSWER_ID] ?: it[LABEL_READ_ONLY_ANSWER_ID]
+        val entityId = inspection.config().labels()?.let {
+          it[LABEL_ANSWER_ID] ?: it[LABEL_READ_ONLY_ANSWER_ID] ?: it[LABEL_TASK_ID]
         }
-        log.info("Removing container $containerId of answer $answerId")
+        log.info("Removing container $containerId of entity $entityId")
         docker.removeContainer(containerId, forceKill(), removeVolumes())
       }
     }

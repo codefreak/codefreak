@@ -57,6 +57,7 @@ class AnswerService : BaseService() {
   }
 
   fun copyFilesFromTask(answer: Answer) {
+    containerService.saveTaskFiles(answer.task)
     val taskDefinition = taskService.getTaskDefinition(answer.task.id)
     fileService.writeCollectionTar(answer.id).use { out ->
       fileService.readCollectionTar(answer.task.id).use { `in` ->
