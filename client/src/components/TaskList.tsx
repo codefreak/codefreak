@@ -1,15 +1,6 @@
-import { Button, Card, Icon, Modal, Tooltip } from 'antd'
-import React, { useEffect, useState } from 'react'
-import {
-  DragDropContext,
-  Draggable,
-  DraggableProvided,
-  DraggableProvidedDragHandleProps,
-  Droppable,
-  DroppableProvided,
-  DroppableStateSnapshot,
-  DropResult
-} from 'react-beautiful-dnd'
+import { Button, Modal, Tooltip } from 'antd'
+import { CardProps } from 'antd/lib/card'
+import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   TaskListItemFragment,
@@ -17,6 +8,7 @@ import {
   useSetTaskPositonMutation
 } from '../services/codefreak-api'
 import { messageService } from '../services/message'
+import CardList from './CardList'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
 
@@ -30,10 +22,9 @@ interface RenderProps {
   delete: (taskId: string) => Promise<any>
 }
 
-const renderTask = (
-  props: RenderProps,
-  dragHandleProps?: DraggableProvidedDragHandleProps
-) => (task: Task) => {
+const renderTask = (props: RenderProps, dragHandleProps?: any) => (
+  task: Task
+) => {
   const confirmDelete = () =>
     confirm({
       title: 'Are you sure?',
@@ -45,56 +36,44 @@ const renderTask = (
       }
     })
 
-  return (
-    <Card
-      title={
-        <>
-          {dragHandleProps ? (
-            <>
-              <Icon
-                type="drag"
-                style={{ cursor: 'grab' }}
-                {...dragHandleProps}
-              />{' '}
-              {task.title}
-            </>
-          ) : (
-            task.title
-          )}
-          {task.answer ? (
-            <EvaluationIndicator
-              style={{ marginLeft: 8 }}
-              answerId={task.answer.id}
-            />
-          ) : null}
-        </>
-      }
-      key={task.id}
-      style={{ marginBottom: 16 }}
-      extra={
-        task.editable ? (
-          <Tooltip
-            title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
-            placement="left"
-          >
-            <Button
-              onClick={confirmDelete}
-              type="dashed"
-              shape="circle"
-              icon="delete"
-            />
-          </Tooltip>
-        ) : null
-      }
-    >
-      {task.body ? <ReactMarkdown source={task.body} /> : null}
-      <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
-        <Button icon="folder-open" type="primary">
-          Details
-        </Button>
-      </EntityLink>
-    </Card>
-  )
+  const cardProps: CardProps = {
+    title: (
+      <>
+        {task.title}
+        {task.answer ? (
+          <EvaluationIndicator
+            style={{ marginLeft: 8 }}
+            answerId={task.answer.id}
+          />
+        ) : null}
+      </>
+    ),
+    extra: task.editable ? (
+      <Tooltip
+        title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
+        placement="left"
+      >
+        <Button
+          onClick={confirmDelete}
+          type="dashed"
+          shape="circle"
+          icon="delete"
+        />
+      </Tooltip>
+    ) : null,
+    children: (
+      <>
+        {task.body ? <ReactMarkdown source={task.body} /> : null}
+        <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
+          <Button icon="folder-open" type="primary">
+            Details
+          </Button>
+        </EntityLink>
+      </>
+    )
+  }
+
+  return cardProps
 }
 
 interface TaskListProps {
@@ -104,10 +83,8 @@ interface TaskListProps {
 }
 
 const TaskList: React.FC<TaskListProps> = props => {
-  const [tasks, setTasks] = useState<Task[]>([])
   const [deleteTask] = useDeleteTaskMutation()
   const [setTaskPosition] = useSetTaskPositonMutation()
-  useEffect(() => setTasks(props.tasks), [props.tasks, setTasks])
   const renderProps: RenderProps = {
     delete: async (id: string) => {
       const result = await deleteTask({ variables: { id } })
@@ -117,60 +94,20 @@ const TaskList: React.FC<TaskListProps> = props => {
       }
     }
   }
-  const onDragEnd = (result: DropResult) => {
-    if (
-      !result.destination ||
-      result.destination.index === result.source.index
-    ) {
-      return
-    }
 
-    // preemptively update the order to prevent flickering
-    const newTasks = [...tasks]
-    const [removed] = newTasks.splice(result.source.index, 1)
-    newTasks.splice(result.destination.index, 0, removed)
-    // setTasks(newTasks)
-
-    setTaskPosition({
-      variables: { id: result.draggableId, position: result.destination.index }
-    })
-      .then(() => messageService.success('Order updated'))
-      .finally(props.update)
-  }
-  if (props.sortable && tasks.length > 1) {
-    return (
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="droppable">
-          {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
-            <div {...provided.droppableProps} ref={provided.innerRef}>
-              {tasks.map(task => (
-                <Draggable
-                  key={task.id}
-                  draggableId={task.id}
-                  index={task.position}
-                >
-                  {(draggableProvided: DraggableProvided) => (
-                    <div
-                      ref={draggableProvided.innerRef}
-                      {...draggableProvided.draggableProps}
-                      style={draggableProvided.draggableProps.style}
-                    >
-                      {renderTask(
-                        renderProps,
-                        draggableProvided.dragHandleProps
-                      )(task)}
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+  const handlePositionChange = (task: Task, newPosition: number) =>
+    setTaskPosition({ variables: { id: task.id, position: newPosition } }).then(
+      () => messageService.success('Order updated')
     )
-  }
-  return <>{tasks.map(renderTask(renderProps))}</>
+
+  return (
+    <CardList
+      sortable={props.sortable}
+      items={props.tasks}
+      renderItem={renderTask(renderProps)}
+      handlePositionChange={handlePositionChange}
+    />
+  )
 }
 
 export default TaskList

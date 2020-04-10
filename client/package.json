@@ -32,6 +32,7 @@
     "apollo-link-error": "^1.1.12",
     "apollo-link-ws": "^1.0.19",
     "apollo-upload-client": "^12.1.0",
+    "array-move": "^2.2.1",
     "craco-antd": "^1.14.1",
     "graphql": "^14.5.8",
     "highlight.js": "^9.18.1",
@@ -42,7 +43,6 @@
     "preval.macro": "^4.0.0",
     "react": "^16.11.0",
     "react-asciidoc": "^0.1.0",
-    "react-beautiful-dnd": "^13.0.0",
     "react-dom": "^16.11.0",
     "react-helmet": "^5.2.1",
     "react-markdown": "^4.2.2",
@@ -50,6 +50,7 @@
     "react-monaco-editor": "^0.34.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.2.0",
+    "react-sortable-hoc": "^1.11.0",
     "react-syntax-highlighter": "^12.2.1",
     "short-uuid": "^3.1.1",
     "subscriptions-transport-ws": "^0.9.16",
@@ -88,7 +89,6 @@
     ]
   },
   "devDependencies": {
-    "@types/react-beautiful-dnd": "^12.1.2",
     "craco-raw-loader": "^1.0.1"
   }
 }
