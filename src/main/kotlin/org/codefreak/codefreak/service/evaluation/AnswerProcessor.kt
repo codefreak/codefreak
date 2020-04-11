@@ -33,8 +33,14 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
     log.debug("Start evaluation of answer {} ({} steps)", answer.id, taskDefinition.evaluation.size)
     taskDefinition.evaluation.forEachIndexed { index, evaluationDefinition ->
       // step may has already been executed
-      if (evaluation.evaluationSteps.find { it.position == index } !== null) {
-        return@forEachIndexed
+      val executedStep = evaluation.evaluationSteps.find { it.position == index }
+      if (executedStep !== null) {
+        // Only re-run if this step errored
+        if (executedStep.result !== EvaluationStep.EvaluationStepResult.ERRORED) {
+          return@forEachIndexed
+        }
+        // remove existing errored step from evaluation for re-running
+        evaluation.evaluationSteps.remove(executedStep)
       }
       val runnerName = evaluationDefinition.step
       val evaluationStep = EvaluationStep(runnerName, index)

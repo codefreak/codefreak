@@ -52,16 +52,7 @@ class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
   val answer by lazy { AnswerDto(entity.answer, ctx) }
   val createdAt = entity.createdAt
   val steps by lazy { entity.evaluationSteps.map { EvaluationStepDto(it) } }
-  val stepsResultSummary by lazy {
-    // use the worst result as global result
-    steps.fold(EvaluationStepResultDto.SUCCESS) { acc, step ->
-      if (step.result != null && step.result > acc) {
-        step.result
-      } else {
-        acc
-      }
-    }
-  }
+  val stepsResultSummary by lazy { entity.stepsResultSummary.let { EvaluationStepResultDto.valueOf(it.name) } }
 }
 
 @GraphQLName("EvaluationStep")
