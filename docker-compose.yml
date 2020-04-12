@@ -3,6 +3,14 @@
 
 version: "3"
 services:
+  proxy:
+    image: traefik:v1.7
+    ports:
+      - "8081:80"
+    command: "--docker --docker.exposedbydefault=false --docker.watch=true"
+    network_mode: bridge
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
   frontend:
     depends_on:
       - backend
@@ -31,7 +39,6 @@ services:
   backend:
     depends_on:
       - postgres
-      - docker
     image: gradle:jdk8
     restart: always
     working_dir: /home/gradle/project
@@ -40,12 +47,9 @@ services:
     volumes:
       - ".:/home/gradle/project"
       - "docker_certs:/certs"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     command: ./gradlew generateGraphqlSchema bootRun
     environment:
-      CODEFREAK_DOCKER_HOST: "https://docker:2376"
-      CODEFREAK_DOCKER_CA_CERT_PATH: "/certs/ca/cert.pem"
-      CODEFREAK_DOCKER_CLIENT_KEY_PATH: "/certs/client/key.pem"
-      CODEFREAK_DOCKER_CLIENT_CERT_PATH: "/certs/client/cert.pem"
       SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/postgres"
       SPRING_DATASOURCE_USERNAME: "postgres"
       SPRING_DATASOURCE_DRIVERCLASSNAME: "org.postgresql.Driver"
@@ -57,16 +61,6 @@ services:
       - private
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-  docker:
-    image: docker:stable-dind
-    privileged: true
-    restart: always
-    environment:
-      DOCKER_TLS_CERTDIR: certs
-    networks:
-      - private
-    volumes:
-      - docker_certs:/certs
 
 volumes:
   docker_certs: {}
