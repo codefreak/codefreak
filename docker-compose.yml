@@ -46,7 +46,6 @@ services:
       - private
     volumes:
       - ".:/home/gradle/project"
-      - "docker_certs:/certs"
       - "/var/run/docker.sock:/var/run/docker.sock"
     command: ./gradlew generateGraphqlSchema bootRun
     environment:
@@ -61,9 +60,6 @@ services:
       - private
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-
-volumes:
-  docker_certs: {}
 
 networks:
   private: {}
