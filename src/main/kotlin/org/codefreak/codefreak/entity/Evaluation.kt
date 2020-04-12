@@ -21,7 +21,7 @@ class Evaluation(
   @Type(type = "image")
   var filesDigest: ByteArray
 ) : BaseEntity() {
-  @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL])
+  @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("position ASC")
   var evaluationSteps = mutableSetOf<EvaluationStep>()
 

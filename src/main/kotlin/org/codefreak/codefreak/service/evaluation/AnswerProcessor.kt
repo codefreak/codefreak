@@ -56,12 +56,18 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
           evaluationStep.result = EvaluationStep.EvaluationStepResult.SUCCESS
         }
         evaluationStep.summary = runner.summarize(feedbackList)
+      } catch (e: EvaluationStepException) {
+        evaluationStep.result = e.result
+        evaluationStep.summary = e.message
       } catch (e: Exception) {
         log.error(e)
         evaluationStep.result = EvaluationStep.EvaluationStepResult.ERRORED
         evaluationStep.summary = e.message ?: "Unknown error"
       }
 
+      log.debug(
+          "Step ${evaluationStep.runnerName} finished ${evaluationStep.result}: ${evaluationStep.summary}"
+      )
       evaluation.addStep(evaluationStep)
     }
     log.debug("Finished evaluation of answer {}", answer.id)

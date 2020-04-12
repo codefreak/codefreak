@@ -5,11 +5,14 @@ import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.withTrailingSlash
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.codefreak.codefreak.entity.EvaluationStep
+import org.codefreak.codefreak.service.evaluation.EvaluationStepException
 import org.openmbee.junit.JUnitMarshalling
 import org.openmbee.junit.model.JUnitTestCase
 import org.springframework.stereotype.Component
 import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
+import javax.xml.bind.UnmarshalException
 
 @Component
 class JUnitRunner : CommandLineRunner() {
@@ -37,10 +40,13 @@ class JUnitRunner : CommandLineRunner() {
         }
       }
     }.also { execution ->
-      // no feedback means the sources failed to compile
-      // in this case we will add the exec results as feedback
-      if (feedback.isEmpty()) {
-        feedback.addAll(execution.map(this::executionToFeedback))
+      val firstFailingCommand = execution.find { it.result.exitCode != 0L }
+      if (feedback.isEmpty() && firstFailingCommand != null) {
+        // e.g. sources failed to compile or other runtime error
+        throw EvaluationStepException(
+            firstFailingCommand.result.output.trim(),
+            EvaluationStep.EvaluationStepResult.FAILED
+        )
       }
     }
     return feedback
@@ -52,7 +58,15 @@ class JUnitRunner : CommandLineRunner() {
   }
 
   protected fun testSuiteToFeedback(xmlResult: ByteArray): List<Feedback> {
-    val suite = JUnitMarshalling.unmarshalTestSuite(xmlResult.inputStream())
+    val suite = try {
+      JUnitMarshalling.unmarshalTestSuite(xmlResult.inputStream())
+    } catch (e: Exception) {
+      throw EvaluationStepException(
+          "Failed to parse jUnit XML:\n${e.message ?: e.cause?.message}",
+          EvaluationStep.EvaluationStepResult.ERRORED,
+          e
+      )
+    }
     return suite.testCases.map { testCase ->
       Feedback(testCase.name).apply {
         group = suite.name
