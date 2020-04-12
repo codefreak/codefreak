@@ -1,4 +1,5 @@
 import 'highlight.js/styles/github-gist.css'
+import { languages } from 'monaco-editor'
 import React, { useCallback, useEffect, useRef } from 'react'
 import SyntaxHighlighterComponent from 'react-syntax-highlighter'
 import './SyntaxHighlighter.less'
@@ -7,6 +8,7 @@ export interface SyntaxHighlighterProps {
   firstLineNumber?: number
   highlightLines?: number[]
   onLineNumberClick?: (lineNumber: number, elem: HTMLSpanElement) => any
+  language?: string
 }
 
 const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = props => {
@@ -60,6 +62,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = props => {
       lineProps={lineHighlighter}
       wrapLines={lineHighlighter !== undefined}
       showLineNumbers
+      language={props.language}
       useInlineStyles={false}
       startingLineNumber={props.firstLineNumber || 1}
       lineNumberContainerProps={{
@@ -71,6 +74,10 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = props => {
       {props.children}
     </SyntaxHighlighterComponent>
   )
+}
+
+SyntaxHighlighter.defaultProps = {
+  language: 'plaintext'
 }
 
 export default SyntaxHighlighter
