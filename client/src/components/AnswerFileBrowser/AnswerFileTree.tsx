@@ -2,12 +2,12 @@ import { Tree } from 'antd'
 import React from 'react'
 import { useGetAnswerFileListQuery } from '../../services/codefreak-api'
 import {
-  basename,
   fileListToTree,
   FileTreeDirectoryNode,
   FileTreeNode
 } from '../../services/file'
 import AsyncPlaceholder from '../AsyncContainer'
+import { basename } from 'path'
 
 const { TreeNode, DirectoryTree } = Tree
 

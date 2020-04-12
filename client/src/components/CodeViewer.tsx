@@ -2,7 +2,6 @@ import { Card, Icon, Result } from 'antd'
 import React from 'react'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
 import {
-  basename,
   isBinaryContent,
   numberOfLines,
   sliceLines
@@ -13,6 +12,7 @@ import Centered from './Centered'
 import ReviewEditor from './code/ReviewEditor'
 import SyntaxHighlighter from './code/SyntaxHighlighter'
 import './CodeViewer.less'
+import {basename} from "path"
 
 interface CodeViewerProps {
   answerId: string

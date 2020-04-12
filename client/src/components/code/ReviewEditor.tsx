@@ -4,11 +4,12 @@ import {
   FeedbackSeverity,
   useCreateCommentFeedbackMutation
 } from '../../generated/graphql'
-import { basename, sliceLines } from '../../services/file'
+import { sliceLines } from '../../services/file'
 import { messageService } from '../../services/message'
 import ReviewCommentForm, { ReviewCommentValues } from './ReviewComment'
 import './ReviewEditor.less'
 import SyntaxHighlighter, { SyntaxHighlighterProps } from './SyntaxHighlighter'
+import {basename} from "path"
 
 export interface ReviewEditorProps {
   syntaxHighlighterProps?: SyntaxHighlighterProps
