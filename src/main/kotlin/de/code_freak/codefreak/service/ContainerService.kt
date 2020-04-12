@@ -1,6 +1,7 @@
 package de.code_freak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
+import com.spotify.docker.client.DockerClient.ListContainersParam.allContainers
 import com.spotify.docker.client.DockerClient.ListContainersParam.withLabel
 import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusExited
 import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusRunning
@@ -168,7 +169,10 @@ class ContainerService : BaseService() {
     return getContainersWithLabel(label, value).firstOrNull()
   }
 
-  protected fun getContainersWithLabel(label: String, value: String? = null) = listContainers(withLabel(label, value))
+  protected fun getContainersWithLabel(label: String, value: String? = null) = listContainers(
+      withLabel(label, value),
+      allContainers()
+  )
 
   protected fun listContainers(vararg listContainerParams: DockerClient.ListContainersParam): List<Container> {
     return docker.listContainers(withLabel(LABEL_INSTANCE_ID, config.instanceId), *listContainerParams)
