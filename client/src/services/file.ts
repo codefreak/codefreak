@@ -1,61 +1,10 @@
 import { File, FileType } from '../generated/graphql'
+import {dirname, resolve} from "path"
 
 export interface FileTreeNode extends Pick<File, 'path' | 'type'> {}
 
 export interface FileTreeDirectoryNode extends FileTreeNode {
   children?: Array<FileTreeNode | FileTreeDirectoryNode>
-}
-
-/**
- * Get the full directory path that contains the file/directory
- * Follows official UNIX rules for dirname
- *
- * Examples:
- * /a/b -> /a
- * ./a/b -> ./a
- * /a -> /
- * . -> .
- * / -> /
- * a -> a
- *
- * @param path
- */
-export const dirname = (path: string): string => {
-  // match everything before last slash
-  // remaining path will contain a trailing slash!
-  const matches = path.match(/^(\/?.*?)[^/]*\/?$/)
-  // in case the path does not contain any slashes return the original path
-  if (!matches || !matches[1]) {
-    return path
-  }
-  // if the remaining path is only a single letter, return it
-  if (matches[1].length === 1) {
-    return matches[1]
-  }
-  // in all other cases return the remaining path without trailing slash
-  return normalizePath(matches[1])
-}
-
-/**
- * Get filename from path including extension
- *
- * @param path
- */
-export const basename = (path: string) => {
-  return (
-    normalizePath(path)
-      .split('/')
-      .pop() || '.'
-  )
-}
-
-/**
- * Remove trailing slashes from path
- *
- * @param path
- */
-export const normalizePath = (path: string) => {
-  return path.replace(/\/+$/g, '')
 }
 
 /**
@@ -65,7 +14,7 @@ export const normalizePath = (path: string) => {
  * @param path
  */
 export const abspath = (path: string) => {
-  return '/' + normalizePath(path).replace(/^\.?\/*/g, '')
+  return resolve('/',path)
 }
 
 export const fileListToTree = (
