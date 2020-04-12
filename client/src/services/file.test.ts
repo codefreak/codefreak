@@ -1,10 +1,5 @@
 import { File, FileType } from '../generated/graphql'
-import {
-  abspath,
-  fileListToTree,
-  numberOfLines,
-  sliceLines
-} from './file'
+import { abspath, fileListToTree, numberOfLines, sliceLines } from './file'
 
 const cid = { collectionId: '123', collectionDigest: 'fff' }
 const file = { ...cid, type: FileType.File }

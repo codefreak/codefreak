@@ -1,4 +1,5 @@
 import { Spin } from 'antd'
+import { basename, extname } from 'path'
 import React, { useState } from 'react'
 import {
   FeedbackSeverity,
@@ -9,7 +10,6 @@ import { messageService } from '../../services/message'
 import ReviewCommentForm, { ReviewCommentValues } from './ReviewComment'
 import './ReviewEditor.less'
 import SyntaxHighlighter, { SyntaxHighlighterProps } from './SyntaxHighlighter'
-import {basename} from "path"
 
 export interface ReviewEditorProps {
   syntaxHighlighterProps?: SyntaxHighlighterProps
@@ -27,7 +27,8 @@ const ReviewEditor: React.FC<ReviewEditorProps> = props => {
   const [createComment, { loading }] = useCreateCommentFeedbackMutation()
 
   const highlighterProps = {
-    onLineNumberClick: setCurrentLineNumber
+    onLineNumberClick: setCurrentLineNumber,
+    language: extname(props.path)
   }
 
   // simply return the highlighted code if we are not reviewing a line currently

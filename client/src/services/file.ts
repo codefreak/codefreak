@@ -1,5 +1,5 @@
+import { dirname, resolve } from 'path'
 import { File, FileType } from '../generated/graphql'
-import {dirname, resolve} from "path"
 
 export interface FileTreeNode extends Pick<File, 'path' | 'type'> {}
 
@@ -14,7 +14,7 @@ export interface FileTreeDirectoryNode extends FileTreeNode {
  * @param path
  */
 export const abspath = (path: string) => {
-  return resolve('/',path)
+  return resolve('/', path)
 }
 
 export const fileListToTree = (
