@@ -12,7 +12,6 @@ import org.openmbee.junit.model.JUnitTestCase
 import org.springframework.stereotype.Component
 import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
-import javax.xml.bind.UnmarshalException
 
 @Component
 class JUnitRunner : CommandLineRunner() {
