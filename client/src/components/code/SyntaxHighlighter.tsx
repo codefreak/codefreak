@@ -1,5 +1,4 @@
 import 'highlight.js/styles/github-gist.css'
-import { languages } from 'monaco-editor'
 import React, { useCallback, useEffect, useRef } from 'react'
 import SyntaxHighlighterComponent from 'react-syntax-highlighter'
 import './SyntaxHighlighter.less'
