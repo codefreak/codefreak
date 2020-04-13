@@ -59,5 +59,9 @@ query GetTaskDetails($id: ID!) {
   task(id: $id) {
     id
     body
+    assignment {
+      id
+      status
+    }
   }
 }

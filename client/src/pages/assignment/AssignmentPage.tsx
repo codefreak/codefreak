@@ -227,7 +227,7 @@ const StatusSteps: React.FC<{
                   </p>
                   <Button
                     type={status === 'INACTIVE' ? 'primary' : 'default'}
-                    disabled={status === 'ACTIVE'}
+                    disabled={status === 'ACTIVE' || status === 'OPEN'}
                     onClick={activate}
                   >
                     Activate

@@ -1,4 +1,4 @@
-import { Button, Card, Empty } from 'antd'
+import { Alert, Button, Card, Empty } from 'antd'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -37,6 +37,15 @@ const TaskDetailsPage: React.FC<{
       </Card>
       {editable ? (
         <Card title="Files" style={{ marginTop: 16 }}>
+          {task.assignment && task.assignment.status === 'OPEN' ? (
+            <Alert
+              style={{ marginBottom: 16 }}
+              message="Warning"
+              description="The assignment is already open. If you make changes to files, they are not applied to already created answers. Every change that is saved will apply to newly created answers. This can happen automatically, for example when the IDE is idle."
+              type="warning"
+              showIcon
+            />
+          ) : null}
           <Link
             to={'/ide/task/' + shorten(task.id)}
             target={'task-ide-' + task.id}
