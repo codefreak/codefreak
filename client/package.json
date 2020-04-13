@@ -92,6 +92,7 @@
     ]
   },
   "devDependencies": {
+    "copy-webpack-plugin": "^5.1.1",
     "craco-raw-loader": "^1.0.1"
   }
 }
