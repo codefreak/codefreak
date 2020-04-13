@@ -37,6 +37,8 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val inPool = entity.assignment == null
   val editable by lazy { entity.isEditable(authorization) }
+  val hiddenFiles by lazy { entity.hiddenFiles.toTypedArray() }
+  val protectedFiles by lazy { entity.protectedFiles.toTypedArray() }
 
   val evaluationStepDefinitions by lazy {
     entity.evaluationStepDefinitions.map { EvaluationStepDefinitionDto(it) }

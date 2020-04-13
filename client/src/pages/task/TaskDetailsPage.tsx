@@ -1,4 +1,4 @@
-import { Alert, Button, Card, Empty } from 'antd'
+import { Alert, Button, Card, Col, Empty, Icon, List, Row, Tooltip } from 'antd'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -7,6 +7,12 @@ import useIdParam from '../../hooks/useIdParam'
 import { TaskInput, useGetTaskDetailsQuery } from '../../services/codefreak-api'
 import { shorten } from '../../services/short-id'
 import { Updater } from '../../services/util'
+
+const renderFilePattern = (pattern: string) => (
+  <List.Item>
+    <code>{pattern}</code>
+  </List.Item>
+)
 
 const TaskDetailsPage: React.FC<{
   updater: Updater<TaskInput, any>
@@ -46,14 +52,78 @@ const TaskDetailsPage: React.FC<{
               showIcon
             />
           ) : null}
-          <Link
-            to={'/ide/task/' + shorten(task.id)}
-            target={'task-ide-' + task.id}
-          >
-            <Button type="primary" icon="edit">
-              Open in IDE
-            </Button>
-          </Link>
+          <p>
+            <Link
+              to={'/ide/task/' + shorten(task.id)}
+              target={'task-ide-' + task.id}
+            >
+              <Button type="primary" icon="edit">
+                Open in IDE
+              </Button>
+            </Link>
+          </p>
+          <Row gutter={16}>
+            <Col span={12}>
+              <List
+                size="small"
+                header={
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <span>
+                      <b>Hidden Files</b>{' '}
+                      <Tooltip
+                        title={
+                          'Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation.'
+                        }
+                        placement="bottom"
+                      >
+                        <Icon type="info-circle" theme="filled" />
+                      </Tooltip>
+                    </span>
+                    <Button type="link" icon="edit" />
+                  </div>
+                }
+                bordered
+                dataSource={task.hiddenFiles}
+                renderItem={renderFilePattern}
+              />
+            </Col>
+            <Col span={12}>
+              <List
+                size="small"
+                header={
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <span>
+                      <b>Protected Files</b>{' '}
+                      <Tooltip
+                        title={
+                          'Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.'
+                        }
+                        placement="bottom"
+                      >
+                        <Icon type="info-circle" theme="filled" />
+                      </Tooltip>
+                    </span>
+                    <Button type="link" icon="edit" />
+                  </div>
+                }
+                bordered
+                dataSource={task.protectedFiles}
+                renderItem={renderFilePattern}
+              />
+            </Col>
+          </Row>
         </Card>
       ) : null}
     </>

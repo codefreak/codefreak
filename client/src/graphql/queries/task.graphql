@@ -59,6 +59,8 @@ query GetTaskDetails($id: ID!) {
   task(id: $id) {
     id
     body
+    hiddenFiles
+    protectedFiles
     assignment {
       id
       status

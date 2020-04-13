@@ -50,7 +50,7 @@ https://github.com/codefreak/codefreak/tree/master/src/main/resources/init/tasks
 [[task]]
 == Task
 
-A task is defined by a directory (or packaged archive) containing source code files and a `codefreak.yml` with the following schema.
+A task is defined by a directory (or packaged archive) containing source code files and a `codefreak.yml` with the following schema. The `codefreak.yml` will be excluded from the source code files.
 
 [cols="1,1,3"]
 .Assignment Object
@@ -67,11 +67,11 @@ A task is defined by a directory (or packaged archive) containing source code fi
 
 |hidden
 |[`string`]
-|Globs of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation. The `codefreak.yml` file is always hidden.
+|Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation.
 
 |protected
 |[`string`]
-|Globs of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.
+|Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.
 
 |evaluation
 |[<<evaluation,Evaluation Step Object>>]
