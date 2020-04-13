@@ -1,12 +1,19 @@
 import { Alert, Button, Card, Col, Empty, Icon, List, Row, Tooltip } from 'antd'
+import { JSONSchema6 } from 'json-schema'
 import React from 'react'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
+import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import useIdParam from '../../hooks/useIdParam'
-import { TaskInput, useGetTaskDetailsQuery } from '../../services/codefreak-api'
+import {
+  TaskDetailsInput,
+  useGetTaskDetailsQuery,
+  useUpdateTaskDetailsMutation
+} from '../../services/codefreak-api'
+import { messageService } from '../../services/message'
 import { shorten } from '../../services/short-id'
-import { Updater } from '../../services/util'
+import { makeUpdater } from '../../services/util'
 
 const renderFilePattern = (pattern: string) => (
   <List.Item>
@@ -14,12 +21,42 @@ const renderFilePattern = (pattern: string) => (
   </List.Item>
 )
 
-const TaskDetailsPage: React.FC<{
-  updater: Updater<TaskInput, any>
-  editable: boolean
-}> = ({ updater, editable }) => {
+const filePatternSchema: JSONSchema6 = {
+  type: 'array',
+  items: { type: 'string' }
+}
+
+const filePatternHelp = (
+  <Alert
+    style={{ marginBottom: 16 }}
+    message={
+      <>
+        File patterns use the Ant pattern syntax. For more information refer to
+        the{' '}
+        <a
+          href="https://ant.apache.org/manual/dirtasks.html#patterns"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          official documentation
+        </a>
+        .
+      </>
+    }
+    type="info"
+  />
+)
+
+const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const result = useGetTaskDetailsQuery({
-    variables: { id: useIdParam() }
+    variables: { id: useIdParam(), teacher: editable }
+  })
+
+  const [updateMutation] = useUpdateTaskDetailsMutation({
+    onCompleted: () => {
+      result.refetch()
+      messageService.success('Task updated')
+    }
   })
 
   if (result.data === undefined) {
@@ -27,6 +64,16 @@ const TaskDetailsPage: React.FC<{
   }
 
   const { task } = result.data
+
+  const taskDetailsInput: TaskDetailsInput = {
+    id: task.id,
+    hiddenFiles: task.hiddenFiles,
+    protectedFiles: task.protectedFiles
+  }
+
+  const updater = makeUpdater(taskDetailsInput, input =>
+    updateMutation({ variables: { input } })
+  )
 
   return (
     <>
@@ -75,7 +122,7 @@ const TaskDetailsPage: React.FC<{
                     }}
                   >
                     <span>
-                      <b>Hidden Files</b>{' '}
+                      <b>Hidden files</b>{' '}
                       <Tooltip
                         title={
                           'Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation.'
@@ -85,7 +132,13 @@ const TaskDetailsPage: React.FC<{
                         <Icon type="info-circle" theme="filled" />
                       </Tooltip>
                     </span>
-                    <Button type="link" icon="edit" />
+                    <JsonSchemaEditButton
+                      title="Edit hidden files"
+                      extraContent={filePatternHelp}
+                      schema={filePatternSchema}
+                      value={task.hiddenFiles}
+                      onSubmit={updater('hiddenFiles')}
+                    />
                   </div>
                 }
                 bordered
@@ -105,7 +158,7 @@ const TaskDetailsPage: React.FC<{
                     }}
                   >
                     <span>
-                      <b>Protected Files</b>{' '}
+                      <b>Protected files</b>{' '}
                       <Tooltip
                         title={
                           'Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.'
@@ -115,7 +168,13 @@ const TaskDetailsPage: React.FC<{
                         <Icon type="info-circle" theme="filled" />
                       </Tooltip>
                     </span>
-                    <Button type="link" icon="edit" />
+                    <JsonSchemaEditButton
+                      title="Edit protected files"
+                      extraContent={filePatternHelp}
+                      schema={filePatternSchema}
+                      value={task.protectedFiles}
+                      onSubmit={updater('protectedFiles')}
+                    />
                   </div>
                 }
                 bordered

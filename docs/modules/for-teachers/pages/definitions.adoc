@@ -78,6 +78,8 @@ A task is defined by a directory (or packaged archive) containing source code fi
 |List of automatic evaluation steps.
 |===
 
+TIP: File patterns use the Ant pattern syntax. For more information refer to the https://ant.apache.org/manual/dirtasks.html#patterns"[official documentation].
+
 .Example
 [source,yaml]
 ----

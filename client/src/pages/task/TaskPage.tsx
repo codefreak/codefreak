@@ -77,8 +77,7 @@ const TaskPage: React.FC = () => {
 
   const taskInput: TaskInput = {
     id: task.id,
-    title: task.title,
-    body: task.body
+    title: task.title
   }
 
   const updater = makeUpdater(taskInput, input =>
@@ -185,7 +184,7 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path}>
-          <TaskDetailsPage editable={editable} updater={updater} />
+          <TaskDetailsPage editable={editable} />
         </Route>
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}

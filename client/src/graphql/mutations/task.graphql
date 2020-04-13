@@ -12,6 +12,10 @@ mutation UpdateTask($input: TaskInput!) {
   updateTask(input: $input)
 }
 
+mutation UpdateTaskDetails($input: TaskDetailsInput!) {
+  updateTaskDetails(input: $input)
+}
+
 mutation SetTaskPositon($id: ID!, $position: Long!) {
   setTaskPosition(id: $id, position: $position)
 }
