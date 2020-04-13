@@ -120,28 +120,26 @@ class ContainerService : BaseService() {
   fun startIdeContainer(id: UUID, label: String, fileCollectionId: UUID): String {
     // either take existing container or create a new one
     val container = getContainerWithLabel(label, id.toString())
-    val tokenFromLabel = container?.labels()?.get(LABEL_TOKEN)
-    if (container != null && tokenFromLabel != null && isContainerRunning(container.id())) {
-      return getIdeUrl(tokenFromLabel)
+    if (container != null && isContainerRunning(container.id())) {
+      return getIdeUrl(container.labels()?.get(LABEL_TOKEN)!!)
     }
 
     if (!canStartNewIdeContainer()) {
       throw ResourceLimitException("Cannot start new IDE. Maximum capacity reached.")
     }
 
-    val token = tokenFromLabel ?: RandomStringUtils.random(40, 0, 0, true, true, null, SecureRandom())
-
-    if (container == null) {
+    return if (container == null) {
+      val token = RandomStringUtils.random(40, 0, 0, true, true, null, SecureRandom())
       val containerId = this.createIdeContainer(label, id, token)
       docker.startContainer(containerId)
       // prepare the environment after the container has started
       this.copyFilesToIde(containerId, fileCollectionId)
+      getIdeUrl(token)
     } else {
       // make sure the container is running. Also existing ones could have been stopped
       docker.startContainer(container.id())
-      //TODO label setzen?
+      getIdeUrl(container.labels()?.get(LABEL_TOKEN)!!)
     }
-    return getIdeUrl(token)
   }
 
   fun canStartNewIdeContainer(): Boolean {

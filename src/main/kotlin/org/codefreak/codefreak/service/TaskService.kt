@@ -2,12 +2,15 @@ package org.codefreak.codefreak.service
 
 import liquibase.util.StreamUtil
 import org.codefreak.codefreak.entity.Assignment
+import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AssignmentRepository
+import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.getYamlDefinition
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
@@ -27,6 +30,9 @@ TaskService : BaseService() {
   private lateinit var assignmentRepository: AssignmentRepository
 
   @Autowired
+  private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
+
+  @Autowired
   private lateinit var fileService: FileService
 
   @Transactional
@@ -39,8 +45,16 @@ TaskService : BaseService() {
     var task = Task(assignment, owner, position, definition.title, definition.description, 100)
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
+
+    task.evaluationStepDefinitions = definition.evaluation
+        .mapIndexed { index, it -> EvaluationStepDefinition(it.step, index, it.options ) }
+        .toMutableSet()
+
+    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
     task = taskRepository.save(task)
-    fileService.writeCollectionTar(task.id).use { it.write(tarContent) }
+    fileService.writeCollectionTar(task.id).use { fileCollection ->
+      TarUtil.copyEntries(tarContent.inputStream(), fileCollection) { !it.name.equals("codefreak.yml", true) }
+    }
     return task
   }
 
@@ -54,22 +68,6 @@ TaskService : BaseService() {
 
   @Transactional
   fun deleteTask(id: UUID) = taskRepository.deleteById(id)
-
-  @Transactional
-  fun updateFromTar(tarContent: ByteArray, taskId: UUID): Task {
-    var task = findTask(taskId)
-    getYamlDefinition<TaskDefinition>(tarContent.inputStream()).let {
-      task.title = it.title
-      task.body = it.description
-    }
-    task = taskRepository.save(task)
-    fileService.writeCollectionTar(task.id).use { it.write(tarContent) }
-    return task
-  }
-
-  fun getTaskDefinition(taskId: UUID) = applyDefaultRunners(
-      fileService.readCollectionTar(taskId).use { getYamlDefinition<TaskDefinition>(it) }
-  )
 
   private fun applyDefaultRunners(taskDefinition: TaskDefinition): TaskDefinition {
     // add "comments" runner by default if not defined

@@ -66,7 +66,7 @@ export const routerConfig: Route = {
         },
         {
           path: '/help/definitions',
-          name: 'Defintion Files',
+          name: 'Definition Files',
           component: DefinitionsHelpPage,
           authority: AUTHORITIES.ROLE_TEACHER
         }

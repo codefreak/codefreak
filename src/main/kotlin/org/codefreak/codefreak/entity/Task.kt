@@ -53,16 +53,19 @@ class Task(
 
   @Type(type = "json")
   @Column(length = 1024)
-  @ColumnDefault("[]")
+  @ColumnDefault("'[]'")
   var hiddenFiles: List<String> = listOf()
 
   @Type(type = "json")
   @Column(length = 1024)
-  @ColumnDefault("[]")
+  @ColumnDefault("'[]'")
   var protectedFiles: List<String> = listOf()
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
+
+  @OneToMany(cascade = [CascadeType.REMOVE])
+  var evaluationStepDefinitions: MutableSet<EvaluationStepDefinition> = mutableSetOf()
 
   override fun compareTo(other: Task) = position.compareTo(other.position)
 }

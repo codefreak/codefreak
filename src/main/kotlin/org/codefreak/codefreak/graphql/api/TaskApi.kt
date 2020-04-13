@@ -38,11 +38,8 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val inPool = entity.assignment == null
   val editable by lazy { entity.isEditable(authorization) }
 
-  val evaluationSteps by lazy {
-    val taskDefinition = serviceAccess.getService(TaskService::class).getTaskDefinition(entity.id)
-    taskDefinition.evaluation.mapIndexed { index, definition ->
-      EvaluationStepDefinitionDto(index, definition)
-    }
+  val evaluationStepDefinitions by lazy {
+    entity.evaluationStepDefinitions.map { EvaluationStepDefinitionDto(it) }
   }
 
   fun answer(userId: UUID?): AnswerDto? {
