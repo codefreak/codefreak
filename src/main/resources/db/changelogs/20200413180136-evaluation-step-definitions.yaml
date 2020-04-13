@@ -1,0 +1,89 @@
+databaseChangeLog:
+- changeSet:
+    id: 1586801075442-2
+    author: vagrant (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              primaryKey: true
+              primaryKeyName: evaluation_step_definitionPK
+            name: id
+            type: UUID
+        - column:
+            constraints:
+              nullable: false
+            name: active
+            type: BOOLEAN
+        - column:
+            defaultValue: '{}'
+            name: options
+            type: VARCHAR(1024)
+        - column:
+            constraints:
+              nullable: false
+            name: position
+            type: INTEGER
+        - column:
+            name: runner_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: task_id
+            type: UUID
+        tableName: evaluation_step_definition
+- changeSet:
+    id: 1586801075442-3
+    author: vagrant (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: definition_id
+            type: uuid
+        tableName: evaluation_step
+- changeSet:
+    id: 1586801075442-4
+    author: vagrant (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: task_id
+        baseTableName: evaluation_step_definition
+        constraintName: FKgjmx008hhp7n0e2dp51as8yug
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: task
+        validate: true
+- changeSet:
+    id: 1586801075442-5
+    author: vagrant (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: definition_id
+        baseTableName: evaluation_step
+        constraintName: FKk9oap1ideibjppdldf4qhk82g
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: evaluation_step_definition
+        validate: true
+- changeSet:
+    id: 1586801075442-6
+    author: vagrant (generated)
+    changes:
+    - dropColumn:
+        columnName: position
+        tableName: evaluation_step
+- changeSet:
+    id: 1586801075442-7
+    author: vagrant (generated)
+    changes:
+    - dropColumn:
+        columnName: runner_name
+        tableName: evaluation_step
+

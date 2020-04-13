@@ -64,7 +64,7 @@ class Task(
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
 
-  @OneToMany(cascade = [CascadeType.REMOVE])
+  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
   var evaluationStepDefinitions: MutableSet<EvaluationStepDefinition> = mutableSetOf()
 
   override fun compareTo(other: Task) = position.compareTo(other.position)

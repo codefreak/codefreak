@@ -4,9 +4,12 @@ import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.ManyToOne
 
 @Entity
 class EvaluationStepDefinition(
+  @ManyToOne(optional = false)
+  var task: Task,
   var runnerName: String,
   var position: Int,
 

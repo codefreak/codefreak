@@ -46,8 +46,9 @@ TaskService : BaseService() {
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
 
+    task = taskRepository.save(task)
     task.evaluationStepDefinitions = definition.evaluation
-        .mapIndexed { index, it -> EvaluationStepDefinition(it.step, index, it.options ) }
+        .mapIndexed { index, it -> EvaluationStepDefinition(task, it.step, index, it.options ) }
         .toMutableSet()
 
     evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
