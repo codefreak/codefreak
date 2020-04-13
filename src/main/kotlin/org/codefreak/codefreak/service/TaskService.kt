@@ -35,9 +35,10 @@ TaskService : BaseService() {
 
   @Transactional
   fun createFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
-    var task = getYamlDefinition<TaskDefinition>(tarContent.inputStream()).let {
-      Task(assignment, owner, position, it.title, it.description, 100)
-    }
+    val definition = getYamlDefinition<TaskDefinition>(tarContent.inputStream())
+    var task = Task(assignment, owner, position, definition.title, definition.description, 100)
+    task.hiddenFiles = definition.hidden
+    task.protectedFiles = definition.protected
     task = taskRepository.save(task)
     fileService.writeCollectionTar(task.id).use { it.write(tarContent) }
     return task
