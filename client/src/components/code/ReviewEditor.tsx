@@ -1,10 +1,11 @@
 import { Spin } from 'antd'
+import { basename, extname } from 'path'
 import React, { useState } from 'react'
 import {
   FeedbackSeverity,
   useCreateCommentFeedbackMutation
 } from '../../generated/graphql'
-import { basename, sliceLines } from '../../services/file'
+import { sliceLines } from '../../services/file'
 import { messageService } from '../../services/message'
 import ReviewCommentForm, { ReviewCommentValues } from './ReviewComment'
 import './ReviewEditor.less'
@@ -26,7 +27,8 @@ const ReviewEditor: React.FC<ReviewEditorProps> = props => {
   const [createComment, { loading }] = useCreateCommentFeedbackMutation()
 
   const highlighterProps = {
-    onLineNumberClick: setCurrentLineNumber
+    onLineNumberClick: setCurrentLineNumber,
+    language: extname(props.path)
   }
 
   // simply return the highlighted code if we are not reviewing a line currently
