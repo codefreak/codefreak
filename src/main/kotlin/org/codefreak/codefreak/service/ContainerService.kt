@@ -2,6 +2,7 @@ package org.codefreak.codefreak.service
 
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam.withLabel
+import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusExited
 import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusRunning
 import com.spotify.docker.client.DockerClient.RemoveContainerParam.forceKill
 import com.spotify.docker.client.DockerClient.RemoveContainerParam.removeVolumes
@@ -144,7 +145,7 @@ class ContainerService : BaseService() {
 
   fun canStartNewIdeContainer(): Boolean {
     if (config.ide.maxContainers < 0) return true
-    return getAllIdeContainers().size < config.ide.maxContainers
+    return getAllIdeContainers(withStatusRunning()).size < config.ide.maxContainers
   }
 
   /**
@@ -299,10 +300,12 @@ class ContainerService : BaseService() {
 
   protected fun isContainerRunning(containerId: String): Boolean = docker.inspectContainer(containerId).state().running()
 
-  protected fun getAllIdeContainers() = mutableListOf<Container>().apply {
-    addAll(listContainers(withLabel(LABEL_ANSWER_ID), withStatusRunning()))
-    addAll(listContainers(withLabel(LABEL_READ_ONLY_ANSWER_ID), withStatusRunning()))
-    addAll(listContainers(withLabel(LABEL_TASK_ID), withStatusRunning()))
+  protected fun getAllIdeContainers(
+    vararg listParams: DockerClient.ListContainersParam
+  ) = mutableListOf<Container>().apply {
+    addAll(listContainers(withLabel(LABEL_ANSWER_ID), *listParams))
+    addAll(listContainers(withLabel(LABEL_READ_ONLY_ANSWER_ID), *listParams))
+    addAll(listContainers(withLabel(LABEL_TASK_ID), *listParams))
   }
 
   @Scheduled(
@@ -313,7 +316,7 @@ class ContainerService : BaseService() {
     log.debug("Checking for idle containers")
     // create a new map to not leak memory if containers disappear in another way
     val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
-    getAllIdeContainers().forEach {
+    getAllIdeContainers(withStatusRunning()).forEach {
       val containerId = it.id()
       // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
       val connections = exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).output.trim()
@@ -362,7 +365,7 @@ class ContainerService : BaseService() {
   protected fun removeShutdownContainers() {
     val thresholdDate = Date.from(Instant.now().minusMillis(config.ide.removeThreshold))
     log.debug("Removing IDE containers exited before $thresholdDate")
-    getAllIdeContainers().forEach { container ->
+    getAllIdeContainers(withStatusExited()).forEach { container ->
       val containerId = container.id()
       val inspection = docker.inspectContainer(containerId)
       if (inspection.state().finishedAt().before(thresholdDate)) {
