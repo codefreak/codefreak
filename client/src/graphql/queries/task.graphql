@@ -37,6 +37,7 @@ query GetTask($id: ID!, $answerUserId: ID) {
   task(id: $id) {
     id
     title
+    editable
     assignment {
       id
       title
@@ -53,9 +54,15 @@ query GetTask($id: ID!, $answerUserId: ID) {
   }
 }
 
-query GetTaskDetails($id: ID!) {
+query GetTaskDetails($id: ID!, $teacher: Boolean = false) {
   task(id: $id) {
     id
     body
+    hiddenFiles @include(if: $teacher)
+    protectedFiles @include(if: $teacher)
+    assignment {
+      id
+      status
+    }
   }
 }

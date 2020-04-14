@@ -1,10 +1,13 @@
 package org.codefreak.codefreak.entity
 
+import com.vladmihalcea.hibernate.type.json.JsonStringType
+import org.hibernate.annotations.TypeDef
 import java.util.UUID
 import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
+@TypeDef(name = "json", typeClass = JsonStringType::class)
 abstract class BaseEntity(
   @Id
   var id: UUID = UUID.randomUUID()

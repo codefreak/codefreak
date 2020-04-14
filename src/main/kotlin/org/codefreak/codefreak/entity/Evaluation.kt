@@ -7,7 +7,6 @@ import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
-import javax.persistence.OrderBy
 
 @Entity
 class Evaluation(
@@ -21,7 +20,6 @@ class Evaluation(
   var filesDigest: ByteArray
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL])
-  @OrderBy("position ASC")
   var evaluationSteps = mutableSetOf<EvaluationStep>()
 
   @CreationTimestamp

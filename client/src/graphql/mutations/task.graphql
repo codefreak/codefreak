@@ -8,6 +8,18 @@ mutation CreateTask {
   }
 }
 
+mutation UpdateTask($input: TaskInput!) {
+  updateTask(input: $input)
+}
+
+mutation UpdateTaskDetails($input: TaskDetailsInput!) {
+  updateTaskDetails(input: $input)
+}
+
+mutation SetTaskPositon($id: ID!, $position: Long!) {
+  setTaskPosition(id: $id, position: $position)
+}
+
 mutation UploadTask($files: [Upload!]!) {
   uploadTask(files: $files) {
     id

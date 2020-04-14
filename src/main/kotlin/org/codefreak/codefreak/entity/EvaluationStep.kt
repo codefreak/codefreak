@@ -17,9 +17,8 @@ import javax.persistence.OneToMany
  */
 @Entity
 class EvaluationStep(
-  var runnerName: String,
-  // TODO: See GitHub Issue #234
-  var position: Int
+  @ManyToOne(optional = false)
+  var definition: EvaluationStepDefinition
 ) : BaseEntity() {
   @ManyToOne(optional = false)
   var evaluation: Evaluation? = null

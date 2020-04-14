@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.inject.Named
 import com.tngtech.archunit.core.importer.ImportOption
-import javax.persistence.Entity
+import javax.persistence.ManyToMany
+import javax.persistence.OneToMany
 
 @RunWith(ArchUnitRunner::class)
 @AnalyzeClasses(packages = ["org.codefreak.codefreak"], importOptions = [ImportOption.DoNotIncludeTests::class])
@@ -54,11 +55,12 @@ internal class ArchitectureTest {
       .beAnnotatedWith(Named::class.java)
 
   @ArchTest
-  val `List is not used as type for entity properties` = ArchRuleDefinition
+  val `List is not used as type for entity relations` = ArchRuleDefinition
       .noFields()
       .that()
-      .areDeclaredInClassesThat()
-      .areAnnotatedWith(Entity::class.java)
+      .areAnnotatedWith(OneToMany::class.java)
+      .or()
+      .areAnnotatedWith(ManyToMany::class.java)
       .should()
       .haveRawType(List::class.java)
 }

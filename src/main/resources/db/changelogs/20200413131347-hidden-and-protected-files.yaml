@@ -1,0 +1,23 @@
+databaseChangeLog:
+- changeSet:
+    id: 1586783732836-2
+    author: vagrant (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            defaultValue: '[]'
+            name: hidden_files
+            type: varchar(1024)
+        tableName: task
+- changeSet:
+    id: 1586783732836-3
+    author: vagrant (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            defaultValue: '[]'
+            name: protected_files
+            type: varchar(1024)
+        tableName: task

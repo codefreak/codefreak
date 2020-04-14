@@ -100,15 +100,13 @@ class EvaluationService : BaseService() {
 
   fun addCommentFeedback(answer: Answer, digest: ByteArray, feedback: Feedback): Feedback {
     // find out if evaluation has a comment step definition
-    val taskDefinition = taskService.getTaskDefinition(answer.task.id)
-    val stepDefinition = taskDefinition.evaluation.find { it.step == CommentRunner.RUNNER_NAME }
+    val stepDefinition = answer.task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME }
         ?: throw IllegalArgumentException("Task has no 'comments' evaluation step")
-    val stepIndex = taskDefinition.evaluation.indexOf(stepDefinition)
     val evaluation = getEvaluationByDigest(answer.id, digest) ?: createEvaluation(answer)
 
     // either take existing comments step on evaluation or create a new one
-    val evaluationStep = evaluation.evaluationSteps.find { it.position == stepIndex }
-        ?: EvaluationStep(CommentRunner.RUNNER_NAME, stepIndex).also { evaluation.addStep(it) }
+    val evaluationStep = evaluation.evaluationSteps.find { it.definition == stepDefinition }
+        ?: EvaluationStep(stepDefinition).also { evaluation.addStep(it) }
 
     evaluationStep.addFeedback(feedback)
     evaluationRepository.save(evaluation)
@@ -119,7 +117,7 @@ class EvaluationService : BaseService() {
     return getLatestEvaluation(answer.id).map {
       // evaluation is fresh if file hash matches and all evaluation steps have been run
       it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answer.id)) &&
-          taskService.getTaskDefinition(answer.task.id).evaluation.size == it.evaluationSteps.size
+          answer.task.evaluationStepDefinitions.size == it.evaluationSteps.size
     }.orElse(false)
   }
 

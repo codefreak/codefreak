@@ -1,6 +1,7 @@
 package org.codefreak.codefreak.entity
 
 import org.codefreak.codefreak.service.AssignmentStatusChangePublisher
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import java.util.SortedSet
@@ -30,6 +31,7 @@ class Assignment(
 
   var openFrom: Instant? = null,
   var deadline: Instant? = null,
+  @ColumnDefault("false")
   var active: Boolean = false
 ) : BaseEntity() {
   /**

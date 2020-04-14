@@ -202,7 +202,7 @@ const StatusSteps: React.FC<{
       >
         <Steps size="small" current={activeStep[status]}>
           <Step
-            title="Draft"
+            title="Inactive"
             description={
               stepsExpanded ? (
                 <>
@@ -227,7 +227,7 @@ const StatusSteps: React.FC<{
                   </p>
                   <Button
                     type={status === 'INACTIVE' ? 'primary' : 'default'}
-                    disabled={status === 'ACTIVE'}
+                    disabled={status === 'ACTIVE' || status === 'OPEN'}
                     onClick={activate}
                   >
                     Activate

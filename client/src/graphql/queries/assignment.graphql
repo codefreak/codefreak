@@ -31,8 +31,10 @@ fragment latestEvaluation on Evaluation {
   stepsResultSummary
   steps {
     id
-    position
-    runnerName
+    definition {
+      position
+      runnerName
+    }
     result
     summary
   }
@@ -67,8 +69,8 @@ query GetAssignmentWithSubmissions($id: ID!) {
       id
       title
       position
-      evaluationSteps {
-        index
+      evaluationStepDefinitions {
+        position
         runnerName
       }
     }
