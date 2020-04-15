@@ -58,7 +58,9 @@ class SubmissionService : BaseService() {
     return submissionRepository.save(submission)
   }
 
-  fun generateSubmissionCsv(assignment: Assignment): String {
+  @Transactional(readOnly = true)
+  fun generateSubmissionCsv(assignmentId: UUID): String {
+    val assignment = assignmentService.findAssignment(assignmentId)
     // store a list of (task -> evaluation steps) that represents each column in our table
     val columnDefinitions = assignment.tasks.flatMap { task ->
       taskService.getTaskDefinition(task.id).evaluation.mapIndexed { index, evaluationDefinition ->
