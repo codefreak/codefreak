@@ -63,7 +63,7 @@ deploy:
   # Deploy legacy 3.0 version
   - provider: script
     on:
-      branch: 3_0
+      branch: "3_0"
     script: docker-ci-deploy --tag 3-legacy -- cfreak/code-freak
 
   # publish release
