@@ -60,6 +60,11 @@ deploy:
       tags: true
     # This will also tag and deploy minor and major version (1.2.3 as 1.2 and 1)
     script: docker-ci-deploy --version-latest --version $TRAVIS_TAG --version-semver cfreak/code-freak
+  # Deploy legacy 3.0 version
+  - provider: script
+    on:
+      branch: 3_0
+    script: docker-ci-deploy --tag 3-legacy -- cfreak/code-freak
 
   # publish release
   - provider: script
