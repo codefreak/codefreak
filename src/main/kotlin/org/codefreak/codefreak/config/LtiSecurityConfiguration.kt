@@ -28,8 +28,10 @@ import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
+import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy
 import java.security.KeyStore
 
 @ConditionalOnProperty("codefreak.lti.enabled")
@@ -37,7 +39,8 @@ import java.security.KeyStore
 @Order(1)
 class LtiSecurityConfiguration(
   @Autowired appConfiguration: AppConfiguration,
-  @Autowired val userService: UserService
+  @Autowired val userService: UserService,
+  @Autowired val sessionRegistry: SessionRegistry
 ) : WebSecurityConfigurerAdapter() {
   val config = appConfiguration.lti
   private val ltiLoginPath = "/lti/login"
@@ -82,8 +85,13 @@ class LtiSecurityConfiguration(
       this.authRequestUrlBuilder = authRequestUrlBuilder()
       this.setAuthenticationSuccessHandler(ltiAuthSuccessHandler())
       this.setFilterProcessesUrl(ltiLoginPath)
+      // register session after login for websocket authentication
+      this.setSessionAuthenticationStrategy(registerSessionAuthStrategy())
     }
   }
+
+  @Bean
+  fun registerSessionAuthStrategy() = RegisterSessionAuthenticationStrategy(sessionRegistry)
 
   @Bean
   fun ltiAuthSuccessHandler(): AuthenticationSuccessHandler {

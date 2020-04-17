@@ -29,6 +29,7 @@ This will create a file called `cf-keys.pkcs12` with a public/private key pair.
 ----
 $ keytool -genkey \
   -keystore cf-keys.p12 \
+  -storetype pkcs12 \
   -storepass "supersecurepassword123" \
   -keyalg RSA \
   -alias codefreak \
@@ -41,7 +42,7 @@ You may need this information when registering Code FREAK as external tool in yo
 
 [source]
 ----
-$ openssl pkcs12 -in cf-keys.pkcs12 -nokeys | openssl x509 -pubkey -noout
+$ openssl pkcs12 -in cf-keys.p12 -nokeys | openssl x509 -pubkey -noout
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQE ...
 ----
@@ -80,6 +81,8 @@ Please replace `[codefreak-url]` with the public accessible URL of your Code FRE
 |Icon URL
 |`[codefreak-url]/images/lti-code-icon.png`
 |===
+
+WARNING: Please make sure your LMS passes the user's name and email address to Code FREAK! Some LMS have additional privacy settings for these options.
 
 The LMS should generate a Client ID for you. Please write it down for the next step.
 

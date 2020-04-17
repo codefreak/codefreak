@@ -1,0 +1,6 @@
+mutation CreateLtiDeepLinkResponse($assignmentId: ID!, $jwtId: ID!) {
+  ltiCreateDeepLinkResponse(assignmentId: $assignmentId, jwtId: $jwtId) {
+    redirectUrl
+    signedJwt
+  }
+}

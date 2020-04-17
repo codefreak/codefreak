@@ -1,4 +1,5 @@
 import ProLayout from '@ant-design/pro-layout'
+import { BasicLayoutProps } from '@ant-design/pro-layout/lib/BasicLayout'
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
 import { Alert } from 'antd'
 import { Route } from 'antd/lib/breadcrumb/Breadcrumb'
@@ -31,12 +32,16 @@ export const createBreadcrumb = (routes: Route[]) => ({
   itemRender: breadcrumbItemRender
 })
 
-interface DefaultLayoutProps {
-  logout: () => void
+interface DefaultLayoutProps extends Partial<BasicLayoutProps> {
+  logout?: () => void
 }
 
 const useSidebarCollapsedState = createOptionState('sidebar-collapsed')
-const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
+const DefaultLayout: React.FC<DefaultLayoutProps> = ({
+  logout,
+  children,
+  ...additionProps
+}) => {
   useLocation() // somehow this is needed for 'active navigation item' to work correctly 🤔
 
   useSubscribeToGlobalEvents()
@@ -71,6 +76,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
       rightContentRender={renderRightHeader}
       footerRender={renderFooter}
       headerRender={renderHeader}
+      {...additionProps}
     >
       {children}
     </ProLayout>
