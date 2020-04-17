@@ -3,7 +3,6 @@ package org.codefreak.codefreak.service.evaluation
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
-import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.error
 import org.slf4j.LoggerFactory
@@ -61,7 +60,7 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
       }
 
       log.debug(
-          "Step ${runnerName} finished ${evaluationStep.result}: ${evaluationStep.summary}"
+          "Step $runnerName finished ${evaluationStep.result}: ${evaluationStep.summary}"
       )
       evaluation.addStep(evaluationStep)
     }
