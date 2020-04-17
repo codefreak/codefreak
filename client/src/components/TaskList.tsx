@@ -1,11 +1,14 @@
-import { Button, Card, Modal, Tooltip } from 'antd'
+import { Button, Modal, Tooltip } from 'antd'
+import { CardProps } from 'antd/lib/card'
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   TaskListItemFragment,
-  useDeleteTaskMutation
+  useDeleteTaskMutation,
+  useSetTaskPositonMutation
 } from '../services/codefreak-api'
 import { messageService } from '../services/message'
+import CardList from './CardList'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
 
@@ -31,54 +34,55 @@ const renderTask = (props: RenderProps) => (task: Task) => {
       }
     })
 
-  return (
-    <Card
-      title={
-        <>
-          {task.title}
-          {task.answer ? (
-            <EvaluationIndicator
-              style={{ marginLeft: 8 }}
-              answerId={task.answer.id}
-            />
-          ) : null}
-        </>
-      }
-      key={task.id}
-      style={{ marginBottom: 16 }}
-      extra={
-        task.editable ? (
-          <Tooltip
-            title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
-            placement="left"
-          >
-            <Button
-              onClick={confirmDelete}
-              type="dashed"
-              shape="circle"
-              icon="delete"
-            />
-          </Tooltip>
-        ) : null
-      }
-    >
-      {task.body ? <ReactMarkdown source={task.body} /> : null}
-      <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
-        <Button icon="folder-open" type="primary">
-          Details
-        </Button>
-      </EntityLink>
-    </Card>
-  )
+  const cardProps: CardProps = {
+    title: (
+      <>
+        {task.title}
+        {task.answer ? (
+          <EvaluationIndicator
+            style={{ marginLeft: 8 }}
+            answerId={task.answer.id}
+          />
+        ) : null}
+      </>
+    ),
+    extra: task.editable ? (
+      <Tooltip
+        title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
+        placement="left"
+      >
+        <Button
+          onClick={confirmDelete}
+          type="dashed"
+          shape="circle"
+          icon="delete"
+        />
+      </Tooltip>
+    ) : null,
+    children: (
+      <>
+        {task.body ? <ReactMarkdown source={task.body} /> : null}
+        <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
+          <Button icon="folder-open" type="primary">
+            Details
+          </Button>
+        </EntityLink>
+      </>
+    )
+  }
+
+  return cardProps
 }
 
 interface TaskListProps {
   tasks: Task[]
   update: () => void
+  sortable?: boolean
 }
 
 const TaskList: React.FC<TaskListProps> = props => {
   const [deleteTask] = useDeleteTaskMutation()
+  const [setTaskPosition] = useSetTaskPositonMutation()
   const renderProps: RenderProps = {
     delete: async (id: string) => {
       const result = await deleteTask({ variables: { id } })
@@ -88,7 +92,20 @@ const TaskList: React.FC<TaskListProps> = props => {
       }
     }
   }
-  return <>{props.tasks.map(renderTask(renderProps))}</>
+
+  const handlePositionChange = (task: Task, newPosition: number) =>
+    setTaskPosition({ variables: { id: task.id, position: newPosition } }).then(
+      () => messageService.success('Order updated')
+    )
+
+  return (
+    <CardList
+      sortable={props.sortable}
+      items={props.tasks}
+      renderItem={renderTask(renderProps)}
+      handlePositionChange={handlePositionChange}
+    />
+  )
 }
 
 export default TaskList

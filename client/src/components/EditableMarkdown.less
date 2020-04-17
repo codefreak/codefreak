@@ -1,0 +1,30 @@
+.markdown-wrapper {
+  padding: 4px;
+  margin: -4px;
+  border-radius: 4px;
+  position: relative;
+
+  .edit-icon {
+    visibility: hidden;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  &.editable:hover {
+    cursor: pointer;
+    background-color: #f0f2f5;
+    .edit-icon {
+      visibility: visible;
+    }
+  }
+
+  > *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.grip > svg {
+  position: relative;
+  top: -6px;
+}

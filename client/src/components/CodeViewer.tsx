@@ -1,14 +1,10 @@
 import { Card, Icon, Result } from 'antd'
 import React from 'react'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
-import {
-  basename,
-  isBinaryContent,
-  numberOfLines,
-  sliceLines
-} from '../services/file'
+import { isBinaryContent, numberOfLines, sliceLines } from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
 
+import { basename, extname } from 'path'
 import Centered from './Centered'
 import ReviewEditor from './code/ReviewEditor'
 import SyntaxHighlighter from './code/SyntaxHighlighter'
@@ -85,6 +81,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
       <SyntaxHighlighter
         firstLineNumber={firstLineNumber}
         highlightLines={highlightLines}
+        language={extname(path)}
       >
         {value}
       </SyntaxHighlighter>

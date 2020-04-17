@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.entity
 
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
 import java.time.Instant
@@ -50,8 +51,21 @@ class Task(
   @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
   var answers: MutableSet<Answer> = mutableSetOf()
 
+  @Type(type = "json")
+  @Column(length = 1024)
+  @ColumnDefault("'[]'")
+  var hiddenFiles: List<String> = listOf()
+
+  @Type(type = "json")
+  @Column(length = 1024)
+  @ColumnDefault("'[]'")
+  var protectedFiles: List<String> = listOf()
+
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
+
+  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
+  var evaluationStepDefinitions: MutableSet<EvaluationStepDefinition> = mutableSetOf()
 
   override fun compareTo(other: Task) = position.compareTo(other.position)
 }

@@ -9,6 +9,7 @@ import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.afterClose
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.codefreak.codefreak.entity.Task
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -57,46 +58,45 @@ class AnswerService : BaseService() {
   }
 
   fun copyFilesFromTask(answer: Answer) {
-    val taskDefinition = taskService.getTaskDefinition(answer.task.id)
+    containerService.saveTaskFiles(answer.task)
     fileService.writeCollectionTar(answer.id).use { out ->
       fileService.readCollectionTar(answer.task.id).use { `in` ->
         TarUtil.copyEntries(TarArchiveInputStream(`in`), TarUtil.PosixTarArchiveOutputStream(out)) {
-          !taskDefinition.isHidden(it)
+          !answer.task.isHidden(it)
         }
       }
     }
   }
 
   fun copyFilesForEvaluation(answer: Answer): InputStream {
-    val taskDefinition = taskService.getTaskDefinition(answer.task.id)
     val out = ByteArrayOutputStream()
     val outTar = TarUtil.PosixTarArchiveOutputStream(out)
     fileService.readCollectionTar(answer.id).use { answerFiles ->
       TarUtil.copyEntries(TarArchiveInputStream(answerFiles), outTar) {
-        !taskDefinition.isHidden(it) && !taskDefinition.isProtected(it)
+        !answer.task.isHidden(it) && !answer.task.isProtected(it)
       }
     }
     fileService.readCollectionTar(answer.task.id).use { taskFiles ->
       TarUtil.copyEntries(TarArchiveInputStream(taskFiles), outTar) {
-        taskDefinition.isHidden(it) || taskDefinition.isProtected(it)
+        answer.task.isHidden(it) || answer.task.isProtected(it)
       }
     }
     return ByteArrayInputStream(out.toByteArray())
   }
 
-  private fun TaskDefinition.isHidden(entry: TarArchiveEntry): Boolean {
+  private fun Task.isHidden(entry: TarArchiveEntry): Boolean {
     val path = TarUtil.normalizeEntryName(entry.name)
     val matcher = AntPathMatcher()
-    hidden.plus("codefreak.yml").forEach {
+    hiddenFiles.plus("codefreak.yml").forEach {
       if (matcher.match(it, path)) return true
     }
     return false
   }
 
-  private fun TaskDefinition.isProtected(entry: TarArchiveEntry): Boolean {
+  private fun Task.isProtected(entry: TarArchiveEntry): Boolean {
     val path = TarUtil.normalizeEntryName(entry.name)
     val matcher = AntPathMatcher()
-    protected.forEach {
+    protectedFiles.forEach {
       if (matcher.match(it, path)) return true
     }
     return false

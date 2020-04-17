@@ -26,22 +26,21 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
   private val log = LoggerFactory.getLogger(this::class.java)
 
   override fun process(answer: Answer): Evaluation {
-    val taskDefinition = taskService.getTaskDefinition(answer.task.id)
     val digest = fileService.getCollectionMd5Digest(answer.id)
     val evaluation =
         evaluationService.getEvaluationByDigest(answer.id, digest) ?: evaluationService.createEvaluation(answer)
-    log.debug("Start evaluation of answer {} ({} steps)", answer.id, taskDefinition.evaluation.size)
-    taskDefinition.evaluation.forEachIndexed { index, evaluationDefinition ->
-      // step may has already been executed
-      if (evaluation.evaluationSteps.find { it.position == index } !== null) {
-        return@forEachIndexed
+    log.debug("Start evaluation of answer {} ({} steps)", answer.id, answer.task.evaluationStepDefinitions.size)
+    answer.task.evaluationStepDefinitions.forEach { evaluationStepDefinition ->
+      // step may have already been executed
+      if (evaluation.evaluationSteps.find { it.definition == evaluationStepDefinition } !== null) {
+        return@forEach
       }
-      val runnerName = evaluationDefinition.step
-      val evaluationStep = EvaluationStep(runnerName, index)
+      val runnerName = evaluationStepDefinition.runnerName
+      val evaluationStep = EvaluationStep(evaluationStepDefinition)
       try {
         log.debug("Running evaluation step with runner '{}'", runnerName)
         val runner = evaluationService.getEvaluationRunner(runnerName)
-        val feedbackList = runner.run(answer, evaluationDefinition.options)
+        val feedbackList = runner.run(answer, evaluationStepDefinition.options)
         evaluationStep.addAllFeedback(feedbackList)
         // only check for explicitly "failed" feedback so we ignore the "skipped" ones
         if (evaluationStep.feedback.any { feedback -> feedback.isFailed }) {

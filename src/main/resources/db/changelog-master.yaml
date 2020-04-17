@@ -20,3 +20,9 @@ databaseChangeLog:
 - include:
     file: changelogs/20200318115544-add-feedback-author.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20200413131347-hidden-and-protected-files.yaml
+    relativeToChangelogFile: true
+- include:
+    file: changelogs/20200413180136-evaluation-step-definitions.yaml
+    relativeToChangelogFile: true

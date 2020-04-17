@@ -23,7 +23,7 @@ const TaskListPage: React.FC = () => {
       Click here to add the first task! <Emoji symbol="✨" />
     </EmptyListCallToAction>
   ) : (
-    <TaskList tasks={tasks} update={update} />
+    <TaskList tasks={tasks} update={update} sortable={editable} />
   )
 }
 

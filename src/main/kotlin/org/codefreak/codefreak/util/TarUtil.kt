@@ -109,6 +109,9 @@ object TarUtil {
     return if (name.startsWith("./")) name.drop(2) else name
   }
 
+  fun copyEntries(from: InputStream, to: OutputStream, filter: (TarArchiveEntry) -> Boolean = { true }) =
+      copyEntries(TarArchiveInputStream(from), PosixTarArchiveOutputStream(to), filter)
+
   fun copyEntries(from: TarArchiveInputStream, to: TarArchiveOutputStream, filter: (TarArchiveEntry) -> Boolean = { true }) {
     generateSequence { from.nextTarEntry }
         .filter { filter(it) }

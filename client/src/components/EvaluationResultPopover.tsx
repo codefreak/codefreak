@@ -13,7 +13,7 @@ import './EvaluationResultPopover.less'
 const EvaluationResultPopover: React.FC<{
   task: Pick<Task, 'title'>
   user: PublicUserFieldsFragment
-  steps: Array<Pick<EvaluationStep, 'runnerName' | 'summary' | 'result' | 'id'>>
+  steps: Array<Pick<EvaluationStep, 'id' | 'summary' | 'result' | 'definition'>>
 }> = ({ task, user, steps, children }) => {
   const popoverContent = (
     <List itemLayout="horizontal" size="small">
@@ -22,7 +22,7 @@ const EvaluationResultPopover: React.FC<{
           <List.Item key={step.id}>
             <List.Item.Meta
               avatar={<EvaluationStepResultIcon stepResult={step.result} />}
-              title={step.runnerName}
+              title={step.definition.runnerName}
               description={step.summary}
             />
           </List.Item>

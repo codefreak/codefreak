@@ -8,6 +8,7 @@ import { Authority } from '../hooks/useHasAuthority'
 import useSubscribeToGlobalEvents from '../hooks/useSubscribeToGlobalEvents'
 import { routerConfig } from '../router.config'
 import { useGetMotdQuery } from '../services/codefreak-api'
+import { createOptionState } from '../services/options'
 import AppFooter from './AppFooter'
 import Authorized from './Authorized'
 import './DefaultLayout.less'
@@ -34,10 +35,14 @@ interface DefaultLayoutProps {
   logout: () => void
 }
 
+const useSidebarCollapsedState = createOptionState('sidebar-collapsed')
 const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
   useLocation() // somehow this is needed for 'active navigation item' to work correctly 🤔
 
   useSubscribeToGlobalEvents()
+  const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsedState(
+    false
+  )
 
   const motd = useGetMotdQuery()
 
@@ -58,7 +63,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ logout, children }) => {
       route={routerConfig}
       title={appName}
       logo={<Logo />}
+      breakpoint={false}
       disableContentMargin={false}
+      collapsed={sidebarCollapsed}
+      onCollapse={setSidebarCollapsed}
       itemRender={breadcrumbItemRender}
       rightContentRender={renderRightHeader}
       footerRender={renderFooter}
