@@ -268,11 +268,17 @@ class ContainerService : BaseService() {
   }
 
   fun answerFilesUpdated(answerId: UUID) {
-    getIdeContainer(answerId)?.let {
-      // use sh to make globbing work
-      // two globs: one for regular files and one for hidden files/dirs except . and ..
-      exec(it, arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*"))
-      copyFilesToIde(it, answerId)
+    try {
+      getIdeContainer(answerId)?.let {
+        // use sh to make globbing work
+        // two globs: one for regular files and one for hidden files/dirs except . and ..
+        exec(it, arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*"))
+        copyFilesToIde(it, answerId)
+      }
+    } catch (e: IllegalStateException) {
+      // happens if the IDE is not running.
+      // We could check if it is running before but the container might get killed while we update files
+      log.debug("Not updating files in IDE for answer $answerId: ${e.message}")
     }
   }
 
