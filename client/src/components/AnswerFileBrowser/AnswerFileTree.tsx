@@ -1,8 +1,8 @@
 import { Tree } from 'antd'
+import { basename } from 'path'
 import React from 'react'
 import { useGetAnswerFileListQuery } from '../../services/codefreak-api'
 import {
-  basename,
   fileListToTree,
   FileTreeDirectoryNode,
   FileTreeNode

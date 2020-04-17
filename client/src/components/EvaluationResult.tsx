@@ -239,7 +239,8 @@ const EvaluationStepPanel: React.FC<{
 }> = ({ answerId, step }) => {
   const title = (
     <>
-      <EvaluationStepResultIcon stepResult={step.result} /> {step.runnerName}
+      <EvaluationStepResultIcon stepResult={step.result} />{' '}
+      {step.definition.runnerName}
     </>
   )
 

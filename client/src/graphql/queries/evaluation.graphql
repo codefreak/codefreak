@@ -51,10 +51,12 @@ query GetDetailedEvaluaton($evaluationId: ID!) {
     stepsResultSummary
     steps {
       id
-      position
       result
       summary
-      runnerName
+      definition {
+        position
+        runnerName
+      }
       feedback {
         id
         summary

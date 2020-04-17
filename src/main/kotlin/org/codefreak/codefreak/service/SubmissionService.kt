@@ -22,9 +22,6 @@ class SubmissionService : BaseService() {
   lateinit var fileService: FileService
 
   @Autowired
-  private lateinit var taskService: TaskService
-
-  @Autowired
   private lateinit var evaluationService: EvaluationService
 
   @Autowired
@@ -58,18 +55,16 @@ class SubmissionService : BaseService() {
     return submissionRepository.save(submission)
   }
 
-  fun generateSubmissionCsv(assignment: Assignment): String {
+  @Transactional(readOnly = true)
+  fun generateSubmissionCsv(assignmentId: UUID): String {
+    val assignment = assignmentService.findAssignment(assignmentId)
     // store a list of (task -> evaluation steps) that represents each column in our table
-    val columnDefinitions = assignment.tasks.flatMap { task ->
-      taskService.getTaskDefinition(task.id).evaluation.mapIndexed { index, evaluationDefinition ->
-        Triple(task, index, evaluationDefinition)
-      }
-    }
+    val columnDefinitions = assignment.tasks.flatMap { task -> task.evaluationStepDefinitions.map { Pair(task, it) } }
     // generate the header columns. In CSV files we have no option to join columns so we have to create a flat
     // list of task-evaluation combinations
     // [EMPTY] | Task #1 Eval #1 | Task #1 Eval #2 | Task #2 Eval #1 | ...
-    val resultTitles = columnDefinitions.map { (task, _, evaluationDefinition) ->
-      "${task.title} (${evaluationDefinition.step})"
+    val resultTitles = columnDefinitions.map { (task, evaluationStepDefinition) ->
+      "${task.title} (${evaluationStepDefinition.runnerName})"
     }
     val titleCols = mutableListOf("User").apply {
       addAll(resultTitles)
@@ -78,10 +73,10 @@ class SubmissionService : BaseService() {
 
     // generate the actual data rows for each submission
     val rows = submissions.map { submission ->
-      val resultCols = columnDefinitions.map { (task, index, _) ->
+      val resultCols = columnDefinitions.map { (task, evaluationStepDefinition) ->
         val answer = submission.getAnswer(task.id)
         val evaluation = answer?.id?.let { evaluationService.getLatestEvaluation(it).orElse(null) }
-        val result = evaluation?.evaluationSteps?.firstOrNull { it.position == index }?.summary
+        val result = evaluation?.evaluationSteps?.firstOrNull { it.definition == evaluationStepDefinition }?.summary
         when {
           answer == null -> "[no answer]"
           evaluation == null -> "[no evaluation]"

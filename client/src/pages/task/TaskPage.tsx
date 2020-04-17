@@ -5,6 +5,7 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
+import EditablePageTitle from '../../components/EditablePageTitle'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
 import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
@@ -15,13 +16,17 @@ import { useQueryParam } from '../../hooks/useQuery'
 import useSubPath from '../../hooks/useSubPath'
 import {
   PublicUserFieldsFragment,
+  TaskInput,
   useCreateAnswerMutation,
-  useGetTaskQuery
+  useGetTaskQuery,
+  useUpdateTaskMutation
 } from '../../services/codefreak-api'
 import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
+import { messageService } from '../../services/message'
 import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
+import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
 import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
@@ -53,21 +58,37 @@ const TaskPage: React.FC = () => {
 
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
 
+  const [updateMutation] = useUpdateTaskMutation({
+    onCompleted: () => {
+      result.refetch()
+      messageService.success('Task updated')
+    }
+  })
+
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
-
   const { task } = result.data
   const { answer } = task
   const differentUser =
     isTeacher && answer && userId ? answer.submission.user : undefined
   const pool = !task.assignment
+  const editable = task.editable && !differentUser
+
+  const taskInput: TaskInput = {
+    id: task.id,
+    title: task.title
+  }
+
+  const updater = makeUpdater(taskInput, input =>
+    updateMutation({ variables: { input } })
+  )
 
   const answerTab = pool
     ? []
     : [
         { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
-        { key: '/ide', tab: tab('Online IDE', 'edit'), disabled: !answer },
+        { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
         {
           key: '/evaluation',
           disabled: !answer,
@@ -148,7 +169,13 @@ const TaskPage: React.FC = () => {
     <DifferentUserContext.Provider value={differentUser}>
       <SetTitle>{task.title}</SetTitle>
       <PageHeaderWrapper
-        title={title}
+        title={
+          <EditablePageTitle
+            editable={editable}
+            title={title}
+            onChange={updater('title')}
+          />
+        }
         breadcrumb={createBreadcrumb(createRoutes.forTask(task))}
         tabList={tabs}
         tabActiveKey={subPath.get()}
@@ -156,7 +183,9 @@ const TaskPage: React.FC = () => {
         extra={extra}
       />
       <Switch>
-        <Route exact path={path} component={TaskDetailsPage} />
+        <Route exact path={path}>
+          <TaskDetailsPage editable={editable} />
+        </Route>
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>

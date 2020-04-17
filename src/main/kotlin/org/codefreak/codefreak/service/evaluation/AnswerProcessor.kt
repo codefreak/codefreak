@@ -18,36 +18,31 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
   private lateinit var fileService: FileService
 
   @Autowired
-  private lateinit var taskService: TaskService
-
-  @Autowired
   private lateinit var evaluationService: EvaluationService
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
   override fun process(answer: Answer): Evaluation {
-    val taskDefinition = taskService.getTaskDefinition(answer.task.id)
     val digest = fileService.getCollectionMd5Digest(answer.id)
     val evaluation =
         evaluationService.getEvaluationByDigest(answer.id, digest) ?: evaluationService.createEvaluation(answer)
-    log.debug("Start evaluation of answer {} ({} steps)", answer.id, taskDefinition.evaluation.size)
-    taskDefinition.evaluation.forEachIndexed { index, evaluationDefinition ->
-      // step may has already been executed
-      val executedStep = evaluation.evaluationSteps.find { it.position == index }
+    log.debug("Start evaluation of answer {} ({} steps)", answer.id, answer.task.evaluationStepDefinitions.size)
+    answer.task.evaluationStepDefinitions.forEach { evaluationStepDefinition ->
+      val executedStep = evaluation.evaluationSteps.find { it.definition == evaluationStepDefinition }
       if (executedStep !== null) {
         // Only re-run if this step errored
         if (executedStep.result !== EvaluationStep.EvaluationStepResult.ERRORED) {
-          return@forEachIndexed
+          return@forEach
         }
         // remove existing errored step from evaluation for re-running
         evaluation.evaluationSteps.remove(executedStep)
       }
-      val runnerName = evaluationDefinition.step
-      val evaluationStep = EvaluationStep(runnerName, index)
+      val runnerName = evaluationStepDefinition.runnerName
+      val evaluationStep = EvaluationStep(evaluationStepDefinition)
       try {
         log.debug("Running evaluation step with runner '{}'", runnerName)
         val runner = evaluationService.getEvaluationRunner(runnerName)
-        val feedbackList = runner.run(answer, evaluationDefinition.options)
+        val feedbackList = runner.run(answer, evaluationStepDefinition.options)
         evaluationStep.addAllFeedback(feedbackList)
         // only check for explicitly "failed" feedback so we ignore the "skipped" ones
         if (evaluationStep.feedback.any { feedback -> feedback.isFailed }) {
@@ -66,7 +61,7 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
       }
 
       log.debug(
-          "Step ${evaluationStep.runnerName} finished ${evaluationStep.result}: ${evaluationStep.summary}"
+          "Step ${runnerName} finished ${evaluationStep.result}: ${evaluationStep.summary}"
       )
       evaluation.addStep(evaluationStep)
     }

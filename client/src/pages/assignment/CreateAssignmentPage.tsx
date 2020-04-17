@@ -83,6 +83,7 @@ const CreateAssignmentPage: React.FC = () => {
           <Button
             onClick={createAssignment}
             size="large"
+            type="primary"
             loading={creatingAssignment}
             block
           >

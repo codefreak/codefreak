@@ -7,6 +7,7 @@ import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
+import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.graphql.BaseDto
@@ -35,18 +36,18 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val createdAt = entity.createdAt
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val inPool = entity.assignment == null
-  val editable by lazy {
-    when (entity.assignment) {
-      null -> authorization.isCurrentUser(entity.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
-      else -> assignment?.editable ?: false
-    }
+  val editable by lazy { entity.isEditable(authorization) }
+  val hiddenFiles by lazy {
+    authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
+    entity.hiddenFiles.toTypedArray()
+  }
+  val protectedFiles by lazy {
+    authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
+    entity.protectedFiles.toTypedArray()
   }
 
-  val evaluationSteps by lazy {
-    val taskDefinition = serviceAccess.getService(TaskService::class).getTaskDefinition(entity.id)
-    taskDefinition.evaluation.mapIndexed { index, definition ->
-      EvaluationStepDefinitionDto(index, definition)
-    }
+  val evaluationStepDefinitions by lazy {
+    entity.evaluationStepDefinitions.map { EvaluationStepDefinitionDto(it) }
   }
 
   fun answer(userId: UUID?): AnswerDto? {
@@ -65,6 +66,14 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
 
     return answer?.let { AnswerDto(it, ctx) }
   }
+}
+
+class TaskInput(var id: UUID, var title: String) {
+  constructor() : this(UUID.randomUUID(), "")
+}
+
+class TaskDetailsInput(var id: UUID, var body: String?, var hiddenFiles: Array<String>, var protectedFiles: Array<String>) {
+  constructor() : this(UUID.randomUUID(), null, arrayOf(), arrayOf())
 }
 
 @Component
@@ -118,4 +127,34 @@ class TaskMutation : BaseResolver(), Mutation {
       TaskDto(task, this)
     }
   }
+
+  fun updateTask(input: TaskInput): Boolean = context {
+    val task = serviceAccess.getService(TaskService::class).findTask(input.id)
+    authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    task.title = input.title
+    serviceAccess.getService(TaskService::class).saveTask(task)
+    true
+  }
+
+  fun updateTaskDetails(input: TaskDetailsInput): Boolean = context {
+    val task = serviceAccess.getService(TaskService::class).findTask(input.id)
+    authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    task.body = input.body
+    task.hiddenFiles = input.hiddenFiles.map { it.trim() }.filter { it.isNotEmpty() }
+    task.protectedFiles = input.protectedFiles.map { it.trim() }.filter { it.isNotEmpty() }
+    serviceAccess.getService(TaskService::class).saveTask(task)
+    true
+  }
+
+  fun setTaskPosition(id: UUID, position: Long): Boolean = context {
+    val task = serviceAccess.getService(TaskService::class).findTask(id)
+    authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    serviceAccess.getService(TaskService::class).setTaskPosition(task, position)
+    true
+  }
+}
+
+fun Task.isEditable(authorization: Authorization) = when (assignment) {
+  null -> authorization.isCurrentUser(owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
+  else -> assignment?.isEditable(authorization) ?: false
 }

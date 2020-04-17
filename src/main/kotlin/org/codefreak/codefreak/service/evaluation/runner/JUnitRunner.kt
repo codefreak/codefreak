@@ -1,17 +1,19 @@
 package org.codefreak.codefreak.service.evaluation.runner
 
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.withTrailingSlash
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.codefreak.codefreak.entity.EvaluationStep
-import org.codefreak.codefreak.service.evaluation.EvaluationStepException
-import org.openmbee.junit.JUnitMarshalling
 import org.openmbee.junit.model.JUnitTestCase
+import org.openmbee.junit.model.JUnitTestSuite
 import org.springframework.stereotype.Component
 import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.annotation.XmlElement
+import javax.xml.bind.annotation.XmlRootElement
 
 @Component
 class JUnitRunner : CommandLineRunner() {
@@ -39,13 +41,10 @@ class JUnitRunner : CommandLineRunner() {
         }
       }
     }.also { execution ->
-      val firstFailingCommand = execution.find { it.result.exitCode != 0L }
-      if (feedback.isEmpty() && firstFailingCommand != null) {
-        // e.g. sources failed to compile or other runtime error
-        throw EvaluationStepException(
-            firstFailingCommand.result.output.trim(),
-            EvaluationStep.EvaluationStepResult.FAILED
-        )
+      // no feedback means the sources failed to compile
+      // in this case we will add the exec results as feedback
+      if (feedback.isEmpty()) {
+        feedback.addAll(execution.map(this::executionToFeedback))
       }
     }
     return feedback
@@ -57,35 +56,49 @@ class JUnitRunner : CommandLineRunner() {
   }
 
   protected fun testSuiteToFeedback(xmlResult: ByteArray): List<Feedback> {
-    val suite = try {
-      JUnitMarshalling.unmarshalTestSuite(xmlResult.inputStream())
-    } catch (e: Exception) {
-      throw EvaluationStepException(
-          "Failed to parse jUnit XML:\n${e.message ?: e.cause?.message}",
-          EvaluationStep.EvaluationStepResult.ERRORED,
-          e
-      )
-    }
-    return suite.testCases.map { testCase ->
-      Feedback(testCase.name).apply {
-        group = suite.name
-        longDescription = when {
-          testCase.failures != null -> testCase.failures.joinToString("\n") { it.message ?: it.value }
-          testCase.errors != null -> testCase.errors.joinToString("\n") { it.message ?: it.value }
-          else -> null
-        }
-        // Make jUnit output valid markdown (code block)
-        longDescription?.let { longDescription = wrapInMarkdownCodeBlock(it) }
-        status = when {
-          testCase.isSkipped -> Feedback.Status.IGNORE
-          testCase.isSuccessful -> Feedback.Status.SUCCESS
-          else -> Feedback.Status.FAILED
-        }
-        if (status == Feedback.Status.FAILED) {
-          severity = if (testCase.errors != null) Feedback.Severity.CRITICAL else Feedback.Severity.MAJOR
+    return xmlToTestSuites(xmlResult.inputStream()).flatMap { suite ->
+      suite.testCases.map { testCase ->
+        Feedback(testCase.name).apply {
+          group = suite.name
+          longDescription = when {
+            testCase.failures != null -> testCase.failures.joinToString("\n") { it.message ?: it.value }
+            testCase.errors != null -> testCase.errors.joinToString("\n") { it.message ?: it.value }
+            else -> null
+          }
+          // Make jUnit output valid markdown (code block)
+          longDescription?.let { longDescription = wrapInMarkdownCodeBlock(it) }
+          status = when {
+            testCase.isSkipped -> Feedback.Status.IGNORE
+            testCase.isSuccessful -> Feedback.Status.SUCCESS
+            else -> Feedback.Status.FAILED
+          }
+          if (status == Feedback.Status.FAILED) {
+            severity = if (testCase.errors != null) Feedback.Severity.CRITICAL else Feedback.Severity.MAJOR
+          }
         }
       }
     }
+  }
+
+  /**
+   * jUnit XML allows a <testsuites> root element for multiple <testsuite>s
+   * The element CAN be omitted if there is only a single <testsuite>
+   */
+  private fun xmlToTestSuites(inputStream: InputStream): List<JUnitTestSuite> {
+    val root = JAXBContext.newInstance(JUnitTestSuites::class.java, JUnitTestSuite::class.java)
+        .createUnmarshaller()
+        .unmarshal(inputStream)
+    return when (root) {
+      is JUnitTestSuites -> root.testSuites
+      is JUnitTestSuite -> listOf(root)
+      else -> throw RuntimeException("Unexpected root class ${root.javaClass}")
+    }
+  }
+
+  @XmlRootElement(name = "testsuites")
+  class JUnitTestSuites {
+    @XmlElement(name = "testsuite")
+    lateinit var testSuites: List<JUnitTestSuite>
   }
 
   val JUnitTestCase.isSkipped

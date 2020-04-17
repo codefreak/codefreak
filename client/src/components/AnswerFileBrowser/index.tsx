@@ -1,7 +1,8 @@
 import { Col, Icon, Result, Row, Tabs } from 'antd'
+import { basename } from 'path'
 import React, { useState } from 'react'
 import { FileType } from '../../services/codefreak-api'
-import { basename, FileTreeNode } from '../../services/file'
+import { FileTreeNode } from '../../services/file'
 import Centered from '../Centered'
 import CodeViewer from '../CodeViewer'
 import AnswerFileTree from './AnswerFileTree'
@@ -50,7 +51,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = ({
 
   return (
     <Row type="flex" className="answer-editor">
-      <Col span={6} style={{ backgroundColor: '#fafafa' }}>
+      <Col span={6} className="answer-editor-file-tree">
         <h4 className="answer-editor-file-title"> Files </h4>
         <AnswerFileTree answerId={answerId} onFileSelect={onSelectFileInTree} />
       </Col>

@@ -5,22 +5,22 @@ import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import com.expediagroup.graphql.spring.operations.Subscription
+import graphql.schema.DataFetchingEnvironment
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
+import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
 import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
-import org.codefreak.codefreak.service.EvaluationDefinition
 import org.codefreak.codefreak.service.EvaluationFinishedEvent
 import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.PendingEvaluationStatus
-import graphql.schema.DataFetchingEnvironment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
@@ -41,8 +41,9 @@ class PendingEvaluationDto(answerEntity: Answer, ctx: ResolverContext) : BaseDto
 }
 
 @GraphQLName("EvaluationStepDefinition")
-class EvaluationStepDefinitionDto(val index: Int, definition: EvaluationDefinition) {
-  val runnerName = definition.step
+class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition) {
+  val runnerName = definition.runnerName
+  val position = definition.position
 }
 
 @GraphQLName("Evaluation")
@@ -51,15 +52,14 @@ class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
   val id = entity.id
   val answer by lazy { AnswerDto(entity.answer, ctx) }
   val createdAt = entity.createdAt
-  val steps by lazy { entity.evaluationSteps.map { EvaluationStepDto(it) } }
+  val steps by lazy { entity.evaluationSteps.map { EvaluationStepDto(it) }.sortedBy { it.definition.position } }
   val stepsResultSummary by lazy { entity.stepsResultSummary.let { EvaluationStepResultDto.valueOf(it.name) } }
 }
 
 @GraphQLName("EvaluationStep")
 class EvaluationStepDto(entity: EvaluationStep) {
   val id = entity.id
-  val runnerName = entity.runnerName
-  val position = entity.position
+  val definition by lazy { EvaluationStepDefinitionDto(entity.definition) }
   val result = entity.result?.let { EvaluationStepResultDto.valueOf(it.name) }
   val summary = entity.summary
   val feedback by lazy { entity.feedback.map { FeedbackDto(it) } }
