@@ -1,6 +1,6 @@
 import { Button, Col, Icon, Input, message, Row, Table, Tooltip } from 'antd'
 import React, { ChangeEvent, useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult,
@@ -189,20 +189,22 @@ const EvaluationStepOverview: React.FC<{
   user: Submission['user']
   evaluation: Answer['latestEvaluation']
 }> = ({ evaluation, task, user }) => {
-  const history = useHistory()
-
-  const onDetailsClick = () => {
-    history.push(getEntityPath(task) + '/evaluation?user=' + shorten(user.id))
-  }
+  const detailsLink = (
+    <Link
+      to={getEntityPath(task) + '/evaluation?user=' + shorten(user.id)}
+      component={Button}
+      type="primary"
+    >
+      <Icon type="bars" /> Details
+    </Link>
+  )
 
   if (!evaluation) {
     return (
       <div className="evaluation-step-results">
         <Icon type="question-circle" />
         <Tooltip title="Answer has not been evaluated, yet">
-          <Button type="primary" icon="bars" onClick={onDetailsClick}>
-            Details
-          </Button>
+          {detailsLink}
         </Tooltip>
       </div>
     )
@@ -219,9 +221,7 @@ const EvaluationStepOverview: React.FC<{
           user={user}
           steps={evaluation.steps}
         >
-          <Button type="primary" icon="bars" onClick={onDetailsClick}>
-            Details
-          </Button>
+          {detailsLink}
         </EvaluationResultPopover>
       </div>
     </>
