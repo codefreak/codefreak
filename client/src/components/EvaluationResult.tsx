@@ -11,6 +11,7 @@ import {
   useGetDetailedEvaluatonQuery
 } from '../generated/graphql'
 import AsyncPlaceholder from './AsyncContainer'
+import SyntaxHighlighter from './code/SyntaxHighlighter'
 import { CodeViewerCard } from './CodeViewer'
 import './EvaluationResult.less'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
@@ -270,8 +271,8 @@ const EvaluationStepPanel: React.FC<{
           title="All checks passed – good job!"
         />
       )
-    } else {
-      body = <Empty />
+    } else if (step.summary) {
+      body = <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>
     }
   } else {
     body = (
@@ -280,6 +281,11 @@ const EvaluationStepPanel: React.FC<{
       </Collapse>
     )
   }
+
+  if (!body) {
+    body = <Empty />
+  }
+
   return (
     <Card
       title={title}

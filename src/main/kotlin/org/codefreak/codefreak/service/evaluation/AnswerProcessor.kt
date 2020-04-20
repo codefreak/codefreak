@@ -3,7 +3,6 @@ package org.codefreak.codefreak.service.evaluation
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
-import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.error
 import org.slf4j.LoggerFactory
@@ -18,9 +17,6 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
   private lateinit var fileService: FileService
 
   @Autowired
-  private lateinit var taskService: TaskService
-
-  @Autowired
   private lateinit var evaluationService: EvaluationService
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -31,9 +27,14 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
         evaluationService.getEvaluationByDigest(answer.id, digest) ?: evaluationService.createEvaluation(answer)
     log.debug("Start evaluation of answer {} ({} steps)", answer.id, answer.task.evaluationStepDefinitions.size)
     answer.task.evaluationStepDefinitions.forEach { evaluationStepDefinition ->
-      // step may have already been executed
-      if (evaluation.evaluationSteps.find { it.definition == evaluationStepDefinition } !== null) {
-        return@forEach
+      val executedStep = evaluation.evaluationSteps.find { it.definition == evaluationStepDefinition }
+      if (executedStep !== null) {
+        // Only re-run if this step errored
+        if (executedStep.result !== EvaluationStep.EvaluationStepResult.ERRORED) {
+          return@forEach
+        }
+        // remove existing errored step from evaluation for re-running
+        evaluation.evaluationSteps.remove(executedStep)
       }
       val runnerName = evaluationStepDefinition.runnerName
       val evaluationStep = EvaluationStep(evaluationStepDefinition)
@@ -49,12 +50,18 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
           evaluationStep.result = EvaluationStep.EvaluationStepResult.SUCCESS
         }
         evaluationStep.summary = runner.summarize(feedbackList)
+      } catch (e: EvaluationStepException) {
+        evaluationStep.result = e.result
+        evaluationStep.summary = e.message
       } catch (e: Exception) {
         log.error(e)
         evaluationStep.result = EvaluationStep.EvaluationStepResult.ERRORED
         evaluationStep.summary = e.message ?: "Unknown error"
       }
 
+      log.debug(
+          "Step $runnerName finished ${evaluationStep.result}: ${evaluationStep.summary}"
+      )
       evaluation.addStep(evaluationStep)
     }
     log.debug("Finished evaluation of answer {}", answer.id)

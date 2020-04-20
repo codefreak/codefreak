@@ -421,21 +421,25 @@ class ContainerService : BaseService() {
       doNothingAndKeepAlive()
       containerConfig { workingDir(projectPath) }
     }
-    answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
-    docker.startContainer(containerId)
     val outputs = mutableListOf<ExecResult>()
-    commands.forEach {
-      if (stopOnFail && outputs.size > 0 && outputs.last().exitCode != 0L) {
-        outputs.add(ExecResult("", -1))
-      } else {
-        outputs.add(exec(containerId, splitCommand(it)))
+    docker.startContainer(containerId)
+    try {
+      answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
+      commands.forEach {
+        if (stopOnFail && outputs.size > 0 && outputs.last().exitCode != 0L) {
+          outputs.add(ExecResult("", -1))
+        } else {
+          outputs.add(exec(containerId, splitCommand(it)))
+        }
       }
+      if (processFiles !== null) {
+        archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
+      }
+    } finally {
+      // ensure cleanup if something goes south during evaluation
+      docker.killContainer(containerId)
+      docker.removeContainer(containerId)
     }
-    if (processFiles !== null) {
-      archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
-    }
-    docker.killContainer(containerId)
-    docker.removeContainer(containerId)
     return outputs
   }
 
