@@ -91,9 +91,7 @@ class AssignmentService : BaseService() {
   fun addTasksToAssignment(assignment: Assignment, tasks: Collection<Task>) {
     var nextPosition = assignment.tasks.maxBy { it.position }?.let { it.position + 1 } ?: 0
     for (task in tasks) {
-      fileService.readCollectionTar(task.id).use {
-        taskService.createFromTar(it.readBytes(), assignment, assignment.owner, nextPosition)
-      }
+      taskService.createFromTar(taskService.getExportTar(task), assignment, assignment.owner, nextPosition)
       nextPosition++
     }
   }
