@@ -18,6 +18,7 @@ import {
 } from './hooks/useAuthenticatedUser'
 import IdePage from './pages/IdePage'
 import LoginPage from './pages/LoginPage'
+import LtiPage from './pages/LtiPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { routerConfig } from './router.config'
 import {
@@ -90,6 +91,7 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
             <Redirect to="/assignments" />
           </Route>
           <Route path="/ide/:type/:id" component={IdePage} />
+          <Route path="/lti" component={LtiPage} />
           {routes.map(renderRoute(logout))}
           <DefaultLayout logout={logout}>
             <Route component={NotFoundPage} />
