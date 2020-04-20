@@ -294,11 +294,17 @@ class ContainerService : BaseService() {
   }
 
   fun answerFilesUpdated(answerId: UUID) {
-    getAnswerIdeContainer(answerId)?.let {
-      // use sh to make globbing work
-      // two globs: one for regular files and one for hidden files/dirs except . and ..
-      exec(it, arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*"))
-      copyFilesToIde(it, answerId)
+    try {
+      getAnswerIdeContainer(answerId)?.let {
+        // use sh to make globbing work
+        // two globs: one for regular files and one for hidden files/dirs except . and ..
+        exec(it, arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*"))
+        copyFilesToIde(it, answerId)
+      }
+    } catch (e: IllegalStateException) {
+      // happens if the IDE is not running.
+      // We could check if it is running before but the container might get killed while we update files
+      log.debug("Not updating files in IDE for answer $answerId: ${e.message}")
     }
   }
 
@@ -333,16 +339,16 @@ class ContainerService : BaseService() {
           val labels = it.labels()!!
           when {
             labels.containsKey(LABEL_READ_ONLY_ANSWER_ID)
-                -> log.info("Shutting down read container $containerId for answer ${labels[LABEL_READ_ONLY_ANSWER_ID]}")
+            -> log.info("Shutting down read container $containerId for answer ${labels[LABEL_READ_ONLY_ANSWER_ID]}")
             labels.containsKey(LABEL_ANSWER_ID) -> {
-                val answer = answerRepository.findById(UUID.fromString(labels[LABEL_ANSWER_ID]))
-                if (answer.isPresent) {
-                  containerService.saveAnswerFiles(answer.get())
-                } else {
-                  log.warn("Answer ${labels[LABEL_ANSWER_ID]} not found. Files are not saved!")
-                }
-                log.info("Shutting down container $containerId of answer ${labels[LABEL_ANSWER_ID]}")
+              val answer = answerRepository.findById(UUID.fromString(labels[LABEL_ANSWER_ID]))
+              if (answer.isPresent) {
+                containerService.saveAnswerFiles(answer.get())
+              } else {
+                log.warn("Answer ${labels[LABEL_ANSWER_ID]} not found. Files are not saved!")
               }
+              log.info("Shutting down container $containerId of answer ${labels[LABEL_ANSWER_ID]}")
+            }
             labels.containsKey(LABEL_TASK_ID) -> {
               val task = taskRepository.findById(UUID.fromString(labels[LABEL_TASK_ID]))
               if (task.isPresent) {
@@ -415,21 +421,25 @@ class ContainerService : BaseService() {
       doNothingAndKeepAlive()
       containerConfig { workingDir(projectPath) }
     }
-    answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
-    docker.startContainer(containerId)
     val outputs = mutableListOf<ExecResult>()
-    commands.forEach {
-      if (stopOnFail && outputs.size > 0 && outputs.last().exitCode != 0L) {
-        outputs.add(ExecResult("", -1))
-      } else {
-        outputs.add(exec(containerId, splitCommand(it)))
+    docker.startContainer(containerId)
+    try {
+      answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
+      commands.forEach {
+        if (stopOnFail && outputs.size > 0 && outputs.last().exitCode != 0L) {
+          outputs.add(ExecResult("", -1))
+        } else {
+          outputs.add(exec(containerId, splitCommand(it)))
+        }
       }
+      if (processFiles !== null) {
+        archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
+      }
+    } finally {
+      // ensure cleanup if something goes south during evaluation
+      docker.killContainer(containerId)
+      docker.removeContainer(containerId)
     }
-    if (processFiles !== null) {
-      archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
-    }
-    docker.killContainer(containerId)
-    docker.removeContainer(containerId)
     return outputs
   }
 

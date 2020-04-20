@@ -7,7 +7,13 @@ const proxyPort = process.env.NODE_PROXY_PORT || '8080'
 const proxyUrl = `${proxyHost}:${proxyPort}`
 
 module.exports = function(app) {
-  app.use(proxy(`http://${proxyUrl}/api`))
-  app.use(proxy('/graphql', { target: `http://${proxyUrl}` }))
-  app.use(proxy('/subscriptions', { target: `ws://${proxyUrl}`, ws: true }))
+  ;['/api', '/graphql', '/lti/login'].forEach(path => {
+    app.use(proxy(`http://${proxyUrl}${path}`))
+  })
+  app.use(
+    proxy('/subscriptions', {
+      target: `ws://${proxyUrl}`,
+      ws: true
+    })
+  )
 }

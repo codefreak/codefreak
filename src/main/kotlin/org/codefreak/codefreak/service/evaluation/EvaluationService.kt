@@ -114,11 +114,21 @@ class EvaluationService : BaseService() {
   }
 
   fun isEvaluationUpToDate(answer: Answer): Boolean {
-    return getLatestEvaluation(answer.id).map {
-      // evaluation is fresh if file hash matches and all evaluation steps have been run
-      it.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answer.id)) &&
-          answer.task.evaluationStepDefinitions.size == it.evaluationSteps.size
-    }.orElse(false)
+    // check if any evaluation has been run at all
+    val evaluation = getLatestEvaluation(answer.id).orNull() ?: return false
+    // check if evaluation has been run for latest file state
+    if (!evaluation.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answer.id))) {
+      return false
+    }
+    // check if all evaluation steps have been run
+    if (answer.task.evaluationStepDefinitions.size != evaluation.evaluationSteps.size) {
+      return false
+    }
+    // allow to re-run if any of the steps errored
+    if (evaluation.stepsResultSummary === EvaluationStep.EvaluationStepResult.ERRORED) {
+      return false
+    }
+    return true
   }
 
   fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name]

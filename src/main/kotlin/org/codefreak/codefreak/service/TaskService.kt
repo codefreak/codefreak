@@ -1,6 +1,10 @@
 package org.codefreak.codefreak.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import liquibase.util.StreamUtil
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Task
@@ -134,4 +138,26 @@ TaskService : BaseService() {
   }
 
   fun getTaskPool(userId: UUID) = taskRepository.findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(userId)
+
+  fun getExportTar(task: Task): ByteArray {
+    val out = ByteArrayOutputStream()
+    val tar = TarUtil.PosixTarArchiveOutputStream(out)
+    fileService.readCollectionTar(task.id).use { files ->
+      TarUtil.copyEntries(TarArchiveInputStream(files), tar) { it.name != "codefreak.yml" }
+    }
+
+    val definition = TaskDefinition(
+        task.title,
+        task.body,
+        task.hiddenFiles,
+        task.protectedFiles,
+        task.evaluationStepDefinitions.map { EvaluationDefinition(it.runnerName, it.options) })
+        .let { ObjectMapper(YAMLFactory()).writeValueAsBytes(it) }
+
+    tar.putArchiveEntry(TarArchiveEntry("codefreak.yml").also { it.size = definition.size.toLong() })
+    tar.write(definition)
+    tar.closeArchiveEntry()
+    tar.close()
+    return out.toByteArray()
+  }
 }

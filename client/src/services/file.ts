@@ -23,7 +23,17 @@ export const fileListToTree = (
   const listCopy = list.slice()
   listCopy.sort((a, b) => abspath(a.path).localeCompare(abspath(b.path)))
   // get the alphabetically sorted first path name as root
-  const rootNode = listCopy.shift()
+  let rootNode = listCopy.shift()
+
+  // there are archives that omit the root directory, so we create one on demand
+  // this is not bullet proof and should be handled on the backend in the future
+  if (rootNode && abspath(rootNode.path) !== '/') {
+    listCopy.unshift(rootNode)
+    rootNode = {
+      path: '/',
+      type: FileType.Directory
+    }
+  }
 
   // create a map with dirname -> file
   const dirnameMap: Record<string, FileTreeNode[]> = {}

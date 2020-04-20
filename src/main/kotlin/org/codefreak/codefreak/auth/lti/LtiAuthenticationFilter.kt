@@ -61,7 +61,7 @@ class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
    * Finally the JWT from the id_token parameter will be evaluated and
    */
   private fun handleIdTokenResponse(request: HttpServletRequest): Authentication? {
-    val session = request.session
+    val session = request.getSession(false)
 
     // check for state, if it doesn't match we bail early
     val storedState = getStoredState(session)

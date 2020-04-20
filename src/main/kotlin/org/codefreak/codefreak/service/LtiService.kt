@@ -3,7 +3,6 @@ package org.codefreak.codefreak.service
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.CachedJwtClaimsSet
 import org.codefreak.codefreak.repository.CachedJwtClaimsSetRepository
 import net.minidev.json.JSONArray
@@ -11,6 +10,7 @@ import org.mitre.jwt.signer.service.JWTSigningAndValidationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
+import org.springframework.util.DigestUtils.md5DigestAsHex
 import java.util.Date
 import java.util.UUID
 
@@ -41,18 +41,18 @@ class LtiService {
   fun removeCachedJwtClaimSet(id: UUID) = cachedJwtClaimsSetRepository.deleteById(id)
 
   /**
-   * Create a LTIDeepLinkingResponse JWT that links to an assignment
+   * Create a LTIDeepLinkingResponse JWT that links to the specified resource
    */
-  fun buildDeepLinkingResponse(requestJwt: JWTClaimsSet, assignment: Assignment, launchUrl: String): SignedJWT {
+  fun buildDeepLinkingResponse(requestJwt: JWTClaimsSet, url: String, title: String): SignedJWT {
     val jwsAlgorithm = signingAndValidationService.defaultSigningAlgorithm
     val contentItems = JSONArray()
     contentItems.appendElement(
         mapOf(
             "type" to "link",
-            "title" to "${assignment.title} (Code FREAK)",
-            "url" to launchUrl,
+            "title" to title,
+            "url" to url,
             "window" to mapOf(
-                "targetName" to "codefreak-${assignment.id}"
+                "targetName" to "codefreak-${md5DigestAsHex(url.toByteArray())}"
             )
         )
     )

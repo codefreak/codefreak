@@ -6,6 +6,7 @@ import graphql.ExceptionWhileDataFetching
 import graphql.GraphQLError
 import graphql.language.SourceLocation
 import graphql.servlet.core.DefaultGraphQLErrorHandler
+import org.codefreak.codefreak.service.EntityNotFoundException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Component
@@ -24,6 +25,7 @@ class ErrorHandler : DefaultGraphQLErrorHandler() {
     val newErrors = errors?.map {
       if (it is ExceptionWhileDataFetching) {
         when (it.exception) {
+          is EntityNotFoundException -> CustomError(it, it.message, "404")
           is AccessDeniedException -> CustomError(it, "Access Denied", "403")
           is BadCredentialsException -> CustomError(it, "Bad Credentials", "422")
           is ResourceLimitException -> CustomError(it, it.message, "503")

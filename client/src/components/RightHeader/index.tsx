@@ -6,23 +6,25 @@ import Avatar from '../user/Avatar'
 import './index.less'
 
 interface RightHeaderProps {
-  logout: () => void
+  logout?: () => void
 }
 
 const Index: React.FC<RightHeaderProps> = ({ logout }) => {
   const user = useAuthenticatedUser()
 
-  const userMenu = (
+  const userMenu = logout ? (
     <Menu selectedKeys={[]}>
       <Menu.Item key="logout" onClick={logout}>
         <Icon type="logout" /> Logout
       </Menu.Item>
     </Menu>
+  ) : (
+    undefined
   )
 
   return (
     <div style={{ float: 'right', paddingRight: 14 }}>
-      <Dropdown overlay={userMenu}>
+      <Dropdown overlay={userMenu} disabled={!userMenu}>
         <div style={{ padding: '0 10px' }}>
           <Avatar size="small" user={user} />
           {displayName(user)}
