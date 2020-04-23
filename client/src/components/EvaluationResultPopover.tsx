@@ -22,7 +22,7 @@ const EvaluationResultPopover: React.FC<{
           <List.Item key={step.id}>
             <List.Item.Meta
               avatar={<EvaluationStepResultIcon stepResult={step.result} />}
-              title={step.definition.runnerName}
+              title={step.definition.title}
               description={step.summary}
             />
           </List.Item>

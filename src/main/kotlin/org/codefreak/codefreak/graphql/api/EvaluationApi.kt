@@ -44,6 +44,7 @@ class PendingEvaluationDto(answerEntity: Answer, ctx: ResolverContext) : BaseDto
 class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition) {
   val runnerName = definition.runnerName
   val position = definition.position
+  val title = definition.title
 }
 
 @GraphQLName("Evaluation")

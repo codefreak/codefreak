@@ -19,6 +19,8 @@ class CommandLineRunner : EvaluationRunner {
 
   override fun getName() = "commandline"
 
+  override fun getDefaultTitle() = "Command Line"
+
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     return executeCommands(answer, options, null).map(this::executionToFeedback)
   }

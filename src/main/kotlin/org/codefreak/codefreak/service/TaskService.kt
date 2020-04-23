@@ -12,6 +12,7 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
+import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
@@ -34,6 +35,9 @@ TaskService : BaseService() {
   private lateinit var assignmentRepository: AssignmentRepository
 
   @Autowired
+  private lateinit var evaluationService: EvaluationService
+
+  @Autowired
   private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
 
   @Autowired
@@ -52,7 +56,11 @@ TaskService : BaseService() {
 
     task = taskRepository.save(task)
     task.evaluationStepDefinitions = definition.evaluation
-        .mapIndexed { index, it -> EvaluationStepDefinition(task, it.step, index, it.options ) }
+        .mapIndexed { index, it ->
+          val runner = evaluationService.getEvaluationRunner(it.step)
+          val title = it.title ?: runner.getDefaultTitle()
+          EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
+        }
         .toMutableSet()
 
     evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
@@ -151,7 +159,7 @@ TaskService : BaseService() {
         task.body,
         task.hiddenFiles,
         task.protectedFiles,
-        task.evaluationStepDefinitions.map { EvaluationDefinition(it.runnerName, it.options) })
+        task.evaluationStepDefinitions.map { EvaluationDefinition(it.runnerName, it.options, it.title) })
         .let { ObjectMapper(YAMLFactory()).writeValueAsBytes(it) }
 
     tar.putArchiveEntry(TarArchiveEntry("codefreak.yml").also { it.size = definition.size.toLong() })

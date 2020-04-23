@@ -1,0 +1,17 @@
+databaseChangeLog:
+- changeSet:
+    id: 1587636761189-2
+    author: vagrant (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: title
+            type: varchar(255)
+        tableName: evaluation_step_definition
+- changeSet:
+    id: 1587636761189-1
+    author: erik.hofer
+    changes:
+    - sql:
+        sql: UPDATE evaluation_step_definition SET title = runner_name

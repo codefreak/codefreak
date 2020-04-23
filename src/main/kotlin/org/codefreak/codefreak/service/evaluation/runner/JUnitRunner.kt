@@ -21,6 +21,8 @@ import javax.xml.bind.annotation.XmlRootElement
 class JUnitRunner : CommandLineRunner() {
   override fun getName() = "junit"
 
+  override fun getDefaultTitle() = "Unit Tests"
+
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     val resultsPath = options.get("results-path", String::class) ?: "build/test-results/test"
     val resultsPattern = (TarUtil.normalizeEntryName(resultsPath).withTrailingSlash() + "TEST-.+\\.xml").toRegex()
