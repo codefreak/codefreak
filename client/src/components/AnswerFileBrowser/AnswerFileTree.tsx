@@ -1,70 +1,89 @@
 import { Tree } from 'antd'
-import { basename } from 'path'
+import { relative, resolve } from 'path'
 import React from 'react'
-import { useGetAnswerFileListQuery } from '../../services/codefreak-api'
 import {
-  fileListToTree,
-  FileTreeDirectoryNode,
-  FileTreeNode
-} from '../../services/file'
+  FileType,
+  GetAnswerFileListQueryResult,
+  useGetAnswerFileListQuery
+} from '../../services/codefreak-api'
+import {
+  fileTree,
+  sortTree,
+  TreeNode as TreeNodeModel
+} from '../../services/file-tree'
 import AsyncPlaceholder from '../AsyncContainer'
 
 const { TreeNode, DirectoryTree } = Tree
 
-const renderTreeNodeRecursive = (
-  node: FileTreeNode | FileTreeDirectoryNode
-) => {
-  let filename = basename(node.path)
-  if (filename === '.') {
-    filename = '/'
-  }
+export type AnswerFile = NonNullable<
+  GetAnswerFileListQueryResult['data']
+>['answerFiles'][number]
 
-  if (!('children' in node) || node.children === undefined) {
-    return <TreeNode title={filename} key={node.path} isLeaf />
+const isRootDir = (path: string) => {
+  return resolve('/', path) === '/'
+}
+
+const renderTreeNodeRecursive = (
+  node: TreeNodeModel<AnswerFile>,
+  parentPath: string
+) => {
+  const filename = relative(parentPath, node.path)
+
+  if (!node.children) {
+    const isLeaf = node.originalNode && node.originalNode.type === FileType.File
+    return <TreeNode title={filename} key={node.path} isLeaf={isLeaf} />
   }
 
   return (
     <TreeNode title={filename} key={node.path}>
-      {node.children.map(renderTreeNodeRecursive)}
+      {node.children.map(child => renderTreeNodeRecursive(child, node.path))}
     </TreeNode>
   )
 }
 
-interface AnswerFileTreeProps {
+export interface AnswerFileTreeProps {
   answerId: string
-  onFileSelect?: (selectedNode: FileTreeNode | undefined) => void
+  onFileSelect?: (selectedNode: AnswerFile) => void
 }
 
 const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({
   answerId,
   onFileSelect
 }) => {
-  const result = useGetAnswerFileListQuery({ variables: { id: answerId } })
+  const result = useGetAnswerFileListQuery({
+    variables: { id: answerId }
+  })
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
   const { answerFiles } = result.data
-  const rootNode = fileListToTree(answerFiles)
-  if (!rootNode) {
-    return <>??</>
+  let rootNodes = sortTree(fileTree(answerFiles))
+
+  // omit the root node and render its children
+  if (rootNodes.length === 1 && isRootDir(rootNodes[0].path)) {
+    rootNodes = rootNodes[0].children || []
   }
 
   const onSelect = (selectedKeys: string[]) => {
+    if (!onFileSelect) {
+      return
+    }
     const path = selectedKeys.shift()
-    if (path && onFileSelect) {
-      onFileSelect(answerFiles.find(file => file.path === path))
+    const selectedFile = path && answerFiles.find(file => file.path === path)
+    if (selectedFile) {
+      onFileSelect(selectedFile)
     }
   }
 
   return (
     <DirectoryTree
       onSelect={onSelect}
-      defaultExpandedKeys={[rootNode.path]}
+      defaultExpandedKeys={[]}
       className="answer-file-tree"
     >
-      {renderTreeNodeRecursive(rootNode)}
+      {rootNodes.map(node => renderTreeNodeRecursive(node, '/'))}
     </DirectoryTree>
   )
 }
