@@ -13,6 +13,8 @@ class CommentRunner : EvaluationRunner {
 
   override fun getName() = RUNNER_NAME
 
+  override fun getDefaultTitle() = "Comments"
+
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     // Does nothing automatically. Comments are added via frontend.
     // Maybe in the future we will have some form of notification for the teacher or an AI that creates comments

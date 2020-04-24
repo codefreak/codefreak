@@ -12,6 +12,7 @@ class EvaluationStepDefinition(
   var task: Task,
   var runnerName: String,
   var position: Int,
+  var title: String,
 
   @Type(type = "json")
   @Column(length = 1024)

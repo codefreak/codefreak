@@ -12,7 +12,8 @@ data class TaskDefinition(
 
 data class EvaluationDefinition(
   val step: String,
-  val options: Map<String, Any> = emptyMap()
+  val options: Map<String, Any> = emptyMap(),
+  val title: String? = null
 ) {
   private constructor() : this("")
 }

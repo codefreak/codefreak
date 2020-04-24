@@ -37,6 +37,8 @@ class CodeclimateRunner : EvaluationRunner {
     return "codeclimate"
   }
 
+  override fun getDefaultTitle() = "Code Quality"
+
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     val codeclimateJson = containerService.runCodeclimate(answer)
     return this.parseCodeclimateJson(codeclimateJson).map { issue ->

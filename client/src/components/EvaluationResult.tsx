@@ -240,7 +240,7 @@ const EvaluationStepPanel: React.FC<{
   const title = (
     <>
       <EvaluationStepResultIcon stepResult={step.result} />{' '}
-      {step.definition.runnerName}
+      {step.definition.title}
     </>
   )
 

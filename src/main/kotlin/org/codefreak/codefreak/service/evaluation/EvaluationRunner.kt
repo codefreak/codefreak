@@ -8,6 +8,7 @@ import kotlin.reflect.full.safeCast
 interface EvaluationRunner {
 
   fun getName(): String
+  fun getDefaultTitle() = getName()
   fun run(answer: Answer, options: Map<String, Any>): List<Feedback>
 
   /**

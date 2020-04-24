@@ -34,6 +34,7 @@ fragment latestEvaluation on Evaluation {
     definition {
       position
       runnerName
+      title
     }
     result
     summary
@@ -72,6 +73,7 @@ query GetAssignmentWithSubmissions($id: ID!) {
       evaluationStepDefinitions {
         position
         runnerName
+        title
       }
     }
   }
