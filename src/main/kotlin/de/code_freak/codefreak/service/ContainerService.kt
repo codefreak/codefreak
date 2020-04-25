@@ -113,13 +113,12 @@ class ContainerService : BaseService() {
 
     if (containerId == null) {
       containerId = this.createIdeContainer(answer, readOnly)
-      docker.startContainer(containerId)
-      // prepare the environment after the container has started
-      this.copyFilesToIde(containerId, answer.id)
-    } else {
-      // make sure the container is running. Also existing ones could have been stopped
-      docker.startContainer(containerId)
     }
+    // make sure the container is running. Also existing ones could have been stopped
+    docker.startContainer(containerId)
+    // write fresh files that might have been uploaded while being stopped
+    // or initial files for new containers
+    this.copyFilesToIde(containerId, answer.id)
   }
 
   fun canStartNewIdeContainer(): Boolean {
