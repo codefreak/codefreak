@@ -8,7 +8,7 @@ import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.notNullValue
 import org.junit.Test
 import org.springframework.core.io.ClassPathResource
-import org.springframework.mock.web.MockMultipartFile
+import org.springframework.mock.web.MockPart
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
@@ -52,9 +52,9 @@ internal class TarUtilTest {
 
   @Test
   fun `file uploads are wrapped in tar`() {
-    val file = MockMultipartFile("file", "C:\\Users\\jdoe\\main.c", "text/plain", "".toByteArray())
+    val file = MockPart("file", "C:\\Users\\jdoe\\main.c", "".toByteArray())
     val out = ByteArrayOutputStream()
-    TarUtil.writeUploadAsTar(file, out)
+    TarUtil.writeUploadAsTar(arrayOf(file), out)
     TarArchiveInputStream(out.toByteArray().inputStream()).use {
       val result = generateSequence { it.nextTarEntry }.filter { it.name == "main.c" }.firstOrNull()
       assertThat(result, notNullValue())
