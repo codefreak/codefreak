@@ -140,6 +140,8 @@ class ContainerService : BaseService() {
     } else {
       // make sure the container is running. Also existing ones could have been stopped
       docker.startContainer(container.id())
+      // write fresh files that might have been uploaded while being stopped
+      this.copyFilesToIde(container.id(), fileCollectionId)
       getIdeUrl(container.labels()?.get(LABEL_TOKEN)!!)
     }
   }
