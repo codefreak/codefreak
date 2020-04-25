@@ -185,6 +185,10 @@ class ContainerService : BaseService() {
       return answer
     }
     val containerId = getIdeContainer(answer.id) ?: return answer
+    if (!isContainerRunning(containerId)) {
+      log.debug("Skipped saving of files from answer ${answer.id} because IDE is not running")
+      return answer
+    }
     archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
       fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
     }
