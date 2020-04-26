@@ -1,10 +1,9 @@
 import { Card, Icon, Result } from 'antd'
+import { basename, extname } from 'path'
 import React from 'react'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
 import { isBinaryContent, numberOfLines, sliceLines } from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
-
-import { basename, extname } from 'path'
 import Centered from './Centered'
 import ReviewEditor from './code/ReviewEditor'
 import SyntaxHighlighter from './code/SyntaxHighlighter'
