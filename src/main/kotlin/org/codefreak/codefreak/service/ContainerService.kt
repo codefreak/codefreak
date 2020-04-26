@@ -140,6 +140,8 @@ class ContainerService : BaseService() {
     } else {
       // make sure the container is running. Also existing ones could have been stopped
       docker.startContainer(container.id())
+      // write fresh files that might have been uploaded while being stopped
+      this.copyFilesToIde(container.id(), fileCollectionId)
       getIdeUrl(container.labels()?.get(LABEL_TOKEN)!!)
     }
   }
@@ -203,6 +205,10 @@ class ContainerService : BaseService() {
       return answer
     }
     val containerId = getAnswerIdeContainer(answer.id) ?: return answer
+    if (!isContainerRunning(containerId)) {
+      log.debug("Skipped saving of files from answer ${answer.id} because IDE is not running")
+      return answer
+    }
     archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
       fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
     }
@@ -281,12 +287,20 @@ class ContainerService : BaseService() {
   }
 
   /**
-   * Prepare a running container with files and other commands like chmod, etc.
+   * Write a file collection to an IDE container. This can only be called
+   * on a running container and will throw an IllegalStateException otherwise.
    */
   protected fun copyFilesToIde(containerId: String, fileCollectionId: UUID) {
     // extract possible existing files of the current submission into project dir
     if (fileService.collectionExists(fileCollectionId)) {
-      fileService.readCollectionTar(fileCollectionId).use { docker.copyToContainer(it, containerId, PROJECT_PATH) }
+      // remove existing files before writing new ones
+      // use sh to make globbing work
+      // two globs: one for regular files and one for hidden files/dirs except . and ..
+      exec(containerId, arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*"))
+
+      fileService.readCollectionTar(fileCollectionId).use {
+        docker.copyToContainer(it, containerId, PROJECT_PATH)
+      }
     }
 
     // change owner from root to coder so we can edit our project files
@@ -295,12 +309,7 @@ class ContainerService : BaseService() {
 
   fun answerFilesUpdated(answerId: UUID) {
     try {
-      getAnswerIdeContainer(answerId)?.let {
-        // use sh to make globbing work
-        // two globs: one for regular files and one for hidden files/dirs except . and ..
-        exec(it, arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*"))
-        copyFilesToIde(it, answerId)
-      }
+      getAnswerIdeContainer(answerId)?.let { copyFilesToIde(it, answerId) }
     } catch (e: IllegalStateException) {
       // happens if the IDE is not running.
       // We could check if it is running before but the container might get killed while we update files
