@@ -67,6 +67,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
 
   const taskDetailsInput: TaskDetailsInput = {
     id: task.id,
+    body: task.body,
     hiddenFiles: task.hiddenFiles,
     protectedFiles: task.protectedFiles
   }
