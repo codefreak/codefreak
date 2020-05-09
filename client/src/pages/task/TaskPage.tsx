@@ -30,6 +30,7 @@ import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
 import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
+import EditEvaluationPage from '../evaluation/EditEvaluationPage'
 import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
@@ -87,29 +88,26 @@ const TaskPage: React.FC = () => {
     updateMutation({ variables: { input } })
   )
 
-  const answerTab = pool
-    ? []
-    : [
-        { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
-        { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
-        {
-          key: '/evaluation',
-          disabled: !answer,
-          tab: (
-            <>
-              {tab('Evaluation', 'dashboard')}
-              {answer ? (
-                <EvaluationIndicator
-                  style={{ marginLeft: 8 }}
-                  answerId={answer.id}
-                />
-              ) : null}
-            </>
-          )
-        }
-      ]
-
-  const tabs = [{ key: '', tab: tab('Task', 'file-text') }, ...answerTab]
+  const tabs = [
+    { key: '', tab: tab('Task', 'file-text') },
+    { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
+    { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
+    {
+      key: '/evaluation',
+      disabled: !answer && !editable,
+      tab: (
+        <>
+          {tab('Evaluation', 'dashboard')}
+          {answer ? (
+            <EvaluationIndicator
+              style={{ marginLeft: 8 }}
+              answerId={answer.id}
+            />
+          ) : null}
+        </>
+      )
+    }
+  ]
 
   const onCreateAnswer = async () => {
     const createAnswerResult = await createAnswer({
@@ -219,7 +217,16 @@ const TaskPage: React.FC = () => {
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route path={`${path}/evaluation`}>
-          {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
+          {answer ? (
+            <EvaluationPage
+              answerId={answer.id}
+              editableTaskId={editable ? task.id : undefined}
+            />
+          ) : editable ? (
+            <EditEvaluationPage taskId={task.id} />
+          ) : (
+            <NotFoundPage />
+          )}
         </Route>
         <Route path={`${path}/ide`}>
           {answer ? (
