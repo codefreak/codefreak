@@ -12,3 +12,7 @@ mutation CreateAnswer($taskId: ID!) {
     ideRunning
   }
 }
+
+mutation DeleteAnswer($id: ID!) {
+  deleteAnswer(id: $id)
+}

@@ -1,5 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button, Icon } from 'antd'
+import { Button, Icon, Tooltip } from 'antd'
+import { Switch as AntSwitch } from 'antd'
 import React, { createContext } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
@@ -18,6 +19,7 @@ import {
   PublicUserFieldsFragment,
   TaskInput,
   useCreateAnswerMutation,
+  useDeleteAnswerMutation,
   useGetTaskQuery,
   useUpdateTaskMutation
 } from '../../services/codefreak-api'
@@ -57,6 +59,7 @@ const TaskPage: React.FC = () => {
   })
 
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
+  const [deleteAnswer, { loading: deletingAnswer }] = useDeleteAnswerMutation()
 
   const [updateMutation] = useUpdateTaskMutation({
     onCompleted: () => {
@@ -118,33 +121,55 @@ const TaskPage: React.FC = () => {
     }
   }
 
+  const setTestingMode = (enabled: boolean) => {
+    if (enabled) {
+      onCreateAnswer()
+    } else {
+      deleteAnswer({ variables: { id: answer!.id } }).then(() => {
+        subPath.set('')
+        result.refetch()
+      })
+    }
+  }
+
   const assignment = task.assignment
-  let extra
-  if (pool) {
-    extra = null
-  } else if (differentUser && assignment) {
+
+  const testingModeSwitch =
+    editable && !differentUser ? (
+      <div style={{ display: 'inline-flex' }}>
+        Testing Mode{' '}
+        <Tooltip
+          placement="left"
+          title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
+        >
+          <AntSwitch
+            onChange={setTestingMode}
+            style={{ marginLeft: 8 }}
+            checked={answer !== null}
+            loading={creatingAnswer || deletingAnswer}
+          />
+        </Tooltip>
+      </div>
+    ) : null
+
+  let buttons
+  if (differentUser && assignment) {
     // Show "back to submissions" button for teachers
     const onClick = () =>
       history.push(getEntityPath(assignment) + '/submissions')
-    extra = (
+    buttons = (
       <Button icon="arrow-left" size="large" onClick={onClick}>
         Back to submissions
       </Button>
     )
   } else if (answer) {
     // regular buttons to work on task for students
-    extra = (
-      <>
-        <StartEvaluationButton
-          answerId={answer.id}
-          type="primary"
-          size="large"
-        />
-      </>
+    buttons = (
+      <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
     )
-  } else {
+  } else if (!testingModeSwitch) {
     // start working on task by default
-    extra = (
+    buttons = (
       <Button
         icon="rocket"
         size="large"
@@ -180,7 +205,11 @@ const TaskPage: React.FC = () => {
         tabList={tabs}
         tabActiveKey={subPath.get()}
         onTabChange={onTabChange}
-        extra={extra}
+        extra={
+          <>
+            {testingModeSwitch} {buttons}
+          </>
+        }
       />
       <Switch>
         <Route exact path={path}>
