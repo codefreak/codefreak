@@ -8,9 +8,14 @@ import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
 import {
   GetEvaluationStepDefinitionsQueryResult,
   useDeleteEvaluationStepDefinitionMutation,
-  useGetEvaluationStepDefinitionsQuery
+  useGetEvaluationStepDefinitionsQuery,
+  useSetEvaluationStepDefinitionPositonMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
+
+type EvaluationStepDefinition = NonNullable<
+  GetEvaluationStepDefinitionsQueryResult['data']
+>['task']['evaluationStepDefinitions'][0]
 
 const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const result = useGetEvaluationStepDefinitionsQuery({ variables: { taskId } })
@@ -20,6 +25,9 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       result.refetch()
     }
   })
+  const [
+    setEvaluationStepDefinitionPosition
+  ] = useSetEvaluationStepDefinitionPositonMutation()
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -29,10 +37,16 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
     task: { evaluationStepDefinitions }
   } = result.data
 
+  const handlePositionChange = (
+    definition: EvaluationStepDefinition,
+    newPosition: number
+  ) =>
+    setEvaluationStepDefinitionPosition({
+      variables: { id: definition.id, position: newPosition }
+    }).then(() => messageService.success('Order updated'))
+
   const renderEvaluationStepDefinition = (
-    definition: NonNullable<
-      GetEvaluationStepDefinitionsQueryResult['data']
-    >['task']['evaluationStepDefinitions'][0]
+    definition: EvaluationStepDefinition
   ) => {
     const confirmDelete = () =>
       Modal.confirm({
@@ -40,7 +54,11 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         content:
           'Do you want to remove this evaluation step? Custom configuration will be lost!',
         async onOk() {
-          await deleteStep({ variables: { id: definition.id } })
+          try {
+            await deleteStep({ variables: { id: definition.id } })
+          } catch (e) {
+            /* Close modal on error */
+          }
         }
       })
 
@@ -95,7 +113,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         sortable
         items={evaluationStepDefinitions}
         renderItem={renderEvaluationStepDefinition}
-        // handlePositionChange={handlePositionChange}
+        handlePositionChange={handlePositionChange}
       />
     </>
   )

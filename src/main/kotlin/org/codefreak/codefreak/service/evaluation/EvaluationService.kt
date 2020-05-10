@@ -9,6 +9,7 @@ import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
+import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.ContainerService
@@ -16,6 +17,7 @@ import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.PositionUtil
 import org.codefreak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,6 +39,9 @@ class EvaluationService : BaseService() {
 
   @Autowired
   private lateinit var fileService: FileService
+
+  @Autowired
+  private lateinit var taskRepository: TaskRepository
 
   @Autowired
   private lateinit var evaluationQueue: EvaluationQueue
@@ -152,5 +157,17 @@ class EvaluationService : BaseService() {
   fun findEvaluationStepDefinition(id: UUID) = evaluationStepDefinitionRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Evaluation step definition not found") }
 
-  fun deleteEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition) = evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
+  @Transactional
+  fun setEvaluationStepDefinitionPosition(evaluationStepDefinition: EvaluationStepDefinition, newPosition: Long) {
+    val task = evaluationStepDefinition.task
+
+    PositionUtil.move(task.evaluationStepDefinitions, evaluationStepDefinition.position.toLong(), newPosition, { position.toLong() }, { position = it.toInt() })
+
+    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
+    taskRepository.save(task)
+  }
+
+  @Transactional
+  fun deleteEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition) =
+      evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
 }

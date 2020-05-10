@@ -24,10 +24,12 @@ import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.PendingEvaluationStatus
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import reactor.core.publisher.Flux
+import java.lang.IllegalStateException
 import java.util.UUID
 
 @GraphQLName("PendingEvaluation")
@@ -154,7 +156,20 @@ class EvaluationMutation : BaseResolver(), Mutation {
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
-    serviceAccess.getService(EvaluationService::class).deleteEvaluationStepDefinition(definition)
+    try {
+      serviceAccess.getService(EvaluationService::class).deleteEvaluationStepDefinition(definition)
+    } catch (e: DataIntegrityViolationException) {
+      throw IllegalStateException("Evaluation steps cannot be deleted once used to generate feedback. You can deactivate it for future evaluation.")
+    }
+    true
+  }
+
+  fun setEvaluationStepDefinitionPosition(id: UUID, position: Long): Boolean = context {
+    val definition = serviceAccess.getService(EvaluationService::class).findEvaluationStepDefinition(id)
+    if (!definition.task.isEditable(authorization)) {
+      Authorization.deny()
+    }
+    serviceAccess.getService(EvaluationService::class).setEvaluationStepDefinitionPosition(definition, position)
     true
   }
 

@@ -15,6 +15,7 @@ import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.PositionUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.getYamlDefinition
 import org.springframework.beans.factory.annotation.Autowired
@@ -101,46 +102,9 @@ TaskService : BaseService() {
   fun setTaskPosition(task: Task, newPosition: Long) {
     val assignment = task.assignment
     require(assignment != null) { "Task is not part of an assignment" }
-    require(newPosition < assignment.tasks.size && newPosition >= 0) { "Invalid position" }
 
-    if (task.position == newPosition) {
-      return
-    }
-    if (task.position < newPosition) {
-      /*  0
-          1 --
-          2  |
-          3 <|
-          4
+    PositionUtil.move(assignment.tasks, task.position, newPosition, { position }, { position = it })
 
-          0 -> 0 // +- 0
-          1 -> 3 // = 3
-          2 -> 1 // -1
-          3 -> 2 // -1
-          4 -> 4 // +- 0
-       */
-      assignment.tasks
-          .filter { it.position > task.position && it.position <= newPosition }
-          .forEach { it.position -- }
-    } else {
-      /*  0
-          1 <|
-          2  |
-          3 --
-          4
-
-          0 -> 0 // +- 0
-          1 -> 2 // +1
-          2 -> 3 // +1
-          3 -> 1 // = 1
-          4 -> 4 // +- 0
-       */
-      assignment.tasks
-          .filter { it.position < task.position && it.position >= newPosition }
-          .forEach { it.position ++ }
-    }
-
-    task.position = newPosition
     taskRepository.saveAll(assignment.tasks)
     assignmentRepository.save(assignment)
   }
