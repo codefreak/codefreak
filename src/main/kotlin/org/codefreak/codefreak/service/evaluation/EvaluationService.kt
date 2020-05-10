@@ -4,15 +4,16 @@ import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
+import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationRepository
+import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.SubmissionService
-import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.orNull
@@ -41,10 +42,10 @@ class EvaluationService : BaseService() {
   private lateinit var evaluationQueue: EvaluationQueue
 
   @Autowired
-  private lateinit var taskService: TaskService
+  private lateinit var runners: List<EvaluationRunner>
 
   @Autowired
-  private lateinit var runners: List<EvaluationRunner>
+  private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
 
   private val runnersByName by lazy { runners.map { it.getName() to it }.toMap() }
 
@@ -147,4 +148,9 @@ class EvaluationService : BaseService() {
     log.info("Automatically trigger evaluation for answers of ${event.assignmentId}")
     startAssignmentEvaluation(event.assignmentId)
   }
+
+  fun findEvaluationStepDefinition(id: UUID) = evaluationStepDefinitionRepository.findById(id)
+      .orElseThrow { EntityNotFoundException("Evaluation step definition not found") }
+
+  fun deleteEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition) = evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
 }

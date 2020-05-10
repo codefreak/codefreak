@@ -5,8 +5,10 @@ import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import com.expediagroup.graphql.spring.operations.Subscription
+import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetchingEnvironment
 import org.codefreak.codefreak.auth.Authority
+import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
@@ -41,10 +43,18 @@ class PendingEvaluationDto(answerEntity: Answer, ctx: ResolverContext) : BaseDto
 }
 
 @GraphQLName("EvaluationStepDefinition")
-class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition) {
+class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: ResolverContext) {
+  companion object {
+    private val objectMapper = ObjectMapper()
+  }
+  val id = definition.id
   val runnerName = definition.runnerName
   val position = definition.position
   val title = definition.title
+  val options: String by lazy {
+    ctx.authorization.requireAuthorityIfNotCurrentUser(definition.task.owner, Authority.ROLE_ADMIN)
+    objectMapper.writeValueAsString(definition.options)
+  }
 }
 
 @GraphQLName("Evaluation")
@@ -53,14 +63,14 @@ class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
   val id = entity.id
   val answer by lazy { AnswerDto(entity.answer, ctx) }
   val createdAt = entity.createdAt
-  val steps by lazy { entity.evaluationSteps.map { EvaluationStepDto(it) }.sortedBy { it.definition.position } }
+  val steps by lazy { entity.evaluationSteps.map { EvaluationStepDto(it, ctx) }.sortedBy { it.definition.position } }
   val stepsResultSummary by lazy { entity.stepsResultSummary.let { EvaluationStepResultDto.valueOf(it.name) } }
 }
 
 @GraphQLName("EvaluationStep")
-class EvaluationStepDto(entity: EvaluationStep) {
+class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   val id = entity.id
-  val definition by lazy { EvaluationStepDefinitionDto(entity.definition) }
+  val definition by lazy { EvaluationStepDefinitionDto(entity.definition, ctx) }
   val result = entity.result?.let { EvaluationStepResultDto.valueOf(it.name) }
   val summary = entity.summary
   val feedback by lazy { entity.feedback.map { FeedbackDto(it) } }
@@ -137,6 +147,15 @@ class EvaluationMutation : BaseResolver(), Mutation {
     serviceAccess.getService(EvaluationService::class).startAssignmentEvaluation(assignmentId).map {
       PendingEvaluationDto(it, this)
     }
+  }
+
+  fun deleteEvaluationStepDefinition(id: UUID) = context {
+    val definition = serviceAccess.getService(EvaluationService::class).findEvaluationStepDefinition(id)
+    if (!definition.task.isEditable(authorization)) {
+      Authorization.deny()
+    }
+    serviceAccess.getService(EvaluationService::class).deleteEvaluationStepDefinition(definition)
+    true
   }
 
   @Secured(Authority.ROLE_TEACHER)

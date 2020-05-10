@@ -30,3 +30,7 @@ mutation CreateCommentFeedback(
     line: $line
   )
 }
+
+mutation DeleteEvaluationStepDefinition($id: ID!) {
+  deleteEvaluationStepDefinition(id: $id)
+}

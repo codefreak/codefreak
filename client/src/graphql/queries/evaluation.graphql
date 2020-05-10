@@ -76,3 +76,16 @@ query GetDetailedEvaluaton($evaluationId: ID!) {
     }
   }
 }
+
+query GetEvaluationStepDefinitions($taskId: ID!) {
+  task(id: $taskId) {
+    id
+    evaluationStepDefinitions {
+      id
+      runnerName
+      position
+      title
+      options
+    }
+  }
+}

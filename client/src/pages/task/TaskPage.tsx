@@ -76,7 +76,6 @@ const TaskPage: React.FC = () => {
   const { answer } = task
   const differentUser =
     isTeacher && answer && userId ? answer.submission.user : undefined
-  const pool = !task.assignment
   const editable = task.editable && !differentUser
 
   const taskInput: TaskInput = {

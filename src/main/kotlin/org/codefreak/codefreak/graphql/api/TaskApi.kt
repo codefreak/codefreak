@@ -47,7 +47,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   }
 
   val evaluationStepDefinitions by lazy {
-    entity.evaluationStepDefinitions.map { EvaluationStepDefinitionDto(it) }
+    entity.evaluationStepDefinitions.map { EvaluationStepDefinitionDto(it, ctx) }
   }
 
   fun answer(userId: UUID?): AnswerDto? {
