@@ -1,4 +1,4 @@
-import { Alert, Button, Descriptions, Modal, Tooltip } from 'antd'
+import { Alert, Button, Descriptions, Modal, Tag, Tooltip } from 'antd'
 import { CardProps } from 'antd/lib/card'
 import YAML from 'json-to-pretty-yaml'
 import React from 'react'
@@ -21,7 +21,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const result = useGetEvaluationStepDefinitionsQuery({ variables: { taskId } })
   const [deleteStep] = useDeleteEvaluationStepDefinitionMutation({
     onCompleted: () => {
-      messageService.success('Evaluation step removed')
+      messageService.success('Evaluation step deleted')
       result.refetch()
     }
   })
@@ -52,7 +52,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       Modal.confirm({
         title: 'Are you sure?',
         content:
-          'Do you want to remove this evaluation step? Custom configuration will be lost!',
+          'Do you want to delete this evaluation step? Custom configuration will be lost!',
         async onOk() {
           try {
             await deleteStep({ variables: { id: definition.id } })
@@ -65,20 +65,32 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
     const cardProps: CardProps = {
       title: definition.title,
       extra: (
-        <Tooltip title="Remove evaluation step" placement="left">
-          <Button
-            onClick={confirmDelete}
-            type="dashed"
-            shape="circle"
-            icon="delete"
-          />
-        </Tooltip>
+        <>
+          {definition.runner.builtIn ? null : (
+            <Tooltip title="Delete evaluation step" placement="left">
+              <Button
+                onClick={confirmDelete}
+                type="dashed"
+                shape="circle"
+                icon="delete"
+              />
+            </Tooltip>
+          )}
+        </>
       ),
       children: (
         <>
           <Descriptions layout="horizontal" style={{ marginBottom: -8 }}>
             <Descriptions.Item label="Runner">
-              {definition.runnerName}
+              {definition.runnerName}{' '}
+              {definition.runner.builtIn ? (
+                <Tooltip
+                  placement="right"
+                  title="Built-in evaluation steps cannot be deleted. You can still hide them from students by deactivating."
+                >
+                  <Tag>built-in</Tag>
+                </Tooltip>
+              ) : null}
             </Descriptions.Item>
           </Descriptions>
           {definition.options === '{}' ? (

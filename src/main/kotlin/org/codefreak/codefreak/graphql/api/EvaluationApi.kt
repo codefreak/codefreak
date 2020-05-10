@@ -21,8 +21,10 @@ import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.EvaluationFinishedEvent
 import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
+import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.PendingEvaluationStatus
+import org.codefreak.codefreak.service.evaluation.isBuiltIn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
@@ -57,6 +59,10 @@ class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: Res
     ctx.authorization.requireAuthorityIfNotCurrentUser(definition.task.owner, Authority.ROLE_ADMIN)
     objectMapper.writeValueAsString(definition.options)
   }
+  val runner by lazy {
+    ctx.authorization.requireAuthority(Authority.ROLE_TEACHER)
+    ctx.serviceAccess.getService(EvaluationService::class).getEvaluationRunner(runnerName).let { EvaluationRunnerDto(it) }
+  }
 }
 
 @GraphQLName("Evaluation")
@@ -71,18 +77,26 @@ class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
 
 @GraphQLName("EvaluationStep")
 class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
+  @GraphQLID
   val id = entity.id
   val definition by lazy { EvaluationStepDefinitionDto(entity.definition, ctx) }
   val result = entity.result?.let { EvaluationStepResultDto.valueOf(it.name) }
   val summary = entity.summary
   val feedback by lazy { entity.feedback.map { FeedbackDto(it) } }
 }
+@GraphQLName("EvaluationRunner")
+class EvaluationRunnerDto(runner: EvaluationRunner) {
+  val name = runner.getName()
+  val builtIn = runner.isBuiltIn()
+}
+
 
 @GraphQLName("EvaluationStepResult")
 enum class EvaluationStepResultDto { SUCCESS, FAILED, ERRORED }
 
 @GraphQLName("Feedback")
 class FeedbackDto(entity: Feedback) {
+  @GraphQLID
   val id = entity.id
   val summary = entity.summary
   val fileContext = entity.fileContext?.let { FileContextDto(it) }
@@ -152,12 +166,14 @@ class EvaluationMutation : BaseResolver(), Mutation {
   }
 
   fun deleteEvaluationStepDefinition(id: UUID) = context {
-    val definition = serviceAccess.getService(EvaluationService::class).findEvaluationStepDefinition(id)
+    val evaluationService = serviceAccess.getService(EvaluationService::class)
+    val definition = evaluationService.findEvaluationStepDefinition(id)
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
+    require(!evaluationService.getEvaluationRunner(definition.runnerName).isBuiltIn()) {"Built-in evaluation steps cannot be deleted"}
     try {
-      serviceAccess.getService(EvaluationService::class).deleteEvaluationStepDefinition(definition)
+      evaluationService.deleteEvaluationStepDefinition(definition)
     } catch (e: DataIntegrityViolationException) {
       throw IllegalStateException("Evaluation steps cannot be deleted once used to generate feedback. You can deactivate it for future evaluation.")
     }

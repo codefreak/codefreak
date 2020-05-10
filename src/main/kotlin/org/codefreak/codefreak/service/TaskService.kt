@@ -13,6 +13,7 @@ import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.evaluation.EvaluationService
+import org.codefreak.codefreak.service.evaluation.isBuiltIn
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.PositionUtil
@@ -23,6 +24,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayOutputStream
+import java.lang.IllegalArgumentException
 import java.util.UUID
 
 @Service
@@ -64,12 +66,30 @@ TaskService : BaseService() {
         }
         .toMutableSet()
 
+    task.evaluationStepDefinitions
+        .groupBy { it.runnerName }
+        .forEach { (runnerName, definitions) ->
+          if (definitions.size > 1 && evaluationService.getEvaluationRunner(runnerName).isBuiltIn()) {
+            throw IllegalArgumentException("Evaluation step with runner '$runnerName' can only be added once!")
+          }
+        }
+
+    addBuiltInEvaluationSteps(task)
+
     evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
     task = taskRepository.save(task)
     fileService.writeCollectionTar(task.id).use { fileCollection ->
       TarUtil.copyEntries(tarContent.inputStream(), fileCollection) { !it.name.equals("codefreak.yml", true) }
     }
     return task
+  }
+
+  private fun addBuiltInEvaluationSteps(task: Task) {
+    if (task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME } == null) {
+      task.evaluationStepDefinitions.forEach { it.position++ }
+      val runner = evaluationService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
+      task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
+    }
   }
 
   @Transactional
@@ -94,6 +114,7 @@ TaskService : BaseService() {
     }
     return taskDefinition
   }
+
 
   @Transactional
   fun saveTask(task: Task) = taskRepository.save(task)
