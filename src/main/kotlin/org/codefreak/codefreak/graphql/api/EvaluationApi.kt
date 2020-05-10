@@ -90,7 +90,6 @@ class EvaluationRunnerDto(runner: EvaluationRunner) {
   val builtIn = runner.isBuiltIn()
 }
 
-
 @GraphQLName("EvaluationStepResult")
 enum class EvaluationStepResultDto { SUCCESS, FAILED, ERRORED }
 
@@ -171,7 +170,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
-    require(!evaluationService.getEvaluationRunner(definition.runnerName).isBuiltIn()) {"Built-in evaluation steps cannot be deleted"}
+    require(!evaluationService.getEvaluationRunner(definition.runnerName).isBuiltIn()) { "Built-in evaluation steps cannot be deleted" }
     try {
       evaluationService.deleteEvaluationStepDefinition(definition)
     } catch (e: DataIntegrityViolationException) {
