@@ -7,6 +7,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
+import org.apache.commons.compress.archivers.tar.TarConstants
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.compressors.CompressorException
@@ -137,6 +138,22 @@ object TarUtil {
     to.closeArchiveEntry()
   }
 
+  fun migrateEntries(source: InputStream, to: TarArchiveOutputStream, prefix: String) =
+      migrateEntries(TarArchiveInputStream(source), to, prefix)
+
+  /**
+   * Copy all files from source archive into the prefix path of output archive
+   */
+  fun migrateEntries(source: TarArchiveInputStream, to: TarArchiveOutputStream, prefix: String) {
+    generateSequence { source.nextTarEntry }
+        // skip the root directory
+        .filter { it.name.trimStart('/', '.').isNotEmpty() }
+        .forEach {
+          it.name = "${prefix.withTrailingSlash()}${normalizeEntryName(it.name)}"
+          copyEntry(source, to, it)
+        }
+  }
+
   inline fun <T> findFile(`in`: InputStream, path: String, consumer: (TarArchiveEntry, TarArchiveInputStream) -> T): T {
     TarArchiveInputStream(`in`).let { tar ->
       generateSequence { tar.nextTarEntry }.forEach {
@@ -193,6 +210,14 @@ object TarUtil {
       tar.closeArchiveEntry()
     }
     tar.finish()
+  }
+
+  fun mkdir(name: String, outputStream: TarArchiveOutputStream) {
+    TarArchiveEntry(name, TarConstants.LF_DIR, false).also {
+      it.mode = TarArchiveEntry.DEFAULT_DIR_MODE
+      outputStream.putArchiveEntry(it)
+      outputStream.closeArchiveEntry()
+    }
   }
 
   private fun basename(path: String): String {
