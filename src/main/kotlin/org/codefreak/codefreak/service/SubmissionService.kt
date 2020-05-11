@@ -6,9 +6,11 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.SubmissionRepository
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.OutputStream
 import java.util.Optional
 import java.util.UUID
 
@@ -91,5 +93,23 @@ class SubmissionService : BaseService() {
     }
 
     return spreadsheetService.generateCsv(titleCols, rows)
+  }
+
+  @Transactional(readOnly = true)
+  fun generateSubmissionsTar(assignmentId: UUID, outputStream: OutputStream) {
+    val assignment = assignmentService.findAssignment(assignmentId)
+    val outputArchive = TarUtil.PosixTarArchiveOutputStream(outputStream)
+    assignment.submissions.forEach { submission ->
+      val submissionPath = "/${submission.user.username}"
+      TarUtil.mkdir(submissionPath, outputArchive)
+      submission.answers.forEach { answer ->
+        val answerPath = "$submissionPath/task-${answer.task.position}"
+        TarUtil.mkdir(answerPath, outputArchive)
+        fileService.readCollectionTar(answer.id).use { answerFiles ->
+          TarUtil.migrateEntries(answerFiles, outputArchive, prefix = answerPath)
+        }
+      }
+    }
+    outputArchive.finish()
   }
 }
