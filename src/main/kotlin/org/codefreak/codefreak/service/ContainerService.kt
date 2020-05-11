@@ -408,14 +408,12 @@ class ContainerService : BaseService() {
         env("CODECLIMATE_ORCHESTRATOR=$name", "CODECLIMATE_CODE=/code")
       }
     }
-    answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, "/code") }
-    docker.startContainer(containerId)
-    // `analyze` would also install missing engines but may time out in the process. Also `engines:install` will update images.
-    exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "engines:install"))
-    val output = exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "analyze", "-f", "json")).output
-    docker.killContainer(containerId)
-    docker.removeContainer(containerId)
-    return output
+    useContainer(containerId) {
+      answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, "/code") }
+      // `analyze` would also install missing engines but may time out in the process. Also `engines:install` will update images.
+      exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "engines:install"))
+      return exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "analyze", "-f", "json")).output
+    }
   }
 
   fun runCommandsForEvaluation(
@@ -431,8 +429,7 @@ class ContainerService : BaseService() {
       containerConfig { workingDir(projectPath) }
     }
     val outputs = mutableListOf<ExecResult>()
-    docker.startContainer(containerId)
-    try {
+    useContainer(containerId) {
       answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
       commands.forEach {
         if (stopOnFail && outputs.size > 0 && outputs.last().exitCode != 0L) {
@@ -444,12 +441,21 @@ class ContainerService : BaseService() {
       if (processFiles !== null) {
         archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
       }
-    } finally {
-      // ensure cleanup if something goes south during evaluation
-      docker.killContainer(containerId)
-      docker.removeContainer(containerId)
+      return outputs
     }
-    return outputs
+  }
+
+  /**
+   * Start a container and runs the specified block.
+   * Ensures container is removed after execution with all attached volumes
+   */
+  private inline fun <T> useContainer(containerId: String, block: () -> T): T {
+    docker.startContainer(containerId)
+    try {
+      return block()
+    } finally {
+      docker.removeContainer(containerId, forceKill(), removeVolumes())
+    }
   }
 
   private fun splitCommand(command: String): Array<String> {
