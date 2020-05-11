@@ -171,6 +171,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
       Authorization.deny()
     }
     require(!evaluationService.getEvaluationRunner(definition.runnerName).isBuiltIn()) { "Built-in evaluation steps cannot be deleted" }
+    check(definition.task.answers.none { evaluationService.isEvaluationPending(it.id) }) { "Cannot delete evaluation step while evaluation is pending" }
     try {
       evaluationService.deleteEvaluationStepDefinition(definition)
     } catch (e: DataIntegrityViolationException) {

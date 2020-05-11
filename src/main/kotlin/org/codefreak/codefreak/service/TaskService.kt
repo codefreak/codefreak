@@ -70,7 +70,7 @@ TaskService : BaseService() {
         .groupBy { it.runnerName }
         .forEach { (runnerName, definitions) ->
           if (definitions.size > 1 && evaluationService.getEvaluationRunner(runnerName).isBuiltIn()) {
-            throw IllegalArgumentException("Evaluation step with runner '$runnerName' can only be added once!")
+            throw IllegalArgumentException("Evaluation step '$runnerName' can only be added once!")
           }
         }
 

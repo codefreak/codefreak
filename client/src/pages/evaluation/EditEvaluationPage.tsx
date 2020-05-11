@@ -51,8 +51,16 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
     const confirmDelete = () =>
       Modal.confirm({
         title: 'Are you sure?',
-        content:
-          'Do you want to delete this evaluation step? Custom configuration will be lost!',
+        width: 600,
+        content: (
+          <>
+            <p>
+              Do you want to delete this evaluation step? Custom configuration
+              will be lost!
+            </p>
+            <Alert message="This will fail if the evaluation has already been run since this step was added. This is because it is referenced by the generated feedback. If you are in testing mode, exit it to delete your answer. You can always deactivate a step to exclude it from future evaluations." />
+          </>
+        ),
         async onOk() {
           try {
             await deleteStep({ variables: { id: definition.id } })
