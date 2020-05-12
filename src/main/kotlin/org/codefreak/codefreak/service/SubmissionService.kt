@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service
 
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Submission
 import org.codefreak.codefreak.entity.User
@@ -106,7 +107,11 @@ class SubmissionService : BaseService() {
         val answerPath = "$submissionPath/task-${answer.task.position}"
         TarUtil.mkdir(answerPath, outputArchive)
         fileService.readCollectionTar(answer.id).use { answerFiles ->
-          TarUtil.migrateEntries(answerFiles, outputArchive, prefix = answerPath)
+          val source = TarArchiveInputStream(answerFiles)
+          TarUtil.copyEntries(source, outputArchive, prefix = answerPath, filter = {
+            // don't copy root directory of answer as we already created one
+            it.name.trimStart('/', '.').isNotEmpty()
+          })
         }
       }
     }
