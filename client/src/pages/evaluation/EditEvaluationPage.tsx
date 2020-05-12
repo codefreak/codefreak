@@ -1,15 +1,28 @@
-import { Alert, Button, Descriptions, Modal, Switch, Tag, Tooltip } from 'antd'
+import {
+  Alert,
+  Button,
+  Descriptions,
+  Modal,
+  Radio,
+  Switch,
+  Tag,
+  Tooltip
+} from 'antd'
 import { CardProps } from 'antd/lib/card'
+import { RadioChangeEvent } from 'antd/lib/radio'
 import YAML from 'json-to-pretty-yaml'
-import React from 'react'
+import React, { useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CardList from '../../components/CardList'
 import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
 import EditableTitle from '../../components/EditableTitle'
 import {
+  EvaluationRunner,
   EvaluationStepDefinitionInput,
   GetEvaluationStepDefinitionsQueryResult,
+  useCreateEvaluationStepDefinitionMutation,
   useDeleteEvaluationStepDefinitionMutation,
+  useGetEvaluationRunnersQuery,
   useGetEvaluationStepDefinitionsQuery,
   useSetEvaluationStepDefinitionPositonMutation,
   useUpdateEvaluationStepDefinitionMutation
@@ -174,8 +187,80 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         renderItem={renderEvaluationStepDefinition}
         handlePositionChange={handlePositionChange}
       />
+      <AddEvaluationStepDefinitionButton
+        taskId={taskId}
+        update={result.refetch}
+      />
     </>
   )
 }
+
+const AddEvaluationStepDefinitionButton: React.FC<{
+  taskId: string
+  update: () => any
+}> = props => {
+  const [modalVisible, setModalVisible] = useState(false)
+  const [runnerName, setRunnerName] = useState<string>()
+  const showModal = () => {
+    setRunnerName(undefined)
+    setModalVisible(true)
+  }
+  const hideModal = () => setModalVisible(false)
+  const result = useGetEvaluationRunnersQuery()
+  const [createStep, { loading }] = useCreateEvaluationStepDefinitionMutation()
+
+  if (result.data === undefined) {
+    return <AsyncPlaceholder result={result} />
+  }
+
+  const runners = result.data.evaluationRunners
+
+  const onChange = (e: RadioChangeEvent) => setRunnerName(e.target.value)
+
+  const onOk = () =>
+    createStep({
+      variables: { runnerName: runnerName!!, taskId: props.taskId }
+    })
+      .then(() => messageService.success('Evaluation step added'))
+      .then(props.update)
+      .finally(hideModal)
+
+  return (
+    <>
+      <Button
+        onClick={showModal}
+        type="primary"
+        style={{ marginTop: 16 }}
+        icon="plus"
+        block
+      >
+        Add Evaluation Step
+      </Button>
+      <Modal
+        title="Add Evaluation Step"
+        visible={modalVisible}
+        onOk={onOk}
+        okButtonProps={{ disabled: runnerName === undefined, loading }}
+        onCancel={hideModal}
+      >
+        <Radio.Group onChange={onChange} value={runnerName}>
+          {runners.map(renderRunnerRadio)}
+        </Radio.Group>
+      </Modal>
+    </>
+  )
+}
+
+const renderRunnerRadio = (
+  runner: Pick<EvaluationRunner, 'name' | 'defaultTitle'>
+) => (
+  <Radio
+    style={{ display: 'block', height: '30px', lineHeight: '30px' }}
+    value={runner.name}
+    key={runner.name}
+  >
+    {runner.defaultTitle} <Tag>{runner.name}</Tag>
+  </Radio>
+)
 
 export default EditEvaluationPage

@@ -106,7 +106,7 @@ class TaskMutation : BaseResolver(), Mutation {
   fun deleteTask(id: UUID): Boolean = context {
     val task = serviceAccess.getService(TaskService::class).findTask(id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
-    serviceAccess.getService(TaskService::class).deleteTask(task.id)
+    serviceAccess.getService(TaskService::class).deleteTask(task)
     true
   }
 

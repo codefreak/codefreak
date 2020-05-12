@@ -21,6 +21,7 @@ import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.EvaluationFinishedEvent
 import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
+import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.PendingEvaluationStatus
@@ -99,6 +100,7 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
 class EvaluationRunnerDto(runner: EvaluationRunner) {
   val name = runner.getName()
   val builtIn = runner.isBuiltIn()
+  val defaultTitle = runner.getDefaultTitle()
 }
 
 @GraphQLName("EvaluationStepResult")
@@ -149,6 +151,14 @@ class PendingEvaluationUpdatedEventDto(event: PendingEvaluationUpdatedEvent) {
 @Component
 class EvaluationQuery : BaseResolver(), Query {
 
+  @Secured(Authority.ROLE_TEACHER)
+  fun evaluationRunners() = context {
+    serviceAccess.getService(EvaluationService::class).getAllEvaluationRunners()
+        .filterNot { it.isBuiltIn() }
+        .map { EvaluationRunnerDto(it) }
+        .toTypedArray()
+  }
+
   @Secured(Authority.ROLE_STUDENT)
   fun evaluation(id: UUID): EvaluationDto = context {
     val evaluation = serviceAccess.getService(EvaluationService::class).getEvaluation(id)
@@ -173,6 +183,19 @@ class EvaluationMutation : BaseResolver(), Mutation {
     serviceAccess.getService(EvaluationService::class).startAssignmentEvaluation(assignmentId).map {
       PendingEvaluationDto(it, this)
     }
+  }
+
+  fun createEvaluationStepDefinition(taskId: UUID, runnerName: String) = context {
+    val task = serviceAccess.getService(TaskService::class).findTask(taskId)
+    val runner = serviceAccess.getService(EvaluationService::class).getEvaluationRunner(runnerName)
+    if (!task.isEditable(authorization)) {
+      Authorization.deny()
+    }
+    val definition = EvaluationStepDefinition(task, runner.getName(), task.evaluationStepDefinitions.size, runner.getDefaultTitle())
+    task.evaluationStepDefinitions.add(definition)
+    serviceAccess.getService(EvaluationService::class).saveEvaluationStepDefinition(definition)
+    serviceAccess.getService(TaskService::class).saveTask(task)
+    true
   }
 
   fun updateEvaluationStepDefinition(input: EvaluationStepDefinitionInputDto): Boolean = context {

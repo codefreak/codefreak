@@ -40,3 +40,11 @@ mutation UpdateEvaluationStepDefinition(
 ) {
   updateEvaluationStepDefinition(input: $input)
 }
+
+mutation CreateEvaluationStepDefinition($taskId: ID!, $runnerName: String!) {
+  createEvaluationStepDefinition(taskId: $taskId, runnerName: $runnerName)
+}
+
+mutation SetEvaluationStepDefinitionPositon($id: ID!, $position: Long!) {
+  setEvaluationStepDefinitionPosition(id: $id, position: $position)
+}

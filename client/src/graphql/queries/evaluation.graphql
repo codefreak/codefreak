@@ -94,6 +94,9 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
   }
 }
 
-mutation SetEvaluationStepDefinitionPositon($id: ID!, $position: Long!) {
-  setEvaluationStepDefinitionPosition(id: $id, position: $position)
+query GetEvaluationRunners {
+  evaluationRunners {
+    name
+    defaultTitle
+  }
 }

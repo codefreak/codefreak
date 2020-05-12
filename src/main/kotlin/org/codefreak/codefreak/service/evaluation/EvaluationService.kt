@@ -140,6 +140,8 @@ class EvaluationService : BaseService() {
   fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name]
       ?: throw IllegalArgumentException("Evaluation runner '$name' not found")
 
+  fun getAllEvaluationRunners() = runners
+
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
   }
