@@ -5,6 +5,7 @@ import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import com.expediagroup.graphql.spring.operations.Subscription
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetchingEnvironment
 import org.codefreak.codefreak.auth.Authority
@@ -101,6 +102,7 @@ class EvaluationRunnerDto(runner: EvaluationRunner) {
   val name = runner.getName()
   val builtIn = runner.isBuiltIn()
   val defaultTitle = runner.getDefaultTitle()
+  val optionsSchema = runner.getOptionsSchema()
 }
 
 @GraphQLName("EvaluationStepResult")
@@ -170,6 +172,10 @@ class EvaluationQuery : BaseResolver(), Query {
 @Component
 class EvaluationMutation : BaseResolver(), Mutation {
 
+  companion object {
+    val objectMapper = ObjectMapper()
+  }
+
   @Secured(Authority.ROLE_STUDENT)
   fun startEvaluation(answerId: UUID): PendingEvaluationDto = context {
     val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
@@ -206,7 +212,8 @@ class EvaluationMutation : BaseResolver(), Mutation {
     definition.run {
       title = input.title
       active = input.active
-      // TODO Options
+      // TODO Validation
+      options = objectMapper.readValue(input.options, object : TypeReference<HashMap<String, Any>>() {})
     }
     serviceAccess.getService(EvaluationService::class).saveEvaluationStepDefinition(definition)
     true

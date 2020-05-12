@@ -8,14 +8,17 @@ import {
   Tag,
   Tooltip
 } from 'antd'
+import { ButtonProps } from 'antd/lib/button'
 import { CardProps } from 'antd/lib/card'
 import { RadioChangeEvent } from 'antd/lib/radio'
+import { JSONSchema6 } from 'json-schema'
 import YAML from 'json-to-pretty-yaml'
 import React, { useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CardList from '../../components/CardList'
 import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
 import EditableTitle from '../../components/EditableTitle'
+import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import {
   EvaluationRunner,
   EvaluationStepDefinitionInput,
@@ -79,6 +82,13 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       options: definition.options
     }
 
+    const optionsSchema: JSONSchema6 = JSON.parse(
+      definition.runner.optionsSchema
+    )
+    const hasOptions =
+      optionsSchema.properties &&
+      Object.keys(optionsSchema.properties).length > 0
+
     const updater = makeUpdater(definitionInput, input =>
       updateMutation({ variables: { input } })
     )
@@ -105,6 +115,15 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         }
       })
 
+    const updateOptions = (newOptions: any) =>
+      updater('options')(JSON.stringify(newOptions))
+
+    const configureButtonProps: ButtonProps = {
+      type: 'primary',
+      shape: 'circle',
+      icon: 'setting'
+    }
+
     const cardProps: CardProps = {
       title: (
         <EditableTitle
@@ -118,11 +137,28 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
           {definition.runner.builtIn ? null : (
             <Tooltip title="Delete evaluation step" placement="left">
               <Button
+                style={{ marginRight: 8 }}
                 onClick={confirmDelete}
                 type="dashed"
                 shape="circle"
                 icon="delete"
               />
+            </Tooltip>
+          )}
+          {hasOptions ? (
+            <JsonSchemaEditButton
+              title={`Configure ${definition.runnerName} step`}
+              value={JSON.parse(definition.options)}
+              schema={optionsSchema}
+              onSubmit={updateOptions}
+              buttonProps={configureButtonProps}
+            />
+          ) : (
+            <Tooltip
+              placement="left"
+              title="This runner does not have any configuration options"
+            >
+              <Button disabled {...configureButtonProps} />
             </Tooltip>
           )}
         </>

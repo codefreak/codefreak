@@ -1,4 +1,5 @@
 import { Button, Modal } from 'antd'
+import { ButtonProps } from 'antd/lib/button'
 import { JSONSchema6 } from 'json-schema'
 import React, { createRef, memo, ReactNode, useState } from 'react'
 import Form from 'react-jsonschema-form'
@@ -10,6 +11,7 @@ interface JsonSchemaEditButtonProps<T> {
   schema: JSONSchema6
   onSubmit: (newValue: T) => Promise<any>
   extraContent?: ReactNode
+  buttonProps?: ButtonProps
 }
 
 function JsonSchemaEditButton<T>(
@@ -36,7 +38,12 @@ function JsonSchemaEditButton<T>(
 
   return (
     <>
-      <Button icon="edit" type="link" onClick={showModal} />
+      <Button
+        icon="edit"
+        type="link"
+        onClick={showModal}
+        {...props.buttonProps}
+      />
       <Modal
         visible={modalVisible}
         onCancel={hideModal}

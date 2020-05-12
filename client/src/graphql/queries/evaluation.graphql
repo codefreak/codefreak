@@ -89,6 +89,7 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       active
       runner {
         builtIn
+        optionsSchema
       }
     }
   }

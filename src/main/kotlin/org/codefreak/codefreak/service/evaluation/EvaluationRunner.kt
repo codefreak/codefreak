@@ -12,6 +12,11 @@ interface EvaluationRunner {
   fun run(answer: Answer, options: Map<String, Any>): List<Feedback>
 
   /**
+   * Returns the schema of the options map that is passed to [run].
+   */
+  fun getOptionsSchema() = "{}"
+
+  /**
    * Default feedback summary is the number of each severities
    */
   fun summarize(feedbackList: List<Feedback>): String {

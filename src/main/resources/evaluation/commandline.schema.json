@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "required": ["image", "project-path"],
+  "properties": {
+    "image": {
+      "type": "string"
+    },
+    "project-path": {
+      "type": "string"
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stop-on-fail": {
+      "type": "boolean"
+    }
+  }
+}
