@@ -77,11 +77,7 @@ object TarUtil {
     zip.finish()
   }
 
-  /**
-   * Check if given path name is the name of a root file like "/", "./", "." or even
-   * weird combinations like "../../."
-   */
-  private fun isRootFilename(path: String) = path.trim('/', '.').isBlank()
+  private fun isRootFilename(path: String) = normalizeEntryName(path).isBlank()
 
   private fun createTarRootDirectory(outputStream: TarArchiveOutputStream) {
     outputStream.putArchiveEntry(TarArchiveEntry("./"))
@@ -118,10 +114,10 @@ object TarUtil {
     tar.finish()
   }
 
-  fun normalizeEntryName(name: String): String {
-    if (name == ".") return ""
-    return if (name.startsWith("./")) name.drop(2) else name
-  }
+  /**
+   * Remove leading dots and slashes from given path
+   */
+  fun normalizeEntryName(name: String) = name.trimStart('.', '/')
 
   fun copyEntries(from: InputStream, to: OutputStream, filter: (TarArchiveEntry) -> Boolean = { true }) =
       copyEntries(TarArchiveInputStream(from), PosixTarArchiveOutputStream(to), filter)
