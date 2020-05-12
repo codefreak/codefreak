@@ -1,6 +1,8 @@
 package org.codefreak.codefreak.frontend
 
 import org.codefreak.codefreak.auth.Authority
+import org.codefreak.codefreak.auth.Authorization
+import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.util.TarUtil
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
@@ -21,7 +23,7 @@ class AssignmentController : BaseController() {
   @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/{id}/submissions.csv")
   fun getSubmissionsCsv(@PathVariable("id") assignmentId: UUID): ResponseEntity<StreamingResponseBody> {
-    val assignment = assignmentService.findAssignment(assignmentId)
+    val assignment = getOwnedAssignment(assignmentId)
     val csv = submissionService.generateSubmissionCsv(assignmentId)
     return download("${assignment.title}-submissions.csv", csv.byteInputStream())
   }
@@ -29,7 +31,7 @@ class AssignmentController : BaseController() {
   @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/{id}/submissions.tar")
   fun downloadSubmissionsTar(@PathVariable("id") assignmentId: UUID): ResponseEntity<StreamingResponseBody> {
-    val assignment = assignmentService.findAssignment(assignmentId)
+    val assignment = getOwnedAssignment(assignmentId)
     return download("${assignment.title}-submissions.tar") {
       submissionService.generateSubmissionsTar(assignmentId, it)
     }
@@ -38,7 +40,7 @@ class AssignmentController : BaseController() {
   @Secured(Authority.ROLE_TEACHER)
   @GetMapping("/{id}/submissions.zip")
   fun downloadSubmissionsZip(@PathVariable("id") assignmentId: UUID): ResponseEntity<StreamingResponseBody> {
-    val assignment = assignmentService.findAssignment(assignmentId)
+    val assignment = getOwnedAssignment(assignmentId)
     return download("${assignment.title}-submissions.zip") { downloadStream ->
       // pipe between tar writer and tar to zip conversion
       val outputPipe = PipedOutputStream()
@@ -50,5 +52,11 @@ class AssignmentController : BaseController() {
       }
       TarUtil.tarToZip(inputPipe, downloadStream)
     }
+  }
+
+  private fun getOwnedAssignment(assignmentId: UUID): Assignment {
+    val assignment = assignmentService.findAssignment(assignmentId)
+    Authorization().requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    return assignment
   }
 }
