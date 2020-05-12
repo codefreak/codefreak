@@ -46,7 +46,7 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
         (status != AssignmentStatus.OPEN))
   }
 
-  val submissionCsvUrl by lazy { FrontendUtil.getUriBuilder().path("/api/assignments/$id/submissions.csv").build().toUriString() }
+  val submissionsDownloadUrl by lazy { FrontendUtil.getUriBuilder().path("/api/assignments/$id/submissions").build().toUriString() }
   val submissions by lazy {
     authorization.requireAuthority(Authority.ROLE_TEACHER)
     serviceAccess.getService(SubmissionService::class)

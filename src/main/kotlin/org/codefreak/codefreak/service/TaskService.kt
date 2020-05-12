@@ -66,7 +66,7 @@ TaskService : BaseService() {
     evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
     task = taskRepository.save(task)
     fileService.writeCollectionTar(task.id).use { fileCollection ->
-      TarUtil.copyEntries(tarContent.inputStream(), fileCollection) { !it.name.equals("codefreak.yml", true) }
+      TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals("codefreak.yml", true) })
     }
     return task
   }
@@ -151,7 +151,7 @@ TaskService : BaseService() {
     val out = ByteArrayOutputStream()
     val tar = TarUtil.PosixTarArchiveOutputStream(out)
     fileService.readCollectionTar(task.id).use { files ->
-      TarUtil.copyEntries(TarArchiveInputStream(files), tar) { it.name != "codefreak.yml" }
+      TarUtil.copyEntries(TarArchiveInputStream(files), tar, filter = { it.name != "codefreak.yml" })
     }
 
     val definition = TaskDefinition(

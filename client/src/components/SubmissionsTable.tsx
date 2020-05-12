@@ -10,6 +10,7 @@ import {
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { getEntityPath } from '../services/entity-path'
 import { shorten } from '../services/short-id'
+import ArchiveDownload from './ArchiveDownload'
 import EvaluationResultPopover from './EvaluationResultPopover'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
@@ -96,11 +97,14 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
           </Button>
           <Button
             type="default"
-            href={assignment.submissionCsvUrl}
-            icon="download"
+            href={`${assignment.submissionsDownloadUrl}.csv`}
+            icon="table"
           >
             Download results as .csv
           </Button>
+          <ArchiveDownload url={assignment.submissionsDownloadUrl}>
+            Download all submissions…
+          </ArchiveDownload>
         </Col>
       </Row>
     )

@@ -7,6 +7,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
+import org.apache.commons.compress.archivers.tar.TarConstants
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.compressors.CompressorException
@@ -119,13 +120,27 @@ object TarUtil {
    */
   fun normalizeEntryName(name: String) = name.trimStart('.', '/')
 
-  fun copyEntries(from: InputStream, to: OutputStream, filter: (TarArchiveEntry) -> Boolean = { true }) =
-      copyEntries(TarArchiveInputStream(from), PosixTarArchiveOutputStream(to), filter)
+  fun copyEntries(
+    from: InputStream,
+    to: OutputStream,
+    filter: (TarArchiveEntry) -> Boolean = { true },
+    prefix: String? = null
+  ) = copyEntries(TarArchiveInputStream(from), PosixTarArchiveOutputStream(to), filter, prefix)
 
-  fun copyEntries(from: TarArchiveInputStream, to: TarArchiveOutputStream, filter: (TarArchiveEntry) -> Boolean = { true }) {
+  fun copyEntries(
+    from: TarArchiveInputStream,
+    to: TarArchiveOutputStream,
+    filter: (TarArchiveEntry) -> Boolean = { true },
+    prefix: String? = null
+  ) {
     generateSequence { from.nextTarEntry }
-        .filter { filter(it) }
-        .forEach { copyEntry(from, to, it) }
+        .filter(filter)
+        .forEach {
+          if (prefix != null) {
+            it.name = "${normalizeEntryName(prefix).withTrailingSlash()}${normalizeEntryName(it.name)}"
+          }
+          copyEntry(from, to, it)
+        }
   }
 
   private fun copyEntry(from: TarArchiveInputStream, to: TarArchiveOutputStream, entry: TarArchiveEntry) {
@@ -192,6 +207,14 @@ object TarUtil {
       tar.closeArchiveEntry()
     }
     tar.finish()
+  }
+
+  fun mkdir(name: String, outputStream: TarArchiveOutputStream) {
+    TarArchiveEntry(name, TarConstants.LF_DIR, false).also {
+      it.mode = TarArchiveEntry.DEFAULT_DIR_MODE
+      outputStream.putArchiveEntry(it)
+      outputStream.closeArchiveEntry()
+    }
   }
 
   private fun basename(path: String): String {
