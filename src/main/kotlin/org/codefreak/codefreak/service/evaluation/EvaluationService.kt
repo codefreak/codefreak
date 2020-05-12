@@ -154,8 +154,10 @@ class EvaluationService : BaseService() {
     startAssignmentEvaluation(event.assignmentId)
   }
 
-  fun findEvaluationStepDefinition(id: UUID) = evaluationStepDefinitionRepository.findById(id)
+  fun findEvaluationStepDefinition(id: UUID): EvaluationStepDefinition = evaluationStepDefinitionRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Evaluation step definition not found") }
+
+  fun saveEvaluationStepDefinition(definition: EvaluationStepDefinition) = evaluationStepDefinitionRepository.save(definition)
 
   @Transactional
   fun setEvaluationStepDefinitionPosition(evaluationStepDefinition: EvaluationStepDefinition, newPosition: Long) {

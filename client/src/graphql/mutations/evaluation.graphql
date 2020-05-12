@@ -34,3 +34,9 @@ mutation CreateCommentFeedback(
 mutation DeleteEvaluationStepDefinition($id: ID!) {
   deleteEvaluationStepDefinition(id: $id)
 }
+
+mutation UpdateEvaluationStepDefinition(
+  $input: EvaluationStepDefinitionInput!
+) {
+  updateEvaluationStepDefinition(input: $input)
+}

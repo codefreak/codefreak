@@ -6,7 +6,7 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
-import EditablePageTitle from '../../components/EditablePageTitle'
+import EditableTitle from '../../components/EditableTitle'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
 import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
@@ -192,7 +192,7 @@ const TaskPage: React.FC = () => {
       <SetTitle>{task.title}</SetTitle>
       <PageHeaderWrapper
         title={
-          <EditablePageTitle
+          <EditableTitle
             editable={editable}
             title={title}
             onChange={updater('title')}

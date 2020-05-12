@@ -5,13 +5,17 @@ import React from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CardList from '../../components/CardList'
 import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
+import EditableTitle from '../../components/EditableTitle'
 import {
+  EvaluationStepDefinitionInput,
   GetEvaluationStepDefinitionsQueryResult,
   useDeleteEvaluationStepDefinitionMutation,
   useGetEvaluationStepDefinitionsQuery,
-  useSetEvaluationStepDefinitionPositonMutation
+  useSetEvaluationStepDefinitionPositonMutation,
+  useUpdateEvaluationStepDefinitionMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
+import { makeUpdater } from '../../services/util'
 
 type EvaluationStepDefinition = NonNullable<
   GetEvaluationStepDefinitionsQueryResult['data']
@@ -28,6 +32,13 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const [
     setEvaluationStepDefinitionPosition
   ] = useSetEvaluationStepDefinitionPositonMutation()
+
+  const [updateMutation] = useUpdateEvaluationStepDefinitionMutation({
+    onCompleted: () => {
+      result.refetch()
+      messageService.success('Step updated')
+    }
+  })
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -48,6 +59,17 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const renderEvaluationStepDefinition = (
     definition: EvaluationStepDefinition
   ) => {
+    const definitionInput: EvaluationStepDefinitionInput = {
+      id: definition.id,
+      active: definition.active,
+      title: definition.title,
+      options: definition.options
+    }
+
+    const updater = makeUpdater(definitionInput, input =>
+      updateMutation({ variables: { input } })
+    )
+
     const confirmDelete = () =>
       Modal.confirm({
         title: 'Are you sure?',
@@ -71,7 +93,13 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       })
 
     const cardProps: CardProps = {
-      title: definition.title,
+      title: (
+        <EditableTitle
+          editable
+          title={definition.title}
+          onChange={updater('title')}
+        />
+      ),
       extra: (
         <>
           {definition.runner.builtIn ? null : (

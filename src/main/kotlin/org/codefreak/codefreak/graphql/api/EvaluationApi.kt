@@ -53,6 +53,7 @@ class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: Res
   }
   val id = definition.id
   val runnerName = definition.runnerName
+  val active = definition.active
   val position = definition.position
   val title = definition.title
   val options: String by lazy {
@@ -63,6 +64,11 @@ class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: Res
     ctx.authorization.requireAuthority(Authority.ROLE_TEACHER)
     ctx.serviceAccess.getService(EvaluationService::class).getEvaluationRunner(runnerName).let { EvaluationRunnerDto(it) }
   }
+}
+
+@GraphQLName("EvaluationStepDefinitionInput")
+class EvaluationStepDefinitionInputDto(var id: UUID, var title: String, var active: Boolean, var options: String) {
+  constructor() : this(UUID.randomUUID(), "", true, "")
 }
 
 @GraphQLName("Evaluation")
@@ -162,6 +168,20 @@ class EvaluationMutation : BaseResolver(), Mutation {
     serviceAccess.getService(EvaluationService::class).startAssignmentEvaluation(assignmentId).map {
       PendingEvaluationDto(it, this)
     }
+  }
+
+  fun updateEvaluationStepDefinition(input: EvaluationStepDefinitionInputDto): Boolean = context {
+    val definition = serviceAccess.getService(EvaluationService::class).findEvaluationStepDefinition(input.id)
+    if (!definition.task.isEditable(authorization)) {
+      Authorization.deny()
+    }
+    definition.run {
+      title = input.title
+      active = input.active
+      // TODO Options
+    }
+    serviceAccess.getService(EvaluationService::class).saveEvaluationStepDefinition(definition)
+    true
   }
 
   fun deleteEvaluationStepDefinition(id: UUID) = context {

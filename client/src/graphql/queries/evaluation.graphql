@@ -86,6 +86,7 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       position
       title
       options
+      active
       runner {
         builtIn
       }
