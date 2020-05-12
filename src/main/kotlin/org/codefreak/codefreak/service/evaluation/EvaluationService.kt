@@ -172,6 +172,11 @@ class EvaluationService : BaseService() {
   }
 
   @Transactional
-  fun deleteEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition) =
-      evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
+  fun deleteEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition) {
+    evaluationStepDefinition.task.run {
+      evaluationStepDefinitions.filter { it.position > evaluationStepDefinition.position }.forEach { it.position-- }
+      evaluationStepDefinitionRepository.saveAll(evaluationStepDefinitions)
+    }
+    evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
+  }
 }

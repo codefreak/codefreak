@@ -101,7 +101,13 @@ TaskService : BaseService() {
   }
 
   @Transactional
-  fun deleteTask(id: UUID) = taskRepository.deleteById(id)
+  fun deleteTask(task: Task) {
+    task.assignment?.run {
+      tasks.filter { it.position > task.position }.forEach { it.position-- }
+      taskRepository.saveAll(tasks)
+    }
+    taskRepository.delete(task)
+  }
 
   private fun applyDefaultRunners(taskDefinition: TaskDefinition): TaskDefinition {
     // add "comments" runner by default if not defined
