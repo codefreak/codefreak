@@ -1,4 +1,4 @@
-import { Alert, Button, Descriptions, Modal, Tag, Tooltip } from 'antd'
+import { Alert, Button, Descriptions, Modal, Switch, Tag, Tooltip } from 'antd'
 import { CardProps } from 'antd/lib/card'
 import YAML from 'json-to-pretty-yaml'
 import React from 'react'
@@ -127,6 +127,17 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                   <Tag>built-in</Tag>
                 </Tooltip>
               ) : null}
+            </Descriptions.Item>
+            <Descriptions.Item label="Active">
+              <Tooltip
+                placement="right"
+                title="If disabled, this evaluation step will not be run in future evaluation. Feedback for this step is hidden from students existing evaluations."
+              >
+                <Switch
+                  checked={definition.active}
+                  onChange={updater('active')}
+                />
+              </Tooltip>
             </Descriptions.Item>
           </Descriptions>
           {definition.options === '{}' ? (

@@ -77,7 +77,12 @@ class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
   val id = entity.id
   val answer by lazy { AnswerDto(entity.answer, ctx) }
   val createdAt = entity.createdAt
-  val steps by lazy { entity.evaluationSteps.map { EvaluationStepDto(it, ctx) }.sortedBy { it.definition.position } }
+  val steps by lazy {
+    entity.evaluationSteps
+        .filter { it.definition.active }
+        .map { EvaluationStepDto(it, ctx) }
+        .sortedBy { it.definition.position }
+  }
   val stepsResultSummary by lazy { entity.stepsResultSummary.let { EvaluationStepResultDto.valueOf(it.name) } }
 }
 
