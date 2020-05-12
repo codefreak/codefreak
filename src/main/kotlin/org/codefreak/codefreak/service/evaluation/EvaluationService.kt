@@ -1,5 +1,8 @@
 package org.codefreak.codefreak.service.evaluation
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.networknt.schema.JsonSchemaFactory
+import com.networknt.schema.SpecVersion
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
@@ -55,6 +58,10 @@ class EvaluationService : BaseService() {
   private val runnersByName by lazy { runners.map { it.getName() to it }.toMap() }
 
   private val log = LoggerFactory.getLogger(this::class.java)
+
+  companion object {
+    private val objectMapper = ObjectMapper()
+  }
 
   fun startAssignmentEvaluation(assignmentId: UUID): List<Answer> {
     val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
@@ -178,5 +185,12 @@ class EvaluationService : BaseService() {
       evaluationStepDefinitionRepository.saveAll(evaluationStepDefinitions)
     }
     evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
+  }
+
+  fun validateRunnerOptions(definition: EvaluationStepDefinition) {
+    val runner = getEvaluationRunner(definition.runnerName)
+    val schema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V6).getSchema(runner.getOptionsSchema())
+    val errors = schema.validate(objectMapper.valueToTree(definition.options))
+    require(errors.isEmpty()) { "Runner options for ${definition.runnerName} are invalid: \n" + errors.joinToString("\n") { it.message } }
   }
 }

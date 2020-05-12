@@ -62,7 +62,9 @@ TaskService : BaseService() {
         .mapIndexed { index, it ->
           val runner = evaluationService.getEvaluationRunner(it.step)
           val title = it.title ?: runner.getDefaultTitle()
-          EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
+          val definition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
+          evaluationService.validateRunnerOptions(definition)
+          definition
         }
         .toMutableSet()
 

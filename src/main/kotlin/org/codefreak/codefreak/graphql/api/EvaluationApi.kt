@@ -192,30 +192,34 @@ class EvaluationMutation : BaseResolver(), Mutation {
   }
 
   fun createEvaluationStepDefinition(taskId: UUID, runnerName: String) = context {
-    val task = serviceAccess.getService(TaskService::class).findTask(taskId)
-    val runner = serviceAccess.getService(EvaluationService::class).getEvaluationRunner(runnerName)
+    val evaluationService = serviceAccess.getService(EvaluationService::class)
+    val taskService = serviceAccess.getService(TaskService::class)
+    val task = taskService.findTask(taskId)
+    val runner = evaluationService.getEvaluationRunner(runnerName)
     if (!task.isEditable(authorization)) {
       Authorization.deny()
     }
     val definition = EvaluationStepDefinition(task, runner.getName(), task.evaluationStepDefinitions.size, runner.getDefaultTitle())
+    evaluationService.validateRunnerOptions(definition)
     task.evaluationStepDefinitions.add(definition)
-    serviceAccess.getService(EvaluationService::class).saveEvaluationStepDefinition(definition)
-    serviceAccess.getService(TaskService::class).saveTask(task)
+    evaluationService.saveEvaluationStepDefinition(definition)
+    taskService.saveTask(task)
     true
   }
 
   fun updateEvaluationStepDefinition(input: EvaluationStepDefinitionInputDto): Boolean = context {
-    val definition = serviceAccess.getService(EvaluationService::class).findEvaluationStepDefinition(input.id)
+    val evaluationService = serviceAccess.getService(EvaluationService::class)
+    val definition = evaluationService.findEvaluationStepDefinition(input.id)
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
     definition.run {
       title = input.title
       active = input.active
-      // TODO Validation
       options = objectMapper.readValue(input.options, object : TypeReference<HashMap<String, Any>>() {})
     }
-    serviceAccess.getService(EvaluationService::class).saveEvaluationStepDefinition(definition)
+    evaluationService.validateRunnerOptions(definition)
+    evaluationService.saveEvaluationStepDefinition(definition)
     true
   }
 
