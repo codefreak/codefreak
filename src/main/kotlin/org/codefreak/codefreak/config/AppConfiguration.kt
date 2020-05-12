@@ -24,7 +24,7 @@ class AppConfiguration {
   val l10n = L10N()
   val docker = Docker()
   val ide = Ide()
-  val traefik = Traefik()
+  val reverseProxy = ReverseProxy()
   val frontend = Frontend()
   val ldap = Ldap()
   val files = Files()
@@ -42,6 +42,15 @@ class AppConfiguration {
 
   class Traefik {
     lateinit var url: String
+  }
+
+  enum class ReverseProxyType {
+    TRAEFIK, PUBLISH
+  }
+
+  class ReverseProxy {
+    lateinit var type: ReverseProxyType
+    val traefik = Traefik()
   }
 
   class Ide {

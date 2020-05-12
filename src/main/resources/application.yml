@@ -58,8 +58,10 @@ codefreak:
     clientCertPath: ~
     # Define how (and if) images will be pulled on application startup
     pull-policy: never
-  traefik:
-    url: "http://localhost:8081"
+  reverse-proxy:
+    traefik:
+      url: "http://localhost:8081"
+    type: traefik
   ide:
     image: "cfreak/ide:1"
     # Interval for checking for idle containers in ms. Default 30 seconds.
