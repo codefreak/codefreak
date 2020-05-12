@@ -7,6 +7,7 @@ import de.code_freak.codefreak.repository.SubmissionRepository
 import de.code_freak.codefreak.service.evaluation.EvaluationService
 import de.code_freak.codefreak.service.file.FileService
 import de.code_freak.codefreak.util.TarUtil
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -113,7 +114,7 @@ class SubmissionService : BaseService() {
         val answerPath = "$submissionPath/task-${answer.task.position}"
         TarUtil.mkdir(answerPath, outputArchive)
         fileService.readCollectionTar(answer.id).use { answerFiles ->
-          TarUtil.migrateEntries(answerFiles, outputArchive, prefix = answerPath)
+          TarUtil.copyEntries(TarArchiveInputStream(answerFiles), outputArchive, prefix = answerPath)
         }
       }
     }

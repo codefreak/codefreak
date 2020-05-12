@@ -124,10 +124,27 @@ object TarUtil {
     return if (name.startsWith("./")) name.drop(2) else name
   }
 
-  fun copyEntries(from: TarArchiveInputStream, to: TarArchiveOutputStream, filter: (TarArchiveEntry) -> Boolean = { true }) {
+  fun copyEntries(
+    from: InputStream,
+    to: OutputStream,
+    filter: (TarArchiveEntry) -> Boolean = { true },
+    prefix: String? = null
+  ) = copyEntries(TarArchiveInputStream(from), PosixTarArchiveOutputStream(to), filter, prefix)
+
+  fun copyEntries(
+    from: TarArchiveInputStream,
+    to: TarArchiveOutputStream,
+    filter: (TarArchiveEntry) -> Boolean = { true },
+    prefix: String? = null
+  ) {
     generateSequence { from.nextTarEntry }
-        .filter { filter(it) }
-        .forEach { copyEntry(from, to, it) }
+        .filter(filter)
+        .forEach {
+          if (prefix != null) {
+            it.name = "${normalizeEntryName(prefix).withTrailingSlash()}${normalizeEntryName(it.name)}"
+          }
+          copyEntry(from, to, it)
+        }
   }
 
   private fun copyEntry(from: TarArchiveInputStream, to: TarArchiveOutputStream, entry: TarArchiveEntry) {
@@ -136,22 +153,6 @@ object TarUtil {
       StreamUtils.copy(from, to)
     }
     to.closeArchiveEntry()
-  }
-
-  fun migrateEntries(source: InputStream, to: TarArchiveOutputStream, prefix: String) =
-      migrateEntries(TarArchiveInputStream(source), to, prefix)
-
-  /**
-   * Copy all files from source archive into the prefix path of output archive
-   */
-  fun migrateEntries(source: TarArchiveInputStream, to: TarArchiveOutputStream, prefix: String) {
-    generateSequence { source.nextTarEntry }
-        // skip the root directory
-        .filter { it.name.trimStart('/', '.').isNotEmpty() }
-        .forEach {
-          it.name = "${prefix.withTrailingSlash()}${normalizeEntryName(it.name)}"
-          copyEntry(source, to, it)
-        }
   }
 
   inline fun <T> findFile(`in`: InputStream, path: String, consumer: (TarArchiveEntry, TarArchiveInputStream) -> T): T {

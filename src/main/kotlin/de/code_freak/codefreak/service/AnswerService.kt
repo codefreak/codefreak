@@ -60,9 +60,9 @@ class AnswerService : BaseService() {
     val taskDefinition = taskService.getTaskDefinition(answer.task.id)
     fileService.writeCollectionTar(answer.id).use { out ->
       fileService.readCollectionTar(answer.task.id).use { `in` ->
-        TarUtil.copyEntries(TarArchiveInputStream(`in`), TarUtil.PosixTarArchiveOutputStream(out)) {
+        TarUtil.copyEntries(TarArchiveInputStream(`in`), TarUtil.PosixTarArchiveOutputStream(out), filter = {
           !taskDefinition.isHidden(it)
-        }
+        })
       }
     }
   }
@@ -72,14 +72,14 @@ class AnswerService : BaseService() {
     val out = ByteArrayOutputStream()
     val outTar = TarUtil.PosixTarArchiveOutputStream(out)
     fileService.readCollectionTar(answer.id).use { answerFiles ->
-      TarUtil.copyEntries(TarArchiveInputStream(answerFiles), outTar) {
+      TarUtil.copyEntries(TarArchiveInputStream(answerFiles), outTar, filter = {
         !taskDefinition.isHidden(it) && !taskDefinition.isProtected(it)
-      }
+      })
     }
     fileService.readCollectionTar(answer.task.id).use { taskFiles ->
-      TarUtil.copyEntries(TarArchiveInputStream(taskFiles), outTar) {
+      TarUtil.copyEntries(TarArchiveInputStream(taskFiles), outTar, filter = {
         taskDefinition.isHidden(it) || taskDefinition.isProtected(it)
-      }
+      })
     }
     return ByteArrayInputStream(out.toByteArray())
   }
