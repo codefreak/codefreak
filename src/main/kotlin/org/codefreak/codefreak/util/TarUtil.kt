@@ -13,11 +13,9 @@ import org.apache.commons.compress.compressors.CompressorException
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.utils.IOUtils
 import org.springframework.util.StreamUtils
-import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
-import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
@@ -79,6 +77,13 @@ object TarUtil {
     zip.finish()
   }
 
+  private fun isRootFilename(path: String) = normalizeEntryName(path).isBlank()
+
+  private fun createTarRootDirectory(outputStream: TarArchiveOutputStream) {
+    outputStream.putArchiveEntry(TarArchiveEntry("./"))
+    outputStream.closeArchiveEntry()
+  }
+
   fun archiveToTar(`in`: InputStream, out: OutputStream) {
     var input = BufferedInputStream(`in`)
     try {
@@ -86,28 +91,33 @@ object TarUtil {
       input = BufferedInputStream(CompressorStreamFactory().createCompressorInputStream(input))
     } catch (e: CompressorException) {
       // input is not compressed or maybe even not an archive at all
+      // createArchiveInputStream() will fail if it's not an uncompressed archive
     }
     val archive = ArchiveStreamFactory().createArchiveInputStream(input)
     val tar = PosixTarArchiveOutputStream(out)
-    generateSequence { archive.nextEntry }.forEach { archiveEntry ->
-      val tarEntry = TarArchiveEntry(normalizeEntryName(archiveEntry.name))
-      if (archiveEntry.isDirectory) {
-        tar.putArchiveEntry(tarEntry)
-      } else {
-        val content = archive.readBytes()
-        tarEntry.size = content.size.toLong()
-        tar.putArchiveEntry(tarEntry)
-        tar.write(content)
-      }
-      tar.closeArchiveEntry()
-    }
+    createTarRootDirectory(tar)
+    generateSequence { archive.nextEntry }
+        // remove all dirs/files that are candidates for root b/c we created a root dir already
+        .filter { !isRootFilename(it.name) }
+        .forEach { archiveEntry ->
+          val tarEntry = TarArchiveEntry(normalizeEntryName(archiveEntry.name))
+          if (archiveEntry.isDirectory) {
+            tar.putArchiveEntry(tarEntry)
+          } else {
+            val content = archive.readBytes()
+            tarEntry.size = content.size.toLong()
+            tar.putArchiveEntry(tarEntry)
+            tar.write(content)
+          }
+          tar.closeArchiveEntry()
+        }
     tar.finish()
   }
 
-  fun normalizeEntryName(name: String): String {
-    if (name == ".") return ""
-    return if (name.startsWith("./")) name.drop(2) else name
-  }
+  /**
+   * Remove leading dots and slashes from given path
+   */
+  fun normalizeEntryName(name: String) = name.trimStart('.', '/')
 
   fun copyEntries(from: InputStream, to: OutputStream, filter: (TarArchiveEntry) -> Boolean = { true }) =
       copyEntries(TarArchiveInputStream(from), PosixTarArchiveOutputStream(to), filter)
@@ -158,26 +168,11 @@ object TarUtil {
     }
   }
 
-  fun writeUploadAsTar(file: MultipartFile, out: OutputStream) {
-    try {
-      try {
-        // try to read upload as archive
-        file.inputStream.use { archiveToTar(it, out) }
-      } catch (e: ArchiveException) {
-        // unknown archive type or no archive at all
-        // create a new tar archive that contains only the uploaded file
-        wrapUploadInTar(file, out)
-      }
-    } catch (e: IOException) {
-      throw IllegalArgumentException("File could not be processed")
-    }
-  }
-
   fun writeUploadAsTar(files: Array<out Part>, out: OutputStream) {
     if (files.size == 1) {
       try {
         // try to read upload as archive
-        files[0].inputStream.use { archiveToTar(it, out) }
+        return files[0].inputStream.use { archiveToTar(it, out) }
       } catch (e: ArchiveException) {
         // unknown archive type or no archive at all
         // create a new tar archive that contains only the uploaded file
@@ -186,18 +181,9 @@ object TarUtil {
     wrapUploadInTar(files, out)
   }
 
-  private fun wrapUploadInTar(file: MultipartFile, out: OutputStream) {
-    val outputStream = PosixTarArchiveOutputStream(out)
-    val entry = TarArchiveEntry(basename(file.originalFilename ?: "file"))
-    entry.size = file.size
-    outputStream.putArchiveEntry(entry)
-    file.inputStream.use { StreamUtils.copy(it, outputStream) }
-    outputStream.closeArchiveEntry()
-    outputStream.finish()
-  }
-
   private fun wrapUploadInTar(files: Array<out Part>, out: OutputStream) {
     val tar = PosixTarArchiveOutputStream(out)
+    createTarRootDirectory(tar)
     for (file in files) {
       val entry = TarArchiveEntry(basename(file.submittedFileName ?: UUID.randomUUID().toString()))
       entry.size = file.size
