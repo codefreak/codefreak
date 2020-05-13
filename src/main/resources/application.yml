@@ -9,11 +9,6 @@ spring:
   profiles:
     # The application runs in dev mode by default! Override this in production mode!
     active: dev
-  jpa:
-    properties:
-      hibernate:
-        # Escape all table names to avoid issues with reserved keywords like "user"
-        globally_quoted_identifiers: true
   batch:
     job:
       enabled: false

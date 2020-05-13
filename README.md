@@ -7,23 +7,22 @@ Code FREAK<br><small>╰ Code Feedback, Review & Evaluation Kit</small>
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 Code FREAK is an online IDE for educational purposes that allows teachers to create and enroll programming tasks
-allows students to programm and execute their code without leaving the browser. Submissions can be evaluated
+allows students to program and execute their code without leaving the browser. Submissions can be evaluated
 automatically by various testing-methods like unit tests or code smell detection.
 
-## Quickstart using docker-compose
-If you want to try Code FREAK locally:
-1. Clone this repository
-2. Install Docker + docker-compose
-3. Run `docker-compose up`
-4. Wait until everything compiled and is running
-5. The UI is accessible at http://localhost:3000.
-6. Log in using `admin` and password `123`
+## Try with Docker 🐋
 
-Please keep in mind that the `docker-compose.yml` is only meant for local testing and development.
+```shell script
+docker run --rm --user=root \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -p 8080:8080 \
+    cfreak/codefreak
+```
 
-## ⚠️ WORK IN PROGRESS ⚠️
-Code FREAK is currently under heavy development. This means things can break without any further notice.
-Please keep this in mind when testing the application.
+The UI is accessible at http://localhost:8080.
+Log in using `admin` and password `123`.
+
+This will use you local Docker daemon for evaluation and IDE instances.
 
 ## Documentation
 For instructions how to run, configure and use the application please find the documentation in the

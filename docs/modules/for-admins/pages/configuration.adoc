@@ -50,3 +50,23 @@ codefreak:
         ssh-key-pass: securepassword123
         ssh-base-url: ssh://git@git.example.org
 ----
+
+== Database
+By default, Code FREAK uses an in-memory database. This means you will lose data between application restarts!
+
+For production usage we recommend using PostgreSQL. Other DB engines are untested. Use the following to use Postgres for persistent data storage.
+
+[source,yaml]
+----
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://{host}:5432/{database}
+    username: {username}
+    password: {yourpassword}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+----
