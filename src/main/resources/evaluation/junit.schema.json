@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "image": {
+      "title": "Image",
+      "default": "gradle",
+      "type": "string",
+      "description": "Inherited from Command Line Runner. The name of the Docker image in which the commands are run."
+    },
+    "project-path": {
+      "title": "Project Path",
+      "type": "string",
+      "default": "/home/gradle/project",
+      "description": "Inherited from Command Line Runner. Absolute path of where the student submission is placed."
+    },
+    "commands": {
+      "title": "Commands",
+      "description": "Inherited from Command Line Runner. List of commands that executed. Working directory is the project path.",
+      "type": "array",
+      "default": ["gradle testClasses", "gradle test"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "stop-on-fail": {
+      "title": "Stop on Fail",
+      "type": "boolean",
+      "description": "Inherited from Command Line Runner. Whether to stop when the first command fails or always execute all commands.",
+      "default": true
+    }
+  }
+}

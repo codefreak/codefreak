@@ -3,19 +3,28 @@
   "required": ["image", "project-path"],
   "properties": {
     "image": {
-      "type": "string"
+      "title": "Image",
+      "type": "string",
+      "description": "The name of the Docker image in which the commands are run."
     },
     "project-path": {
-      "type": "string"
+      "title": "Project Path",
+      "type": "string",
+      "description": "Absolute path of where the student submission is placed."
     },
     "commands": {
+      "title": "Commands",
+      "description": "List of commands that executed. Working directory is the project path.",
       "type": "array",
       "items": {
         "type": "string"
       }
     },
     "stop-on-fail": {
-      "type": "boolean"
+      "title": "Stop on Fail",
+      "type": "boolean",
+      "description": "Whether to stop when the first command fails or always execute all commands.",
+      "default": true
     }
   }
 }
