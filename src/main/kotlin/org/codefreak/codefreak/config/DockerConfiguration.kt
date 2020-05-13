@@ -9,10 +9,10 @@ import org.codefreak.codefreak.service.DockerPublishReverseProxy
 import org.codefreak.codefreak.service.ReverseProxy
 import org.codefreak.codefreak.service.TraefikReverseProxy
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import java.nio.file.Paths
 
 /**
@@ -80,15 +80,14 @@ class DockerConfiguration {
   }
 
   @Bean
-  @ConditionalOnProperty("codefreak.reverse-proxy.type", matchIfMissing = true)
-  @Primary
-  fun defaultReverseProxy(): ReverseProxy {
-    return DockerPublishReverseProxy()
+  @ConditionalOnProperty("codefreak.reverse-proxy.type", havingValue = "traefik")
+  fun traefikReverseProxy(): ReverseProxy {
+    return TraefikReverseProxy(config.reverseProxy.url, config.ide.httpPort)
   }
 
   @Bean
-  @ConditionalOnProperty("codefreak.reverse-proxy.type", havingValue = "traefik")
-  fun traefikReverseProxy(): ReverseProxy {
-    return TraefikReverseProxy(config.reverseProxy.traefik.url)
+  @ConditionalOnMissingBean
+  fun defaultReverseProxy(): ReverseProxy {
+    return DockerPublishReverseProxy(config.reverseProxy.url, config.ide.httpPort)
   }
 }

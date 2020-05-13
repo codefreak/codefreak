@@ -7,6 +7,7 @@ import java.util.Random
 
 class TraefikReverseProxy(
   private val url: String,
+  private val idePort: String,
   private val random: Random = SecureRandom()
 ) : ReverseProxy {
   companion object {
@@ -20,7 +21,7 @@ class TraefikReverseProxy(
           LABEL_TOKEN to token,
           "traefik.enable" to "true",
           "traefik.frontend.rule" to "PathPrefixStrip: " + getIdePath(token),
-          "traefik.port" to "3000"
+          "traefik.port" to idePort
       ))
     }
   }

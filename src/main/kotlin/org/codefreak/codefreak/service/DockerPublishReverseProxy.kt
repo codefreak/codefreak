@@ -3,22 +3,25 @@ package org.codefreak.codefreak.service
 import com.spotify.docker.client.messages.ContainerInfo
 import com.spotify.docker.client.messages.PortBinding
 
-class DockerPublishReverseProxy : ReverseProxy {
+class DockerPublishReverseProxy(
+  private val baseUrl: String,
+  private val idePort: String
+) : ReverseProxy {
   override fun configureContainer(containerBuilder: ContainerBuilder) {
     containerBuilder.hostConfig {
       portBindings(mapOf(
-          "3000/tcp" to listOf(PortBinding.randomPort("0.0.0.0"))
+          "$idePort/tcp" to listOf(PortBinding.randomPort("0.0.0.0"))
       ))
     }
     containerBuilder.containerConfig {
-      exposedPorts("3000/tcp")
+      exposedPorts("$idePort/tcp")
     }
   }
 
   override fun getIdeUrl(containerInfo: ContainerInfo): String {
-    val port = containerInfo.networkSettings()?.ports()?.get("3000/tcp")?.first() ?: throw RuntimeException(
-        "Container ${containerInfo.id()} does not expose port 3000/tcp. IDE is unreachable."
+    val port = containerInfo.networkSettings()?.ports()?.get("$idePort/tcp")?.first() ?: throw RuntimeException(
+        "Container ${containerInfo.id()} does not expose port $idePort/tcp. IDE is unreachable."
     )
-    return "http://localhost:${port.hostPort()}"
+    return "$baseUrl:${port.hostPort()}"
   }
 }
