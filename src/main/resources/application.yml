@@ -52,7 +52,7 @@ codefreak:
     clientKeyPath: ~
     clientCertPath: ~
     # Define how (and if) images will be pulled on application startup
-    pull-policy: never
+    pull-policy: always
   ide:
     image: "cfreak/ide:1"
     # Interval for checking for idle containers in ms. Default 30 seconds.
