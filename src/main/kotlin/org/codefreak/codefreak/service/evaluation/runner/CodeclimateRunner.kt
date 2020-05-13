@@ -39,6 +39,8 @@ class CodeclimateRunner : EvaluationRunner {
 
   override fun getDefaultTitle() = "Code Quality"
 
+  override fun getDocumentationUrl() = "https://docs.codefreak.org/codefreak/for-teachers/definitions.html#codeclimate"
+
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     val codeclimateJson = containerService.runCodeclimate(answer)
     return this.parseCodeclimateJson(codeclimateJson).map { issue ->

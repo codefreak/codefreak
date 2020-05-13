@@ -9,6 +9,7 @@ interface EvaluationRunner {
 
   fun getName(): String
   fun getDefaultTitle() = getName()
+  fun getDocumentationUrl(): String? = null
   fun run(answer: Answer, options: Map<String, Any>): List<Feedback>
 
   /**

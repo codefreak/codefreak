@@ -24,6 +24,8 @@ class JUnitRunner : CommandLineRunner() {
 
   override fun getDefaultTitle() = "Unit Tests"
 
+  override fun getDocumentationUrl() = "https://docs.codefreak.org/codefreak/for-teachers/definitions.html#junit"
+
   override fun getOptionsSchema() = ClassPathResource("evaluation/junit.schema.json").inputStream.use { String(it.readBytes()) }
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {

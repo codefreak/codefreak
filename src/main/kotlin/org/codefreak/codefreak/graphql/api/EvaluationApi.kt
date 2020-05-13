@@ -97,12 +97,14 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   val summary = entity.summary
   val feedback by lazy { entity.feedback.map { FeedbackDto(it) } }
 }
+
 @GraphQLName("EvaluationRunner")
 class EvaluationRunnerDto(runner: EvaluationRunner) {
   val name = runner.getName()
   val builtIn = runner.isBuiltIn()
   val defaultTitle = runner.getDefaultTitle()
   val optionsSchema = runner.getOptionsSchema()
+  val documentationUrl = runner.getDocumentationUrl()
 }
 
 @GraphQLName("EvaluationStepResult")

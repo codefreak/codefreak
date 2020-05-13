@@ -94,5 +94,6 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
     defaultTitle
     builtIn
     optionsSchema
+    documentationUrl
   }
 }

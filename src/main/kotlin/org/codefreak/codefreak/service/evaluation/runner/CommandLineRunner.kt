@@ -22,6 +22,8 @@ class CommandLineRunner : EvaluationRunner {
 
   override fun getDefaultTitle() = "Command Line"
 
+  override fun getDocumentationUrl() = "https://docs.codefreak.org/codefreak/for-teachers/definitions.html#commandline"
+
   override fun getOptionsSchema() = ClassPathResource("evaluation/commandline.schema.json").inputStream.use { String(it.readBytes()) }
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {

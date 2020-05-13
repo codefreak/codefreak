@@ -187,6 +187,19 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 >
                   <Tag>built-in</Tag>
                 </Tooltip>
+              ) : null}{' '}
+              {runner.documentationUrl ? (
+                <>
+                  (
+                  <a
+                    href={runner.documentationUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Documentation
+                  </a>
+                  )
+                </>
               ) : null}
             </Descriptions.Item>
             <Descriptions.Item label="Active">
