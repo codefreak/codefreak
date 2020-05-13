@@ -4,6 +4,7 @@ import { CardProps } from 'antd/lib/card'
 import { JSONSchema6 } from 'json-schema'
 import YAML from 'json-to-pretty-yaml'
 import React from 'react'
+import { deepEquals } from 'react-jsonschema-form/lib/utils'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CardList from '../../components/CardList'
 import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
@@ -31,6 +32,20 @@ const parseSchema = (schema: string) => {
   const hasProperties =
     optionsSchema.properties && Object.keys(optionsSchema.properties).length > 0
   return { optionsSchema, hasProperties }
+}
+
+const stringifyOptions = (options: any, optionsSchema: JSONSchema6) => {
+  const optionsCopy = { ...options }
+  if (optionsSchema.properties) {
+    // remove values if they are same as default
+    for (const propName of Object.keys(optionsSchema.properties)) {
+      const propSchema = optionsSchema.properties[propName] as any
+      if (deepEquals(propSchema.default, optionsCopy[propName])) {
+        delete optionsCopy[propName]
+      }
+    }
+  }
+  return JSON.stringify(optionsCopy)
 }
 
 const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
@@ -113,7 +128,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       })
 
     const updateOptions = (newOptions: any) =>
-      updater('options')(JSON.stringify(newOptions))
+      updater('options')(stringifyOptions(newOptions, optionsSchema))
 
     const configureButtonProps: ButtonProps = {
       type: 'primary',
@@ -250,12 +265,19 @@ const renderAddStepButton = (
   }
   const createStepWithoutOptions = () => createStep({})
   const createStep = (options: unknown) =>
-    onCreate(runner.name, JSON.stringify(options))
+    onCreate(runner.name, stringifyOptions(options, optionsSchema))
   if (!hasProperties) {
-    return <Button {...buttonProps} onClick={createStepWithoutOptions} />
+    return (
+      <Button
+        key={runner.name}
+        {...buttonProps}
+        onClick={createStepWithoutOptions}
+      />
+    )
   }
   return (
     <JsonSchemaEditButton
+      key={runner.name}
       title={`Configure ${runner.name} step`}
       value={{}}
       schema={optionsSchema}
