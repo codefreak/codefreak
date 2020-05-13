@@ -177,7 +177,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
             <Descriptions.Item label="Active">
               <Tooltip
                 placement="right"
-                title="If disabled, this evaluation step will not be run in future evaluation. Feedback for this step is hidden from students existing evaluations."
+                title="If disabled, this evaluation step will not be run in future evaluation. Feedback for this step is hidden from students in existing evaluations."
               >
                 <Switch
                   checked={definition.active}
