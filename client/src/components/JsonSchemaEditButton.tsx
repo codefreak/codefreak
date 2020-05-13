@@ -9,7 +9,7 @@ interface JsonSchemaEditButtonProps<T> {
   title: string
   value: T
   schema: JSONSchema6
-  onSubmit: (newValue: T) => Promise<any>
+  onSubmit: (newValue: T) => Promise<unknown>
   extraContent?: ReactNode
   buttonProps?: ButtonProps
 }

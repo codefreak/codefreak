@@ -87,17 +87,12 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       title
       options
       active
-      runner {
-        builtIn
-        optionsSchema
-      }
     }
   }
-}
-
-query GetEvaluationRunners {
   evaluationRunners {
     name
     defaultTitle
+    builtIn
+    optionsSchema
   }
 }

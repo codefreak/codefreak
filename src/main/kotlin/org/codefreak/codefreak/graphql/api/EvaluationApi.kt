@@ -156,7 +156,6 @@ class EvaluationQuery : BaseResolver(), Query {
   @Secured(Authority.ROLE_TEACHER)
   fun evaluationRunners() = context {
     serviceAccess.getService(EvaluationService::class).getAllEvaluationRunners()
-        .filterNot { it.isBuiltIn() }
         .map { EvaluationRunnerDto(it) }
         .toTypedArray()
   }
@@ -191,7 +190,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     }
   }
 
-  fun createEvaluationStepDefinition(taskId: UUID, runnerName: String) = context {
+  fun createEvaluationStepDefinition(taskId: UUID, runnerName: String, options: String) = context {
     val evaluationService = serviceAccess.getService(EvaluationService::class)
     val taskService = serviceAccess.getService(TaskService::class)
     val task = taskService.findTask(taskId)
@@ -199,7 +198,8 @@ class EvaluationMutation : BaseResolver(), Mutation {
     if (!task.isEditable(authorization)) {
       Authorization.deny()
     }
-    val definition = EvaluationStepDefinition(task, runner.getName(), task.evaluationStepDefinitions.size, runner.getDefaultTitle())
+    val optionsMap = objectMapper.readValue(options, object : TypeReference<HashMap<String, Any>>() {})
+    val definition = EvaluationStepDefinition(task, runner.getName(), task.evaluationStepDefinitions.size, runner.getDefaultTitle(), optionsMap)
     evaluationService.validateRunnerOptions(definition)
     task.evaluationStepDefinitions.add(definition)
     evaluationService.saveEvaluationStepDefinition(definition)
