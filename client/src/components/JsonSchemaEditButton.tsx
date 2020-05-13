@@ -54,6 +54,7 @@ function JsonSchemaEditButton<T>(
         {props.extraContent}
         <div className="bootstrap">
           <Form
+            showErrorList={false}
             ref={formRef}
             schema={props.schema}
             formData={props.value}
