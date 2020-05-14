@@ -24,7 +24,7 @@ class AppConfiguration {
   val l10n = L10N()
   val docker = Docker()
   val ide = Ide()
-  val traefik = Traefik()
+  val reverseProxy = ReverseProxy()
   val frontend = Frontend()
   val ldap = Ldap()
   val files = Files()
@@ -40,8 +40,14 @@ class AppConfiguration {
     lateinit var customScript: String
   }
 
-  class Traefik {
-    lateinit var url: String
+  enum class ReverseProxyType {
+    TRAEFIK, PUBLISH
+  }
+
+  class ReverseProxy {
+    var type: ReverseProxyType = ReverseProxyType.PUBLISH
+    /** Base URL for IDE containers */
+    var url: String = "http://localhost"
   }
 
   class Ide {
@@ -62,6 +68,9 @@ class AppConfiguration {
 
     /** Maximum number of IDE containers that are started at the same time. Negative = unlimited. */
     var maxContainers = -1
+
+    /** HTTP port exposed by IDE container */
+    var httpPort = "3000"
 
     /**
      * Memory limit in bytes

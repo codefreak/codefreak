@@ -5,7 +5,12 @@ import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerCertificates
 import com.spotify.docker.client.DockerCertificatesStore
 import com.spotify.docker.client.DockerClient
+import org.codefreak.codefreak.service.DockerPublishReverseProxy
+import org.codefreak.codefreak.service.ReverseProxy
+import org.codefreak.codefreak.service.TraefikReverseProxy
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.nio.file.Paths
@@ -72,5 +77,17 @@ class DockerConfiguration {
         .clientCertPath(Paths.get(config.docker.clientCertPath))
         .clientKeyPath(Paths.get(config.docker.clientKeyPath))
         .build()
+  }
+
+  @Bean
+  @ConditionalOnProperty("codefreak.reverse-proxy.type", havingValue = "traefik")
+  fun traefikReverseProxy(): ReverseProxy {
+    return TraefikReverseProxy(config.reverseProxy.url, config.ide.httpPort)
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  fun defaultReverseProxy(): ReverseProxy {
+    return DockerPublishReverseProxy(config.reverseProxy.url, config.ide.httpPort)
   }
 }

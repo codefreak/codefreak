@@ -3,7 +3,6 @@ package org.codefreak.codefreak.service
 import org.codefreak.codefreak.Env
 import org.codefreak.codefreak.auth.Role
 import org.codefreak.codefreak.entity.Assignment
-import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.UserRepository
 import org.codefreak.codefreak.util.TarUtil
@@ -13,56 +12,49 @@ import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Profile
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
 import java.time.Instant
 
 /**
- * Seed the database with some initial value
+ * Seed the database with some initial assignments
  * This should only be needed until we have a UI for creation
  */
 @Service
 @Profile(Env.DEV)
-class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered {
+@Order(Ordered.LOWEST_PRECEDENCE)
+class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
 
-  @Autowired lateinit var userRepository: UserRepository
-  @Autowired lateinit var assignmentRepository: AssignmentRepository
-  @Autowired lateinit var taskService: TaskService
-  @Autowired lateinit var assignmentService: AssignmentService
+  @Autowired
+  lateinit var userRepository: UserRepository
+
+  @Autowired
+  lateinit var assignmentRepository: AssignmentRepository
+
+  @Autowired
+  lateinit var taskService: TaskService
+
+  @Autowired
+  lateinit var assignmentService: AssignmentService
 
   private val log = LoggerFactory.getLogger(this::class.java)
-
-  companion object {
-    private const val DEV_USER_PASSWORD = "{noop}123"
-    val admin = User("admin").apply {
-      roles = mutableSetOf(Role.ADMIN)
-      firstName = "John"
-      lastName = "Admin"
-      password = DEV_USER_PASSWORD
-    }
-    val teacher = User("teacher").apply {
-      roles = mutableSetOf(Role.TEACHER)
-      firstName = "Kim"
-      lastName = "Teacher"
-      password = DEV_USER_PASSWORD
-    }
-    val student = User("student").apply {
-      roles = mutableSetOf(Role.STUDENT)
-      firstName = "Alice"
-      lastName = "Student"
-      password = DEV_USER_PASSWORD
-    }
-  }
 
   override fun onApplicationEvent(event: ContextRefreshedEvent) {
     if (assignmentRepository.count() > 0) {
       return
     }
 
-    log.info("Initializing database with sample data")
+    // find someone in the DB who is teacher
+    val teacher = userRepository.findAll().firstOrNull { it.roles.contains(Role.TEACHER) }
 
-    userRepository.saveAll(listOf(admin, teacher, student))
+    if (teacher === null) {
+      log.warn("Skip seeding of sample data: There are no teachers in your database.")
+      return
+    }
+
+    log.info("Seeding database with sample data. Assignments belong to user '${teacher.username}'.")
 
     val assignment1 = Assignment("C Assignment", teacher, Instant.now().plusSeconds(60), active = true)
     val assignment2 = Assignment("Java Assignment", teacher, Instant.now(), active = true)
@@ -99,9 +91,5 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent>, Ordered 
         }
       }
     }
-  }
-
-  override fun getOrder(): Int {
-    return Ordered.LOWEST_PRECEDENCE
   }
 }

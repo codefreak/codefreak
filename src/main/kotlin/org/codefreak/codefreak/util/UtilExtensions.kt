@@ -7,6 +7,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.Optional
 
+fun String.withoutTrailingSlash(): String = trimEnd('/')
 fun String.withTrailingSlash(): String = if (endsWith("/")) this else "$this/"
 
 fun OutputStream.afterClose(callback: () -> Any?) = object : ProxyOutputStream(this) {

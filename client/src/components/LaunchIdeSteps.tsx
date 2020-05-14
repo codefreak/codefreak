@@ -21,8 +21,10 @@ const LaunchIdeSteps: React.FC<{
   const checkIde = useCallback(
     async (url: string) => {
       try {
-        const res = await fetch(url)
-        if (res.ok) {
+        const res = await fetch(url, {
+          mode: 'no-cors'
+        })
+        if (res.ok || res.type === 'opaque') {
           onReady(url)
         } else {
           throw new Error()
