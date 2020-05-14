@@ -15,10 +15,11 @@ class Submission(
   var user: User,
 
   /**
-   * The assignment this submission belongs to
+   * The assignment this submission belongs to.
+   * Null means this is used for testing mode in the task pool.
    */
   @ManyToOne
-  var assignment: Assignment
+  var assignment: Assignment?
 ) : BaseEntity() {
   /**
    * List of answers in this submission

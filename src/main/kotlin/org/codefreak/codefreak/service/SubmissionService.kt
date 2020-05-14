@@ -42,9 +42,12 @@ class SubmissionService : BaseService() {
       submissionRepository.findByAssignmentIdAndUserId(assignmentId, userId)
 
   @Transactional
-  fun findOrCreateSubmission(assignmentId: UUID, user: User): Submission =
+  fun deleteSubmission(submissionId: UUID) = submissionRepository.deleteById(submissionId)
+
+  @Transactional
+  fun findOrCreateSubmission(assignmentId: UUID?, user: User): Submission =
       submissionRepository.findByAssignmentIdAndUserId(assignmentId, user.id)
-          .orElseGet { createSubmission(assignmentService.findAssignment(assignmentId), user) }
+          .orElseGet { createSubmission(assignmentId?.let { assignmentService.findAssignment(it) }, user) }
 
   @Transactional
   fun findSubmissionsOfAssignment(assignmentId: UUID) = submissionRepository.findByAssignmentId(assignmentId)
@@ -53,7 +56,7 @@ class SubmissionService : BaseService() {
   fun findSubmissionsOfUser(userId: UUID) = submissionRepository.findAllByUserId(userId)
 
   @Transactional
-  fun createSubmission(assignment: Assignment, user: User): Submission {
+  fun createSubmission(assignment: Assignment?, user: User): Submission {
     val submission = Submission(assignment = assignment, user = user)
     return submissionRepository.save(submission)
   }
