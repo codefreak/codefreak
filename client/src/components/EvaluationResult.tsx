@@ -235,7 +235,9 @@ const sortFeedbackList = (
 
 const EvaluationStepPanel: React.FC<{
   answerId: string
-  step: EvaluationStep
+  step: Omit<EvaluationStep, 'definition'> & {
+    definition: Pick<EvaluationStep['definition'], 'title'>
+  }
 }> = ({ answerId, step }) => {
   const title = (
     <>

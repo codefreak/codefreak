@@ -30,3 +30,29 @@ mutation CreateCommentFeedback(
     line: $line
   )
 }
+
+mutation DeleteEvaluationStepDefinition($id: ID!) {
+  deleteEvaluationStepDefinition(id: $id)
+}
+
+mutation UpdateEvaluationStepDefinition(
+  $input: EvaluationStepDefinitionInput!
+) {
+  updateEvaluationStepDefinition(input: $input)
+}
+
+mutation CreateEvaluationStepDefinition(
+  $taskId: ID!
+  $runnerName: String!
+  $options: String!
+) {
+  createEvaluationStepDefinition(
+    taskId: $taskId
+    runnerName: $runnerName
+    options: $options
+  )
+}
+
+mutation SetEvaluationStepDefinitionPositon($id: ID!, $position: Long!) {
+  setEvaluationStepDefinitionPosition(id: $id, position: $position)
+}

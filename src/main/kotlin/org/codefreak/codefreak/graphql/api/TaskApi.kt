@@ -48,7 +48,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   }
 
   val evaluationStepDefinitions by lazy {
-    entity.evaluationStepDefinitions.map { EvaluationStepDefinitionDto(it) }
+    entity.evaluationStepDefinitions.sortedBy { it.position }.map { EvaluationStepDefinitionDto(it, ctx) }
   }
 
   fun answer(userId: UUID?): AnswerDto? {
@@ -117,7 +117,7 @@ class TaskMutation : BaseResolver(), Mutation {
   fun deleteTask(id: UUID): Boolean = context {
     val task = serviceAccess.getService(TaskService::class).findTask(id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
-    serviceAccess.getService(TaskService::class).deleteTask(task.id)
+    serviceAccess.getService(TaskService::class).deleteTask(task)
     true
   }
 

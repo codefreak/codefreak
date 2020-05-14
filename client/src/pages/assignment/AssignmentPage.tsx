@@ -21,7 +21,7 @@ import AssignmentStatusComponent from '../../components/AssignmentStatus'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
-import EditablePageTitle from '../../components/EditablePageTitle'
+import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
@@ -120,7 +120,7 @@ const AssignmentPage: React.FC = () => {
       <SetTitle>{assignment.title}</SetTitle>
       <PageHeaderWrapper
         title={
-          <EditablePageTitle
+          <EditableTitle
             editable={assignment.editable}
             title={assignment.title}
             onChange={updater('title')}
