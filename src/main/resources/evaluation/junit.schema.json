@@ -13,6 +13,12 @@
       "default": "/home/gradle/project",
       "description": "Inherited from Command Line Runner. Absolute path of where the student submission is placed."
     },
+    "results-path": {
+      "title": "Directory containing jUnit XML results",
+      "type": "string",
+      "default": "build/test-results/test",
+      "description": "Path is relative to to Project Path. XML files have to match the pattern TEST-[name].xml."
+    },
     "commands": {
       "title": "Commands",
       "description": "Inherited from Command Line Runner. List of commands that executed. Working directory is the project path.",
