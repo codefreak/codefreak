@@ -2,8 +2,8 @@ mutation DeleteTask($id: ID!) {
   deleteTask(id: $id)
 }
 
-mutation CreateTask {
-  createTask {
+mutation CreateTask($template: TaskTemplate) {
+  createTask(template: $template) {
     id
   }
 }

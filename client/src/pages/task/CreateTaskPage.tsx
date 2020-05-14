@@ -4,6 +4,7 @@ import React from 'react'
 import { useHistory } from 'react-router'
 import FileImport from '../../components/FileImport'
 import {
+  TaskTemplate,
   UploadTaskMutationResult,
   useCreateTaskMutation,
   useImportTaskMutation,
@@ -47,11 +48,15 @@ const CreateTaskPage: React.FC = () => {
       uploadOrImportCompleted(r.data ? r.data.importTask : null)
     )
 
-  const createTask = async () => {
-    const result = await createTaskMutation()
+  const createTask = (template?: TaskTemplate) => async () => {
+    const result = await createTaskMutation({ variables: { template } })
     if (result.data) {
       onTaskCreated(result.data.createTask)
     }
+  }
+  const gridStyle: React.CSSProperties = {
+    width: '25%',
+    textAlign: 'center'
   }
   return (
     <>
@@ -61,7 +66,26 @@ const CreateTaskPage: React.FC = () => {
         style={{ marginBottom: 16 }}
       />
       <Card title="From Template" style={{ marginBottom: 16 }}>
-        TODO
+        <Card.Grid style={gridStyle}>
+          <Button type="primary" onClick={createTask(TaskTemplate.Java)}>
+            Java
+          </Button>
+        </Card.Grid>
+        <Card.Grid style={gridStyle}>
+          <Button type="primary" disabled>
+            Android
+          </Button>
+        </Card.Grid>
+        <Card.Grid style={gridStyle}>
+          <Button type="primary" disabled>
+            C++
+          </Button>
+        </Card.Grid>
+        <Card.Grid style={gridStyle}>
+          <Button type="primary" disabled>
+            JavaScript
+          </Button>
+        </Card.Grid>
       </Card>
       <Card title="Import" style={{ marginBottom: 16 }}>
         <FileImport
@@ -74,7 +98,7 @@ const CreateTaskPage: React.FC = () => {
       <Card title="From Scratch">
         <div style={{ textAlign: 'center' }}>
           <Button
-            onClick={createTask}
+            onClick={createTask()}
             size="large"
             loading={creatingTask}
             block
