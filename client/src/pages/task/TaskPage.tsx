@@ -1,11 +1,12 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button, Icon } from 'antd'
+import { Button, Icon, Tooltip } from 'antd'
+import { Switch as AntSwitch } from 'antd'
 import React, { createContext } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
-import EditablePageTitle from '../../components/EditablePageTitle'
+import EditableTitle from '../../components/EditableTitle'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
 import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
@@ -18,6 +19,7 @@ import {
   PublicUserFieldsFragment,
   TaskInput,
   useCreateAnswerMutation,
+  useDeleteAnswerMutation,
   useGetTaskQuery,
   useUpdateTaskMutation
 } from '../../services/codefreak-api'
@@ -28,6 +30,7 @@ import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
 import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
+import EditEvaluationPage from '../evaluation/EditEvaluationPage'
 import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
@@ -57,6 +60,7 @@ const TaskPage: React.FC = () => {
   })
 
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
+  const [deleteAnswer, { loading: deletingAnswer }] = useDeleteAnswerMutation()
 
   const [updateMutation] = useUpdateTaskMutation({
     onCompleted: () => {
@@ -72,7 +76,6 @@ const TaskPage: React.FC = () => {
   const { answer } = task
   const differentUser =
     isTeacher && answer && userId ? answer.submission.user : undefined
-  const pool = !task.assignment
   const editable = task.editable && !differentUser
 
   const taskInput: TaskInput = {
@@ -84,29 +87,26 @@ const TaskPage: React.FC = () => {
     updateMutation({ variables: { input } })
   )
 
-  const answerTab = pool
-    ? []
-    : [
-        { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
-        { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
-        {
-          key: '/evaluation',
-          disabled: !answer,
-          tab: (
-            <>
-              {tab('Evaluation', 'dashboard')}
-              {answer ? (
-                <EvaluationIndicator
-                  style={{ marginLeft: 8 }}
-                  answerId={answer.id}
-                />
-              ) : null}
-            </>
-          )
-        }
-      ]
-
-  const tabs = [{ key: '', tab: tab('Task', 'file-text') }, ...answerTab]
+  const tabs = [
+    { key: '', tab: tab('Task', 'file-text') },
+    { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
+    { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
+    {
+      key: '/evaluation',
+      disabled: !answer && !editable,
+      tab: (
+        <>
+          {tab('Evaluation', 'dashboard')}
+          {answer ? (
+            <EvaluationIndicator
+              style={{ marginLeft: 8 }}
+              answerId={answer.id}
+            />
+          ) : null}
+        </>
+      )
+    }
+  ]
 
   const onCreateAnswer = async () => {
     const createAnswerResult = await createAnswer({
@@ -118,33 +118,55 @@ const TaskPage: React.FC = () => {
     }
   }
 
+  const setTestingMode = (enabled: boolean) => {
+    if (enabled) {
+      onCreateAnswer()
+    } else {
+      deleteAnswer({ variables: { id: answer!.id } }).then(() => {
+        subPath.set('')
+        result.refetch()
+      })
+    }
+  }
+
   const assignment = task.assignment
-  let extra
-  if (pool) {
-    extra = null
-  } else if (differentUser && assignment) {
+
+  const testingModeSwitch =
+    editable && !differentUser ? (
+      <div style={{ display: 'inline-flex' }}>
+        Testing Mode{' '}
+        <Tooltip
+          placement="left"
+          title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
+        >
+          <AntSwitch
+            onChange={setTestingMode}
+            style={{ marginLeft: 8 }}
+            checked={answer !== null}
+            loading={creatingAnswer || deletingAnswer}
+          />
+        </Tooltip>
+      </div>
+    ) : null
+
+  let buttons
+  if (differentUser && assignment) {
     // Show "back to submissions" button for teachers
     const onClick = () =>
       history.push(getEntityPath(assignment) + '/submissions')
-    extra = (
+    buttons = (
       <Button icon="arrow-left" size="large" onClick={onClick}>
         Back to submissions
       </Button>
     )
   } else if (answer) {
     // regular buttons to work on task for students
-    extra = (
-      <>
-        <StartEvaluationButton
-          answerId={answer.id}
-          type="primary"
-          size="large"
-        />
-      </>
+    buttons = (
+      <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
     )
-  } else {
+  } else if (!testingModeSwitch) {
     // start working on task by default
-    extra = (
+    buttons = (
       <Button
         icon="rocket"
         size="large"
@@ -170,7 +192,7 @@ const TaskPage: React.FC = () => {
       <SetTitle>{task.title}</SetTitle>
       <PageHeaderWrapper
         title={
-          <EditablePageTitle
+          <EditableTitle
             editable={editable}
             title={title}
             onChange={updater('title')}
@@ -180,7 +202,11 @@ const TaskPage: React.FC = () => {
         tabList={tabs}
         tabActiveKey={subPath.get()}
         onTabChange={onTabChange}
-        extra={extra}
+        extra={
+          <>
+            {testingModeSwitch} {buttons}
+          </>
+        }
       />
       <Switch>
         <Route exact path={path}>
@@ -190,7 +216,16 @@ const TaskPage: React.FC = () => {
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route path={`${path}/evaluation`}>
-          {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
+          {answer ? (
+            <EvaluationPage
+              answerId={answer.id}
+              editableTaskId={editable ? task.id : undefined}
+            />
+          ) : editable ? (
+            <EditEvaluationPage taskId={task.id} />
+          ) : (
+            <NotFoundPage />
+          )}
         </Route>
         <Route path={`${path}/ide`}>
           {answer ? (

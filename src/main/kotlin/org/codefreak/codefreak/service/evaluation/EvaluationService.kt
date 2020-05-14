@@ -1,20 +1,26 @@
 package org.codefreak.codefreak.service.evaluation
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.networknt.schema.JsonSchemaFactory
+import com.networknt.schema.SpecVersion
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
+import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationRepository
+import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
+import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.SubmissionService
-import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.PositionUtil
 import org.codefreak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,17 +44,24 @@ class EvaluationService : BaseService() {
   private lateinit var fileService: FileService
 
   @Autowired
-  private lateinit var evaluationQueue: EvaluationQueue
+  private lateinit var taskRepository: TaskRepository
 
   @Autowired
-  private lateinit var taskService: TaskService
+  private lateinit var evaluationQueue: EvaluationQueue
 
   @Autowired
   private lateinit var runners: List<EvaluationRunner>
 
+  @Autowired
+  private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
+
   private val runnersByName by lazy { runners.map { it.getName() to it }.toMap() }
 
   private val log = LoggerFactory.getLogger(this::class.java)
+
+  companion object {
+    private val objectMapper = ObjectMapper()
+  }
 
   fun startAssignmentEvaluation(assignmentId: UUID): List<Answer> {
     val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
@@ -134,6 +147,8 @@ class EvaluationService : BaseService() {
   fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name]
       ?: throw IllegalArgumentException("Evaluation runner '$name' not found")
 
+  fun getAllEvaluationRunners() = runners
+
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
   }
@@ -146,5 +161,36 @@ class EvaluationService : BaseService() {
     }
     log.info("Automatically trigger evaluation for answers of ${event.assignmentId}")
     startAssignmentEvaluation(event.assignmentId)
+  }
+
+  fun findEvaluationStepDefinition(id: UUID): EvaluationStepDefinition = evaluationStepDefinitionRepository.findById(id)
+      .orElseThrow { EntityNotFoundException("Evaluation step definition not found") }
+
+  fun saveEvaluationStepDefinition(definition: EvaluationStepDefinition) = evaluationStepDefinitionRepository.save(definition)
+
+  @Transactional
+  fun setEvaluationStepDefinitionPosition(evaluationStepDefinition: EvaluationStepDefinition, newPosition: Long) {
+    val task = evaluationStepDefinition.task
+
+    PositionUtil.move(task.evaluationStepDefinitions, evaluationStepDefinition.position.toLong(), newPosition, { position.toLong() }, { position = it.toInt() })
+
+    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
+    taskRepository.save(task)
+  }
+
+  @Transactional
+  fun deleteEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition) {
+    evaluationStepDefinition.task.run {
+      evaluationStepDefinitions.filter { it.position > evaluationStepDefinition.position }.forEach { it.position-- }
+      evaluationStepDefinitionRepository.saveAll(evaluationStepDefinitions)
+    }
+    evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
+  }
+
+  fun validateRunnerOptions(definition: EvaluationStepDefinition) {
+    val runner = getEvaluationRunner(definition.runnerName)
+    val schema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V6).getSchema(runner.getOptionsSchema())
+    val errors = schema.validate(objectMapper.valueToTree(definition.options))
+    require(errors.isEmpty()) { "Runner options for ${definition.runnerName} are invalid: \n" + errors.joinToString("\n") { it.message } }
   }
 }

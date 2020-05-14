@@ -9,6 +9,7 @@ import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.withTrailingSlash
 import org.openmbee.junit.model.JUnitTestCase
 import org.openmbee.junit.model.JUnitTestSuite
+import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
@@ -22,6 +23,10 @@ class JUnitRunner : CommandLineRunner() {
   override fun getName() = "junit"
 
   override fun getDefaultTitle() = "Unit Tests"
+
+  override fun getDocumentationUrl() = "https://docs.codefreak.org/codefreak/for-teachers/definitions.html#junit"
+
+  override fun getOptionsSchema() = ClassPathResource("evaluation/junit.schema.json").inputStream.use { String(it.readBytes()) }
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     val resultsPath = options.get("results-path", String::class) ?: "build/test-results/test"

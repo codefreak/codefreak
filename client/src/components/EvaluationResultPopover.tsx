@@ -13,7 +13,11 @@ import './EvaluationResultPopover.less'
 const EvaluationResultPopover: React.FC<{
   task: Pick<Task, 'title'>
   user: PublicUserFieldsFragment
-  steps: Array<Pick<EvaluationStep, 'id' | 'summary' | 'result' | 'definition'>>
+  steps: Array<
+    Pick<EvaluationStep, 'id' | 'summary' | 'result'> & {
+      definition: { title: string }
+    }
+  >
 }> = ({ task, user, steps, children }) => {
   const popoverContent = (
     <List itemLayout="horizontal" size="small">

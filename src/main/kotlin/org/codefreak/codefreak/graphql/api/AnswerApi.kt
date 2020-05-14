@@ -19,6 +19,7 @@ import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.orNull
 import org.apache.catalina.core.ApplicationPart
+import org.codefreak.codefreak.service.SubmissionService
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -89,6 +90,23 @@ class AnswerMutation : BaseResolver(), Mutation {
     serviceAccess.getService(AnswerService::class)
         .findOrCreateAnswer(taskId, FrontendUtil.getCurrentUser())
         .let { AnswerDto(it, this) }
+  }
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun deleteAnswer(id: UUID): Boolean = context {
+    val answer = serviceAccess.getService(AnswerService::class).findAnswer(id)
+    authorization.requireIsCurrentUser(answer.submission.user)
+    check(!serviceAccess.getService(EvaluationService::class).isEvaluationPending(answer.id)) {
+      "Answer cannot be deleted while evaluation is running"
+    }
+    // If this is the only answer, delete the whole submission. This makes sense for testing mode.
+    // We may want to change this, if students are ever able to delete answers.
+    if (answer.submission.answers.size == 1) {
+      serviceAccess.getService(SubmissionService::class).deleteSubmission(answer.submission.id)
+    } else {
+      serviceAccess.getService(AnswerService::class).deleteAnswer(answer.id)
+    }
+    true
   }
 }
 

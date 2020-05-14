@@ -13,8 +13,10 @@ import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.evaluation.EvaluationService
+import org.codefreak.codefreak.service.evaluation.isBuiltIn
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.PositionUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.getYamlDefinition
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +24,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayOutputStream
+import java.lang.IllegalArgumentException
 import java.util.UUID
 
 @Service
@@ -59,9 +62,21 @@ TaskService : BaseService() {
         .mapIndexed { index, it ->
           val runner = evaluationService.getEvaluationRunner(it.step)
           val title = it.title ?: runner.getDefaultTitle()
-          EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
+          val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
+          evaluationService.validateRunnerOptions(stepDefinition)
+          stepDefinition
         }
         .toMutableSet()
+
+    task.evaluationStepDefinitions
+        .groupBy { it.runnerName }
+        .forEach { (runnerName, definitions) ->
+          if (definitions.size > 1 && evaluationService.getEvaluationRunner(runnerName).isBuiltIn()) {
+            throw IllegalArgumentException("Evaluation step '$runnerName' can only be added once!")
+          }
+        }
+
+    addBuiltInEvaluationSteps(task)
 
     evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
     task = taskRepository.save(task)
@@ -69,6 +84,14 @@ TaskService : BaseService() {
       TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals("codefreak.yml", true) })
     }
     return task
+  }
+
+  private fun addBuiltInEvaluationSteps(task: Task) {
+    if (task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME } == null) {
+      task.evaluationStepDefinitions.forEach { it.position++ }
+      val runner = evaluationService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
+      task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
+    }
   }
 
   @Transactional
@@ -80,7 +103,13 @@ TaskService : BaseService() {
   }
 
   @Transactional
-  fun deleteTask(id: UUID) = taskRepository.deleteById(id)
+  fun deleteTask(task: Task) {
+    task.assignment?.run {
+      tasks.filter { it.position > task.position }.forEach { it.position-- }
+      taskRepository.saveAll(tasks)
+    }
+    taskRepository.delete(task)
+  }
 
   private fun applyDefaultRunners(taskDefinition: TaskDefinition): TaskDefinition {
     // add "comments" runner by default if not defined
@@ -101,46 +130,9 @@ TaskService : BaseService() {
   fun setTaskPosition(task: Task, newPosition: Long) {
     val assignment = task.assignment
     require(assignment != null) { "Task is not part of an assignment" }
-    require(newPosition < assignment.tasks.size && newPosition >= 0) { "Invalid position" }
 
-    if (task.position == newPosition) {
-      return
-    }
-    if (task.position < newPosition) {
-      /*  0
-          1 --
-          2  |
-          3 <|
-          4
+    PositionUtil.move(assignment.tasks, task.position, newPosition, { position }, { position = it })
 
-          0 -> 0 // +- 0
-          1 -> 3 // = 3
-          2 -> 1 // -1
-          3 -> 2 // -1
-          4 -> 4 // +- 0
-       */
-      assignment.tasks
-          .filter { it.position > task.position && it.position <= newPosition }
-          .forEach { it.position -- }
-    } else {
-      /*  0
-          1 <|
-          2  |
-          3 --
-          4
-
-          0 -> 0 // +- 0
-          1 -> 2 // +1
-          2 -> 3 // +1
-          3 -> 1 // = 1
-          4 -> 4 // +- 0
-       */
-      assignment.tasks
-          .filter { it.position < task.position && it.position >= newPosition }
-          .forEach { it.position ++ }
-    }
-
-    task.position = newPosition
     taskRepository.saveAll(assignment.tasks)
     assignmentRepository.save(assignment)
   }

@@ -8,10 +8,11 @@ export interface SyntaxHighlighterProps {
   highlightLines?: number[]
   onLineNumberClick?: (lineNumber: number, elem: HTMLSpanElement) => any
   language?: string
+  noLineNumbers?: boolean
 }
 
 const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = props => {
-  const { highlightLines, firstLineNumber } = props
+  const { highlightLines, firstLineNumber, noLineNumbers } = props
 
   const absLineNumber = useCallback(
     (relLineNumber: number) => {
@@ -60,7 +61,7 @@ const SyntaxHighlighter: React.FC<SyntaxHighlighterProps> = props => {
     <SyntaxHighlighterComponent
       lineProps={lineHighlighter}
       wrapLines={lineHighlighter !== undefined}
-      showLineNumbers
+      showLineNumbers={!noLineNumbers}
       language={props.language}
       useInlineStyles={false}
       startingLineNumber={props.firstLineNumber || 1}

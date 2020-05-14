@@ -6,6 +6,7 @@ import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.ExecResult
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 import java.io.InputStream
 
@@ -20,6 +21,10 @@ class CommandLineRunner : EvaluationRunner {
   override fun getName() = "commandline"
 
   override fun getDefaultTitle() = "Command Line"
+
+  override fun getDocumentationUrl() = "https://docs.codefreak.org/codefreak/for-teachers/definitions.html#commandline"
+
+  override fun getOptionsSchema() = ClassPathResource("evaluation/commandline.schema.json").inputStream.use { String(it.readBytes()) }
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     return executeCommands(answer, options, null).map(this::executionToFeedback)

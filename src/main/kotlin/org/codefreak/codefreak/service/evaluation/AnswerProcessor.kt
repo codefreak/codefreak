@@ -26,7 +26,7 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
     val evaluation =
         evaluationService.getEvaluationByDigest(answer.id, digest) ?: evaluationService.createEvaluation(answer)
     log.debug("Start evaluation of answer {} ({} steps)", answer.id, answer.task.evaluationStepDefinitions.size)
-    answer.task.evaluationStepDefinitions.forEach { evaluationStepDefinition ->
+    answer.task.evaluationStepDefinitions.filter { it.active }.forEach { evaluationStepDefinition ->
       val executedStep = evaluation.evaluationSteps.find { it.definition == evaluationStepDefinition }
       if (executedStep !== null) {
         // Only re-run if this step errored
