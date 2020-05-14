@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetchingEnvironment
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
+import org.codefreak.codefreak.auth.hasAuthority
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
@@ -181,7 +182,8 @@ class EvaluationMutation : BaseResolver(), Mutation {
   fun startEvaluation(answerId: UUID): PendingEvaluationDto = context {
     val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
     authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
-    serviceAccess.getService(EvaluationService::class).startEvaluation(answer)
+    val forceSaveFiles = authorization.isCurrentUser(answer.task.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
+    serviceAccess.getService(EvaluationService::class).startEvaluation(answer, forceSaveFiles)
     PendingEvaluationDto(answer, this)
   }
 
