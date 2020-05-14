@@ -2,6 +2,7 @@ package org.codefreak.codefreak.service
 
 import com.spotify.docker.client.messages.ContainerInfo
 import com.spotify.docker.client.messages.PortBinding
+import org.codefreak.codefreak.util.withoutTrailingSlash
 
 class DockerPublishReverseProxy(
   private val baseUrl: String,
@@ -22,6 +23,6 @@ class DockerPublishReverseProxy(
     val port = containerInfo.networkSettings()?.ports()?.get("$idePort/tcp")?.first() ?: throw RuntimeException(
         "Container ${containerInfo.id()} does not expose port $idePort/tcp. IDE is unreachable."
     )
-    return "$baseUrl:${port.hostPort()}"
+    return "${baseUrl.withoutTrailingSlash()}:${port.hostPort()}"
   }
 }
