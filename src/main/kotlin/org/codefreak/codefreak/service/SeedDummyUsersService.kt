@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 @Service
 @ConditionalOnProperty("codefreak.authentication-method", havingValue = "simple", matchIfMissing = true)
 @Order(Ordered.LOWEST_PRECEDENCE - 1)
-class SeedDummyUsers : ApplicationListener<ContextRefreshedEvent> {
+class SeedDummyUsersService : ApplicationListener<ContextRefreshedEvent> {
 
   @Autowired
   lateinit var userRepository: UserRepository
