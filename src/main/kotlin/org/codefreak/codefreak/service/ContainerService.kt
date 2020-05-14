@@ -132,6 +132,7 @@ class ContainerService : BaseService() {
 
     return if (container == null) {
       val token = RandomStringUtils.random(40, 0, 0, true, true, null, SecureRandom())
+      log.info("Creating new IDE container with $label=$id")
       val containerId = this.createIdeContainer(label, id, token)
       docker.startContainer(containerId)
       // prepare the environment after the container has started
@@ -204,7 +205,11 @@ class ContainerService : BaseService() {
       log.info("Skipped saving of files from answer ${answer.id} because assignment is not open")
       return answer
     }
-    val containerId = getAnswerIdeContainer(answer.id) ?: return answer
+    val containerId = getAnswerIdeContainer(answer.id)
+    if (containerId === null) {
+      log.debug("Not saving files of answer ${answer.id}: No write container found")
+      return answer
+    }
     if (!isContainerRunning(containerId)) {
       log.debug("Skipped saving of files from answer ${answer.id} because IDE is not running")
       return answer
