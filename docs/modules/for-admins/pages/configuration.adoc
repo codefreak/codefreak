@@ -50,3 +50,50 @@ codefreak:
         ssh-key-pass: securepassword123
         ssh-base-url: ssh://git@git.example.org
 ----
+
+== Database
+By default, Code FREAK uses an in-memory database. This means you will lose data between application restarts!
+
+For production usage we recommend using PostgreSQL. Other DB engines are untested. Use the following to use Postgres for persistent data storage.
+
+[source,yaml]
+----
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://{host}:5432/{database}
+    username: {username}
+    password: {yourpassword}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+----
+
+== IDE Reverse Proxy
+Code FREAK starts instances of IDEs (VSCode, etc.) in their own Docker container. The default configuration exposes the HTTP endpoint of each IDE via port publishing. Docker will choose a random free port from your machine and you can access it via `http://localhost:{random-port}`. This is useful for local development and testing but not for production usage.
+
+Currently, we support https://docs.traefik.io/[Traefik (v1)] as alternative reverse proxy. This will create path-based routes to IDE instances.
+
+=== Traefik
+To configure Traefik as your reverse proxy you have to start at least one instance of Traefik with a Docker backend:
+
+[source]
+----
+docker run -p80:80 -d \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  traefik:1.7-alpine --docker --debug
+----
+
+Afterwards you can configure Code FREAK to use Traefik reverse proxy:
+
+[source, yaml]
+----
+codefreak:
+  reverse-proxy:
+    type: traefik
+    url: http://my-docker-host.domain.example
+----
+
+This will create URLs like `http://my-docker-host.domain.example/ide/random-token`

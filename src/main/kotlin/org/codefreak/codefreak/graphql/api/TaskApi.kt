@@ -19,6 +19,7 @@ import org.codefreak.codefreak.service.GitImportService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
+import org.springframework.core.io.ClassPathResource
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -47,7 +48,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   }
 
   val evaluationStepDefinitions by lazy {
-    entity.evaluationStepDefinitions.map { EvaluationStepDefinitionDto(it) }
+    entity.evaluationStepDefinitions.sortedBy { it.position }.map { EvaluationStepDefinitionDto(it, ctx) }
   }
 
   fun answer(userId: UUID?): AnswerDto? {
@@ -66,6 +67,10 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
 
     return answer?.let { AnswerDto(it, ctx) }
   }
+}
+
+enum class TaskTemplate {
+  JAVA
 }
 
 class TaskInput(var id: UUID, var title: String) {
@@ -99,14 +104,20 @@ class TaskQuery : BaseResolver(), Query {
 class TaskMutation : BaseResolver(), Mutation {
 
   @Secured(Authority.ROLE_TEACHER)
-  fun createTask(): TaskDto = context {
-    serviceAccess.getService(TaskService::class).createEmptyTask(authorization.currentUser).let { TaskDto(it, this) }
+  fun createTask(template: TaskTemplate?): TaskDto = context {
+    if (template != null) {
+      val templateTar = ClassPathResource("org/codefreak/templates/${template.name.toLowerCase()}.tar").inputStream.use { it.readBytes() }
+      serviceAccess.getService(TaskService::class).createFromTar(templateTar, null, authorization.currentUser, 0)
+          .let { TaskDto(it, this) }
+    } else {
+      serviceAccess.getService(TaskService::class).createEmptyTask(authorization.currentUser).let { TaskDto(it, this) }
+    }
   }
 
   fun deleteTask(id: UUID): Boolean = context {
     val task = serviceAccess.getService(TaskService::class).findTask(id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
-    serviceAccess.getService(TaskService::class).deleteTask(task.id)
+    serviceAccess.getService(TaskService::class).deleteTask(task)
     true
   }
 

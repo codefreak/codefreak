@@ -2,7 +2,7 @@ import { Button, Input, Modal } from 'antd'
 import React, { useState } from 'react'
 import { extractTargetValue } from '../services/util'
 
-const EditablePageTitle: React.FC<{
+const EditableTitle: React.FC<{
   editable: boolean
   title: string
   onChange: (newTitle: string) => void
@@ -49,4 +49,4 @@ const EditablePageTitle: React.FC<{
   )
 }
 
-export default EditablePageTitle
+export default EditableTitle

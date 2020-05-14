@@ -2,7 +2,7 @@ package org.codefreak.codefreak.auth
 
 import org.codefreak.codefreak.SpringFrontendTest
 import org.codefreak.codefreak.frontend.BaseController
-import org.codefreak.codefreak.service.SeedDatabaseService
+import org.codefreak.codefreak.service.SeedDummyUsersService
 import org.codefreak.codefreak.service.UserService
 import org.junit.Test
 import org.springframework.security.access.annotation.Secured
@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.ResponseBody
 @Component
 class TestUserDetailsService(private val userService: UserService) : UserDetailsService {
   override fun loadUserByUsername(username: String): UserDetails = when (username) {
-    "admin" -> SeedDatabaseService.admin
-    "teacher" -> SeedDatabaseService.teacher
-    "student" -> SeedDatabaseService.student
+    "admin" -> SeedDummyUsersService.admin
+    "teacher" -> SeedDummyUsersService.teacher
+    "student" -> SeedDummyUsersService.student
     else -> throw UsernameNotFoundException("User $username cannot be found")
   }
 }

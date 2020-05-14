@@ -18,7 +18,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.lang.IllegalArgumentException
 import java.util.UUID
 
 @Service
@@ -47,10 +46,12 @@ class AnswerService : BaseService() {
   @Transactional
   fun findOrCreateAnswer(taskId: UUID, user: User): Answer {
     val assignmentId = taskService.findTask(taskId).assignment?.id
-            ?: throw IllegalArgumentException("Task is not part of an assignment")
     return submissionService.findOrCreateSubmission(assignmentId, user)
         .let { it.getAnswer(taskId) ?: createAnswer(it, taskId) }
   }
+
+  @Transactional
+  fun deleteAnswer(answerId: UUID) = answerRepository.deleteById(answerId)
 
   fun setFiles(answer: Answer): OutputStream {
     answer.task.assignment?.requireOpen()

@@ -66,6 +66,8 @@ dependencies {
   implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.10.0'
   implementation 'com.expediagroup:graphql-kotlin-spring-server:1.4.2'
   implementation 'com.vladmihalcea:hibernate-types-52:2.9.8'
+  implementation 'com.github.codefreak:templates:1.0.0'
+  implementation 'com.networknt:json-schema-validator:1.0.38'
   kapt 'org.springframework.boot:spring-boot-configuration-processor'
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
   runtimeOnly 'org.postgresql:postgresql'

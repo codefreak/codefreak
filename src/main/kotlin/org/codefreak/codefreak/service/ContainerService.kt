@@ -10,7 +10,6 @@ import com.spotify.docker.client.DockerClient.RemoveContainerParam.removeVolumes
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.HostConfig
-import org.apache.commons.lang.RandomStringUtils
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.AssignmentStatus
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StreamUtils
 import java.io.InputStream
-import java.security.SecureRandom
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
@@ -38,11 +36,10 @@ import javax.ws.rs.ProcessingException
 class ContainerService : BaseService() {
 
   companion object {
-    private const val LABEL_PREFIX = "org.codefreak."
+    const val LABEL_PREFIX = "org.codefreak."
     const val LABEL_READ_ONLY_ANSWER_ID = LABEL_PREFIX + "answer-id-read-only"
     const val LABEL_ANSWER_ID = LABEL_PREFIX + "answer-id"
     const val LABEL_TASK_ID = LABEL_PREFIX + "task-id"
-    const val LABEL_TOKEN = LABEL_PREFIX + "token"
     const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance-id"
     const val PROJECT_PATH = "/home/coder/project"
   }
@@ -70,6 +67,9 @@ class ContainerService : BaseService() {
 
   @Autowired
   private lateinit var answerService: AnswerService
+
+  @Autowired
+  private lateinit var reverseProxy: ReverseProxy
 
   /**
    * Inherit behaviour of the standard Docker CLI and fallback to :latest if no tag is given
@@ -123,7 +123,7 @@ class ContainerService : BaseService() {
     // either take existing container or create a new one
     val container = getContainerWithLabel(label, id.toString())
     if (container != null && isContainerRunning(container.id())) {
-      return getIdeUrl(container.labels()?.get(LABEL_TOKEN)!!)
+      return getIdeUrl(container.id())
     }
 
     if (!canStartNewIdeContainer()) {
@@ -131,19 +131,17 @@ class ContainerService : BaseService() {
     }
 
     return if (container == null) {
-      val token = RandomStringUtils.random(40, 0, 0, true, true, null, SecureRandom())
-      log.info("Creating new IDE container with $label=$id")
-      val containerId = this.createIdeContainer(label, id, token)
+      val containerId = this.createIdeContainer(label, id)
       docker.startContainer(containerId)
       // prepare the environment after the container has started
       this.copyFilesToIde(containerId, fileCollectionId)
-      getIdeUrl(token)
+      getIdeUrl(containerId)
     } else {
       // make sure the container is running. Also existing ones could have been stopped
       docker.startContainer(container.id())
       // write fresh files that might have been uploaded while being stopped
       this.copyFilesToIde(container.id(), fileCollectionId)
-      getIdeUrl(container.labels()?.get(LABEL_TOKEN)!!)
+      getIdeUrl(container.id())
     }
   }
 
@@ -169,13 +167,12 @@ class ContainerService : BaseService() {
 
   /**
    * Get the URL for an IDE container
-   * TODO: make this configurable for different types of hosting/reverse proxies/etc
    */
-  fun getIdeUrl(token: String): String {
-    return config.traefik.url + getIdePath(token)
+  fun getIdeUrl(containerId: String): String {
+    return this.reverseProxy.getIdeUrl(
+        docker.inspectContainer(containerId)
+    )
   }
-
-  protected fun getIdePath(token: String) = "/ide/$token/"
 
   fun isIdeContainerRunning(answerId: UUID): Boolean {
     return getAnswerIdeContainer(answerId)?.let { isContainerRunning(it) } ?: false
@@ -266,16 +263,12 @@ class ContainerService : BaseService() {
    * Configure and create a new IDE container.
    * Returns the ID of the created container
    */
-  protected fun createIdeContainer(label: String, id: UUID, token: String): String {
+  protected fun createIdeContainer(label: String, id: UUID): String {
     val containerId = createContainer(config.ide.image) {
       labels = mapOf(
-          label to id.toString(),
-          LABEL_TOKEN to token,
-          "traefik.enable" to "true",
-          "traefik.frontend.rule" to "PathPrefixStrip: " + getIdePath(token),
-          "traefik.port" to "3000",
-          "traefik.frontend.headers.customResponseHeaders" to "Access-Control-Allow-Origin:*"
+          label to id.toString()
       )
+      reverseProxy.configureContainer(this)
       hostConfig {
         restartPolicy(HostConfig.RestartPolicy.unlessStopped())
         capAdd("SYS_PTRACE") // required for lsof

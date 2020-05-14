@@ -9,11 +9,6 @@ spring:
   profiles:
     # The application runs in dev mode by default! Override this in production mode!
     active: dev
-  jpa:
-    properties:
-      hibernate:
-        # Escape all table names to avoid issues with reserved keywords like "user"
-        globally_quoted_identifiers: true
   batch:
     job:
       enabled: false
@@ -57,9 +52,7 @@ codefreak:
     clientKeyPath: ~
     clientCertPath: ~
     # Define how (and if) images will be pulled on application startup
-    pull-policy: never
-  traefik:
-    url: "http://localhost:8081"
+    pull-policy: always
   ide:
     image: "cfreak/ide:1"
     # Interval for checking for idle containers in ms. Default 30 seconds.
