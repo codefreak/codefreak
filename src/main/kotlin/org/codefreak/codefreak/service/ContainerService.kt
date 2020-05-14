@@ -131,6 +131,7 @@ class ContainerService : BaseService() {
     }
 
     return if (container == null) {
+      log.info("Creating new IDE container with $label=$id")
       val containerId = this.createIdeContainer(label, id)
       docker.startContainer(containerId)
       // prepare the environment after the container has started
