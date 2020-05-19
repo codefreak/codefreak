@@ -26,6 +26,10 @@ before_install:
   - pip3 install --user --upgrade pip
   - pip3 install --user docker-ci-deploy
 
+install:
+  # skip bootJar for project initialization
+  - ./gradlew assemble -x bootJar
+
 # Run gradle check as only script
 script:
   - ./gradlew check sonarqube
