@@ -33,6 +33,11 @@ task check {
 }
 
 task assemble(type: NpmTask) {
+  args = ['run', 'assemble']
+  dependsOn generate
+}
+
+task bundle(type: NpmTask) {
   args = ['run', 'build']
   dependsOn generate
 }

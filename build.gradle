@@ -168,7 +168,7 @@ task generateGraphqlSchema(type: JavaExec) {
 task deployFrontend(type: Copy) {
   from 'client/build'
   into 'build/resources/main/static'
-  dependsOn "client:assemble"
+  dependsOn "client:bundle"
 }
 
 jib {
