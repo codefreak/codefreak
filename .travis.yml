@@ -25,16 +25,10 @@ before_install:
   # https://github.com/praekeltfoundation/docker-ci-deploy
   - pip3 install --user --upgrade pip
   - pip3 install --user docker-ci-deploy
-  - docker pull cfreak/codeclimate:latest
 
-# Run gradle checks and try to build the Docker image as latest
+# Run gradle check as only script
 script:
   - ./gradlew check sonarqube
-  - docker build
-    --build-arg GITHUB_TOKEN
-    --build-arg GIT_COMMIT="$TRAVIS_COMMIT"
-    --build-arg GIT_TAG="$TRAVIS_TAG"
-    -t cfreak/codefreak:latest $TRAVIS_BUILD_DIR
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -48,6 +42,9 @@ cache:
 # build & push image to Docker Cloud
 # The Autobuild feature of Docker Cloud has been too slow in the past so we use Travis
 before_deploy:
+  # Pull docker image to utilize layer cache
+  - docker pull cfreak/codefreak
+  - ./gradlew jibDockerBuild
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 deploy:
   # deploy master branch as latest
