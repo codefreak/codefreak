@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.config
 
 import org.codefreak.codefreak.frontend.ShortUuidConverter
-import nz.net.ultraq.thymeleaf.LayoutDialect
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.AsyncTaskExecutor
@@ -13,11 +12,6 @@ import java.util.concurrent.Executors
 
 @Configuration
 class FrontendConfiguration : WebMvcConfigurer {
-
-  @Bean
-  fun layoutDialect(): LayoutDialect {
-    return LayoutDialect()
-  }
 
   override fun addFormatters(registry: FormatterRegistry) {
     registry.addConverter(ShortUuidConverter())

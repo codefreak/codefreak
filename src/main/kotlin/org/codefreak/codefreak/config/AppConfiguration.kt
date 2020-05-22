@@ -25,20 +25,11 @@ class AppConfiguration {
   val docker = Docker()
   val ide = Ide()
   val reverseProxy = ReverseProxy()
-  val frontend = Frontend()
   val ldap = Ldap()
   val files = Files()
   val lti = Lti()
   val evaluation = Evaluation()
   val gitImport = GitImport()
-
-  class Frontend {
-    /**
-     * This can be used to inject custom javascript code (needs to include script tags).
-     * It is injected after dependencies (like jQuery) and before template specific scripts.
-     */
-    lateinit var customScript: String
-  }
 
   enum class ReverseProxyType {
     TRAEFIK, PUBLISH

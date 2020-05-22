@@ -145,7 +145,7 @@ class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
 
     logger.debug("from TokenEndpoint jsonString = " + jsonString!!)
 
-    val jsonRoot = JsonParser().parse(jsonString)
+    val jsonRoot = JsonParser.parseString(jsonString)
     if (!jsonRoot.isJsonObject) {
       throw AuthenticationServiceException("Token Endpoint did not return a JSON object: $jsonRoot")
     }
