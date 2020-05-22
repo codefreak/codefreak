@@ -13,7 +13,7 @@ automatically by various testing-methods like unit tests or code smell detection
 ## Try with Docker 🐋
 
 ```shell script
-docker run --rm --user=root \
+docker run -it --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -p 8080:8080 \
     cfreak/codefreak

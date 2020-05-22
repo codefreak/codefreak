@@ -12,6 +12,7 @@ plugins {
   id "org.sonarqube" version "2.7"
   id 'net.researchgate.release' version '2.6.0'
   id 'org.liquibase.gradle' version '2.0.1'
+  id 'com.google.cloud.tools.jib' version '2.2.0'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -99,10 +100,9 @@ compileTestKotlin {
 }
 
 bootJar {
-  from ('client/build') {
-    into 'BOOT-INF/classes/static'
-  }
-  dependsOn 'client:assemble'
+  // you can still build a fat jar for testing but this is NOT used for building
+  // the Docker production image with jib!
+  dependsOn 'deployFrontend'
 }
 
 spotless {
@@ -155,3 +155,28 @@ task generateGraphqlSchema(type: JavaExec) {
   main = "org.codefreak.codefreak.graphql.SchemaPrinterKt"
   args 'build/generated/graphql/schema.graphqls'
 }
+
+task deployFrontend(type: Copy) {
+  from 'client/build'
+  into 'build/resources/main/static'
+  dependsOn "client:bundle"
+}
+
+jib {
+  to {
+    image = "cfreak/codefreak"
+  }
+  container {
+    mainClass = springBoot.mainClassName
+    ports = ["8080"]
+    // set image build date to current timestamp
+    creationTime = "USE_CURRENT_TIMESTAMP"
+    environment = [
+      ENV: "prod",
+      SPRING_PROFILES_ACTIVE: "prod",
+      SENTRY_ENVIRONMENT: "prod",
+      SENTRY_RELEASE: project.version.toString()
+    ]
+  }
+}
+tasks.jibDockerBuild.dependsOn deployFrontend
