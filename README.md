@@ -1,16 +1,34 @@
-Code FREAK<br><small>╰ Code Feedback, Review & Evaluation Kit</small>
-======
+<p align="center">
+    <img alt="Code FREAK Logo" src="https://raw.githubusercontent.com/codefreak/codefreak/master/client/public/logo192.png" />
+</p>
+<h1 align="center">Code FREAK</h1>
 
 [![Build Status](https://travis-ci.com/codefreak/codefreak.svg?branch=master)](https://travis-ci.com/codefreak/codefreak)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=code-freak_code-freak&metric=alert_status)](https://sonarcloud.io/dashboard?id=code-freak_code-freak)
-[![Docker Image](https://images.microbadger.com/badges/version/cfreak/codefreak.svg)](https://microbadger.com/images/cfreak/codefreak)
+[![Docker Image](https://images.microbadger.com/badges/version/cfreak/codefreak.svg)](https://hub.docker.com/cfreak/codefreak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-Code FREAK is an online IDE for educational purposes that allows teachers to create and enroll programming tasks
-allows students to program and execute their code without leaving the browser. Submissions can be evaluated
-automatically by various testing-methods like unit tests or code smell detection.
+Code FREAK (Code Feedback, Review & Evaluation Kit) is an online programming platform and evaluation/autograding system for coding assignments. It supports every major programming language (language agnostic) and has a modular evaluation system based on Docker.
 
-## Try with Docker 🐋
+![Code FREAK Screenshot](./screenshot.png)
+
+## Main Features
+
+- [x] Support for every major programming language (language agnostic)
+- [x] Pluggable evaluation system based on Docker (Dynamic Testing, Linting, …)
+- [x] In-browser IDE based on VSCode/[Coder](https://github.com/cdr/code-server)
+- [x] Modern UI based on React and Ant Design
+- [x] Integrates with learn management systems (LMS) via LTI 1.3 standard
+- [x] LDAP authentication
+- [x] 100% free and open source
+
+## Installation
+
+We currently only support installation via Docker. The image name is [`cfreak/codefreak`](https://hub.docker.com/cfreak/codefreak). Check out its [tags](https://hub.docker.com/cfreak/codefreak?tab=tags) for the latest version.
+
+### Try with Docker 🐋
+
+You can try out Code FREAK locally. The only requirement is a working installation of Docker on your computer.
 
 ```shell script
 docker run -it --rm \
@@ -24,11 +42,39 @@ Log in using `admin` and password `123`.
 
 This will use you local Docker daemon for evaluation and IDE instances.
 
+### Image variants
+
+There are two major image versions on Docker Hub: `latest` and `canary`. `latest` always points to the latest stable release and `canary` is basically a snapshot release based on the `master` branch from GitHub.
+
+Our image tags follow semantic versioning. For example the tag `cfreak/codefreak:4` will always reference the latest v4 release.
+
+### Deployment & Configuration
+
+Our Docker image should run without any further configuration. Out of the box it will use an in-memory database and the Docker daemon available via `/var/run/docker.sock` or the `DOCKER_HOST` environment variable. This is of course NOT suitable for production deployments. Please see our [installation/deployment guide](https://docs.codefreak.org/codefreak/for-admins/installation.html) for detailed instructions and recommendations.
+
 ## Documentation
-For instructions how to run, configure and use the application please find the documentation in the
-[`/docs`](docs/README.md) directory or at [docs.codefreak.org](https://docs.codefreak.org).
+
+The latest documentation is always available on [docs.codefreak.org](https://docs.codefreak.org). You can find the "raw" documentation files inside the [`/docs`](https://github.com/codefreak/codefreak/tree/master/docs) directory.
+
+## State of the Project
+
+The development of Code FREAK started in 2018. It has been used in production from an early stage on at [Kiel University of Applied Sciences](https://www.fh-kiel.de/) (Germany). Extensive testing in various computer science courses resulted in valuable feedback. The reception by studends and teachers was very positive.
+
+While this is not a mature product yet, all major features (editing, evaluation, reviewing) do work already. We have many ideas for new features and the existing application still needs some polishing. Development is ongoing in cooperation with current users.
+
+Code FREAK is intended to become a community-driven project. If you are interested in trying it for your educational institution or if you have any questions, feel free to get in touch with us! ✉ codefreak@fh-kiel.de
+
+## Roadmap / Planned Features
+
+- [ ] Kubernetes integration
+- [ ] Evaluation system with Windows and MacOS support
+- [ ] Git integration for code synchronization
+- [ ] Real autograding and LTI 1.3 scoring support
+- [ ] Plugin for Moodle tests
+- [ ] Internationalization & localization
 
 ## License
+
     Code FREAK | Code Feedback Review & Evaluation Kit
     Copyright (C) 2019 Kiel University of Applied Sciences
 
