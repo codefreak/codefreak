@@ -1,9 +1,10 @@
 plugins {
-  id "com.moowork.node" version "1.3.1"
+  id "com.github.node-gradle.node" version "2.2.4"
 }
 
 node {
   download = true
+  npmInstallCommand = "ci"
 }
 
 task generate(type: NpmTask) {
