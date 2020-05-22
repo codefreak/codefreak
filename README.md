@@ -58,7 +58,7 @@ The latest documentation is always available on [docs.codefreak.org](https://doc
 
 ## State of the Project
 
-The development of Code FREAK started in 2018. It has been used in production from an early stage on at [Kiel University of Applied Sciences](https://www.fh-kiel.de/) (Germany). Extensive testing in various computer science courses resulted in valuable feedback. The reception by studends and teachers was very positive.
+The development of Code FREAK started in 2018. It has been used in production from an early stage on at [Kiel University of Applied Sciences](https://www.fh-kiel.de/) (Germany). Extensive testing in various computer science courses resulted in valuable feedback. The reception by studends and teachers is very positive.
 
 While this is not a mature product yet, all major features (editing, evaluation, reviewing) do work already. We have many ideas for new features and the existing application still needs some polishing. Development is ongoing in cooperation with current users.
 
