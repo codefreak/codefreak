@@ -33,6 +33,7 @@ install:
 # Run gradle check as only script
 script:
   - ./gradlew check sonarqube
+  - ./gradlew jibDockerBuild -x check
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -46,9 +47,6 @@ cache:
 # build & push image to Docker Cloud
 # The Autobuild feature of Docker Cloud has been too slow in the past so we use Travis
 before_deploy:
-  # Pull docker image to utilize layer cache
-  - docker pull cfreak/codefreak
-  - ./gradlew jibDockerBuild
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 deploy:
   # deploy master branch as latest
