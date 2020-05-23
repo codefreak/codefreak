@@ -115,10 +115,12 @@ object TarUtil {
     tar.finish()
   }
 
+  private val stripPrefixPattern = """^(?:\.*/)*(?:\.+$)?""".toRegex()
+
   /**
    * Remove leading dots and slashes from given path
    */
-  fun normalizeEntryName(name: String) = name.trimStart('.', '/')
+  fun normalizeEntryName(name: String) = name.trim().replace(stripPrefixPattern, "").trim()
 
   fun copyEntries(
     from: InputStream,
