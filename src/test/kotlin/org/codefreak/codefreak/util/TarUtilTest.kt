@@ -65,20 +65,20 @@ internal class TarUtilTest {
   @Test
   fun `entry name is normalized correctly`() {
     mapOf(
-      " " to "",
-      "foo" to "foo",
-      "foo " to "foo",
-      "foo/bar" to "foo/bar",
-      ".foo" to ".foo",
-      ".foo.bar" to ".foo.bar",
-      ".foo/bar" to ".foo/bar",
-      ".foo/.bar" to ".foo/.bar",
-      "./" to "",
-      "." to "",
-      "../" to "",
-      "../." to "",
+        " " to "",
+        "foo" to "foo",
+        "foo " to "foo",
+        "foo/bar" to "foo/bar",
+        ".foo" to ".foo",
+        ".foo.bar" to ".foo.bar",
+        ".foo/bar" to ".foo/bar",
+        ".foo/.bar" to ".foo/.bar",
+        "./" to "",
+        "." to "",
+        "../" to "",
+        "../." to "",
         "../.." to "",
-      ".././foo" to "foo"
+        ".././foo" to "foo"
     ).forEach {
       assertEquals(it.value, TarUtil.normalizeEntryName(it.key))
     }
