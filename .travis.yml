@@ -71,7 +71,7 @@ deploy:
       git config --global user.email "${GITHUB_USER}" &&
       git config --global user.name "Travis CI" &&
       git checkout $TRAVIS_BRANCH &&
-      ./gradlew release -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=$RELEASE_VERSION
+      ./gradlew release -x check -x bootJar -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=$RELEASE_VERSION
   - provider: releases
     api_key: $GITHUB_TOKEN
     on:
