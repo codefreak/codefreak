@@ -1,6 +1,5 @@
 const { DefinePlugin } = require('webpack')
 const CracoAntDesignPlugin = require('craco-antd')
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 const rawLoader = require('craco-raw-loader')
 const CopyPlugin = require('copy-webpack-plugin')
 const GitRevisionPlugin = require('git-revision-webpack-plugin')
@@ -14,7 +13,6 @@ module.exports = {
   ],
   webpack: {
     plugins: [
-      new MonacoWebpackPlugin(),
       new CopyPlugin([
         {
           from: 'node_modules/bootstrap-less/fonts/*',
