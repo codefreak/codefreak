@@ -146,7 +146,7 @@ evaluation:
     options:
       image: "python:3.7" <5>
       project-path: /code <6>
-      results-path: /code <7>
+      results-path: . <7>
       commands:
         - pip install pytest <8>
         - pytest --junitxml=TEST-report.xml main_test.py <9>
@@ -157,8 +157,8 @@ evaluation:
 <3> The first evaluation step is <<definitions.adoc#codeclimate,Code Climate>>. If you don't add any more options it will perform a basic static code analysis.
 <4> The second evaluation step is the actual unit testing. See <<definitions.adoc#junit,the definition docs>> for a full reference of available options.
 <5> We use the official https://hub.docker.com/_/python[Python 3.7] Docker image for running the tests. This makes Code FREAK so flexible and allows you to use the Docker Image of your favorite programming language.
-<6> The `project-path` is the working directory inside your container. All commands will be executed relative to this path.
-<7> The `results-path` is a path that will contain the jUnit XML files. Code FREAK will look for `.xml` files starting with `TEST-*`.
+<6> The `project-path` is the working directory inside your container. All commands will be executed relative to this path. This can be any directory.
+<7> The `results-path` is a path that will contain the jUnit XML files. Code FREAK will look for `.xml` files starting with `TEST-*`. The path is relative to the `project-path`!
 <8> Because the Docker container does not ship with `pytest` we have to install it first.
 <9> This is our actual `pytest` command that runs the test in our `main_test.py` file and generates a `TEST-report.xml` file for Code FREAK.
 
@@ -199,7 +199,7 @@ docker run -it --rm \
 ----
 
 == Creating and uploading an assignment
-If your assignment is ready to be uploaded to Code FREAK you have to create a `zip` or `tar` archive.
+If your assignment is ready to be uploaded to Code FREAK you have to create a `zip` or `tar` archive. The archive name itseld does not have to follow any naming scheme.
 
 The root directory of the archive has to contain the assignment `codefreak.yml` file! So do not create a archive that contains another `assignment-123` directory. Be warned that many archive programs do this by default. The safest way is selecting the `codefreak.yml` file and all `task-*` directory and use your context menu to create an archive of these file.
 

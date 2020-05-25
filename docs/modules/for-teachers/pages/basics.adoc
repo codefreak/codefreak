@@ -9,6 +9,15 @@ Code FREAK allows teachers to create assignments with automatic evaluation. The 
 
 All of these evaluation types are language-agnostic and can be configured to some extent. To read more about the different types of runners and how they can be configured please refer to the xref:for-teachers:evaluation-types.adoc[Evaluation Types] section.
 
+== Tasks and Assignments
+The most basic unit of work in Code FREAK is a *task*. Each task consists at least of a title. Everything else, like a description, boilerplate files or evaluation, is optional. Because teacher may re-use tasks periodically (semester, school-year), Code FREAK gives teacher the option to organize tasks in their personal *task pool*. The pool and its tasks are not shared with anyone else.
+
+Tasks are language-agnostic, meaning you do not have to configure a central programming language for you tasks. The evaluation-configuration and run-configuration for the IDE will tell Code FREAK how to handle students files.
+
+To make tasks available for students a teacher has to create an *assignment*. An assignment has a title and one or more tasks. The tasks can either be taken from the teacher's task-pool or are created on-demand by uploading files or UI. Currently, assignments are shared via link. There is no in-built classroom feature to group assignments and students. Share the link with your students by using you LMS or email, etc.
+
+TIP: Learn more about how to create an assignment with a single task in our xref:for-teachers:assignments.adoc[tutorial for teachers].
+
 == Running Evaluations
 Once configured for a task the evaluation can be run by students (and teachers) after they upload their results. Currently, we have no limits how often the evaluation can be run. This might change in the future. The evaluation is also run for all submissions after the deadline for an assignment has been reached.
 
