@@ -13,6 +13,13 @@ import {
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 
+const TEMPLATES: { [key in TaskTemplate]: string } = {
+  CSHARP: 'C#',
+  JAVA: 'Java',
+  JAVASCRIPT: 'JavaScript',
+  PYTHON: 'Python'
+}
+
 const CreateTaskPage: React.FC = () => {
   const [
     createTaskMutation,
@@ -66,26 +73,13 @@ const CreateTaskPage: React.FC = () => {
         style={{ marginBottom: 16 }}
       />
       <Card title="From Template" style={{ marginBottom: 16 }}>
-        <Card.Grid style={gridStyle}>
-          <Button type="primary" onClick={createTask(TaskTemplate.Java)}>
-            Java
-          </Button>
-        </Card.Grid>
-        <Card.Grid style={gridStyle}>
-          <Button type="primary" disabled>
-            Android
-          </Button>
-        </Card.Grid>
-        <Card.Grid style={gridStyle}>
-          <Button type="primary" disabled>
-            C++
-          </Button>
-        </Card.Grid>
-        <Card.Grid style={gridStyle}>
-          <Button type="primary" disabled>
-            JavaScript
-          </Button>
-        </Card.Grid>
+        {(Object.keys(TEMPLATES) as TaskTemplate[]).map(template => (
+          <Card.Grid style={gridStyle}>
+            <Button type="primary" onClick={createTask(template)}>
+              {TEMPLATES[template]}
+            </Button>
+          </Card.Grid>
+        ))}
       </Card>
       <Card title="Import" style={{ marginBottom: 16 }}>
         <FileImport
