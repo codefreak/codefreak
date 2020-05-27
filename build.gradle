@@ -72,8 +72,19 @@ dependencies {
   testImplementation 'com.tngtech.archunit:archunit-junit4:0.11.0'
 
   // workaround for https://github.com/spotify/docker-client/issues/1030
-  implementation 'org.glassfish.jersey.inject:jersey-hk2:2.26'
-  implementation 'org.glassfish.jersey.bundles.repackaged:jersey-guava:2.25.1'
+  implementation 'org.glassfish.jersey.inject:jersey-hk2:2.28'
+
+  // Docker Client doesn't work with jersey-common >=2.29 because of missing Base64 class
+  implementation('org.glassfish.jersey.core:jersey-common') {
+    version {
+      strictly '2.28'
+    }
+  }
+  implementation('org.glassfish.jersey.core:jersey-client') {
+    version {
+      strictly '2.28'
+    }
+  }
 
   // workaround for https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server/issues/1468
   implementation 'org.springframework.security.oauth:spring-security-oauth2:2.1.5.RELEASE'
