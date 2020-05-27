@@ -199,7 +199,7 @@ docker run -it --rm \
 ----
 
 == Creating and uploading an assignment
-If your assignment is ready to be uploaded to Code FREAK you have to create a `zip` or `tar` archive. The archive name itseld does not have to follow any naming scheme.
+If your assignment is ready to be uploaded to Code FREAK you have to create a `zip` or `tar` archive. The archive name itself does not have to follow any naming scheme.
 
 The root directory of the archive has to contain the assignment `codefreak.yml` file! So do not create a archive that contains another `assignment-123` directory. Be warned that many archive programs do this by default. The safest way is selecting the `codefreak.yml` file and all `task-*` directory and use your context menu to create an archive of these file.
 
