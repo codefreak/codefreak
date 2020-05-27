@@ -9,9 +9,18 @@ Code FREAK allows teachers to create assignments with automatic evaluation. The 
 
 All of these evaluation types are language-agnostic and can be configured to some extent. To read more about the different types of runners and how they can be configured please refer to the xref:for-teachers:evaluation-types.adoc[Evaluation Types] section.
 
-== Running Evaluations
-Once configured for a task the evaluation can be run by students (and teachers) after they upload their results. Currently, we have no limits how often the evaluation can be run. This might change in the future. The evaluation is also run for all submissions after the deadline for an assignment has been reached.
+== Tasks and Assignments
+The most basic unit of work in Code FREAK is a *task*. Each task has a title. Everything else--like a description, boilerplate files or evaluation--is optional. Tasks are created in the teacher's personal *task pool*. This makes it possible to re-use tasks, for example every semester/school year. The pool and its tasks are not shared with anyone else.
 
-Evaluations are always executed in separate **Docker Container**s for each student. This makes evaluation super flexible and adds some form of isolation on top. Students will never be able to see others submissions this way and cannot tamper the host's filesystem.
+Tasks are language-agnostic, meaning you do not have to configure a hard-wired programming language for a task. The evaluation configuration and IDE run configuration tell Code FREAK how to handle the files submitted by students.
+
+To make tasks available for students, the teacher has to create an *assignment*. An assignment has a title and one or more tasks. The tasks are added from the task pool. This creates an independent copy that can be modified without affecting the original task in the pool. Currently, assignments are shared via link. There is no built-in classroom feature to group assignments and students. Share the link with your students by using you LMS or email, etc.
+
+TIP: Learn step by step how to create a task and assignment in our xref:for-teachers:assignments.adoc[tutorial for teachers].
+
+== Running Evaluations
+Once configured for a task, the evaluation can be run by students (and teachers) after they upload their results. Currently, we have no limits on how often the evaluation can be run. This might change in the future. The evaluation is also run for all submissions after the deadline for an assignment has been reached.
+
+Evaluations are always executed in separate **Docker Container**s for each student. This makes evaluation super flexible and adds some form of isolation on top. Students will never be able to see others' submissions this way and cannot tamper the host's filesystem.
 
 If you have never worked with Docker we recommend that you read at least the basics so your understand the terms _Container_, _Image_ and _Registry_. The https://docs.docker.com/engine/docker-overview/[official Docker documentation] gives a nice overview on the Docker ecosystem.
