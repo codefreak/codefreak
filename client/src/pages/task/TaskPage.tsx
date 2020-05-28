@@ -159,7 +159,7 @@ const TaskPage: React.FC = () => {
 
   const teacherControls =
     editable && !differentUser ? (
-        <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
+      <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
     ) : null
 
   let buttons
