@@ -2,7 +2,7 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Icon, Tooltip } from 'antd'
 import { Switch as AntSwitch } from 'antd'
 import React, { createContext } from 'react'
-import { Route, Switch, useRouteMatch } from 'react-router-dom'
+import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -30,7 +30,6 @@ import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
 import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
-import EditEvaluationPage from '../evaluation/EditEvaluationPage'
 import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
@@ -46,7 +45,7 @@ const tab = (title: string, icon: string) => (
 )
 
 const TaskPage: React.FC = () => {
-  const { path } = useRouteMatch()
+  const { path, url } = useRouteMatch()
   const subPath = useSubPath()
   const isTeacher = useHasAuthority('ROLE_TEACHER')
   const userId = useQueryParam('user')
@@ -93,7 +92,7 @@ const TaskPage: React.FC = () => {
     { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
     {
       key: '/evaluation',
-      disabled: !answer && !editable,
+      disabled: !answer,
       tab: (
         <>
           {tab('Evaluation', 'dashboard')}
@@ -210,6 +209,9 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path}>
+          <Redirect to={`${url}/details`} />
+        </Route>
+        <Route path={`${path}/details`}>
           <TaskDetailsPage editable={editable} />
         </Route>
         <Route path={`${path}/answer`}>
@@ -221,8 +223,6 @@ const TaskPage: React.FC = () => {
               answerId={answer.id}
               editableTaskId={editable ? task.id : undefined}
             />
-          ) : editable ? (
-            <EditEvaluationPage taskId={task.id} />
           ) : (
             <NotFoundPage />
           )}
