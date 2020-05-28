@@ -74,7 +74,7 @@ const CreateTaskPage: React.FC = () => {
       />
       <Card title="From Template" style={{ marginBottom: 16 }}>
         {(Object.keys(TEMPLATES) as TaskTemplate[]).map(template => (
-          <Card.Grid style={gridStyle}>
+          <Card.Grid style={gridStyle} key={template}>
             <Button type="primary" onClick={createTask(template)}>
               {TEMPLATES[template]}
             </Button>
