@@ -68,9 +68,7 @@ class TaskController : BaseController() {
   fun getExportZip(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val task = taskService.findTask(taskId)
     Authorization().requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
-    val tar = taskService.getExportTar(task.id)
-    return download("${task.title}.zip") {
-      TarUtil.archiveToTar(ByteArrayInputStream(tar), it)
-    }
+    val zip = TarUtil.tarToZip(taskService.getExportTar(task.id))
+    return download("${task.title}.zip", ByteArrayInputStream(zip))
   }
 }
