@@ -86,8 +86,45 @@ const TaskPage: React.FC = () => {
     updateMutation({ variables: { input } })
   )
 
+  const setTestingMode = (enabled: boolean) => {
+    if (enabled) {
+      onCreateAnswer()
+    } else {
+      deleteAnswer({ variables: { id: answer!.id } }).then(() => {
+        subPath.set('')
+        result.refetch()
+      })
+    }
+  }
+
+  const testingModeSwitch =
+    editable && !differentUser
+      ? [
+          {
+            key: 'testing-mode',
+            tab: (
+              <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
+                Testing Mode{' '}
+                <Tooltip
+                  placement="right"
+                  title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
+                >
+                  <AntSwitch
+                    onChange={setTestingMode}
+                    style={{ marginLeft: 8 }}
+                    checked={answer !== null}
+                    loading={creatingAnswer || deletingAnswer}
+                  />
+                </Tooltip>
+              </span>
+            )
+          }
+        ]
+      : []
+
   const tabs = [
     { key: '', tab: tab('Task', 'file-text') },
+    ...testingModeSwitch,
     { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
     { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
     {
@@ -117,36 +154,7 @@ const TaskPage: React.FC = () => {
     }
   }
 
-  const setTestingMode = (enabled: boolean) => {
-    if (enabled) {
-      onCreateAnswer()
-    } else {
-      deleteAnswer({ variables: { id: answer!.id } }).then(() => {
-        subPath.set('')
-        result.refetch()
-      })
-    }
-  }
-
   const assignment = task.assignment
-
-  const testingModeSwitch =
-    editable && !differentUser ? (
-      <div style={{ display: 'inline-flex' }}>
-        Testing Mode{' '}
-        <Tooltip
-          placement="left"
-          title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
-        >
-          <AntSwitch
-            onChange={setTestingMode}
-            style={{ marginLeft: 8 }}
-            checked={answer !== null}
-            loading={creatingAnswer || deletingAnswer}
-          />
-        </Tooltip>
-      </div>
-    ) : null
 
   let buttons
   if (differentUser && assignment) {
@@ -163,7 +171,7 @@ const TaskPage: React.FC = () => {
     buttons = (
       <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
     )
-  } else if (!testingModeSwitch) {
+  } else if (!editable && !differentUser) {
     // start working on task by default
     buttons = (
       <Button
@@ -183,7 +191,9 @@ const TaskPage: React.FC = () => {
     : task.title
 
   const onTabChange = (activeKey: string) => {
-    subPath.set(activeKey, userId ? { user: userId } : undefined)
+    if (activeKey !== 'testing-mode') {
+      subPath.set(activeKey, userId ? { user: userId } : undefined)
+    }
   }
 
   return (
@@ -201,11 +211,7 @@ const TaskPage: React.FC = () => {
         tabList={tabs}
         tabActiveKey={subPath.get()}
         onTabChange={onTabChange}
-        extra={
-          <>
-            {testingModeSwitch} {buttons}
-          </>
-        }
+        extra={buttons}
       />
       <Switch>
         <Route exact path={path}>

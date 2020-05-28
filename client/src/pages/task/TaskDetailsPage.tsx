@@ -243,8 +243,6 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
       </TabPane>
     </Tabs>
   )
-
-  return <></>
 }
 
 export default TaskDetailsPage
