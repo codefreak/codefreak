@@ -10,7 +10,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import java.io.ByteArrayInputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import java.util.UUID
@@ -58,5 +60,23 @@ class AssignmentController : BaseController() {
     val assignment = assignmentService.findAssignment(assignmentId)
     Authorization().requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
     return assignment
+  }
+
+  @GetMapping("/{assignmentId}/export.tar", produces = ["application/tar"])
+  @ResponseBody
+  fun getExportTar(@PathVariable("assignmentId") assignmentId: UUID): ResponseEntity<StreamingResponseBody> {
+    val assignment = assignmentService.findAssignment(assignmentId)
+    Authorization().requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    val tar = assignmentService.getExportTar(assignment.id)
+    return download("${assignment.title}.tar", ByteArrayInputStream(tar))
+  }
+
+  @GetMapping("/{assignmentId}/export.zip", produces = ["application/zip"])
+  @ResponseBody
+  fun getExportZip(@PathVariable("assignmentId") assignmentId: UUID): ResponseEntity<StreamingResponseBody> {
+    val assignment = assignmentService.findAssignment(assignmentId)
+    Authorization().requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    val zip = TarUtil.tarToZip(assignmentService.getExportTar(assignment.id))
+    return download("${assignment.title}.zip", ByteArrayInputStream(zip))
   }
 }
