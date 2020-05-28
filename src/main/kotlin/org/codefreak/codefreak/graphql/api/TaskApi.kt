@@ -70,7 +70,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
 }
 
 enum class TaskTemplate {
-  JAVA
+  JAVA, PYTHON, CSHARP, JAVASCRIPT
 }
 
 class TaskInput(var id: UUID, var title: String) {
