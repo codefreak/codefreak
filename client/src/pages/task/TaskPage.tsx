@@ -218,14 +218,7 @@ const TaskPage: React.FC = () => {
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route path={`${path}/evaluation`}>
-          {answer ? (
-            <EvaluationPage
-              answerId={answer.id}
-              editableTaskId={editable ? task.id : undefined}
-            />
-          ) : (
-            <NotFoundPage />
-          )}
+          {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route path={`${path}/ide`}>
           {answer ? (
