@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
@@ -7,6 +9,8 @@ import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
 import liquibase.util.StreamUtil
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
@@ -99,4 +103,27 @@ class AssignmentService : BaseService() {
 
   @Transactional
   fun saveAssignment(assignment: Assignment) = assignmentRepository.save(assignment)
+
+  @Transactional
+  fun getExportTar(assignmentId: UUID): ByteArray {
+    val out = ByteArrayOutputStream()
+    val tar = TarUtil.PosixTarArchiveOutputStream(out)
+    val assignment = findAssignment(assignmentId)
+
+    assignment.tasks.forEach {
+      val taskTar = TarArchiveInputStream(ByteArrayInputStream(taskService.getExportTar(it)))
+      TarUtil.copyEntries(taskTar, tar, prefix = "task-${it.position}/")
+    }
+
+    val definition = AssignmentDefinition(
+        assignment.title,
+        assignment.tasks.map { "task-${it.position}" }
+    ).let { ObjectMapper(YAMLFactory()).writeValueAsBytes(it) }
+
+    tar.putArchiveEntry(TarArchiveEntry("codefreak.yml").also { it.size = definition.size.toLong() })
+    tar.write(definition)
+    tar.closeArchiveEntry()
+    tar.close()
+    return out.toByteArray()
+  }
 }

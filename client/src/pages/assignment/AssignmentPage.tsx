@@ -17,6 +17,7 @@ import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import moment, { Moment, unitOfTime } from 'moment'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
+import ArchiveDownload from '../../components/ArchiveDownload'
 import AssignmentStatusComponent from '../../components/AssignmentStatus'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
@@ -133,6 +134,9 @@ const AssignmentPage: React.FC = () => {
         onTabChange={subPath.set}
         extra={
           <Authorized condition={assignment.editable}>
+            <ArchiveDownload url={assignment.exportUrl}>
+              Export Assignment
+            </ArchiveDownload>
             <AddTasksButton assignment={assignment} />
           </Authorized>
         }

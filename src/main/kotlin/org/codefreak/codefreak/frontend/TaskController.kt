@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.frontend
 
+import org.codefreak.codefreak.auth.Authority
+import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileService
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
+import java.io.ByteArrayInputStream
 import java.util.UUID
 
 @Controller
@@ -49,5 +52,23 @@ class TaskController : BaseController() {
         out -> TarUtil.tarToZip(it, out)
       }
     }
+  }
+
+  @GetMapping("/{taskId}/export.tar", produces = ["application/tar"])
+  @ResponseBody
+  fun getExportTar(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
+    val task = taskService.findTask(taskId)
+    Authorization().requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    val tar = taskService.getExportTar(task.id)
+    return download("${task.title}.tar", ByteArrayInputStream(tar))
+  }
+
+  @GetMapping("/{taskId}/export.zip", produces = ["application/zip"])
+  @ResponseBody
+  fun getExportZip(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
+    val task = taskService.findTask(taskId)
+    Authorization().requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    val zip = TarUtil.tarToZip(taskService.getExportTar(task.id))
+    return download("${task.title}.zip", ByteArrayInputStream(zip))
   }
 }

@@ -38,6 +38,7 @@ query GetTask($id: ID!, $answerUserId: ID) {
     id
     title
     editable
+    exportUrl
     assignment {
       id
       title
