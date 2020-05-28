@@ -78,7 +78,8 @@ object TarUtil {
     zip.finish()
   }
 
-  private fun isRootFilename(path: String) = normalizeEntryName(path).isBlank()
+  fun isRoot(path: String) = normalizeEntryName(path).isBlank()
+  fun isRoot(entry: TarArchiveEntry) = isRoot(entry.name)
 
   private fun createTarRootDirectory(outputStream: TarArchiveOutputStream) {
     outputStream.putArchiveEntry(TarArchiveEntry("./"))
@@ -99,7 +100,7 @@ object TarUtil {
     createTarRootDirectory(tar)
     generateSequence { archive.nextEntry }
         // remove all dirs/files that are candidates for root b/c we created a root dir already
-        .filter { !isRootFilename(it.name) }
+        .filter { !isRoot(it.name) }
         .forEach { archiveEntry ->
           val tarEntry = TarArchiveEntry(normalizeEntryName(archiveEntry.name))
           if (archiveEntry.isDirectory) {

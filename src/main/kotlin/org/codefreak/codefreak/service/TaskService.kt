@@ -139,11 +139,15 @@ TaskService : BaseService() {
 
   fun getTaskPool(userId: UUID) = taskRepository.findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(userId)
 
+  @Transactional
+  fun getExportTar(taskId: UUID) = getExportTar(findTask(taskId))
+
+  @Transactional
   fun getExportTar(task: Task): ByteArray {
     val out = ByteArrayOutputStream()
     val tar = TarUtil.PosixTarArchiveOutputStream(out)
     fileService.readCollectionTar(task.id).use { files ->
-      TarUtil.copyEntries(TarArchiveInputStream(files), tar, filter = { it.name != "codefreak.yml" })
+      TarUtil.copyEntries(TarArchiveInputStream(files), tar, filter = { !TarUtil.isRoot(it) && it.name != "codefreak.yml" })
     }
 
     val definition = TaskDefinition(

@@ -4,6 +4,7 @@ import { Switch as AntSwitch } from 'antd'
 import React, { createContext } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
+import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
@@ -131,22 +132,25 @@ const TaskPage: React.FC = () => {
 
   const assignment = task.assignment
 
-  const testingModeSwitch =
+  const teacherControls =
     editable && !differentUser ? (
-      <div style={{ display: 'inline-flex' }}>
-        Testing Mode{' '}
-        <Tooltip
-          placement="left"
-          title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
-        >
-          <AntSwitch
-            onChange={setTestingMode}
-            style={{ marginLeft: 8 }}
-            checked={answer !== null}
-            loading={creatingAnswer || deletingAnswer}
-          />
-        </Tooltip>
-      </div>
+      <>
+        <div style={{ display: 'inline-flex' }}>
+          Testing Mode{' '}
+          <Tooltip
+            placement="left"
+            title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
+          >
+            <AntSwitch
+              onChange={setTestingMode}
+              style={{ marginLeft: 8 }}
+              checked={answer !== null}
+              loading={creatingAnswer || deletingAnswer}
+            />
+          </Tooltip>
+        </div>
+        <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
+      </>
     ) : null
 
   let buttons
@@ -164,7 +168,7 @@ const TaskPage: React.FC = () => {
     buttons = (
       <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
     )
-  } else if (!testingModeSwitch) {
+  } else if (!teacherControls) {
     // start working on task by default
     buttons = (
       <Button
@@ -204,7 +208,7 @@ const TaskPage: React.FC = () => {
         onTabChange={onTabChange}
         extra={
           <>
-            {testingModeSwitch} {buttons}
+            {teacherControls} {buttons}
           </>
         }
       />
