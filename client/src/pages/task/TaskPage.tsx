@@ -123,7 +123,7 @@ const TaskPage: React.FC = () => {
       : []
 
   const tabs = [
-    { key: '', tab: tab('Task', 'file-text') },
+    { key: '/details', tab: tab('Task', 'file-text') },
     ...testingModeSwitch,
     { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
     { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
