@@ -4,6 +4,7 @@ import { Switch as AntSwitch } from 'antd'
 import React, { createContext } from 'react'
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
+import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
@@ -156,6 +157,11 @@ const TaskPage: React.FC = () => {
 
   const assignment = task.assignment
 
+  const teacherControls =
+    editable && !differentUser ? (
+        <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
+    ) : null
+
   let buttons
   if (differentUser && assignment) {
     // Show "back to submissions" button for teachers
@@ -171,7 +177,7 @@ const TaskPage: React.FC = () => {
     buttons = (
       <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
     )
-  } else if (!editable && !differentUser) {
+  } else if (!teacherControls) {
     // start working on task by default
     buttons = (
       <Button
@@ -211,7 +217,11 @@ const TaskPage: React.FC = () => {
         tabList={tabs}
         tabActiveKey={subPath.get()}
         onTabChange={onTabChange}
-        extra={buttons}
+        extra={
+          <>
+            {teacherControls} {buttons}
+          </>
+        }
       />
       <Switch>
         <Route exact path={path}>

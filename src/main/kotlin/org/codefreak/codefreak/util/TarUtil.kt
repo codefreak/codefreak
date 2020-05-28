@@ -15,6 +15,8 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.utils.IOUtils
 import org.springframework.util.StreamUtils
 import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -78,7 +80,14 @@ object TarUtil {
     zip.finish()
   }
 
-  private fun isRootFilename(path: String) = normalizeEntryName(path).isBlank()
+  fun tarToZip(tar: ByteArray): ByteArray {
+    val out = ByteArrayOutputStream()
+    tarToZip(ByteArrayInputStream(tar), out)
+    return out.toByteArray()
+  }
+
+  private fun isRoot(path: String) = normalizeEntryName(path).isBlank()
+  fun isRoot(entry: TarArchiveEntry) = isRoot(entry.name)
 
   private fun createTarRootDirectory(outputStream: TarArchiveOutputStream) {
     outputStream.putArchiveEntry(TarArchiveEntry("./"))
@@ -99,7 +108,7 @@ object TarUtil {
     createTarRootDirectory(tar)
     generateSequence { archive.nextEntry }
         // remove all dirs/files that are candidates for root b/c we created a root dir already
-        .filter { !isRootFilename(it.name) }
+        .filter { !isRoot(it.name) }
         .forEach { archiveEntry ->
           val tarEntry = TarArchiveEntry(normalizeEntryName(archiveEntry.name))
           if (archiveEntry.isDirectory) {

@@ -38,6 +38,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val inPool = entity.assignment == null
   val editable by lazy { entity.isEditable(authorization) }
+  val exportUrl by lazy { FrontendUtil.getUriBuilder().path("/api/tasks/$id/export").build().toUriString() }
   val hiddenFiles by lazy {
     authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
     entity.hiddenFiles.toTypedArray()
