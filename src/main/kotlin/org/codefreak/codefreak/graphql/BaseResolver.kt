@@ -6,6 +6,7 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.service.SessionService
 import graphql.schema.DataFetchingEnvironment
 import graphql.servlet.context.GraphQLWebSocketContext
+import org.codefreak.codefreak.auth.NotAuthenticatedException
 import org.springframework.beans.factory.annotation.Autowired
 
 open class BaseResolver {
@@ -32,7 +33,8 @@ open class BaseResolver {
           ?.map { it.trim() }
           ?.firstOrNull { it.startsWith(SESSION_COOKIE) }
           ?.drop(SESSION_COOKIE.length)
-      val session = sessionId?.let { serviceAccess.getService(SessionService::class).getSession(it) } ?: Authorization.deny()
+      val session = sessionId?.let { serviceAccess.getService(SessionService::class).getSession(it) }
+          ?: throw NotAuthenticatedException()
       Authorization(session.principal as User)
     } else {
       Authorization()
