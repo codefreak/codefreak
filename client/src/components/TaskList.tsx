@@ -63,7 +63,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
     children: (
       <>
         {task.body ? (
-          <CropContainer maxHeight={120}>
+          <CropContainer maxHeight={100}>
             <ReactMarkdown source={task.body} />
           </CropContainer>
         ) : null}

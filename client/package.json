@@ -35,7 +35,10 @@
     "apollo-upload-client": "^12.1.0",
     "array-move": "^2.2.1",
     "bootstrap-less": "^3.3.8",
+    "copy-webpack-plugin": "^5.1.1",
     "craco-antd": "^1.14.1",
+    "craco-raw-loader": "^1.0.1",
+    "git-revision-webpack-plugin": "^3.0.6",
     "graphql": "^14.5.8",
     "highlight.js": "^9.18.1",
     "json-to-pretty-yaml": "^1.2.2",
@@ -54,14 +57,12 @@
     "react-syntax-highlighter": "^12.2.1",
     "short-uuid": "^3.1.1",
     "subscriptions-transport-ws": "^0.9.16",
+    "ts-debounce": "^2.0.1",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-react": "^4.1.0",
     "typescript": "3.6.4",
-    "use-persisted-state": "^0.3.0",
-    "copy-webpack-plugin": "^5.1.1",
-    "craco-raw-loader": "^1.0.1",
-    "git-revision-webpack-plugin": "^3.0.6"
+    "use-persisted-state": "^0.3.0"
   },
   "scripts": {
     "start": "craco start",
