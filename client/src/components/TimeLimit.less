@@ -1,0 +1,27 @@
+@import '~antd/es/style/themes/default';
+
+.time-limit {
+  &.running {
+    position: relative;
+    padding-left: 17px;
+
+    &::before,
+    &::after {
+      position: absolute;
+      left: 7px;
+      top: 50%;
+      margin-top: -3px;
+      content: '';
+      display: inline-block;
+      background-color: @orange-6;
+      width: 6px;
+      height: 6px;
+      border-radius: 3px;
+      margin-bottom: 1px;
+      margin-right: 0.25em;
+    }
+    &::after {
+      animation: antStatusProcessing 1.2s infinite ease-in-out;
+    }
+  }
+}

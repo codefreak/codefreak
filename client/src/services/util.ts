@@ -1,5 +1,3 @@
-import { Moment } from 'moment'
-
 export const noop = () => {
   /* do nothing */
 }
@@ -22,10 +20,6 @@ export function makeUpdater<T, R>(
 export type Updater<T, R = any> = <P extends keyof T>(
   propName: P
 ) => (propValue: T[P]) => Promise<R>
-
-export function momentToDate<T>(fn: (date: Date) => T) {
-  return (moment: Moment) => fn(moment.toDate())
-}
 
 export function extractTargetValue<V, T>(fn: (value: V) => T) {
   return (e: { target: { value: V } }) => fn(e.target.value)

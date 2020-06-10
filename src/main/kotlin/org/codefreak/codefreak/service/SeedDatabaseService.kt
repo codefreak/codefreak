@@ -66,7 +66,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
     }
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
-      taskService.createFromTar(it.toByteArray(), assignment2, teacher, 0)
+      taskService.createFromTar(it.toByteArray(), assignment2, teacher, 0).also { task ->
+        // set a 1h 1min time limit
+        task.timeLimit = 3600 + 60
+        taskService.saveTask(task)
+      }
     }
 
     // task pool

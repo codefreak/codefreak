@@ -1,6 +1,7 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Icon, Tooltip } from 'antd'
 import { Switch as AntSwitch } from 'antd'
+import moment from 'moment'
 import React, { createContext } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
@@ -12,6 +13,7 @@ import EvaluationIndicator from '../../components/EvaluationIndicator'
 import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
+import TimeLimit from '../../components/TimeLimit'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
@@ -201,6 +203,16 @@ const TaskPage: React.FC = () => {
             title={title}
             onChange={updater('title')}
           />
+        }
+        subTitle={
+          task.timeLimit ? (
+            <TimeLimit
+              timeLimit={task.timeLimit}
+              startedAt={
+                task.answer ? moment(task.answer.createdAt) : undefined
+              }
+            />
+          ) : null
         }
         breadcrumb={createBreadcrumb(createRoutes.forTask(task))}
         tabList={tabs}

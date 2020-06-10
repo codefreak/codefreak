@@ -36,10 +36,10 @@ function CardList<T>(props: React.PropsWithChildren<CardListProps<T>>) {
   const [items, setItems] = useState(props.items)
   useEffect(() => setItems(props.items), [props.items])
   const sortable = props.sortable && items.length > 1
-  const renderCard = (item: T) => {
+  const renderCard = (item: T, index: number) => {
     const { children: cardChildren, title, ...cardProps } = renderItem(item)
     return (
-      <li className="card-list-item">
+      <li className="card-list-item" key={index}>
         <Card
           title={
             sortable ? (
@@ -81,7 +81,11 @@ function CardList<T>(props: React.PropsWithChildren<CardListProps<T>>) {
       onSortStart={onSortStart}
     >
       {items.map((item, index) => (
-        <SortableElement key={index} index={index} value={renderCard(item)} />
+        <SortableElement
+          key={index}
+          index={index}
+          value={renderCard(item, index)}
+        />
       ))}
     </SortableContainer>
   )

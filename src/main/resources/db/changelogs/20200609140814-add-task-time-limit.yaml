@@ -1,0 +1,34 @@
+databaseChangeLog:
+- changeSet:
+    id: 1591704522162-2
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: created_at
+            type: timestamp
+            defaultValueComputed: CURRENT_TIMESTAMP
+        tableName: answer
+- changeSet:
+    id: 1591704522162-3
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: time_limit
+            type: bigint
+        tableName: task
+- changeSet:
+    id: 1591704522162-4
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: updated_at
+            type: timestamp
+            defaultValueComputed: CURRENT_TIMESTAMP
+        tableName: answer
+

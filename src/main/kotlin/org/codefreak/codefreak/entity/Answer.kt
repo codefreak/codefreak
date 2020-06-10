@@ -1,5 +1,8 @@
 package org.codefreak.codefreak.entity
 
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
+import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -18,6 +21,7 @@ class Answer(
    */
   @ManyToOne
   var task: Task
+
 ) : BaseEntity() {
 
   init {
@@ -28,4 +32,10 @@ class Answer(
 
   @OneToMany(mappedBy = "answer", cascade = [CascadeType.REMOVE])
   var evaluations = mutableSetOf<Evaluation>()
+
+  @CreationTimestamp
+  var createdAt: Instant = Instant.now()
+
+  @UpdateTimestamp
+  var updatedAt: Instant = Instant.now()
 }
