@@ -52,11 +52,11 @@ class Answer(
       }
     }
 
-  val timeLimitReached get() = deadline?.let { Instant.now().isAfter(it) } ?: false
+  val deadlineReached get() = deadline?.let { Instant.now().isAfter(it) } ?: false
 
   val isEditable get() = when {
     task.assignment?.status?.equals(AssignmentStatus.OPEN) == false -> false
-    timeLimitReached -> false
+    deadlineReached -> false
     // no assignment or no time limit
     else -> true
   }
