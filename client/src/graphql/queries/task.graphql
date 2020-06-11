@@ -17,6 +17,7 @@ query GetTaskList($assignmentId: ID!) {
       answer {
         id
         createdAt
+        deadline
       }
     }
   }
@@ -50,6 +51,7 @@ query GetTask($id: ID!, $answerUserId: ID) {
       id
       ideRunning
       createdAt
+      deadline
       submission {
         user {
           ...publicUserFields

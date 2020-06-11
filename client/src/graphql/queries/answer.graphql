@@ -2,6 +2,7 @@ query GetAnswer($id: ID!) {
   answer(id: $id) {
     id
     sourceUrl
+    deadline
   }
 }
 

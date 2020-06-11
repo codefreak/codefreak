@@ -49,7 +49,11 @@ const renderTask = (props: RenderProps) => (task: Task) => {
         {!!task.timeLimit ? (
           <TimeLimit
             timeLimit={task.timeLimit}
-            startedAt={task.answer ? moment(task.answer.createdAt) : undefined}
+            deadline={
+              task.answer && task.answer.deadline
+                ? moment(task.answer.deadline)
+                : undefined
+            }
           />
         ) : null}
       </>

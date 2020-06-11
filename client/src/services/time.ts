@@ -25,10 +25,25 @@ export const toRelTime = (
 }
 
 export const secondsToRelTime = (sec: number): string => {
+  const { hours, minutes, seconds } = secondsToComponents(sec)
+  return toRelTime(hours, minutes, seconds)
+}
+
+export interface TimeComponents {
+  hours: number
+  minutes: number
+  seconds: number
+}
+
+export const secondsToComponents = (sec: number): TimeComponents => {
   const hours = Math.floor(sec / 3600)
   const minutes = Math.floor((sec - hours * 3600) / 60)
   const seconds = sec - hours * 3600 - minutes * 60
-  return toRelTime(hours, minutes, seconds)
+  return { hours, minutes, seconds }
+}
+
+export const componentsToSeconds = (components: TimeComponents): number => {
+  return components.hours * 3600 + components.minutes * 60 + components.seconds
 }
 
 export function momentToDate<T>(fn: (date: Date) => T) {

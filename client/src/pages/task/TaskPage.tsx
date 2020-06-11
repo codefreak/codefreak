@@ -5,6 +5,7 @@ import moment from 'moment'
 import React, { createContext } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
+import AnswerBlocker from '../../components/AnswerBlocker'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -13,7 +14,7 @@ import EvaluationIndicator from '../../components/EvaluationIndicator'
 import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
-import TimeLimit from '../../components/TimeLimit'
+import TimeLimit, { EditableTimeLimit } from '../../components/TimeLimit'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
@@ -83,7 +84,8 @@ const TaskPage: React.FC = () => {
 
   const taskInput: TaskInput = {
     id: task.id,
-    title: task.title
+    title: task.title,
+    timeLimit: task.timeLimit
   }
 
   const updater = makeUpdater(taskInput, input =>
@@ -193,6 +195,29 @@ const TaskPage: React.FC = () => {
     subPath.set(activeKey, userId ? { user: userId } : undefined)
   }
 
+  const renderTimeLimit = () => {
+    if (!editable || task.answer) {
+      return task.timeLimit ? (
+        <TimeLimit
+          timeLimit={task.timeLimit}
+          deadline={
+            task.answer && task.answer.deadline
+              ? moment(task.answer.deadline)
+              : undefined
+          }
+        />
+      ) : null
+    }
+
+    return (
+      <EditableTimeLimit
+        taskId={task.id}
+        timeLimit={task.timeLimit}
+        onTimeLimitChange={updater('timeLimit')}
+      />
+    )
+  }
+
   return (
     <DifferentUserContext.Provider value={differentUser}>
       <SetTitle>{task.title}</SetTitle>
@@ -204,16 +229,7 @@ const TaskPage: React.FC = () => {
             onChange={updater('title')}
           />
         }
-        subTitle={
-          task.timeLimit ? (
-            <TimeLimit
-              timeLimit={task.timeLimit}
-              startedAt={
-                task.answer ? moment(task.answer.createdAt) : undefined
-              }
-            />
-          ) : null
-        }
+        subTitle={renderTimeLimit()}
         breadcrumb={createBreadcrumb(createRoutes.forTask(task))}
         tabList={tabs}
         tabActiveKey={subPath.get()}
@@ -246,7 +262,11 @@ const TaskPage: React.FC = () => {
         <Route path={`${path}/ide`}>
           {answer ? (
             <div className="no-padding">
-              <IdeIframe type="answer" id={answer.id} />
+              <AnswerBlocker
+                deadline={answer.deadline ? moment(answer.deadline) : undefined}
+              >
+                <IdeIframe type="answer" id={answer.id} />
+              </AnswerBlocker>
             </div>
           ) : (
             <NotFoundPage />

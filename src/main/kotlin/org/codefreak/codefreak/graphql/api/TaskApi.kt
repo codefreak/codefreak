@@ -75,8 +75,8 @@ enum class TaskTemplate {
   JAVA, PYTHON, CSHARP, JAVASCRIPT
 }
 
-class TaskInput(var id: UUID, var title: String) {
-  constructor() : this(UUID.randomUUID(), "")
+class TaskInput(var id: UUID, var title: String, var timeLimit: Long?) {
+  constructor() : this(UUID.randomUUID(), "", null)
 }
 
 class TaskDetailsInput(var id: UUID, var body: String?, var hiddenFiles: Array<String>, var protectedFiles: Array<String>) {
@@ -145,6 +145,7 @@ class TaskMutation : BaseResolver(), Mutation {
     val task = serviceAccess.getService(TaskService::class).findTask(input.id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     task.title = input.title
+    task.timeLimit = input.timeLimit
     serviceAccess.getService(TaskService::class).saveTask(task)
     true
   }
