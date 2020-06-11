@@ -22,7 +22,6 @@ import org.springframework.core.io.ClassPathResource
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 import com.nhaarman.mockitokotlin2.eq
-import org.codefreak.codefreak.entity.AssignmentStatus
 import org.hamcrest.Matchers.greaterThan
 import org.junit.Ignore
 import org.mockito.Mockito
@@ -42,6 +41,7 @@ internal class ContainerServiceTest : SpringTest() {
   val answer: Answer by lazy {
     val mock = mock(Answer::class.java, Mockito.RETURNS_DEEP_STUBS)
     `when`(mock.id).thenReturn(UUID(0, 0))
+    `when`(mock.isEditable).thenReturn(true)
     mock
   }
 
@@ -91,7 +91,6 @@ internal class ContainerServiceTest : SpringTest() {
     `when`(fileService.readCollectionTar(eq(answer.id))).thenReturn(files.inputStream())
     `when`(fileService.collectionExists(eq(answer.id))).thenReturn(true)
     `when`(fileService.writeCollectionTar(eq(answer.id))).thenReturn(out)
-    `when`(answer.task.assignment?.status).thenReturn(AssignmentStatus.OPEN)
     containerService.startIdeContainer(answer)
     containerService.saveAnswerFiles(answer)
     //verify(fileService, times(1)).writeCollectionTar(answer.id)
