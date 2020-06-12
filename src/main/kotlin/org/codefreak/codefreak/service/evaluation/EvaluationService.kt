@@ -13,6 +13,8 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
+import org.codefreak.codefreak.service.AnswerDeadlineReachedEvent
+import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.ContainerService
@@ -47,6 +49,9 @@ class EvaluationService : BaseService() {
   private lateinit var taskRepository: TaskRepository
 
   @Autowired
+  private lateinit var answerService: AnswerService
+
+  @Autowired
   private lateinit var evaluationQueue: EvaluationQueue
 
   @Autowired
@@ -78,6 +83,7 @@ class EvaluationService : BaseService() {
     }
   }
 
+  @Synchronized
   fun startEvaluation(answer: Answer, forceSaveFiles: Boolean = false) {
     containerService.saveAnswerFiles(answer, forceSaveFiles)
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
@@ -155,7 +161,14 @@ class EvaluationService : BaseService() {
 
   @EventListener
   @Transactional
-  fun onApplicationEvent(event: AssignmentStatusChangedEvent) {
+  fun onAnswerDeadlineReached(event: AnswerDeadlineReachedEvent) {
+    log.info("Automatically trigger evaluation for answer ${event.answerId}")
+    startEvaluation(answerService.findAnswer(event.answerId), forceSaveFiles = true)
+  }
+
+  @EventListener
+  @Transactional
+  fun onAssignmentClosed(event: AssignmentStatusChangedEvent) {
     if (event.status != AssignmentStatus.CLOSED) {
       return
     }

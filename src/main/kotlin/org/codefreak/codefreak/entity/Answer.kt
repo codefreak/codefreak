@@ -1,14 +1,17 @@
 package org.codefreak.codefreak.entity
 
+import org.codefreak.codefreak.service.AnswerDeadlinePublisher
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 
 @Entity
+@EntityListeners(AnswerDeadlinePublisher::class)
 class Answer(
   /**
    * The submission of which this task is part of

@@ -11,3 +11,5 @@ class EvaluationFinishedEvent(val evaluation: Evaluation) : ApplicationEvent(eva
 class PendingEvaluationUpdatedEvent(val answerId: UUID, val status: PendingEvaluationStatus) : ApplicationEvent(answerId)
 
 class AssignmentStatusChangedEvent(val assignmentId: UUID, val status: AssignmentStatus) : ApplicationEvent(assignmentId)
+
+class AnswerDeadlineReachedEvent(val answerId: UUID) : ApplicationEvent(answerId)
