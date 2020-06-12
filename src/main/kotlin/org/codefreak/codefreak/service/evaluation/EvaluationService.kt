@@ -163,7 +163,11 @@ class EvaluationService : BaseService() {
   @Transactional
   fun onAnswerDeadlineReached(event: AnswerDeadlineReachedEvent) {
     log.info("Automatically trigger evaluation for answer ${event.answerId}")
-    startEvaluation(answerService.findAnswer(event.answerId), forceSaveFiles = true)
+    try {
+      startEvaluation(answerService.findAnswer(event.answerId), forceSaveFiles = true)
+    } catch (e: IllegalStateException) {
+      // evaluation has already been triggered
+    }
   }
 
   @EventListener
