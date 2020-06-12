@@ -12,7 +12,7 @@ import { messageService } from '../services/message'
 import CardList from './CardList'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
-import TimeLimit from './TimeLimit'
+import TimeLimitTag from './time-limit/TimeLimitTag'
 
 const { confirm } = Modal
 
@@ -47,7 +47,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
           />
         ) : null}{' '}
         {!!task.timeLimit ? (
-          <TimeLimit
+          <TimeLimitTag
             timeLimit={task.timeLimit}
             deadline={
               task.answer && task.answer.deadline

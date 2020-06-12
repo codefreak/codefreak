@@ -1,27 +1,31 @@
 import { Moment } from 'moment'
 import React from 'react'
-import ReactCountdown, { CountdownRenderProps } from 'react-countdown'
-import { toRelTime } from '../services/time'
+import ReactCountdown, {
+  CountdownProps as ReactCountdownProps,
+  CountdownRenderProps
+} from 'react-countdown'
+import { componentsToRelTime } from '../services/time'
 
-const countdownRenderer = (props: CountdownRenderProps): React.ReactNode => {
+const defaultCountdownRenderer = (
+  props: CountdownRenderProps
+): React.ReactNode => {
   if (props.completed) {
-    return toRelTime(0, 0, 0)
+    return componentsToRelTime({ hours: 0, minutes: 0, seconds: 0 })
   }
 
-  const { days, hours, minutes, seconds } = props
-  return toRelTime(days * 24 + hours, minutes, seconds, true)
+  return componentsToRelTime(props, true)
 }
 
 interface CountdownProps {
   date: Moment
-  onComplete?: () => void
+  onComplete?: ReactCountdownProps['onComplete']
 }
 
 const Countdown: React.FC<CountdownProps> = ({ date, onComplete }) => {
   return (
     <ReactCountdown
       date={date.toDate()}
-      renderer={countdownRenderer}
+      renderer={defaultCountdownRenderer}
       onComplete={onComplete}
     />
   )

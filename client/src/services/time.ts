@@ -1,12 +1,24 @@
 import { Moment } from 'moment'
 import { zeroPad } from 'react-countdown'
 
-export const toRelTime = (
-  hours: number,
-  minutes: number,
-  seconds: number,
+export interface TimeComponents {
+  hours: number
+  minutes: number
+  seconds: number
+}
+
+/**
+ * Creates a time string like 2h 12m 20s from time components
+ * Omits every component that is zero.
+ *
+ * @param components
+ * @param forceSeconds
+ */
+export const componentsToRelTime = (
+  components: TimeComponents,
   forceSeconds: boolean = false
 ): string => {
+  const { hours, minutes, seconds } = components
   if (hours + minutes + seconds <= 0) {
     return '0s'
   }
@@ -19,21 +31,13 @@ export const toRelTime = (
     str += `${minutes}m `
   }
   if (forceSeconds || seconds > 0) {
-    str += ` ${zeroPad(seconds, 2)}s`
+    str += `${zeroPad(seconds, 2)}s`
   }
   return str.trimEnd()
 }
 
-export const secondsToRelTime = (sec: number): string => {
-  const { hours, minutes, seconds } = secondsToComponents(sec)
-  return toRelTime(hours, minutes, seconds)
-}
-
-export interface TimeComponents {
-  hours: number
-  minutes: number
-  seconds: number
-}
+export const secondsToRelTime = (sec: number) =>
+  componentsToRelTime(secondsToComponents(sec))
 
 export const secondsToComponents = (sec: number): TimeComponents => {
   const hours = Math.floor(sec / 3600)

@@ -14,7 +14,9 @@ import EvaluationIndicator from '../../components/EvaluationIndicator'
 import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
-import TimeLimit, { EditableTimeLimit } from '../../components/TimeLimit'
+import TimeLimitTag, {
+  EditableTimeLimitTag
+} from '../../components/time-limit/TimeLimitTag'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
@@ -198,7 +200,7 @@ const TaskPage: React.FC = () => {
   const renderTimeLimit = () => {
     if (!editable || task.answer) {
       return task.timeLimit ? (
-        <TimeLimit
+        <TimeLimitTag
           timeLimit={task.timeLimit}
           deadline={
             task.answer && task.answer.deadline
@@ -210,10 +212,10 @@ const TaskPage: React.FC = () => {
     }
 
     return (
-      <EditableTimeLimit
+      <EditableTimeLimitTag
         taskId={task.id}
         timeLimit={task.timeLimit}
-        onTimeLimitChange={updater('timeLimit')}
+        onChange={updater('timeLimit')}
       />
     )
   }
