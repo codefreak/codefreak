@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service
 
+import com.nhaarman.mockitokotlin2.eq
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
 import org.codefreak.codefreak.SpringTest
@@ -9,23 +10,19 @@ import org.codefreak.codefreak.util.TarUtil
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.greaterThan
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ClassPathResource
 import java.io.ByteArrayOutputStream
-import java.util.UUID
-import com.nhaarman.mockitokotlin2.eq
-import org.hamcrest.Matchers.greaterThan
-import org.junit.Ignore
-import org.mockito.Mockito
-import org.springframework.boot.test.mock.mockito.MockBean
 
 internal class ContainerServiceTest : SpringTest() {
 
@@ -38,16 +35,15 @@ internal class ContainerServiceTest : SpringTest() {
   @Autowired
   lateinit var containerService: ContainerService
 
-  val answer: Answer by lazy {
-    val mock = mock(Answer::class.java, Mockito.RETURNS_DEEP_STUBS)
-    `when`(mock.id).thenReturn(UUID(0, 0))
-    `when`(mock.isEditable).thenReturn(true)
-    mock
-  }
-
   private val files = ByteArrayOutputStream().use {
     TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file, it); it.toByteArray()
   }
+
+  @Before
+  fun setupEntities() = super.seedDatabase()
+
+  @After
+  fun removeEntities() = super.clearDatabase()
 
   @Before
   @After

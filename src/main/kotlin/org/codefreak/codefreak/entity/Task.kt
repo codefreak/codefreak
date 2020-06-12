@@ -40,13 +40,13 @@ class Task(
    * The task body/description of what to do
    */
   @Type( type = "text" )
-  var body: String?,
+  var body: String? = null,
 
   /**
    * A weight >=0, <=100 how the task is weighted
    * The total weight of all tasks should not be > 100
    */
-  var weight: Int?,
+  var weight: Int? = null,
 
   /**
    * Time limit for this task in seconds.
