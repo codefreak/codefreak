@@ -52,7 +52,7 @@
     "react-markdown": "^4.2.2",
     "react-mde": "^8.2.0",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.2.0",
+    "react-scripts": "3.4.1",
     "react-sortable-hoc": "^1.11.0",
     "react-syntax-highlighter": "^12.2.1",
     "short-uuid": "^3.1.1",
@@ -61,8 +61,9 @@
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-react": "^4.1.0",
-    "typescript": "3.6.4",
-    "use-persisted-state": "^0.3.0"
+    "typescript": "3.9.5",
+    "use-persisted-state": "^0.3.0",
+    "webpack": "4.42.0"
   },
   "scripts": {
     "start": "craco start",
