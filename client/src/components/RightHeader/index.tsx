@@ -18,9 +18,7 @@ const Index: React.FC<RightHeaderProps> = ({ logout }) => {
         <Icon type="logout" /> Logout
       </Menu.Item>
     </Menu>
-  ) : (
-    undefined
-  )
+  ) : undefined
 
   return (
     <div style={{ float: 'right', paddingRight: 14 }}>
