@@ -1,0 +1,46 @@
+.crop-container {
+  position: relative;
+  overflow: hidden;
+
+  .crop-container-body {
+    transition: max-height 200ms ease-in-out;
+  }
+
+  &.has-overflow {
+    padding-bottom: 40px;
+    &::after {
+      content: '';
+      position: absolute;
+      z-index: 1;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(
+        to top,
+        rgb(255, 255, 255) 0,
+        rgb(255, 255, 255) 20px,
+        rgba(255, 255, 255, 0.75) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transition: background-position 100ms;
+      pointer-events: none;
+    }
+
+    &.expanded::after {
+      display: none;
+    }
+
+    .show-toggle {
+      position: absolute;
+      z-index: 2;
+      padding-top: 20px;
+      padding-bottom: 10px;
+      line-height: 20px;
+      height: 50px;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+    }
+  }
+}
