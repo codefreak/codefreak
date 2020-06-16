@@ -37,22 +37,14 @@ const resetWebsocket = () => {
   websocket.connect()
 }
 
-/** If not authenticated or session expired, reload page to show login dialog */
-const reloadIfNotAuthenticated = (error: any) => {
-  if (
-    error.networkError &&
-    error.networkError.extensions &&
-    error.networkError.extensions.errorCode === '401'
-  ) {
-    window.location.reload()
-  }
-}
-
 const apolloClient = new ApolloClient({
   link: ApolloLink.from([
     onError(error => {
       if (!error.operation.getContext().disableGlobalErrorHandling) {
-        reloadIfNotAuthenticated(error)
+        // If not authenticated or session expired, reload page to show login dialog
+        if ((error as any).networkError?.extensions?.errorCode === '401') {
+          window.location.reload()
+        }
         messageService.error(extractErrorMessage(error))
       }
     }),
