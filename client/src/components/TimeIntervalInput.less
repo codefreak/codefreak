@@ -1,0 +1,22 @@
+.time-interval-input {
+  display: inline-block;
+
+  .ant-input-number {
+    width: 70px;
+
+    &:not(:first-child) {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-left-width: 0;
+    }
+
+    &:not(:last-child) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .ant-input-number-handler-wrap {
+      opacity: 1;
+    }
+  }
+}

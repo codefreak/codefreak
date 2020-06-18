@@ -46,6 +46,7 @@
     "prettier": "^2.0.5",
     "react": "^16.11.0",
     "react-asciidoc": "^0.1.0",
+    "react-countdown": "^2.2.1",
     "react-dom": "^16.11.0",
     "react-helmet": "^5.2.1",
     "react-jsonschema-form": "^1.8.1",

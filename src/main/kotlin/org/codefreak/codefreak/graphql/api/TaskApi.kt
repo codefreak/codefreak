@@ -35,6 +35,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val position = entity.position.toInt()
   val body = entity.body
   val createdAt = entity.createdAt
+  val timeLimit = entity.timeLimit
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val inPool = entity.assignment == null
   val editable by lazy { entity.isEditable(authorization) }
@@ -74,8 +75,8 @@ enum class TaskTemplate {
   JAVA, PYTHON, CSHARP, JAVASCRIPT
 }
 
-class TaskInput(var id: UUID, var title: String) {
-  constructor() : this(UUID.randomUUID(), "")
+class TaskInput(var id: UUID, var title: String, var timeLimit: Long?) {
+  constructor() : this(UUID.randomUUID(), "", null)
 }
 
 class TaskDetailsInput(var id: UUID, var body: String?, var hiddenFiles: Array<String>, var protectedFiles: Array<String>) {
@@ -144,6 +145,7 @@ class TaskMutation : BaseResolver(), Mutation {
     val task = serviceAccess.getService(TaskService::class).findTask(input.id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     task.title = input.title
+    task.timeLimit = input.timeLimit
     serviceAccess.getService(TaskService::class).saveTask(task)
     true
   }

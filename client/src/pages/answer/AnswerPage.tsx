@@ -1,5 +1,7 @@
 import { Alert, Card } from 'antd'
+import moment from 'moment'
 import React, { useContext, useEffect } from 'react'
+import AnswerBlocker from '../../components/AnswerBlocker'
 import AnswerFileBrowser from '../../components/AnswerFileBrowser'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -14,8 +16,8 @@ import { messageService } from '../../services/message'
 import { displayName } from '../../services/user'
 import { DifferentUserContext } from '../task/TaskPage'
 
-const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
-  answer: { id }
+const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id' | 'deadline'> }> = ({
+  answer: { id, deadline }
 }) => {
   const [
     uploadSource,
@@ -39,12 +41,14 @@ const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
 
   return (
     <Card title="Upload Source Code">
-      <FileImport
-        uploading={uploading}
-        onUpload={onUpload}
-        onImport={onImport}
-        importing={importing}
-      />
+      <AnswerBlocker deadline={deadline ? moment(deadline) : undefined}>
+        <FileImport
+          uploading={uploading}
+          onUpload={onUpload}
+          onImport={onImport}
+          importing={importing}
+        />
+      </AnswerBlocker>
     </Card>
   )
 }

@@ -1,5 +1,6 @@
 import { Button, Modal, Tooltip } from 'antd'
 import { CardProps } from 'antd/lib/card'
+import moment from 'moment'
 import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
@@ -12,6 +13,7 @@ import CardList from './CardList'
 import CropContainer from './CropContainer'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
+import TimeLimitTag from './time-limit/TimeLimitTag'
 
 const { confirm } = Modal
 
@@ -43,6 +45,16 @@ const renderTask = (props: RenderProps) => (task: Task) => {
           <EvaluationIndicator
             style={{ marginLeft: 8 }}
             answerId={task.answer.id}
+          />
+        ) : null}{' '}
+        {!!task.timeLimit ? (
+          <TimeLimitTag
+            timeLimit={task.timeLimit}
+            deadline={
+              task.answer && task.answer.deadline
+                ? moment(task.answer.deadline)
+                : undefined
+            }
           />
         ) : null}
       </>

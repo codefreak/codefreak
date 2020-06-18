@@ -54,7 +54,7 @@ class AnswerService : BaseService() {
   fun deleteAnswer(answerId: UUID) = answerRepository.deleteById(answerId)
 
   fun setFiles(answer: Answer): OutputStream {
-    answer.task.assignment?.requireOpen()
+    require(answer.isEditable) { "The answer is not editable anymore" }
     return fileService.writeCollectionTar(answer.id).afterClose { containerService.answerFilesUpdated(answer.id) }
   }
 

@@ -16,8 +16,8 @@ import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ScheduledFuture
 import javax.persistence.PostPersist
-import javax.persistence.PostRemove
 import javax.persistence.PostUpdate
+import javax.persistence.PreRemove
 
 @Component
 class AssignmentStatusChangePublisher {
@@ -54,8 +54,8 @@ class AssignmentStatusChangePublisher {
     }
   }
 
-  @PostRemove
-  fun onAssignmentRemoved(assignment: Assignment) = cancelAssignmentEvents(assignment)
+  @PreRemove
+  fun onAssignmentRemove(assignment: Assignment) = cancelAssignmentEvents(assignment)
 
   private fun cancelAssignmentEvents(assignment: Assignment) {
     cancelAssignmentStatusEvents(assignment, AssignmentStatus.OPEN)
