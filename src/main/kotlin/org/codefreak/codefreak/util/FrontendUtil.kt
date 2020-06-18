@@ -1,8 +1,8 @@
 package org.codefreak.codefreak.util
 
+import org.codefreak.codefreak.auth.NotAuthenticatedException
 import org.codefreak.codefreak.entity.User
 import org.slf4j.LoggerFactory
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -19,7 +19,7 @@ object FrontendUtil {
       return principal
     }
     log.warn("Expected instance of User but received $principal instead.")
-    throw AccessDeniedException("Not authenticated")
+    throw NotAuthenticatedException()
   }
 
   fun getUriBuilder() = ServletUriComponentsBuilder.fromCurrentRequestUri().replacePath(null)

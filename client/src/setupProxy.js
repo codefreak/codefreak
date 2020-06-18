@@ -6,7 +6,7 @@ const proxyHost = process.env.NODE_PROXY_HOST || 'localhost'
 const proxyPort = process.env.NODE_PROXY_PORT || '8080'
 const proxyUrl = `${proxyHost}:${proxyPort}`
 
-module.exports = function(app) {
+module.exports = function (app) {
   ;['/api', '/graphql', '/lti/login'].forEach(path => {
     app.use(proxy(`http://${proxyUrl}${path}`))
   })

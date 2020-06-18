@@ -215,9 +215,7 @@ const StatusSteps: React.FC<{
                     Deactivate
                   </Button>
                 </>
-              ) : (
-                undefined
-              )
+              ) : undefined
             }
           />
           <Step
@@ -237,9 +235,7 @@ const StatusSteps: React.FC<{
                     Activate
                   </Button>
                 </>
-              ) : (
-                undefined
-              )
+              ) : undefined
             }
           />
           <Step
@@ -258,9 +254,7 @@ const StatusSteps: React.FC<{
                     type={status === 'ACTIVE' ? 'primary' : undefined}
                   />
                 </>
-              ) : (
-                undefined
-              )
+              ) : undefined
             }
           />
           <Step
@@ -280,9 +274,7 @@ const StatusSteps: React.FC<{
                     Close Now
                   </Button>
                 </>
-              ) : (
-                undefined
-              )
+              ) : undefined
             }
           />
         </Steps>
