@@ -2,7 +2,7 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Icon, Tooltip } from 'antd'
 import { Switch as AntSwitch } from 'antd'
 import React, { createContext } from 'react'
-import { Route, Switch, useRouteMatch } from 'react-router-dom'
+import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -31,7 +31,6 @@ import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
 import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
-import EditEvaluationPage from '../evaluation/EditEvaluationPage'
 import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
@@ -47,7 +46,7 @@ const tab = (title: string, icon: string) => (
 )
 
 const TaskPage: React.FC = () => {
-  const { path } = useRouteMatch()
+  const { path, url } = useRouteMatch()
   const subPath = useSubPath()
   const isTeacher = useHasAuthority('ROLE_TEACHER')
   const userId = useQueryParam('user')
@@ -88,13 +87,50 @@ const TaskPage: React.FC = () => {
     updateMutation({ variables: { input } })
   )
 
+  const setTestingMode = (enabled: boolean) => {
+    if (enabled) {
+      onCreateAnswer()
+    } else {
+      deleteAnswer({ variables: { id: answer!.id } }).then(() => {
+        subPath.set('')
+        result.refetch()
+      })
+    }
+  }
+
+  const testingModeSwitch =
+    editable && !differentUser
+      ? [
+          {
+            key: 'testing-mode',
+            tab: (
+              <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
+                Testing Mode{' '}
+                <Tooltip
+                  placement="right"
+                  title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
+                >
+                  <AntSwitch
+                    onChange={setTestingMode}
+                    style={{ marginLeft: 8 }}
+                    checked={answer !== null}
+                    loading={creatingAnswer || deletingAnswer}
+                  />
+                </Tooltip>
+              </span>
+            )
+          }
+        ]
+      : []
+
   const tabs = [
-    { key: '', tab: tab('Task', 'file-text') },
+    { key: '/details', tab: tab('Task', 'file-text') },
+    ...testingModeSwitch,
     { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
     { key: '/ide', tab: tab('Online IDE', 'cloud'), disabled: !answer },
     {
       key: '/evaluation',
-      disabled: !answer && !editable,
+      disabled: !answer,
       tab: (
         <>
           {tab('Evaluation', 'dashboard')}
@@ -119,38 +155,11 @@ const TaskPage: React.FC = () => {
     }
   }
 
-  const setTestingMode = (enabled: boolean) => {
-    if (enabled) {
-      onCreateAnswer()
-    } else {
-      deleteAnswer({ variables: { id: answer!.id } }).then(() => {
-        subPath.set('')
-        result.refetch()
-      })
-    }
-  }
-
   const assignment = task.assignment
 
   const teacherControls =
     editable && !differentUser ? (
-      <>
-        <div style={{ display: 'inline-flex' }}>
-          Testing Mode{' '}
-          <Tooltip
-            placement="left"
-            title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
-          >
-            <AntSwitch
-              onChange={setTestingMode}
-              style={{ marginLeft: 8 }}
-              checked={answer !== null}
-              loading={creatingAnswer || deletingAnswer}
-            />
-          </Tooltip>
-        </div>
-        <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
-      </>
+      <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
     ) : null
 
   let buttons
@@ -188,7 +197,9 @@ const TaskPage: React.FC = () => {
     : task.title
 
   const onTabChange = (activeKey: string) => {
-    subPath.set(activeKey, userId ? { user: userId } : undefined)
+    if (activeKey !== 'testing-mode') {
+      subPath.set(activeKey, userId ? { user: userId } : undefined)
+    }
   }
 
   return (
@@ -214,22 +225,16 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path}>
+          <Redirect to={`${url}/details`} />
+        </Route>
+        <Route path={`${path}/details`}>
           <TaskDetailsPage editable={editable} />
         </Route>
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route path={`${path}/evaluation`}>
-          {answer ? (
-            <EvaluationPage
-              answerId={answer.id}
-              editableTaskId={editable ? task.id : undefined}
-            />
-          ) : editable ? (
-            <EditEvaluationPage taskId={task.id} />
-          ) : (
-            <NotFoundPage />
-          )}
+          {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route path={`${path}/ide`}>
           {answer ? (

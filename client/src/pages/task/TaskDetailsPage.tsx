@@ -1,11 +1,26 @@
-import { Alert, Button, Card, Col, Empty, Icon, List, Row, Tooltip } from 'antd'
+import {
+  Alert,
+  Button,
+  Card,
+  Checkbox,
+  Col,
+  Empty,
+  Icon,
+  List,
+  Row,
+  Tabs,
+  Tooltip
+} from 'antd'
+import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { JSONSchema6 } from 'json-schema'
-import React from 'react'
+import React, { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
 import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import useIdParam from '../../hooks/useIdParam'
+import useSubPath from '../../hooks/useSubPath'
 import {
   TaskDetailsInput,
   useGetTaskDetailsQuery,
@@ -14,6 +29,9 @@ import {
 import { messageService } from '../../services/message'
 import { shorten } from '../../services/short-id'
 import { makeUpdater } from '../../services/util'
+import EditEvaluationPage from '../evaluation/EditEvaluationPage'
+
+const { TabPane } = Tabs
 
 const renderFilePattern = (pattern: string) => (
   <List.Item>
@@ -48,6 +66,7 @@ const filePatternHelp = (
 )
 
 const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
+  const subPath = useSubPath()
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
   })
@@ -58,6 +77,10 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
       messageService.success('Task updated')
     }
   })
+
+  const [sureToEditFiles, setSureToEditFiles] = useState(false)
+  const onSureToEditFilesChange = (e: CheckboxChangeEvent) =>
+    setSureToEditFiles(e.target.checked)
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -76,26 +99,75 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
     updateMutation({ variables: { input } })
   )
 
+  const details = (
+    <Card title="Instructions">
+      {task.body ? (
+        <ReactMarkdown source={task.body} />
+      ) : (
+        <Empty description="This task has no extra instructions. Take a look at the provided files." />
+      )}
+    </Card>
+  )
+
+  if (!editable) {
+    return details
+  }
+
+  const assignmentOpen =
+    task.assignment !== null && task.assignment.status === 'OPEN'
+
   return (
-    <>
-      <Card title="Instructions">
-        {task.body || editable ? (
-          <EditableMarkdown
-            content={task.body}
-            editable={editable}
-            onSave={updater('body')}
-          />
-        ) : (
-          <Empty description="This task has no extra instructions. Take a look at the provided files." />
-        )}
-      </Card>
-      {editable ? (
+    <Tabs
+      defaultActiveKey={subPath.get()}
+      onChange={subPath.set}
+      style={{ marginTop: -16 }}
+    >
+      <TabPane tab="Details" key="">
+        <Alert
+          type="info"
+          message={
+            <>
+              This is what your students will see when they open the task. Check
+              out the "edit" tabs that are only visible to you.
+              <br />
+              <Icon type="info-circle" theme="twoTone" /> To try out what your
+              students see when they start working on this task, enable{' '}
+              <i>testing mode</i>.
+            </>
+          }
+          style={{ marginBottom: 16 }}
+        />
+        {details}
+      </TabPane>
+      <TabPane tab="Edit Details" key="/edit">
+        <Card title="Instructions">
+          {task.body || editable ? (
+            <EditableMarkdown
+              content={task.body}
+              editable={editable}
+              onSave={updater('body')}
+            />
+          ) : (
+            <Empty description="This task has no extra instructions. Take a look at the provided files." />
+          )}
+        </Card>
         <Card title="Files" style={{ marginTop: 16 }}>
-          {task.assignment && task.assignment.status === 'OPEN' ? (
+          {assignmentOpen ? (
             <Alert
               style={{ marginBottom: 16 }}
               message="Warning"
-              description="The assignment is already open. If you make changes to files, they are not applied to already created answers. Every change that is saved will apply to newly created answers. This can happen automatically, for example when the IDE is idle."
+              description={
+                <>
+                  The assignment is already open. If you make changes to files,
+                  they do not affect students that already started to work on
+                  this task. Only students that start the task after the change
+                  will get the updated files. Hidden and protected files are
+                  updated for everyone but only in new evaluations. Past
+                  evaluations are not affected.{' '}
+                  <Checkbox onChange={onSureToEditFilesChange} /> I understand
+                  this and want to do it anyway
+                </>
+              }
               type="warning"
               showIcon
             />
@@ -105,8 +177,12 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
               to={'/ide/task/' + shorten(task.id)}
               target={'task-ide-' + task.id}
             >
-              <Button type="primary" icon="edit">
-                Open in IDE
+              <Button
+                type="primary"
+                icon="edit"
+                disabled={assignmentOpen && !sureToEditFiles}
+              >
+                Open task files in IDE
               </Button>
             </Link>
           </p>
@@ -185,8 +261,11 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             </Col>
           </Row>
         </Card>
-      ) : null}
-    </>
+      </TabPane>
+      <TabPane tab="Edit Evaluation" key="/edit-evaluation">
+        <EditEvaluationPage taskId={task.id} />
+      </TabPane>
+    </Tabs>
   )
 }
 

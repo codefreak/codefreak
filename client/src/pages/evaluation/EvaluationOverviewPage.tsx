@@ -12,15 +12,13 @@ import {
 } from '../../services/codefreak-api'
 import { shorten } from '../../services/short-id'
 import { DifferentUserContext } from '../task/TaskPage'
-import EditEvaluationPage from './EditEvaluationPage'
 
 const { Step } = Steps
 const { TabPane } = Tabs
 
 const EvaluationPage: React.FC<{
   answerId: string
-  editableTaskId?: string
-}> = ({ answerId, editableTaskId }) => {
+}> = ({ answerId }) => {
   const subPath = useSubPath()
   const result = useGetEvaluationOverviewQuery({ variables: { answerId } })
   const [step, setStep] = useState(0)
@@ -135,11 +133,6 @@ const EvaluationPage: React.FC<{
         >
           <EvaluationHistory answerId={answer.id} />
         </TabPane>
-        {editableTaskId ? (
-          <TabPane tab="Edit Evaluation" key="/edit">
-            <EditEvaluationPage taskId={editableTaskId} />
-          </TabPane>
-        ) : null}
       </Tabs>
     </>
   )
