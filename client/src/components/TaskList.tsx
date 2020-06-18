@@ -10,6 +10,7 @@ import {
 } from '../services/codefreak-api'
 import { messageService } from '../services/message'
 import CardList from './CardList'
+import CropContainer from './CropContainer'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
 import TimeLimitTag from './time-limit/TimeLimitTag'
@@ -73,7 +74,11 @@ const renderTask = (props: RenderProps) => (task: Task) => {
     ) : null,
     children: (
       <>
-        {task.body ? <ReactMarkdown source={task.body} /> : null}
+        {task.body ? (
+          <CropContainer maxHeight={100}>
+            <ReactMarkdown source={task.body} />
+          </CropContainer>
+        ) : null}
         <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
           <Button icon="folder-open" type="primary">
             Details
@@ -106,9 +111,9 @@ const TaskList: React.FC<TaskListProps> = props => {
   }
 
   const handlePositionChange = (task: Task, newPosition: number) =>
-    setTaskPosition({ variables: { id: task.id, position: newPosition } }).then(
-      () => messageService.success('Order updated')
-    )
+    setTaskPosition({
+      variables: { id: task.id, position: newPosition }
+    }).then(() => messageService.success('Order updated'))
 
   return (
     <CardList

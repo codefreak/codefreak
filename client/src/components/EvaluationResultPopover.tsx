@@ -8,6 +8,7 @@ import {
 import { displayName } from '../services/user'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 
+import { ellipsis } from '../services/strings'
 import './EvaluationResultPopover.less'
 
 const EvaluationResultPopover: React.FC<{
@@ -22,12 +23,13 @@ const EvaluationResultPopover: React.FC<{
   const popoverContent = (
     <List itemLayout="horizontal" size="small">
       {steps.map(step => {
+        const summary = step.summary ? ellipsis(step.summary, 80) : undefined
         return (
           <List.Item key={step.id}>
             <List.Item.Meta
               avatar={<EvaluationStepResultIcon stepResult={step.result} />}
               title={step.definition.title}
-              description={step.summary}
+              description={summary}
             />
           </List.Item>
         )

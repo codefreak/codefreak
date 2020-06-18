@@ -17,11 +17,7 @@ interface JsonSchemaEditButtonProps<T> {
 function JsonSchemaEditButton<T>(
   props: React.PropsWithChildren<JsonSchemaEditButtonProps<T>>
 ) {
-  const [idPrefix] = useState(
-    Math.random()
-      .toString(36)
-      .substring(2)
-  )
+  const [idPrefix] = useState(Math.random().toString(36).substring(2))
   const formRef = createRef<Form<any>>()
   const [modalVisible, setModalVisible] = useState(false)
   const [submitting, setSubmitting] = useState(false)

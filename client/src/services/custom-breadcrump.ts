@@ -13,7 +13,7 @@ const forAssignment = (assignment: EntityWithTitle) => [
 ]
 
 interface Task extends EntityWithTitle {
-  assignment?: EntityWithTitle
+  assignment?: EntityWithTitle | null
 }
 
 const forTask = (task: Task) => {
