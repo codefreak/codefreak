@@ -1,19 +1,15 @@
 package org.codefreak.codefreak.graphql
 
 import com.expediagroup.graphql.annotations.GraphQLIgnore
-import org.codefreak.codefreak.auth.Authorization
-import org.codefreak.codefreak.entity.User
-import org.codefreak.codefreak.service.SessionService
 import graphql.schema.DataFetchingEnvironment
 import graphql.servlet.context.GraphQLWebSocketContext
+import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.NotAuthenticatedException
+import org.codefreak.codefreak.entity.User
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.Authentication
 
 open class BaseResolver {
-
-  companion object {
-    private const val SESSION_COOKIE = "JSESSIONID="
-  }
 
   @Autowired
   @GraphQLIgnore
@@ -28,14 +24,15 @@ open class BaseResolver {
   fun <T> context(env: DataFetchingEnvironment, block: ResolverContext.() -> T): T {
     val ctx = env.getContext<Any>()
     val authorization = if (ctx is GraphQLWebSocketContext) {
-      val sessionId = ctx.handshakeRequest.headers["cookie"]
-          ?.flatMap { it.split(";") }
-          ?.map { it.trim() }
-          ?.firstOrNull { it.startsWith(SESSION_COOKIE) }
-          ?.drop(SESSION_COOKIE.length)
-      val session = sessionId?.let { serviceAccess.getService(SessionService::class).getSession(it) }
-          ?: throw NotAuthenticatedException()
-      Authorization(session.principal as User)
+      val userPrincipal = ctx.session.userPrincipal
+      if (userPrincipal !is Authentication) {
+        throw NotAuthenticatedException()
+      }
+      val user = userPrincipal.principal
+      if (user !is User) {
+        throw NotAuthenticatedException()
+      }
+      Authorization(user)
     } else {
       Authorization()
     }
