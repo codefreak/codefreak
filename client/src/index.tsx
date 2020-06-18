@@ -41,6 +41,10 @@ const apolloClient = new ApolloClient({
   link: ApolloLink.from([
     onError(error => {
       if (!error.operation.getContext().disableGlobalErrorHandling) {
+        // If not authenticated or session expired, reload page to show login dialog
+        if ((error as any).networkError?.extensions?.errorCode === '401') {
+          window.location.reload()
+        }
         messageService.error(extractErrorMessage(error))
       }
     }),

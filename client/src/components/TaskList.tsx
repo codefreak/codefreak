@@ -99,9 +99,9 @@ const TaskList: React.FC<TaskListProps> = props => {
   }
 
   const handlePositionChange = (task: Task, newPosition: number) =>
-    setTaskPosition({ variables: { id: task.id, position: newPosition } }).then(
-      () => messageService.success('Order updated')
-    )
+    setTaskPosition({
+      variables: { id: task.id, position: newPosition }
+    }).then(() => messageService.success('Order updated'))
 
   return (
     <CardList

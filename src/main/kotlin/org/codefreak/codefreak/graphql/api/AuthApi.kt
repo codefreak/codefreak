@@ -7,12 +7,12 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
-import org.codefreak.codefreak.service.SessionService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
 import org.springframework.stereotype.Component
 
@@ -35,7 +35,7 @@ class AuthMutation : BaseResolver(), Mutation {
     session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, securityContext)
     return context {
       // we have to register the session ourselves because we do the login manually
-      serviceAccess.getService(SessionService::class).registerNewSession(session.id, authorization.currentUser)
+      serviceAccess.getService(SessionRegistry::class).registerNewSession(session.id, authorization.currentUser)
       AuthenticationDto(session.id, authorization.currentUser, this)
     }
   }
