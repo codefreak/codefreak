@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import {
   componentsToSeconds,
   secondsToComponents,
-  TimeComponents,
+  TimeComponents
 } from '../../services/time'
 import TimeIntervalInput from '../TimeIntervalInput'
 
@@ -19,7 +19,7 @@ const TimeLimitForm: React.FC<TimeLimitFormProps> = ({
   onChangeValue,
   onChangeStatus,
   enabled,
-  timeLimit,
+  timeLimit
 }) => {
   const onCheckboxChange = (state: CheckboxChangeEvent) => {
     if (onChangeStatus) {
@@ -36,10 +36,10 @@ const TimeLimitForm: React.FC<TimeLimitFormProps> = ({
   return (
     <Form
       labelCol={{
-        xs: { span: 8 },
+        xs: { span: 8 }
       }}
       wrapperCol={{
-        xs: { span: 16 },
+        xs: { span: 16 }
       }}
     >
       <Form.Item label="Enable time limit">
