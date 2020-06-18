@@ -2,6 +2,7 @@ import {
   Alert,
   Button,
   Card,
+  Checkbox,
   Col,
   Empty,
   Icon,
@@ -10,8 +11,9 @@ import {
   Tabs,
   Tooltip
 } from 'antd'
+import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { JSONSchema6 } from 'json-schema'
-import React from 'react'
+import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -76,6 +78,10 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
     }
   })
 
+  const [sureToEditFiles, setSureToEditFiles] = useState(false)
+  const onSureToEditFilesChange = (e: CheckboxChangeEvent) =>
+    setSureToEditFiles(e.target.checked)
+
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
@@ -106,6 +112,9 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   if (!editable) {
     return details
   }
+
+  const assignmentOpen =
+    task.assignment !== null && task.assignment.status === 'OPEN'
 
   return (
     <Tabs
@@ -143,11 +152,22 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
           )}
         </Card>
         <Card title="Files" style={{ marginTop: 16 }}>
-          {task.assignment && task.assignment.status === 'OPEN' ? (
+          {assignmentOpen ? (
             <Alert
               style={{ marginBottom: 16 }}
               message="Warning"
-              description="The assignment is already open. If you make changes to files, they are not applied to already created answers. Every change that is saved will apply to newly created answers. This can happen automatically, for example when the IDE is idle."
+              description={
+                <>
+                  The assignment is already open. If you make changes to files,
+                  they do not affect students that already started to work on
+                  this task. Only students that start the task after the change
+                  will get the updated files. Hidden and protected files are
+                  updated for everyone but only in new evaluations. Past
+                  evaluations are not affected.{' '}
+                  <Checkbox onChange={onSureToEditFilesChange} /> I understand
+                  this and want to do it anyway
+                </>
+              }
               type="warning"
               showIcon
             />
@@ -157,8 +177,12 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
               to={'/ide/task/' + shorten(task.id)}
               target={'task-ide-' + task.id}
             >
-              <Button type="primary" icon="edit">
-                Open in IDE
+              <Button
+                type="primary"
+                icon="edit"
+                disabled={assignmentOpen && !sureToEditFiles}
+              >
+                Open task files in IDE
               </Button>
             </Link>
           </p>
