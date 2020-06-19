@@ -12,17 +12,10 @@ import {
 } from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-
-const TEMPLATES: {
-  [key in TaskTemplate]: { title: string; description: string }
-} = {
-  CSHARP: { title: 'C#', description: '.NET, NUnit, Code Climate' },
-  JAVA: { title: 'Java', description: 'JUnit, Code Climate' },
-  JAVASCRIPT: { title: 'JavaScript', description: 'Jest, Code Climate' },
-  PYTHON: { title: 'Python', description: 'pytest, Code Climate' }
-}
+import { getAllTemplates } from '../../services/templates'
 
 const CreateTaskPage: React.FC = () => {
+  const taskTemplates = getAllTemplates()
   const [
     createTaskMutation,
     { loading: creatingTask }
@@ -70,31 +63,42 @@ const CreateTaskPage: React.FC = () => {
         message="Tasks can only be created in the task pool. You can later add them to any assignment."
         style={{ marginBottom: 16 }}
       />
-      <Row gutter={16} style={{ marginBottom: 8 }}>
-        {(Object.keys(TEMPLATES) as TaskTemplate[]).map(template => (
-          <Col span={4} key={template}>
-            <Card
-              cover={
-                <img
-                  alt="Logo"
-                  src={`${
-                    process.env.PUBLIC_URL
-                  }/templates/${template.toLowerCase()}.png`}
-                />
-              }
-              actions={[
-                <Button key="1" type="primary" onClick={createTask(template)}>
-                  Use this template
-                </Button>
-              ]}
+      <Row gutter={16}>
+        {(Object.keys(taskTemplates) as TaskTemplate[]).map(templateKey => {
+          const template = taskTemplates[templateKey]
+          return (
+            <Col
+              xs={24}
+              sm={12}
+              md={6}
+              xl={4}
+              style={{ marginBottom: 16 }}
+              key={templateKey}
             >
-              <Card.Meta
-                title={TEMPLATES[template].title}
-                description={TEMPLATES[template].description}
-              />
-            </Card>
-          </Col>
-        ))}
+              <Card
+                cover={
+                  <div style={{ padding: '2em 2em 0' }}>
+                    <template.logo className="language-logo" />
+                  </div>
+                }
+                actions={[
+                  <Button
+                    key="1"
+                    type="primary"
+                    onClick={createTask(templateKey)}
+                  >
+                    Use this template
+                  </Button>
+                ]}
+              >
+                <Card.Meta
+                  title={template.title}
+                  description={template.description}
+                />
+              </Card>
+            </Col>
+          )
+        })}
       </Row>
       <div style={{ marginBottom: 16 }}>
         <i>All trademarks are the property of their respective owners.</i>
