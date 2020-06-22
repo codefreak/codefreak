@@ -1,5 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Alert, Button, Card } from 'antd'
+import { Alert, Button, Card, Col, Row } from 'antd'
 import React from 'react'
 import { useHistory } from 'react-router'
 import FileImport from '../../components/FileImport'
@@ -12,15 +12,10 @@ import {
 } from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-
-const TEMPLATES: { [key in TaskTemplate]: string } = {
-  CSHARP: 'C#',
-  JAVA: 'Java',
-  JAVASCRIPT: 'JavaScript',
-  PYTHON: 'Python'
-}
+import { getAllTemplates } from '../../services/templates'
 
 const CreateTaskPage: React.FC = () => {
+  const taskTemplates = getAllTemplates()
   const [
     createTaskMutation,
     { loading: creatingTask }
@@ -61,10 +56,6 @@ const CreateTaskPage: React.FC = () => {
       onTaskCreated(result.data.createTask)
     }
   }
-  const gridStyle: React.CSSProperties = {
-    width: '25%',
-    textAlign: 'center'
-  }
   return (
     <>
       <PageHeaderWrapper />
@@ -72,15 +63,46 @@ const CreateTaskPage: React.FC = () => {
         message="Tasks can only be created in the task pool. You can later add them to any assignment."
         style={{ marginBottom: 16 }}
       />
-      <Card title="From Template" style={{ marginBottom: 16 }}>
-        {(Object.keys(TEMPLATES) as TaskTemplate[]).map(template => (
-          <Card.Grid style={gridStyle} key={template}>
-            <Button type="primary" onClick={createTask(template)}>
-              {TEMPLATES[template]}
-            </Button>
-          </Card.Grid>
-        ))}
-      </Card>
+      <Row gutter={16}>
+        {(Object.keys(taskTemplates) as TaskTemplate[]).map(templateKey => {
+          const template = taskTemplates[templateKey]
+          return (
+            <Col
+              xs={24}
+              sm={12}
+              md={6}
+              xl={4}
+              style={{ marginBottom: 16 }}
+              key={templateKey}
+            >
+              <Card
+                cover={
+                  <div style={{ padding: '2em 2em 0' }}>
+                    <template.logo className="language-logo" />
+                  </div>
+                }
+                actions={[
+                  <Button
+                    key="1"
+                    type="primary"
+                    onClick={createTask(templateKey)}
+                  >
+                    Use this template
+                  </Button>
+                ]}
+              >
+                <Card.Meta
+                  title={template.title}
+                  description={template.description}
+                />
+              </Card>
+            </Col>
+          )
+        })}
+      </Row>
+      <div style={{ marginBottom: 16 }}>
+        <i>All trademarks are the property of their respective owners.</i>
+      </div>
       <Card title="Import" style={{ marginBottom: 16 }}>
         <FileImport
           uploading={uploading}
