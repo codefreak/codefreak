@@ -16,3 +16,12 @@ export const ellipsis = (
   }
   return str.substr(0, max) + ellipsisChar
 }
+
+/**
+ * Check if haystack contains needle case insensitive
+ *
+ * @param needle
+ * @param haystack
+ */
+export const matches = (needle: string, haystack: string) =>
+  haystack.toLocaleLowerCase().indexOf(needle.toLocaleLowerCase()) !== -1

@@ -10,6 +10,7 @@ import {
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { getEntityPath } from '../services/entity-path'
 import { shorten } from '../services/short-id'
+import { matches } from '../services/strings'
 import ArchiveDownload from './ArchiveDownload'
 import EvaluationResultPopover from './EvaluationResultPopover'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
@@ -21,6 +22,7 @@ type Assignment = NonNullable<
 type Submission = Assignment['submissions'][number]
 type Answer = Submission['answers'][number]
 type Task = Assignment['tasks'][number]
+type User = Submission['user']
 
 const { Column } = Table
 
@@ -32,10 +34,19 @@ const alphabeticSorter = (
   return valA.localeCompare(valB)
 }
 
-const filterSubmissions = (submissions: Submission[], criteria: string) => {
-  const needle = criteria.toLocaleLowerCase()
+const SEARCHABLE_USER_COLUMNS: Array<keyof User> = [
+  'username',
+  'firstName',
+  'lastName'
+]
+
+const searchSubmissions = (submissions: Submission[], criteria: string) => {
   return submissions.filter(submission => {
-    return submission.user.username.toLocaleLowerCase().indexOf(needle) !== -1
+    return (
+      SEARCHABLE_USER_COLUMNS.find(column =>
+        matches(criteria, submission.user[column] || '')
+      ) !== undefined
+    )
   })
 }
 
@@ -43,14 +54,14 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
   assignment
 }) => {
   const allSubmissions = assignment.submissions
-  const [filterCriteria, setFilterCriteria] = useState<string>()
+  const [searchCriteria, setSearchCriteria] = useState<string>()
 
-  const submissions = filterCriteria
-    ? filterSubmissions(allSubmissions, filterCriteria)
+  const submissions = searchCriteria?.trim().length
+    ? searchSubmissions(allSubmissions, searchCriteria.trim())
     : allSubmissions
 
   const submissionSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setFilterCriteria(e.target.value)
+    setSearchCriteria(e.target.value)
   }
 
   const [
@@ -82,6 +93,7 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
         <Col span={6}>
           <Input.Search
             addonBefore="Search User"
+            placeholder="first name, last name or username"
             allowClear
             onChange={submissionSearch}
           />
