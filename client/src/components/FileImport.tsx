@@ -1,6 +1,9 @@
 import { Button, Col, Form, Icon, Input, Row, Spin, Upload } from 'antd'
 import { RcFile } from 'antd/lib/upload/interface'
-import React, { useState } from 'react'
+import filesize from 'filesize'
+import React, { useCallback, useState } from 'react'
+import useSystemConfig from '../hooks/useSystemConfig'
+import { messageService } from '../services/message'
 import Centered from './Centered'
 
 const { Dragger } = Upload
@@ -15,14 +18,26 @@ interface FileImportProps {
 const FileImport: React.FC<FileImportProps> = props => {
   const { uploading, onUpload, importing, onImport } = props
   const [url, setUrl] = useState('')
+  const { data: maxFileSize } = useSystemConfig('maxFileUploadSize')
 
-  const beforeUpload = (file: RcFile, fileList: RcFile[]) => {
-    // this function is called for every file
-    if (fileList.indexOf(file) === 0) {
-      onUpload(fileList)
-    }
-    return false
-  }
+  const beforeUpload = useCallback(
+    (file: RcFile, fileList: RcFile[]) => {
+      // this function is called for every file
+      if (fileList.indexOf(file) === 0) {
+        if (maxFileSize && file.size > maxFileSize) {
+          messageService.error(
+            `Selected file is too large. Maximum allowed size is ${filesize(
+              maxFileSize
+            )}.`
+          )
+          return false
+        }
+        onUpload(fileList)
+      }
+      return false
+    },
+    [onUpload, maxFileSize]
+  )
 
   const onUrlChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setUrl(e.target.value)
@@ -47,6 +62,9 @@ const FileImport: React.FC<FileImportProps> = props => {
           <p className="ant-upload-hint">
             Support for a single or bulk upload. To preserve the directory
             structure create a .zip, .tar or .tar.gz archive.
+          </p>
+          <p className="ant-upload-hint">
+            Max. file size: {maxFileSize ? filesize(maxFileSize) : '…'}
           </p>
         </Dragger>
       </Col>
