@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component
 
 @GraphQLName("SystemConfig")
 class SystemConfigDto(
-    val motd: String?,
-    val maxFileUploadSize: Long
+  val motd: String?,
+  val maxFileUploadSize: Long
 )
 
 @Component
