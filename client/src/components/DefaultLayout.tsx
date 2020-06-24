@@ -7,8 +7,8 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Authority } from '../hooks/useHasAuthority'
 import useSubscribeToGlobalEvents from '../hooks/useSubscribeToGlobalEvents'
+import useSystemConfig from '../hooks/useSystemConfig'
 import { routerConfig } from '../router.config'
-import { useGetMotdQuery } from '../services/codefreak-api'
 import { createOptionState } from '../services/options'
 import AppFooter from './AppFooter'
 import Authorized from './Authorized'
@@ -49,16 +49,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
     false
   )
 
-  const motd = useGetMotdQuery()
+  const { data: motd } = useSystemConfig('motd')
 
   const renderRightHeader = () => <RightHeader logout={logout} />
   const renderFooter = () => <AppFooter />
   const renderHeader = (_: any, defaultDom: React.ReactNode) => (
     <>
       {defaultDom}
-      {motd.data && motd.data.motd ? (
-        <Alert banner message={motd.data.motd} />
-      ) : null}
+      {motd ? <Alert banner message={motd} /> : null}
     </>
   )
 
