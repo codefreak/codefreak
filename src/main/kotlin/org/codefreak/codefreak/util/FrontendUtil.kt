@@ -3,6 +3,7 @@ package org.codefreak.codefreak.util
 import org.codefreak.codefreak.auth.NotAuthenticatedException
 import org.codefreak.codefreak.entity.User
 import org.slf4j.LoggerFactory
+import org.springframework.security.authentication.AnonymousAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -14,11 +15,13 @@ object FrontendUtil {
   fun getRequest() = (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes).request
 
   fun getCurrentUser(): User {
-    val principal = SecurityContextHolder.getContext().authentication?.principal
+    val auth = SecurityContextHolder.getContext().authentication
+    val principal = auth?.principal
     if (principal is User) {
       return principal
+    } else if (auth !is AnonymousAuthenticationToken) {
+      log.warn("Unexpected authentication principal: $principal")
     }
-    log.warn("Expected instance of User but received $principal instead.")
     throw NotAuthenticatedException()
   }
 
