@@ -1,4 +1,4 @@
-import { Moment } from 'moment'
+import moment, { Moment } from 'moment'
 import { zeroPad } from 'react-countdown'
 
 export interface TimeComponents {
@@ -38,6 +38,9 @@ export const componentsToRelTime = (
 
 export const secondsToRelTime = (sec: number) =>
   componentsToRelTime(secondsToComponents(sec))
+
+export const momentToRelTime = (date: Moment, now = moment()) =>
+  secondsToRelTime(Math.max(0, date.diff(now, 's')))
 
 export const secondsToComponents = (sec: number): TimeComponents => {
   const hours = Math.floor(sec / 3600)

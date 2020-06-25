@@ -185,6 +185,7 @@ const TaskPage: React.FC = () => {
       <CreateAnswerButton
         size="large"
         task={task}
+        assignment={task.assignment || undefined}
         onAnswerCreated={onAnswerCreated}
       >
         Start working on this task!

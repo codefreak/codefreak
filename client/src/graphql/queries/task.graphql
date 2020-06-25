@@ -45,6 +45,7 @@ query GetTask($id: ID!, $answerUserId: ID) {
     assignment {
       id
       title
+      deadline
     }
     timeLimit
     answer(userId: $answerUserId) {
