@@ -2,12 +2,13 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Icon, Tooltip } from 'antd'
 import { Switch as AntSwitch } from 'antd'
 import moment from 'moment'
-import React, { createContext } from 'react'
+import React, { createContext, useCallback } from 'react'
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AnswerBlocker from '../../components/AnswerBlocker'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
+import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
@@ -67,6 +68,11 @@ const TaskPage: React.FC = () => {
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
   const [deleteAnswer, { loading: deletingAnswer }] = useDeleteAnswerMutation()
 
+  const onAnswerCreated = useCallback(() => {
+    subPath.set('/answer')
+    result.refetch()
+  }, [result, subPath])
+
   const [updateMutation] = useUpdateTaskMutation({
     onCompleted: () => {
       result.refetch()
@@ -95,7 +101,7 @@ const TaskPage: React.FC = () => {
 
   const setTestingMode = (enabled: boolean) => {
     if (enabled) {
-      onCreateAnswer()
+      createAnswer({ variables: { taskId: task.id } }).then(onAnswerCreated)
     } else {
       deleteAnswer({ variables: { id: answer!.id } }).then(() => {
         subPath.set('')
@@ -151,16 +157,6 @@ const TaskPage: React.FC = () => {
     }
   ]
 
-  const onCreateAnswer = async () => {
-    const createAnswerResult = await createAnswer({
-      variables: { taskId: task.id }
-    })
-    if (createAnswerResult.data) {
-      subPath.set('/answer')
-      result.refetch()
-    }
-  }
-
   const assignment = task.assignment
 
   const teacherControls =
@@ -186,15 +182,14 @@ const TaskPage: React.FC = () => {
   } else if (!teacherControls) {
     // start working on task by default
     buttons = (
-      <Button
-        icon="rocket"
+      <CreateAnswerButton
         size="large"
-        type="primary"
-        onClick={onCreateAnswer}
-        loading={creatingAnswer}
+        task={task}
+        assignment={task.assignment || undefined}
+        onAnswerCreated={onAnswerCreated}
       >
         Start working on this task!
-      </Button>
+      </CreateAnswerButton>
     )
   }
 
