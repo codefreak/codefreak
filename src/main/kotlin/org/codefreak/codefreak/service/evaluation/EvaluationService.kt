@@ -97,12 +97,12 @@ class EvaluationService : BaseService() {
 
   fun isEvaluationInQueue(answerId: UUID) = evaluationQueue.isQueued(answerId)
 
-  fun getEvaluationByDigest(answerId: UUID, digest: ByteArray): Evaluation? {
-    return evaluationRepository.findFirstByAnswerIdAndFilesDigest(answerId, digest).orNull()
+  fun getLatestEvaluationByDigest(answerId: UUID, digest: ByteArray): Evaluation? {
+    return evaluationRepository.findFirstByAnswerIdAndFilesDigestOrderByCreatedAtDesc(answerId, digest).orNull()
   }
 
   fun createEvaluation(answer: Answer): Evaluation {
-    return evaluationRepository.save(Evaluation(answer, fileService.getCollectionMd5Digest(answer.id)))
+    return evaluationRepository.save(Evaluation(answer, fileService.getCollectionMd5Digest(answer.id), answer.task.evaluationSettingsChangedAt))
   }
 
   fun createCommentFeedback(author: User, comment: String): Feedback {
@@ -121,7 +121,7 @@ class EvaluationService : BaseService() {
     // find out if evaluation has a comment step definition
     val stepDefinition = answer.task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME }
         ?: throw IllegalArgumentException("Task has no 'comments' evaluation step")
-    val evaluation = getEvaluationByDigest(answer.id, digest) ?: createEvaluation(answer)
+    val evaluation = getLatestEvaluationByDigest(answer.id, digest) ?: createEvaluation(answer)
 
     // either take existing comments step on evaluation or create a new one
     val evaluationStep = evaluation.evaluationSteps.find { it.definition == stepDefinition }
@@ -135,6 +135,10 @@ class EvaluationService : BaseService() {
   fun isEvaluationUpToDate(answer: Answer): Boolean {
     // check if any evaluation has been run at all
     val evaluation = getLatestEvaluation(answer.id).orNull() ?: return false
+    // check if evaluation settings have been changed since the evaluation was run
+    if (evaluation.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) {
+      return false
+    }
     // check if evaluation has been run for latest file state
     if (!evaluation.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answer.id))) {
       return false

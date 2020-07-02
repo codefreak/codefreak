@@ -34,7 +34,6 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import reactor.core.publisher.Flux
-import java.lang.IllegalStateException
 import java.util.UUID
 
 @GraphQLName("PendingEvaluation")
@@ -208,6 +207,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     task.evaluationStepDefinitions.add(definition)
     evaluationService.saveEvaluationStepDefinition(definition)
     taskService.saveTask(task)
+    taskService.invalidateLatestEvaluations(task)
     true
   }
 
@@ -224,6 +224,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     }
     evaluationService.validateRunnerOptions(definition)
     evaluationService.saveEvaluationStepDefinition(definition)
+    serviceAccess.getService(TaskService::class).invalidateLatestEvaluations(definition.task)
     true
   }
 
@@ -240,6 +241,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     } catch (e: DataIntegrityViolationException) {
       throw IllegalStateException("Evaluation steps cannot be deleted once used to generate feedback. You can deactivate it for future evaluation.")
     }
+    // we do not need to invalidate evaluations here because we throw if there are any
     true
   }
 
@@ -249,6 +251,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
       Authorization.deny()
     }
     serviceAccess.getService(EvaluationService::class).setEvaluationStepDefinitionPosition(definition, position)
+    // we do not need to invalidate evaluations here because order does not matter
     true
   }
 

@@ -32,3 +32,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20200609140814-add-task-time-limit.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20200702190202-invalidate-evaluations.yaml
+    relativeToChangelogFile: true

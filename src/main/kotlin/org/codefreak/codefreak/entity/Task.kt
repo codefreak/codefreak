@@ -75,5 +75,7 @@ class Task(
   @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
   var evaluationStepDefinitions: MutableSet<EvaluationStepDefinition> = mutableSetOf()
 
+  var evaluationSettingsChangedAt: Instant = Instant.now()
+
   override fun compareTo(other: Task) = position.compareTo(other.position)
 }

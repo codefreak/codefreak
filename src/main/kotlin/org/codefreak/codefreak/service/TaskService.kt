@@ -24,7 +24,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayOutputStream
-import java.lang.IllegalArgumentException
+import java.time.Instant
 import java.util.UUID
 
 @Service
@@ -163,5 +163,15 @@ TaskService : BaseService() {
     tar.closeArchiveEntry()
     tar.close()
     return out.toByteArray()
+  }
+
+  /**
+   * Makes sure that evaluations can be run on this task even if answer files
+   * have not changed. Call this every time you update evaluation settings.
+   */
+  @Transactional
+  fun invalidateLatestEvaluations(task: Task) {
+    task.evaluationSettingsChangedAt = Instant.now()
+    taskRepository.save(task)
   }
 }
