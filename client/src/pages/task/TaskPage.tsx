@@ -23,6 +23,8 @@ import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
 import useSubPath from '../../hooks/useSubPath'
 import {
+  GetTaskListDocument,
+  GetTaskPoolDocument,
   PublicUserFieldsFragment,
   TaskInput,
   useCreateAnswerMutation,
@@ -103,7 +105,19 @@ const TaskPage: React.FC = () => {
     if (enabled) {
       createAnswer({ variables: { taskId: task.id } }).then(onAnswerCreated)
     } else {
-      deleteAnswer({ variables: { id: answer!.id } }).then(() => {
+      deleteAnswer({
+        variables: { id: answer!.id },
+        refetchQueries: [
+          task.assignment
+            ? {
+                query: GetTaskListDocument,
+                variables: { assignmentId: task.assignment.id }
+              }
+            : {
+                query: GetTaskPoolDocument
+              }
+        ]
+      }).then(() => {
         subPath.set('')
         result.refetch()
       })
