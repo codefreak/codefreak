@@ -97,8 +97,10 @@ class EvaluationService : BaseService() {
 
   fun isEvaluationInQueue(answerId: UUID) = evaluationQueue.isQueued(answerId)
 
-  fun getLatestEvaluationByDigest(answerId: UUID, digest: ByteArray): Evaluation? {
-    return evaluationRepository.findFirstByAnswerIdAndFilesDigestOrderByCreatedAtDesc(answerId, digest).orNull()
+  fun getOrCreateValidEvaluationByDigest(answer: Answer, digest: ByteArray): Evaluation {
+    return evaluationRepository.findFirstByAnswerIdAndFilesDigestOrderByCreatedAtDesc(answer.id, digest)
+        .map { if (it.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) createEvaluation(answer) else it }
+        .orElseGet { createEvaluation(answer) }
   }
 
   fun createEvaluation(answer: Answer): Evaluation {
@@ -121,7 +123,7 @@ class EvaluationService : BaseService() {
     // find out if evaluation has a comment step definition
     val stepDefinition = answer.task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME }
         ?: throw IllegalArgumentException("Task has no 'comments' evaluation step")
-    val evaluation = getLatestEvaluationByDigest(answer.id, digest) ?: createEvaluation(answer)
+    val evaluation = getOrCreateValidEvaluationByDigest(answer, digest)
 
     // either take existing comments step on evaluation or create a new one
     val evaluationStep = evaluation.evaluationSteps.find { it.definition == stepDefinition }

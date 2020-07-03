@@ -23,12 +23,7 @@ class AnswerProcessor : ItemProcessor<Answer, Evaluation> {
 
   override fun process(answer: Answer): Evaluation {
     val digest = fileService.getCollectionMd5Digest(answer.id)
-    val latestEvaluation = evaluationService.getLatestEvaluationByDigest(answer.id, digest)
-    val evaluation = if (latestEvaluation == null || latestEvaluation.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) {
-      evaluationService.createEvaluation(answer)
-    } else {
-      latestEvaluation
-    }
+    val evaluation = evaluationService.getOrCreateValidEvaluationByDigest(answer, digest)
     log.debug("Start evaluation of answer {} ({} steps)", answer.id, answer.task.evaluationStepDefinitions.size)
     answer.task.evaluationStepDefinitions.filter { it.active }.forEach { evaluationStepDefinition ->
       val executedStep = evaluation.evaluationSteps.find { it.definition == evaluationStepDefinition }
