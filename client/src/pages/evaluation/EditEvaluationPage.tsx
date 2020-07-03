@@ -1,9 +1,19 @@
-import { Alert, Button, Descriptions, Modal, Switch, Tag, Tooltip } from 'antd'
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Descriptions,
+  Modal,
+  Switch,
+  Tag,
+  Tooltip
+} from 'antd'
 import { ButtonProps } from 'antd/lib/button'
 import { CardProps } from 'antd/lib/card'
+import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { JSONSchema6 } from 'json-schema'
 import YAML from 'json-to-pretty-yaml'
-import React from 'react'
+import React, { useState } from 'react'
 import { deepEquals } from 'react-jsonschema-form/lib/utils'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CardList from '../../components/CardList'
@@ -69,14 +79,20 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
 
   const [createStep] = useCreateEvaluationStepDefinitionMutation()
 
+  const [sureToEdit, setSureToEdit] = useState(false)
+  const onSureToEditChange = (e: CheckboxChangeEvent) =>
+    setSureToEdit(e.target.checked)
+
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
   const {
-    task: { evaluationStepDefinitions },
+    task: { evaluationStepDefinitions, assignment },
     evaluationRunners
   } = result.data
+
+  const assignmentOpen = assignment !== null && assignment.status === 'OPEN'
 
   const handlePositionChange = (
     definition: EvaluationStepDefinition,
@@ -163,7 +179,10 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
               value={JSON.parse(definition.options)}
               schema={optionsSchema}
               onSubmit={updateOptions}
-              buttonProps={configureButtonProps}
+              buttonProps={{
+                ...configureButtonProps,
+                disabled: assignmentOpen && !sureToEdit
+              }}
             />
           ) : (
             <Tooltip
@@ -210,6 +229,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 <Switch
                   checked={definition.active}
                   onChange={updater('active')}
+                  disabled={assignmentOpen && !sureToEdit}
                 />
               </Tooltip>
             </Descriptions.Item>
@@ -250,6 +270,22 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         }
         style={{ marginBottom: 16 }}
       />
+      {assignmentOpen ? (
+        <Alert
+          style={{ marginBottom: 16 }}
+          message="Warning"
+          description={
+            <>
+              The assignment is already open. If you make changes to the
+              configuration, all evaluations are marked as out of date and must
+              be re-run. <Checkbox onChange={onSureToEditChange} /> I understand
+              this and want to do it anyway
+            </>
+          }
+          type="warning"
+          showIcon
+        />
+      ) : null}
       <CardList
         sortable
         items={evaluationStepDefinitions}
