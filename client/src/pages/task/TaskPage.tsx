@@ -1,12 +1,14 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Icon, Tooltip } from 'antd'
 import { Switch as AntSwitch } from 'antd'
+import Tag from 'antd/es/tag'
 import moment from 'moment'
 import React, { createContext, useCallback } from 'react'
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AnswerBlocker from '../../components/AnswerBlocker'
 import ArchiveDownload from '../../components/ArchiveDownload'
+import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -228,7 +230,7 @@ const TaskPage: React.FC = () => {
               : undefined
           }
         />
-      ) : null
+      ) : undefined
     }
 
     return (
@@ -240,6 +242,10 @@ const TaskPage: React.FC = () => {
     )
   }
 
+  const tags = [
+    assignment ? <AssignmentStatusTag status={assignment.status} /> : undefined,
+    renderTimeLimit()
+  ].filter((it): it is React.ReactElement<Tag> => it !== undefined)
   return (
     <DifferentUserContext.Provider value={differentUser}>
       <SetTitle>{task.title}</SetTitle>
@@ -251,7 +257,7 @@ const TaskPage: React.FC = () => {
             onChange={updater('title')}
           />
         }
-        subTitle={renderTimeLimit()}
+        tags={tags}
         breadcrumb={createBreadcrumb(createRoutes.forTask(task))}
         tabList={tabs}
         tabActiveKey={subPath.get()}

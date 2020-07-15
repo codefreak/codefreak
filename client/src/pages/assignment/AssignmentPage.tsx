@@ -18,7 +18,7 @@ import moment, { Moment, unitOfTime } from 'moment'
 import React, { useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import ArchiveDownload from '../../components/ArchiveDownload'
-import AssignmentStatusComponent from '../../components/AssignmentStatus'
+import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -128,7 +128,7 @@ const AssignmentPage: React.FC = () => {
             onChange={updater('title')}
           />
         }
-        subTitle={<AssignmentStatusComponent assignment={assignment} />}
+        tags={[<AssignmentStatusTag status={assignment.status} />]}
         tabList={tabs}
         tabActiveKey={subPath.get()}
         breadcrumb={createBreadcrumb(createRoutes.forAssignment(assignment))}
