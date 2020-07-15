@@ -20,6 +20,7 @@ import StartEvaluationButton from '../../components/StartEvaluationButton'
 import TimeLimitTag, {
   EditableTimeLimitTag
 } from '../../components/time-limit/TimeLimitTag'
+import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
@@ -68,6 +69,13 @@ const TaskPage: React.FC = () => {
       answerUserId: isTeacher && userId ? unshorten(userId) : undefined
     }
   })
+
+  useAssignmentStatusChange(
+    result?.data?.task.assignment?.id,
+    useCallback(() => {
+      result.refetch()
+    }, [result])
+  )
 
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
   const [deleteAnswer, { loading: deletingAnswer }] = useDeleteAnswerMutation()
@@ -220,14 +228,12 @@ const TaskPage: React.FC = () => {
   }
 
   const renderTimeLimit = () => {
-    if (!editable || task.answer) {
+    if (!editable || answer) {
       return task.timeLimit ? (
         <TimeLimitTag
           timeLimit={task.timeLimit}
           deadline={
-            task.answer && task.answer.deadline
-              ? moment(task.answer.deadline)
-              : undefined
+            answer && answer.deadline ? moment(answer.deadline) : undefined
           }
         />
       ) : undefined
@@ -246,6 +252,7 @@ const TaskPage: React.FC = () => {
     assignment ? <AssignmentStatusTag status={assignment.status} /> : undefined,
     renderTimeLimit()
   ].filter((it): it is React.ReactElement<Tag> => it !== undefined)
+
   return (
     <DifferentUserContext.Provider value={differentUser}>
       <SetTitle>{task.title}</SetTitle>

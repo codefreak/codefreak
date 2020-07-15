@@ -47,7 +47,7 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
     ...customButtonProps
   }
 
-  if (assignment && assignment.status != AssignmentStatus.Open) {
+  if (assignment && assignment.status !== AssignmentStatus.Open) {
     return (
       <Tooltip title="The assignment is not open!">
         <Button {...buttonProps} disabled />

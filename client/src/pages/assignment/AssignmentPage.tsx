@@ -15,7 +15,7 @@ import {
 import { DropdownButtonProps } from 'antd/es/dropdown/dropdown-button'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import moment, { Moment, unitOfTime } from 'moment'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
@@ -24,6 +24,7 @@ import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
+import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
@@ -58,9 +59,10 @@ const activeStep = {
 }
 
 const AssignmentPage: React.FC = () => {
+  const assignmentId = useIdParam()
   const { path } = useRouteMatch()
   const result = useGetAssignmentQuery({
-    variables: { id: useIdParam() }
+    variables: { id: assignmentId }
   })
   const subPath = useSubPath()
   const formatter = useFormatter()
@@ -70,6 +72,13 @@ const AssignmentPage: React.FC = () => {
       messageService.success('Assignment updated')
     }
   })
+
+  useAssignmentStatusChange(
+    assignmentId,
+    useCallback(() => {
+      result.refetch()
+    }, [result])
+  )
 
   const tabs = [{ key: '', tab: 'Tasks' }]
   if (useHasAuthority('ROLE_TEACHER')) {
@@ -128,7 +137,7 @@ const AssignmentPage: React.FC = () => {
             onChange={updater('title')}
           />
         }
-        tags={[<AssignmentStatusTag status={assignment.status} />]}
+        tags={<AssignmentStatusTag status={assignment.status} />}
         tabList={tabs}
         tabActiveKey={subPath.get()}
         breadcrumb={createBreadcrumb(createRoutes.forAssignment(assignment))}

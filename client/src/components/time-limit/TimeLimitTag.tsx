@@ -2,7 +2,7 @@ import { Icon, Tag, Tooltip } from 'antd'
 import { TagProps } from 'antd/es/tag'
 import { TooltipProps } from 'antd/es/tooltip'
 import { Moment } from 'moment'
-import React, { HTMLProps, useState } from 'react'
+import React, { HTMLProps, useEffect, useState } from 'react'
 import { secondsToRelTime } from '../../services/time'
 import Countdown from '../Countdown'
 import TimeLimitEditModal from './TimeLimitEditModal'
@@ -20,9 +20,12 @@ const TimeLimitTag: React.FC<TimeLimitTagProps> = ({
   suffix,
   ...htmlProps
 }) => {
-  const [isOver, setIsOver] = useState<boolean>(
-    !!deadline && deadline.isSameOrBefore()
-  )
+  const [isOver, setIsOver] = useState<boolean>()
+
+  // handle deadline changes properly
+  useEffect(() => {
+    setIsOver(!!deadline && deadline.isSameOrBefore())
+  }, [deadline, setIsOver])
 
   const relTime = secondsToRelTime(timeLimit)
   const tooltipProps: TooltipProps = {

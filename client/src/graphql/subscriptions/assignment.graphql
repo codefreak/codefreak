@@ -1,0 +1,3 @@
+subscription AssignmentStatusChange($assignmentId: ID!) {
+  assignmentStatusChange(assignmentId: $assignmentId)
+}
