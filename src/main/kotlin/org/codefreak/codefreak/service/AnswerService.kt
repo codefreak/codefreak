@@ -9,7 +9,11 @@ import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.afterClose
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.codefreak.codefreak.auth.Authority
+import org.codefreak.codefreak.auth.hasAuthority
+import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Task
+import org.codefreak.codefreak.util.FrontendUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -105,8 +109,15 @@ class AnswerService : BaseService() {
 
   @Transactional
   fun createAnswer(submission: Submission, taskId: UUID): Answer {
-    val answer = answerRepository.save(Answer(submission, taskService.findTask(taskId)))
+    val task = taskService.findTask(taskId)
+    if (!task.isTesting() && task.assignment?.status != AssignmentStatus.OPEN) {
+      throw IllegalStateException("Assignment is not open. Cannot create answer.")
+    }
+    val answer = answerRepository.save(Answer(submission, task))
     copyFilesFromTask(answer)
     return answer
   }
+
+  private fun Task.isTesting() =
+      this.owner == FrontendUtil.getCurrentUser() || FrontendUtil.getCurrentUser().hasAuthority(Authority.ROLE_ADMIN)
 }
