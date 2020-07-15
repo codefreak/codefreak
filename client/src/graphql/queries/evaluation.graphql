@@ -80,6 +80,10 @@ query GetDetailedEvaluaton($evaluationId: ID!) {
 query GetEvaluationStepDefinitions($taskId: ID!) {
   task(id: $taskId) {
     id
+    assignment {
+      id
+      status
+    }
     evaluationStepDefinitions {
       id
       runnerName

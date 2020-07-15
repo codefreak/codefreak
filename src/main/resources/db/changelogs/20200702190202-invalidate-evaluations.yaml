@@ -1,0 +1,21 @@
+databaseChangeLog:
+- changeSet:
+    id: 1593716666483-2
+    author: vagrant (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: evaluation_settings_changed_at
+            type: timestamp
+        tableName: task
+- changeSet:
+    id: 1593716666483-3
+    author: vagrant (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: evaluation_settings_from
+            type: timestamp
+        tableName: evaluation

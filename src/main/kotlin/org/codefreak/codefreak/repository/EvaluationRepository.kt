@@ -9,5 +9,5 @@ import java.util.UUID
 @Repository
 interface EvaluationRepository : CrudRepository<Evaluation, UUID> {
   fun findFirstByAnswerIdOrderByCreatedAtDesc(answerId: UUID): Optional<Evaluation>
-  fun findFirstByAnswerIdAndFilesDigest(answerId: UUID, digest: ByteArray): Optional<Evaluation>
+  fun findFirstByAnswerIdAndFilesDigestOrderByCreatedAtDesc(answerId: UUID, digest: ByteArray): Optional<Evaluation>
 }
