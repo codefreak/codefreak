@@ -13,6 +13,15 @@ const isDisplayedInIframe = () => {
   }
 }
 
+/**
+ * This is the page a users sees if he clicks a resource link from the
+ * LTI provider.
+ * Currently, we do not support iframe embedding. This would require
+ * Content Security Policy headers on all pages, even if the user is not working
+ * via LTI. CSP frame-ancestors headers are only set on pages prefixed with /lti.
+ * Redirecting the user to other pages will cause the browser to show a warning
+ * at the moment.
+ */
 const LaunchPage: React.FC = () => {
   const assignmentId = useIdParam()
   const assignmentUrl = `/assignments/${shorten(assignmentId)}`
@@ -21,29 +30,15 @@ const LaunchPage: React.FC = () => {
     return <Redirect to={assignmentUrl} />
   }
 
-  const createContinue = (type: 'blank' | 'embedded') => () => {
-    if (type === 'blank') {
-      window.open(assignmentUrl, '_blank')
-    } else {
-      window.location.href = assignmentUrl
-    }
-  }
+  const openInNewWindow = () => window.open(assignmentUrl, '_blank')
 
   return (
     <Centered style={{ flexGrow: 1 }}>
       <Card
         extra={<Icon type="info-circle" />}
-        title={<>Open in new window?</>}
+        title="Embedding is not allowed"
         actions={[
-          <Button
-            key="continue"
-            type="link"
-            style={{ color: 'grey' }}
-            onClick={createContinue('embedded')}
-          >
-            Continue embedded
-          </Button>,
-          <Button key="blank" type="link" onClick={createContinue('blank')}>
+          <Button key="blank" type="link" onClick={openInNewWindow}>
             Open new window
           </Button>
         ]}
@@ -51,8 +46,10 @@ const LaunchPage: React.FC = () => {
       >
         <p>
           It looks like you are viewing Code FREAK embedded in another
-          application. For the best experience we recommend opening it in a new
-          window/tab.
+          application. For security reasons this is not allowed.
+        </p>
+        <p>
+          Please click the link below to open the assignment in a new window.
         </p>
       </Card>
     </Centered>
