@@ -1,0 +1,49 @@
+= Roles
+
+Code FREAK has a hierarchical role system: Each user will receive one of the following rules depending on the configuration:
+
+* `admin`
+* `teacher`
+* `student`
+
+The permissions obtained with each role are currently very limited.
+Basically, `teachers` can manage their own tasks and assignments.
+`students` can only work on assignments.
+`admins` have access to all assignments.
+
+Below is a list with basic permissions for each role.
+
+|===
+|  |`admin` | `teacher` | `student`
+
+|Work on assignments
+|✔️
+|✔️
+|✔️
+
+|Manage task pool
+|✔️
+|✔️
+|
+
+|Create assignments
+|✔️
+|✔️
+|
+
+|List own assignments
+|✔️
+|✔️
+|
+
+|List all assignments
+|✔️
+|
+|
+
+|View submissions
+|✔️
+|✔️
+|
+
+|===

@@ -28,10 +28,15 @@ codefreak:
     url: ldap://127.0.0.1:389
     root-dn: dc=planetexpress,dc=com
     group-search-base: ou=people
-    role-mappings.admin_staff: admin
-    role-mappings.ship_crew: student
+    role-mappings:
+      admin_staff: admin
+      ship_crew: student
     #active-directory: true (set this if you are using an Active Directory server)
 ----
+
+`role-mappings` is a dictionary where each key is group from your LDAP server, and the value represents a role of Code FREAK.
+Valid roles are `admin`, `teacher` and `student`.
+See xref:codefreak:for-admins:roles.adoc[Roles] for more information on the role system.
 
 == Git import
 You can allow your students to import their source code from a remote Git repository. Currently, this is possible only via a
