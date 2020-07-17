@@ -36,6 +36,7 @@ $ keytool -genkey \
   -validity 10950
 ----
 
+[#public-key]
 ==== Export public key in PEM format:
 This will extract the public key (without certificate information) from the pkcs12 file you just created.
 You may need this information when registering Code FREAK as external tool in your CMS.
@@ -79,7 +80,7 @@ Please replace `[codefreak-url]` with the public accessible URL of your Code FRE
 |`[codefreak-url]/lti/select-content`
 
 |Icon URL
-|`[codefreak-url]/images/lti-code-icon.png`
+|`[codefreak-url]/codefreak-logo.svg`
 |===
 
 WARNING: Please make sure your LMS passes the user's name and email address to Code FREAK! Some LMS have additional privacy settings for these options.
@@ -112,3 +113,127 @@ codefreak:
         key-store-entry-name: codefreak
         key-store-entry-pin: supersecurepassword123
 ----
+
+== Example LMS Configurations
+
+Below are some example configurations for individual learn management systems.
+
+== Moodle
+
+TIP: LTI 1.3 is supported in Moodle version 3.7 and later!
+
+There are two ways to configure an LTI tool in Moodle: Either globally for all courses or locally for a single course.
+The global configuration must be done by a Moodle admin. Local tools can be added by the course owner.
+
+The following example was tested in Moodle 3.8.
+
+[#moodle-global-configuration]
+=== Global configuration
+You will find the wizard to configure LTI tools in Site Administration -> Plugins -> Activity Modules -> External tool -> Manage tools.
+Use "Configure a tool manually" and enter the following data:
+
+
+|===
+|Setting|Value
+
+|Tool name
+|Code FREAK
+
+|Tool URL
+|[codefreak-url]
+
+|Tool description
+|(optional, will be shown in activity creation wizard)
+
+|LTI version
+|LTI 1.3
+
+|Public Key
+|public key obtained in step xref:public-key["export public key"]
+
+|Initiate login URL
+|[codefreak-url]/lti/login
+
+|Redirection URI(s)
+| [codefreak-url]/lti/launch +
+  [codefreak-url]/lti/login
+
+|Custom parameters
+|(leave empty!)
+
+|Tool configuration usage
+|Show in activity chooser and as a preconfigured tool
+
+|Default launch container
+|New window
+
+|Content Selection URL
+|[codefreak-url]/lti/select-content
+
+|Icon URL
+|[codefreak-url]/codefreak-logo.svg
+
+|Secure Icon URL
+|[codefreak-url]/codefreak-logo.svg
+
+|IMS LTI Assignment and Grade Services
+|Do not use this service
+
+|IMS LTI Names and Role Provisioning
+|Use this service
+
+|Tool settings
+|Do not use this service
+
+|Share launcher‘s name with tool
+|Always
+
+|Share launcher‘s email with tool
+|Always
+
+|Accept grades from the tool
+|Never
+
+|===
+
+Save the settings and click the "view configuration details" button in the tools list view of Moodle.
+This will show you all required configuration settings for Code FREAK that you must insert in the `application.yml`.
+
+[source,yaml]
+----
+codefreak:
+  lti:
+    # ... see above
+    providers:
+      - name: Moodle
+        issuer: "[moodle-url]"
+        client-id: "[Client ID from the 'view configuration details' wizard]"
+        auth-url: "[moodle-url]/mod/lti/auth.php"
+        token-url: "[moodle-url]/mod/lti/token.php"
+        jwk-url: "[moodle-url]/mod/lti/certs.php"
+         # ... see above
+----
+
+=== Local Course Configuration
+
+If allowed by the administrator a course owner can add Code FREAK locally to the course.
+This does not require Code FREAK to be configured globally by the Moodle administrator.
+Go to your course, enter editing mode in Moodle, create a new activity and choose "external tool" as activity.
+Click the "+" button next to the selection box of "Preconfigured tool".
+This will open the same dialog as in xref:moodle-global-configuration[the global configuration].
+
+=== Add a Code FREAK activity
+After you configured Code FREAK globally or locally you can always add Code FREAK by using the "external tool" activity.
+If the Moodle administrator configured the LTI tool globally (and enabled the activity option) you will find Code FREAK as standalone activity in the creation wizard.
+
+After choosing the "external tool" or "Code FREAK" activity you will see a "select content" button.
+Clicking this button will open a pop-up with all your assignments from Code FREAK.
+Select one of the assignments from the list.
+This will auto-fill all the required fields in Moodle.
+Optionally, you can change the activity name.
+Make sure that "Share launcher's name" and "Share launcher's email" is enabled under "Privacy".
+All other fields should be left unchanged.
+
+Finish the activity creation by clicking "Save and return to course".
+You should now have a new activity in your course that will open the assignment in Code FREAK.
+Bonus: If students use this activity link they will be logged in automatically in Code FREAK.
