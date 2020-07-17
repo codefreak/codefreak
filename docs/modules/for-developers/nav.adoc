@@ -1,3 +1,5 @@
 * For Developers
-** xref:for-developers:development.adoc[Development]
+** xref:for-developers:introduction.adoc[Introduction]
+** xref:for-developers:development.adoc[Getting Started]
 ** xref:for-developers:architecture.adoc[Architecture]
+** xref:for-developers:style-guide.adoc[Style Guide]

@@ -1,0 +1,22 @@
+= Development Style Guide
+
+If you would like to make a contribution to Code FREAK please make sure you follow our implicit style guide.
+We do not maintain a list of rules for Dos and Don'ts but we use automated linters for Kotlin and Typescript.
+This ensures consistently formatted code.
+
+== Kotlin
+
+Our code style for Kotlin is based on https://github.com/pinterest/ktlint[ktlint] without any custom rules.
+`ktlint` itself is added implicitly via https://github.com/diffplug/spotless[spotless].
+
+To apply the correct code style simply run: `./gradlew spotlessApply`.
+For running a check only like the CI server does use `./gradlew spotlessCheck`.
+
+== Typescript, TSX, LESS, etc. (Frontend)
+
+Our frontend is created with React and uses https://github.com/palantir/tslint[tslint] and https://github.com/prettier/prettier[prettier] to maintain a properly formatted code base.
+There are only minor tweaks to the default ruleset. Take a look at the `.prettierrc.json` and `tslint[.prod].json` to find the modifications.
+
+You can apply the frontend rules inside the `client` directory by running `npm run fix`.
+Even if you run the auto fixer there might be some problems left that could not be fixed automatically.
+You can find them by using `npm run lint`.

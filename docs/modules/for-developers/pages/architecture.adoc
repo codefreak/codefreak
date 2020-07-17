@@ -3,6 +3,9 @@
 :toc: left
 :toclevels: 3
 
+WARNING: This page is out of date!
+While the documentation is still correct it misses the new React frontend.
+
 == High level overview
 Currently there are three major components of the system:
 
