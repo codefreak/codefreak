@@ -65,13 +65,10 @@ While this is not a mature product yet, all major features (editing, evaluation,
 Code FREAK is intended to become a community-driven project. If you are interested in trying it for your educational institution or if you have any questions, feel free to get in touch with us! ✉ codefreak@fh-kiel.de
 
 ## Roadmap / Planned Features
+There are still **A LOT** of features that have not been integrated into Code FREAK, yet.  
+You will find them in our [`ROADMAP.md`](./ROADMAP.md) file.
 
-- [ ] Kubernetes integration
-- [ ] Evaluation system with Windows and MacOS support
-- [ ] Git integration for code synchronization
-- [ ] Real autograding and LTI 1.3 scoring support
-- [ ] Plugin for Moodle tests
-- [ ] Internationalization & localization
+If your desired feature is missing please open an issue on GitHub!
 
 ## License
 
