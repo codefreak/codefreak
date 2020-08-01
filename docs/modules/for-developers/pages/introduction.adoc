@@ -1,0 +1,17 @@
+= Code FREAK Development
+:sectnums:
+:toc: left
+:toclevels: 3
+
+Code FREAK is a Free and Open Source (FOSS) project under the GNU AGPL license.
+The Git repository is available https://github.com/codefreak/codefreak[on GitHub].
+Developers are encouraged to submit bug reports/fixes and new features via GitHub issues or pull requests.
+
+== Contact
+
+The development of Code FREAK has been initiated by the CS department of the University of Applied Sciences Kiel, Germany.
+Primary point of contact for the project is https://www.fh-kiel.de/index.php?id=woelk[Prof. Dr. Felix Woelk].
+If you have any questions send a mail to mailto:codefreak@fh-kiel.de[codefreak@fh-kiel.de].
+
+The lead developers for the project may change over time.
+You will find the current maintainers by looking at the "people" section https://github.com/codefreak/codefreak/people[in the GitHub repo].

@@ -1,23 +1,58 @@
-= Development
+= Getting Started
 :sectnums:
 :toc: left
 :toclevels: 3
 
-== Configuration
-Create a file `src/main/resources/application-dev.yml`. For documentation on how to configure the
-server see https://github.com/codefreak/codefreak/blob/master/src/main/resources/application.yml[`application.yml`]
-in the same directory. Minimum configuration that uses the in-memory database:
+TIP: This guide is only for developers!
+If you would like to deploy Code FREAK to your servers please check out the xref:codefreak:for-admins:installation.adoc[admin installation guide].
 
-[source,yaml]
-[source]
------
-spring.jpa.database: HSQL
-spring.jpa.hibernate.ddl-auto: update
------
+== Programming Languages and Frameworks
+
+Code FREAK uses Spring/Kotlin for its backend code and React/Typescript for the frontend.
+Frontend and backend communicate over a GraphQL API.
+Because Code FREAK makes heavy use of containers some basic Docker knowledge can be useful.
+
+== Directory Structure
+
+At its root the Code FREAK code base is a Gradle project.
+All backend code resides inside the `/src` directory.
+The frontend code lives inside the `/client` directory as its own Gradle module.
+Beside frontend and backend code there is only the `/docs` directory were you will find the source for this documentation.
+
+== Development Setup Steps
+
+We recommend using an IDE that can handle both Kotlin and Typescript (e.g. IntellJ Ultimate).
+
+TIP: You need Docker to run and build Code FREAK!
+Please install the official Docker (Desktop) distribution for your operating system before you run the steps below.
+
+1. Obtain the source code of Code FREAK from GitHub: `git clone https://github.com/codefreak/codefreak.git`
+2. Generate the GraphQL schema: `./gradlew client:generate` (this will also install all backend and frontend dependencies)
+3. Start the backend with `./gradlew bootRun`
+4. Start the frontend inside the `client` directory with `npm start` (initial compilation make take some time)
+
+The frontend should open automatically.
+If it does not please open `http://localhost:3000` in you browser.
+For default credentials see xref:authentication[Authentication].
+Please be aware that all data is stored in an in-memory database by default that does not survive backend restarts!
+See the configuration below to improve the default settings.
+
+== Building Code FREAK
+
+Build Code FREAK by using `./gradlew jibDockerBuild`.
+This will generate the Docker image `cfreak/codefreak` on your local machine.
+
+== Configuration
+
+Create the file `src/main/resources/application-dev.yml`.
+For documentation on how to configure the server see https://github.com/codefreak/codefreak/blob/master/src/main/resources/application.yml[`application.yml`]
+in the same directory.
 
 === Database
-You can either use the embedded HSQL storage or a PostgreSQL database. Data from the HSQL database will get lost when
-the application shuts down. For Postgres create at least a dedicated database and adjust the configuration accordingly:
+
+You can either use the embedded HSQL storage or a PostgreSQL database.
+Data from the HSQL database will get lost when the application shuts down.
+For Postgres create at least a dedicated database and adjust the configuration accordingly:
 
 [source,yaml]
 [source]
@@ -33,13 +68,14 @@ spring:
 -----
 
 === Docker
-For many parts of the application we need connection to a (dedicated) Docker daemon. By default we use the default
-socket for your platform. If you are on Linux please follow the installation guidelines for your distribution.
-For Windows, MacOS and other OS that cannot run Docker natively you will either need the official Docker for Windows/MacOS
-software stacks or use the Vagrant machine that is included in this repository. The Vagrant machine will make the Docker
-daemon available at `127.0.0.1:2375` (the official Docker port). If you setup Docker for Windows/MacOS the Daemon should
-be reachable on the same address. So if you are on Windows or MacOS adjust your `application-dev.properties` file so it points
-at a Docker daemon.
+
+For many parts of the application we need connection to a (dedicated) Docker daemon.
+By default we use the default socket for your platform.
+If you are on Linux please follow the installation guidelines for your distribution.
+For Windows, MacOS and other OS that cannot run Docker natively you will either need the official Docker for Windows/MacOS software stacks or use the Vagrant machine that is included in this repository.
+The Vagrant machine will make the Docker daemon available at `127.0.0.1:2375` (the official Docker port).
+If you setup Docker for Windows/MacOS the Daemon should be reachable on the same address.
+So if you are on Windows or MacOS adjust your `application-dev.properties` file so it points at a Docker daemon.
 
 [source,yaml]
 [source]
@@ -50,10 +86,14 @@ codefreak:
 -----
 
 == Run the application
-If you use IntelliJ simply start the `CodeFreakApplication` Spring Boot application.
-For Gradle run the command `./gradlew bootRun`. The application is started at `http://localhost:8080`.
 
+If you use IntelliJ simply start the `CodeFreakApplication` Spring Boot application.
+For Gradle run the command `./gradlew bootRun`.
+The application is started at `http://localhost:8080`.
+
+[#authentication]
 == Authentication
+
 The following sample users are pre-configured for development.
 
 .Sample Users
@@ -74,7 +114,9 @@ The following sample users are pre-configured for development.
 |===
 
 == Running tests
-To run the tests you need a working Docker connection. It is also possible to use the Vagrant machine for Testing:
+
+To run the tests you need a working Docker connection.
+It is also possible to use the Vagrant machine for Testing:
 
 [source,shell]
 [source]
@@ -92,22 +134,28 @@ $ ./gradlew spotlessApply
 -----
 
 == Making changes to the database schema
-If you modify the entity layer under `org.codefreak.codefreak.entity` in a way that changes the database schema,
-you have to create a migration changelog. Code FREAK uses https://www.liquibase.org/[Liquibase] for versioning the database
-schema. After you made your changes to the JPA entities, execute the script `generateChangelog.sh` in the project directory.
-It will create a new file under `src/main/resources/db/changelogs`. It contains differences between the latest schema version
-and the JPA entities. Modify the file if needed, for example if you create a new non-null column, add a `value` that is used
-for existing records. Keep in mind that the migration will be run on existing production databases. Please refer to the
+
+If you modify the entity layer under `org.codefreak.codefreak.entity` in a way that changes the database schema, you have to create a migration changelog.
+Code FREAK uses https://www.liquibase.org/[Liquibase] for versioning the database schema.
+After you made your changes to the JPA entities, execute the script `generateChangelog.sh` in the project directory.
+It will create a new file under `src/main/resources/db/changelogs`.
+It contains differences between the latest schema version and the JPA entities.
+Modify the file if needed, for example if you create a new non-null column, add a `value` that is used for existing records.
+Keep in mind that the migration will be run on existing production databases.
+Please refer to the
 http://www.liquibase.org/documentation[Liquibase documentation] for more information on changelogs.
 
-NOTE: If you are on Windows, the script does not work on all emulated shells. Make sure to use one that is based on `bash`.
+NOTE: If you are on Windows, the script does not work on all emulated shells.
+Make sure to use one that is based on `bash`.
 
 == Releasing a new version
 
 The project is split up into a main application and some auxiliary that have there own repositories (e.g. the IDE).
-There are different release processes depending on the project. All repositories use https://semver.org/[semantic versioning].
+There are different release processes depending on the project.
+All repositories use https://semver.org/[semantic versioning].
 
-Most projects produce a Docker image as their main artifact. The following tags are automatically created/updated by CI:
+Most projects produce a Docker image as their main artifact.
+The following tags are automatically created/updated by CI:
 
 * `latest` -> latest released version
 * `<major>` -> latest release with this major version
@@ -116,17 +164,16 @@ Most projects produce a Docker image as their main artifact. The following tags 
 * `canary` -> latest build from master (not necessarily released yet)
 
 
-WARNING: If you need at least a specific version of a Docker image as a dependency, you need to create a new major release
-of the depending AND the dependent project. This is necessary event if the dependent version is downwards compatible.
+WARNING: If you need at least a specific version of a Docker image as a dependency, you need to create a new major release of the depending AND the dependent project.
+This is necessary event if the dependent version is downwards compatible.
 This is a limitation of the tag system introduced above.
 
 === Advanced release process via CI
 
 NOTE: This is currently only used by the main application https://github.com/codefreak/codefreak[`codefreak/codefreak`].
 
-To release a new version, https://blog.travis-ci.com/2017-08-24-trigger-custom-build[trigger a custom CI build] with the
-following configuration (use actual version number). Run the task on the appropriate major version branch (currently
-only `master` is supported).
+To release a new version, https://blog.travis-ci.com/2017-08-24-trigger-custom-build[trigger a custom CI build] with the following configuration (use actual version number).
+Run the task on the appropriate major version branch (currently only `master` is supported).
 
 [source]
 [source]
