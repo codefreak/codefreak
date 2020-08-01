@@ -1,4 +1,5 @@
 * For Admins
 ** xref:for-admins:installation.adoc[Installation]
 ** xref:for-admins:configuration.adoc[Configuration]
+** xref:for-admins:roles.adoc[Roles]
 ** xref:for-admins:lti-integration.adoc[LTI Integration]
