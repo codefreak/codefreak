@@ -42,7 +42,7 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-batch'
   implementation 'org.springframework.security:spring-security-ldap'
   implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.9'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.1'
   implementation 'org.jetbrains.kotlin:kotlin-reflect'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
   implementation 'com.spotify:docker-client:8.15.1'
