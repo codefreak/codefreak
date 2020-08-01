@@ -2,7 +2,7 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
 import React from 'react'
 import { Link } from 'react-router-dom'
-import AssignmentStatus from '../../components/AssignmentStatus'
+import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import EntityLink from '../../components/EntityLink'
@@ -73,7 +73,11 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
     })
   return (
     <Card
-      title={assignment.title}
+      title={
+        <>
+          {assignment.title} <AssignmentStatusTag status={assignment.status} />
+        </>
+      }
       key={assignment.id}
       style={{ marginBottom: 16 }}
       extra={
@@ -90,9 +94,6 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
       }
     >
       <Descriptions>
-        <Descriptions.Item label="Status">
-          <AssignmentStatus assignment={assignment} />
-        </Descriptions.Item>
         <Descriptions.Item label="Tasks">
           {assignment.tasks.length}
         </Descriptions.Item>

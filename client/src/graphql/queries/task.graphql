@@ -46,6 +46,7 @@ query GetTask($id: ID!, $answerUserId: ID) {
       id
       title
       deadline
+      status
     }
     timeLimit
     answer(userId: $answerUserId) {

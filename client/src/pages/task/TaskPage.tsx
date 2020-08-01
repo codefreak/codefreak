@@ -1,12 +1,14 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Icon, Tooltip } from 'antd'
 import { Switch as AntSwitch } from 'antd'
+import Tag from 'antd/es/tag'
 import moment from 'moment'
 import React, { createContext, useCallback } from 'react'
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useHistory } from 'react-router-dom'
 import AnswerBlocker from '../../components/AnswerBlocker'
 import ArchiveDownload from '../../components/ArchiveDownload'
+import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
@@ -18,6 +20,7 @@ import StartEvaluationButton from '../../components/StartEvaluationButton'
 import TimeLimitTag, {
   EditableTimeLimitTag
 } from '../../components/time-limit/TimeLimitTag'
+import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
@@ -66,6 +69,13 @@ const TaskPage: React.FC = () => {
       answerUserId: isTeacher && userId ? unshorten(userId) : undefined
     }
   })
+
+  useAssignmentStatusChange(
+    result?.data?.task.assignment?.id,
+    useCallback(() => {
+      result.refetch()
+    }, [result])
+  )
 
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
   const [deleteAnswer, { loading: deletingAnswer }] = useDeleteAnswerMutation()
@@ -218,17 +228,15 @@ const TaskPage: React.FC = () => {
   }
 
   const renderTimeLimit = () => {
-    if (!editable || task.answer) {
+    if (!editable || answer) {
       return task.timeLimit ? (
         <TimeLimitTag
           timeLimit={task.timeLimit}
           deadline={
-            task.answer && task.answer.deadline
-              ? moment(task.answer.deadline)
-              : undefined
+            answer && answer.deadline ? moment(answer.deadline) : undefined
           }
         />
-      ) : null
+      ) : undefined
     }
 
     return (
@@ -239,6 +247,11 @@ const TaskPage: React.FC = () => {
       />
     )
   }
+
+  const tags = [
+    assignment ? <AssignmentStatusTag status={assignment.status} /> : undefined,
+    renderTimeLimit()
+  ].filter((it): it is React.ReactElement<Tag> => it !== undefined)
 
   return (
     <DifferentUserContext.Provider value={differentUser}>
@@ -251,7 +264,7 @@ const TaskPage: React.FC = () => {
             onChange={updater('title')}
           />
         }
-        subTitle={renderTimeLimit()}
+        tags={tags}
         breadcrumb={createBreadcrumb(createRoutes.forTask(task))}
         tabList={tabs}
         tabActiveKey={subPath.get()}

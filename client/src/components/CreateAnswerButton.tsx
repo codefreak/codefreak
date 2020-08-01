@@ -1,9 +1,10 @@
-import { Alert, Button, Modal } from 'antd'
+import { Alert, Button, Modal, Tooltip } from 'antd'
 import { ButtonProps } from 'antd/lib/button'
 import moment from 'moment'
 import React, { useState } from 'react'
 import {
   Assignment,
+  AssignmentStatus,
   CreateAnswerMutation,
   Task,
   useCreateAnswerMutation
@@ -14,7 +15,7 @@ import TimeLimitTag from './time-limit/TimeLimitTag'
 interface CreateAnswerButtonProps
   extends Omit<ButtonProps, 'onClick' | 'loading'> {
   task: Pick<Task, 'id' | 'timeLimit'>
-  assignment?: Pick<Assignment, 'deadline'>
+  assignment?: Pick<Assignment, 'deadline' | 'status'>
   onAnswerCreated?: (result: CreateAnswerMutation) => void
 }
 
@@ -44,6 +45,14 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
     icon: 'rocket',
     type: 'primary',
     ...customButtonProps
+  }
+
+  if (assignment && assignment.status !== AssignmentStatus.Open) {
+    return (
+      <Tooltip title="The assignment is not open!">
+        <Button {...buttonProps} disabled />
+      </Tooltip>
+    )
   }
 
   if (!task.timeLimit) {

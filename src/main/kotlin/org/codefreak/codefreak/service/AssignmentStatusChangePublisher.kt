@@ -49,8 +49,13 @@ class AssignmentStatusChangePublisher {
   @PostUpdate
   fun onAssignmentChanged(assignment: Assignment) {
     cancelAssignmentEvents(assignment)
-    if (assignment.status >= AssignmentStatus.ACTIVE) {
+    val status = assignment.status
+    if (status >= AssignmentStatus.ACTIVE) {
       scheduleAssignmentStatusEvents(assignment)
+    }
+    // trigger instant status events for ACTIVE and INACTIVE assignments
+    if (status <= AssignmentStatus.ACTIVE) {
+      eventPublisher.publishEvent(AssignmentStatusChangedEvent(assignment.id, status))
     }
   }
 
