@@ -187,8 +187,8 @@ class EvaluationMutation : BaseResolver(), Mutation {
   }
 
   @Secured(Authority.ROLE_TEACHER)
-  fun startAssignmentEvaluation(assignmentId: UUID): List<PendingEvaluationDto> = context {
-    serviceAccess.getService(EvaluationService::class).startAssignmentEvaluation(assignmentId).map {
+  fun startAssignmentEvaluation(assignmentId: UUID, force: Boolean): List<PendingEvaluationDto> = context {
+    serviceAccess.getService(EvaluationService::class).startAssignmentEvaluation(assignmentId, force).map {
       PendingEvaluationDto(it, this)
     }
   }

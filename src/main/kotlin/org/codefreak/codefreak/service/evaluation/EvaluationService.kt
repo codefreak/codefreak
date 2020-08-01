@@ -4,17 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import org.codefreak.codefreak.entity.Answer
+import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Feedback
+import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.AnswerDeadlineReachedEvent
 import org.codefreak.codefreak.service.AnswerService
+import org.codefreak.codefreak.service.AssignmentService
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.ContainerService
@@ -29,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 import java.util.UUID
 
 @Service
@@ -52,6 +56,9 @@ class EvaluationService : BaseService() {
   private lateinit var answerService: AnswerService
 
   @Autowired
+  private lateinit var assignmentService: AssignmentService
+
+  @Autowired
   private lateinit var evaluationQueue: EvaluationQueue
 
   @Autowired
@@ -68,7 +75,11 @@ class EvaluationService : BaseService() {
     private val objectMapper = ObjectMapper()
   }
 
-  fun startAssignmentEvaluation(assignmentId: UUID): List<Answer> {
+  @Transactional
+  fun startAssignmentEvaluation(assignmentId: UUID, force: Boolean = false): List<Answer> {
+    if (force) {
+      invalidateEvaluations(assignmentService.findAssignment(assignmentId))
+    }
     val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
     return submissions.flatMap { it.answers }.mapNotNull {
       try {
@@ -102,6 +113,14 @@ class EvaluationService : BaseService() {
         .map { if (it.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) createEvaluation(answer) else it }
         .orElseGet { createEvaluation(answer) }
   }
+
+  @Transactional
+  fun invalidateEvaluations(task: Task) {
+    task.evaluationSettingsChangedAt = Instant.now()
+  }
+
+  @Transactional
+  fun invalidateEvaluations(assignment: Assignment) = assignment.tasks.forEach(this::invalidateEvaluations)
 
   fun createEvaluation(answer: Answer): Evaluation {
     return evaluationRepository.save(Evaluation(answer, fileService.getCollectionMd5Digest(answer.id), answer.task.evaluationSettingsChangedAt))

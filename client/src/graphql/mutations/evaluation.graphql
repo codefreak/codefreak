@@ -4,8 +4,11 @@ mutation StartEvaluation($answerId: ID!) {
   }
 }
 
-mutation StartAssignmentEvaluation($assignmentId: ID!) {
-  startAssignmentEvaluation(assignmentId: $assignmentId) {
+mutation StartAssignmentEvaluation(
+  $assignmentId: ID!
+  $force: Boolean = false
+) {
+  startAssignmentEvaluation(assignmentId: $assignmentId, force: $force) {
     answer {
       id
     }
