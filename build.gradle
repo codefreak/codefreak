@@ -48,7 +48,7 @@ dependencies {
   implementation 'com.spotify:docker-client:8.15.1'
   implementation 'org.apache.commons:commons-compress:1.19'
   implementation 'org.apache.commons:commons-csv:1.7'
-  implementation 'io.sentry:sentry-logback:1.7.16'
+  implementation 'io.sentry:sentry-logback:1.7.30'
   implementation 'com.github.hsingh:java-shortuuid:2a4d72f'
   implementation 'com.github.Open-MBEE:junit-xml-parser:1.0.0'
   implementation 'org.mitre:openid-connect-client:1.3.3'
