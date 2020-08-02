@@ -12,7 +12,7 @@ plugins {
   id "org.sonarqube" version "2.7"
   id 'net.researchgate.release' version '2.6.0'
   id 'org.liquibase.gradle' version '2.0.1'
-  id 'com.google.cloud.tools.jib' version '2.2.0'
+  id 'com.google.cloud.tools.jib' version '2.4.0'
 }
 
 apply plugin: 'io.spring.dependency-management'
