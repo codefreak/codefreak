@@ -92,7 +92,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
     evaluationRunners
   } = result.data
 
-  const assignmentOpen = assignment !== null && assignment.status === 'OPEN'
+  const assignmentOpen = assignment?.status === 'OPEN'
 
   const handlePositionChange = (
     definition: EvaluationStepDefinition,

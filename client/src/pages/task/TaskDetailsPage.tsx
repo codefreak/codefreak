@@ -113,8 +113,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
     return details
   }
 
-  const assignmentOpen =
-    task.assignment !== null && task.assignment.status === 'OPEN'
+  const assignmentOpen = task.assignment?.status === 'OPEN'
 
   return (
     <Tabs
