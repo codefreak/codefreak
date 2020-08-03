@@ -89,7 +89,7 @@ dependencies {
   // workaround for https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server/issues/1468
   implementation 'org.springframework.security.oauth:spring-security-oauth2:2.1.5.RELEASE'
 
-  liquibaseRuntime 'org.liquibase.ext:liquibase-hibernate5:3.6'
+  liquibaseRuntime 'org.liquibase.ext:liquibase-hibernate5:3.10.2'
   liquibaseRuntime 'com.h2database:h2:1.4.200'
   liquibaseRuntime 'org.yaml:snakeyaml:1.15'
   liquibaseRuntime sourceSets.main.runtimeClasspath
