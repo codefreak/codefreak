@@ -411,10 +411,8 @@ const OpenAssignmentButton: React.FC<
     hideModal()
   }
 
-  const isInPast = (
-    date: Moment | null,
-    resolution?: unitOfTime.StartOf
-  ) => (date && date.isBefore(moment(), resolution)) || false
+  const isInPast = (date: Moment | null, resolution?: unitOfTime.StartOf) =>
+    (date && date.isBefore(moment(), resolution)) || false
 
   const openNow = () => {
     const variables = {
