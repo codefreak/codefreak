@@ -1,14 +1,14 @@
 package org.codefreak.codefreak.graphql
 
+import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.function.Consumer
+import javax.annotation.PostConstruct
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.util.ReflectionUtils
 import reactor.core.publisher.Flux
 import reactor.core.publisher.FluxSink
-import java.util.concurrent.Executors
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.function.Consumer
-import javax.annotation.PostConstruct
 
 // Based on https://developer.okta.com/blog/2018/09/24/reactive-apis-with-spring-webflux
 

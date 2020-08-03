@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.frontend
 
+import java.io.InputStream
+import java.io.OutputStream
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.service.AnswerService
@@ -12,8 +14,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
-import java.io.InputStream
-import java.io.OutputStream
 
 abstract class BaseController {
 

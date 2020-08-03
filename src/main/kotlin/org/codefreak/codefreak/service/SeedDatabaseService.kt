@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.service
 
+import java.io.ByteArrayOutputStream
+import java.time.Instant
 import org.codefreak.codefreak.Env
 import org.codefreak.codefreak.auth.Role
 import org.codefreak.codefreak.entity.Assignment
@@ -15,8 +17,6 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
-import java.io.ByteArrayOutputStream
-import java.time.Instant
 
 /**
  * Seed the database with some initial assignments

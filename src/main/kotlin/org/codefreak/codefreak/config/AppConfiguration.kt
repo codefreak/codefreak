@@ -1,5 +1,9 @@
 package org.codefreak.codefreak.config
 
+import java.time.ZoneId
+import java.util.Locale
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotEmpty
 import org.codefreak.codefreak.auth.AuthenticationMethod
 import org.codefreak.codefreak.auth.Role
 import org.jetbrains.annotations.NotNull
@@ -7,10 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
 import org.springframework.validation.annotation.Validated
-import java.time.ZoneId
-import java.util.Locale
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
 
 @Configuration("config")
 @ConfigurationProperties(prefix = "codefreak")

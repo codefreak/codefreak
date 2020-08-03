@@ -1,5 +1,10 @@
 package org.codefreak.codefreak.service.evaluation.runner
 
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.annotation.XmlElement
+import javax.xml.bind.annotation.XmlRootElement
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.EvaluationStep
@@ -12,11 +17,6 @@ import org.openmbee.junit.model.JUnitTestSuite
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 import org.springframework.util.StreamUtils
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.annotation.XmlElement
-import javax.xml.bind.annotation.XmlRootElement
 
 @Component
 class JUnitRunner : CommandLineRunner() {

@@ -1,5 +1,6 @@
 package org.codefreak.codefreak
 
+import java.time.Instant
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Submission
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
-import java.time.Instant
 
 @RunWith(SpringRunner::class)
 @SpringBootTest

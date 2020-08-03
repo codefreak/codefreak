@@ -1,9 +1,9 @@
 package org.codefreak.codefreak.service.evaluation
 
-import org.codefreak.codefreak.entity.Answer
-import org.codefreak.codefreak.entity.Feedback
 import kotlin.reflect.KClass
 import kotlin.reflect.full.safeCast
+import org.codefreak.codefreak.entity.Answer
+import org.codefreak.codefreak.entity.Feedback
 
 interface EvaluationRunner {
 

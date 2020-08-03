@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.frontend
 
+import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.service.ContainerService
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
-import java.util.UUID
 
 @Controller
 @RequestMapping("/api/answers")

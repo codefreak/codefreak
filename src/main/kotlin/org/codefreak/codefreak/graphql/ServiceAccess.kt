@@ -1,9 +1,9 @@
 package org.codefreak.codefreak.graphql
 
+import kotlin.reflect.KClass
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
-import kotlin.reflect.KClass
 
 /**
  * We use this for the GraphQL API to resolve dependencies at runtime. When the [SchemaPrinter] application is

@@ -2,6 +2,8 @@ package org.codefreak.codefreak.entity
 
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -11,8 +13,6 @@ import org.junit.Test
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 class AnswerTest {
   @Mock

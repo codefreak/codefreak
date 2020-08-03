@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.service.evaluation
 
+import java.util.Date
+import java.util.UUID
 import org.codefreak.codefreak.config.EvaluationConfiguration
 import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
 import org.slf4j.LoggerFactory
@@ -20,8 +22,6 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.util.Date
-import java.util.UUID
 
 @Component
 class EvaluationQueue : StepExecutionListener {

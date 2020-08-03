@@ -1,8 +1,5 @@
 package org.codefreak.codefreak.entity
 
-import org.codefreak.codefreak.service.AssignmentStatusChangePublisher
-import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.CreationTimestamp
 import java.time.Instant
 import java.util.SortedSet
 import javax.persistence.CascadeType
@@ -12,6 +9,9 @@ import javax.persistence.EntityListeners
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OrderBy
+import org.codefreak.codefreak.service.AssignmentStatusChangePublisher
+import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.CreationTimestamp
 
 @Entity
 @EntityListeners(AssignmentStatusChangePublisher::class)

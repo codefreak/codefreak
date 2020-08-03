@@ -1,13 +1,13 @@
 package org.codefreak.codefreak.service
 
+import java.io.OutputStream
+import java.net.URI
+import java.nio.file.Files
 import org.codefreak.codefreak.config.AppConfiguration
 import org.eclipse.jgit.api.Git
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
-import java.io.OutputStream
-import java.net.URI
-import java.nio.file.Files
 
 @Service
 class GitImportService : BaseService() {

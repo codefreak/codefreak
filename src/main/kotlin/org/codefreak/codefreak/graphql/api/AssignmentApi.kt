@@ -7,6 +7,10 @@ import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import com.expediagroup.graphql.spring.operations.Subscription
 import graphql.schema.DataFetchingEnvironment
+import java.io.ByteArrayOutputStream
+import java.time.Instant
+import java.util.UUID
+import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
@@ -15,23 +19,19 @@ import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
+import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AssignmentService
+import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.GitImportService
 import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
-import org.apache.catalina.core.ApplicationPart
-import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
-import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
-import java.io.ByteArrayOutputStream
-import java.time.Instant
-import java.util.UUID
 
 @GraphQLName("Assignment")
 class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext) : BaseDto(ctx) {

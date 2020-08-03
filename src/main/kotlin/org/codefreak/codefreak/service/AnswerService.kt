@@ -1,28 +1,28 @@
 package org.codefreak.codefreak.service
 
-import org.codefreak.codefreak.entity.Answer
-import org.codefreak.codefreak.entity.Submission
-import org.codefreak.codefreak.entity.User
-import org.codefreak.codefreak.repository.AnswerRepository
-import org.codefreak.codefreak.service.file.FileService
-import org.codefreak.codefreak.util.TarUtil
-import org.codefreak.codefreak.util.afterClose
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.codefreak.codefreak.auth.Authority
-import org.codefreak.codefreak.auth.hasAuthority
-import org.codefreak.codefreak.entity.AssignmentStatus
-import org.codefreak.codefreak.entity.Task
-import org.codefreak.codefreak.util.FrontendUtil
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.AntPathMatcher
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.codefreak.codefreak.auth.Authority
+import org.codefreak.codefreak.auth.hasAuthority
+import org.codefreak.codefreak.entity.Answer
+import org.codefreak.codefreak.entity.AssignmentStatus
+import org.codefreak.codefreak.entity.Submission
+import org.codefreak.codefreak.entity.Task
+import org.codefreak.codefreak.entity.User
+import org.codefreak.codefreak.repository.AnswerRepository
+import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.FrontendUtil
+import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.afterClose
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.AntPathMatcher
 
 @Service
 class AnswerService : BaseService() {

@@ -1,14 +1,14 @@
 package org.codefreak.codefreak.auth.lti
 
 import com.nimbusds.jwt.JWTClaimsSet
+import java.util.UUID
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 import org.codefreak.codefreak.service.LtiService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.web.util.UriComponentsBuilder
-import java.util.UUID
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class LtiAuthenticationSuccessHandler(defaultTargetUrl: String) :
     SimpleUrlAuthenticationSuccessHandler(defaultTargetUrl) {

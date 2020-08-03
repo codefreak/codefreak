@@ -1,11 +1,11 @@
 package org.codefreak.codefreak.util
 
-import org.apache.commons.io.input.ProxyInputStream
-import org.apache.commons.io.output.ProxyOutputStream
-import org.slf4j.Logger
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.Optional
+import org.apache.commons.io.input.ProxyInputStream
+import org.apache.commons.io.output.ProxyOutputStream
+import org.slf4j.Logger
 
 fun String.withoutTrailingSlash(): String = trimEnd('/')
 fun String.withTrailingSlash(): String = if (endsWith("/")) this else "$this/"

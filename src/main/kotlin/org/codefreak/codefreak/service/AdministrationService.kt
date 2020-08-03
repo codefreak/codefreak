@@ -1,11 +1,11 @@
 package org.codefreak.codefreak.service
 
+import javax.servlet.MultipartConfigElement
 import org.codefreak.codefreak.Env
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.core.env.Profiles
 import org.springframework.stereotype.Service
-import javax.servlet.MultipartConfigElement
 
 @Service
 class AdministrationService : BaseService() {
