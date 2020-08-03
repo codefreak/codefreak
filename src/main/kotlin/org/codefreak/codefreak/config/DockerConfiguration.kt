@@ -5,6 +5,7 @@ import com.spotify.docker.client.DefaultDockerClient
 import com.spotify.docker.client.DockerCertificates
 import com.spotify.docker.client.DockerCertificatesStore
 import com.spotify.docker.client.DockerClient
+import java.nio.file.Paths
 import org.codefreak.codefreak.service.DockerPublishReverseProxy
 import org.codefreak.codefreak.service.ReverseProxy
 import org.codefreak.codefreak.service.TraefikReverseProxy
@@ -13,7 +14,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.nio.file.Paths
 
 /**
  * Configure the Docker client

@@ -4,6 +4,10 @@ import com.expediagroup.graphql.extensions.print
 import com.expediagroup.graphql.spring.GraphQLConfigurationProperties
 import com.expediagroup.graphql.spring.SchemaAutoConfiguration
 import graphql.schema.GraphQLSchema
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import kotlin.system.exitProcess
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.WebApplicationType
@@ -11,10 +15,6 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileWriter
-import kotlin.system.exitProcess
 
 @ImportAutoConfiguration(SchemaAutoConfiguration::class)
 @ComponentScan("org.codefreak.codefreak.graphql")

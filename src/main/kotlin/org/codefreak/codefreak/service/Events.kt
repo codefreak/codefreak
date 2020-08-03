@@ -1,10 +1,10 @@
 package org.codefreak.codefreak.service
 
+import java.util.UUID
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.service.evaluation.PendingEvaluationStatus
 import org.springframework.context.ApplicationEvent
-import java.util.UUID
 
 class EvaluationFinishedEvent(val evaluation: Evaluation) : ApplicationEvent(evaluation)
 

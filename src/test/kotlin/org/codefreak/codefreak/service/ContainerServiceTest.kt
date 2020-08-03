@@ -3,6 +3,7 @@ package org.codefreak.codefreak.service
 import com.nhaarman.mockitokotlin2.eq
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
+import java.io.ByteArrayOutputStream
 import org.codefreak.codefreak.SpringTest
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.service.file.FileService
@@ -22,7 +23,6 @@ import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ClassPathResource
-import java.io.ByteArrayOutputStream
 
 internal class ContainerServiceTest : SpringTest() {
 
@@ -89,7 +89,7 @@ internal class ContainerServiceTest : SpringTest() {
     `when`(fileService.writeCollectionTar(eq(answer.id))).thenReturn(out)
     containerService.startIdeContainer(answer)
     containerService.saveAnswerFiles(answer)
-    //verify(fileService, times(1)).writeCollectionTar(answer.id)
+    // verify(fileService, times(1)).writeCollectionTar(answer.id)
     assertThat(out.toByteArray().size, greaterThan(0))
   }
 

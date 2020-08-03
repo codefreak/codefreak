@@ -1,5 +1,11 @@
 package org.codefreak.codefreak.service
 
+import java.time.Instant
+import java.util.UUID
+import java.util.concurrent.ScheduledFuture
+import javax.persistence.PostPersist
+import javax.persistence.PostUpdate
+import javax.persistence.PreRemove
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.slf4j.LoggerFactory
@@ -13,12 +19,6 @@ import org.springframework.core.annotation.Order
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
-import java.util.UUID
-import java.util.concurrent.ScheduledFuture
-import javax.persistence.PostPersist
-import javax.persistence.PostUpdate
-import javax.persistence.PreRemove
 
 @Component
 class AnswerDeadlinePublisher {

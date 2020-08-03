@@ -1,11 +1,11 @@
 package org.codefreak.codefreak.entity
 
+import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.UUID
 
 val ID1 = UUID(0, 0)
 val ID2 = UUID(0, 1)

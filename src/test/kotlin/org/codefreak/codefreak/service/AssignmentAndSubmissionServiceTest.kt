@@ -1,6 +1,8 @@
 package org.codefreak.codefreak.service
 
 import com.nhaarman.mockitokotlin2.any
+import java.util.Optional
+import java.util.UUID
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Submission
@@ -18,8 +20,6 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
-import java.util.UUID
 
 class AssignmentAndSubmissionServiceTest {
   private val assignment = Assignment("Assignment 1", User("user"), null)

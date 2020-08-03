@@ -1,8 +1,5 @@
 package org.codefreak.codefreak.entity
 
-import org.codefreak.codefreak.auth.Role
-import org.springframework.security.core.CredentialsContainer
-import org.springframework.security.core.userdetails.UserDetails
 import javax.persistence.CollectionTable
 import javax.persistence.Column
 import javax.persistence.ElementCollection
@@ -10,6 +7,9 @@ import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.persistence.FetchType
+import org.codefreak.codefreak.auth.Role
+import org.springframework.security.core.CredentialsContainer
+import org.springframework.security.core.userdetails.UserDetails
 
 @Entity
 class User(private val username: String) : BaseEntity(), UserDetails, CredentialsContainer {

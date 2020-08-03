@@ -5,6 +5,8 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
+import java.util.UUID
+import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.entity.Answer
@@ -14,16 +16,14 @@ import org.codefreak.codefreak.graphql.ResolverContext
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.GitImportService
+import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.orNull
-import org.apache.catalina.core.ApplicationPart
-import org.codefreak.codefreak.service.SubmissionService
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
 
 @GraphQLName("Answer")
 class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseDto(ctx) {

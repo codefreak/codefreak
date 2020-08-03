@@ -1,10 +1,10 @@
 package org.codefreak.codefreak.service
 
 import com.spotify.docker.client.messages.ContainerInfo
-import org.apache.commons.lang.RandomStringUtils
-import org.codefreak.codefreak.util.withoutTrailingSlash
 import java.security.SecureRandom
 import java.util.Random
+import org.apache.commons.lang.RandomStringUtils
+import org.codefreak.codefreak.util.withoutTrailingSlash
 
 class TraefikReverseProxy(
   private val url: String,

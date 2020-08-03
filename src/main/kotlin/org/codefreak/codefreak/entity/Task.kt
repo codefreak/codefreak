@@ -1,14 +1,14 @@
 package org.codefreak.codefreak.entity
 
-import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.Type
 import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.Type
 
 @Entity
 class Task(
@@ -39,7 +39,7 @@ class Task(
   /**
    * The task body/description of what to do
    */
-  @Type( type = "text" )
+  @Type(type = "text")
   var body: String? = null,
 
   /**

@@ -2,6 +2,7 @@ package org.codefreak.codefreak.config
 
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.JWK
+import java.security.KeyStore
 import org.codefreak.codefreak.auth.lti.IdCodeAuthRequestBuilder
 import org.codefreak.codefreak.auth.lti.LtiAuthenticationFilter
 import org.codefreak.codefreak.auth.lti.LtiAuthenticationProvider
@@ -32,7 +33,6 @@ import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
 import org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy
-import java.security.KeyStore
 
 @ConditionalOnProperty("codefreak.lti.enabled")
 @Configuration

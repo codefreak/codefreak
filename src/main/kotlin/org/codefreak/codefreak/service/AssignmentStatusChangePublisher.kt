@@ -1,5 +1,11 @@
 package org.codefreak.codefreak.service
 
+import java.time.Instant
+import java.util.UUID
+import java.util.concurrent.ScheduledFuture
+import javax.persistence.PostPersist
+import javax.persistence.PostUpdate
+import javax.persistence.PreRemove
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.repository.AssignmentRepository
@@ -12,12 +18,6 @@ import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
-import java.time.Instant
-import java.util.UUID
-import java.util.concurrent.ScheduledFuture
-import javax.persistence.PostPersist
-import javax.persistence.PostUpdate
-import javax.persistence.PreRemove
 
 @Component
 class AssignmentStatusChangePublisher {

@@ -8,6 +8,7 @@ import com.expediagroup.graphql.spring.operations.Subscription
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetchingEnvironment
+import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
@@ -34,7 +35,6 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import reactor.core.publisher.Flux
-import java.util.UUID
 
 @GraphQLName("PendingEvaluation")
 class PendingEvaluationDto(answerEntity: Answer, ctx: ResolverContext) : BaseDto(ctx) {
