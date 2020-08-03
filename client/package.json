@@ -67,7 +67,7 @@
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-react": "4.1.0",
-    "typescript": "3.9.5",
+    "typescript": "3.9.7",
     "use-persisted-state": "0.3.0",
     "webpack": "4.42.0"
   },
