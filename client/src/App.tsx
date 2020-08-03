@@ -1,5 +1,5 @@
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
-import { useApolloClient } from '@apollo/react-hooks'
+import { useApolloClient } from '@apollo/client'
 import { Spin } from 'antd'
 import React, { useEffect, useState } from 'react'
 import {
