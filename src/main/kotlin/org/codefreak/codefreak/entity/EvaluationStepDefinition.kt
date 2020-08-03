@@ -1,10 +1,10 @@
 package org.codefreak.codefreak.entity
 
-import org.hibernate.annotations.ColumnDefault
-import org.hibernate.annotations.Type
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
+import org.hibernate.annotations.ColumnDefault
+import org.hibernate.annotations.Type
 
 @Entity
 class EvaluationStepDefinition(

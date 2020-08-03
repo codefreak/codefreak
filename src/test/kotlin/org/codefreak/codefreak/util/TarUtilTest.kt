@@ -1,5 +1,8 @@
 package org.codefreak.codefreak.util
 
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.nio.file.Files
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
@@ -10,9 +13,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockPart
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.nio.file.Files
 
 internal class TarUtilTest {
 

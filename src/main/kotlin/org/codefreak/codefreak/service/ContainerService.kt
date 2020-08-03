@@ -10,6 +10,12 @@ import com.spotify.docker.client.DockerClient.RemoveContainerParam.removeVolumes
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.HostConfig
+import java.io.InputStream
+import java.time.Instant
+import java.util.Date
+import java.util.UUID
+import java.util.regex.Pattern
+import javax.ws.rs.ProcessingException
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Task
@@ -24,12 +30,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StreamUtils
-import java.io.InputStream
-import java.time.Instant
-import java.util.Date
-import java.util.UUID
-import java.util.regex.Pattern
-import javax.ws.rs.ProcessingException
 
 @Service
 class ContainerService : BaseService() {

@@ -2,6 +2,15 @@ package org.codefreak.codefreak.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.UUID
+import javax.servlet.http.Part
 import org.apache.commons.compress.archivers.ArchiveException
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
@@ -14,15 +23,6 @@ import org.apache.commons.compress.compressors.CompressorException
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.utils.IOUtils
 import org.springframework.util.StreamUtils
-import java.io.BufferedInputStream
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.UUID
-import javax.servlet.http.Part
 
 object TarUtil {
   class PosixTarArchiveOutputStream(out: OutputStream) : TarArchiveOutputStream(out) {

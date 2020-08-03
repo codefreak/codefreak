@@ -2,10 +2,10 @@ package org.codefreak.codefreak.graphql
 
 import graphql.schema.GraphQLScalarType
 import graphql.servlet.core.ApolloScalars
-import org.apache.catalina.core.ApplicationPart
 import java.time.Instant
 import java.util.UUID
 import kotlin.reflect.KClassifier
+import org.apache.catalina.core.ApplicationPart
 
 object ScalarTypes {
   private val scalars = mapOf(

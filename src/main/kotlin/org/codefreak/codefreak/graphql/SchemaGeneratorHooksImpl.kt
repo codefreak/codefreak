@@ -2,8 +2,8 @@ package org.codefreak.codefreak.graphql
 
 import com.expediagroup.graphql.hooks.SchemaGeneratorHooks
 import graphql.schema.GraphQLType
-import org.springframework.stereotype.Component
 import kotlin.reflect.KType
+import org.springframework.stereotype.Component
 
 @Component
 class SchemaGeneratorHooksImpl : SchemaGeneratorHooks {

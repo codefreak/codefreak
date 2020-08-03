@@ -3,16 +3,16 @@ package org.codefreak.codefreak.service
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import java.util.Date
+import java.util.UUID
+import net.minidev.json.JSONArray
 import org.codefreak.codefreak.entity.CachedJwtClaimsSet
 import org.codefreak.codefreak.repository.CachedJwtClaimsSetRepository
-import net.minidev.json.JSONArray
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.util.DigestUtils.md5DigestAsHex
-import java.util.Date
-import java.util.UUID
 
 @Service
 @ConditionalOnProperty("codefreak.lti.enabled")

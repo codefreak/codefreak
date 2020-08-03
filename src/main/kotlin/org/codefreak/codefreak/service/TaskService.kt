@@ -2,6 +2,9 @@ package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import java.io.ByteArrayOutputStream
+import java.time.Instant
+import java.util.UUID
 import liquibase.util.StreamUtil
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -23,9 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.ByteArrayOutputStream
-import java.time.Instant
-import java.util.UUID
 
 @Service
 class

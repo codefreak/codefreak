@@ -1,6 +1,7 @@
 package org.codefreak.codefreak.graphql.api
 
 import com.expediagroup.graphql.spring.operations.Mutation
+import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.service.AnswerService
@@ -8,7 +9,6 @@ import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.TaskService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
 
 @Component
 class IdeMutation : BaseResolver(), Mutation {

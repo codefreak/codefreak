@@ -10,6 +10,11 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.JWTParser
 import com.nimbusds.jwt.PlainJWT
 import com.nimbusds.jwt.SignedJWT
+import java.text.ParseException
+import java.util.Date
+import java.util.UUID
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.HttpClientBuilder
@@ -25,11 +30,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
-import java.text.ParseException
-import java.util.Date
-import java.util.UUID
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
 

@@ -4,11 +4,11 @@ import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Pointcut
+import org.codefreak.codefreak.auth.NotAuthenticatedException
 import org.codefreak.codefreak.util.FrontendUtil
 import org.springframework.core.annotation.Order
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
-import org.codefreak.codefreak.auth.NotAuthenticatedException
 
 /**
  * This aspect is executed for all GraphQL resolver methods that use method security.

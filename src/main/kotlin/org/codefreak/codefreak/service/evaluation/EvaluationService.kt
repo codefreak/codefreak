@@ -3,6 +3,8 @@ package org.codefreak.codefreak.service.evaluation
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
+import java.time.Instant
+import java.util.UUID
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.AssignmentStatus
@@ -32,8 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
-import java.util.UUID
 
 @Service
 class EvaluationService : BaseService() {

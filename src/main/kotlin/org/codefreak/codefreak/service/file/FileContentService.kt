@@ -1,15 +1,15 @@
 package org.codefreak.codefreak.service.file
 
-import org.codefreak.codefreak.service.BaseService
-import org.codefreak.codefreak.util.TarUtil
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
-import org.springframework.util.StreamUtils
 import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.util.UUID
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.codefreak.codefreak.service.BaseService
+import org.codefreak.codefreak.util.TarUtil
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import org.springframework.util.StreamUtils
 
 @Service
 class FileContentService : BaseService() {

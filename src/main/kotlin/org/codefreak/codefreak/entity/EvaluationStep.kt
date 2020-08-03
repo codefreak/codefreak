@@ -1,6 +1,5 @@
 package org.codefreak.codefreak.entity
 
-import org.hibernate.annotations.Type
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -10,6 +9,7 @@ import javax.persistence.FetchType
 import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import org.hibernate.annotations.Type
 
 /**
  * Each Evaluation is made up of several EvaluationSteps that ar running in parallel.
