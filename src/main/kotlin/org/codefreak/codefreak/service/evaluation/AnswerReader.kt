@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service.evaluation
 
+import java.util.UUID
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.springframework.batch.core.configuration.annotation.StepScope
@@ -8,7 +9,6 @@ import org.springframework.batch.item.ParseException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 @StepScope

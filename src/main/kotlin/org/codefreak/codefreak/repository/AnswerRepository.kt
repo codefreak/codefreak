@@ -1,12 +1,12 @@
 package org.codefreak.codefreak.repository
 
+import java.util.Optional
+import java.util.UUID
 import org.codefreak.codefreak.entity.Answer
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
-import java.util.Optional
-import java.util.UUID
 
 @Repository
 interface AnswerRepository : CrudRepository<Answer, UUID> {

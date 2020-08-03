@@ -1,26 +1,26 @@
 package org.codefreak.codefreak.config
 
 import org.codefreak.codefreak.auth.AuthenticationMethod
-import org.codefreak.codefreak.auth.SimpleUserDetailsService
 import org.codefreak.codefreak.auth.LdapUserDetailsContextMapper
+import org.codefreak.codefreak.auth.SimpleUserDetailsService
 import org.codefreak.codefreak.service.UserService
 import org.codefreak.codefreak.util.withTrailingSlash
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.BeanIds
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.session.SessionRegistry
+import org.springframework.security.core.session.SessionRegistryImpl
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider
-import org.springframework.security.core.session.SessionRegistryImpl
-import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.web.session.HttpSessionEventPublisher
-import org.springframework.boot.web.servlet.ServletListenerRegistrationBean
-import org.springframework.security.config.annotation.web.builders.WebSecurity
 
 @Configuration
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {

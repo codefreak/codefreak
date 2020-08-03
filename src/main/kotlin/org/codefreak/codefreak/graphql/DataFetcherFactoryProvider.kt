@@ -5,9 +5,9 @@ import com.expediagroup.graphql.execution.KotlinDataFetcherFactoryProvider
 import com.expediagroup.graphql.hooks.SchemaGeneratorHooks
 import graphql.schema.DataFetcherFactories
 import graphql.schema.DataFetcherFactory
+import kotlin.reflect.KFunction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import kotlin.reflect.KFunction
 
 /**
  * Workaround for https://github.com/ExpediaGroup/graphql-kotlin/issues/518

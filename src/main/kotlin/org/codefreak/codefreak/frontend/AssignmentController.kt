@@ -1,5 +1,10 @@
 package org.codefreak.codefreak.frontend
 
+import java.io.ByteArrayInputStream
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
+import java.util.UUID
+import kotlin.concurrent.thread
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.entity.Assignment
@@ -12,11 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
-import java.io.ByteArrayInputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
-import java.util.UUID
-import kotlin.concurrent.thread
 
 @Controller
 @RequestMapping("/api/assignments")

@@ -5,6 +5,8 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
+import java.io.ByteArrayOutputStream
+import java.util.UUID
 import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
@@ -23,8 +25,6 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.io.ByteArrayOutputStream
-import java.util.UUID
 
 @GraphQLName("Task")
 class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(ctx) {

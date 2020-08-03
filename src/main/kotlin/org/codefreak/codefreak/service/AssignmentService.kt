@@ -2,23 +2,23 @@ package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.lang.Exception
+import java.util.UUID
+import liquibase.util.StreamUtil
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
-import liquibase.util.StreamUtil
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.lang.Exception
-import java.util.UUID
 
 @Service
 class AssignmentService : BaseService() {

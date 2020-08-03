@@ -1,5 +1,8 @@
 package org.codefreak.codefreak.service
 
+import java.io.OutputStream
+import java.util.Optional
+import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Submission
@@ -11,9 +14,6 @@ import org.codefreak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.OutputStream
-import java.util.Optional
-import java.util.UUID
 
 @Service
 class SubmissionService : BaseService() {

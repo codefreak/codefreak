@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service.evaluation.runner
 
+import java.io.InputStream
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.service.ContainerService
@@ -8,7 +9,6 @@ import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
-import java.io.InputStream
 
 @Component
 class CommandLineRunner : EvaluationRunner {

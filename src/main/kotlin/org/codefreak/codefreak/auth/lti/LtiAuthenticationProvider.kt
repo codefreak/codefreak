@@ -15,7 +15,7 @@ class LtiAuthenticationProvider(private val userService: UserService) : OIDCAuth
   private val roleMap = mapOf(
       "http://purl.imsglobal.org/vocab/lis/v2/system/person#Administrator" to Role.ADMIN
       // Memberships depend on the context (course) and cannot be assigned as global role
-      //"http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor" to Role.TEACHER
+      // "http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor" to Role.TEACHER
   )
 
   /**

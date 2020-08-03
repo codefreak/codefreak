@@ -411,10 +411,8 @@ const OpenAssignmentButton: React.FC<
     hideModal()
   }
 
-  const isInPast = (
-    date: Moment | undefined,
-    resolution?: unitOfTime.StartOf
-  ) => (date && date.isBefore(moment(), resolution)) || false
+  const isInPast = (date: Moment | null, resolution?: unitOfTime.StartOf) =>
+    (date && date.isBefore(moment(), resolution)) || false
 
   const openNow = () => {
     const variables = {
@@ -429,7 +427,7 @@ const OpenAssignmentButton: React.FC<
   }
 
   const onChangeDate = (date: Moment | null) => date && setFrom(date)
-  const isBeforeToday = (date?: Moment) => isInPast(date, 'days')
+  const isBeforeToday = (date: Moment | null) => isInPast(date, 'days')
   return (
     <>
       <Dropdown.Button

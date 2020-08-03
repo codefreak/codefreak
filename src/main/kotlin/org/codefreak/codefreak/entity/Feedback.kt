@@ -1,6 +1,5 @@
 package org.codefreak.codefreak.entity
 
-import org.hibernate.annotations.Type
 import javax.persistence.Column
 import javax.persistence.Embeddable
 import javax.persistence.Embedded
@@ -9,6 +8,7 @@ import javax.persistence.EnumType
 import javax.persistence.Enumerated
 import javax.persistence.Lob
 import javax.persistence.ManyToOne
+import org.hibernate.annotations.Type
 
 @Entity
 class Feedback(

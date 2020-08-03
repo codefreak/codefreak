@@ -1,10 +1,10 @@
 package org.codefreak.codefreak.service.file
 
-import org.springframework.util.DigestUtils
-import org.springframework.util.StreamUtils
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
+import org.springframework.util.DigestUtils
+import org.springframework.util.StreamUtils
 
 interface FileService {
   fun readCollectionTar(collectionId: UUID): InputStream

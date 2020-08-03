@@ -1,8 +1,8 @@
 package org.codefreak.codefreak.entity
 
-import org.hibernate.annotations.Type
 import java.util.UUID
 import javax.persistence.Entity
+import org.hibernate.annotations.Type
 
 @Entity
 class FileCollection(id: UUID) : BaseEntity() {

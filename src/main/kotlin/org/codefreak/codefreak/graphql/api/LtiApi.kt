@@ -1,6 +1,7 @@
 package org.codefreak.codefreak.graphql.api
 
 import com.expediagroup.graphql.spring.operations.Mutation
+import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.graphql.BaseResolver
@@ -10,7 +11,6 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import java.util.UUID
 
 class LtiDeepLinkResponse(val signedJwt: String, val redirectUrl: String)
 
