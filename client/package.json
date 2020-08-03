@@ -64,7 +64,7 @@
     "subscriptions-transport-ws": "0.9.17",
     "svg-react-loader": "0.4.6",
     "ts-debounce": "2.0.1",
-    "tslint": "5.20.0",
+    "tslint": "5.20.1",
     "tslint-config-prettier": "1.18.0",
     "tslint-react": "4.1.0",
     "typescript": "3.9.5",
