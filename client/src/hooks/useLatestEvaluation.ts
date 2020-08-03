@@ -10,22 +10,24 @@ const useLatestEvaluation = (
 ): { summary: EvaluationStepResult | null; loading: boolean } => {
   const [summary, setSummary] = useState<EvaluationStepResult | null>(null)
 
-  const latesEvaluation = useGetLatestEvaluationStatusQuery({
+  const latestEvaluation = useGetLatestEvaluationStatusQuery({
     variables: { answerId },
     fetchPolicy: 'cache-and-network'
   })
 
   useEffect(() => {
-    if (latesEvaluation.data && latesEvaluation.data.answer.latestEvaluation) {
+    if (
+      latestEvaluation.data &&
+      latestEvaluation.data.answer.latestEvaluation
+    ) {
       setSummary(
-        latesEvaluation.data.answer.latestEvaluation.stepsResultSummary
+        latestEvaluation.data.answer.latestEvaluation.stepsResultSummary
       )
       // if there is no latest evaluation, stay at null
     }
-  }, [setSummary, latesEvaluation.data])
+  }, [setSummary, latestEvaluation.data])
 
   useEvaluationFinishedSubscription({
-    variables: { answerId },
     onSubscriptionData: data => {
       if (data.subscriptionData.data) {
         setSummary(
@@ -35,7 +37,7 @@ const useLatestEvaluation = (
     }
   })
 
-  return { summary, loading: latesEvaluation.loading }
+  return { summary, loading: latestEvaluation.loading }
 }
 
 export default useLatestEvaluation

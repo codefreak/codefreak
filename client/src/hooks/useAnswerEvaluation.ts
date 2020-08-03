@@ -8,7 +8,7 @@ import usePendingEvaluationUpdated from './usePendingEvaluationUpdated'
 
 const useAnswerEvaluation = (
   answerId: string,
-  initialLatestEvaluation: LatestEvaluationFragment | null,
+  initialLatestEvaluation: LatestEvaluationFragment | null | undefined,
   initialPendingEvaluationStatus: PendingEvaluationStatus | null
 ) => {
   const [
@@ -24,10 +24,9 @@ const useAnswerEvaluation = (
     }
   })
 
-  const [
-    latestEvaluation,
-    setLatestEvaluation
-  ] = useState<LatestEvaluationFragment | null>(initialLatestEvaluation)
+  const [latestEvaluation, setLatestEvaluation] = useState<
+    LatestEvaluationFragment | null | undefined
+  >(initialLatestEvaluation)
   const [
     fetchLatestEvaluation,
     latestEvaluationQuery
