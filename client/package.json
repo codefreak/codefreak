@@ -27,7 +27,7 @@
     "@types/react-syntax-highlighter": "11.0.4",
     "@types/use-persisted-state": "0.3.0",
     "a11y-react-emoji": "1.1.2",
-    "antd": "3.24.3",
+    "antd": "3.26.18",
     "apollo-cache-inmemory": "1.6.6",
     "apollo-client": "2.6.10",
     "apollo-link": "1.2.14",
