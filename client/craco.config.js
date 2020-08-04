@@ -15,13 +15,15 @@ module.exports = {
   ],
   webpack: {
     plugins: [
-      new CopyPlugin([
-        {
-          from: 'node_modules/bootstrap-less/fonts/*',
-          to: 'fonts',
-          flatten: true
-        }
-      ]),
+      new CopyPlugin({
+        patterns: [
+          {
+            from: 'node_modules/bootstrap-less/fonts/*',
+            to: 'fonts',
+            flatten: true
+          }
+        ]
+      }),
       new GitRevisionPlugin(),
       new DefinePlugin({
         'process.env.BUILD_YEAR': JSON.stringify(new Date().getFullYear()),
