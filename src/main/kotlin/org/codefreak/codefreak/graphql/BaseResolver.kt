@@ -1,8 +1,8 @@
 package org.codefreak.codefreak.graphql
 
 import com.expediagroup.graphql.annotations.GraphQLIgnore
+import graphql.kickstart.servlet.context.GraphQLWebSocketContext
 import graphql.schema.DataFetchingEnvironment
-import graphql.servlet.context.GraphQLWebSocketContext
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.NotAuthenticatedException
 import org.codefreak.codefreak.entity.User
