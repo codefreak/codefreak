@@ -1,4 +1,4 @@
-import { useHistory, useLocation, useRouteMatch } from 'react-router'
+import { useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 
 interface StringMap {
   [key: string]: string

@@ -1,7 +1,7 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Card, Modal } from 'antd'
 import React from 'react'
-import { useHistory } from 'react-router'
+import { useHistory } from 'react-router-dom'
 import FileImport from '../../components/FileImport'
 import HelpButton from '../../components/HelpButton'
 import {

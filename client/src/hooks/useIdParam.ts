@@ -1,4 +1,4 @@
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 import { unshorten } from '../services/short-id'
 
 const useIdParam = () => {
