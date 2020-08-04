@@ -45,7 +45,7 @@ const alphabeticSorter = (
   return valA.localeCompare(valB)
 }
 
-const SEARCHABLE_USER_COLUMNS: Array<keyof User> = [
+const SEARCHABLE_USER_COLUMNS: (keyof User)[] = [
   'username',
   'firstName',
   'lastName'
