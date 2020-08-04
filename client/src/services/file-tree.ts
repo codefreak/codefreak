@@ -7,12 +7,12 @@ export interface Node {
 export interface TreeNode<T> {
   path: string
   originalNode?: T
-  children?: Array<TreeNode<T>>
+  children?: TreeNode<T>[]
 }
 
 interface RootNode<T> extends TreeNode<T> {
   path: ''
-  children: Array<TreeNode<T>>
+  children: TreeNode<T>[]
 }
 
 const abspath = (path: string) => resolve('/', path)
@@ -39,7 +39,7 @@ const dirnames = (path: string): string[] => {
  *
  * @param nodes
  */
-export const fileTree = <T extends Node>(nodes: T[]): Array<TreeNode<T>> => {
+export const fileTree = <T extends Node>(nodes: T[]): TreeNode<T>[] => {
   if (nodes.length === 0) {
     return []
   }
@@ -113,9 +113,9 @@ export const treePathSorter = <T>(a: TreeNode<T>, b: TreeNode<T>) =>
  * @param sortFunction Optional custom function
  */
 export const sortTree = <T>(
-  nodes: Array<TreeNode<T>>,
+  nodes: TreeNode<T>[],
   sortFunction: TreeSortFunction<T> = treePathSorter
-): Array<TreeNode<T>> => {
+): TreeNode<T>[] => {
   return nodes
     .map(node => {
       if (!node.children) {
