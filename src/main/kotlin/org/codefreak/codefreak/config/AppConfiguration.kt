@@ -8,11 +8,11 @@ import org.codefreak.codefreak.auth.AuthenticationMethod
 import org.codefreak.codefreak.auth.Role
 import org.jetbrains.annotations.NotNull
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
+import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 
-@Configuration("config")
+@Component("config")
 @ConfigurationProperties(prefix = "codefreak")
 @Validated
 class AppConfiguration {
