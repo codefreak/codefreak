@@ -18,7 +18,7 @@
     "@types/highlight.js": "9.12.4",
     "@types/jest": "26.0.9",
     "@types/loadable__component": "5.13.0",
-    "@types/node": "12.12.53",
+    "@types/node": "12.12.54",
     "@types/react": "16.9.44",
     "@types/react-dom": "16.9.8",
     "@types/react-helmet": "6.1.0",
