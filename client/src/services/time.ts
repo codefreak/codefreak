@@ -33,7 +33,7 @@ export const componentsToRelTime = (
   if (forceSeconds || seconds > 0) {
     str += `${zeroPad(seconds, 2)}s`
   }
-  return str.trimEnd()
+  return str.trimRight()
 }
 
 export const secondsToRelTime = (sec: number) =>
