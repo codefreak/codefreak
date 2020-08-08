@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@ant-design/pro-layout": "4.8.3",
+    "@ant-design/pro-layout": "4.11.4",
     "@apollo/react-common": "3.1.4",
     "@apollo/react-hooks": "3.1.5",
     "@codefreak/docs": "file:../docs",
