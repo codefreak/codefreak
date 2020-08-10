@@ -98,7 +98,7 @@ class AnswerMutation : BaseResolver(), Mutation {
   @Secured(Authority.ROLE_TEACHER)
   fun deleteAnswer(id: UUID): Boolean = context {
     val answer = serviceAccess.getService(AnswerService::class).findAnswer(id)
-    authorization.requireIsCurrentUser(answer.submission.user)
+    authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_ADMIN)
     check(!serviceAccess.getService(EvaluationService::class).isEvaluationPending(answer.id)) {
       "Answer cannot be deleted while evaluation is running"
     }
