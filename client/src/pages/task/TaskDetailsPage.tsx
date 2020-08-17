@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
 import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
+import StartSubmissionEvaluationButton from '../../components/StartSubmissionEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import {
@@ -157,14 +158,23 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
               message="Warning"
               description={
                 <>
-                  The assignment is already open. If you make changes to files,
-                  they do not affect students that already started to work on
-                  this task. Only students that start the task after the change
-                  will get the updated files. Hidden and protected files are
-                  updated for everyone but only in new evaluations. Past
-                  evaluations are not affected.{' '}
-                  <Checkbox onChange={onSureToEditFilesChange} /> I understand
-                  this and want to do it anyway
+                  <p>
+                    The assignment is already open. If you make changes to
+                    files, they do not affect students that already started to
+                    work on this task. Only students that start the task after
+                    the change will get the updated files. Hidden and protected
+                    files are updated for everyone but only in new evaluations.
+                    Past evaluations are not affected.
+                  </p>
+                  <p>
+                    After you made changes to the files please click the
+                    evaluation button to check all answers again!
+                  </p>
+                  <p>
+                    <Checkbox onChange={onSureToEditFilesChange}>
+                      I understand this and want to do it anyway
+                    </Checkbox>
+                  </p>
                 </>
               }
               type="warning"
@@ -181,9 +191,20 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                 icon="edit"
                 disabled={assignmentOpen && !sureToEditFiles}
               >
-                Open task files in IDE
+                Edit task files in IDE
               </Button>
-            </Link>
+            </Link>{' '}
+            {task.assignment?.id && (
+              <StartSubmissionEvaluationButton
+                assignmentId={task.assignment.id}
+                invalidateTask={task.id}
+                disabled={assignmentOpen && !sureToEditFiles}
+                type="primary"
+                icon="sync"
+              >
+                Evaluate all answers of this task
+              </StartSubmissionEvaluationButton>
+            )}
           </p>
           <Row gutter={16}>
             <Col span={12}>

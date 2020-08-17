@@ -1,22 +1,10 @@
-import {
-  Button,
-  Col,
-  Dropdown,
-  Icon,
-  Input,
-  Menu,
-  message,
-  Row,
-  Table,
-  Tooltip
-} from 'antd'
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import { Button, Col, Icon, Input, Row, Table, Tooltip } from 'antd'
+import React, { ChangeEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult,
-  PendingEvaluationStatus,
-  useStartAssignmentEvaluationMutation
+  PendingEvaluationStatus
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { getEntityPath } from '../services/entity-path'
@@ -75,34 +63,6 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     setSearchCriteria(e.target.value)
   }
 
-  const [
-    startAssignmentEvaluation,
-    assignmentEvaluationResult
-  ] = useStartAssignmentEvaluationMutation()
-
-  const evaluateAll = () =>
-    startAssignmentEvaluation({
-      variables: { assignmentId: assignment.id }
-    })
-  const forceEvaluateAll = () =>
-    startAssignmentEvaluation({
-      variables: { force: true, assignmentId: assignment.id }
-    })
-
-  // show message with number of queued evaluations
-  useEffect(() => {
-    if (assignmentEvaluationResult.data) {
-      const {
-        startAssignmentEvaluation: queuedEvaluations
-      } = assignmentEvaluationResult.data
-      if (queuedEvaluations.length) {
-        message.success(`Queued ${queuedEvaluations.length} evaluation(s)`)
-      } else {
-        message.info(`No new evaluations queued`)
-      }
-    }
-  }, [assignmentEvaluationResult])
-
   const titleFunc = () => {
     return (
       <Row>
@@ -115,28 +75,6 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
           />
         </Col>
         <Col span={18} style={{ textAlign: 'right' }}>
-          <Button.Group>
-            <Button
-              loading={assignmentEvaluationResult.loading}
-              onClick={evaluateAll}
-              type="default"
-              icon="reload"
-            >
-              Evaluate all submissions
-            </Button>
-            <Dropdown
-              placement="bottomRight"
-              overlay={
-                <Menu>
-                  <Menu.Item key="force" onClick={forceEvaluateAll}>
-                    Force (re-)evaluation of all submissions
-                  </Menu.Item>
-                </Menu>
-              }
-            >
-              <Button icon="more" />
-            </Dropdown>
-          </Button.Group>
           <Button
             type="default"
             href={`${assignment.submissionsDownloadUrl}.csv`}
@@ -145,7 +83,7 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
             Download results as .csv
           </Button>
           <ArchiveDownload url={assignment.submissionsDownloadUrl}>
-            Download all submissions…
+            Download files of all submissions…
           </ArchiveDownload>
         </Col>
       </Row>
