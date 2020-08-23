@@ -1,4 +1,5 @@
 * For Teachers
 ** xref:for-teachers:basics.adoc[Basics]
 ** xref:for-teachers:assignments.adoc[Creating Assignments]
+** xref:for-teachers:evaluation-types.adoc[Evaluation Types]
 ** xref:for-teachers:definitions.adoc[Definition Files]
