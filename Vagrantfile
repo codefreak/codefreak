@@ -27,6 +27,7 @@ Vagrant.configure("2") do |config|
     # Run Traefik as reverse proxy inside the VM
     # It is available on port 8081 on the host
     d.run "traefik",
+      image: "traefik:1.7",
       cmd: "--loglevel=info --docker=true --docker.exposedbydefault=false",
       args: "-p 80:80 -v /var/run/docker.sock:/var/run/docker.sock"
     d.run "portainer/portainer", # credentials admin:admin
