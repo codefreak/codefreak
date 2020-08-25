@@ -30,7 +30,7 @@ class JUnitRunner : CommandLineRunner() {
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     val resultsPath = options.get("results-path", String::class) ?: "build/test-results/test"
-    val resultsPattern = (TarUtil.normalizeEntryName(resultsPath).withTrailingSlash() + "TEST-.+\\.xml").toRegex()
+    val resultsPattern = TarUtil.normalizeEntryName(resultsPath.withTrailingSlash() + "TEST-.+\\.xml").toRegex()
     val defaultOptions = mapOf(
         "image" to "gradle",
         "project-path" to "/home/gradle/project",
