@@ -12,11 +12,8 @@ class LtiAuthenticationProvider(private val userService: UserService) : OIDCAuth
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  private val roleMap = mapOf(
-      "http://purl.imsglobal.org/vocab/lis/v2/system/person#Administrator" to Role.ADMIN
-      // Memberships depend on the context (course) and cannot be assigned as global role
-      // "http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor" to Role.TEACHER
-  )
+  // Role mapping is currently disabled because they are course-based and we only support global roles
+  private val roleMap = mapOf<String, Role>()
 
   /**
    * Authenticate the user based on the data we received via JWT
@@ -44,14 +41,14 @@ class LtiAuthenticationProvider(private val userService: UserService) : OIDCAuth
       firstName = claims.getStringClaim("given_name")
       lastName = claims.getStringClaim("family_name")
     }
-    // roles from LTI should not be persisted
-    user.roles = roles.toMutableSet()
+    // merge roles from LTI and roles from DB
+    user.roles.addAll(roles)
     return user
   }
 
   private fun buildRoles(claims: JWTClaimsSet): List<Role> {
     val roles = claims.getStringArrayClaim("https://purl.imsglobal.org/spec/lti/claim/roles")
-    return roles.mapNotNull { role -> roleMap[role] }
+    return roles.mapNotNull { role -> roleMap[role] }.ifEmpty { listOf(Role.STUDENT) }
   }
 
   override fun supports(authentication: Class<*>?): Boolean {
