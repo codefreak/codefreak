@@ -1,45 +1,119 @@
 = Installation Guide
 
-There are various methods to run the application in production. We only support the Docker/docker-compose setup.
-If you plan to run the application directly on a host-system you should know what you are doing. If you are looking
-for a development setup please take a look at the xref:for-developers:development.adoc[Development] section.
+There are various methods to run the application in production.
+We only support the Docker/docker-compose setup.
+If you plan to run the application directly on a host-system you should know what you are doing.
+If you are looking for a development setup please take a look at the xref:for-developers:development.adoc[Development] section.
 
 == Prerequisites
+
+For production usage you should run the Code FREAK backend application and the dedicated Docker daemon it connects to on different hosts.
+
 === Backend application:
 
-* A Docker host/daemon
-* About 1-2GB RAM
+Because the backend application is provided as Docker image you need a running installation of Docker on your server.
+The application itself is not demanding many resources.
+A single CPU core and about 1GiB of RAM should be sufficient.
 
 === Dedicated Docker host:
 
-* Separated Docker daemon that does not run on the same host as the backend application
-* Lots of memory. You should plan 3-4GB RAM per concurrent user (depending on the
-programming language). We are working on reducing the RAM usage!
-* About 1 CPU Core / 10 concurrent users
+The dedicated Docker host is used to run the web IDE instances and the evaluation.
+Because the containers will run arbitrary untrusted code from students you should take additional security measures to secure this machine.
+Especially the VSCode web IDE will require lots of memory (depending on the programming language).
+Some tests have shown that Java projects can consume more than 3GB of RAM per user.
+Simple C projects will only require about 500MB RAM.
+Depending on the programming languages you should plan the required resources accordingly.
+
+TIP: We are working on an alternative IDE that reduces the resource usage per user.
+
+=== Postgres Database
+
+Code FREAK uses Postgres to store its data and files.
+You can either use a dedicated/managed database host or start a database container next to the backend application.
+Check out the xref:for-admins:configuration.adoc#_database[configuration docs] on how to configure the database connection.
 
 == Preparing the Docker daemon
-Docker allows to connect via HTTP/TLS to the integrated API. This requires to set up a PKI for certificate-management.
+
+The dedicated Docker instance will run on a different machine.
+Docker exposes an API that Code FREAK speaks to.
+By default it will search for a UNIX Domain Socket located at `/var/run/docker.sock`.
+If you run the CF backend and Docker host on two different machines you will have to enable the HTTP API of Docker.
+The communication than runs over TCP and should be secured by TLS.
 There is an extensive documentation on how to do this in the official Docker docs.
-https://docs.docker.com/engine/security/https/[Please follow this article] carefully. As the result you should have
-a `ca.pem`, `cert.pem` and `key.pem` file that can be used on your backend application host.
+https://docs.docker.com/engine/security/https/[Please follow this article] carefully.
+As the result you should have a `ca.pem`, `cert.pem` and `key.pem` file that can be used on your backend application host.
+You need these files for the following steps.
 
-== Set up using Docker Compose
-We have included a sample `docker-compose.yml` in the main repository. This should work fine out-of-the-box but uses
-a Docker-in-Docker container which is not suited for development. Please remove the `docker` service and adjust the
-environment-variables of the `app` service that it points to your dedicated Docker host. Place the `ca.pem`, `cert.pem`
-and `key.pem` files in a directory `certificates` next to your `docker-compose.yml` and adjust the configuration
-accordingly:
+== Docker Compose example configuration
 
+You could spin up Code FREAK with `docker run` but for a reproducible setup you should utilize a container orchestration system like Docker Compose.
+The following is a example production configuration for Docker Compose that runs the backend application and a Postgres database container:
+
+.docker-compose.yml
 [source,yaml]
 ----
-version: "3"
+version: "3.7"
 services:
   app:
-    # ... SNIP ...
+    image: "cfreak/codefreak"
+    restart: "on-failure:10"
+    ports:
+      # you might want to use a reverse proxy that passes the traffic to Code FREAK
+      - "80:8080"
+    networks:
+      - default
+      - private
     volumes:
-      - "./certificates:/var/codefreak/certs"
+      - "./application.yml:/app/resources/config/application.yml" <1>
+      - "./certificates:/var/codefreak/certs" <2>
+  postgres:
+    image: "postgres:11"
+    restart: "on-failure:3"
     environment:
-      DOCKER_HOST: "http://docker-host.at-your-company.domain.com:2376"
-      DOCKER_CERT_PATH: "/var/codefreak/certs"
-      # ... SNIP ...
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    networks:
+      - private
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+
+networks:
+  private: {}
+
+volumes:
+  postgres_data: {}
+
 ----
+
+<1> We mount an `application.yml` file into the container.
+This allows us to configure Code FREAK. Below is a minimal configuration file that uses the database container and the dedicated Docker host.
+<2> Place the `ca.pem`, `cert.pem` and `key.pem` files from the previous step in a directory `certificates` next to your `docker-compose.yml`.
+
+.application.yml
+[source,yaml]
+----
+# Configure the Postgres database
+spring:
+  datasource:
+    url: "jdbc:postgresql://postgres:5432/postgres"
+    username: postgres
+    # We enabled "trust" authentication for our Postgres DB. This requires no password
+    #password: <none>
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+
+codefreak:
+  docker:
+    host: "https://[your-docker-host-url]:2376"
+    cert-path: /var/codefreak/certs
+
+----
+
+== Configuration
+
+For further information and available settings please check out the xref:for-admins:configuration.adoc[Configuration] section of the docs.

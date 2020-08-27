@@ -1,14 +1,26 @@
 = Configuration
 
-For more details on configuration please check the https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-application-property-files[Spring documentation].
+Code FREAK's configuration is based on Spring Boot.
+This means you can also tweak all of the Spring configuration.
+For more details on how to apply configuration to Code FREAK and Spring check out https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html#boot-features-external-config-application-property-files[the official Spring documentation].
+
+All shown configuration in this documentation is meant to be placed in an `application.yml` file.
+If you use the official Docker image please mount the `application.yml` file inside the container at `/app/resources/config/application.yml`.
 
 == Authentication
-Code FREAK provides multiple ways to authenticate users. You can choose one of the following methods to integrate the application with your existing infrastructure.
+
+Code FREAK provides multiple ways to authenticate users.
+You can choose one of the following methods to integrate the application with your existing infrastructure.
 
 === Simple Authentication
-Simple authentication means that users are managed by Code FREAK itself. Accounts are created by administrators and saved to the database.
 
-WARNING: Simple authentication has not been implemented yet! It only works in `dev` mode with preconfigured users. See https://github.com/codefreak/codefreak/issues/122[Issue #122] for progress.
+Simple authentication means that users are managed by Code FREAK internally.
+
+WARNING: User management has not been implemented yet!
+It only works in `dev` mode with some preconfigured users.
+See https://github.com/codefreak/codefreak/issues/122[Issue #122] for progress.
+The current preconfigured users are `admin`, `teacher` and `student`.
+All users share the same password `123`.
 
 [source,yaml]
 ----
@@ -16,9 +28,12 @@ codefreak.authentication-method: simple # this is the default
 ----
 
 === LDAP
-Code FREAK can connect to an LDAP server and use it for authentication. A minimal configuration requires the URL of the server and a mapping from LDAP groups to Code FREAK roles.
 
-As an example, you can find an LDAP test server https://github.com/rroemhild/docker-test-openldap[here]. It can be used with the following configuration.
+Code FREAK can connect to an LDAP server and use it for authentication.
+A minimal configuration requires the URL of the server and a mapping from LDAP groups to Code FREAK roles.
+
+As an example, you can find an LDAP test server https://github.com/rroemhild/docker-test-openldap[here].
+It can be used with the following configuration.
 
 [source,yaml]
 ----
@@ -39,10 +54,13 @@ Valid roles are `admin`, `teacher` and `student`.
 See xref:codefreak:for-admins:roles.adoc[Roles] for more information on the role system.
 
 == Git import
-You can allow your students to import their source code from a remote Git repository. Currently, this is possible only via a
-shared SSH key that has access to all repositories on the Git server. Some Git servers allow this by using so-called
-"deployment keys". You can configure multiple hosts but only one SSH key per host. Students have to use the clone URL
-starting with `ssh://` when importing from the remote repository. Import via HTTP is not possible currently.
+
+You can allow your students to import their source code from a remote Git repository.
+Currently, this is possible only via a shared SSH key that has access to all repositories on the Git server.
+Some Git servers allow this by using so-called "deployment keys".
+You can configure multiple hosts but only one SSH key per host.
+Students have to use the clone URL starting with `ssh://` when importing from the remote repository.
+Import via HTTP is not possible currently.
 
 [source,yaml]
 ----
@@ -57,9 +75,12 @@ codefreak:
 ----
 
 == Database
-By default, Code FREAK uses an in-memory database. This means you will lose data between application restarts!
 
-For production usage we recommend using PostgreSQL. Other DB engines are untested. Use the following to use Postgres for persistent data storage.
+By default, Code FREAK uses an in-memory database.
+This means you will lose data between application restarts!
+
+For production usage we recommend using PostgreSQL. Other DB engines are untested.
+Use the following to use Postgres for persistent data storage.
 
 [source,yaml]
 ----
@@ -77,14 +98,23 @@ spring:
 ----
 
 == IDE Reverse Proxy
-Code FREAK starts instances of IDEs (VSCode, etc.) in their own Docker container. The default configuration exposes the HTTP endpoint of each IDE via port publishing. Docker will choose a random free port from your machine and you can access it via `http://localhost:{random-port}`. This is useful for local development and testing but not for production usage.
 
-Currently, we support https://docs.traefik.io/[Traefik (v1)] as alternative reverse proxy. This will create path-based routes to IDE instances.
+Code FREAK starts instances of IDEs (VSCode, etc.) in their own Docker container.
+The default configuration exposes the HTTP endpoint of each IDE via port publishing.
+Docker will choose a random free port from your machine and you can access it via `http://localhost:{random-port}`.
+This is useful for local development and testing but not for production usage.
+
+Currently, we support https://docs.traefik.io/[Traefik (v1)] as alternative reverse proxy.
+This will create path-based routes to IDE instances.
 
 === Traefik
-To configure Traefik as your reverse proxy you have to start at least one instance of Traefik with a Docker backend:
 
-[source]
+To configure Traefik as your reverse proxy you have to start at least one instance of Traefik with a Docker backend.
+Current support is limited to Traefik 1.x. Traefik v2 is NOT supported, yet.
+
+You should run Traefik on the dedicated Docker host using the following command:
+
+[source,shell script]
 ----
 docker run -p80:80 -d \
   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -93,7 +123,7 @@ docker run -p80:80 -d \
 
 Afterwards you can configure Code FREAK to use Traefik reverse proxy:
 
-[source, yaml]
+[source,yaml]
 ----
 codefreak:
   reverse-proxy:
@@ -102,3 +132,12 @@ codefreak:
 ----
 
 This will create URLs like `http://my-docker-host.domain.example/ide/random-token`
+
+== Running Code FREAK behind a reverse proxy
+If you are using a reverse proxy (Traefik, Nginx, …) to pass traffic to Code FREAK you will need the following additional configuration so the application will understand all URLs correctly:
+
+[source,yaml]
+----
+server:
+  forward-headers-strategy: framework
+----
