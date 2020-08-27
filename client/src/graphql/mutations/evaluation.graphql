@@ -6,9 +6,14 @@ mutation StartEvaluation($answerId: ID!) {
 
 mutation StartAssignmentEvaluation(
   $assignmentId: ID!
-  $force: Boolean = false
+  $invalidateAll: Boolean
+  $invalidateTask: ID
 ) {
-  startAssignmentEvaluation(assignmentId: $assignmentId, force: $force) {
+  startAssignmentEvaluation(
+    assignmentId: $assignmentId
+    invalidateAll: $invalidateAll
+    invalidateTask: $invalidateTask
+  ) {
     answer {
       id
     }

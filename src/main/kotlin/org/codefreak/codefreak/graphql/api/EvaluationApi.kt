@@ -22,6 +22,8 @@ import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
 import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
+import org.codefreak.codefreak.service.AssignmentService
+import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.EvaluationFinishedEvent
 import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
 import org.codefreak.codefreak.service.TaskService
@@ -187,8 +189,26 @@ class EvaluationMutation : BaseResolver(), Mutation {
   }
 
   @Secured(Authority.ROLE_TEACHER)
-  fun startAssignmentEvaluation(assignmentId: UUID, force: Boolean): List<PendingEvaluationDto> = context {
-    serviceAccess.getService(EvaluationService::class).startAssignmentEvaluation(assignmentId, force).map {
+  fun startAssignmentEvaluation(
+    assignmentId: UUID,
+    invalidateAll: Boolean?,
+    invalidateTask: UUID?
+  ): List<PendingEvaluationDto> = context {
+    val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(assignmentId)
+    authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+    val evaluationService = serviceAccess.getService(EvaluationService::class)
+    when {
+      invalidateAll == true -> evaluationService.invalidateEvaluations(assignment)
+      // find task in assignment and invalidate their evaluations + save modified task files from IDE
+      // this also prevents passing IDs of foreign tasks
+      invalidateTask != null -> assignment.tasks.find { it.id == invalidateTask }
+          ?.let {
+            evaluationService.invalidateEvaluations(it)
+            serviceAccess.getService(ContainerService::class).saveTaskFiles(it)
+          }
+    }
+
+    evaluationService.startAssignmentEvaluation(assignmentId).map {
       PendingEvaluationDto(it, this)
     }
   }
