@@ -7,6 +7,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=code-freak_code-freak&metric=alert_status)](https://sonarcloud.io/dashboard?id=code-freak_code-freak)
 [![Docker Image Version](https://img.shields.io/docker/v/cfreak/codefreak?sort=semver)](https://hub.docker.com/r/cfreak/codefreak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Join Discord Server](https://img.shields.io/discord/748856997105107025?color=7289da&label=discord&logo=discord&logoColor=ffffff)](https://discord.gg/HYDQEDt)
 
 Code FREAK (Code Feedback, Review & Evaluation Kit) is an online programming platform and evaluation/autograding system for coding assignments. It supports every major programming language (language agnostic) and has a modular evaluation system based on Docker.
 
