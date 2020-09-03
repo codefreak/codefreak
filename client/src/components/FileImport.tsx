@@ -47,7 +47,7 @@ const FileImport: React.FC<FileImportProps> = props => {
     <Row gutter={16}>
       <Col span={12}>
         <Dragger
-          height={150}
+          height={170}
           multiple
           showUploadList={false}
           beforeUpload={beforeUpload}
