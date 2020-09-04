@@ -7,5 +7,15 @@
     "before 6am"
   ],
   "prCreation": "not-pending",
-  "dependencyDashboard": true
+  "dependencyDashboard": true,
+  "packageRules": [
+    {
+      "packagePatterns": [
+        "^com\\.github\\.codefreak\\.",
+        "^org\\.codefreak\\.",
+        "^@codefreak/"
+      ],
+      "stabilityDays": 0
+    }
+  ]
 }
