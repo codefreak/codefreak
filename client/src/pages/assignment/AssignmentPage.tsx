@@ -28,6 +28,7 @@ import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
+import { useServerMoment } from '../../hooks/useServerTimeOffset'
 import useSubPath from '../../hooks/useSubPath'
 import {
   Assignment,
@@ -386,10 +387,11 @@ const OpenAssignmentButton: React.FC<
   } & Omit<DropdownButtonProps, 'overlay'>
 > = ({ input, mutation, ...buttonProps }) => {
   const [modalVisible, setModalVisible] = useState(false)
-  const [from, setFrom] = useState(moment())
+  const serverMoment = useServerMoment()
+  const [from, setFrom] = useState(serverMoment())
   const [period, setPeriod] = useState(moment('00:30:00', 'HH:mm:ss'))
   const showModal = () => {
-    setFrom(moment())
+    setFrom(serverMoment())
     setPeriod(moment('00:30:00', 'HH:mm:ss'))
     setModalVisible(true)
   }
@@ -412,7 +414,7 @@ const OpenAssignmentButton: React.FC<
   }
 
   const isInPast = (date: Moment | null, resolution?: unitOfTime.StartOf) =>
-    (date && date.isBefore(moment(), resolution)) || false
+    (date && date.isBefore(serverMoment(), resolution)) || false
 
   const openNow = () => {
     const variables = {
