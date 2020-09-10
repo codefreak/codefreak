@@ -73,6 +73,12 @@ class AnswerService : BaseService() {
     }
   }
 
+  fun resetAnswerFiles(answer: Answer) {
+    require(answer.isEditable) { "The answer is not editable anymore" }
+    copyFilesFromTask(answer)
+    containerService.answerFilesUpdated(answer.id)
+  }
+
   fun copyFilesForEvaluation(answer: Answer): InputStream {
     val out = ByteArrayOutputStream()
     val outTar = TarUtil.PosixTarArchiveOutputStream(out)
