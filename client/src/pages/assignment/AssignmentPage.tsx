@@ -42,7 +42,7 @@ import {
 import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-import { momentToDate } from '../../services/time'
+import { momentToIsoCb } from '../../services/time'
 import { makeUpdater, noop, Updater } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
@@ -105,8 +105,8 @@ const AssignmentPage: React.FC = () => {
 
   const renderDate = (
     label: string,
-    onOk: (date?: Date) => any,
-    value?: Date | null
+    onOk: (date?: string) => any,
+    value?: string | null
   ) => {
     const handleClear = (v: any) => (v === null ? onOk() : noop())
     return assignment.editable ? (
@@ -116,7 +116,7 @@ const AssignmentPage: React.FC = () => {
           showTime
           onChange={handleClear}
           defaultValue={value ? moment(value) : undefined}
-          onOk={momentToDate(onOk)}
+          onOk={momentToIsoCb(onOk)}
         />
       </Descriptions.Item>
     ) : value ? (
@@ -195,7 +195,7 @@ const StatusSteps: React.FC<{
 
   const closeNow = () =>
     mutation({
-      variables: { ...input, deadline: new Date() }
+      variables: { ...input, deadline: moment().toISOString() }
     })
 
   const activate = () => updater('active')(true)
@@ -399,13 +399,13 @@ const OpenAssignmentButton: React.FC<
       variables: {
         ...input,
         active: true,
-        openFrom: from.toDate(),
+        openFrom: from.toISOString(),
         deadline: from
           .add(
             period.hours() * 60 * 60 + period.minutes() * 60 + period.seconds(),
             'seconds'
           )
-          .toDate()
+          .toISOString()
       }
     })
     hideModal()
@@ -418,7 +418,7 @@ const OpenAssignmentButton: React.FC<
     const variables = {
       ...input,
       active: true,
-      openFrom: new Date()
+      openFrom: moment().toISOString()
     }
     if (variables.deadline && isInPast(moment(variables.deadline))) {
       delete variables.deadline
