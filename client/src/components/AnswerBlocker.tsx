@@ -1,6 +1,7 @@
 import { Icon, Result } from 'antd'
 import { Moment } from 'moment'
-import React, { PropsWithChildren, useEffect, useState } from 'react'
+import React, { PropsWithChildren } from 'react'
+import useMomentReached from '../hooks/useMomentReached'
 
 interface AnswerBlockerProps {
   deadline: Moment | undefined
@@ -10,25 +11,9 @@ const AnswerBlocker: React.FC<PropsWithChildren<AnswerBlockerProps>> = ({
   deadline,
   children
 }) => {
-  const [deadlineReached, setDeadlineReached] = useState<boolean>(
-    deadline !== undefined && deadline.isAfter()
-  )
+  const deadlineReached = useMomentReached(deadline)
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (deadline) {
-        setDeadlineReached(deadline.isAfter())
-      } else {
-        clearInterval(timer)
-      }
-    }, 100)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [setDeadlineReached, deadline])
-
-  if (!deadline || deadlineReached) {
+  if (deadline === undefined || !deadlineReached) {
     return <>{children}</>
   } else {
     const relativeTime = deadline.fromNow(true)

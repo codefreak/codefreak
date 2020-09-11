@@ -6,6 +6,7 @@ import AnswerFileBrowser from '../../components/AnswerFileBrowser'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
+import useMomentReached from '../../hooks/useMomentReached'
 import {
   Answer,
   useGetAnswerQuery,
@@ -17,8 +18,8 @@ import { messageService } from '../../services/message'
 import { displayName } from '../../services/user'
 import { DifferentUserContext } from '../task/TaskPage'
 
-const DangerZone: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
-  answer: { id }
+const DangerZone: React.FC<{ answer: Pick<Answer, 'id' | 'deadline'> }> = ({
+  answer: { id, deadline }
 }) => {
   const [resetAnswer, { loading: resetLoading }] = useResetAnswerMutation({
     variables: { id }
@@ -27,6 +28,13 @@ const DangerZone: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
   const toggleDangerZone = useCallback(() => {
     setShowDangerZone(!showDangerZone)
   }, [showDangerZone, setShowDangerZone])
+  const deadlineReached = useMomentReached(
+    deadline ? moment(deadline) : undefined
+  )
+
+  if (deadlineReached === true) {
+    return null
+  }
 
   const onResetClick = () => {
     Modal.confirm({
@@ -46,7 +54,10 @@ const DangerZone: React.FC<{ answer: Pick<Answer, 'id'> }> = ({
           Are you sure?
         </>
       ),
-      onOk: () => resetAnswer()
+      onOk: () =>
+        resetAnswer().then(() => {
+          messageService.success('Answer has been reset to initial files!')
+        })
     })
   }
 
