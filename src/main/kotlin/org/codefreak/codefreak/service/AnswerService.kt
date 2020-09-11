@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.AntPathMatcher
+import java.time.Instant
 
 @Service
 class AnswerService : BaseService() {
@@ -57,9 +58,13 @@ class AnswerService : BaseService() {
   @Transactional
   fun deleteAnswer(answerId: UUID) = answerRepository.deleteById(answerId)
 
+  @Transactional
   fun setFiles(answer: Answer): OutputStream {
     require(answer.isEditable) { "The answer is not editable anymore" }
-    return fileService.writeCollectionTar(answer.id).afterClose { containerService.answerFilesUpdated(answer.id) }
+    return fileService.writeCollectionTar(answer.id).afterClose {
+      answer.updatedAt = Instant.now()
+      containerService.answerFilesUpdatedExternally(answer.id)
+    }
   }
 
   fun copyFilesFromTask(answer: Answer) {

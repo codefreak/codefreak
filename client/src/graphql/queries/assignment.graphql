@@ -55,6 +55,7 @@ query GetAssignmentWithSubmissions($id: ID!) {
       answers {
         id
         sourceUrl
+        updatedAt
         task {
           id
           title
