@@ -66,7 +66,6 @@ export const useCalculatedServerTimeOffset = (): number | undefined => {
         setOffset(newOffset)
       })
       .catch(e => {
-        // tslint:disable-next-line no-console
         console.warn(
           'Could not fetch time offset. Relative times might be incorrect.',
           e
