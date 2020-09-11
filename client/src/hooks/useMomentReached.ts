@@ -24,21 +24,23 @@ const useMomentReached = (
   const [dateReached, setDateReached] = useState<boolean | undefined>(
     checkDateReached()
   )
+  const updateReached = useCallback(() => {
+    const reached = checkDateReached()
+    setDateReached(reached)
+    return reached
+  }, [checkDateReached, setDateReached])
 
   useEffect(() => {
     // handle possible change of date
-    const reached = checkDateReached()
-    setDateReached(reached)
-    if (reached === false) {
+    if (updateReached() === false) {
       // schedule checks if deadline has NOT been reached (and is not undefined)
       const intervalId = setInterval(() => {
-        const reached = checkDateReached()
-        setDateReached(reached)
-        if (reached !== false) clearInterval(intervalId)
+        // stop if reached is either true or undefined
+        if (updateReached() !== false) clearInterval(intervalId)
       }, precision)
       return () => clearInterval(intervalId)
     }
-  }, [date, nowFn, checkDateReached, setDateReached, precision])
+  }, [date, nowFn, updateReached, precision])
 
   return dateReached
 }
