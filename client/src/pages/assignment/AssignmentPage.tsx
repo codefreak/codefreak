@@ -24,6 +24,7 @@ import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
+import CopyToClipboardButton from '../../components/CopyToClipboardButton'
 import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
@@ -144,6 +145,9 @@ const AssignmentPage: React.FC = () => {
         onTabChange={subPath.set}
         extra={
           <Authorized condition={assignment.editable}>
+            <CopyToClipboardButton icon="link" value={window.location.href}>
+              Share Assignment Link
+            </CopyToClipboardButton>
             <ArchiveDownload url={assignment.exportUrl}>
               Export Assignment
             </ArchiveDownload>
