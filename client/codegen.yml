@@ -12,4 +12,6 @@ generates:
       withHooks: true
       withHOC: false
       scalars:
-        DateTime: Date
+        DateTime: string
+        Long: number
+        Upload: Blob

@@ -53,6 +53,6 @@ export const componentsToSeconds = (components: TimeComponents): number => {
   return components.hours * 3600 + components.minutes * 60 + components.seconds
 }
 
-export function momentToDate<T>(fn: (date?: Date) => T) {
-  return (m: Moment | null) => fn(m?.toDate())
+export function momentToIsoCb<T>(fn: (date?: string) => T) {
+  return (m: Moment | null) => fn(m?.toISOString())
 }

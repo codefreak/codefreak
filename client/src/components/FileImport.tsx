@@ -47,7 +47,7 @@ const FileImport: React.FC<FileImportProps> = props => {
     <Row gutter={16}>
       <Col span={12}>
         <Dragger
-          height={150}
+          height={170}
           multiple
           showUploadList={false}
           beforeUpload={beforeUpload}
@@ -69,7 +69,7 @@ const FileImport: React.FC<FileImportProps> = props => {
         </Dragger>
       </Col>
       <Col span={12}>
-        <Centered style={{ height: 150 }}>
+        <Centered style={{ height: 170 }}>
           <Form
             layout="horizontal"
             style={{ width: '100%', maxWidth: 700, marginBottom: -24 }}

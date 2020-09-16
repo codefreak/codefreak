@@ -24,6 +24,7 @@ import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
+import CopyToClipboardButton from '../../components/CopyToClipboardButton'
 import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
@@ -43,7 +44,7 @@ import {
 import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-import { momentToDate } from '../../services/time'
+import { momentToIsoCb } from '../../services/time'
 import { makeUpdater, noop, Updater } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
@@ -106,8 +107,8 @@ const AssignmentPage: React.FC = () => {
 
   const renderDate = (
     label: string,
-    onOk: (date?: Date) => any,
-    value?: Date | null
+    onOk: (date?: string) => any,
+    value?: string | null
   ) => {
     const handleClear = (v: any) => (v === null ? onOk() : noop())
     return assignment.editable ? (
@@ -117,7 +118,7 @@ const AssignmentPage: React.FC = () => {
           showTime
           onChange={handleClear}
           defaultValue={value ? moment(value) : undefined}
-          onOk={momentToDate(onOk)}
+          onOk={momentToIsoCb(onOk)}
         />
       </Descriptions.Item>
     ) : value ? (
@@ -145,6 +146,9 @@ const AssignmentPage: React.FC = () => {
         onTabChange={subPath.set}
         extra={
           <Authorized condition={assignment.editable}>
+            <CopyToClipboardButton icon="link" value={window.location.href}>
+              Share Assignment Link
+            </CopyToClipboardButton>
             <ArchiveDownload url={assignment.exportUrl}>
               Export Assignment
             </ArchiveDownload>
@@ -196,7 +200,7 @@ const StatusSteps: React.FC<{
 
   const closeNow = () =>
     mutation({
-      variables: { ...input, deadline: new Date() }
+      variables: { ...input, deadline: moment().toISOString() }
     })
 
   const activate = () => updater('active')(true)
@@ -401,13 +405,13 @@ const OpenAssignmentButton: React.FC<
       variables: {
         ...input,
         active: true,
-        openFrom: from.toDate(),
+        openFrom: from.toISOString(),
         deadline: from
           .add(
             period.hours() * 60 * 60 + period.minutes() * 60 + period.seconds(),
             'seconds'
           )
-          .toDate()
+          .toISOString()
       }
     })
     hideModal()
@@ -420,7 +424,7 @@ const OpenAssignmentButton: React.FC<
     const variables = {
       ...input,
       active: true,
-      openFrom: new Date()
+      openFrom: moment().toISOString()
     }
     if (variables.deadline && isInPast(moment(variables.deadline))) {
       delete variables.deadline

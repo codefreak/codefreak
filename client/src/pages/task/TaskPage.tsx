@@ -242,7 +242,7 @@ const TaskPage: React.FC = () => {
     return (
       <EditableTimeLimitTag
         taskId={task.id}
-        timeLimit={task.timeLimit}
+        timeLimit={task.timeLimit ?? undefined}
         onChange={updater('timeLimit')}
       />
     )

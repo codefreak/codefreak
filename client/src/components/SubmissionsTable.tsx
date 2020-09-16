@@ -174,12 +174,10 @@ const EvaluationStepOverview: React.FC<{
   evaluation: Answer['latestEvaluation']
 }> = ({ evaluation, task, user }) => {
   const detailsLink = (
-    <Link
-      to={getEntityPath(task) + '/evaluation?user=' + shorten(user.id)}
-      component={Button}
-      type="primary"
-    >
-      <Icon type="bars" /> Details
+    <Link to={getEntityPath(task) + '/evaluation?user=' + shorten(user.id)}>
+      <Button type="primary">
+        <Icon type="bars" /> Details
+      </Button>
     </Link>
   )
 
