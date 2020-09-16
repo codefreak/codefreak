@@ -1,5 +1,5 @@
-import { Result, Spin } from 'antd'
 import { ApolloError } from '@apollo/client'
+import { Result, Spin } from 'antd'
 import React from 'react'
 
 interface AsyncPlaceholderProps {

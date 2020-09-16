@@ -143,7 +143,7 @@ const AnswerSummary: React.FC<{
   } = useAnswerEvaluation(
     answer.id,
     answer.latestEvaluation,
-    answer.pendingEvaluation ? answer.pendingEvaluation.status : null
+    answer.pendingEvaluation?.status
   )
 
   // prevent flashing of old evaluation result by also showing loading indicator for fetching new results

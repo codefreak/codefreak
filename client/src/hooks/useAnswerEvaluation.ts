@@ -8,13 +8,12 @@ import usePendingEvaluationUpdated from './usePendingEvaluationUpdated'
 
 const useAnswerEvaluation = (
   answerId: string,
-  initialLatestEvaluation: LatestEvaluationFragment | null | undefined,
-  initialPendingEvaluationStatus: PendingEvaluationStatus | null
+  initialLatestEvaluation: LatestEvaluationFragment | undefined | null,
+  initialPendingEvaluationStatus: PendingEvaluationStatus | undefined | null
 ) => {
-  const [
-    pendingEvaluationStatus,
-    setPendingEvaluationStatus
-  ] = useState<PendingEvaluationStatus | null>(initialPendingEvaluationStatus)
+  const [pendingEvaluationStatus, setPendingEvaluationStatus] = useState<
+    PendingEvaluationStatus | null | undefined
+  >(initialPendingEvaluationStatus)
 
   usePendingEvaluationUpdated(answerId, newStatus => {
     setPendingEvaluationStatus(newStatus)
