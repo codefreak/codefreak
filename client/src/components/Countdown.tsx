@@ -4,6 +4,7 @@ import ReactCountdown, {
   CountdownProps as ReactCountdownProps,
   CountdownRenderProps
 } from 'react-countdown'
+import { useServerNow } from '../hooks/useServerTimeOffset'
 import { componentsToRelTime } from '../services/time'
 
 const defaultCountdownRenderer = (
@@ -22,11 +23,14 @@ interface CountdownProps {
 }
 
 const Countdown: React.FC<CountdownProps> = ({ date, onComplete }) => {
+  const serverNow = useServerNow()
+
   return (
     <ReactCountdown
       date={date.toDate()}
       renderer={defaultCountdownRenderer}
       onComplete={onComplete}
+      now={serverNow}
     />
   )
 }

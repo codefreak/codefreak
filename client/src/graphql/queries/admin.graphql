@@ -4,3 +4,10 @@ query GetSystemConfig {
     maxFileUploadSize
   }
 }
+
+query TimeSync($clientTimestamp: Long!) {
+  timeSync(clientTimestamp: $clientTimestamp) {
+    clientTimestamp
+    serverTimestamp
+  }
+}

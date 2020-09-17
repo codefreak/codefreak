@@ -9,7 +9,8 @@ import {
   Task,
   useCreateAnswerMutation
 } from '../generated/graphql'
-import { momentToRelTime, secondsToRelTime } from '../services/time'
+import { useServerMoment } from '../hooks/useServerTimeOffset'
+import { momentDifferenceToRelTime, secondsToRelTime } from '../services/time'
 import TimeLimitTag from './time-limit/TimeLimitTag'
 
 interface CreateAnswerButtonProps
@@ -27,6 +28,7 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
 }) => {
   const [confirmVisible, setConfirmVisible] = useState<boolean>(false)
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
+  const serverMoment = useServerMoment()
 
   const showConfirm = () => setConfirmVisible(true)
   const hideConfirm = () => setConfirmVisible(false)
@@ -70,10 +72,13 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
     // render warning if assignment deadline is before time limit ends
     if (
       assignment?.deadline &&
-      moment().add(task.timeLimit, 's').isAfter(assignment.deadline)
+      serverMoment().add(task.timeLimit, 's').isAfter(assignment.deadline)
     ) {
       const taskRelTimeLimit = secondsToRelTime(timeLimit)
-      const assignmentRelDeadline = momentToRelTime(moment(assignment.deadline))
+      const assignmentRelDeadline = momentDifferenceToRelTime(
+        moment(assignment.deadline),
+        serverMoment()
+      )
       return (
         <Alert
           type="warning"
