@@ -1,15 +1,15 @@
 = Working on Assignments
 
-Your teacher will give you access to an assignment via a link.
-Once you open this link you will land in the assignment overview.
-An assignment consists of multiple tasks that you will see in a list.
-Clicking the "Details" button of a task will bring you to the task view.
+Your teacher gives you access to an assignment via a link.
+When you open this link, you are taken to the assignment overview.
+An assignment consists of multiple tasks that you see in a list.
+Clicking the "Details" button of a task brings you to the task view.
 
 image:for-students:assignment-student-view.png[Assignment view as a student]
 
 == Task View
 
-Inside the task view you will find the instructions of your teacher what to do and various options to modify and check your answer.
+Inside the task view you find the instructions of your teacher and various options to modify and check your answer.
 Initially, most of the options are grayed out because you have not yet started working on the task.
 
 image:for-students:task-view-initial.png[Code FREAK initial task view]
@@ -17,28 +17,27 @@ image:for-students:task-view-initial.png[Code FREAK initial task view]
 === Start working on the task
 
 To start working on a task you have to click the blue button in the top right corner.
-If the button is not visible the assignment might not be open for submissions yet/anymore.
-After you clicked the button, the tabs "Answer", "Online IDE" and "Evaluation" should become available.
+If the button is not visible, the assignment is not open for submissions yet/anymore.
+When you click the button, the tabs "Answer", "Online IDE" and "Evaluation" become available.
 
 === Your current answer
 
 In the "Answer" tab you can see your current submitted files for this task.
-If you just started working on the task this will be the initial files you received from your teacher as a starting point.
+If you just started working on the task, these are the initial files you received from your teacher as a starting point.
 You can navigate through the file tree and view the contents of each file.
-In the top right corner of the card you will find a button to download your current answer as a zip- or tar-archive.
+In the top right corner of the card you will find a button to download your current answer as a zip or tar archive.
 
 image:for-students:task-answer-view.png[Code FREAK current submission view]
 
 === Uploading and importing files
 
-If you are working on your answer locally you can upload the files to Code FREAK by using the "Upload Source Code" section.
+If you are working on your answer locally, you can upload the files to Code FREAK by using the "Upload Source Code" section.
 Either upload a single file by dragging it into the gray area or select it from your computer by clicking the upload area.
-If you want to upload a full directory structure you need to create a zip- or tar-archive.
+If you want to upload a full directory structure you need to create a zip or tar archive.
 
-Next to the upload area there can be an option to import files from a Git repository.
-If the import option is not available the administrator has not enabled it.
+Next to the upload area there is an option to import files from a Git repository (this feature needs to be enabled by the administrator).
 You can paste a URL pointing to a Git repository into the text field.
-Make sure your Git repository is publicly accessible, or the import will fail.
+Make sure your Git repository is publicly accessible or the import will fail.
 
 NOTE: Uploading a full archive or single file will always **remove** all current files on the server!
 This does also occur if you import files from a Git repository.
@@ -52,44 +51,44 @@ Use the "Online IDE" tab to start an online VSCode instance.
 This web IDE allows you to write your source code and compile the application on the server.
 
 All modifications on files you make via the IDE are stored in real time on the server.
-You can close your browser and resume working on the answer at any time – also from a different browser or computer.
+You can close your browser and resume working on the answer at any time –- also from a different browser or computer.
 
 image:for-students:task-online-ide.png[Code FREAK Online IDE]
 
 === Resetting your answer
 
 In case you need a fresh start for your answer you can reset it to the initial files you received from your teacher.
-At the end of the "Answer" tab you will find a section called "Danger Zone".
+At the end of the "Answer" tab you find a section called "Danger Zone".
 The section is collapsed by default, and you have to expand it with the "Show" button on the very right.
 
 WARNING: Resetting your answer will **remove all modifications** you made to files!
 This action is not reversible!
-Only use it in the case you really need the initial files!
+Only use it in case you really need the initial files!
 
 image:for-students:task-view-reset-answer.png[Resetting an answer in Code FREAK]
 
 == Evaluating your answer
 
-Your teacher will have automated checks configured for checking your answer for correctness.
+Your teacher may have configured automated checks for checking your answer for correctness.
 Currently, you can evaluate your answer as often as you like.
 There is no limit for the number of evaluations.
 
 Click the "Start Evaluation" button in the top right corner of the task view to start the evaluation of the answer.
 The evaluation might take a few seconds to a few minutes, depending on the number and types of checks your teacher has set up.
 
-After the evaluation has finished you will receive a pop up notification which includes a link to the evaluation results.
+After the evaluation has finished, you receive a pop up notification which includes a link to the evaluation results.
 The latest evaluation result is also available in the "Evaluation" tab.
-There is a small indicator next to the "Evaluation" tab which gives a first hint if the evaluation was successful (green) or failed (red).
+There is a small indicator next to the "Evaluation" tab which gives you a first hint whether the evaluation was successful (green) or failed (red).
 A pulsating blue circle indicates the evaluation is still running.
 
 image::task-evaluation-tab.png[Evaluation Tab in Code FREAK]
 
-Each evaluation consists of one or multiple steps that will check your answer with various testing methods.
-You will find a list of feedback below each evaluation step.
-Many feedback messages also give you more details on what went wrong if you click/expand the message title.
+Each evaluation consists of one or multiple steps that will check your answer with a specific testing method.
+You find a list of feedback messages below each evaluation step.
+They may give you more details on what went wrong if you click/expand the message title.
 
 image::task-evaluation-feedback-details.png[Code FREAK detailed feedback message]
 
 In case your code does not compile you will receive the raw compiler output.
-This should contain all information on how to fix your code.
+This should contain information on how to fix your code.
 Please correct these errors first and re-run the evaluation to receive real feedback.
