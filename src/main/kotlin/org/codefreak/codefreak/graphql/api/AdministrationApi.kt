@@ -2,6 +2,7 @@ package org.codefreak.codefreak.graphql.api
 
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Query
+import java.time.Instant
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.service.AdministrationService
@@ -14,6 +15,12 @@ class SystemConfigDto(
   val maxFileUploadSize: Long
 )
 
+@GraphQLName("TimeSync")
+class TimeSyncDto(
+  val clientTimestamp: Long,
+  val serverTimestamp: Long
+)
+
 @Component
 class AdministrationQuery : BaseResolver(), Query {
 
@@ -24,6 +31,13 @@ class AdministrationQuery : BaseResolver(), Query {
     return SystemConfigDto(
         motd = adminService.getMotd(),
         maxFileUploadSize = adminService.getMaxUploadSize()
+    )
+  }
+
+  fun timeSync(clientTimestamp: Long): TimeSyncDto {
+    return TimeSyncDto(
+        clientTimestamp,
+        Instant.now().toEpochMilli()
     )
   }
 }

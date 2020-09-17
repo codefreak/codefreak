@@ -9,7 +9,8 @@ import {
   Task,
   useCreateAnswerMutation
 } from '../generated/graphql'
-import { momentToRelTime, secondsToRelTime } from '../services/time'
+import { useServerMoment } from '../hooks/useServerTimeOffset'
+import { momentDifferenceToRelTime, secondsToRelTime } from '../services/time'
 import TimeLimitTag from './time-limit/TimeLimitTag'
 
 interface CreateAnswerButtonProps
@@ -27,6 +28,7 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
 }) => {
   const [confirmVisible, setConfirmVisible] = useState<boolean>(false)
   const [createAnswer, { loading: creatingAnswer }] = useCreateAnswerMutation()
+  const serverMoment = useServerMoment()
 
   const showConfirm = () => setConfirmVisible(true)
   const hideConfirm = () => setConfirmVisible(false)
@@ -55,7 +57,8 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
     )
   }
 
-  if (!task.timeLimit) {
+  const timeLimit = task.timeLimit
+  if (!timeLimit) {
     return (
       <Button
         {...buttonProps}
@@ -69,10 +72,13 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
     // render warning if assignment deadline is before time limit ends
     if (
       assignment?.deadline &&
-      moment().add(task.timeLimit, 's').isAfter(assignment.deadline)
+      serverMoment().add(task.timeLimit, 's').isAfter(assignment.deadline)
     ) {
-      const taskRelTimeLimit = secondsToRelTime(task.timeLimit)
-      const assignmentRelDeadline = momentToRelTime(moment(assignment.deadline))
+      const taskRelTimeLimit = secondsToRelTime(timeLimit)
+      const assignmentRelDeadline = momentDifferenceToRelTime(
+        moment(assignment.deadline),
+        serverMoment()
+      )
       return (
         <Alert
           type="warning"
@@ -103,9 +109,9 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
       >
         <p>
           This task has a time limit of{' '}
-          <TimeLimitTag style={{ marginRight: 0 }} timeLimit={task.timeLimit} />
-          . If you start working on the task, you cannot stop the timer! When
-          the time is up, you cannot modify your answer anymore.
+          <TimeLimitTag style={{ marginRight: 0 }} timeLimit={timeLimit} />. If
+          you start working on the task, you cannot stop the timer! When the
+          time is up, you cannot modify your answer anymore.
         </p>
         {renderEarlyDeadlineWarning()}
       </Modal>

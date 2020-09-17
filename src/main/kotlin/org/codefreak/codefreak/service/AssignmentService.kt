@@ -94,7 +94,7 @@ class AssignmentService : BaseService() {
 
   @Transactional
   fun addTasksToAssignment(assignment: Assignment, tasks: Collection<Task>) {
-    var nextPosition = assignment.tasks.maxBy { it.position }?.let { it.position + 1 } ?: 0
+    var nextPosition = assignment.tasks.maxByOrNull { it.position }?.let { it.position + 1 } ?: 0
     for (task in tasks) {
       taskService.createFromTar(taskService.getExportTar(task), assignment, assignment.owner, nextPosition)
       nextPosition++

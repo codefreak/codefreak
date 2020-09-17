@@ -3,6 +3,7 @@ import { TagProps } from 'antd/es/tag'
 import { TooltipProps } from 'antd/es/tooltip'
 import { Moment } from 'moment'
 import React, { HTMLProps, useEffect, useState } from 'react'
+import { useServerNow } from '../../hooks/useServerTimeOffset'
 import { secondsToRelTime } from '../../services/time'
 import Countdown from '../Countdown'
 import TimeLimitEditModal from './TimeLimitEditModal'
@@ -21,11 +22,12 @@ const TimeLimitTag: React.FC<TimeLimitTagProps> = ({
   ...htmlProps
 }) => {
   const [isOver, setIsOver] = useState<boolean>()
+  const now = useServerNow()
 
   // handle deadline changes properly
   useEffect(() => {
-    setIsOver(!!deadline && deadline.isSameOrBefore())
-  }, [deadline, setIsOver])
+    setIsOver(!!deadline && deadline.isSameOrBefore(now()))
+  }, [deadline, setIsOver, now])
 
   const relTime = secondsToRelTime(timeLimit)
   const tooltipProps: TooltipProps = {
@@ -45,7 +47,7 @@ const TimeLimitTag: React.FC<TimeLimitTagProps> = ({
       tagProps.children = "Time's up"
     } else {
       const onComplete = () => setIsOver(true)
-      const countdown = <Countdown date={deadline!!} onComplete={onComplete} />
+      const countdown = <Countdown date={deadline} onComplete={onComplete} />
       tooltipProps.title = <>You have {countdown} left to finish this task.</>
       tooltipProps.className += ' running'
       tagProps.color = 'orange'
