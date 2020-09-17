@@ -16,3 +16,7 @@ mutation CreateAnswer($taskId: ID!) {
 mutation DeleteAnswer($id: ID!) {
   deleteAnswer(id: $id)
 }
+
+mutation ResetAnswer($id: ID!) {
+  resetAnswer(id: $id)
+}
