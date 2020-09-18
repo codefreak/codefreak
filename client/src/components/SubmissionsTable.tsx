@@ -98,6 +98,10 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     return <div style={{ textAlign: 'right' }}>{text}</div>
   }
 
+  // 700px = width of first columns
+  // 200px = min width for each task column
+  const scrollX = 700 + assignment.tasks.length * 200
+
   return (
     <Table
       dataSource={submissions}
@@ -106,24 +110,30 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
       rowKey="id"
       title={titleFunc}
       footer={footerFunc}
+      scroll={{
+        x: scrollX
+      }}
     >
       <Column
         title="Last Name"
         dataIndex="user.lastName"
-        width="10%"
+        width={200}
+        fixed="left"
         defaultSortOrder="ascend"
         sorter={alphabeticSorter(submission => submission.user.lastName)}
       />
       <Column
         title="First Name"
         dataIndex="user.firstName"
-        width="10%"
+        width={200}
+        fixed="left"
         sorter={alphabeticSorter(submission => submission.user.firstName)}
       />
       <Column
         title="Username"
         dataIndex="user.username"
-        width="20%"
+        width={300}
+        fixed="left"
         sorter={alphabeticSorter(submission => submission.user.username)}
       />
       {renderTaskColumnGroups(assignment.tasks)}
@@ -255,13 +265,11 @@ const renderTaskColumnGroups = (tasks: Task[]) => {
     return <AnswerSummary user={submission.user} task={task} answer={answer} />
   }
 
-  // distribute remaining 60% width over all task columns
-  const width = Math.floor(60 / tasks.length)
+  // column width is determined by scrollX of the table
   return tasks.map(task => {
     return (
       <Column
         key={`task-${task.id}`}
-        width={`${width}%`}
         title={task.title}
         align="center"
         filters={[
