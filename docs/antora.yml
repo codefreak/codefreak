@@ -5,4 +5,5 @@ nav:
   - modules/ROOT/nav.adoc
   - modules/for-admins/nav.adoc
   - modules/for-teachers/nav.adoc
+  - modules/for-students/nav.adoc
   - modules/for-developers/nav.adoc

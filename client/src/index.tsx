@@ -68,9 +68,14 @@ const apolloClient = new ApolloClient({
   }
 })
 
+const onUserChanged = () => {
+  resetWebsocket()
+  apolloClient.clearStore()
+}
+
 ReactDOM.render(
   <ApolloProvider client={apolloClient}>
-    <App onUserChanged={resetWebsocket} />
+    <App onUserChanged={onUserChanged} />
   </ApolloProvider>,
   document.getElementById('root')
 )

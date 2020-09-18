@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.time.Instant
 import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.AntPathMatcher
-import java.time.Instant
 
 @Service
 class AnswerService : BaseService() {
@@ -76,6 +76,12 @@ class AnswerService : BaseService() {
         })
       }
     }
+  }
+
+  fun resetAnswerFiles(answer: Answer) {
+    require(answer.isEditable) { "The answer is not editable anymore" }
+    copyFilesFromTask(answer)
+    containerService.answerFilesUpdatedExternally(answer.id)
   }
 
   fun copyFilesForEvaluation(answer: Answer): InputStream {

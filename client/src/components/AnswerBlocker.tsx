@@ -1,6 +1,8 @@
 import { Icon, Result } from 'antd'
 import { Moment } from 'moment'
-import React, { PropsWithChildren, useEffect, useState } from 'react'
+import React, { PropsWithChildren } from 'react'
+import useMomentReached from '../hooks/useMomentReached'
+import { useServerNow } from '../hooks/useServerTimeOffset'
 
 interface AnswerBlockerProps {
   deadline: Moment | undefined
@@ -10,28 +12,12 @@ const AnswerBlocker: React.FC<PropsWithChildren<AnswerBlockerProps>> = ({
   deadline,
   children
 }) => {
-  const [deadlineReached, setDeadlineReached] = useState<boolean>(
-    deadline !== undefined && deadline.isAfter()
-  )
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (deadline) {
-        setDeadlineReached(deadline.isAfter())
-      } else {
-        clearInterval(timer)
-      }
-    }, 100)
-
-    return () => {
-      clearInterval(timer)
-    }
-  }, [setDeadlineReached, deadline])
-
-  if (!deadline || deadlineReached) {
+  const now = useServerNow()
+  const deadlineReached = useMomentReached(deadline, now)
+  if (!deadline || !deadlineReached) {
     return <>{children}</>
   } else {
-    const relativeTime = deadline.fromNow(true)
+    const relativeTime = deadline.from(now())
     return (
       <Result
         status="info"
@@ -39,7 +25,7 @@ const AnswerBlocker: React.FC<PropsWithChildren<AnswerBlockerProps>> = ({
         icon={<Icon type="clock-circle" />}
         subTitle={
           <>
-            The deadline has been reached {relativeTime} ago. <br />
+            The deadline has been reached {relativeTime}. <br />
             You cannot edit your answer anymore.
           </>
         }

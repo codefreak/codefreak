@@ -295,7 +295,7 @@ const taskColumnRenderer = (
       )
     }
     if (display === 'answer-dates') {
-      return dateTimeFormat(answer.updatedAt)
+      return dateTimeFormat(new Date(answer.updatedAt))
     } else {
       return (
         <AnswerEvaluationSummary

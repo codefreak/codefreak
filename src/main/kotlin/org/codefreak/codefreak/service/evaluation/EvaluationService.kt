@@ -116,7 +116,9 @@ class EvaluationService : BaseService() {
   }
 
   @Transactional
-  fun invalidateEvaluations(assignment: Assignment) = assignment.tasks.forEach(this::invalidateEvaluations)
+  fun invalidateEvaluations(assignment: Assignment) {
+    assignment.tasks.forEach(this::invalidateEvaluations)
+  }
 
   fun createEvaluation(answer: Answer): Evaluation {
     return evaluationRepository.save(Evaluation(answer, fileService.getCollectionMd5Digest(answer.id), answer.task.evaluationSettingsChangedAt))
