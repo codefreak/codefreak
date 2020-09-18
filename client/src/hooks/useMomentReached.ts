@@ -18,7 +18,7 @@ const useMomentReached = (
   precision: number = 100
 ): boolean | undefined => {
   const checkDateReached = useCallback((): boolean | undefined => {
-    const timestamp = date?.unix()
+    const timestamp = date?.valueOf()
     return timestamp ? timestamp <= nowFn() : undefined
   }, [date, nowFn])
   const [dateReached, setDateReached] = useState<boolean | undefined>(
