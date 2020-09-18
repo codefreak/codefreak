@@ -7,6 +7,7 @@ import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
 import useMomentReached from '../../hooks/useMomentReached'
+import { useServerNow } from "../../hooks/useServerTimeOffset";
 import {
   Answer,
   useGetAnswerQuery,
@@ -28,8 +29,10 @@ const DangerZone: React.FC<{ answer: Pick<Answer, 'id' | 'deadline'> }> = ({
   const toggleDangerZone = useCallback(() => {
     setShowDangerZone(!showDangerZone)
   }, [showDangerZone, setShowDangerZone])
+  const serverNow = useServerNow()
   const deadlineReached = useMomentReached(
-    deadline ? moment(deadline) : undefined
+    deadline ? moment(deadline) : undefined,
+    serverNow
   )
 
   if (deadlineReached === true) {
