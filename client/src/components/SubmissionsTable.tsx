@@ -105,6 +105,10 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
   return (
     <Table
       dataSource={submissions}
+      pagination={{
+        pageSize: 100,
+        hideOnSinglePage: true
+      }}
       bordered
       className="submissions-table"
       rowKey="id"
