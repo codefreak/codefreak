@@ -7,7 +7,7 @@ import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
 import useMomentReached from '../../hooks/useMomentReached'
-import { useServerNow } from "../../hooks/useServerTimeOffset";
+import { useServerNow } from '../../hooks/useServerTimeOffset'
 import {
   Answer,
   useGetAnswerQuery,
