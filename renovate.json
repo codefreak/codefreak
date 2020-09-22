@@ -16,6 +16,17 @@
         "^@codefreak/"
       ],
       "stabilityDays": 0
+    },
+    {
+      "packageNames": [
+        "org.jetbrains.kotlin.jvm",
+        "org.jetbrains.kotlin.plugin.jpa",
+        "org.jetbrains.kotlin.plugin.spring",
+        "org.jetbrains.kotlin:kotlin-reflect",
+        "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
+        "org.jetbrains.kotlin.kapt"
+      ],
+      "groupName": "Kotlin"
     }
   ]
 }

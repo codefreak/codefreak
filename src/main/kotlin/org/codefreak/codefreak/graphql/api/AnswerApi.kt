@@ -111,6 +111,15 @@ class AnswerMutation : BaseResolver(), Mutation {
     }
     true
   }
+
+  @Secured(Authority.ROLE_STUDENT)
+  fun resetAnswer(id: UUID): Boolean = context {
+    val answerService = serviceAccess.getService(AnswerService::class)
+    val answer = answerService.findAnswer(id)
+    authorization.requireIsCurrentUser(answer.submission.user)
+    answerService.resetAnswerFiles(answer)
+    true
+  }
 }
 
 @Component

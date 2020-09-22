@@ -1,5 +1,4 @@
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
-import { useApolloClient } from '@apollo/client'
 import { Spin } from 'antd'
 import React, { useEffect, useState } from 'react'
 import {
@@ -16,6 +15,10 @@ import {
   AuthenticatedUser,
   AuthenticatedUserContext
 } from './hooks/useAuthenticatedUser'
+import {
+  ServerTimeOffsetProvider,
+  useCalculatedServerTimeOffset
+} from './hooks/useServerTimeOffset'
 import IdePage from './pages/IdePage'
 import LoginPage from './pages/LoginPage'
 import LtiPage from './pages/LtiPage'
@@ -34,6 +37,7 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
   const [authenticatedUser, setAuthenticatedUser] = useState<
     AuthenticatedUser
   >()
+  const timeOffset = useCalculatedServerTimeOffset()
 
   const { data: authResult, loading } = useGetAuthenticatedUserQuery({
     context: { disableGlobalErrorHandling: true },
@@ -41,7 +45,6 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
   })
 
   const [logout, { data: logoutSucceeded }] = useLogoutMutation()
-  const apolloClient = useApolloClient()
 
   useEffect(() => {
     if (authResult !== undefined) {
@@ -57,12 +60,7 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
     }
   }, [logoutSucceeded, onUserChanged])
 
-  // make sure to delete cached data after login/logout
-  useEffect(() => {
-    apolloClient.clearStore()
-  }, [authenticatedUser, apolloClient])
-
-  if (loading) {
+  if (loading || timeOffset === undefined) {
     return (
       <Centered>
         <Spin size="large" />
@@ -83,22 +81,24 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
   flattenRoutes(routerConfig.routes || [], routes)
 
   return (
-    <AuthenticatedUserContext.Provider value={authenticatedUser}>
-      <Router>
-        <ScrollToHash />
-        <Switch>
-          <Route exact path="/">
-            <Redirect to="/assignments" />
-          </Route>
-          <Route path="/ide/:type/:id" component={IdePage} />
-          <Route path="/lti" component={LtiPage} />
-          {routes.map(renderRoute(logout))}
-          <DefaultLayout logout={logout}>
-            <Route component={NotFoundPage} />
-          </DefaultLayout>
-        </Switch>
-      </Router>
-    </AuthenticatedUserContext.Provider>
+    <ServerTimeOffsetProvider value={timeOffset}>
+      <AuthenticatedUserContext.Provider value={authenticatedUser}>
+        <Router>
+          <ScrollToHash />
+          <Switch>
+            <Route exact path="/">
+              <Redirect to="/assignments" />
+            </Route>
+            <Route path="/ide/:type/:id" component={IdePage} />
+            <Route path="/lti" component={LtiPage} />
+            {routes.map(renderRoute(logout))}
+            <DefaultLayout logout={logout}>
+              <Route component={NotFoundPage} />
+            </DefaultLayout>
+          </Switch>
+        </Router>
+      </AuthenticatedUserContext.Provider>
+    </ServerTimeOffsetProvider>
   )
 }
 
