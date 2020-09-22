@@ -22,7 +22,7 @@ const LoginPage: React.FC<LoginProps> = props => {
   const [login, { data, loading }] = useLoginMutation()
 
   useEffect(() => {
-    if (data !== undefined) {
+    if (data) {
       onSuccessfulLogin(data.login.user)
     }
   }, [onSuccessfulLogin, data])

@@ -11,6 +11,7 @@ generates:
       withComponent: false
       withHooks: true
       withHOC: false
+      reactApolloVersion: 3
       scalars:
         DateTime: string
         Long: number

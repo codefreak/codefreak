@@ -1,6 +1,5 @@
-import { ApolloProvider, useApolloClient } from '@apollo/react-hooks'
+import { ApolloClient, ApolloProvider, useApolloClient } from '@apollo/client'
 import { Button, Card, Modal, Timeline } from 'antd'
-import ApolloClient from 'apollo-client'
 import React from 'react'
 import {
   EvaluationStepResult,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   EvaluationStepResult,
   useEvaluationFinishedSubscription,
@@ -28,13 +28,19 @@ const useLatestEvaluation = (
   }, [setSummary, latestEvaluation.data])
 
   useEvaluationFinishedSubscription({
-    onSubscriptionData: data => {
-      if (data.subscriptionData.data) {
-        setSummary(
-          data.subscriptionData.data.evaluationFinished.stepsResultSummary
-        )
-      }
-    }
+    onSubscriptionData: useCallback(
+      data => {
+        if (
+          data.subscriptionData.data?.evaluationFinished?.answer?.id ===
+          answerId
+        ) {
+          setSummary(
+            data.subscriptionData.data.evaluationFinished.stepsResultSummary
+          )
+        }
+      },
+      [answerId]
+    )
   })
 
   return { summary, loading: latestEvaluation.loading }

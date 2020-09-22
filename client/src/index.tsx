@@ -1,12 +1,14 @@
-import { ApolloProvider } from '@apollo/react-hooks'
-import { InMemoryCache } from 'apollo-cache-inmemory'
-import ApolloClient from 'apollo-client'
-import { ApolloLink } from 'apollo-link'
-import { split } from 'apollo-link'
-import { onError } from 'apollo-link-error'
-import { WebSocketLink } from 'apollo-link-ws'
+import {
+  ApolloClient,
+  ApolloLink,
+  ApolloProvider,
+  InMemoryCache,
+  split
+} from '@apollo/client'
+import { onError } from '@apollo/client/link/error'
+import { WebSocketLink } from '@apollo/client/link/ws'
+import { getMainDefinition } from '@apollo/client/utilities'
 import { createUploadLink } from 'apollo-upload-client'
-import { getMainDefinition } from 'apollo-utilities'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
