@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service
 
+import com.google.common.collect.MapMaker
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam.allContainers
 import com.spotify.docker.client.DockerClient.ListContainersParam.withLabel
@@ -7,6 +8,7 @@ import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusExit
 import com.spotify.docker.client.DockerClient.ListContainersParam.withStatusRunning
 import com.spotify.docker.client.DockerClient.RemoveContainerParam.forceKill
 import com.spotify.docker.client.DockerClient.RemoveContainerParam.removeVolumes
+import com.spotify.docker.client.exceptions.ContainerNotFoundException
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.HostConfig
@@ -14,6 +16,7 @@ import java.io.InputStream
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
+import java.util.concurrent.locks.ReentrantLock
 import java.util.regex.Pattern
 import javax.ws.rs.ProcessingException
 import org.codefreak.codefreak.config.AppConfiguration
@@ -69,6 +72,12 @@ class ContainerService : BaseService() {
 
   @Autowired
   private lateinit var reverseProxy: ReverseProxy
+
+  /**
+   * A map that keeps a lock for each answer (collection) that should be used for file operations
+   * @see withCollectionFileLock
+   */
+  private val answerFileLockMap = MapMaker().weakValues().makeMap<UUID, ReentrantLock>()
 
   /**
    * Inherit behaviour of the standard Docker CLI and fallback to :latest if no tag is given
@@ -129,19 +138,22 @@ class ContainerService : BaseService() {
       throw ResourceLimitException("Cannot start new IDE. Maximum capacity reached.")
     }
 
-    return if (container == null) {
-      log.info("Creating new IDE container with $label=$id")
-      val containerId = this.createIdeContainer(label, id)
-      docker.startContainer(containerId)
-      // prepare the environment after the container has started
-      this.copyFilesToIde(containerId, fileCollectionId)
-      getIdeUrl(containerId)
-    } else {
-      // make sure the container is running. Also existing ones could have been stopped
-      docker.startContainer(container.id())
-      // write fresh files that might have been uploaded while being stopped
-      this.copyFilesToIde(container.id(), fileCollectionId)
-      getIdeUrl(container.id())
+    // lock early so the container files will not be altered before it is ready
+    return withCollectionFileLock(id) {
+      if (container == null) {
+        log.info("Creating new IDE container with $label=$id")
+        val containerId = this.createIdeContainer(label, id)
+        docker.startContainer(containerId)
+        // prepare the environment after the container has started
+        this.copyFilesToIde(containerId, fileCollectionId)
+        getIdeUrl(containerId)
+      } else {
+        // make sure the container is running. Also existing ones could have been stopped
+        docker.startContainer(container.id())
+        // write fresh files that might have been uploaded while being stopped
+        this.copyFilesToIde(container.id(), fileCollectionId)
+        getIdeUrl(container.id())
+      }
     }
   }
 
@@ -211,8 +223,10 @@ class ContainerService : BaseService() {
       log.debug("Skipped saving of files from answer ${answer.id} because IDE is not running")
       return answer
     }
-    archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
-      fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
+    withCollectionFileLock(answer.id) {
+      archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
+        fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
+      }
     }
     log.info("Saved files of answer ${answer.id} from container $containerId (force=$force)")
     return entityManager.merge(answer)
@@ -287,6 +301,7 @@ class ContainerService : BaseService() {
   /**
    * Write a file collection to an IDE container. This can only be called
    * on a running container and will throw an IllegalStateException otherwise.
+   * Please lock the collection before using this method to prevent losing files
    */
   protected fun copyFilesToIde(containerId: String, fileCollectionId: UUID) {
     // extract possible existing files of the current submission into project dir
@@ -307,7 +322,9 @@ class ContainerService : BaseService() {
 
   fun answerFilesUpdated(answerId: UUID) {
     try {
-      getAnswerIdeContainer(answerId)?.let { copyFilesToIde(it, answerId) }
+      withCollectionFileLock(answerId) {
+        getAnswerIdeContainer(answerId)?.let { copyFilesToIde(it, answerId) }
+      }
     } catch (e: IllegalStateException) {
       // happens if the IDE is not running.
       // We could check if it is running before but the container might get killed while we update files
@@ -315,7 +332,11 @@ class ContainerService : BaseService() {
     }
   }
 
-  protected fun isContainerRunning(containerId: String): Boolean = docker.inspectContainer(containerId).state().running()
+  protected fun isContainerRunning(containerId: String): Boolean = try {
+    docker.inspectContainer(containerId).state().running()
+  } catch (e: ContainerNotFoundException) {
+    false
+  }
 
   protected fun getAllIdeContainers(
     vararg listParams: DockerClient.ListContainersParam
@@ -472,5 +493,19 @@ class ContainerService : BaseService() {
       }
     }
     return matchList.toArray(arrayOf())
+  }
+
+  /**
+   * Lock collection for file operations (read/write files in the container)
+   * We cannot use the container id for locking because we need to lock even before we know the container id
+   */
+  fun <T> withCollectionFileLock(collectionId: UUID, block: () -> T): T {
+    val lock = answerFileLockMap.getOrPut(collectionId) { ReentrantLock() }
+    lock.lock()
+    try {
+      return block()
+    } finally {
+      lock.unlock()
+    }
   }
 }
