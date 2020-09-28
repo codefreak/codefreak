@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.catalina.core.ApplicationPart
 
 /**
- * Custom ObjectMapper brings back the short-cut behaviour of Jackson pre v2.10
+ * Custom ObjectMapper brings back the short circuit behaviour of Jackson pre v2.10
  * If fromValue is already of the correct type no further conversion is done
  *
  * We need this in GraphQL to make uploads work properly

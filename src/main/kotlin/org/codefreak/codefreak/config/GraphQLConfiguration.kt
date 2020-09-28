@@ -25,13 +25,13 @@ class GraphQLConfiguration {
   /**
    * Do not introduce as "ObjectMapper" because this would replace the global jackson object mapper
    */
-  @Bean("shortCutObjectMapper")
-  fun shortCutJacksonObjectMapper(
+  @Bean("shortCircuitObjectMapper")
+  fun shortCircuitObjectMapper(
     builder: Jackson2ObjectMapperBuilder
   ): ShortCircuitObjectMapper = ShortCircuitObjectMapper().also { builder.configure(it) }
 
   @Bean
   fun dataFetcherProvider(
-    @Qualifier("shortCutObjectMapper") objectMapper: ShortCircuitObjectMapper
+    @Qualifier("shortCircuitObjectMapper") objectMapper: ShortCircuitObjectMapper
   ): KotlinDataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(objectMapper)
 }
