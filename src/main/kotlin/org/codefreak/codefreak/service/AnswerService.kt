@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.time.Instant
 import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -57,9 +58,13 @@ class AnswerService : BaseService() {
   @Transactional
   fun deleteAnswer(answerId: UUID) = answerRepository.deleteById(answerId)
 
+  @Transactional
   fun setFiles(answer: Answer): OutputStream {
     require(answer.isEditable) { "The answer is not editable anymore" }
-    return fileService.writeCollectionTar(answer.id).afterClose { containerService.answerFilesUpdated(answer.id) }
+    return fileService.writeCollectionTar(answer.id).afterClose {
+      answer.updatedAt = Instant.now()
+      containerService.answerFilesUpdatedExternally(answer.id)
+    }
   }
 
   fun copyFilesFromTask(answer: Answer) {
@@ -76,7 +81,7 @@ class AnswerService : BaseService() {
   fun resetAnswerFiles(answer: Answer) {
     require(answer.isEditable) { "The answer is not editable anymore" }
     copyFilesFromTask(answer)
-    containerService.answerFilesUpdated(answer.id)
+    containerService.answerFilesUpdatedExternally(answer.id)
   }
 
   fun copyFilesForEvaluation(answer: Answer): InputStream {

@@ -229,6 +229,7 @@ class ContainerService : BaseService() {
       }
     }
     log.info("Saved files of answer ${answer.id} from container $containerId (force=$force)")
+    answer.updatedAt = Instant.now()
     return entityManager.merge(answer)
   }
 
@@ -320,7 +321,7 @@ class ContainerService : BaseService() {
     exec(containerId, arrayOf("chown", "-R", "coder:coder", PROJECT_PATH))
   }
 
-  fun answerFilesUpdated(answerId: UUID) {
+  fun answerFilesUpdatedExternally(answerId: UUID) {
     try {
       withCollectionFileLock(answerId) {
         getAnswerIdeContainer(answerId)?.let { copyFilesToIde(it, answerId) }

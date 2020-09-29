@@ -1,5 +1,6 @@
-import { Button, Col, Icon, Input, Row, Table, Tooltip } from 'antd'
-import React, { ChangeEvent, useState } from 'react'
+import { Button, Col, Icon, Input, Radio, Row, Table, Tooltip } from 'antd'
+import { RadioGroupProps } from 'antd/es/radio'
+import React, { ChangeEvent, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   EvaluationStepResult,
@@ -7,6 +8,7 @@ import {
   PendingEvaluationStatus
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
+import { useFormatter } from '../hooks/useFormatter'
 import { getEntityPath } from '../services/entity-path'
 import { shorten } from '../services/short-id'
 import { matches } from '../services/strings'
@@ -49,11 +51,17 @@ const searchSubmissions = (submissions: Submission[], criteria: string) => {
   })
 }
 
+type ColumnDisplay = 'eval-results' | 'answer-dates'
+
 const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
   assignment
 }) => {
+  const { dateTime } = useFormatter()
   const allSubmissions = assignment.submissions
   const [searchCriteria, setSearchCriteria] = useState<string>()
+  const [columnDisplay, setColumnDisplay] = useState<ColumnDisplay>(
+    'eval-results'
+  )
 
   const submissions = searchCriteria?.trim().length
     ? searchSubmissions(allSubmissions, searchCriteria.trim())
@@ -63,9 +71,16 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     setSearchCriteria(e.target.value)
   }
 
+  const onColumnDisplayChange: RadioGroupProps['onChange'] = useCallback(
+    e => {
+      setColumnDisplay(e.target.value)
+    },
+    [setColumnDisplay]
+  )
+
   const titleFunc = () => {
     return (
-      <Row>
+      <Row gutter={16}>
         <Col span={6}>
           <Input.Search
             addonBefore="Search User"
@@ -74,7 +89,17 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
             onChange={submissionSearch}
           />
         </Col>
-        <Col span={18} style={{ textAlign: 'right' }}>
+        <Col span={6}>
+          <Radio.Group value={columnDisplay} onChange={onColumnDisplayChange}>
+            <Radio.Button value="eval-results">
+              Show Evaluation Results
+            </Radio.Button>
+            <Radio.Button value="answer-dates">
+              Show Submission Dates
+            </Radio.Button>
+          </Radio.Group>
+        </Col>
+        <Col span={12} style={{ textAlign: 'right' }}>
           <Button
             type="default"
             href={`${assignment.submissionsDownloadUrl}.csv`}
@@ -98,40 +123,53 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     return <div style={{ textAlign: 'right' }}>{text}</div>
   }
 
+  // 700px = width of first columns
+  // 200px = min width for each task column
+  const scrollX = 700 + assignment.tasks.length * 200
+
   return (
     <Table
       dataSource={submissions}
+      pagination={{
+        pageSize: 100,
+        hideOnSinglePage: true
+      }}
       bordered
       className="submissions-table"
       rowKey="id"
       title={titleFunc}
       footer={footerFunc}
+      scroll={{
+        x: scrollX
+      }}
     >
       <Column
         title="Last Name"
         dataIndex="user.lastName"
-        width="10%"
+        width={200}
+        fixed="left"
         defaultSortOrder="ascend"
         sorter={alphabeticSorter(submission => submission.user.lastName)}
       />
       <Column
         title="First Name"
         dataIndex="user.firstName"
-        width="10%"
+        width={200}
+        fixed="left"
         sorter={alphabeticSorter(submission => submission.user.firstName)}
       />
       <Column
         title="Username"
         dataIndex="user.username"
-        width="20%"
+        width={300}
         sorter={alphabeticSorter(submission => submission.user.username)}
       />
-      {renderTaskColumnGroups(assignment.tasks)}
+      {taskColumnRenderer(dateTime, columnDisplay, assignment.tasks)}
     </Table>
   )
 }
 
-const AnswerSummary: React.FC<{
+const AnswerEvaluationSummary: React.FC<{
   task: Task
   user: Submission['user']
   answer: Answer
@@ -240,7 +278,11 @@ const getAnswerFromSubmission = (
 ): Answer | undefined =>
   submission.answers.find(candidate => candidate.task.id === task.id)
 
-const renderTaskColumnGroups = (tasks: Task[]) => {
+const taskColumnRenderer = (
+  dateTimeFormat: (date: Date) => string,
+  display: ColumnDisplay,
+  tasks: Task[]
+) => {
   const renderAnswer = (task: Task, submission: Submission) => {
     const answer = getAnswerFromSubmission(submission, task)
 
@@ -251,17 +293,24 @@ const renderTaskColumnGroups = (tasks: Task[]) => {
         </Tooltip>
       )
     }
-
-    return <AnswerSummary user={submission.user} task={task} answer={answer} />
+    if (display === 'answer-dates') {
+      return dateTimeFormat(new Date(answer.updatedAt))
+    } else {
+      return (
+        <AnswerEvaluationSummary
+          user={submission.user}
+          task={task}
+          answer={answer}
+        />
+      )
+    }
   }
 
-  // distribute remaining 60% width over all task columns
-  const width = Math.floor(60 / tasks.length)
+  // column width is determined by scrollX of the table
   return tasks.map(task => {
     return (
       <Column
         key={`task-${task.id}`}
-        width={`${width}%`}
         title={task.title}
         align="center"
         filters={[
