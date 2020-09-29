@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@ant-design/pro-layout": "4.8.3",
+    "@ant-design/pro-layout": "4.11.4",
     "@apollo/client": "3.2.0",
     "@codefreak/docs": "file:../docs",
     "@craco/craco": "5.6.4",
