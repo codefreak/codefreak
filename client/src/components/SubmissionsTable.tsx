@@ -162,7 +162,6 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
         title="Username"
         dataIndex="user.username"
         width={300}
-        fixed="left"
         sorter={alphabeticSorter(submission => submission.user.username)}
       />
       {taskColumnRenderer(dateTime, columnDisplay, assignment.tasks)}
