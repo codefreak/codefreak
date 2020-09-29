@@ -1,7 +1,7 @@
 package org.codefreak.codefreak.graphql
 
+import graphql.kickstart.servlet.apollo.ApolloScalars
 import graphql.schema.GraphQLScalarType
-import graphql.servlet.core.ApolloScalars
 import java.time.Instant
 import java.util.UUID
 import kotlin.reflect.KClassifier

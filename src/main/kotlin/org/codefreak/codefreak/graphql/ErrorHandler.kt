@@ -3,8 +3,8 @@ package org.codefreak.codefreak.graphql
 import graphql.ErrorClassification
 import graphql.ExceptionWhileDataFetching
 import graphql.GraphQLError
+import graphql.kickstart.execution.error.DefaultGraphQLErrorHandler
 import graphql.language.SourceLocation
-import graphql.servlet.core.DefaultGraphQLErrorHandler
 import org.codefreak.codefreak.auth.NotAuthenticatedException
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.ResourceLimitException
