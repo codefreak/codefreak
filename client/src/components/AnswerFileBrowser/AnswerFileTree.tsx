@@ -1,30 +1,26 @@
 import { Tree } from 'antd'
 import { relative, resolve } from 'path'
 import React from 'react'
-import {
-  FileType,
-  GetAnswerFileListQueryResult,
-  useGetAnswerFileListQuery
-} from '../../services/codefreak-api'
+import { FileType } from '../../services/codefreak-api'
 import {
   fileTree,
   sortTree,
   TreeNode as TreeNodeModel
 } from '../../services/file-tree'
-import AsyncPlaceholder from '../AsyncContainer'
 
 const { TreeNode, DirectoryTree } = Tree
 
-export type AnswerFile = NonNullable<
-  GetAnswerFileListQueryResult['data']
->['answerFiles'][number]
+export interface FileTreeFile {
+  path: string
+  type: FileType
+}
 
 const isRootDir = (path: string) => {
   return resolve('/', path) === '/'
 }
 
 const renderTreeNodeRecursive = (
-  node: TreeNodeModel<AnswerFile>,
+  node: TreeNodeModel<FileTreeFile>,
   parentPath: string
 ) => {
   const filename = relative(parentPath, node.path)
@@ -42,24 +38,15 @@ const renderTreeNodeRecursive = (
 }
 
 export interface AnswerFileTreeProps {
-  answerId: string
-  onFileSelect?: (selectedNode: AnswerFile) => void
+  onFileSelect?: (selectedNode: FileTreeFile) => void
+  files: FileTreeFile[]
 }
 
 const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({
-  answerId,
-  onFileSelect
+  onFileSelect,
+  files
 }) => {
-  const result = useGetAnswerFileListQuery({
-    variables: { id: answerId }
-  })
-
-  if (result.data === undefined) {
-    return <AsyncPlaceholder result={result} />
-  }
-
-  const { answerFiles } = result.data
-  let rootNodes = sortTree(fileTree(answerFiles))
+  let rootNodes = sortTree(fileTree(files))
 
   // omit the root node and render its children
   if (rootNodes.length === 1 && isRootDir(rootNodes[0].path)) {
@@ -71,7 +58,7 @@ const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({
       return
     }
     const path = selectedKeys.shift()
-    const selectedFile = path && answerFiles.find(file => file.path === path)
+    const selectedFile = path && files.find(file => file.path === path)
     if (selectedFile) {
       onFileSelect(selectedFile)
     }

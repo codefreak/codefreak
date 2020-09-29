@@ -19,9 +19,13 @@ import { messageService } from '../../services/message'
 import { displayName } from '../../services/user'
 import { DifferentUserContext } from '../task/TaskPage'
 
-const DangerZone: React.FC<{ answer: Pick<Answer, 'id' | 'deadline'> }> = ({
-  answer: { id, deadline }
-}) => {
+interface DangerZoneProps {
+  answer: Pick<Answer, 'id' | 'deadline'>
+  onReset?: () => void
+}
+
+const DangerZone: React.FC<DangerZoneProps> = props => {
+  const { id, deadline } = props.answer
   const [resetAnswer, { loading: resetLoading }] = useResetAnswerMutation({
     variables: { id }
   })
@@ -60,6 +64,9 @@ const DangerZone: React.FC<{ answer: Pick<Answer, 'id' | 'deadline'> }> = ({
       onOk: () =>
         resetAnswer().then(() => {
           messageService.success('Answer has been reset to initial files!')
+          if (props.onReset) {
+            props.onReset()
+          }
         })
     })
   }
@@ -101,9 +108,13 @@ const DangerZone: React.FC<{ answer: Pick<Answer, 'id' | 'deadline'> }> = ({
   )
 }
 
-const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id' | 'deadline'> }> = ({
-  answer: { id, deadline }
-}) => {
+interface UploadAnswerProps {
+  answer: Pick<Answer, 'id' | 'deadline'>
+  onUpload?: () => void
+}
+
+const UploadAnswer: React.FC<UploadAnswerProps> = props => {
+  const { id, deadline } = props.answer
   const [
     uploadSource,
     { loading: uploading, data: uploadSuccess }
@@ -114,7 +125,12 @@ const UploadAnswer: React.FC<{ answer: Pick<Answer, 'id' | 'deadline'> }> = ({
     { loading: importing, data: importSucess }
   ] = useImportAnswerSourceMutation()
 
-  const onUpload = (files: File[]) => uploadSource({ variables: { files, id } })
+  const onUpload = (files: File[]) =>
+    uploadSource({ variables: { files, id } }).then(() => {
+      if (props.onUpload) {
+        props.onUpload()
+      }
+    })
 
   const onImport = (url: string) => importSource({ variables: { url, id } })
 
@@ -143,6 +159,9 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
     variables: { id: props.answerId }
   })
   const differentUser = useContext(DifferentUserContext)
+  const [reloadFiles, setReloadFiles] = useState<() => void>(() => {
+    return () => undefined
+  })
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -153,6 +172,10 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
   const filesTitle = differentUser
     ? `Files uploaded by ${displayName(differentUser)}`
     : 'Your current submission'
+
+  // if we want to store a function in state we have to wrap it in another callback
+  // otherwise React will execute the function
+  const onFileTreeReady = (reload: () => void) => setReloadFiles(() => reload)
 
   return (
     <>
@@ -172,12 +195,16 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
             style={{ marginBottom: 16 }}
           />
         )}
-        <AnswerFileBrowser answerId={answer.id} review={!!differentUser} />
+        <AnswerFileBrowser
+          answerId={answer.id}
+          review={!!differentUser}
+          onReady={onFileTreeReady}
+        />
       </Card>
       {!differentUser && (
         <>
-          <UploadAnswer answer={answer} />
-          <DangerZone answer={answer} />
+          <UploadAnswer answer={answer} onUpload={reloadFiles} />
+          <DangerZone answer={answer} onReset={reloadFiles} />
         </>
       )}
     </>
