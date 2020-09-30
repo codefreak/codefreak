@@ -194,7 +194,7 @@ const sortFeedbackList = (
   feedbackList: Feedback[],
   by: keyof typeof FeedbackSortOptions
 ) => {
-  return feedbackList.sort((a: Feedback, b: Feedback) => {
+  return feedbackList.slice().sort((a: Feedback, b: Feedback) => {
     switch (by) {
       case 'STATUS':
         if (a.status && b.status) {
