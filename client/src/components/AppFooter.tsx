@@ -14,7 +14,7 @@ const AppFooter: React.FC = () => {
     : repoUrl
 
   return (
-    <Layout.Footer>
+    <Layout.Footer className="app-footer">
       powered by Code FREAK{' '}
       <a href={buildVersionLink} target="_blank" rel="noopener noreferrer">
         v{buildVersion}
