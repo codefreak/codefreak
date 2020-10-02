@@ -25,3 +25,19 @@ export const ellipsis = (
  */
 export const matches = (needle: string, haystack: string) =>
   haystack.toLocaleLowerCase().indexOf(needle.toLocaleLowerCase()) !== -1
+
+/**
+ * Capitalize the first letter of the string.
+ * E.g. "hello" => "Hello"; "HELLO" => "Hello"
+ *
+ * @param s The string to be capitalized
+ */
+export const capitalize = (s: string) => {
+  if (s.length === 0) {
+    return s
+  } else if (s.length === 1) {
+    return s.charAt(0).toUpperCase()
+  }
+
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
+}
