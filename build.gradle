@@ -76,7 +76,7 @@ dependencies {
   testImplementation 'com.tngtech.archunit:archunit-junit4:0.11.0'
 
   // workaround for https://github.com/spotify/docker-client/issues/1030
-  implementation 'org.glassfish.jersey.inject:jersey-hk2:2.31'
+  implementation 'org.glassfish.jersey.inject:jersey-hk2:2.32'
 
   // workaround for https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server/issues/1468
   implementation 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
