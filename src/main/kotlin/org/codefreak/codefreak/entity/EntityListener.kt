@@ -5,7 +5,6 @@ import javax.persistence.PostUpdate
 import javax.persistence.PreRemove
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberFunctions
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-@Qualifier
 annotation class EntityListener(vararg val value: KClass<*> = [])
 
 @Component
