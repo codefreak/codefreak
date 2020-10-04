@@ -7,6 +7,7 @@ import javax.persistence.PostPersist
 import javax.persistence.PostUpdate
 import javax.persistence.PreRemove
 import org.codefreak.codefreak.entity.Answer
+import org.codefreak.codefreak.entity.EntityListener
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
+@EntityListener(Answer::class)
 class AnswerDeadlinePublisher {
   companion object {
     private val log = LoggerFactory.getLogger(AnswerDeadlinePublisher::class.java)

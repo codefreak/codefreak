@@ -8,6 +8,7 @@ import javax.persistence.PostUpdate
 import javax.persistence.PreRemove
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.AssignmentStatus
+import org.codefreak.codefreak.entity.EntityListener
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
@@ -20,6 +21,7 @@ import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 
 @Component
+@EntityListener(Assignment::class)
 class AssignmentStatusChangePublisher {
   @Autowired
   private lateinit var eventPublisher: ApplicationEventPublisher

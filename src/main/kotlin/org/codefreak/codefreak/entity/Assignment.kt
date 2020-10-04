@@ -9,12 +9,11 @@ import javax.persistence.EntityListeners
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OrderBy
-import org.codefreak.codefreak.service.AssignmentStatusChangePublisher
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
 
 @Entity
-@EntityListeners(AssignmentStatusChangePublisher::class)
+@EntityListeners(SpringEntityListenerAdapter::class)
 class Assignment(
   /**
    * A title for this assignment
