@@ -1,6 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
-import React from 'react'
+import {Button, Card, Descriptions, Modal, Tooltip} from 'antd'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -12,6 +12,7 @@ import {
   useGetAssignmentListQuery
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
+import SortSelect from '../../components/SortSelect'
 
 const { confirm } = Modal
 
@@ -19,11 +20,25 @@ const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
   const [deleteAssignment] = useDeleteAssignmentMutation()
 
+  const sortVariants: Record<string, (_: Assignment, __: Assignment) => number> = {
+    NEWEST: (_: Assignment, __: Assignment) => 0,
+    OLDEST: (_: Assignment, __: Assignment) => 0,
+    TITLE: (_: Assignment, __: Assignment) => 0,
+    STATUS: (_: Assignment, __: Assignment) => 0
+  }
+  const sortValues: string[] = Object.keys(sortVariants)
+  const [currentSortValue, setCurrentSortValue] = useState(sortValues[0])
+
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
   const { assignments } = result.data
+
+  const handleSortChange = ((value: string) => {
+    setCurrentSortValue(value)
+    assignments.slice().sort(sortVariants[value])
+  })
 
   const renderProps: RenderProps = {
     delete: async (id: string) => {
@@ -39,16 +54,23 @@ const AssignmentListPage: React.FC = () => {
     <>
       <PageHeaderWrapper
         extra={
-          <Authorized authority="ROLE_TEACHER">
-            <Link to="/assignments/create" key="1">
-              <Button type="primary" icon="plus">
-                Create Assignment
-              </Button>
-            </Link>
-          </Authorized>
+          <>
+            <SortSelect
+              defaultValue={currentSortValue}
+              values={sortValues}
+              onSortChange={handleSortChange}
+            />
+            <Authorized authority="ROLE_TEACHER">
+              <Link to="/assignments/create" key="1">
+                <Button type="primary" icon="plus">
+                  Create Assignment
+                </Button>
+              </Link>
+            </Authorized>
+          </>
         }
       />
-      {assignments.map(renderAssignment(renderProps))}
+      {assignments.slice().sort().map(renderAssignment(renderProps))}
     </>
   )
 }
