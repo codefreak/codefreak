@@ -7,12 +7,14 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import EntityLink from '../../components/EntityLink'
 import {
+  AssignmentStatus,
   GetAssignmentListQueryResult,
   useDeleteAssignmentMutation,
   useGetAssignmentListQuery
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import SortSelect from '../../components/SortSelect'
+import {compare} from "../../services/util";
 
 const { confirm } = Modal
 
@@ -20,12 +22,28 @@ const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
   const [deleteAssignment] = useDeleteAssignmentMutation()
 
-  const sortVariants: Record<string, (_: Assignment, __: Assignment) => number> = {
-    NEWEST: (_: Assignment, __: Assignment) => 0,
-    OLDEST: (_: Assignment, __: Assignment) => 0,
-    TITLE: (_: Assignment, __: Assignment) => 0,
-    STATUS: (_: Assignment, __: Assignment) => 0
+  const sortVariants: Record<string, (a: Assignment, b: Assignment) => number> = {
+    NEWEST: (a: Assignment, b: Assignment) => {
+      const result = compare(a.createdAt, b.createdAt, value => Date.parse(value))
+
+      // Reverse the order, if both exist
+      // The list has to be reverse sorted, because newer timestamps are greater than older ones
+      return (a.createdAt && b.createdAt) ? (-1 * result) : result
+    },
+    OLDEST: (a: Assignment, b: Assignment) => sortVariants['NEWEST'](b, a),
+    TITLE: (a: Assignment, b: Assignment) => a.title.localeCompare(b.title),
+    STATUS: (a: Assignment, b: Assignment) => {
+      const statusOrder: Record<AssignmentStatus, number> = {
+        INACTIVE: 0,
+        ACTIVE: 1,
+        OPEN: 2,
+        CLOSED: 3
+      }
+
+      return compare(a.status, b.status, (value => statusOrder[value]))
+    }
   }
+
   const sortValues: string[] = Object.keys(sortVariants)
   const [currentSortValue, setCurrentSortValue] = useState(sortValues[0])
 
@@ -37,7 +55,6 @@ const AssignmentListPage: React.FC = () => {
 
   const handleSortChange = ((value: string) => {
     setCurrentSortValue(value)
-    assignments.slice().sort(sortVariants[value])
   })
 
   const renderProps: RenderProps = {
@@ -70,7 +87,11 @@ const AssignmentListPage: React.FC = () => {
           </>
         }
       />
-      {assignments.slice().sort().map(renderAssignment(renderProps))}
+      {
+        assignments.slice()
+          .sort(sortVariants[currentSortValue])
+          .map(renderAssignment(renderProps))
+      }
     </>
   )
 }
