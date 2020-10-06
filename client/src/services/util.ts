@@ -24,3 +24,25 @@ export type Updater<T, R = any> = <P extends keyof T>(
 export function extractTargetValue<V, T>(fn: (value: V) => T) {
   return (e: { target: { value: V } }) => fn(e.target.value)
 }
+
+/**
+ * Compares two values with the given transformation method.
+ * Returns a positive number, if a is greater than b.
+ * Returns a negative number, if b is greater than a.
+ * Returns 0 otherwise.
+ *
+ * @param a the first value to be compared
+ * @param b the second value to be compared
+ * @param transform a function that transforms the values to a number
+ */
+export function compare<T>(a: T, b: T, transform: (value: T) => number) {
+  if (a && b) {
+    return transform(a) - transform(b)
+  } else if (a) {
+    return -1
+  } else if (b) {
+    return 1
+  } else {
+    return 0
+  }
+}

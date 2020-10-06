@@ -4,6 +4,7 @@ query GetAssignmentList {
     title
     deletable
     status
+    createdAt
     deadline
     openFrom
     tasks {

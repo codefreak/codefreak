@@ -1,29 +1,63 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import EntityLink from '../../components/EntityLink'
 import {
+  AssignmentStatus,
   GetAssignmentListQueryResult,
   useDeleteAssignmentMutation,
   useGetAssignmentListQuery
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
+import SortSelect from '../../components/SortSelect'
+import { compare } from '../../services/util'
+import SortedList from '../../components/SortedList'
 
 const { confirm } = Modal
+
+const statusOrder: Record<AssignmentStatus, number> = {
+  INACTIVE: 0,
+  ACTIVE: 1,
+  OPEN: 2,
+  CLOSED: 3
+}
+
+const sortByNewest = (a: Assignment, b: Assignment) => {
+  const result = compare(a.createdAt, b.createdAt, value => Date.parse(value))
+
+  // Reverse the order, if both exist
+  // The list has to be reverse sorted, because newer timestamps are greater than older ones
+  return a.createdAt && b.createdAt ? -1 * result : result
+}
+
+const sortVariants: Record<string, (a: Assignment, b: Assignment) => number> = {
+  NEWEST: (a: Assignment, b: Assignment) => sortByNewest(a, b),
+  OLDEST: (a: Assignment, b: Assignment) => sortByNewest(b, a),
+  TITLE: (a: Assignment, b: Assignment) => a.title.localeCompare(b.title),
+  STATUS: (a: Assignment, b: Assignment) =>
+    compare(a.status, b.status, value => statusOrder[value])
+}
 
 const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
   const [deleteAssignment] = useDeleteAssignmentMutation()
+
+  const sortValues: string[] = Object.keys(sortVariants)
+  const [sortValue, setSortValue] = useState(sortValues[0])
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
   const { assignments } = result.data
+
+  const handleSortChange = (value: string) => {
+    setSortValue(value)
+  }
 
   const renderProps: RenderProps = {
     delete: async (id: string) => {
@@ -39,16 +73,27 @@ const AssignmentListPage: React.FC = () => {
     <>
       <PageHeaderWrapper
         extra={
-          <Authorized authority="ROLE_TEACHER">
-            <Link to="/assignments/create" key="1">
-              <Button type="primary" icon="plus">
-                Create Assignment
-              </Button>
-            </Link>
-          </Authorized>
+          <>
+            <SortSelect
+              defaultValue={sortValue}
+              values={sortValues}
+              onSortChange={handleSortChange}
+            />
+            <Authorized authority="ROLE_TEACHER">
+              <Link to="/assignments/create" key="1">
+                <Button type="primary" icon="plus">
+                  Create Assignment
+                </Button>
+              </Link>
+            </Authorized>
+          </>
         }
       />
-      {assignments.map(renderAssignment(renderProps))}
+      <SortedList
+        list={assignments}
+        sort={sortVariants[sortValue]}
+        render={renderAssignment(renderProps)}
+      />
     </>
   )
 }
