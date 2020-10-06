@@ -1,4 +1,4 @@
-import { Card, Collapse, Empty, Icon, Result, Select, Typography } from 'antd'
+import { Card, Collapse, Empty, Icon, Result, Typography } from 'antd'
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
@@ -15,6 +15,9 @@ import SyntaxHighlighter from './code/SyntaxHighlighter'
 import { CodeViewerCard } from './CodeViewer'
 import './EvaluationResult.less'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
+import { compare } from '../services/util'
+import SortSelect from './SortSelect'
+import SortedList from './SortedList'
 
 const { Text } = Typography
 
@@ -174,11 +177,6 @@ const EvaluationResult: React.FC<{ evaluationId: string }> = ({
   )
 }
 
-enum FeedbackSortOptions {
-  SEVERITY,
-  FILE,
-  STATUS
-}
 const severityOrder: Record<FeedbackSeverity, number> = {
   INFO: 3,
   MINOR: 2,
@@ -190,47 +188,30 @@ const statusOrder: Record<FeedbackStatus, number> = {
   SUCCESS: 1,
   IGNORE: 2
 }
-const sortFeedbackList = (
-  feedbackList: Feedback[],
-  by: keyof typeof FeedbackSortOptions
-) => {
-  return feedbackList.slice().sort((a: Feedback, b: Feedback) => {
-    switch (by) {
-      case 'STATUS':
-        if (a.status && b.status) {
-          return statusOrder[a.status] - statusOrder[b.status]
-        } else if (a.status) {
-          return -1
-        } else if (b.status) {
-          return 1
-        }
-        return 0
-      case 'SEVERITY':
-        if (a.severity && b.severity) {
-          return severityOrder[a.severity] - severityOrder[b.severity]
-        } else if (a.severity) {
-          return -1
-        } else if (b.severity) {
-          return 1
-        }
-        return 0
-      case 'FILE':
-        if (a.fileContext && b.fileContext) {
-          if (a.fileContext.path === b.fileContext.path) {
-            return (
-              (a.fileContext.lineStart || 0) - (b.fileContext.lineStart || 0)
-            )
-          }
-          return a.fileContext.path.localeCompare(b.fileContext.path)
-        } else if (a.fileContext) {
-          return -1
-        } else if (b.fileContext) {
-          return 1
-        }
-        return 0
+
+const FeedbackSortMethods: Record<
+  string,
+  (a: Feedback, b: Feedback) => number
+> = {
+  SEVERITY: (a, b) =>
+    compare(a.severity, b.severity, value =>
+      value ? severityOrder[value] : 0
+    ),
+  STATUS: (a, b) =>
+    compare(a.status, b.status, value => (value ? statusOrder[value] : 0)),
+  FILE: (a, b) => {
+    if (a.fileContext && b.fileContext) {
+      if (a.fileContext.path === b.fileContext.path) {
+        return (a.fileContext.lineStart || 0) - (b.fileContext.lineStart || 0)
+      }
+      return a.fileContext.path.localeCompare(b.fileContext.path)
+    } else if (a.fileContext) {
+      return -1
+    } else if (b.fileContext) {
+      return 1
     }
     return 0
-  })
+  }
 }
 
 const EvaluationStepPanel: React.FC<{
@@ -246,23 +227,20 @@ const EvaluationStepPanel: React.FC<{
     </>
   )
 
-  const [sortValue, setSortValue] = useState<keyof typeof FeedbackSortOptions>(
-    'FILE'
-  )
-  const feedbackList = sortFeedbackList(step.feedback, sortValue)
-  const onSortChange = (value: keyof typeof FeedbackSortOptions) =>
-    setSortValue(value)
+  const [sortValue, setSortValue] = useState('FILE')
+  const feedbackList = step.feedback
+  const handleSortChange = (value: string) => setSortValue(value)
+  const FeedbackSortOptions: string[] = Object.keys(FeedbackSortMethods)
   const sorter = (
-    <Select
+    <SortSelect
       defaultValue={sortValue}
-      onChange={onSortChange}
-      style={{ width: '150px' }}
-    >
-      <Select.Option value="STATUS">Sort by Status</Select.Option>
-      <Select.Option value="FILE">Sort by File</Select.Option>
-      <Select.Option value="SEVERITY">Sort by Severity</Select.Option>
-    </Select>
+      values={FeedbackSortOptions}
+      onSortChange={handleSortChange}
+    />
   )
+
+  const renderFeedback = (feedback: Feedback) =>
+    renderFeedbackPanel(answerId, feedback)
 
   let body
   if (!step.feedback || step.feedback.length === 0) {
@@ -279,7 +257,11 @@ const EvaluationStepPanel: React.FC<{
   } else {
     body = (
       <Collapse>
-        {feedbackList.map(feedback => renderFeedbackPanel(answerId, feedback))}
+        <SortedList
+          list={feedbackList}
+          sort={FeedbackSortMethods[sortValue]}
+          render={renderFeedback}
+        />
       </Collapse>
     )
   }
