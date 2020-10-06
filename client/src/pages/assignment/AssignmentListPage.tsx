@@ -15,6 +15,7 @@ import {
 import { messageService } from '../../services/message'
 import SortSelect from '../../components/SortSelect'
 import {compare} from "../../services/util";
+import SortedList from "../../components/SortedList";
 
 const { confirm } = Modal
 
@@ -87,11 +88,11 @@ const AssignmentListPage: React.FC = () => {
           </>
         }
       />
-      {
-        assignments.slice()
-          .sort(sortVariants[currentSortValue])
-          .map(renderAssignment(renderProps))
-      }
+      <SortedList
+        list={assignments}
+        sort={sortVariants[currentSortValue]}
+        render={renderAssignment(renderProps)}
+      />
     </>
   )
 }
