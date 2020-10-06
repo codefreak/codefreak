@@ -1,5 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import {Button, Card, Descriptions, Modal, Tooltip} from 'antd'
+import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
@@ -14,39 +14,40 @@ import {
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import SortSelect from '../../components/SortSelect'
-import {compare} from "../../services/util";
-import SortedList from "../../components/SortedList";
+import { compare } from '../../services/util'
+import SortedList from '../../components/SortedList'
 
 const { confirm } = Modal
+
+const statusOrder: Record<AssignmentStatus, number> = {
+  INACTIVE: 0,
+  ACTIVE: 1,
+  OPEN: 2,
+  CLOSED: 3
+}
+
+const sortByNewest = (a: Assignment, b: Assignment) => {
+  const result = compare(a.createdAt, b.createdAt, value => Date.parse(value))
+
+  // Reverse the order, if both exist
+  // The list has to be reverse sorted, because newer timestamps are greater than older ones
+  return a.createdAt && b.createdAt ? -1 * result : result
+}
+
+const sortVariants: Record<string, (a: Assignment, b: Assignment) => number> = {
+  NEWEST: (a: Assignment, b: Assignment) => sortByNewest(a, b),
+  OLDEST: (a: Assignment, b: Assignment) => sortByNewest(b, a),
+  TITLE: (a: Assignment, b: Assignment) => a.title.localeCompare(b.title),
+  STATUS: (a: Assignment, b: Assignment) =>
+    compare(a.status, b.status, value => statusOrder[value])
+}
 
 const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
   const [deleteAssignment] = useDeleteAssignmentMutation()
 
-  const sortVariants: Record<string, (a: Assignment, b: Assignment) => number> = {
-    NEWEST: (a: Assignment, b: Assignment) => {
-      const result = compare(a.createdAt, b.createdAt, value => Date.parse(value))
-
-      // Reverse the order, if both exist
-      // The list has to be reverse sorted, because newer timestamps are greater than older ones
-      return (a.createdAt && b.createdAt) ? (-1 * result) : result
-    },
-    OLDEST: (a: Assignment, b: Assignment) => sortVariants['NEWEST'](b, a),
-    TITLE: (a: Assignment, b: Assignment) => a.title.localeCompare(b.title),
-    STATUS: (a: Assignment, b: Assignment) => {
-      const statusOrder: Record<AssignmentStatus, number> = {
-        INACTIVE: 0,
-        ACTIVE: 1,
-        OPEN: 2,
-        CLOSED: 3
-      }
-
-      return compare(a.status, b.status, (value => statusOrder[value]))
-    }
-  }
-
   const sortValues: string[] = Object.keys(sortVariants)
-  const [currentSortValue, setCurrentSortValue] = useState(sortValues[0])
+  const [sortValue, setSortValue] = useState(sortValues[0])
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -54,9 +55,9 @@ const AssignmentListPage: React.FC = () => {
 
   const { assignments } = result.data
 
-  const handleSortChange = ((value: string) => {
-    setCurrentSortValue(value)
-  })
+  const handleSortChange = (value: string) => {
+    setSortValue(value)
+  }
 
   const renderProps: RenderProps = {
     delete: async (id: string) => {
@@ -74,7 +75,7 @@ const AssignmentListPage: React.FC = () => {
         extra={
           <>
             <SortSelect
-              defaultValue={currentSortValue}
+              defaultValue={sortValue}
               values={sortValues}
               onSortChange={handleSortChange}
             />
@@ -90,7 +91,7 @@ const AssignmentListPage: React.FC = () => {
       />
       <SortedList
         list={assignments}
-        sort={sortVariants[currentSortValue]}
+        sort={sortVariants[sortValue]}
         render={renderAssignment(renderProps)}
       />
     </>
