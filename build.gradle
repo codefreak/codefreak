@@ -56,7 +56,7 @@ dependencies {
   implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:5.9.0.202009080501-r'
   implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:5.9.0.202009080501-r'
   implementation 'org.liquibase:liquibase-core:4.1.0'
-  implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:7.1.0'
+  implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:7.2.0'
   implementation 'com.expediagroup:graphql-kotlin-spring-server:2.1.2'
   implementation 'com.vladmihalcea:hibernate-types-52:2.9.13'
   implementation 'com.github.codefreak:templates:1.2.2'
