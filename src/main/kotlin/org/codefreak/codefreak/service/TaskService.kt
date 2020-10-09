@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.util.UUID
@@ -21,8 +20,9 @@ import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.PositionUtil
 import org.codefreak.codefreak.util.TarUtil
-import org.codefreak.codefreak.util.TarUtil.getYamlDefinition
+import org.codefreak.codefreak.util.TarUtil.getCodefreakDefinition
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -46,16 +46,22 @@ TaskService : BaseService() {
   @Autowired
   private lateinit var fileService: FileService
 
+  @Autowired
+  @Qualifier("yamlObjectMapper")
+  private lateinit var yamlMapper: ObjectMapper
+
   @Transactional
   fun findTask(id: UUID): Task = taskRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Task not found") }
 
   @Transactional
   fun createFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
-    val definition = getYamlDefinition<TaskDefinition>(tarContent.inputStream())
+    val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
     var task = Task(assignment, owner, position, definition.title, definition.description, 100)
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
+    task.ideEnabled = definition.ide?.enabled ?: true
+    task.ideImage = definition.ide?.image
 
     task = taskRepository.save(task)
     task.evaluationStepDefinitions = definition.evaluation
@@ -156,7 +162,7 @@ TaskService : BaseService() {
         task.hiddenFiles,
         task.protectedFiles,
         task.evaluationStepDefinitions.map { EvaluationDefinition(it.runnerName, it.options, it.title) })
-        .let { ObjectMapper(YAMLFactory()).writeValueAsBytes(it) }
+        .let { yamlMapper.writeValueAsBytes(it) }
 
     tar.putArchiveEntry(TarArchiveEntry("codefreak.yml").also { it.size = definition.size.toLong() })
     tar.write(definition)

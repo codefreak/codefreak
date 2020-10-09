@@ -77,5 +77,9 @@ class Task(
 
   var evaluationSettingsChangedAt: Instant = Instant.now()
 
+  var ideEnabled: Boolean = true
+
+  var ideImage: String? = null
+
   override fun compareTo(other: Task) = position.compareTo(other.position)
 }

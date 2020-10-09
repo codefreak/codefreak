@@ -2,6 +2,7 @@ package org.codefreak.codefreak.config
 
 import com.expediagroup.graphql.execution.KotlinDataFetcherFactoryProvider
 import com.expediagroup.graphql.execution.SimpleKotlinDataFetcherFactoryProvider
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.codefreak.codefreak.graphql.ShortCircuitObjectMapper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.servlet.FilterRegistrationBean
@@ -22,16 +23,13 @@ class GraphQLConfiguration {
     addUrlPatterns("/graphql")
   }
 
-  /**
-   * Do not introduce as "ObjectMapper" because this would replace the global jackson object mapper
-   */
   @Bean("shortCircuitObjectMapper")
   fun shortCircuitObjectMapper(
     builder: Jackson2ObjectMapperBuilder
-  ): ShortCircuitObjectMapper = ShortCircuitObjectMapper().also { builder.configure(it) }
+  ): ObjectMapper = ShortCircuitObjectMapper().also { builder.configure(it) }
 
   @Bean
   fun dataFetcherProvider(
-    @Qualifier("shortCircuitObjectMapper") objectMapper: ShortCircuitObjectMapper
+    @Qualifier("shortCircuitObjectMapper") objectMapper: ObjectMapper
   ): KotlinDataFetcherFactoryProvider = SimpleKotlinDataFetcherFactoryProvider(objectMapper)
 }
