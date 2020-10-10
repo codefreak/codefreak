@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@ant-design/pro-layout": "4.11.4",
-    "@apollo/client": "3.2.0",
+    "@apollo/client": "3.2.3",
     "@codefreak/docs": "file:../docs",
     "@craco/craco": "5.7.0",
     "@graphql-codegen/cli": "1.17.10",
