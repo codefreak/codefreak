@@ -6,6 +6,7 @@ import javax.persistence.PreRemove
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberFunctions
 import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
@@ -16,9 +17,13 @@ annotation class EntityListener(vararg val value: KClass<*> = [])
 
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-class SpringEntityListenerAdapter(ctx: ApplicationContext) {
+class SpringEntityListenerAdapter : ApplicationContextAware {
 
-  private val listenerBeans = ctx.getBeansWithAnnotation(EntityListener::class.java).values.toList()
+  private lateinit var listenerBeans: List<Any>
+
+  override fun setApplicationContext(applicationContext: ApplicationContext) {
+    this.listenerBeans = applicationContext.getBeansWithAnnotation(EntityListener::class.java).values.toList()
+  }
 
   @PostUpdate
   fun postUpdate(entity: Any) = delegateToBeans(entity, PostUpdate::class)
