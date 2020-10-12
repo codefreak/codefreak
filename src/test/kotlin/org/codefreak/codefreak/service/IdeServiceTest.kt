@@ -24,13 +24,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ClassPathResource
 
-internal class ContainerServiceTest : SpringTest() {
+internal class IdeServiceTest : SpringTest() {
 
   @MockBean
   lateinit var fileService: FileService
 
   @Autowired
   lateinit var docker: DockerClient
+
+  @Autowired
+  lateinit var ideService: IdeService
 
   @Autowired
   lateinit var containerService: ContainerService
@@ -57,15 +60,15 @@ internal class ContainerServiceTest : SpringTest() {
 
   @Test
   fun `New IDE container is started`() {
-    containerService.startIdeContainer(answer)
+    ideService.startIdeContainer(answer)
     val container = getIdeContainer(answer) // throws if container is not present
     assertTrue(docker.inspectContainer(container.id()).state().running())
   }
 
   @Test
   fun `Existing IDE container is used`() {
-    containerService.startIdeContainer(answer)
-    containerService.startIdeContainer(answer) // start twice for the same answer
+    ideService.startIdeContainer(answer)
+    ideService.startIdeContainer(answer) // start twice for the same answer
     assertThat(getIdeContainers(answer), hasSize(1))
   }
 
@@ -73,7 +76,7 @@ internal class ContainerServiceTest : SpringTest() {
   fun `files are extracted to project directory`() {
     `when`(fileService.readCollectionTar(eq(answer.id))).thenReturn(files.inputStream())
     `when`(fileService.collectionExists(eq(answer.id))).thenReturn(true)
-    containerService.startIdeContainer(answer)
+    ideService.startIdeContainer(answer)
     val containerId = getIdeContainer(answer).id()
     // assert that file is existing and nothing is owned by root
     val dirContent = containerService.exec(containerId, arrayOf("ls", "-l", ContainerService.PROJECT_PATH))
@@ -87,8 +90,8 @@ internal class ContainerServiceTest : SpringTest() {
     `when`(fileService.readCollectionTar(eq(answer.id))).thenReturn(files.inputStream())
     `when`(fileService.collectionExists(eq(answer.id))).thenReturn(true)
     `when`(fileService.writeCollectionTar(eq(answer.id))).thenReturn(out)
-    containerService.startIdeContainer(answer)
-    containerService.saveAnswerFiles(answer)
+    ideService.startIdeContainer(answer)
+    ideService.saveAnswerFiles(answer)
     // verify(fileService, times(1)).writeCollectionTar(answer.id)
     assertThat(out.toByteArray().size, greaterThan(0))
   }
@@ -97,11 +100,11 @@ internal class ContainerServiceTest : SpringTest() {
   fun `files are not overridden in existing IDE containers`() {
     `when`(fileService.readCollectionTar(eq(answer.id))).thenReturn(files.inputStream())
     `when`(fileService.collectionExists(eq(answer.id))).thenReturn(true)
-    containerService.startIdeContainer(answer)
+    ideService.startIdeContainer(answer)
     val containerId = getIdeContainer(answer).id()
     containerService.exec(containerId, arrayOf("sh", "-c", "echo 'foo' >> main.c"))
     val fileContentBefore = containerService.exec(containerId, arrayOf("cat", "main.c"))
-    containerService.startIdeContainer(answer)
+    ideService.startIdeContainer(answer)
     val fileContentAfter = containerService.exec(containerId, arrayOf("cat", "main.c"))
     assertThat(fileContentAfter, `is`(fileContentBefore))
   }
@@ -109,17 +112,17 @@ internal class ContainerServiceTest : SpringTest() {
   @Test
   @Ignore("Disabled until #138 is fixed")
   fun `idle containers are shut down automatically`() {
-    containerService.startIdeContainer(answer)
+    ideService.startIdeContainer(answer)
     Thread.sleep(10000)
     assertThat(getIdeContainers(answer), hasSize(0))
   }
 
   private fun getAllIdeContainers() = docker.listContainers(
-      ListContainersParam.withLabel(ContainerService.LABEL_ANSWER_ID)
+      ListContainersParam.withLabel(IdeService.LABEL_ANSWER_ID)
   )
 
   private fun getIdeContainers(answer: Answer) = docker.listContainers(
-      ListContainersParam.withLabel(ContainerService.LABEL_ANSWER_ID, answer.id.toString())
+      ListContainersParam.withLabel(IdeService.LABEL_ANSWER_ID, answer.id.toString())
   )
 
   private fun getIdeContainer(answer: Answer) = getIdeContainers(answer).first()

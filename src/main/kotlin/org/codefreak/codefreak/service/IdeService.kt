@@ -24,9 +24,9 @@ import org.springframework.util.StreamUtils
 class IdeService : BaseService() {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
-    private const val LABEL_READ_ONLY_ANSWER_ID = ContainerService.LABEL_PREFIX + "answer-id-read-only"
-    private const val LABEL_ANSWER_ID = ContainerService.LABEL_PREFIX + "answer-id"
-    private const val LABEL_TASK_ID = ContainerService.LABEL_PREFIX + "task-id"
+    const val LABEL_READ_ONLY_ANSWER_ID = ContainerService.LABEL_PREFIX + "answer-id-read-only"
+    const val LABEL_ANSWER_ID = ContainerService.LABEL_PREFIX + "answer-id"
+    const val LABEL_TASK_ID = ContainerService.LABEL_PREFIX + "task-id"
   }
 
   @Autowired
