@@ -13,6 +13,7 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.NetUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -299,11 +300,14 @@ class IdeService : BaseService() {
     log.debug("Checking for idle containers")
     // create a new map to not leak memory if containers disappear in another way
     val newIdleContainers: MutableMap<String, Long> = mutableMapOf()
-    getAllIdeContainers(ListContainersParam.withStatusRunning()).forEach {
-      val containerId = it.id()
-      // TODO: Use `cat /proc/net/tcp` instead of lsof (requires no privileges)
-      val connections = containerService.exec(containerId, arrayOf("/opt/code-freak/num-active-connections.sh")).output.trim()
-      if (connections == "0") {
+    getAllIdeContainers(ListContainersParam.withStatusRunning()).forEach { container ->
+      val containerId = container.id()
+      val tcpConnections = containerService.exec(containerId, arrayOf("cat", "/proc/net/tcp")).output.trim()
+      // check if there is an established TCP connection on port 3000
+      val isClientConnected = NetUtil.tcpConnectionSequence(tcpConnections).any {
+        it.localPort == 3000L && it.connectionState == 1
+      }
+      if (!isClientConnected) {
         val now: Long = System.currentTimeMillis()
         val idleSince: Long = idleContainers[containerId] ?: now
         val idleFor = now - idleSince
