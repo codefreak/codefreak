@@ -21,8 +21,8 @@ import org.codefreak.codefreak.service.AnswerDeadlineReachedEvent
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
-import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.EntityNotFoundException
+import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
@@ -43,7 +43,7 @@ class EvaluationService : BaseService() {
   private lateinit var evaluationRepository: EvaluationRepository
 
   @Autowired
-  private lateinit var containerService: ContainerService
+  private lateinit var ideService: IdeService
 
   @Autowired
   private lateinit var fileService: FileService
@@ -89,7 +89,7 @@ class EvaluationService : BaseService() {
 
   @Synchronized
   fun startEvaluation(answer: Answer, forceSaveFiles: Boolean = false) {
-    containerService.saveAnswerFiles(answer, forceSaveFiles)
+    ideService.saveAnswerFiles(answer, forceSaveFiles)
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
     check(!isEvaluationPending(answer.id)) { "Evaluation is already running or queued." }
     evaluationQueue.insert(answer.id)
