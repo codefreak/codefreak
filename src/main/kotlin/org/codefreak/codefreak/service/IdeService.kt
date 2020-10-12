@@ -2,7 +2,11 @@ package org.codefreak.codefreak.service
 
 import com.spotify.docker.client.DockerClient.ListContainersParam
 import com.spotify.docker.client.messages.Container
+import com.spotify.docker.client.messages.ContainerInfo
 import com.spotify.docker.client.messages.HostConfig
+import java.time.Instant
+import java.util.Date
+import java.util.UUID
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Task
@@ -15,9 +19,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StreamUtils
-import java.time.Instant
-import java.util.Date
-import java.util.UUID
 
 @Service
 class IdeService : BaseService() {
@@ -57,7 +58,11 @@ class IdeService : BaseService() {
    */
   @Throws(ResourceLimitException::class)
   fun startIdeContainer(answer: Answer, readOnly: Boolean = false): String {
-    return startIdeContainer(answer.id, if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID, answer.id)
+    return startIdeContainer(
+        answer.id,
+        if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID, answer.id,
+        answer.task.ideImage
+    )
   }
 
   @Throws(ResourceLimitException::class)
@@ -67,7 +72,7 @@ class IdeService : BaseService() {
 
   @Synchronized
   @Throws(ResourceLimitException::class)
-  fun startIdeContainer(id: UUID, label: String, fileCollectionId: UUID): String {
+  fun startIdeContainer(id: UUID, label: String, fileCollectionId: UUID, customImage: String? = null): String {
     // either take existing container or create a new one
     val container = containerService.getContainerWithLabel(label, id.toString())
     if (container != null && containerService.isContainerRunning(container.id())) {
@@ -82,7 +87,7 @@ class IdeService : BaseService() {
     return containerService.withCollectionFileLock(id) {
       if (container == null) {
         log.info("Creating new IDE container with $label=$id")
-        val containerId = this.createIdeContainer(label, id)
+        val containerId = this.createIdeContainer(label, id, customImage)
         containerService.startContainer(containerId)
         // prepare the environment after the container has started
         this.copyFilesToIde(containerId, fileCollectionId)
@@ -159,8 +164,9 @@ class IdeService : BaseService() {
    * Configure and create a new IDE container.
    * Returns the ID of the created container
    */
-  protected fun createIdeContainer(label: String, id: UUID): String {
-    val containerId = containerService.createContainer(config.ide.image) {
+  protected fun createIdeContainer(label: String, id: UUID, customImage: String? = null): String {
+    val image = customImage ?: config.ide.image
+    val containerId = containerService.createContainer(image) {
       labels = mapOf(
           label to id.toString()
       )
@@ -225,6 +231,66 @@ class IdeService : BaseService() {
     addAll(containerService.listContainers(ListContainersParam.withLabel(LABEL_TASK_ID), *listParams))
   }
 
+  /**
+   * Remove answer container and possible read-only containers
+   */
+  fun removeAnswerIdeContainers(answerId: UUID) {
+    arrayOf(
+        getAnswerIdeContainer(answerId),
+        getAnswerIdeContainer(answerId, readOnly = true)
+    ).filterNotNull().forEach {
+      stopIdeContainer(it)
+      removeIdeContainer(it)
+    }
+  }
+
+  fun stopIdeContainer(containerId: String) {
+    val labels = containerService.inspectContainer(containerId).config().labels() ?: mapOf()
+    when {
+      labels.containsKey(LABEL_READ_ONLY_ANSWER_ID)
+      -> log.info("Shutting down read container $containerId for answer ${labels[LABEL_READ_ONLY_ANSWER_ID]}")
+      labels.containsKey(LABEL_ANSWER_ID) -> {
+        val answer = answerRepository.findById(UUID.fromString(labels[LABEL_ANSWER_ID]))
+        if (answer.isPresent) {
+          ideService.saveAnswerFiles(answer.get())
+        } else {
+          log.warn("Answer ${labels[LABEL_ANSWER_ID]} not found. Files are not saved!")
+        }
+        log.info("Shutting down container $containerId of answer ${labels[LABEL_ANSWER_ID]}")
+      }
+      labels.containsKey(LABEL_TASK_ID) -> {
+        val task = taskRepository.findById(UUID.fromString(labels[LABEL_TASK_ID]))
+        if (task.isPresent) {
+          ideService.saveTaskFiles(task.get())
+        } else {
+          log.warn("Task ${labels[LABEL_TASK_ID]} not found. Files are not saved!")
+        }
+        log.info("Shutting down container $containerId of task ${labels[LABEL_TASK_ID]}")
+      }
+      else -> {
+        log.info("Container $containerId does not seem like an IDE container.")
+        return
+      }
+    }
+    containerService.stopContainer(containerId, 2)
+  }
+
+  fun removeIdeContainer(containerId: String, condition: ((info: ContainerInfo) -> Boolean)? = null) {
+    val inspection = containerService.inspectContainer(containerId)
+    val labels = inspection.config().labels() ?: mapOf()
+    if (condition == null || condition(inspection)) {
+      when {
+        labels.containsKey(LABEL_ANSWER_ID) -> log.info("Removing IDE of answer ${labels[LABEL_ANSWER_ID]}")
+        labels.containsKey(LABEL_READ_ONLY_ANSWER_ID) -> log.info("Removing read-only IDE of answer ${labels[LABEL_READ_ONLY_ANSWER_ID]}")
+        else -> {
+          log.info("Container $containerId does not seem like an IDE container.")
+          return
+        }
+      }
+      containerService.removeContainer(containerId, force = true, removeVolumes = true)
+    }
+  }
+
   @Scheduled(
       fixedRateString = "\${codefreak.ide.idle-check-rate}",
       initialDelayString = "\${codefreak.ide.idle-check-rate}"
@@ -243,30 +309,7 @@ class IdeService : BaseService() {
         val idleFor = now - idleSince
         log.debug("Container $containerId has been idle for more than $idleFor ms")
         if (idleFor >= config.ide.idleShutdownThreshold) {
-          val labels = it.labels()!!
-          when {
-            labels.containsKey(LABEL_READ_ONLY_ANSWER_ID)
-            -> log.info("Shutting down read container $containerId for answer ${labels[LABEL_READ_ONLY_ANSWER_ID]}")
-            labels.containsKey(LABEL_ANSWER_ID) -> {
-              val answer = answerRepository.findById(UUID.fromString(labels[LABEL_ANSWER_ID]))
-              if (answer.isPresent) {
-                ideService.saveAnswerFiles(answer.get())
-              } else {
-                log.warn("Answer ${labels[LABEL_ANSWER_ID]} not found. Files are not saved!")
-              }
-              log.info("Shutting down container $containerId of answer ${labels[LABEL_ANSWER_ID]}")
-            }
-            labels.containsKey(LABEL_TASK_ID) -> {
-              val task = taskRepository.findById(UUID.fromString(labels[LABEL_TASK_ID]))
-              if (task.isPresent) {
-                ideService.saveTaskFiles(task.get())
-              } else {
-                log.warn("Task ${labels[LABEL_TASK_ID]} not found. Files are not saved!")
-              }
-              log.info("Shutting down container $containerId of task ${labels[LABEL_TASK_ID]}")
-            }
-          }
-          containerService.stopContainer(containerId, 5)
+          stopIdeContainer(containerId)
         } else {
           newIdleContainers[containerId] = idleSince
         }
@@ -285,12 +328,8 @@ class IdeService : BaseService() {
     getAllIdeContainers(ListContainersParam.withStatusExited()).forEach { container ->
       val containerId = container.id()
       val inspection = containerService.inspectContainer(containerId)
-      if (inspection.state().finishedAt().before(thresholdDate)) {
-        val entityId = inspection.config().labels()?.let {
-          it[LABEL_ANSWER_ID] ?: it[LABEL_READ_ONLY_ANSWER_ID] ?: it[LABEL_TASK_ID]
-        }
-        log.info("Removing container $containerId of entity $entityId")
-        containerService.removeContainer(containerId, force = true, removeVolumes = true)
+      removeIdeContainer(containerId) {
+        inspection.state().finishedAt().before(thresholdDate)
       }
     }
   }

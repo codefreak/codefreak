@@ -56,7 +56,10 @@ class AnswerService : BaseService() {
   }
 
   @Transactional
-  fun deleteAnswer(answerId: UUID) = answerRepository.deleteById(answerId)
+  fun deleteAnswer(answerId: UUID) {
+    ideService.removeAnswerIdeContainers(answerId)
+    answerRepository.deleteById(answerId)
+  }
 
   @Transactional
   fun setFiles(answer: Answer): OutputStream {

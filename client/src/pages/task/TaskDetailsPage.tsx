@@ -188,7 +188,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             }}
             defaultValue={task.ideImage || ''}
             placeholder="e.g. foo/bar:latest"
-            allowClear={true}
+            allowClear
             enterButton={<Icon type="save" />}
             onSearch={updater('ideImage')}
           />

@@ -15,12 +15,12 @@ class SerializationConfiguration {
   @Bean
   @Primary
   fun defaultObjectMapper(
-      builder: Jackson2ObjectMapperBuilder
+    builder: Jackson2ObjectMapperBuilder
   ): ObjectMapper = builder.createXmlMapper(false).build()
 
   @Bean("yamlObjectMapper")
   fun yamlObjectMapper(
-      builder: Jackson2ObjectMapperBuilder
+    builder: Jackson2ObjectMapperBuilder
   ): ObjectMapper {
     val yamlFactory = YAMLFactoryBuilder(YAMLFactory())
         .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)

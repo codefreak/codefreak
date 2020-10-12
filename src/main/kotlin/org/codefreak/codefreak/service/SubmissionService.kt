@@ -33,6 +33,9 @@ class SubmissionService : BaseService() {
   @Autowired
   private lateinit var assignmentService: AssignmentService
 
+  @Autowired
+  private lateinit var answerService: AnswerService
+
   @Transactional
   fun findSubmission(id: UUID): Submission = submissionRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Submission not found") }
@@ -42,7 +45,11 @@ class SubmissionService : BaseService() {
       submissionRepository.findByAssignmentIdAndUserId(assignmentId, userId)
 
   @Transactional
-  fun deleteSubmission(submissionId: UUID) = submissionRepository.deleteById(submissionId)
+  fun deleteSubmission(submissionId: UUID) {
+    // call respective delete method for each answer
+    findSubmission(submissionId).answers.forEach { answerService.deleteAnswer(it.id) }
+    submissionRepository.deleteById(submissionId)
+  }
 
   @Transactional
   fun findOrCreateSubmission(assignmentId: UUID?, user: User): Submission =
