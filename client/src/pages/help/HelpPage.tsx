@@ -27,6 +27,9 @@ const HelpPage: React.FC = () => {
               <li>
                 <Link to="/help/definitions">Definition Files</Link>
               </li>
+              <li>
+                <Link to="/help/ide">Online IDE</Link>
+              </li>
             </ul>
           </Card>
         </>

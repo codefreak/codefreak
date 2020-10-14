@@ -1,0 +1,64 @@
+= Online IDE
+
+Code FREAK ships with an online IDE that can be used by students to edit their answers without leaving the browser.
+The current IDE is based on Microsoft's Visual Studio Code (VSCode) that has been ported to the browser by the https://github.com/cdr/code-server["Coder" Team] and the Community.
+VSCode does not only allow editing source code files but also makes it possible to compile and debug a full application.
+Because you cannot run arbitrary programming languages in your browser the IDE use a backend service running inside a Docker container which does the actual work, like modifying files, compiling code and executing programs.
+The UI in the browser will delegate all tasks to the server.
+Thus, it is currently not possible to communicate with local hardware like USB devices (microcontrollers, …).
+
+image::online-ide.png[Code FREAK Online IDE]
+
+== Features of the Online IDE
+
+Basically, the Online IDE has the same features as VSCode.
+Here are some highlights:
+
+* Supports every major programming language.
+See VSCode's https://code.visualstudio.com/docs/languages/overview[official documentation] for a full list of supported languages.
+* Compatible with VSCode Extensions
+* Smart Auto-Completion (IntelliSense)
+* Supports drag&drop for files from the local machine into the browser
+
+== Default IDE image
+
+By default, Code FREAK uses the Docker Image https://hub.docker.com/r/cfreak/ide[cfreak/ide].
+It contains the compiler and extensions for a few basic programming languages (Python, Java, C/C++, C#, NodeJS).
+For a full list of pre-installed languages and extensions please check the readme of our https://github.com/codefreak/ide#pre-installed-languages--vscode-plugins[IDE repository].
+
+== Custom IDE images
+
+If you need a different version of extensions and/or compilers you have to create a custom version of the IDE image manually.
+To modify only some settings of VSCode you can make use of the https://code.visualstudio.com/docs/getstarted/settings#_settings-file-locations[`.vscode` workspace directory] and place a `settings.json` there.
+
+As a starting point you can use the https://github.com/codefreak/ide/blob/master/Dockerfile[`Dockerfile`] of our IDE repository.
+Customize the Dockerfile for your needs and publish it to Docker Hub.
+Docker provides an official documentation how to get started with Docker and how to create, run and share images https://docs.docker.com/get-started/[here].
+
+=== IDE image requirements
+
+IDE images have to fulfill the following requirements:
+
+* It publishes a webserver on port `3000` (on all IP addresses!)
+* The containers runs with the user `coder` and group `coder`
+* Project files are stored at `/home/coder/project/`
+
+=== Use a custom IDE image
+
+Each task may use a custom IDE image.
+You can either configure this via `codefreak.yml` or in the UI.
+The following is a `codefreak.yml` with the default settings:
+
+.codefreak.yml
+[source,yaml]
+----
+# ...
+ide:
+  enabled: true <1>
+  image: cfreak/ide <2>
+----
+
+<1> For new tasks the IDE is enabled by default. The IDE can be disabled by setting `ide.enabled` to `false`. This will remove the IDE option for students.
+<2> Optionally, you can provide a custom Docker image like described in the previous section.
+
+You can configure the same settings in the UI at `Task > Edit Details > Online IDE`.
