@@ -28,6 +28,8 @@ class IdeService : BaseService() {
     const val LABEL_READ_ONLY_ANSWER_ID = ContainerService.LABEL_PREFIX + "answer-id-read-only"
     const val LABEL_ANSWER_ID = ContainerService.LABEL_PREFIX + "answer-id"
     const val LABEL_TASK_ID = ContainerService.LABEL_PREFIX + "task-id"
+    // directory inside the IDE container with project files
+    const val PROJECT_PATH = "/home/coder/project"
   }
 
   @Autowired
@@ -142,7 +144,7 @@ class IdeService : BaseService() {
       return answer
     }
     containerService.withCollectionFileLock(answer.id) {
-      containerService.archiveContainer(containerId, "${ContainerService.PROJECT_PATH}/.") { tar ->
+      containerService.archiveContainer(containerId, "${PROJECT_PATH}/.") { tar ->
         fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
       }
     }
@@ -154,7 +156,7 @@ class IdeService : BaseService() {
   @Transactional
   fun saveTaskFiles(task: Task): Task {
     val containerId = containerService.getContainerWithLabel(LABEL_TASK_ID, task.id.toString())?.id() ?: return task
-    containerService.archiveContainer(containerId, "${ContainerService.PROJECT_PATH}/.") { tar ->
+    containerService.archiveContainer(containerId, "${PROJECT_PATH}/.") { tar ->
       fileService.writeCollectionTar(task.id).use { StreamUtils.copy(tar, it) }
     }
     log.info("Saved files of task ${task.id} from container $containerId")
@@ -200,16 +202,16 @@ class IdeService : BaseService() {
       // two globs: one for regular files and one for hidden files/dirs except . and ..
       containerService.exec(
           containerId,
-          arrayOf("sh", "-c", "rm -rf ${ContainerService.PROJECT_PATH}/* ${ContainerService.PROJECT_PATH}/.[!.]*")
+          arrayOf("sh", "-c", "rm -rf ${PROJECT_PATH}/* ${PROJECT_PATH}/.[!.]*")
       )
 
       fileService.readCollectionTar(fileCollectionId).use {
-        containerService.copyToContainer(it, containerId, ContainerService.PROJECT_PATH)
+        containerService.copyToContainer(it, containerId, PROJECT_PATH)
       }
     }
 
     // change owner from root to coder so we can edit our project files
-    containerService.exec(containerId, arrayOf("chown", "-R", "coder:coder", ContainerService.PROJECT_PATH))
+    containerService.exec(containerId, arrayOf("chown", "-R", "coder:coder", PROJECT_PATH))
   }
 
   fun answerFilesUpdatedExternally(answerId: UUID) {

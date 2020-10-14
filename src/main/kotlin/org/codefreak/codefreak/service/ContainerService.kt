@@ -29,7 +29,6 @@ class ContainerService : BaseService() {
   companion object {
     const val LABEL_PREFIX = "org.codefreak."
     const val LABEL_INSTANCE_ID = LABEL_PREFIX + "instance-id"
-    const val PROJECT_PATH = "/home/coder/project"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
