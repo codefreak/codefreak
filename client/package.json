@@ -22,7 +22,7 @@
     "@types/react-dom": "16.9.8",
     "@types/react-helmet": "6.1.0",
     "@types/react-jsonschema-form": "1.7.4",
-    "@types/react-router-dom": "5.1.5",
+    "@types/react-router-dom": "5.1.6",
     "@types/react-syntax-highlighter": "11.0.5",
     "@types/use-persisted-state": "0.3.0",
     "a11y-react-emoji": "1.1.2",
