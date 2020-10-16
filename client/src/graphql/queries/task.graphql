@@ -1,6 +1,7 @@
 fragment taskListItem on Task {
   id
   title
+  createdAt
   position
   body
   editable
@@ -27,6 +28,7 @@ query GetTaskPoolForAdding {
   taskPool {
     id
     title
+    createdAt
   }
 }
 
