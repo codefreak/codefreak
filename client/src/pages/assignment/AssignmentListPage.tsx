@@ -1,53 +1,24 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
+import {Button, Col, Row} from 'antd'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
-import EntityLink from '../../components/EntityLink'
 import {
-  AssignmentStatus,
-  GetAssignmentListQueryResult,
   useDeleteAssignmentMutation,
   useGetAssignmentListQuery
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import SortSelect from '../../components/SortSelect'
-import { compare } from '../../services/util'
-import SortedList from '../../components/SortedList'
-
-const { confirm } = Modal
-
-const statusOrder: Record<AssignmentStatus, number> = {
-  INACTIVE: 0,
-  ACTIVE: 1,
-  OPEN: 2,
-  CLOSED: 3
-}
-
-const sortByNewest = (a: Assignment, b: Assignment) => {
-  const result = compare(a.createdAt, b.createdAt, value => Date.parse(value))
-
-  // Reverse the order, if both exist
-  // The list has to be reverse sorted, because newer timestamps are greater than older ones
-  return a.createdAt && b.createdAt ? -1 * result : result
-}
-
-const sortVariants: Record<string, (a: Assignment, b: Assignment) => number> = {
-  NEWEST: (a: Assignment, b: Assignment) => sortByNewest(a, b),
-  OLDEST: (a: Assignment, b: Assignment) => sortByNewest(b, a),
-  TITLE: (a: Assignment, b: Assignment) => a.title.localeCompare(b.title),
-  STATUS: (a: Assignment, b: Assignment) =>
-    compare(a.status, b.status, value => statusOrder[value])
-}
+import AssignmentList, {sortMethodNames} from '../../components/AssignmentList'
+import SearchBar from '../../components/SearchBar'
 
 const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
   const [deleteAssignment] = useDeleteAssignmentMutation()
 
-  const sortValues: string[] = Object.keys(sortVariants)
-  const [sortValue, setSortValue] = useState(sortValues[0])
+  const [sortMethod, setSortMethod] = useState(sortMethodNames[0])
+  const [filterCriteria, setFilterCriteria] = useState('')
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -56,105 +27,71 @@ const AssignmentListPage: React.FC = () => {
   const { assignments } = result.data
 
   const handleSortChange = (value: string) => {
-    setSortValue(value)
+    setSortMethod(value)
   }
 
-  const renderProps: RenderProps = {
-    delete: async (id: string) => {
-      const deleteResult = await deleteAssignment({ variables: { id } })
-      if (deleteResult.data) {
-        messageService.success('Assignment removed')
-        result.refetch()
-      }
+  const handleFilterChange = (value: string) => {
+    setFilterCriteria(value)
+  }
+
+  const handleDelete = async (id: string) => {
+    const deleteResult = await deleteAssignment({ variables: { id } })
+    if (deleteResult.data) {
+      messageService.success('Assignment removed')
+      result.refetch()
     }
   }
+
+  const sorter = (
+    <SortSelect
+      defaultValue={sortMethodNames[0]}
+      values={sortMethodNames}
+      onSortChange={handleSortChange}
+    />
+  )
+
+  const searchBar = (
+    <SearchBar
+      searchType='Assignment'
+      placeholder='for name...'
+      onChange={handleFilterChange}
+    />
+  )
+
+  const createButton = (
+    <Authorized authority="ROLE_TEACHER">
+      <Link to="/assignments/create" key="1">
+        <Button type="primary" icon="plus">
+          Create Assignment
+        </Button>
+      </Link>
+    </Authorized>
+  )
 
   return (
     <>
       <PageHeaderWrapper
         extra={
-          <>
-            <SortSelect
-              defaultValue={sortValue}
-              values={sortValues}
-              onSortChange={handleSortChange}
-            />
-            <Authorized authority="ROLE_TEACHER">
-              <Link to="/assignments/create" key="1">
-                <Button type="primary" icon="plus">
-                  Create Assignment
-                </Button>
-              </Link>
-            </Authorized>
-          </>
+          <Row justify='end' gutter={16} type='flex'>
+            <Col>
+              {searchBar}
+            </Col>
+            <Col>
+              {sorter}
+            </Col>
+            <Col>
+              {createButton}
+            </Col>
+          </Row>
         }
       />
-      <SortedList
+      <AssignmentList
         list={assignments}
-        sort={sortVariants[sortValue]}
-        render={renderAssignment(renderProps)}
+        sortMethod={sortMethod}
+        filterCriteria={filterCriteria}
+        onDelete={handleDelete}
       />
     </>
-  )
-}
-
-type Assignment = NonNullable<
-  GetAssignmentListQueryResult['data']
->['assignments'][number]
-
-interface RenderProps {
-  delete: (assignmentId: string) => Promise<any>
-}
-
-const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
-  const confirmDelete = () =>
-    confirm({
-      title: 'Are you sure?',
-      content:
-        'You are deleting an assignment. The original task templates will stay in the task pool. All other data (including student submissions) will be lost.',
-      async onOk() {
-        await props.delete(assignment.id)
-      }
-    })
-  return (
-    <Card
-      title={
-        <>
-          {assignment.title} <AssignmentStatusTag status={assignment.status} />
-        </>
-      }
-      key={assignment.id}
-      style={{ marginBottom: 16 }}
-      extra={
-        assignment.deletable ? (
-          <Tooltip title={'Delete assignment'} placement="left">
-            <Button
-              onClick={confirmDelete}
-              type="dashed"
-              shape="circle"
-              icon="delete"
-            />
-          </Tooltip>
-        ) : null
-      }
-    >
-      <Descriptions>
-        <Descriptions.Item label="Tasks">
-          {assignment.tasks.length}
-        </Descriptions.Item>
-      </Descriptions>
-      <EntityLink to={assignment}>
-        <Button icon="folder-open" type="primary">
-          Details
-        </Button>
-      </EntityLink>
-      <Authorized authority="ROLE_TEACHER">
-        {' '}
-        <EntityLink to={assignment} sub="/submissions">
-          <Button icon="table">Student Submissions</Button>
-        </EntityLink>
-      </Authorized>
-    </Card>
   )
 }
 
