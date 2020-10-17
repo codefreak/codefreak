@@ -2,13 +2,13 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import {
   Alert,
   Button,
-  Checkbox,
+  Checkbox, Col,
   DatePicker,
   Descriptions,
   Dropdown,
   Form,
   Menu,
-  Modal,
+  Modal, Row,
   Steps,
   TimePicker
 } from 'antd'
@@ -45,11 +45,14 @@ import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { momentToIsoCb } from '../../services/time'
-import { makeUpdater, noop, Updater } from '../../services/util'
+import {makeUpdater, noop, Updater} from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
 import TaskListPage from '../task/TaskListPage'
 import './AssignmentPage.less'
+import SortSelect from '../../components/SortSelect'
+import SearchBar from '../../components/SearchBar'
+import {filterTasks, TaskSortMethods, TaskSortMethodNames} from '../../services/task';
 
 const { Step } = Steps
 
@@ -327,6 +330,29 @@ const AddTasksButton: React.FC<{
       history.push(tasksPath)
     }
   }
+
+  const [sortMethod, setSortMethod] = useState(TaskSortMethodNames[0])
+  const [filterCriteria, setFilterCriteria] = useState('')
+
+  const handleSortChange = (value: string) => setSortMethod(value)
+  const handleFilterChange = (value: string) => setFilterCriteria(value)
+
+  const sorter = (
+    <SortSelect
+      defaultValue={TaskSortMethodNames[0]}
+      values={TaskSortMethodNames}
+      onSortChange={handleSortChange}
+    />
+  )
+
+  const searchBar = (
+    <SearchBar
+      searchType='Task'
+      placeholder='by name...'
+      onChange={handleFilterChange}
+    />
+  )
+
   return (
     <>
       <Button type="primary" icon="plus" onClick={showModal}>
@@ -343,14 +369,27 @@ const AddTasksButton: React.FC<{
         }}
         onOk={submit}
       >
+        <Row gutter={16} type='flex'>
+          <Col>
+            {searchBar}
+          </Col>
+          <Col>
+            {sorter}
+          </Col>
+        </Row>
         <Alert
           message={
             'When a task from the pool is added to an assignment, an independent copy is created. ' +
             'Editing the task in the pool will have no effect on the assignment and vice versa.'
           }
-          style={{ marginBottom: 16 }}
+          style={{ marginBottom: 16, marginTop: 16 }}
         />
-        <TaskSelection value={taskIds} setValue={setTaskIds} />
+        <TaskSelection
+          value={taskIds}
+          setValue={setTaskIds}
+          sortMethod={sortMethod}
+          filterCriteria={filterCriteria}
+        />
       </Modal>
     </>
   )
@@ -359,6 +398,8 @@ const AddTasksButton: React.FC<{
 const TaskSelection: React.FC<{
   value: string[]
   setValue: (value: string[]) => void
+  sortMethod: string
+  filterCriteria: string
 }> = props => {
   const result = useGetTaskPoolForAddingQuery()
 
@@ -366,7 +407,15 @@ const TaskSelection: React.FC<{
     return <AsyncPlaceholder result={result} />
   }
 
-  const options = result.data.taskPool.map(task => ({
+  let taskPool = result.data.taskPool.slice()
+
+  if (props.filterCriteria) {
+    taskPool = filterTasks(taskPool, props.filterCriteria)
+  }
+
+  taskPool = taskPool.sort(TaskSortMethods[props.sortMethod])
+
+  const options = taskPool.map(task => ({
     label: task.title,
     value: task.id
   }))
