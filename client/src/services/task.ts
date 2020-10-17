@@ -1,6 +1,6 @@
 import {compare} from './util';
 import {matches} from './strings';
-import {GetTaskPoolForAddingQueryResult, GetTaskPoolQueryResult} from '../generated/graphql';
+import {GetTaskPoolForAddingQueryResult, GetTaskPoolQueryResult} from './codefreak-api';
 
 type TaskToAdd = NonNullable<GetTaskPoolForAddingQueryResult['data']>['taskPool'][number]
 
