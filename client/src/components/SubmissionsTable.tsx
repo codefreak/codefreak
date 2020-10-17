@@ -1,6 +1,6 @@
-import { Button, Col, Icon, Input, Radio, Row, Table, Tooltip } from 'antd'
+import { Button, Col, Icon, Radio, Row, Table, Tooltip } from 'antd'
 import { RadioGroupProps } from 'antd/es/radio'
-import React, { ChangeEvent, useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   EvaluationStepResult,
@@ -16,6 +16,7 @@ import ArchiveDownload from './ArchiveDownload'
 import EvaluationResultPopover from './EvaluationResultPopover'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
+import SearchBar from './SearchBar';
 
 type Assignment = NonNullable<
   GetAssignmentWithSubmissionsQueryResult['data']
@@ -67,8 +68,8 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     ? searchSubmissions(allSubmissions, searchCriteria.trim())
     : allSubmissions
 
-  const submissionSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchCriteria(e.target.value)
+  const handleSearch = (value: string) => {
+    setSearchCriteria(value)
   }
 
   const onColumnDisplayChange: RadioGroupProps['onChange'] = useCallback(
@@ -82,11 +83,10 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     return (
       <Row gutter={16}>
         <Col span={6}>
-          <Input.Search
-            addonBefore="Search User"
-            placeholder="first name, last name or username"
-            allowClear
-            onChange={submissionSearch}
+          <SearchBar
+            searchType='User'
+            placeholder='by first-, last- or username'
+            onChange={handleSearch}
           />
         </Col>
         <Col span={6}>
