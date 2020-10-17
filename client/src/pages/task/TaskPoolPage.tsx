@@ -1,15 +1,19 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import Emoji from 'a11y-react-emoji'
-import {Button, Col, Row} from 'antd'
-import React, {useState} from 'react'
+import { Button, Col, Row } from 'antd'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EmptyListCallToAction from '../../components/EmptyListCallToAction'
 import TaskList from '../../components/TaskList'
 import { useGetTaskPoolQuery } from '../../generated/graphql'
-import {filterTasks, TaskSortMethodNames, TaskSortMethods} from '../../services/task';
-import SortSelect from '../../components/SortSelect';
-import SearchBar from '../../components/SearchBar';
+import {
+  filterTasks,
+  TaskSortMethodNames,
+  TaskSortMethods
+} from '../../services/task'
+import SortSelect from '../../components/SortSelect'
+import SearchBar from '../../components/SearchBar'
 
 const TaskPoolPage: React.FC = () => {
   const result = useGetTaskPoolQuery({ fetchPolicy: 'cache-and-network' })
@@ -42,8 +46,8 @@ const TaskPoolPage: React.FC = () => {
 
   const searchBar = (
     <SearchBar
-      searchType='Task'
-      placeholder='by name...'
+      searchType="Task"
+      placeholder="by name..."
       onChange={handleFilterChange}
     />
   )
@@ -62,16 +66,10 @@ const TaskPoolPage: React.FC = () => {
     <>
       <PageHeaderWrapper
         extra={
-          <Row justify='end' gutter={16} type='flex'>
-            <Col>
-              {searchBar}
-            </Col>
-            <Col>
-              {sorter}
-            </Col>
-            <Col>
-              {createButton}
-            </Col>
+          <Row justify="end" gutter={16} type="flex">
+            <Col>{searchBar}</Col>
+            <Col>{sorter}</Col>
+            <Col>{createButton}</Col>
           </Row>
         }
       />

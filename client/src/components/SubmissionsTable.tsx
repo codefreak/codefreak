@@ -16,7 +16,7 @@ import ArchiveDownload from './ArchiveDownload'
 import EvaluationResultPopover from './EvaluationResultPopover'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
-import SearchBar from './SearchBar';
+import SearchBar from './SearchBar'
 
 type Assignment = NonNullable<
   GetAssignmentWithSubmissionsQueryResult['data']
@@ -84,8 +84,8 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
       <Row gutter={16}>
         <Col span={6}>
           <SearchBar
-            searchType='User'
-            placeholder='by first-, last- or username'
+            searchType="User"
+            placeholder="by first-, last- or username"
             onChange={handleSearch}
           />
         </Col>

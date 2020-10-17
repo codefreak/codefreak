@@ -1,12 +1,22 @@
-import {compare} from './util';
-import {matches} from './strings';
-import {GetTaskPoolForAddingQueryResult, GetTaskPoolQueryResult} from './codefreak-api';
+import { compare } from './util'
+import { matches } from './strings'
+import {
+  GetTaskPoolForAddingQueryResult,
+  GetTaskPoolQueryResult
+} from './codefreak-api'
 
-type TaskToAdd = NonNullable<GetTaskPoolForAddingQueryResult['data']>['taskPool'][number]
+type TaskToAdd = NonNullable<
+  GetTaskPoolForAddingQueryResult['data']
+>['taskPool'][number]
 
-type TaskPoolItem = NonNullable<GetTaskPoolQueryResult['data']>['taskPool'][number]
+type TaskPoolItem = NonNullable<
+  GetTaskPoolQueryResult['data']
+>['taskPool'][number]
 
-const sortByNewest = (a: TaskToAdd | TaskPoolItem, b: TaskToAdd | TaskPoolItem) => {
+const sortByNewest = (
+  a: TaskToAdd | TaskPoolItem,
+  b: TaskToAdd | TaskPoolItem
+) => {
   const result = compare(a.createdAt, b.createdAt, value => Date.parse(value))
 
   // Reverse the order, if both exist
@@ -14,7 +24,10 @@ const sortByNewest = (a: TaskToAdd | TaskPoolItem, b: TaskToAdd | TaskPoolItem) 
   return a.createdAt && b.createdAt ? -1 * result : result
 }
 
-export const TaskSortMethods: Record<string, (a: TaskToAdd | TaskPoolItem, b: TaskToAdd | TaskPoolItem) => number> = {
+export const TaskSortMethods: Record<
+  string,
+  (a: TaskToAdd | TaskPoolItem, b: TaskToAdd | TaskPoolItem) => number
+> = {
   NEWEST: (a, b) => sortByNewest(a, b),
   OLDEST: (a, b) => sortByNewest(b, a)
 }

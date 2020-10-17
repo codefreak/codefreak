@@ -1,17 +1,20 @@
-import {Button, Card, Descriptions, Modal, Tooltip} from 'antd'
+import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
 import AssignmentStatusTag from './AssignmentStatusTag'
 import EntityLink from './EntityLink'
 import Authorized from './Authorized'
 import React from 'react'
-import {AssignmentStatus, GetAssignmentListQueryResult} from '../services/codefreak-api'
-import {compare} from '../services/util'
-import {matches} from '../services/strings'
+import {
+  AssignmentStatus,
+  GetAssignmentListQueryResult
+} from '../services/codefreak-api'
+import { compare } from '../services/util'
+import { matches } from '../services/strings'
 
 const { confirm } = Modal
 
 export type Assignment = NonNullable<
   GetAssignmentListQueryResult['data']
-  >['assignments'][number]
+>['assignments'][number]
 
 const statusOrder: Record<AssignmentStatus, number> = {
   INACTIVE: 0,
@@ -28,7 +31,10 @@ const sortByNewest = (a: Assignment, b: Assignment) => {
   return a.createdAt && b.createdAt ? -1 * result : result
 }
 
-export const sortMethods: Record<string, (a: Assignment, b: Assignment) => number> = {
+export const sortMethods: Record<
+  string,
+  (a: Assignment, b: Assignment) => number
+> = {
   NEWEST: (a: Assignment, b: Assignment) => sortByNewest(a, b),
   OLDEST: (a: Assignment, b: Assignment) => sortByNewest(b, a),
   TITLE: (a: Assignment, b: Assignment) => a.title.localeCompare(b.title),
@@ -38,7 +44,8 @@ export const sortMethods: Record<string, (a: Assignment, b: Assignment) => numbe
 
 export const sortMethodNames = Object.keys(sortMethods)
 
-const filterAssignments = (list: Assignment[], criteria: string) => list.filter(assignment => matches(criteria, assignment.title))
+const filterAssignments = (list: Assignment[], criteria: string) =>
+  list.filter(assignment => matches(criteria, assignment.title))
 
 interface AssignmentListProps {
   list: Assignment[]
@@ -58,11 +65,7 @@ const AssignmentList = (props: AssignmentListProps) => {
     list = list.slice().sort(sortMethods[props.sortMethod])
   }
 
-  return (
-    <>
-      {list.map(renderAssignment({delete: props.onDelete}))}
-    </>
-  )
+  return <>{list.map(renderAssignment({ delete: props.onDelete }))}</>
 }
 
 interface RenderProps {

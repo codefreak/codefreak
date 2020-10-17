@@ -1,5 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import {Button, Col, Row} from 'antd'
+import { Button, Col, Row } from 'antd'
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -10,7 +10,9 @@ import {
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import SortSelect from '../../components/SortSelect'
-import AssignmentList, {sortMethodNames} from '../../components/AssignmentList'
+import AssignmentList, {
+  sortMethodNames
+} from '../../components/AssignmentList'
 import SearchBar from '../../components/SearchBar'
 
 const AssignmentListPage: React.FC = () => {
@@ -52,8 +54,8 @@ const AssignmentListPage: React.FC = () => {
 
   const searchBar = (
     <SearchBar
-      searchType='Assignment'
-      placeholder='for name...'
+      searchType="Assignment"
+      placeholder="for name..."
       onChange={handleFilterChange}
     />
   )
@@ -72,16 +74,10 @@ const AssignmentListPage: React.FC = () => {
     <>
       <PageHeaderWrapper
         extra={
-          <Row justify='end' gutter={16} type='flex'>
-            <Col>
-              {searchBar}
-            </Col>
-            <Col>
-              {sorter}
-            </Col>
-            <Col>
-              {createButton}
-            </Col>
+          <Row justify="end" gutter={16} type="flex">
+            <Col>{searchBar}</Col>
+            <Col>{sorter}</Col>
+            <Col>{createButton}</Col>
           </Row>
         }
       />

@@ -2,13 +2,15 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import {
   Alert,
   Button,
-  Checkbox, Col,
+  Checkbox,
+  Col,
   DatePicker,
   Descriptions,
   Dropdown,
   Form,
   Menu,
-  Modal, Row,
+  Modal,
+  Row,
   Steps,
   TimePicker
 } from 'antd'
@@ -45,14 +47,18 @@ import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { momentToIsoCb } from '../../services/time'
-import {makeUpdater, noop, Updater} from '../../services/util'
+import { makeUpdater, noop, Updater } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
 import TaskListPage from '../task/TaskListPage'
 import './AssignmentPage.less'
 import SortSelect from '../../components/SortSelect'
 import SearchBar from '../../components/SearchBar'
-import {filterTasks, TaskSortMethods, TaskSortMethodNames} from '../../services/task';
+import {
+  filterTasks,
+  TaskSortMethods,
+  TaskSortMethodNames
+} from '../../services/task'
 
 const { Step } = Steps
 
@@ -347,8 +353,8 @@ const AddTasksButton: React.FC<{
 
   const searchBar = (
     <SearchBar
-      searchType='Task'
-      placeholder='by name...'
+      searchType="Task"
+      placeholder="by name..."
       onChange={handleFilterChange}
     />
   )
@@ -369,13 +375,9 @@ const AddTasksButton: React.FC<{
         }}
         onOk={submit}
       >
-        <Row gutter={16} type='flex'>
-          <Col>
-            {searchBar}
-          </Col>
-          <Col>
-            {sorter}
-          </Col>
+        <Row gutter={16} type="flex">
+          <Col>{searchBar}</Col>
+          <Col>{sorter}</Col>
         </Row>
         <Alert
           message={
