@@ -1,6 +1,8 @@
 fragment taskListItem on Task {
   id
   title
+  createdAt
+  updatedAt
   position
   body
   editable
@@ -40,6 +42,8 @@ query GetTask($id: ID!, $answerUserId: ID) {
   task(id: $id) {
     id
     title
+    createdAt
+    updatedAt
     editable
     exportUrl
     assignment {
