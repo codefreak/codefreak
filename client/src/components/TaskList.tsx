@@ -15,7 +15,7 @@ import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
 import TimeLimitTag from './time-limit/TimeLimitTag'
 import DateTag, { DateType } from './DateTag'
-import Authorized from './Authorized';
+import Authorized from './Authorized'
 
 const { confirm } = Modal
 
