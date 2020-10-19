@@ -7,14 +7,14 @@ export enum DateType {
   UPDATED
 }
 
-type DateTagInfo = {
+type DateTypeInfo = {
   title: string
   color: string
   iconType: string
 }
 
-const DateTagMapping: {
-  [key in DateType]: DateTagInfo
+const DateTypeMapping: {
+  [key in DateType]: DateTypeInfo
 } = {
   [DateType.CREATED]: {
     title: 'Created',
@@ -35,7 +35,7 @@ type DateTagProps = {
 }
 
 const DateTag = (props: DateTagProps) => {
-  const info = DateTagMapping[props.dateType]
+  const info = DateTypeMapping[props.dateType]
   const formattedDate = moment(props.date).fromNow()
   const description = `The ${props.contentType.toLocaleLowerCase()} was ${info.title.toLowerCase()} ${formattedDate}`
 
