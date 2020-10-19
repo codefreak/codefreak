@@ -15,6 +15,7 @@ import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
 import TimeLimitTag from './time-limit/TimeLimitTag'
 import DateTag, { DateType } from './DateTag'
+import Authorized from './Authorized';
 
 const { confirm } = Modal
 
@@ -78,8 +79,10 @@ const renderTask = (props: RenderProps) => (task: Task) => {
             }
           />
         ) : null}
-        {createdAtTag}
-        {updateTimeDifference >= oneSecond ? updatedAtTag : null}
+        <Authorized authority="ROLE_TEACHER">
+          {createdAtTag}
+          {updateTimeDifference >= oneSecond ? updatedAtTag : null}
+        </Authorized>
       </>
     ),
     extra: task.editable ? (
