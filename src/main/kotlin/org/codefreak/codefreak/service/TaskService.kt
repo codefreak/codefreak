@@ -165,6 +165,22 @@ TaskService : BaseService() {
     return out.toByteArray()
   }
 
+  @Transactional
+  fun getExportTar(tasks: Collection<Task>): ByteArray {
+    val out = ByteArrayOutputStream()
+    val tar = TarUtil.PosixTarArchiveOutputStream(out)
+
+    tasks.forEach {task ->
+      val taskTar = getExportTar(findTask(task.id)) // use findTask() on each task so everything is lazy initialized correctly
+      tar.putArchiveEntry(TarArchiveEntry("${task.title}-${task.id}.tar").also { it.size = taskTar.size.toLong() })
+      tar.write(taskTar)
+      tar.closeArchiveEntry()
+    }
+
+    tar.close()
+    return out.toByteArray()
+  }
+
   /**
    * Makes sure that evaluations can be run on this task even if answer files
    * have not changed. Call this every time you update evaluation settings.
