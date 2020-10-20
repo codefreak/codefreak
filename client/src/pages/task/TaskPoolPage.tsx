@@ -7,6 +7,7 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import EmptyListCallToAction from '../../components/EmptyListCallToAction'
 import TaskList from '../../components/TaskList'
 import { useGetTaskPoolQuery } from '../../generated/graphql'
+import ArchiveDownload from '../../components/ArchiveDownload';
 
 const TaskPoolPage: React.FC = () => {
   const result = useGetTaskPoolQuery({ fetchPolicy: 'cache-and-network' })
@@ -22,13 +23,14 @@ const TaskPoolPage: React.FC = () => {
   return (
     <>
       <PageHeaderWrapper
-        extra={
+        extra={[
+          <ArchiveDownload url="/api/tasks/export">Export Tasks</ArchiveDownload>,
           <Link to="/tasks/pool/create">
             <Button type="primary" icon="plus">
               Create Task
             </Button>
           </Link>
-        }
+        ]}
       />
       {tasks.length > 0 ? (
         <TaskList tasks={tasks} update={update} />
