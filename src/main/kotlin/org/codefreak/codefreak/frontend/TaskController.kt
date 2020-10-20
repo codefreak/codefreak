@@ -4,9 +4,11 @@ import java.io.ByteArrayInputStream
 import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
+import org.codefreak.codefreak.auth.NotAuthenticatedException
 import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -70,5 +72,13 @@ class TaskController : BaseController() {
     Authorization().requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     val zip = TarUtil.tarToZip(taskService.getExportTar(task.id))
     return download("${task.title}.zip", ByteArrayInputStream(zip))
+  }
+
+  @GetMapping("/export.tar", produces = ["application/tar"])
+  @ResponseBody
+  fun getTaskPoolExportTar(): ResponseEntity<StreamingResponseBody> {
+    val taskPool = taskService.getTaskPool(user.id)
+    val tar = taskService.getExportTar(taskPool)
+    return download("tasks.tar", ByteArrayInputStream(tar))
   }
 }
