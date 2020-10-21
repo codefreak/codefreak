@@ -26,6 +26,10 @@ mutation UploadTask($files: [Upload!]!) {
   }
 }
 
+mutation UploadTasks($files: [Upload!]!) {
+  uploadTasks(files: $files)
+}
+
 mutation ImportTask($url: String!) {
   importTask(url: $url) {
     id

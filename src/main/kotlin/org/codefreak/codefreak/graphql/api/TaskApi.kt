@@ -133,6 +133,15 @@ class TaskMutation : BaseResolver(), Mutation {
   }
 
   @Secured(Authority.ROLE_TEACHER)
+  fun uploadTasks(files: Array<ApplicationPart>): Boolean = context {
+    ByteArrayOutputStream().use {
+      TarUtil.writeUploadAsTar(files, it)
+      serviceAccess.getService(TaskService::class).createMultipleFromTar(it.toByteArray(), null, authorization.currentUser, 0L)
+      true
+    }
+  }
+
+  @Secured(Authority.ROLE_TEACHER)
   fun importTask(url: String): TaskDto = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
