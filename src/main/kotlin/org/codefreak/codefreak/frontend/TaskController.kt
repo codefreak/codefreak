@@ -85,6 +85,6 @@ class TaskController : BaseController() {
   fun getTaskPoolExportZip(): ResponseEntity<StreamingResponseBody> {
     val taskPool = taskService.getTaskPool(user.id)
     val zip = TarUtil.tarToZip(taskService.getExportTar(taskPool))
-    return download("tasks.tar", ByteArrayInputStream(zip))
+    return download("tasks.zip", ByteArrayInputStream(zip))
   }
 }
