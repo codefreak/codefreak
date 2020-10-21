@@ -29,6 +29,7 @@ query GetTaskPoolForAdding {
   taskPool {
     id
     title
+    createdAt
   }
 }
 
