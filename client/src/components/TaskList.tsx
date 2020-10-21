@@ -14,6 +14,8 @@ import CropContainer from './CropContainer'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
 import TimeLimitTag from './time-limit/TimeLimitTag'
+import DateTag, { DateType } from './DateTag'
+import Authorized from './Authorized'
 
 const { confirm } = Modal
 
@@ -37,6 +39,26 @@ const renderTask = (props: RenderProps) => (task: Task) => {
       }
     })
 
+  const createdAtTag = (
+    <DateTag
+      dateType={DateType.CREATED}
+      contentType="TASK"
+      date={new Date(task.createdAt)}
+    />
+  )
+
+  const updatedAtTag = (
+    <DateTag
+      dateType={DateType.UPDATED}
+      contentType="TASK"
+      date={new Date(task.updatedAt)}
+    />
+  )
+
+  const updateTimeDifference =
+    Date.parse(task.updatedAt) - Date.parse(task.createdAt)
+  const oneSecond = 1000
+
   const cardProps: CardProps = {
     title: (
       <>
@@ -57,6 +79,10 @@ const renderTask = (props: RenderProps) => (task: Task) => {
             }
           />
         ) : null}
+        <Authorized authority="ROLE_TEACHER">
+          {createdAtTag}
+          {updateTimeDifference >= oneSecond ? updatedAtTag : null}
+        </Authorized>
       </>
     ),
     extra: task.editable ? (
