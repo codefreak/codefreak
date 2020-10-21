@@ -2,12 +2,14 @@ package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.util.UUID
 import liquibase.util.StreamUtil
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.utils.IOUtils
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Task
@@ -84,6 +86,17 @@ TaskService : BaseService() {
       TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals("codefreak.yml", true) })
     }
     return task
+  }
+
+  @Transactional
+  fun createMultipleFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long) {
+    val input = TarArchiveInputStream(ByteArrayInputStream(tarContent))
+    generateSequence { input.nextTarEntry }
+        .filter { it.isFile }
+        .filter { it.name.endsWith(".tar", ignoreCase = true).or(it.name.endsWith(".zip", ignoreCase = true)) }
+        .forEach { _ ->
+          createFromTar(IOUtils.toByteArray(input), assignment, owner, position)
+        }
   }
 
   private fun addBuiltInEvaluationSteps(task: Task) {
@@ -170,7 +183,7 @@ TaskService : BaseService() {
     val out = ByteArrayOutputStream()
     val tar = TarUtil.PosixTarArchiveOutputStream(out)
 
-    tasks.forEach {task ->
+    tasks.forEach { task ->
       val taskTar = getExportTar(findTask(task.id)) // use findTask() on each task so everything is lazy initialized correctly
       tar.putArchiveEntry(TarArchiveEntry("${task.title}-${task.id}.tar").also { it.size = taskTar.size.toLong() })
       tar.write(taskTar)
