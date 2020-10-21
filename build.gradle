@@ -4,11 +4,11 @@ plugins {
   id 'org.jetbrains.kotlin.plugin.spring' version '1.4.10'
   id "org.jetbrains.kotlin.kapt" version "1.3.72"
   id 'org.springframework.boot' version '2.3.4.RELEASE'
-  id 'com.diffplug.spotless' version '5.6.1'
+  id 'com.diffplug.spotless' version '5.7.0'
   id 'com.bertramlabs.asset-pipeline' version '3.0.10'
   id 'jacoco'
   id 'ua.eshepelyuk.ManifestClasspath' version '1.0.0'
-  id "com.gorylenko.gradle-git-properties" version "2.2.3"
+  id "com.gorylenko.gradle-git-properties" version "2.2.4"
   id "org.sonarqube" version "3.0"
   id 'net.researchgate.release' version '2.8.1'
   id 'org.liquibase.gradle' version '2.0.4'
@@ -48,7 +48,7 @@ dependencies {
   implementation 'com.spotify:docker-client:8.16.0'
   implementation 'org.apache.commons:commons-compress:1.20'
   implementation 'org.apache.commons:commons-csv:1.8'
-  implementation 'io.sentry:sentry-logback:1.7.30'
+  implementation 'io.sentry:sentry-logback:3.0.0'
   implementation 'com.github.hsingh:java-shortuuid:2a4d72f'
   implementation 'com.github.Open-MBEE:junit-xml-parser:1.0.0'
   implementation 'org.mitre:openid-connect-client:1.3.3'
@@ -58,7 +58,7 @@ dependencies {
   implementation 'org.liquibase:liquibase-core:4.1.0'
   implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:7.2.0'
   implementation 'com.expediagroup:graphql-kotlin-spring-server:2.1.2'
-  implementation 'com.vladmihalcea:hibernate-types-52:2.9.13'
+  implementation 'com.vladmihalcea:hibernate-types-52:2.10.0'
   implementation 'com.github.codefreak:templates:1.2.2'
   implementation 'com.networknt:json-schema-validator:1.0.43'
   implementation 'javax.validation:validation-api:2.0.1.Final'
@@ -81,7 +81,7 @@ dependencies {
   // workaround for https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server/issues/1468
   implementation 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
 
-  liquibaseRuntime 'org.liquibase.ext:liquibase-hibernate5:4.1.0'
+  liquibaseRuntime 'org.liquibase.ext:liquibase-hibernate5:4.1.1'
   liquibaseRuntime 'com.h2database:h2:1.4.200'
   liquibaseRuntime 'org.yaml:snakeyaml:1.27'
   liquibaseRuntime sourceSets.main.runtimeClasspath
