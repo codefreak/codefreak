@@ -79,7 +79,7 @@ internal class IdeServiceTest : SpringTest() {
     ideService.startIdeContainer(answer)
     val containerId = getIdeContainer(answer).id()
     // assert that file is existing and nothing is owned by root
-    val dirContent = containerService.exec(containerId, arrayOf("ls", "-l", ContainerService.PROJECT_PATH))
+    val dirContent = containerService.exec(containerId, arrayOf("ls", "-l", IdeService.PROJECT_PATH))
     assertThat(dirContent.output, containsString("main.c"))
     assertThat(dirContent.output, not(containsString("root")))
   }
