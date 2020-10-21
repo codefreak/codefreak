@@ -144,7 +144,7 @@ class IdeService : BaseService() {
       return answer
     }
     containerService.withCollectionFileLock(answer.id) {
-      containerService.archiveContainer(containerId, "${PROJECT_PATH}/.") { tar ->
+      containerService.archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
         fileService.writeCollectionTar(answer.id).use { StreamUtils.copy(tar, it) }
       }
     }
@@ -156,7 +156,7 @@ class IdeService : BaseService() {
   @Transactional
   fun saveTaskFiles(task: Task): Task {
     val containerId = containerService.getContainerWithLabel(LABEL_TASK_ID, task.id.toString())?.id() ?: return task
-    containerService.archiveContainer(containerId, "${PROJECT_PATH}/.") { tar ->
+    containerService.archiveContainer(containerId, "$PROJECT_PATH/.") { tar ->
       fileService.writeCollectionTar(task.id).use { StreamUtils.copy(tar, it) }
     }
     log.info("Saved files of task ${task.id} from container $containerId")
@@ -202,7 +202,7 @@ class IdeService : BaseService() {
       // two globs: one for regular files and one for hidden files/dirs except . and ..
       containerService.exec(
           containerId,
-          arrayOf("sh", "-c", "rm -rf ${PROJECT_PATH}/* ${PROJECT_PATH}/.[!.]*")
+          arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*")
       )
 
       fileService.readCollectionTar(fileCollectionId).use {
