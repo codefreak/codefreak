@@ -8,4 +8,5 @@ databaseChangeLog:
         - column:
             name: updated_at
             type: timestamp
+            defaultValueComputed: CURRENT_TIMESTAMP
         tableName: task
