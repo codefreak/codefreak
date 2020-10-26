@@ -32,7 +32,7 @@
     "bootstrap-less": "3.3.8",
     "copy-webpack-plugin": "6.2.1",
     "copy-to-clipboard": "3.3.1",
-    "craco-antd": "1.18.1",
+    "craco-antd": "1.19.0",
     "craco-raw-loader": "1.0.1",
     "devicon": "2.2.0",
     "filesize": "6.1.0",
