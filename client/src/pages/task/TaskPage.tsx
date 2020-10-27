@@ -159,10 +159,22 @@ const TaskPage: React.FC = () => {
         ]
       : []
 
+  // insert online IDE before last element if enabled
+  const ideTab = task.ideEnabled
+    ? [
+        {
+          key: '/ide',
+          tab: tab('Online IDE', 'cloud'),
+          disabled: !answer
+        }
+      ]
+    : []
+
   const tabs = [
     { key: '/details', tab: tab('Task', 'file-text') },
     ...testingModeSwitch,
     { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
+    ...ideTab,
     {
       key: '/evaluation',
       disabled: !answer,
@@ -179,15 +191,6 @@ const TaskPage: React.FC = () => {
       )
     }
   ]
-
-  if (task.ideEnabled) {
-    // insert online IDE before last element if enabled
-    tabs.splice(-1, 0, {
-      key: '/ide',
-      tab: tab('Online IDE', 'cloud'),
-      disabled: !answer
-    })
-  }
 
   const assignment = task.assignment
 
