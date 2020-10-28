@@ -307,7 +307,7 @@ class IdeService : BaseService() {
       val tcpConnections = containerService.exec(containerId, arrayOf("cat", "/proc/net/tcp")).output.trim()
       // check if there is an established TCP connection on port 3000
       val isClientConnected = NetUtil.tcpConnectionSequence(tcpConnections).any {
-        it.localPort == 3000L && it.connectionState == 1
+        it.localPort == 3000L && it.connectionState == NetUtil.ConnectionState.TCP_ESTABLISHED
       }
       if (!isClientConnected) {
         val now: Long = System.currentTimeMillis()

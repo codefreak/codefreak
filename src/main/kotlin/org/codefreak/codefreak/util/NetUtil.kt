@@ -1,7 +1,29 @@
 package org.codefreak.codefreak.util
 
 object NetUtil {
-  private val TCP_CONNECTION_REGEX = Regex("^\\s*(\\d+):\\s+(\\w+:\\w+)\\s+(\\w+:\\w+)\\s+(\\d+)")
+  private val TCP_CONNECTION_REGEX = Regex("^\\s*(\\d+):\\s+(\\p{XDigit}+:\\p{XDigit}+)\\s+(\\p{XDigit}+:\\p{XDigit}+)\\s+(\\p{XDigit}+)")
+
+  /**
+   * https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/net/tcp_states.h
+   */
+  enum class ConnectionState {
+    TCP_ESTABLISHED,
+    TCP_SYN_SENT,
+    TCP_SYN_RECV,
+    TCP_FIN_WAIT1,
+    TCP_FIN_WAIT2,
+    TCP_TIME_WAIT,
+    TCP_CLOSE,
+    TCP_CLOSE_WAIT,
+    TCP_LAST_ACK,
+    TCP_LISTEN,
+    TCP_CLOSING,
+    TCP_NEW_SYN_RECV;
+
+    companion object {
+      fun fromInt(value: Int) = values()[value - 1]
+    }
+  }
 
   /**
    * https://www.kernel.org/doc/html/latest/networking/proc_net_tcp.html
@@ -15,7 +37,7 @@ object NetUtil {
     val localPort: Long,
     val remoteIpv4: Long,
     val remotePort: Long,
-    val connectionState: Int
+    val connectionState: ConnectionState
   )
 
   /**
@@ -37,7 +59,7 @@ object NetUtil {
   /**
    * Parse a line from /proc/net/tcp into [TcpConnection] instance
    */
-  fun parseTcpConnection(line: String): TcpConnection {
+  private fun parseTcpConnection(line: String): TcpConnection {
     val matches = TCP_CONNECTION_REGEX.find(line)?.groupValues
         ?: throw IllegalArgumentException("Provided string is not a line from /proc/net/tcp")
     val (localIp, localPort) = parseHexIpAndPort(matches[2])
@@ -48,7 +70,7 @@ object NetUtil {
         localPort,
         remoteIp,
         remotePort,
-        matches[4].toInt()
+        ConnectionState.fromInt(matches[4].toInt(16))
     )
   }
 
