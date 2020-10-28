@@ -75,9 +75,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
   })
-  const { data: defaultIdeDockerImage } = useSystemConfig(
-    'defaultIdeDockerImage'
-  )
+  const { data: defaultIdeImage } = useSystemConfig('defaultIdeImage')
 
   const [updateMutation] = useUpdateTaskDetailsMutation({
     onCompleted: () => {
@@ -180,8 +178,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             about custom IDE images <HelpLink category="ide">here</HelpLink>.
           </p>
           <p>
-            Leave blank to use the default image{' '}
-            <code>{defaultIdeDockerImage}</code>.
+            Leave blank to use the default image <code>{defaultIdeImage}</code>.
           </p>
           <Input.Search
             style={{

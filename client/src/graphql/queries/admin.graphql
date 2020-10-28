@@ -2,7 +2,7 @@ query GetSystemConfig {
   systemConfig {
     motd
     maxFileUploadSize
-    defaultIdeDockerImage
+    defaultIdeImage
   }
 }
 
