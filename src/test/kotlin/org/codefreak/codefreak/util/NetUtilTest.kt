@@ -26,7 +26,7 @@ internal class NetUtilTest {
                 hasProperty("localPort", `is`(41771L)),
                 hasProperty("remoteIpv4", `is`(0L)),
                 hasProperty("remotePort", `is`(0L)),
-                hasProperty("connectionState", `is`(NetUtil.ConnectionState.TCP_LISTEN)),
+                hasProperty("connectionState", `is`(NetUtil.ConnectionState.TCP_LISTEN))
             )
         )
     )
