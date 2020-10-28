@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
@@ -13,9 +12,10 @@ import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AssignmentRepository
-import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.TarUtil.getCodefreakDefinition
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,7 +38,8 @@ class AssignmentService : BaseService() {
   private lateinit var self: AssignmentService
 
   @Autowired
-  private lateinit var fileService: FileService
+  @Qualifier("yamlObjectMapper")
+  private lateinit var yamlMapper: ObjectMapper
 
   @Transactional
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
@@ -58,7 +59,7 @@ class AssignmentService : BaseService() {
 
   @Transactional
   fun createFromTar(content: ByteArray, owner: User, modify: Assignment.() -> Unit = {}): AssignmentCreationResult {
-    val definition = TarUtil.getYamlDefinition<AssignmentDefinition>(ByteArrayInputStream(content))
+    val definition = yamlMapper.getCodefreakDefinition<AssignmentDefinition>(ByteArrayInputStream(content))
     val assignment = self.withNewTransaction {
       val assignment = Assignment(definition.title, owner)
       assignment.modify()
@@ -90,7 +91,11 @@ class AssignmentService : BaseService() {
   }
 
   @Transactional
-  fun deleteAssignment(id: UUID) = assignmentRepository.deleteById(id)
+  fun deleteAssignment(id: UUID) {
+    // call respective delete method for each submission
+    findAssignment(id).submissions.forEach { submissionService.deleteSubmission(it.id) }
+    assignmentRepository.deleteById(id)
+  }
 
   @Transactional
   fun addTasksToAssignment(assignment: Assignment, tasks: Collection<Task>) {
@@ -118,7 +123,7 @@ class AssignmentService : BaseService() {
     val definition = AssignmentDefinition(
         assignment.title,
         assignment.tasks.map { "task-${it.position}" }
-    ).let { ObjectMapper(YAMLFactory()).writeValueAsBytes(it) }
+    ).let { yamlMapper.writeValueAsBytes(it) }
 
     tar.putArchiveEntry(TarArchiveEntry("codefreak.yml").also { it.size = definition.size.toLong() })
     tar.write(definition)

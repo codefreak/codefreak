@@ -46,6 +46,7 @@ query GetTask($id: ID!, $answerUserId: ID) {
     createdAt
     updatedAt
     editable
+    ideEnabled
     exportUrl
     assignment {
       id
@@ -72,6 +73,8 @@ query GetTaskDetails($id: ID!, $teacher: Boolean = false) {
   task(id: $id) {
     id
     body
+    ideEnabled
+    ideImage @include(if: $teacher)
     hiddenFiles @include(if: $teacher)
     protectedFiles @include(if: $teacher)
     assignment {

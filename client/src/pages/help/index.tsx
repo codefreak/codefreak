@@ -7,3 +7,5 @@ export const BasicHelpPage = loadable(() => import('./BasicHelpPage'))
 export const DefinitionsHelpPage = loadable(
   () => import('./DefinitionsHelpPage')
 )
+
+export const IdeHelpPage = loadable(() => import('./IdeHelpPage'))
