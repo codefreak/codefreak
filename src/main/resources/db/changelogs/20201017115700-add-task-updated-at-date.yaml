@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: 1602928585000-1
+    author: HannesOlszewski
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: updated_at
+            type: timestamp
+            defaultValueComputed: CURRENT_TIMESTAMP
+        tableName: task

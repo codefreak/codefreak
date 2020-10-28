@@ -9,6 +9,7 @@ import javax.persistence.OneToMany
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
+import org.hibernate.annotations.UpdateTimestamp
 
 @Entity
 class Task(
@@ -71,6 +72,9 @@ class Task(
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
+
+  @UpdateTimestamp
+  var updatedAt: Instant = Instant.now()
 
   @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
   var evaluationStepDefinitions: MutableSet<EvaluationStepDefinition> = mutableSetOf()

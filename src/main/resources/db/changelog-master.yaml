@@ -36,5 +36,8 @@ databaseChangeLog:
     file: changelogs/20200702190202-invalidate-evaluations.yaml
     relativeToChangelogFile: true
 - include:
-    file: changelogs/20201009114158-configurable-ide.yaml
+    file: changelogs/20201017115700-add-task-updated-at-date.yaml
     relativeToChangelogFile: true
+- include:
+      file: changelogs/20201009114158-configurable-ide.yaml
+      relativeToChangelogFile: true

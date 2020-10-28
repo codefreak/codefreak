@@ -35,6 +35,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val position = entity.position.toInt()
   val body = entity.body
   val createdAt = entity.createdAt
+  val updatedAt = entity.updatedAt
   val timeLimit = entity.timeLimit
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val inPool = entity.assignment == null
