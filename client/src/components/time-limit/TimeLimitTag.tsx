@@ -6,7 +6,6 @@ import React, { HTMLProps, useEffect, useState } from 'react'
 import { useServerNow } from '../../hooks/useServerTimeOffset'
 import { secondsToRelTime } from '../../services/time'
 import Countdown from '../Countdown'
-import TimeLimitEditModal from './TimeLimitEditModal'
 import './TimeLimitTag.less'
 
 interface TimeLimitTagProps extends HTMLProps<HTMLSpanElement> {
@@ -61,65 +60,6 @@ const TimeLimitTag: React.FC<TimeLimitTagProps> = ({
         <Icon type="clock-circle" /> {tagProps.children} {suffix}
       </Tag>
     </Tooltip>
-  )
-}
-
-interface EditableTimeLimitTagProps
-  extends Omit<TimeLimitTagProps, 'timeLimit' | 'onChange'> {
-  taskId: string
-  timeLimit?: number
-  onChange?: (seconds: number | undefined) => void
-}
-
-export const EditableTimeLimitTag: React.FC<EditableTimeLimitTagProps> = ({
-  taskId,
-  onChange,
-  ...props
-}) => {
-  const [isEditing, setIsEditing] = useState<boolean>(false)
-  const [timeLimit, setTimeLimit] = useState(props.timeLimit)
-  const onClickEdit = () => {
-    setIsEditing(true)
-  }
-
-  let timeLimitNode: React.ReactNode
-  if (timeLimit) {
-    timeLimitNode = (
-      <TimeLimitTag
-        {...props}
-        className="editable"
-        timeLimit={timeLimit}
-        suffix={<Icon type="edit" />}
-        onClick={onClickEdit}
-      />
-    )
-  } else {
-    timeLimitNode = (
-      <Tag onClick={onClickEdit} className="time-limit editable">
-        No time limit <Icon type="edit" />
-      </Tag>
-    )
-  }
-
-  const onCancel = () => setIsEditing(false)
-  const onOk = (value: number | undefined) => {
-    setTimeLimit(value)
-    setIsEditing(false)
-    if (onChange) {
-      onChange(value)
-    }
-  }
-
-  return (
-    <>
-      <TimeLimitEditModal
-        initialValue={timeLimit}
-        onOk={onOk}
-        visible={isEditing}
-        onCancel={onCancel}
-      />
-      {timeLimitNode}
-    </>
   )
 }
 

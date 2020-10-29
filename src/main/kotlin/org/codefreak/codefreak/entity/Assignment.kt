@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.entity
 
 import java.time.Instant
-import java.util.SortedSet
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -38,7 +37,7 @@ class Assignment(
    */
   @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
   @OrderBy("position ASC")
-  var tasks: SortedSet<Task> = sortedSetOf<Task>()
+  var tasks: MutableSet<Task> = sortedSetOf()
     get() = field.sortedBy { it.position }.toSortedSet()
 
   val status get() = when {
@@ -53,4 +52,12 @@ class Assignment(
 
   @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
   var submissions = mutableSetOf<Submission>()
+
+  /**
+   * Optional time limit for this assignments in seconds.
+   * If a student starts working on the assignment he has e.g. 900sec = 15min time
+   * to finish all tasks of the assignment. After the time limit is reached the cannot modify
+   * his answers anymore.
+   */
+  var timeLimit: Long? = null
 }

@@ -36,7 +36,6 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val body = entity.body
   val createdAt = entity.createdAt
   val updatedAt = entity.updatedAt
-  val timeLimit = entity.timeLimit
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val inPool = entity.assignment == null
   val editable by lazy { entity.isEditable(authorization) }
@@ -151,7 +150,6 @@ class TaskMutation : BaseResolver(), Mutation {
     val task = serviceAccess.getService(TaskService::class).findTask(input.id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     task.title = input.title
-    task.timeLimit = input.timeLimit
     serviceAccess.getService(TaskService::class).saveTask(task)
     true
   }

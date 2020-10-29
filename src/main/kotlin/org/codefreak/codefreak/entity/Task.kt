@@ -47,15 +47,7 @@ class Task(
    * A weight >=0, <=100 how the task is weighted
    * The total weight of all tasks should not be > 100
    */
-  var weight: Int? = null,
-
-  /**
-   * Time limit for this task in seconds.
-   * If a student starts working on the task he has e.g. 900sec = 15min time
-   * to finish this task. After the time limit is reached the cannot modify
-   * his answer.
-   */
-  var timeLimit: Long? = null
+  var weight: Int? = null
 ) : BaseEntity(), Comparable<Task> {
   @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
   var answers: MutableSet<Answer> = mutableSetOf()

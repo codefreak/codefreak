@@ -15,8 +15,8 @@ import TimeLimitTag from './time-limit/TimeLimitTag'
 
 interface CreateAnswerButtonProps
   extends Omit<ButtonProps, 'onClick' | 'loading'> {
-  task: Pick<Task, 'id' | 'timeLimit'>
-  assignment?: Pick<Assignment, 'deadline' | 'status'>
+  task: Pick<Task, 'id'>
+  assignment?: Pick<Assignment, 'deadline' | 'status' | 'timeLimit'>
   onAnswerCreated?: (result: CreateAnswerMutation) => void
 }
 
@@ -57,7 +57,7 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
     )
   }
 
-  const timeLimit = task.timeLimit
+  const timeLimit = assignment?.timeLimit
   if (!timeLimit) {
     return (
       <Button
@@ -72,7 +72,7 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = ({
     // render warning if assignment deadline is before time limit ends
     if (
       assignment?.deadline &&
-      serverMoment().add(task.timeLimit, 's').isAfter(assignment.deadline)
+      serverMoment().add(timeLimit, 's').isAfter(assignment.deadline)
     ) {
       const taskRelTimeLimit = secondsToRelTime(timeLimit)
       const assignmentRelDeadline = momentDifferenceToRelTime(

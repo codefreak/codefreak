@@ -15,4 +15,5 @@ class SubmissionDto(@GraphQLIgnore val entity: Submission, ctx: ResolverContext)
   val user by lazy { UserDto(entity.user, ctx) }
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val answers by lazy { entity.answers.map { AnswerDto(it, ctx) } }
+  val deadline = entity.deadline
 }

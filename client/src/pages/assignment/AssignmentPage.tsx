@@ -19,6 +19,7 @@ import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import moment, { Moment, unitOfTime } from 'moment'
 import React, { useCallback, useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
+import { debounce } from 'ts-debounce'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -27,6 +28,9 @@ import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
 import CopyToClipboardButton from '../../components/CopyToClipboardButton'
+import TimeIntervalInput, {
+  TimeIntervalInputProps
+} from '../../components/TimeIntervalInput'
 import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
@@ -46,7 +50,11 @@ import {
 import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-import { momentToIsoCb } from '../../services/time'
+import {
+  componentsToSeconds,
+  momentToIsoCb,
+  secondsToComponents
+} from '../../services/time'
 import { makeUpdater, noop, Updater } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
@@ -107,7 +115,8 @@ const AssignmentPage: React.FC = () => {
     title: assignment.title,
     active: assignment.active,
     deadline: assignment.deadline,
-    openFrom: assignment.openFrom
+    openFrom: assignment.openFrom,
+    timeLimit: assignment.timeLimit
   }
 
   const updater = makeUpdater(assignmentInput, variables =>
@@ -135,6 +144,12 @@ const AssignmentPage: React.FC = () => {
         {formatter.dateTime(value)}
       </Descriptions.Item>
     ) : null
+  }
+
+  const updateTimeLimit = updater('timeLimit')
+  const onTimeLimitChange: TimeIntervalInputProps['onChange'] = async (limit) => {
+    const seconds = limit ? componentsToSeconds(limit) : 0
+    await updateTimeLimit(seconds > 0 ? seconds : null)
   }
 
   return (
@@ -176,6 +191,13 @@ const AssignmentPage: React.FC = () => {
                 assignment.openFrom
               )}
               {renderDate('Deadline', updater('deadline'), assignment.deadline)}
+              <Descriptions.Item label="Time Limit">
+                <TimeIntervalInput
+                  onChange={debounce(onTimeLimitChange, 500)}
+                  defaultValue={secondsToComponents(assignment.timeLimit || 0)}
+                  nullable
+                />
+              </Descriptions.Item>
             </Descriptions>
             <Authorized condition={assignment.editable}>
               <StatusSteps

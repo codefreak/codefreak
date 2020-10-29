@@ -42,6 +42,7 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
   val owner by lazy { UserDto(entity.owner, ctx) }
   val createdAt = entity.createdAt
   val deadline = entity.deadline
+  val timeLimit = entity.timeLimit
   val status by lazy { entity.status }
   val active = entity.active
   val openFrom = entity.openFrom
@@ -133,13 +134,14 @@ class AssignmentMutation : BaseResolver(), Mutation {
     true
   }
 
-  fun updateAssignment(id: UUID, title: String, active: Boolean, deadline: Instant?, openFrom: Instant?): Boolean = context {
+  fun updateAssignment(id: UUID, title: String, active: Boolean, deadline: Instant?, openFrom: Instant?, timeLimit: Long?): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
     assignment.title = title
     assignment.active = active
     assignment.deadline = deadline
     assignment.openFrom = openFrom
+    assignment.timeLimit = timeLimit
     serviceAccess.getService(AssignmentService::class).saveAssignment(assignment)
     true
   }

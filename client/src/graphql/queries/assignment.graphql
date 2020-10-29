@@ -21,6 +21,7 @@ query GetAssignment($id: ID!) {
     status
     createdAt
     deadline
+    timeLimit
     openFrom
     active
     exportUrl

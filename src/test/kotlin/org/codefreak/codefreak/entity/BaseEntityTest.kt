@@ -7,10 +7,12 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-val ID1 = UUID(0, 0)
-val ID2 = UUID(0, 1)
-
 internal class BaseEntityTest {
+  companion object {
+    val ID1 = UUID(0, 0)
+    val ID2 = UUID(0, 1)
+  }
+
   class StubEntity(id: UUID) : BaseEntity(id)
 
   val entity = StubEntity(ID1)

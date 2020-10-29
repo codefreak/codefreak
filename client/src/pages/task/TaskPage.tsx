@@ -17,9 +17,7 @@ import EvaluationIndicator from '../../components/EvaluationIndicator'
 import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
-import TimeLimitTag, {
-  EditableTimeLimitTag
-} from '../../components/time-limit/TimeLimitTag'
+import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
 import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import useIdParam from '../../hooks/useIdParam'
@@ -103,8 +101,7 @@ const TaskPage: React.FC = () => {
 
   const taskInput: TaskInput = {
     id: task.id,
-    title: task.title,
-    timeLimit: task.timeLimit
+    title: task.title
   }
 
   const updater = makeUpdater(taskInput, input =>
@@ -220,7 +217,7 @@ const TaskPage: React.FC = () => {
       <CreateAnswerButton
         size="large"
         task={task}
-        assignment={task.assignment || undefined}
+        assignment={assignment || undefined}
         onAnswerCreated={onAnswerCreated}
       >
         Start working on this task!
@@ -239,24 +236,16 @@ const TaskPage: React.FC = () => {
   }
 
   const renderTimeLimit = () => {
-    if (!editable || answer) {
-      return task.timeLimit ? (
-        <TimeLimitTag
-          timeLimit={task.timeLimit}
-          deadline={
-            answer && answer.deadline ? moment(answer.deadline) : undefined
-          }
-        />
-      ) : undefined
-    }
-
-    return (
-      <EditableTimeLimitTag
-        taskId={task.id}
-        timeLimit={task.timeLimit ?? undefined}
-        onChange={updater('timeLimit')}
+    return assignment?.timeLimit ? (
+      <TimeLimitTag
+        timeLimit={assignment.timeLimit}
+        deadline={
+          answer?.submission?.deadline
+            ? moment(answer.submission.deadline)
+            : undefined
+        }
       />
-    )
+    ) : undefined
   }
 
   const tags = [
@@ -303,7 +292,11 @@ const TaskPage: React.FC = () => {
           {answer ? (
             <div className="no-padding">
               <AnswerBlocker
-                deadline={answer.deadline ? moment(answer.deadline) : undefined}
+                deadline={
+                  answer.submission.deadline
+                    ? moment(answer.submission.deadline)
+                    : undefined
+                }
               >
                 <IdeIframe type="answer" id={answer.id} />
               </AnswerBlocker>

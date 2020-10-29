@@ -10,6 +10,7 @@ import useMomentReached from '../../hooks/useMomentReached'
 import { useServerNow } from '../../hooks/useServerTimeOffset'
 import {
   Answer,
+  Submission,
   useGetAnswerQuery,
   useImportAnswerSourceMutation,
   useResetAnswerMutation,
@@ -19,13 +20,16 @@ import { messageService } from '../../services/message'
 import { displayName } from '../../services/user'
 import { DifferentUserContext } from '../task/TaskPage'
 
+type AnswerWithSubmissionDeadline = Pick<Answer, 'id'> & { submission: Pick<Submission, 'deadline'> }
+
 interface DangerZoneProps {
-  answer: Pick<Answer, 'id' | 'deadline'>
+  answer: AnswerWithSubmissionDeadline
   onReset?: () => void
 }
 
 const DangerZone: React.FC<DangerZoneProps> = props => {
-  const { id, deadline } = props.answer
+  const { id } = props.answer
+  const { deadline } = props.answer.submission
   const [resetAnswer, { loading: resetLoading }] = useResetAnswerMutation({
     variables: { id }
   })
@@ -109,12 +113,13 @@ const DangerZone: React.FC<DangerZoneProps> = props => {
 }
 
 interface UploadAnswerProps {
-  answer: Pick<Answer, 'id' | 'deadline'>
+  answer: AnswerWithSubmissionDeadline
   onUpload?: () => void
 }
 
 const UploadAnswer: React.FC<UploadAnswerProps> = props => {
-  const { id, deadline } = props.answer
+  const { id } = props.answer
+  const { deadline } = props.answer.submission
   const [
     uploadSource,
     { loading: uploading, data: uploadSuccess }
