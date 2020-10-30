@@ -4,7 +4,12 @@ import AdminPage from './pages/AdminPage'
 import AssignmentListPage from './pages/assignment/AssignmentListPage'
 import AssignmentPage from './pages/assignment/AssignmentPage'
 import CreateAssignmentPage from './pages/assignment/CreateAssignmentPage'
-import { BasicHelpPage, DefinitionsHelpPage, HelpPage } from './pages/help'
+import {
+  BasicHelpPage,
+  DefinitionsHelpPage,
+  HelpPage,
+  IdeHelpPage
+} from './pages/help'
 import CreateTaskPage from './pages/task/CreateTaskPage'
 import TaskPage from './pages/task/TaskPage'
 import TaskPoolPage from './pages/task/TaskPoolPage'
@@ -68,6 +73,12 @@ export const routerConfig: Route = {
           path: '/help/definitions',
           name: 'Definition Files',
           component: DefinitionsHelpPage,
+          authority: AUTHORITIES.ROLE_TEACHER
+        },
+        {
+          path: '/help/ide',
+          name: 'Online IDE',
+          component: IdeHelpPage,
           authority: AUTHORITIES.ROLE_TEACHER
         }
       ]

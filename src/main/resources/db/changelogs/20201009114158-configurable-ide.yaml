@@ -1,0 +1,26 @@
+databaseChangeLog:
+- changeSet:
+    id: 1602236526069-1
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: ide_enabled
+            type: boolean
+            defaultValueBoolean: true
+        tableName: task
+- changeSet:
+    id: 1602236526069-2
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: ide_image
+            type: varchar(255)
+            defaultValue: null
+        tableName: task
+

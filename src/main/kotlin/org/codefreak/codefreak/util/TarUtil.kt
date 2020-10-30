@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -174,10 +173,9 @@ object TarUtil {
   }
 
   @Throws(IllegalArgumentException::class)
-  inline fun <reified T> getYamlDefinition(`in`: InputStream): T {
+  inline fun <reified T> ObjectMapper.getCodefreakDefinition(`in`: InputStream): T {
     findFile(`in`, "codefreak.yml") { _, fileStream ->
-      val mapper = ObjectMapper(YAMLFactory())
-      return mapper.readValue(fileStream, T::class.java)
+      return readValue(fileStream, T::class.java)
     }
   }
 

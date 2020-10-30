@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component
 @GraphQLName("SystemConfig")
 class SystemConfigDto(
   val motd: String?,
-  val maxFileUploadSize: Long
+  val maxFileUploadSize: Long,
+  val defaultIdeImage: String
 )
 
 @GraphQLName("TimeSync")
@@ -30,7 +31,8 @@ class AdministrationQuery : BaseResolver(), Query {
 
     return SystemConfigDto(
         motd = adminService.getMotd(),
-        maxFileUploadSize = adminService.getMaxUploadSize()
+        maxFileUploadSize = adminService.getMaxUploadSize(),
+        defaultIdeImage = adminService.getDefaultIdeDockerImageName()
     )
   }
 

@@ -5,7 +5,7 @@ import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.service.AnswerService
-import org.codefreak.codefreak.service.ContainerService
+import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -25,12 +25,12 @@ class IdeMutation : BaseResolver(), Mutation {
           authorization.requireAuthority(Authority.ROLE_TEACHER)
         }
 
-        serviceAccess.getService(ContainerService::class).startIdeContainer(answer, readOnly)
+        serviceAccess.getService(IdeService::class).startIdeContainer(answer, readOnly)
       }
       "task" -> {
         val task = serviceAccess.getService(TaskService::class).findTask(id)
         require(task.isEditable(authorization))
-        serviceAccess.getService(ContainerService::class).startIdeContainer(task)
+        serviceAccess.getService(IdeService::class).startIdeContainer(task)
       }
       else -> throw IllegalArgumentException("Unknown type")
     }

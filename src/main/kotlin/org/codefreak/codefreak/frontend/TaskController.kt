@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream
 import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
-import org.codefreak.codefreak.service.ContainerService
+import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
@@ -25,7 +25,7 @@ class TaskController : BaseController() {
   lateinit var taskService: TaskService
 
   @Autowired
-  lateinit var containerService: ContainerService
+  lateinit var ideService: IdeService
 
   @Autowired
   lateinit var fileService: FileService
@@ -35,7 +35,7 @@ class TaskController : BaseController() {
   fun getSourceTar(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val task = taskService.findTask(taskId)
     val submission = submissionService.findSubmission(task.assignment?.id ?: throw IllegalArgumentException(), user.id).get()
-    val answer = containerService.saveAnswerFiles(submission.getAnswer(taskId) ?: throw IllegalArgumentException())
+    val answer = ideService.saveAnswerFiles(submission.getAnswer(taskId) ?: throw IllegalArgumentException())
     fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId).use {
       return download("${answer.task.title}.tar", it)
     }
@@ -46,7 +46,7 @@ class TaskController : BaseController() {
   fun getSourceZip(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val task = taskService.findTask(taskId)
     val submission = submissionService.findSubmission(task.assignment?.id ?: throw IllegalArgumentException(), user.id).get()
-    val answer = containerService.saveAnswerFiles(submission.getAnswer(taskId) ?: throw IllegalArgumentException())
+    val answer = ideService.saveAnswerFiles(submission.getAnswer(taskId) ?: throw IllegalArgumentException())
     fileService.readCollectionTar(if (fileService.collectionExists(answer.id)) answer.id else taskId).use {
       return download("${answer.task.title}.zip") {
         out -> TarUtil.tarToZip(it, out)

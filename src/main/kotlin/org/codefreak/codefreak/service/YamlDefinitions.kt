@@ -7,7 +7,8 @@ data class TaskDefinition(
   val hidden: List<String> = emptyList(),
   val protected: List<String> = emptyList(),
   val evaluation: List<EvaluationDefinition> = emptyList(),
-  val updatedAt: String? = null
+  val updatedAt: String? = null,
+  val ide: IdeDefinition? = null
 ) {
   private constructor() : this("")
 }
@@ -25,4 +26,11 @@ data class AssignmentDefinition(
   val tasks: List<String>
 ) {
   private constructor() : this("", emptyList())
+}
+
+data class IdeDefinition(
+  val enabled: Boolean,
+  val image: String?
+) {
+  constructor() : this(true, null)
 }

@@ -23,8 +23,8 @@ import org.codefreak.codefreak.graphql.ResolverContext
 import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentService
-import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.EvaluationFinishedEvent
+import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
@@ -204,7 +204,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
       invalidateTask != null -> assignment.tasks.find { it.id == invalidateTask }
           ?.let {
             evaluationService.invalidateEvaluations(it)
-            serviceAccess.getService(ContainerService::class).saveTaskFiles(it)
+            serviceAccess.getService(IdeService::class).saveTaskFiles(it)
           }
     }
 

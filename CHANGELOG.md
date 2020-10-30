@@ -11,6 +11,7 @@
 * The assignment list is sortable now (#595)
 * The assignment list is filterable now (#616)
 * The answer file view reloads if new files are uploaded (#584)
+* IDE can be disabled and custom images can be used (#606)
 * Tasks show the dates they were created and last updated (#617)
 * The task pool list and the 'add tasks to assignment' list are now sortable and filterable (#616)
 

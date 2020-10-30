@@ -6,8 +6,10 @@ import {
   Col,
   Empty,
   Icon,
+  Input,
   List,
   Row,
+  Switch,
   Tabs,
   Tooltip
 } from 'antd'
@@ -18,6 +20,7 @@ import ReactMarkdown from 'react-markdown'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
+import HelpLink from '../../components/HelpLink'
 import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import StartSubmissionEvaluationButton from '../../components/StartSubmissionEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
@@ -31,6 +34,7 @@ import { messageService } from '../../services/message'
 import { shorten } from '../../services/short-id'
 import { makeUpdater } from '../../services/util'
 import EditEvaluationPage from '../evaluation/EditEvaluationPage'
+import useSystemConfig from '../../hooks/useSystemConfig'
 
 const { TabPane } = Tabs
 
@@ -71,6 +75,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
   })
+  const { data: defaultIdeImage } = useSystemConfig('defaultIdeImage')
 
   const [updateMutation] = useUpdateTaskDetailsMutation({
     onCompleted: () => {
@@ -93,7 +98,9 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
     id: task.id,
     body: task.body,
     hiddenFiles: task.hiddenFiles,
-    protectedFiles: task.protectedFiles
+    protectedFiles: task.protectedFiles,
+    ideEnabled: task.ideEnabled,
+    ideImage: task.ideImage
   }
 
   const updater = makeUpdater(taskDetailsInput, input =>
@@ -150,6 +157,39 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
           ) : (
             <Empty description="This task has no extra instructions. Take a look at the provided files." />
           )}
+        </Card>
+        <Card
+          title="Online IDE"
+          style={{ marginTop: 16 }}
+          extra={
+            <Switch
+              defaultChecked={task.ideEnabled}
+              unCheckedChildren={<Icon type="poweroff" />}
+              onChange={updater('ideEnabled')}
+            />
+          }
+          bodyStyle={{
+            display: !task.ideEnabled ? 'none' : ''
+          }}
+        >
+          <p>
+            Optionally, you can specify a custom Docker image for the student
+            Online IDE. You will most likely <em>not</em> need this! Read more
+            about custom IDE images <HelpLink category="ide">here</HelpLink>.
+          </p>
+          <p>
+            Leave blank to use the default image <code>{defaultIdeImage}</code>.
+          </p>
+          <Input.Search
+            style={{
+              maxWidth: 400
+            }}
+            defaultValue={task.ideImage || ''}
+            placeholder="e.g. foo/bar:latest"
+            allowClear
+            enterButton={<Icon type="save" />}
+            onSearch={updater('ideImage')}
+          />
         </Card>
         <Card title="Files" style={{ marginTop: 16 }}>
           {assignmentOpen ? (

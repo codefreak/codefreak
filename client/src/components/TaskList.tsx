@@ -14,7 +14,7 @@ import CropContainer from './CropContainer'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
 import TimeLimitTag from './time-limit/TimeLimitTag'
-import DateTag, { DateType } from './DateTag'
+import RelativeDateTime from './RelativeDateTime'
 import Authorized from './Authorized'
 
 const { confirm } = Modal
@@ -40,24 +40,16 @@ const renderTask = (props: RenderProps) => (task: Task) => {
     })
 
   const createdAtTag = (
-    <DateTag
-      dateType={DateType.CREATED}
-      contentType="TASK"
-      date={new Date(task.createdAt)}
-    />
+    <span style={{ marginRight: '1em' }}>
+      Created: <RelativeDateTime date={new Date(task.createdAt)} />
+    </span>
   )
 
   const updatedAtTag = (
-    <DateTag
-      dateType={DateType.UPDATED}
-      contentType="TASK"
-      date={new Date(task.updatedAt)}
-    />
+    <span style={{ marginRight: '1em' }}>
+      Updated: <RelativeDateTime date={new Date(task.updatedAt)} />
+    </span>
   )
-
-  const updateTimeDifference =
-    Date.parse(task.updatedAt) - Date.parse(task.createdAt)
-  const oneSecond = 1000
 
   const cardProps: CardProps = {
     title: (
@@ -79,25 +71,29 @@ const renderTask = (props: RenderProps) => (task: Task) => {
             }
           />
         ) : null}
-        <Authorized authority="ROLE_TEACHER">
-          {createdAtTag}
-          {updateTimeDifference >= oneSecond ? updatedAtTag : null}
-        </Authorized>
       </>
     ),
-    extra: task.editable ? (
-      <Tooltip
-        title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
-        placement="left"
-      >
-        <Button
-          onClick={confirmDelete}
-          type="dashed"
-          shape="circle"
-          icon="delete"
-        />
-      </Tooltip>
-    ) : null,
+    extra: (
+      <>
+        <Authorized authority="ROLE_TEACHER">
+          {createdAtTag}
+          {updatedAtTag}
+        </Authorized>
+        {task.editable ? (
+          <Tooltip
+            title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
+            placement="left"
+          >
+            <Button
+              onClick={confirmDelete}
+              type="dashed"
+              shape="circle"
+              icon="delete"
+            />
+          </Tooltip>
+        ) : null}
+      </>
+    ),
     children: (
       <>
         {task.body ? (

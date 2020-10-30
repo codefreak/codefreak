@@ -14,8 +14,8 @@ import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
 import org.codefreak.codefreak.service.AnswerService
-import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.GitImportService
+import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.util.FrontendUtil
@@ -57,8 +57,7 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseD
   }
 
   val ideRunning by lazy {
-    serviceAccess.getService(ContainerService::class)
-        .isIdeContainerRunning(id)
+    serviceAccess.getService(IdeService::class).isIdeContainerRunning(id)
   }
 }
 
