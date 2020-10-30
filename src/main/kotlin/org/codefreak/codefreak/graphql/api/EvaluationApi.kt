@@ -237,14 +237,8 @@ class EvaluationMutation : BaseResolver(), Mutation {
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
-    definition.run {
-      title = input.title
-      active = input.active
-      options = objectMapper.readValue(input.options, object : TypeReference<HashMap<String, Any>>() {})
-    }
-    evaluationService.validateRunnerOptions(definition)
-    evaluationService.saveEvaluationStepDefinition(definition)
-    serviceAccess.getService(TaskService::class).invalidateLatestEvaluations(definition.task)
+    val options = objectMapper.readValue(input.options, object : TypeReference<HashMap<String, Any>>() {})
+    evaluationService.updateEvaluationStepDefinition(definition, input.title, input.active, options)
     true
   }
 

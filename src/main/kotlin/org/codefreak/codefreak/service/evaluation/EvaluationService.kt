@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service.evaluation
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
@@ -14,16 +15,11 @@ import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
+import org.codefreak.codefreak.graphql.api.EvaluationMutation
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
-import org.codefreak.codefreak.service.AnswerDeadlineReachedEvent
-import org.codefreak.codefreak.service.AnswerService
-import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
-import org.codefreak.codefreak.service.BaseService
-import org.codefreak.codefreak.service.EntityNotFoundException
-import org.codefreak.codefreak.service.IdeService
-import org.codefreak.codefreak.service.SubmissionService
+import org.codefreak.codefreak.service.*
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.PositionUtil
@@ -53,6 +49,9 @@ class EvaluationService : BaseService() {
 
   @Autowired
   private lateinit var answerService: AnswerService
+
+  @Autowired
+  private lateinit var taskService: TaskService
 
   @Autowired
   private lateinit var evaluationQueue: EvaluationQueue
@@ -232,5 +231,23 @@ class EvaluationService : BaseService() {
     val schema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V6).getSchema(runner.getOptionsSchema())
     val errors = schema.validate(objectMapper.valueToTree(definition.options))
     require(errors.isEmpty()) { "Runner options for ${definition.runnerName} are invalid: \n" + errors.joinToString("\n") { it.message } }
+  }
+
+  @Transactional
+  fun updateEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition, title: String?, active: Boolean?, options: Map<String, Any>?): EvaluationStepDefinition {
+    title?.let {
+      evaluationStepDefinition.title = it
+    }
+    active?.let {
+      evaluationStepDefinition.active = it
+    }
+    options?.let {
+      evaluationStepDefinition.options = it
+    }
+    validateRunnerOptions(evaluationStepDefinition)
+    saveEvaluationStepDefinition(evaluationStepDefinition)
+    taskService.invalidateLatestEvaluations(evaluationStepDefinition.task)
+
+    return evaluationStepDefinition
   }
 }
