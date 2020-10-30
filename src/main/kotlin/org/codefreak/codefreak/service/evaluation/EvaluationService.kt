@@ -1,6 +1,5 @@
 package org.codefreak.codefreak.service.evaluation
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
@@ -15,11 +14,17 @@ import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
-import org.codefreak.codefreak.graphql.api.EvaluationMutation
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
-import org.codefreak.codefreak.service.*
+import org.codefreak.codefreak.service.AnswerDeadlineReachedEvent
+import org.codefreak.codefreak.service.AnswerService
+import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
+import org.codefreak.codefreak.service.BaseService
+import org.codefreak.codefreak.service.EntityNotFoundException
+import org.codefreak.codefreak.service.IdeService
+import org.codefreak.codefreak.service.SubmissionService
+import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.PositionUtil
