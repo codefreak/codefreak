@@ -9,7 +9,6 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.TaskRepository
-import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.util.PositionUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
