@@ -35,24 +35,24 @@ TaskService : BaseService() {
   @Transactional
   fun createFromTar(
     tarContent: ByteArray,
-    assignment: Assignment?,
     owner: User,
-    position: Long
-  ): Task = taskTarHelper.createFromTar(tarContent, assignment, owner, position)
+    assignment: Assignment? = null,
+    position: Long = 0L
+  ): Task = taskTarHelper.createFromTar(tarContent, owner, assignment, position)
 
   @Transactional
   fun createMultipleFromTar(
     tarContent: ByteArray,
-    assignment: Assignment?,
     owner: User,
-    position: Long
-  ) = taskTarHelper.createMultipleFromTar(tarContent, assignment, owner, position)
+    assignment: Assignment? = null,
+    position: Long = 0L
+  ) = taskTarHelper.createMultipleFromTar(tarContent, owner, assignment, position)
 
   @Transactional
   fun createEmptyTask(owner: User): Task {
     return ByteArrayOutputStream().use {
       StreamUtil.copy(ClassPathResource("empty_task.tar").inputStream, it)
-      createFromTar(it.toByteArray(), null, owner, 0)
+      createFromTar(it.toByteArray(), owner)
     }
   }
 

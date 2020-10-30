@@ -62,11 +62,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
 
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
-      taskService.createFromTar(it.toByteArray(), assignment1, teacher, 0)
+      taskService.createFromTar(it.toByteArray(), teacher, assignment1)
     }
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
-      taskService.createFromTar(it.toByteArray(), assignment2, teacher, 0).also { task ->
+      taskService.createFromTar(it.toByteArray(), teacher, assignment2).also { task ->
         // set a 1h 1min time limit
         task.timeLimit = 3600 + 60
         taskService.saveTask(task)
@@ -76,11 +76,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
     // task pool
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
-      taskService.createFromTar(it.toByteArray(), null, teacher, 0)
+      taskService.createFromTar(it.toByteArray(), teacher)
     }
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
-      taskService.createFromTar(it.toByteArray(), null, teacher, 0)
+      taskService.createFromTar(it.toByteArray(), teacher)
     }
 
     ByteArrayOutputStream().use {

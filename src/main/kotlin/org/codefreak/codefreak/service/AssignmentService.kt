@@ -71,7 +71,7 @@ class AssignmentService : BaseService() {
       TarUtil.extractSubdirectory(ByteArrayInputStream(content), taskContent, it)
       try {
         self.withNewTransaction {
-          taskService.createFromTar(taskContent.toByteArray(), assignment, owner, index.toLong()).let {
+          taskService.createFromTar(taskContent.toByteArray(), owner, assignment, index.toLong()).let {
             assignment.tasks.add(it)
           }
         }
@@ -101,7 +101,7 @@ class AssignmentService : BaseService() {
   fun addTasksToAssignment(assignment: Assignment, tasks: Collection<Task>) {
     var nextPosition = assignment.tasks.maxByOrNull { it.position }?.let { it.position + 1 } ?: 0
     for (task in tasks) {
-      taskService.createFromTar(taskService.getExportTar(task), assignment, assignment.owner, nextPosition)
+      taskService.createFromTar(taskService.getExportTar(task), assignment.owner, assignment, nextPosition)
       nextPosition++
     }
   }

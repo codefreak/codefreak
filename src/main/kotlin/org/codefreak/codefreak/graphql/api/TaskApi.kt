@@ -115,7 +115,7 @@ class TaskMutation : BaseResolver(), Mutation {
   fun createTask(template: TaskTemplate?): TaskDto = context {
     if (template != null) {
       val templateTar = ClassPathResource("org/codefreak/templates/${template.name.toLowerCase()}.tar").inputStream.use { it.readBytes() }
-      serviceAccess.getService(TaskService::class).createFromTar(templateTar, null, authorization.currentUser, 0)
+      serviceAccess.getService(TaskService::class).createFromTar(templateTar, authorization.currentUser)
           .let { TaskDto(it, this) }
     } else {
       serviceAccess.getService(TaskService::class).createEmptyTask(authorization.currentUser).let { TaskDto(it, this) }
@@ -133,7 +133,7 @@ class TaskMutation : BaseResolver(), Mutation {
   fun uploadTask(files: Array<ApplicationPart>): TaskDto = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-      val task = serviceAccess.getService(TaskService::class).createFromTar(it.toByteArray(), null, authorization.currentUser, 0L)
+      val task = serviceAccess.getService(TaskService::class).createFromTar(it.toByteArray(), authorization.currentUser)
       TaskDto(task, this)
     }
   }
@@ -142,7 +142,7 @@ class TaskMutation : BaseResolver(), Mutation {
   fun uploadTasks(files: Array<ApplicationPart>): Boolean = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-      serviceAccess.getService(TaskService::class).createMultipleFromTar(it.toByteArray(), null, authorization.currentUser, 0L)
+      serviceAccess.getService(TaskService::class).createMultipleFromTar(it.toByteArray(), authorization.currentUser)
       true
     }
   }
@@ -151,7 +151,7 @@ class TaskMutation : BaseResolver(), Mutation {
   fun importTask(url: String): TaskDto = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
-      val task = serviceAccess.getService(TaskService::class).createFromTar(it.toByteArray(), null, authorization.currentUser, 0L)
+      val task = serviceAccess.getService(TaskService::class).createFromTar(it.toByteArray(), authorization.currentUser)
       TaskDto(task, this)
     }
   }

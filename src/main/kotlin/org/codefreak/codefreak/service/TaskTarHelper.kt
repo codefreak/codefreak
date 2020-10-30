@@ -43,7 +43,7 @@ internal class TaskTarHelper {
   @Autowired
   private lateinit var fileService: FileService
 
-  fun createFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
+  fun createFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
     val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
 
     val existingTask = try {
@@ -58,7 +58,7 @@ internal class TaskTarHelper {
     }
 
     var task = if (existingTask == null) {
-      createNewTaskFromTar(definition, assignment, owner, position)
+      createNewTaskFromTar(definition, owner, assignment, position)
     } else {
       updateExistingTaskFromTar(existingTask, definition)
     }
@@ -119,7 +119,7 @@ internal class TaskTarHelper {
     }
   }
 
-  private fun createNewTaskFromTar(definition: TaskDefinition, assignment: Assignment?, owner: User, position: Long): Task {
+  private fun createNewTaskFromTar(definition: TaskDefinition, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
     var task = Task(assignment, owner, position, definition.title, definition.description, 100)
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
@@ -166,13 +166,13 @@ internal class TaskTarHelper {
     evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
   }
 
-  fun createMultipleFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long) {
+  fun createMultipleFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null, position: Long = 0L) {
     val input = TarArchiveInputStream(ByteArrayInputStream(tarContent))
     generateSequence { input.nextTarEntry }
         .filter { it.isFile }
         .filter { it.name.endsWith(".tar", ignoreCase = true).or(it.name.endsWith(".zip", ignoreCase = true)) }
         .forEach { _ ->
-          createFromTar(IOUtils.toByteArray(input), assignment, owner, position)
+          createFromTar(IOUtils.toByteArray(input), owner, assignment, position)
         }
   }
 
