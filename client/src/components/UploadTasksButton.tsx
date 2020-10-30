@@ -49,7 +49,7 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
         ]}
       >
         <Dragger
-          accept="application/tar,application/zip"
+          accept=".tar,.tar.gz,.zip"
           height={170}
           multiple
           showUploadList={false}
