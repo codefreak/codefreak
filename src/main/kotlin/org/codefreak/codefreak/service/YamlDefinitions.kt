@@ -2,10 +2,12 @@ package org.codefreak.codefreak.service
 
 data class TaskDefinition(
   val title: String,
+  val id: String? = null,
   val description: String? = null,
   val hidden: List<String> = emptyList(),
   val protected: List<String> = emptyList(),
-  val evaluation: List<EvaluationDefinition> = emptyList()
+  val evaluation: List<EvaluationDefinition> = emptyList(),
+  val updatedAt: String? = null
 ) {
   private constructor() : this("")
 }
