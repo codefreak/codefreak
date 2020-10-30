@@ -66,18 +66,6 @@ TaskService : BaseService() {
     taskRepository.delete(task)
   }
 
-  private fun applyDefaultRunners(taskDefinition: TaskDefinition): TaskDefinition {
-    // add "comments" runner by default if not defined
-    taskDefinition.run {
-      if (evaluation.find { it.step == CommentRunner.RUNNER_NAME } == null) {
-        return copy(evaluation = evaluation.toMutableList().apply {
-          add(EvaluationDefinition(CommentRunner.RUNNER_NAME))
-        })
-      }
-    }
-    return taskDefinition
-  }
-
   @Transactional
   fun saveTask(task: Task) = taskRepository.save(task)
 
