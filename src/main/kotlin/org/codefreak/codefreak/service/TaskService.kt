@@ -78,7 +78,7 @@ TaskService : BaseService() {
   }
 
   private fun updateExistingTaskFromTar(task: Task, tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
-    val definition = getYamlDefinition<TaskDefinition>(tarContent.inputStream())
+    val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
 
     val updatedAt = Instant.parse(definition.updatedAt)
     val isUpToDate = !updatedAt.isAfter(task.updatedAt)
@@ -93,7 +93,7 @@ TaskService : BaseService() {
   }
 
   private fun createNewTaskFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
-    val definition = getYamlDefinition<TaskDefinition>(tarContent.inputStream())
+    val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
     var task = Task(assignment, owner, position, definition.title, definition.description, 100)
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
