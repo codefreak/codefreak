@@ -157,7 +157,7 @@ internal class TaskTarHelper {
 
   private fun copyTaskFilesFromTar(taskId: UUID, tarContent: ByteArray) {
     fileService.writeCollectionTar(taskId).use { fileCollection ->
-      TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals("codefreak.yml", true) })
+      TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals(TarUtil.CODEFREAK_DEFINITION_NAME, true) })
     }
   }
 
@@ -188,7 +188,7 @@ internal class TaskTarHelper {
     val out = ByteArrayOutputStream()
     val tar = TarUtil.PosixTarArchiveOutputStream(out)
     fileService.readCollectionTar(task.id).use { files ->
-      TarUtil.copyEntries(TarArchiveInputStream(files), tar, filter = { !TarUtil.isRoot(it) && it.name != "codefreak.yml" })
+      TarUtil.copyEntries(TarArchiveInputStream(files), tar, filter = { !TarUtil.isRoot(it) && it.name != TarUtil.CODEFREAK_DEFINITION_NAME })
     }
 
     val definition = TaskDefinition(
