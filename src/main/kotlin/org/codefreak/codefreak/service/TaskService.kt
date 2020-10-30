@@ -54,7 +54,43 @@ TaskService : BaseService() {
 
   @Transactional
   fun createFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
+    val existingTask = try {
+      val definition = getYamlDefinition<TaskDefinition>(tarContent.inputStream())
+      val taskId = UUID.fromString(definition.id ?: "")
+      findTask(taskId).takeIf { it.owner == owner }
+    } catch (e: IllegalArgumentException) {
+      // Thrown if no valid id is found in the task definition
+      null
+    } catch (e: EntityNotFoundException) {
+      // Thrown if task is not found in the repository
+      null
+    }
+
+    existingTask?.let {
+      return updateExistingTaskFromTar(it, tarContent, assignment, owner, position)
+    }
+
+    return createNewTaskFromTar(tarContent, assignment, owner, position)
+  }
+
+  private fun updateExistingTaskFromTar(task: Task, tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
     val definition = getYamlDefinition<TaskDefinition>(tarContent.inputStream())
+
+    val updatedAt = Instant.parse(definition.updatedAt)
+    val isUpToDate = !updatedAt.isAfter(task.updatedAt)
+
+    if (isUpToDate) {
+      return task
+    }
+
+    // TODO Update task
+
+    return task
+  }
+
+  private fun createNewTaskFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
+    val definition = getYamlDefinition<TaskDefinition>(tarContent.inputStream())
+
     var task = Task(assignment, owner, position, definition.title, definition.description, 100)
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
@@ -85,6 +121,7 @@ TaskService : BaseService() {
     fileService.writeCollectionTar(task.id).use { fileCollection ->
       TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals("codefreak.yml", true) })
     }
+
     return task
   }
 
@@ -164,12 +201,14 @@ TaskService : BaseService() {
     }
 
     val definition = TaskDefinition(
-        task.title,
-        task.body,
-        task.hiddenFiles,
-        task.protectedFiles,
-        task.evaluationStepDefinitions.map { EvaluationDefinition(it.runnerName, it.options, it.title) })
-        .let { ObjectMapper(YAMLFactory()).writeValueAsBytes(it) }
+        title = task.title,
+        id = task.id.toString(),
+        description = task.body,
+        hidden = task.hiddenFiles,
+        protected = task.protectedFiles,
+        evaluation = task.evaluationStepDefinitions.map { EvaluationDefinition(it.runnerName, it.options, it.title) },
+        updatedAt = task.updatedAt.toString()
+    ).let { ObjectMapper(YAMLFactory()).writeValueAsBytes(it) }
 
     tar.putArchiveEntry(TarArchiveEntry("codefreak.yml").also { it.size = definition.size.toLong() })
     tar.write(definition)
