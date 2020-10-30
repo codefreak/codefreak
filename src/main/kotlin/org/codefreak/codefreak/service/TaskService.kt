@@ -26,6 +26,7 @@ import org.codefreak.codefreak.util.TarUtil.getCodefreakDefinition
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -58,8 +59,9 @@ TaskService : BaseService() {
 
   @Transactional
   fun createFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
+    val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
+
     val existingTask = try {
-      val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
       val taskId = UUID.fromString(definition.id ?: "")
       findTask(taskId).takeIf { it.owner == owner }
     } catch (e: IllegalArgumentException) {
@@ -70,16 +72,20 @@ TaskService : BaseService() {
       null
     }
 
-    existingTask?.let {
-      return updateExistingTaskFromTar(it, tarContent, assignment, owner, position)
+    var task = if (existingTask == null) {
+      createNewTaskFromTar(definition, assignment, owner, position)
+    } else {
+      updateExistingTaskFromTar(existingTask, definition)
     }
 
-    return createNewTaskFromTar(tarContent, assignment, owner, position)
+    saveTaskEvaluationStepDefinitions(task)
+    task = saveTask(task)
+    copyTaskFilesFromTar(task.id, tarContent)
+
+    return task
   }
 
-  private fun updateExistingTaskFromTar(task: Task, tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
-    val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
-
+  private fun updateExistingTaskFromTar(task: Task, definition: TaskDefinition): Task {
     val updatedAt = Instant.parse(definition.updatedAt)
     val isUpToDate = !updatedAt.isAfter(task.updatedAt)
 
@@ -87,29 +93,56 @@ TaskService : BaseService() {
       return task
     }
 
-    // TODO Update task
+    var updatedTask = task
 
-    return task
+    updatedTask.title = definition.title
+    updatedTask.body = definition.description
+    updatedTask.hiddenFiles = definition.hidden
+    updatedTask.protectedFiles = definition.protected
+    updatedTask.ideEnabled = definition.ide?.enabled ?: true
+    updatedTask.ideImage = definition.ide?.image
+
+    updatedTask = saveTask(updatedTask)
+
+    val stepDefinitions = getEvaluationStepDefinitions(definition, task)
+
+    updateExistingEvaluationStepDefinitions(updatedTask, stepDefinitions)
+
+    val newStepDefinitions = stepDefinitions.filter {
+      updatedTask.evaluationStepDefinitions.find { evaluationStepDefinition -> it == evaluationStepDefinition } == null
+    }
+    updatedTask.evaluationStepDefinitions.addAll(newStepDefinitions)
+
+    return updatedTask
   }
 
-  private fun createNewTaskFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
-    val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
+  private fun updateExistingEvaluationStepDefinitions(task: Task, newStepDefinitions: Collection<EvaluationStepDefinition>) {
+    task.evaluationStepDefinitions.forEach { existingStepDefinition ->
+      val stepDefinition = newStepDefinitions.find { it == existingStepDefinition }
+
+      if (stepDefinition != null) {
+        evaluationService.updateEvaluationStepDefinition(existingStepDefinition, stepDefinition.title, stepDefinition.active, stepDefinition.options)
+      } else {
+        try {
+          evaluationService.deleteEvaluationStepDefinition(existingStepDefinition)
+        } catch (e: DataIntegrityViolationException) {
+          // The step cannot be deleted if it has been used for evaluation already
+          // Deactivate it for future evaluation instead
+          existingStepDefinition.active = false
+        }
+      }
+    }
+  }
+
+  private fun createNewTaskFromTar(definition: TaskDefinition, assignment: Assignment?, owner: User, position: Long): Task {
     var task = Task(assignment, owner, position, definition.title, definition.description, 100)
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
     task.ideEnabled = definition.ide?.enabled ?: true
     task.ideImage = definition.ide?.image
 
-    task = taskRepository.save(task)
-    task.evaluationStepDefinitions = definition.evaluation
-        .mapIndexed { index, it ->
-          val runner = evaluationService.getEvaluationRunner(it.step)
-          val title = it.title ?: runner.getDefaultTitle()
-          val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
-          evaluationService.validateRunnerOptions(stepDefinition)
-          stepDefinition
-        }
-        .toMutableSet()
+    task = saveTask(task)
+    task.evaluationStepDefinitions = getEvaluationStepDefinitions(definition, task)
 
     task.evaluationStepDefinitions
         .groupBy { it.runnerName }
@@ -119,15 +152,33 @@ TaskService : BaseService() {
           }
         }
 
-    addBuiltInEvaluationSteps(task)
+    return task
+  }
 
-    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
-    task = taskRepository.save(task)
-    fileService.writeCollectionTar(task.id).use { fileCollection ->
+  private fun getEvaluationStepDefinitions(taskDefinition: TaskDefinition, task: Task) = taskDefinition.evaluation
+      .mapIndexed { index, it ->
+        val runner = evaluationService.getEvaluationRunner(it.step)
+        val title = it.title ?: runner.getDefaultTitle()
+        val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
+        stepDefinition.id = try {
+          UUID.fromString(it.id ?: "")
+        } catch (e: IllegalArgumentException) {
+          stepDefinition.id
+        }
+        evaluationService.validateRunnerOptions(stepDefinition)
+        stepDefinition
+      }
+      .toMutableSet()
+
+  private fun copyTaskFilesFromTar(taskId: UUID, tarContent: ByteArray) {
+    fileService.writeCollectionTar(taskId).use { fileCollection ->
       TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals("codefreak.yml", true) })
     }
+  }
 
-    return task
+  private fun saveTaskEvaluationStepDefinitions(task: Task) {
+    addBuiltInEvaluationSteps(task)
+    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
   }
 
   @Transactional
@@ -211,7 +262,14 @@ TaskService : BaseService() {
         description = task.body,
         hidden = task.hiddenFiles,
         protected = task.protectedFiles,
-        evaluation = task.evaluationStepDefinitions.map { EvaluationDefinition(it.runnerName, it.options, it.title) },
+        evaluation = task.evaluationStepDefinitions.map {
+          EvaluationDefinition(
+              step = it.runnerName,
+              options = it.options,
+              title = it.title,
+              id = it.id.toString()
+          )
+        },
         updatedAt = task.updatedAt.toString()
     ).let { yamlMapper.writeValueAsBytes(it) }
 
