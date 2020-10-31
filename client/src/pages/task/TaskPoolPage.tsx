@@ -65,9 +65,11 @@ const TaskPoolPage: React.FC = () => {
 
   const update = () => result.refetch()
 
-  const handleUploadCompleted = (createdTasks: {id: string, createdAt: string, updatedAt: string}[]) => {
+  const handleUploadCompleted = (
+    createdTasks: { id: string; createdAt: string; updatedAt: string }[]
+  ) => {
     if (createdTasks.length === 0) {
-      messageService.error("Tasks could not be created")
+      messageService.error('Tasks could not be created')
     } else {
       let numCreated = 0
       let numUpdated = 0
@@ -76,7 +78,9 @@ const TaskPoolPage: React.FC = () => {
         const existingTask = tasks.filter(task => task.id === createdTask.id)
 
         if (existingTask.length > 0) {
-          const isTaskUpdated = Date.parse(existingTask[0].updatedAt) < Date.parse(createdTask.updatedAt)
+          const isTaskUpdated =
+            Date.parse(existingTask[0].updatedAt) <
+            Date.parse(createdTask.updatedAt)
           if (isTaskUpdated) {
             numUpdated++
           }
@@ -93,16 +97,14 @@ const TaskPoolPage: React.FC = () => {
           messageService.success(`${numUpdated} task(s) successfully updated`)
         }
       } else {
-        messageService.success("All tasks are up-to-date")
+        messageService.success('All tasks are up-to-date')
       }
     }
     result.refetch()
   }
 
   const exportButton = (
-    <ArchiveDownload url="/api/tasks/export">
-      Export Tasks
-    </ArchiveDownload>
+    <ArchiveDownload url="/api/tasks/export">Export Tasks</ArchiveDownload>
   )
 
   const importButton = (
