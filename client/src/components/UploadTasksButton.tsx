@@ -6,7 +6,7 @@ import { RcFile } from 'antd/lib/upload/interface'
 const { Dragger } = Upload
 
 interface UploadTasksButtonProps {
-  onUploadCompleted: (success: boolean) => void
+  onUploadCompleted: (tasks: {id: string, createdAt: string, updatedAt: string}[]) => void
 }
 
 const UploadTasksButton = (props: UploadTasksButtonProps) => {
@@ -20,7 +20,13 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
     uploadTasks({ variables: { files } }).then(r => {
       hideModal()
       if (r.data) {
-        props.onUploadCompleted(r.data.uploadTasks)
+        props.onUploadCompleted(r.data.uploadTasks.map(task => {
+          return {
+            id: task.id,
+            createdAt: task.createdAt,
+            updatedAt: task.updatedAt
+          }})
+        )
       }
     })
   }

@@ -24,6 +24,7 @@ import org.codefreak.codefreak.util.TarUtil
 import org.springframework.core.io.ClassPathResource
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
+import org.springframework.transaction.UnexpectedRollbackException
 import org.springframework.transaction.annotation.Transactional
 
 @GraphQLName("Task")
@@ -139,11 +140,11 @@ class TaskMutation : BaseResolver(), Mutation {
   }
 
   @Secured(Authority.ROLE_TEACHER)
-  fun uploadTasks(files: Array<ApplicationPart>): Boolean = context {
+  fun uploadTasks(files: Array<ApplicationPart>): List<TaskDto> = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-      serviceAccess.getService(TaskService::class).createMultipleFromTar(it.toByteArray(), authorization.currentUser)
-      true
+      val tasks = serviceAccess.getService(TaskService::class).createMultipleFromTar(it.toByteArray(), authorization.currentUser)
+      tasks.map { task -> TaskDto(task, this) }
     }
   }
 

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 internal class TaskTarHelper {
@@ -54,6 +55,7 @@ internal class TaskTarHelper {
    * @param position the position of the task if it belongs to an assignment
    * @return the created or updated task
    */
+  @Transactional
   fun createFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
     val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
 
@@ -194,15 +196,18 @@ internal class TaskTarHelper {
    * @param tarContent the tar containing multiple tasks as tar archives
    * @param owner the owner of the tasks
    * @param assignment the assignment the tasks belong to, if any
+   * @return the created or updated tasks.
    */
-  fun createMultipleFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null) {
+  fun createMultipleFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null): List<Task> {
     val input = TarArchiveInputStream(ByteArrayInputStream(tarContent))
+    val tasks = mutableListOf<Task>()
     generateSequence { input.nextTarEntry }
         .filter { it.isFile }
         .filter { it.name.endsWith(".tar", ignoreCase = true).or(it.name.endsWith(".zip", ignoreCase = true)) }
         .forEach { _ ->
-          createFromTar(IOUtils.toByteArray(input), owner, assignment)
+          tasks.add(createFromTar(IOUtils.toByteArray(input), owner, assignment))
         }
+    return tasks
   }
 
   private fun addBuiltInEvaluationSteps(task: Task) {

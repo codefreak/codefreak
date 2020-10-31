@@ -13,6 +13,7 @@ import org.codefreak.codefreak.util.PositionUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -60,13 +61,13 @@ TaskService : BaseService() {
    * @param tarContent the tar containing multiple tasks as tar archives
    * @param owner the owner of the tasks
    * @param assignment the assignment the tasks belong to, if any
+   * @return the created or updated tasks.
    */
-  @Transactional
   fun createMultipleFromTar(
       tarContent: ByteArray,
       owner: User,
       assignment: Assignment? = null
-  ) = taskTarHelper.createMultipleFromTar(tarContent, owner, assignment)
+  ): List<Task> = taskTarHelper.createMultipleFromTar(tarContent, owner, assignment)
 
   @Transactional
   fun createEmptyTask(owner: User): Task {
