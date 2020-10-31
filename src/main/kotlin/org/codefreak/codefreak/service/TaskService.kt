@@ -13,7 +13,6 @@ import org.codefreak.codefreak.util.PositionUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -46,10 +45,10 @@ TaskService : BaseService() {
    */
   @Transactional
   fun createFromTar(
-      tarContent: ByteArray,
-      owner: User,
-      assignment: Assignment? = null,
-      position: Long = 0L
+    tarContent: ByteArray,
+    owner: User,
+    assignment: Assignment? = null,
+    position: Long = 0L
   ): Task = taskTarHelper.createFromTar(tarContent, owner, assignment, position)
 
   /**
@@ -64,9 +63,9 @@ TaskService : BaseService() {
    * @return the created or updated tasks.
    */
   fun createMultipleFromTar(
-      tarContent: ByteArray,
-      owner: User,
-      assignment: Assignment? = null
+    tarContent: ByteArray,
+    owner: User,
+    assignment: Assignment? = null
   ): List<Task> = taskTarHelper.createMultipleFromTar(tarContent, owner, assignment)
 
   @Transactional
