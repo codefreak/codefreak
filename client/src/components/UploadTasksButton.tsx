@@ -18,22 +18,25 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
 
   const [uploadTasks, { loading: uploading }] = useUploadTasksMutation()
 
-  const onUpload = (files: File[]) => {
-    uploadTasks({ variables: { files } }).then(r => {
-      hideModal()
-      if (r.data) {
-        props.onUploadCompleted(
-          r.data.uploadTasks.map(task => {
-            return {
-              id: task.id,
-              createdAt: task.createdAt,
-              updatedAt: task.updatedAt
-            }
-          })
-        )
-      }
-    })
-  }
+  const onUpload = useCallback(
+    (files: File[]) => {
+      uploadTasks({ variables: { files } }).then(r => {
+        hideModal()
+        if (r.data) {
+          props.onUploadCompleted(
+            r.data.uploadTasks.map(task => {
+              return {
+                id: task.id,
+                createdAt: task.createdAt,
+                updatedAt: task.updatedAt
+              }
+            })
+          )
+        }
+      })
+    },
+    []
+  )
 
   const beforeUpload = useCallback(
     (_: RcFile, fileList: RcFile[]) => {
