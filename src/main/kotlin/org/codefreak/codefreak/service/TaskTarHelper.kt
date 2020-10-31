@@ -43,6 +43,17 @@ internal class TaskTarHelper {
   @Autowired
   private lateinit var fileService: FileService
 
+  /**
+   * Creates and saves a new task from the given tar.
+   * If the task already exists in the repository and the tar content is newer,
+   * no new task is created and the existing task is updated instead.
+   *
+   * @param tarContent the tar containing a task
+   * @param owner the owner of the task
+   * @param assignment the assignment the task belongs to, if any
+   * @param position the position of the task if it belongs to an assignment
+   * @return the created or updated task
+   */
   fun createFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
     val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
 
@@ -58,18 +69,25 @@ internal class TaskTarHelper {
     }
 
     var task = if (existingTask == null) {
-      createNewTaskFromTar(definition, owner, assignment, position)
+      createNewTaskFromDefinition(definition, owner, assignment, position)
     } else {
       updateExistingTaskFromTar(existingTask, definition)
     }
 
-    saveTaskEvaluationStepDefinitions(task)
+    addBuiltInEvaluationSteps(task)
+    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
+
     task = taskService.saveTask(task)
     copyTaskFilesFromTar(task.id, tarContent)
 
     return task
   }
 
+  /**
+   * Updates an existing task with the information provided in the TaskDefinition.
+   * Also updates all evaluation step definitions of the task.
+   * Saves the task to the repository in the process.
+   */
   private fun updateExistingTaskFromTar(task: Task, definition: TaskDefinition): Task {
     val updatedAt = Instant.parse(definition.updatedAt)
     val isUpToDate = !updatedAt.isAfter(task.updatedAt)
@@ -119,7 +137,10 @@ internal class TaskTarHelper {
     }
   }
 
-  private fun createNewTaskFromTar(definition: TaskDefinition, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
+  /**
+   * Creates and saves a new task from a given TaskDefinition.
+   */
+  private fun createNewTaskFromDefinition(definition: TaskDefinition, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
     var task = Task(assignment, owner, position, definition.title, definition.description, 100)
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
@@ -140,6 +161,9 @@ internal class TaskTarHelper {
     return task
   }
 
+  /**
+   * Returns a set of evaluation step definitions for a task defined in a given TaskDefinition.
+   */
   private fun getEvaluationStepDefinitions(taskDefinition: TaskDefinition, task: Task) = taskDefinition.evaluation
       .mapIndexed { index, it ->
         val runner = evaluationService.getEvaluationRunner(it.step)
@@ -161,18 +185,23 @@ internal class TaskTarHelper {
     }
   }
 
-  private fun saveTaskEvaluationStepDefinitions(task: Task) {
-    addBuiltInEvaluationSteps(task)
-    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
-  }
-
-  fun createMultipleFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null, position: Long = 0L) {
+  /**
+   * Creates and saves multiple tasks from the given tar.
+   * The tar has to contain the individual tasks as tar archives themselves.
+   * Tasks that already exist, but are newer in the archive are updated,
+   * new tasks are created and saved to the repository.
+   *
+   * @param tarContent the tar containing multiple tasks as tar archives
+   * @param owner the owner of the tasks
+   * @param assignment the assignment the tasks belong to, if any
+   */
+  fun createMultipleFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null) {
     val input = TarArchiveInputStream(ByteArrayInputStream(tarContent))
     generateSequence { input.nextTarEntry }
         .filter { it.isFile }
         .filter { it.name.endsWith(".tar", ignoreCase = true).or(it.name.endsWith(".zip", ignoreCase = true)) }
         .forEach { _ ->
-          createFromTar(IOUtils.toByteArray(input), owner, assignment, position)
+          createFromTar(IOUtils.toByteArray(input), owner, assignment)
         }
   }
 
@@ -184,6 +213,12 @@ internal class TaskTarHelper {
     }
   }
 
+  /**
+   * Creates a tar archive of the given task.
+   *
+   * @param task the task to be exported
+   * @return a tar archive containing the task
+   */
   fun getExportTar(task: Task): ByteArray {
     val out = ByteArrayOutputStream()
     val tar = TarUtil.PosixTarArchiveOutputStream(out)
@@ -215,6 +250,12 @@ internal class TaskTarHelper {
     return out.toByteArray()
   }
 
+  /**
+   * Creates a tar archive containing the given tasks each as a tar archive.
+   *
+   * @param tasks the tasks to be exported
+   * @return a tar containing the exported tasks
+   */
   fun getExportTar(tasks: Collection<Task>): ByteArray {
     val out = ByteArrayOutputStream()
     val tar = TarUtil.PosixTarArchiveOutputStream(out)
