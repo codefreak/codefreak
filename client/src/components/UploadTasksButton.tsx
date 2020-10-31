@@ -18,12 +18,14 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
 
   const [uploadTasks, { loading: uploading }] = useUploadTasksMutation()
 
+  const onUploadCompleted = props.onUploadCompleted
+
   const onUpload = useCallback(
     (files: File[]) => {
       uploadTasks({ variables: { files } }).then(r => {
         hideModal()
         if (r.data) {
-          props.onUploadCompleted(
+          onUploadCompleted(
             r.data.uploadTasks.map(task => {
               return {
                 id: task.id,
@@ -35,7 +37,7 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
         }
       })
     },
-    []
+    [onUploadCompleted, uploadTasks]
   )
 
   const beforeUpload = useCallback(
@@ -56,7 +58,7 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
         onCancel={hideModal}
         title="Import tasks"
         footer={[
-          <Button type="default" onClick={hideModal}>
+          <Button type="default" onClick={hideModal} key="cancel">
             Cancel
           </Button>
         ]}
