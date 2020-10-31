@@ -210,8 +210,15 @@ internal class TaskTarHelper {
     generateSequence { input.nextTarEntry }
         .filter { it.isFile }
         .filter { it.name.endsWith(".tar", ignoreCase = true).or(it.name.endsWith(".zip", ignoreCase = true)) }
-        .forEach { _ ->
-          tasks.add(createFromTar(IOUtils.toByteArray(input), owner, assignment))
+        .forEach {
+          var content = IOUtils.toByteArray(input)
+          if (!it.name.endsWith(".tar")) {
+            val inputStream = ByteArrayInputStream(content)
+            val outputStream = ByteArrayOutputStream()
+            TarUtil.archiveToTar(inputStream, outputStream)
+            content = outputStream.toByteArray()
+          }
+          tasks.add(createFromTar(content, owner, assignment))
         }
     return tasks
   }
