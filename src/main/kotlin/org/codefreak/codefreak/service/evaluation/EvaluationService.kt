@@ -186,7 +186,7 @@ class EvaluationService : BaseService() {
 
   @EventListener
   @Transactional
-  fun onAnswerDeadlineReached(event: SubmissionDeadlineReachedEvent) {
+  fun onSubmissionDeadlineReached(event: SubmissionDeadlineReachedEvent) {
     log.info("Automatically trigger evaluation for answers of submission ${event.submissionId}")
     submissionService.findSubmission(event.submissionId).answers.forEach { answer ->
       try {
