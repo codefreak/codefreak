@@ -37,6 +37,9 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
   lateinit var taskService: TaskService
 
   @Autowired
+  lateinit var taskTarService: TaskTarService
+
+  @Autowired
   lateinit var assignmentService: AssignmentService
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -62,11 +65,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
 
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
-      taskService.createFromTar(it.toByteArray(), teacher, assignment1)
+      taskTarService.createFromTar(it.toByteArray(), teacher, assignment1)
     }
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
-      taskService.createFromTar(it.toByteArray(), teacher, assignment2).also { task ->
+      taskTarService.createFromTar(it.toByteArray(), teacher, assignment2).also { task ->
         // set a 1h 1min time limit
         task.timeLimit = 3600 + 60
         taskService.saveTask(task)
@@ -76,11 +79,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
     // task pool
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/java-add").file, it)
-      taskService.createFromTar(it.toByteArray(), teacher)
+      taskTarService.createFromTar(it.toByteArray(), teacher)
     }
     ByteArrayOutputStream().use {
       TarUtil.createTarFromDirectory(ClassPathResource("init/tasks/c-add").file, it)
-      taskService.createFromTar(it.toByteArray(), teacher)
+      taskTarService.createFromTar(it.toByteArray(), teacher)
     }
 
     ByteArrayOutputStream().use {

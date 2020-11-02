@@ -6,6 +6,7 @@ import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
+import org.codefreak.codefreak.service.TaskTarService
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +24,9 @@ class TaskController : BaseController() {
 
   @Autowired
   lateinit var taskService: TaskService
+
+  @Autowired
+  lateinit var taskTarService: TaskTarService
 
   @Autowired
   lateinit var ideService: IdeService
@@ -59,7 +63,7 @@ class TaskController : BaseController() {
   fun getExportTar(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val task = taskService.findTask(taskId)
     Authorization().requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
-    val tar = taskService.getExportTar(task.id)
+    val tar = taskTarService.getExportTar(task.id)
     return download("${task.title}.tar", ByteArrayInputStream(tar))
   }
 
@@ -68,7 +72,7 @@ class TaskController : BaseController() {
   fun getExportZip(@PathVariable("taskId") taskId: UUID): ResponseEntity<StreamingResponseBody> {
     val task = taskService.findTask(taskId)
     Authorization().requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
-    val zip = TarUtil.tarToZip(taskService.getExportTar(task.id))
+    val zip = TarUtil.tarToZip(taskTarService.getExportTar(task.id))
     return download("${task.title}.zip", ByteArrayInputStream(zip))
   }
 
@@ -76,7 +80,7 @@ class TaskController : BaseController() {
   @ResponseBody
   fun getTaskPoolExportTar(): ResponseEntity<StreamingResponseBody> {
     val taskPool = taskService.getTaskPool(user.id)
-    val tar = taskService.getExportTar(taskPool)
+    val tar = taskTarService.getExportTar(taskPool)
     return download("tasks.tar", ByteArrayInputStream(tar))
   }
 
@@ -84,7 +88,7 @@ class TaskController : BaseController() {
   @ResponseBody
   fun getTaskPoolExportZip(): ResponseEntity<StreamingResponseBody> {
     val taskPool = taskService.getTaskPool(user.id)
-    val zip = TarUtil.tarToZip(taskService.getExportTar(taskPool))
+    val zip = TarUtil.tarToZip(taskTarService.getExportTar(taskPool))
     return download("tasks.zip", ByteArrayInputStream(zip))
   }
 }

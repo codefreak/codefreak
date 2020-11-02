@@ -1,6 +1,7 @@
 package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import liquibase.util.StreamUtil
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.time.Instant
@@ -21,12 +22,13 @@ import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.getCodefreakDefinition
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.core.io.ClassPathResource
 import org.springframework.dao.DataIntegrityViolationException
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-@Component
-internal class TaskTarHelper {
+@Service
+class TaskTarService: BaseService() {
 
   @Autowired
   @Qualifier("yamlObjectMapper")
@@ -230,6 +232,29 @@ internal class TaskTarHelper {
       task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
     }
   }
+
+  /**
+   * Creates an empty task for the given User.
+   *
+   * @param owner the user who will own the task
+   * @return the created task
+   */
+  @Transactional
+  fun createEmptyTask(owner: User): Task {
+    return ByteArrayOutputStream().use {
+      StreamUtil.copy(ClassPathResource("empty_task.tar").inputStream, it)
+      createFromTar(it.toByteArray(), owner)
+    }
+  }
+
+  /**
+   * Creates a tar archive of the task with the given id.
+   *
+   * @param taskId the id of the task to be exported
+   * @return a tar archive containing the task
+   */
+  @Transactional
+  fun getExportTar(taskId: UUID) = getExportTar(taskService.findTask(taskId))
 
   /**
    * Creates a tar archive of the given task.
