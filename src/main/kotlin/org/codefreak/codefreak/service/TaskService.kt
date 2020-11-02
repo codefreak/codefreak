@@ -1,16 +1,12 @@
 package org.codefreak.codefreak.service
 
-import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.util.UUID
-import liquibase.util.StreamUtil
 import org.codefreak.codefreak.entity.Task
-import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.util.PositionUtil
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
