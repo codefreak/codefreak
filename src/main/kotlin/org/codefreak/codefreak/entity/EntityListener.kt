@@ -1,17 +1,17 @@
 package org.codefreak.codefreak.entity
 
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
-import org.springframework.core.Ordered
-import org.springframework.core.annotation.AnnotationUtils
-import org.springframework.core.annotation.Order
-import org.springframework.stereotype.Component
 import javax.persistence.PostPersist
 import javax.persistence.PostUpdate
 import javax.persistence.PreRemove
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.javaMethod
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.AnnotationUtils
+import org.springframework.core.annotation.Order
+import org.springframework.stereotype.Component
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)

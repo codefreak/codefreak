@@ -7,6 +7,9 @@ import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import com.expediagroup.graphql.spring.operations.Subscription
 import graphql.schema.DataFetchingEnvironment
+import java.io.ByteArrayOutputStream
+import java.time.Instant
+import java.util.UUID
 import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
@@ -30,9 +33,6 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
-import java.io.ByteArrayOutputStream
-import java.time.Instant
-import java.util.UUID
 
 @GraphQLName("Assignment")
 class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext) : BaseDto(ctx) {

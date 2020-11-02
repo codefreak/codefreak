@@ -17,7 +17,6 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
-import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException

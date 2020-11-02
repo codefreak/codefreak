@@ -4,10 +4,10 @@ import java.time.Instant
 import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import org.hibernate.annotations.CreationTimestamp
-import javax.persistence.EntityListeners
 
 @Entity
 @EntityListeners(SpringEntityListenerAdapter::class)
