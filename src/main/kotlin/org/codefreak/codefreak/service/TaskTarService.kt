@@ -20,6 +20,7 @@ import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.getCodefreakDefinition
+import org.codefreak.codefreak.util.UuidUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
@@ -62,13 +63,11 @@ class TaskTarService: BaseService() {
     val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
 
     val existingTask = try {
-      val taskId = UUID.fromString(definition.id ?: "")
-      taskService.findTask(taskId).takeIf { it.owner == owner }
-    } catch (e: IllegalArgumentException) {
-      // Thrown if no valid id is found in the task definition
-      null
+      val taskId = UuidUtil.parse(definition.id)
+      taskId?.let {
+        id -> taskService.findTask(id).takeIf { it.owner == owner }
+      }
     } catch (e: EntityNotFoundException) {
-      // Thrown if task is not found in the repository
       null
     }
 
@@ -149,7 +148,7 @@ class TaskTarService: BaseService() {
 
     // Set the task id if the definition contains any to prevent duplication on later uploads
     definition.id?.let {
-      task.id = try { UUID.fromString(it) } catch (e: java.lang.IllegalArgumentException) { task.id }
+      task.id = UuidUtil.parse(definition.id) ?: task.id
     }
 
     task.hiddenFiles = definition.hidden
@@ -179,11 +178,7 @@ class TaskTarService: BaseService() {
         val runner = evaluationService.getEvaluationRunner(it.step)
         val title = it.title ?: runner.getDefaultTitle()
         val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
-        stepDefinition.id = try {
-          UUID.fromString(it.id ?: "")
-        } catch (e: IllegalArgumentException) {
-          stepDefinition.id
-        }
+        stepDefinition.id = UuidUtil.parse(it.id) ?: stepDefinition.id
         evaluationService.validateRunnerOptions(stepDefinition)
         stepDefinition
       }
