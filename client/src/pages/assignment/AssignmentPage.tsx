@@ -181,7 +181,7 @@ const AssignmentPage: React.FC = () => {
         }
         content={
           <>
-            <Descriptions size="small" column={4}>
+            <Descriptions className="assignment-dates" size="small" column={4}>
               <Descriptions.Item label="Created">
                 {formatter.date(assignment.createdAt)}
               </Descriptions.Item>
