@@ -25,6 +25,10 @@ query GetAssignment($id: ID!) {
     openFrom
     active
     exportUrl
+    submission {
+      id
+      deadline
+    }
   }
 }
 

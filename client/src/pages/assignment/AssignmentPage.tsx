@@ -53,7 +53,8 @@ import { messageService } from '../../services/message'
 import {
   componentsToSeconds,
   momentToIsoCb,
-  secondsToComponents
+  secondsToComponents,
+  secondsToRelTime
 } from '../../services/time'
 import { makeUpdater, noop, Updater } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
@@ -67,6 +68,7 @@ import {
   TaskSortMethods,
   TaskSortMethodNames
 } from '../../services/task'
+import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
 
 const { Step } = Steps
 
@@ -109,6 +111,7 @@ const AssignmentPage: React.FC = () => {
   }
 
   const { assignment } = result.data
+  const { submission } = assignment
 
   const assignmentInput: UpdateAssignmentMutationVariables = {
     id: assignment.id,
@@ -152,6 +155,36 @@ const AssignmentPage: React.FC = () => {
     await updateTimeLimit(seconds > 0 ? seconds : null)
   }
 
+  const timeLimitInput = (
+    <TimeIntervalInput
+      onChange={debounce(onTimeLimitChange, 500)}
+      defaultValue={
+        assignment.timeLimit
+          ? secondsToComponents(assignment.timeLimit)
+          : undefined
+      }
+      nullable
+    />
+  )
+
+  const deadline = submission?.deadline
+    ? moment(submission.deadline)
+    : undefined
+  const timeLimitTag = assignment.timeLimit
+    ? [
+        <TimeLimitTag
+          key="time-limit"
+          timeLimit={assignment.timeLimit}
+          deadline={deadline}
+        />
+      ]
+    : []
+
+  const assignmentTags = [
+    <AssignmentStatusTag key="assignment-status" status={assignment.status} />,
+    ...timeLimitTag
+  ]
+
   return (
     <>
       <SetTitle>{assignment.title}</SetTitle>
@@ -163,7 +196,7 @@ const AssignmentPage: React.FC = () => {
             onChange={updater('title')}
           />
         }
-        tags={<AssignmentStatusTag status={assignment.status} />}
+        tags={assignmentTags}
         tabList={tabs}
         tabActiveKey={subPath.get()}
         breadcrumb={createBreadcrumb(createRoutes.forAssignment(assignment))}
@@ -192,15 +225,11 @@ const AssignmentPage: React.FC = () => {
               )}
               {renderDate('Deadline', updater('deadline'), assignment.deadline)}
               <Descriptions.Item label="Time Limit">
-                <TimeIntervalInput
-                  onChange={debounce(onTimeLimitChange, 500)}
-                  defaultValue={
-                    assignment.timeLimit
-                      ? secondsToComponents(assignment.timeLimit)
-                      : undefined
-                  }
-                  nullable
-                />
+                {assignment.editable
+                  ? timeLimitInput
+                  : assignment.timeLimit
+                  ? secondsToRelTime(assignment.timeLimit)
+                  : 'none'}
               </Descriptions.Item>
             </Descriptions>
             <Authorized condition={assignment.editable}>

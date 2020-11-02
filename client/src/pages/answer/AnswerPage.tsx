@@ -20,7 +20,9 @@ import { messageService } from '../../services/message'
 import { displayName } from '../../services/user'
 import { DifferentUserContext } from '../task/TaskPage'
 
-type AnswerWithSubmissionDeadline = Pick<Answer, 'id'> & { submission: Pick<Submission, 'deadline'> }
+type AnswerWithSubmissionDeadline = Pick<Answer, 'id'> & {
+  submission: Pick<Submission, 'deadline'>
+}
 
 interface DangerZoneProps {
   answer: AnswerWithSubmissionDeadline

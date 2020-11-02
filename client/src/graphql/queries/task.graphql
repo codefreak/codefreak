@@ -37,7 +37,7 @@ query GetTaskPool {
   }
 }
 
-query GetTask($id: ID!, $answerUserId: ID) {
+query GetTask($id: ID!, $userId: ID) {
   task(id: $id) {
     id
     title
@@ -52,8 +52,11 @@ query GetTask($id: ID!, $answerUserId: ID) {
       deadline
       status
       timeLimit
+      submission(userId: $userId) {
+        deadline
+      }
     }
-    answer(userId: $answerUserId) {
+    answer(userId: $userId) {
       id
       ideRunning
       createdAt

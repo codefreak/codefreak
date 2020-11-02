@@ -7,9 +7,6 @@ import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import com.expediagroup.graphql.spring.operations.Subscription
 import graphql.schema.DataFetchingEnvironment
-import java.io.ByteArrayOutputStream
-import java.time.Instant
-import java.util.UUID
 import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
@@ -27,11 +24,15 @@ import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.orNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
+import java.io.ByteArrayOutputStream
+import java.time.Instant
+import java.util.UUID
 
 @GraphQLName("Assignment")
 class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext) : BaseDto(ctx) {
@@ -61,6 +62,17 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
         .findSubmissionsOfAssignment(id)
         .map { SubmissionDto(it, ctx) }
   }
+
+  fun submission(userId: UUID?): SubmissionDto? {
+    val submissionService = serviceAccess.getService(SubmissionService::class)
+    val submission = if (userId == null || userId == authorization.currentUser.id) {
+      submissionService.findSubmission(entity.id, authorization.currentUser.id).orNull()
+    } else {
+      authorization.requireAuthority(Authority.ROLE_TEACHER)
+      submissionService.findSubmission(entity.id, userId).orNull()
+    }
+    return submission?.let { SubmissionDto(it, ctx) }
+  }
 }
 
 @GraphQLName("AssignmentCreationResult")
@@ -83,9 +95,9 @@ class AssignmentQuery : BaseResolver(), Query {
     val user = FrontendUtil.getCurrentUser()
     val assignments = when {
       authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
-          -> assignmentService.findAllAssignments()
+      -> assignmentService.findAllAssignments()
       authorization.currentUser.hasAuthority(Authority.ROLE_TEACHER)
-          -> assignmentService.findAssignmentsByOwner(authorization.currentUser)
+      -> assignmentService.findAssignmentsByOwner(authorization.currentUser)
       else -> assignmentService.findAllAssignmentsForUser(user.id)
     }
     assignments.map { AssignmentDto(it, this) }

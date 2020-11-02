@@ -64,7 +64,7 @@ const TaskPage: React.FC = () => {
   const result = useGetTaskQuery({
     variables: {
       id: useIdParam(),
-      answerUserId: isTeacher && userId ? unshorten(userId) : undefined
+      userId: isTeacher && userId ? unshorten(userId) : undefined
     }
   })
 
@@ -190,6 +190,7 @@ const TaskPage: React.FC = () => {
   ]
 
   const assignment = task.assignment
+  const submission = assignment?.submission
 
   const teacherControls =
     editable && !differentUser ? (
@@ -218,6 +219,7 @@ const TaskPage: React.FC = () => {
         size="large"
         task={task}
         assignment={assignment || undefined}
+        submission={submission || undefined}
         onAnswerCreated={onAnswerCreated}
       >
         Start working on this task!
@@ -240,9 +242,7 @@ const TaskPage: React.FC = () => {
       <TimeLimitTag
         timeLimit={assignment.timeLimit}
         deadline={
-          answer?.submission?.deadline
-            ? moment(answer.submission.deadline)
-            : undefined
+          submission?.deadline ? moment(submission.deadline) : undefined
         }
       />
     ) : undefined
@@ -293,9 +293,7 @@ const TaskPage: React.FC = () => {
             <div className="no-padding">
               <AnswerBlocker
                 deadline={
-                  answer.submission.deadline
-                    ? moment(answer.submission.deadline)
-                    : undefined
+                  submission?.deadline ? moment(submission.deadline) : undefined
                 }
               >
                 <IdeIframe type="answer" id={answer.id} />
