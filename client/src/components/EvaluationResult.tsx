@@ -17,7 +17,6 @@ import './EvaluationResult.less'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import { compare } from '../services/util'
 import SortSelect from './SortSelect'
-import SortedList from './SortedList'
 
 const { Text } = Typography
 
@@ -242,6 +241,11 @@ const EvaluationStepPanel: React.FC<{
   const renderFeedback = (feedback: Feedback) =>
     renderFeedbackPanel(answerId, feedback)
 
+  const renderedFeedbackList = feedbackList
+    .slice()
+    .sort(FeedbackSortMethods[sortValue])
+    .map(renderFeedback)
+
   let body
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
@@ -255,15 +259,7 @@ const EvaluationStepPanel: React.FC<{
       body = <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>
     }
   } else {
-    body = (
-      <Collapse>
-        <SortedList
-          list={feedbackList}
-          sort={FeedbackSortMethods[sortValue]}
-          render={renderFeedback}
-        />
-      </Collapse>
-    )
+    body = <Collapse>{renderedFeedbackList}</Collapse>
   }
 
   if (!body) {

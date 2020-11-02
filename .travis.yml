@@ -37,7 +37,7 @@ install:
 # Run gradle check as only script
 script:
   - ./gradlew check sonarqube
-  - ./gradlew jibDockerBuild -x check
+  - travis_wait ./gradlew jibDockerBuild -x check
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
