@@ -7,9 +7,10 @@ import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.UpdateTimestamp
+import javax.persistence.EntityListeners
 
 @Entity
+@EntityListeners(SpringEntityListenerAdapter::class)
 class Submission(
   /**
    * The user that handed in this submissions
