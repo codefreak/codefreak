@@ -147,7 +147,7 @@ const AssignmentPage: React.FC = () => {
   }
 
   const updateTimeLimit = updater('timeLimit')
-  const onTimeLimitChange: TimeIntervalInputProps['onChange'] = async (limit) => {
+  const onTimeLimitChange: TimeIntervalInputProps['onChange'] = async limit => {
     const seconds = limit ? componentsToSeconds(limit) : 0
     await updateTimeLimit(seconds > 0 ? seconds : null)
   }
@@ -194,7 +194,11 @@ const AssignmentPage: React.FC = () => {
               <Descriptions.Item label="Time Limit">
                 <TimeIntervalInput
                   onChange={debounce(onTimeLimitChange, 500)}
-                  defaultValue={secondsToComponents(assignment.timeLimit || 0)}
+                  defaultValue={
+                    assignment.timeLimit
+                      ? secondsToComponents(assignment.timeLimit)
+                      : undefined
+                  }
                   nullable
                 />
               </Descriptions.Item>

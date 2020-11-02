@@ -47,7 +47,9 @@ const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
   const [components, setComponents] = useState<TimeComponents>(
     defaultValue || { hours: 0, minutes: 0, seconds: 0 }
   )
-  const [enabled, setEnabled] = useState<boolean>(!nullable || !!defaultValue)
+  const [enabled, setEnabled] = useState<boolean>(
+    !nullable || defaultValue !== undefined
+  )
 
   const createOnValueChange = (field: keyof TimeComponents) => (
     value: number
@@ -55,7 +57,7 @@ const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
     const newComponents = { ...components, [field]: value }
     setComponents(newComponents)
     if (onChange) {
-      onChange(newComponents)
+      onChange(enabled ? newComponents : undefined)
     }
   }
 
