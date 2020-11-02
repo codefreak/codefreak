@@ -1,11 +1,11 @@
 package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import liquibase.util.StreamUtil
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.util.UUID
+import liquibase.util.StreamUtil
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.utils.IOUtils
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class TaskTarService: BaseService() {
+class TaskTarService : BaseService() {
 
   @Autowired
   @Qualifier("yamlObjectMapper")

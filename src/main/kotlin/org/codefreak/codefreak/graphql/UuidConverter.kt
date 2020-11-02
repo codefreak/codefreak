@@ -4,8 +4,8 @@ import graphql.language.StringValue
 import graphql.schema.Coercing
 import graphql.schema.CoercingParseLiteralException
 import graphql.schema.CoercingParseValueException
-import org.codefreak.codefreak.util.UuidUtil
 import java.util.UUID
+import org.codefreak.codefreak.util.UuidUtil
 
 class UuidConverter : Coercing<UUID, String> {
 
