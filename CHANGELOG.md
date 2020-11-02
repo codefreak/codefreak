@@ -16,5 +16,6 @@
 * The task pool list and the 'add tasks to assignment' list are now sortable and filterable (#616)
 
 ### Changed
+* Time limit can be specified on assignments and not on individual tasks (#635)
 
 ### Removed
