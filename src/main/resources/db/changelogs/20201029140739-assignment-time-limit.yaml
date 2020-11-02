@@ -8,6 +8,7 @@ databaseChangeLog:
         - column:
             name: created_at
             type: timestamp
+            defaultValueComputed: CURRENT_TIMESTAMP
         tableName: submission
 - changeSet:
     id: 1603976898190-3
