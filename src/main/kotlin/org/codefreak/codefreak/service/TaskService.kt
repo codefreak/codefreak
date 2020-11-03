@@ -1,29 +1,12 @@
 package org.codefreak.codefreak.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.util.UUID
-import liquibase.util.StreamUtil
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.codefreak.codefreak.entity.Assignment
-import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Task
-import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AssignmentRepository
-import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
-import org.codefreak.codefreak.service.evaluation.EvaluationService
-import org.codefreak.codefreak.service.evaluation.isBuiltIn
-import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
-import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.PositionUtil
-import org.codefreak.codefreak.util.TarUtil
-import org.codefreak.codefreak.util.TarUtil.getCodefreakDefinition
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -37,76 +20,9 @@ TaskService : BaseService() {
   @Autowired
   private lateinit var assignmentRepository: AssignmentRepository
 
-  @Autowired
-  private lateinit var evaluationService: EvaluationService
-
-  @Autowired
-  private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
-
-  @Autowired
-  private lateinit var fileService: FileService
-
-  @Autowired
-  @Qualifier("yamlObjectMapper")
-  private lateinit var yamlMapper: ObjectMapper
-
   @Transactional
   fun findTask(id: UUID): Task = taskRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Task not found") }
-
-  @Transactional
-  fun createFromTar(tarContent: ByteArray, assignment: Assignment?, owner: User, position: Long): Task {
-    val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
-    var task = Task(assignment, owner, position, definition.title, definition.description, 100)
-    task.hiddenFiles = definition.hidden
-    task.protectedFiles = definition.protected
-    task.ideEnabled = definition.ide?.enabled ?: true
-    task.ideImage = definition.ide?.image
-
-    task = taskRepository.save(task)
-    task.evaluationStepDefinitions = definition.evaluation
-        .mapIndexed { index, it ->
-          val runner = evaluationService.getEvaluationRunner(it.step)
-          val title = it.title ?: runner.getDefaultTitle()
-          val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
-          evaluationService.validateRunnerOptions(stepDefinition)
-          stepDefinition
-        }
-        .toMutableSet()
-
-    task.evaluationStepDefinitions
-        .groupBy { it.runnerName }
-        .forEach { (runnerName, definitions) ->
-          if (definitions.size > 1 && evaluationService.getEvaluationRunner(runnerName).isBuiltIn()) {
-            throw IllegalArgumentException("Evaluation step '$runnerName' can only be added once!")
-          }
-        }
-
-    addBuiltInEvaluationSteps(task)
-
-    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
-    task = taskRepository.save(task)
-    fileService.writeCollectionTar(task.id).use { fileCollection ->
-      TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals("codefreak.yml", true) })
-    }
-    return task
-  }
-
-  private fun addBuiltInEvaluationSteps(task: Task) {
-    if (task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME } == null) {
-      task.evaluationStepDefinitions.forEach { it.position++ }
-      val runner = evaluationService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
-      task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
-    }
-  }
-
-  @Transactional
-  fun createEmptyTask(owner: User): Task {
-    return ByteArrayOutputStream().use {
-      StreamUtil.copy(ClassPathResource("empty_task.tar").inputStream, it)
-      createFromTar(it.toByteArray(), null, owner, 0)
-    }
-  }
 
   @Transactional
   fun deleteTask(task: Task) {
@@ -115,18 +31,6 @@ TaskService : BaseService() {
       taskRepository.saveAll(tasks)
     }
     taskRepository.delete(task)
-  }
-
-  private fun applyDefaultRunners(taskDefinition: TaskDefinition): TaskDefinition {
-    // add "comments" runner by default if not defined
-    taskDefinition.run {
-      if (evaluation.find { it.step == CommentRunner.RUNNER_NAME } == null) {
-        return copy(evaluation = evaluation.toMutableList().apply {
-          add(EvaluationDefinition(CommentRunner.RUNNER_NAME))
-        })
-      }
-    }
-    return taskDefinition
   }
 
   @Transactional
@@ -144,32 +48,6 @@ TaskService : BaseService() {
   }
 
   fun getTaskPool(userId: UUID) = taskRepository.findByOwnerIdAndAssignmentIsNullOrderByCreatedAt(userId)
-
-  @Transactional
-  fun getExportTar(taskId: UUID) = getExportTar(findTask(taskId))
-
-  @Transactional
-  fun getExportTar(task: Task): ByteArray {
-    val out = ByteArrayOutputStream()
-    val tar = TarUtil.PosixTarArchiveOutputStream(out)
-    fileService.readCollectionTar(task.id).use { files ->
-      TarUtil.copyEntries(TarArchiveInputStream(files), tar, filter = { !TarUtil.isRoot(it) && it.name != "codefreak.yml" })
-    }
-
-    val definition = TaskDefinition(
-        task.title,
-        task.body,
-        task.hiddenFiles,
-        task.protectedFiles,
-        task.evaluationStepDefinitions.map { EvaluationDefinition(it.runnerName, it.options, it.title) })
-        .let { yamlMapper.writeValueAsBytes(it) }
-
-    tar.putArchiveEntry(TarArchiveEntry("codefreak.yml").also { it.size = definition.size.toLong() })
-    tar.write(definition)
-    tar.closeArchiveEntry()
-    tar.close()
-    return out.toByteArray()
-  }
 
   /**
    * Makes sure that evaluations can be run on this task even if answer files

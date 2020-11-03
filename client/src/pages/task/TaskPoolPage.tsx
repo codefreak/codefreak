@@ -6,7 +6,10 @@ import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EmptyListCallToAction from '../../components/EmptyListCallToAction'
 import TaskList from '../../components/TaskList'
-import { useGetTaskPoolQuery } from '../../generated/graphql'
+import { useGetTaskPoolQuery } from '../../services/codefreak-api'
+import ArchiveDownload from '../../components/ArchiveDownload'
+import { messageService } from '../../services/message'
+import UploadTasksButton from '../../components/UploadTasksButton'
 import {
   filterTasks,
   TaskSortMethodNames,
@@ -62,6 +65,52 @@ const TaskPoolPage: React.FC = () => {
 
   const update = () => result.refetch()
 
+  const handleUploadCompleted = (
+    createdTasks: { id: string; createdAt: string; updatedAt: string }[]
+  ) => {
+    if (createdTasks.length === 0) {
+      messageService.error('Tasks could not be created')
+    } else {
+      let numCreated = 0
+      let numUpdated = 0
+
+      createdTasks.forEach(createdTask => {
+        const existingTask = tasks.filter(task => task.id === createdTask.id)
+
+        if (existingTask.length > 0) {
+          const isTaskUpdated =
+            Date.parse(existingTask[0].updatedAt) <
+            Date.parse(createdTask.updatedAt)
+          if (isTaskUpdated) {
+            numUpdated++
+          }
+        } else {
+          numCreated++
+        }
+      })
+
+      if (numCreated + numUpdated > 0) {
+        if (numCreated > 0) {
+          messageService.success(`${numCreated} task(s) successfully created`)
+        }
+        if (numUpdated > 0) {
+          messageService.success(`${numUpdated} task(s) successfully updated`)
+        }
+      } else {
+        messageService.success('All tasks are up-to-date')
+      }
+    }
+    result.refetch()
+  }
+
+  const exportButton = (
+    <ArchiveDownload url="/api/tasks/export">Export Tasks</ArchiveDownload>
+  )
+
+  const importButton = (
+    <UploadTasksButton onUploadCompleted={handleUploadCompleted} />
+  )
+
   return (
     <>
       <PageHeaderWrapper
@@ -69,6 +118,8 @@ const TaskPoolPage: React.FC = () => {
           <Row justify="end" gutter={16} type="flex">
             <Col>{searchBar}</Col>
             <Col>{sorter}</Col>
+            <Col>{exportButton}</Col>
+            <Col>{importButton}</Col>
             <Col>{createButton}</Col>
           </Row>
         }

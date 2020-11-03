@@ -20,4 +20,11 @@ class EvaluationStepDefinition(
   var options: Map<String, Any> = mapOf()
 ) : BaseEntity() {
   var active: Boolean = true
+
+  override fun equals(other: Any?): Boolean {
+    if (other is EvaluationStepDefinition) {
+      return other.id == id && other.runnerName == runnerName
+    }
+    return super.equals(other)
+  }
 }
