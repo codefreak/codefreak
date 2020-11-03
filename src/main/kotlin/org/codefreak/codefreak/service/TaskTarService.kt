@@ -65,7 +65,7 @@ class TaskTarService : BaseService() {
     val existingTask = try {
       val taskId = UuidUtil.parse(definition.id)
       taskId?.let {
-        id -> taskService.findTask(id).takeIf { it.owner == owner }
+        id -> taskService.findTask(id).takeIf { it.owner == owner && it.assignment == assignment }
       }
     } catch (e: EntityNotFoundException) {
       null
