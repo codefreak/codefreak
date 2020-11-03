@@ -44,3 +44,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20201029140739-assignment-time-limit.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20201103152656-evaluation-step-timeout.yaml
+    relativeToChangelogFile: true

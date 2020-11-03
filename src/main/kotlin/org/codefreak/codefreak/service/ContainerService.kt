@@ -13,11 +13,8 @@ import com.spotify.docker.client.messages.ContainerInfo
 import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.locks.ReentrantLock
-import java.util.regex.Pattern
 import javax.ws.rs.ProcessingException
 import org.codefreak.codefreak.config.AppConfiguration
-import org.codefreak.codefreak.entity.Answer
-import org.codefreak.codefreak.util.withTrailingSlash
 import org.glassfish.jersey.internal.LocalizationMessages
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,9 +35,6 @@ class ContainerService : BaseService() {
 
   @Autowired
   lateinit var config: AppConfiguration
-
-  @Autowired
-  private lateinit var answerService: AnswerService
 
   /**
    * A map that keeps a lock for each answer (collection) that should be used for file operations
@@ -174,83 +168,17 @@ class ContainerService : BaseService() {
     false
   }
 
-  fun runCodeclimate(answer: Answer): String {
-    val containerId = createContainer(config.evaluation.codeclimate.image) {
-      name = "codeclimate_orchestrator_${answer.id}"
-      doNothingAndKeepAlive()
-      hostConfig {
-        appendBinds("/var/run/docker.sock:/var/run/docker.sock", "/tmp/cc:/tmp/cc")
-      }
-      containerConfig {
-        env("CODECLIMATE_ORCHESTRATOR=$name", "CODECLIMATE_CODE=/code")
-      }
-    }
-    useContainer(containerId) {
-      answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, "/code") }
-      // `analyze` would also install missing engines but may time out in the process. Also `engines:install` will update images.
-      exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "engines:install"))
-      return exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "analyze", "-f", "json")).output
-    }
-  }
-
-  fun runCommandsForEvaluation(
-    answer: Answer,
-    image: String,
-    projectPath: String,
-    commands: List<String>,
-    stopOnFail: Boolean,
-    processFiles: ((InputStream) -> Unit)? = null
-  ): List<ExecResult> {
-    val containerId = createContainer(image) {
-      doNothingAndKeepAlive()
-      containerConfig { workingDir(projectPath) }
-    }
-    val outputs = mutableListOf<ExecResult>()
-    useContainer(containerId) {
-      answerService.copyFilesForEvaluation(answer).use { docker.copyToContainer(it, containerId, projectPath) }
-      commands.forEach {
-        if (stopOnFail && outputs.size > 0 && outputs.last().exitCode != 0L) {
-          outputs.add(ExecResult("", -1))
-        } else {
-          outputs.add(exec(containerId, splitCommand(it)))
-        }
-      }
-      if (processFiles !== null) {
-        archiveContainer(containerId, "${projectPath.withTrailingSlash()}.", processFiles)
-      }
-      return outputs
-    }
-  }
-
   /**
    * Start a container and runs the specified block.
    * Ensures container is removed after execution with all attached volumes
    */
-  private inline fun <T> useContainer(containerId: String, block: () -> T): T {
+  final inline fun <T> useContainer(containerId: String, block: () -> T): T {
     docker.startContainer(containerId)
     try {
       return block()
     } finally {
       docker.removeContainer(containerId, forceKill(), removeVolumes())
     }
-  }
-
-  private fun splitCommand(command: String): Array<String> {
-    // from https://stackoverflow.com/a/366532/5519485
-    val matchList = ArrayList<String>()
-    val regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'")
-    val regexMatcher = regex.matcher(command)
-    while (regexMatcher.find()) {
-      when {
-        regexMatcher.group(1) != null -> // Add double-quoted string without the quotes
-          matchList.add(regexMatcher.group(1))
-        regexMatcher.group(2) != null -> // Add single-quoted string without the quotes
-          matchList.add(regexMatcher.group(2))
-        else -> // Add unquoted word
-          matchList.add(regexMatcher.group())
-      }
-    }
-    return matchList.toArray(arrayOf())
   }
 
   /**
