@@ -32,7 +32,7 @@ class AssignmentService : BaseService() {
   private lateinit var submissionService: SubmissionService
 
   @Autowired
-  private lateinit var taskService: TaskService
+  private lateinit var taskTarService: TaskTarService
 
   @Autowired
   private lateinit var self: AssignmentService
@@ -71,7 +71,7 @@ class AssignmentService : BaseService() {
       TarUtil.extractSubdirectory(ByteArrayInputStream(content), taskContent, it)
       try {
         self.withNewTransaction {
-          taskService.createFromTar(taskContent.toByteArray(), assignment, owner, index.toLong()).let {
+          taskTarService.createFromTar(taskContent.toByteArray(), owner, assignment, index.toLong()).let {
             assignment.tasks.add(it)
           }
         }
@@ -101,7 +101,7 @@ class AssignmentService : BaseService() {
   fun addTasksToAssignment(assignment: Assignment, tasks: Collection<Task>) {
     var nextPosition = assignment.tasks.maxByOrNull { it.position }?.let { it.position + 1 } ?: 0
     for (task in tasks) {
-      taskService.createFromTar(taskService.getExportTar(task), assignment, assignment.owner, nextPosition)
+      taskTarService.createFromTar(taskTarService.getExportTar(task), assignment.owner, assignment, nextPosition)
       nextPosition++
     }
   }
@@ -116,7 +116,7 @@ class AssignmentService : BaseService() {
     val assignment = findAssignment(assignmentId)
 
     assignment.tasks.forEach {
-      val taskTar = TarArchiveInputStream(ByteArrayInputStream(taskService.getExportTar(it)))
+      val taskTar = TarArchiveInputStream(ByteArrayInputStream(taskTarService.getExportTar(it)))
       TarUtil.copyEntries(taskTar, tar, prefix = "task-${it.position}/")
     }
 

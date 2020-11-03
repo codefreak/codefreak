@@ -19,6 +19,7 @@ import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.GitImportService
 import org.codefreak.codefreak.service.TaskService
+import org.codefreak.codefreak.service.TaskTarService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.springframework.core.io.ClassPathResource
@@ -114,10 +115,10 @@ class TaskMutation : BaseResolver(), Mutation {
   fun createTask(template: TaskTemplate?): TaskDto = context {
     if (template != null) {
       val templateTar = ClassPathResource("org/codefreak/templates/${template.name.toLowerCase()}.tar").inputStream.use { it.readBytes() }
-      serviceAccess.getService(TaskService::class).createFromTar(templateTar, null, authorization.currentUser, 0)
+      serviceAccess.getService(TaskTarService::class).createFromTar(templateTar, authorization.currentUser)
           .let { TaskDto(it, this) }
     } else {
-      serviceAccess.getService(TaskService::class).createEmptyTask(authorization.currentUser).let { TaskDto(it, this) }
+      serviceAccess.getService(TaskTarService::class).createEmptyTask(authorization.currentUser).let { TaskDto(it, this) }
     }
   }
 
@@ -132,8 +133,17 @@ class TaskMutation : BaseResolver(), Mutation {
   fun uploadTask(files: Array<ApplicationPart>): TaskDto = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-      val task = serviceAccess.getService(TaskService::class).createFromTar(it.toByteArray(), null, authorization.currentUser, 0L)
+      val task = serviceAccess.getService(TaskTarService::class).createFromTar(it.toByteArray(), authorization.currentUser)
       TaskDto(task, this)
+    }
+  }
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun uploadTasks(files: Array<ApplicationPart>): List<TaskDto> = context {
+    ByteArrayOutputStream().use {
+      TarUtil.writeUploadAsTar(files, it)
+      val tasks = serviceAccess.getService(TaskTarService::class).createMultipleFromTar(it.toByteArray(), authorization.currentUser)
+      tasks.map { task -> TaskDto(task, this) }
     }
   }
 
@@ -141,7 +151,7 @@ class TaskMutation : BaseResolver(), Mutation {
   fun importTask(url: String): TaskDto = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
-      val task = serviceAccess.getService(TaskService::class).createFromTar(it.toByteArray(), null, authorization.currentUser, 0L)
+      val task = serviceAccess.getService(TaskTarService::class).createFromTar(it.toByteArray(), authorization.currentUser)
       TaskDto(task, this)
     }
   }

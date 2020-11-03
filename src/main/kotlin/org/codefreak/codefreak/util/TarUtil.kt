@@ -24,6 +24,8 @@ import org.apache.commons.compress.utils.IOUtils
 import org.springframework.util.StreamUtils
 
 object TarUtil {
+  val CODEFREAK_DEFINITION_NAME = "codefreak.yml"
+
   class PosixTarArchiveOutputStream(out: OutputStream) : TarArchiveOutputStream(out) {
     init {
       setLongFileMode(LONGFILE_POSIX)
@@ -174,7 +176,7 @@ object TarUtil {
 
   @Throws(IllegalArgumentException::class)
   inline fun <reified T> ObjectMapper.getCodefreakDefinition(`in`: InputStream): T {
-    findFile(`in`, "codefreak.yml") { _, fileStream ->
+    findFile(`in`, CODEFREAK_DEFINITION_NAME) { _, fileStream ->
       return readValue(fileStream, T::class.java)
     }
   }
