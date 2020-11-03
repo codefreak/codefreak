@@ -146,11 +146,6 @@ class TaskTarService : BaseService() {
   private fun createNewTaskFromDefinition(definition: TaskDefinition, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
     var task = Task(assignment, owner, position, definition.title, definition.description, 100)
 
-    // Set the task id if the definition contains any to prevent duplication on later uploads
-    definition.id?.let {
-      task.id = UuidUtil.parse(definition.id) ?: task.id
-    }
-
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
     task.ideEnabled = definition.ide?.enabled ?: true
