@@ -91,10 +91,14 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
             </Route>
             <Route path="/ide/:type/:id" component={IdePage} />
             <Route path="/lti" component={LtiPage} />
-            {routes.map(renderRoute(logout))}
-            <DefaultLayout logout={logout}>
-              <Route component={NotFoundPage} />
-            </DefaultLayout>
+            <Route>
+              <DefaultLayout logout={logout}>
+                <Switch>
+                  {routes.map(renderRoute())}
+                  <Route component={NotFoundPage} />
+                </Switch>
+              </DefaultLayout>
+            </Route>
           </Switch>
         </Router>
       </AuthenticatedUserContext.Provider>
@@ -110,16 +114,14 @@ const flattenRoutes = (items: MenuDataItem[], routes: MenuDataItem[]) => {
   }
 }
 
-const renderRoute = (logout: () => {}) => (
+const renderRoute = () => (
   item: MenuDataItem,
   index: number
 ): React.ReactNode => {
   const { component: Component, ...props } = item
   return (
     <Route key={index} {...props}>
-      <DefaultLayout logout={logout}>
-        <Component />
-      </DefaultLayout>
+      <Component />
     </Route>
   )
 }
