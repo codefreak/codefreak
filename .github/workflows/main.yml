@@ -47,7 +47,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Before Deploy
-        if: github.ref == 'ref/head/master'
+        if: github.ref == 'ref/head/master' || startsWith(github.ref, 'ref/tags') || github.event_name == 'workflow_dispatch'
         run: |
           pip3 install --user --upgrade pip
           pip3 install --user docker-ci-deploy
