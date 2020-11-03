@@ -294,6 +294,7 @@ class TaskTarService : BaseService() {
    * @param tasks the tasks to be exported
    * @return a tar containing the exported tasks
    */
+  @Transactional(readOnly = true)
   fun getExportTar(tasks: Collection<Task>): ByteArray {
     val out = ByteArrayOutputStream()
     val tar = TarUtil.PosixTarArchiveOutputStream(out)
