@@ -1,15 +1,6 @@
 name: CI
 
-on:
-  push:
-  pull_request:
-  release:
-  workflow_dispatch:
-    inputs:
-      releaseVersion:
-        description: 'Release version (use actual version number)'
-        required: true
-        default: '<major>.<minor>.<patch>'
+on: [push, pull_request, release]
 
 jobs:
   main:
@@ -17,8 +8,6 @@ jobs:
     env:
       # webpack build needs a lot of memory
       NODE_OPTIONS: --max_old_space_size=4096
-      GITHUBUSER: ${{ secrets.GITHUBUSER }}
-      GITHUBTOKEN: ${{ secrets.GITHUBTOKEN }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
@@ -51,7 +40,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Before Deploy
-        if: github.ref == 'ref/head/master' || startsWith(github.ref, 'ref/tags') || github.event_name == 'workflow_dispatch'
+        if: github.ref == 'ref/head/master' || startsWith(github.ref, 'ref/tags')
         run: |
           pip3 install --user --upgrade pip
           pip3 install --user docker-ci-deploy
@@ -65,12 +54,3 @@ jobs:
       - name: Deploy tags
         if: startsWith(github.ref, 'ref/tags')
         run: docker-ci-deploy --version-latest --version ${GITHUB_REF/refs\/tags\//} --version-semver cfreak/codefreak
-
-      - name: Publish release
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git remote set-url origin https://$GITHUBTOKEN@github.com/${{ github.repository }}.git
-          git config --global user.email "$GITHUBUSER"
-          git config --global user.name "CI"
-          git checkout ${{ github.ref }}
-          ./gradlew release -x check -x bootJar -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ github.event.inputs.releaseVersion }}

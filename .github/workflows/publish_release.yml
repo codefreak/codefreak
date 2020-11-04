@@ -1,0 +1,31 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: 'Release version (use actual version number)'
+        required: true
+        default: '<major>.<minor>.<patch>'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    env:
+      # webpack build needs a lot of memory
+      NODE_OPTIONS: --max_old_space_size=4096
+      GITHUBUSER: ${{ secrets.GITHUBUSER }}
+      GITHUBTOKEN: ${{ secrets.GITHUBTOKEN }}
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Publish release
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git remote set-url origin https://$GITHUBTOKEN@github.com/${{ github.repository }}.git
+          git config --global user.email "$GITHUBUSER"
+          git config --global user.name "CI"
+          git checkout ${{ github.ref }}
+          ./gradlew release -x check -x bootJar -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ github.event.inputs.releaseVersion }}
