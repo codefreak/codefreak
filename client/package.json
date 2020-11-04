@@ -26,7 +26,7 @@
     "@types/react-syntax-highlighter": "11.0.5",
     "@types/use-persisted-state": "0.3.0",
     "a11y-react-emoji": "1.1.2",
-    "antd": "3.26.18",
+    "antd": "3.26.20",
     "apollo-upload-client": "14.1.2",
     "array-move": "3.0.1",
     "bootstrap-less": "3.3.8",
