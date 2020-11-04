@@ -40,7 +40,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Before Deploy
-        if: github.ref == 'ref/head/master' || startsWith(github.ref, 'ref/tags')
+        if: github.ref == 'refs/head/master' || startsWith(github.ref, 'refs/tags')
         run: |
           pip3 install --user --upgrade pip
           pip3 install --user docker-ci-deploy
@@ -48,10 +48,10 @@ jobs:
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Deploy master branch as latest
-        if: github.ref == 'ref/head/master'
+        if: github.ref == 'refs/head/master'
         run: docker-ci-deploy --tag canary -- cfreak/codefreak
 
       # ${GITHUB_REF/refs\/tags\//} returns the tag name from 'refs/tags/TAG_NAME'
       - name: Deploy tags
-        if: startsWith(github.ref, 'ref/tags')
+        if: startsWith(github.ref, 'refs/tags')
         run: docker-ci-deploy --version-latest --version ${GITHUB_REF/refs\/tags\//} --version-semver cfreak/codefreak
