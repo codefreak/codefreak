@@ -51,6 +51,7 @@ jobs:
         if: github.ref == 'ref/head/master'
         run: docker-ci-deploy --tag canary -- cfreak/codefreak
 
+      # ${GITHUB_REF/refs\/tags\//} returns the tag name from 'refs/tags/TAG_NAME'
       - name: Deploy tags
         if: startsWith(github.ref, 'ref/tags')
         run: docker-ci-deploy --version-latest --version ${GITHUB_REF/refs\/tags\//} --version-semver cfreak/codefreak
