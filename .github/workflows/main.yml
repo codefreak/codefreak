@@ -17,6 +17,10 @@ jobs:
     env:
       # webpack build needs a lot of memory
       NODE_OPTIONS: --max_old_space_size=4096
+      GITHUBUSER: ${{ secrets.GITHUBUSER }}
+      GITHUBTOKEN: ${{ secrets.GITHUBTOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -51,7 +55,7 @@ jobs:
         run: |
           pip3 install --user --upgrade pip
           pip3 install --user docker-ci-deploy
-          docker login -u ${{ secrets.DockerUsername }} -p ${{ secrets.DockerPassword }}
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Deploy master branch as latest
         if: github.ref == 'ref/head/master'
@@ -64,8 +68,8 @@ jobs:
       - name: Publish release
         if: github.event_name == 'workflow_dispatch'
         run: |
-          git remote set-url origin https://${{ github.token }}@github.com/${{ github.repository }}.git
-          git config --global user.email "${{ secrets.githubUser }}"
+          git remote set-url origin https://$GITHUBTOKEN@github.com/${{ github.repository }}.git
+          git config --global user.email "$GITHUBUSER"
           git config --global user.name "CI"
           git checkout ${{ github.ref }}
           ./gradlew release -x check -x bootJar -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ github.event.inputs.releaseVersion }}
