@@ -15,11 +15,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Merge master branch into pull request to check whether it would be successful after merge
-      - name: Merge master into pull request
-        if: github.event_name == 'pull_request'
-        run: git merge master
-
       - name: Assemble
         run: ./gradlew assemble -x bootJar
 
