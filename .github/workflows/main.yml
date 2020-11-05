@@ -15,14 +15,8 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Assemble
-        run: ./gradlew assemble -x bootJar
-
-      - name: Check code
-        run: ./gradlew check
-
-      - name: Jib Docker Build
-        run: ./gradlew jibDockerBuild -x check
+      - name: Test
+        run: ./gradlew jibDockerBuild -x bootJar
 
       - name: Before cache
         run: |
