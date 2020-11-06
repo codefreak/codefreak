@@ -15,15 +15,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Test
-        run: ./gradlew jibDockerBuild -x bootJar
-
-      - name: Before cache
-        run: |
-          rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-          rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-      - name: Cache
+      - name: Load Cache
         uses: actions/cache@v2
         with:
           path: |
@@ -32,6 +24,14 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: Test
+        run: ./gradlew jibDockerBuild -x bootJar
+
+      - name: Prepare cache
+        run: |
+          rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+          rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 
       - name: Before Deploy
         if: github.ref == 'refs/head/master' || startsWith(github.ref, 'refs/tags')
