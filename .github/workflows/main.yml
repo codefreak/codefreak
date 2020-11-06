@@ -47,7 +47,7 @@ jobs:
           pip3 install --user --upgrade pip
           pip3 install --user docker-ci-deploy
           docker logout
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
 
       - name: Deploy master branch as latest
         if: github.ref == 'refs/heads/master'
