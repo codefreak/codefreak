@@ -42,8 +42,8 @@ jobs:
       - name: Before Deploy
         if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags')
         run: |
-          pip3 install --user --upgrade pip
-          pip3 install --user docker-ci-deploy
+          pip3 install --upgrade pip
+          pip3 install docker-ci-deploy
           docker logout
           docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
 
