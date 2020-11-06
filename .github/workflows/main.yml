@@ -8,8 +8,6 @@ jobs:
     env:
       # webpack build needs a lot of memory
       NODE_OPTIONS: --max_old_space_size=4096
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -47,7 +45,7 @@ jobs:
           pip3 install --user --upgrade pip
           pip3 install --user docker-ci-deploy
           docker logout
-          docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+          docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
 
       - name: Deploy master branch as latest
         if: github.ref == 'refs/heads/master'
