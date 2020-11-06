@@ -3,8 +3,7 @@
 </p>
 <h1 align="center">Code FREAK</h1>
 
-[![Build Status](https://travis-ci.com/codefreak/codefreak.svg?branch=master)](https://travis-ci.com/codefreak/codefreak)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=code-freak_code-freak&metric=alert_status)](https://sonarcloud.io/dashboard?id=code-freak_code-freak)
+![CI](https://github.com/codefreak/codefreak/workflows/CI/badge.svg)
 [![Docker Image Version](https://img.shields.io/docker/v/cfreak/codefreak?sort=semver)](https://hub.docker.com/r/cfreak/codefreak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Join Discord Server](https://img.shields.io/discord/748856997105107025?color=7289da&label=discord&logo=discord&logoColor=ffffff)](https://discord.gg/HYDQEDt)
@@ -66,7 +65,7 @@ While this is not a mature product yet, all major features (editing, evaluation,
 Code FREAK is intended to become a community-driven project. If you are interested in trying it for your educational institution or if you have any questions, feel free to get in touch with us! ✉ codefreak@fh-kiel.de
 
 ## Roadmap / Planned Features
-There are still **A LOT** of features that have not been integrated into Code FREAK, yet.  
+There are still **A LOT** of features that have not been integrated into Code FREAK, yet.
 You will find them in our [`ROADMAP.md`](./ROADMAP.md) file.
 
 If your desired feature is missing please open an issue on GitHub!

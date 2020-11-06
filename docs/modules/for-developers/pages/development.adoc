@@ -172,15 +172,8 @@ This is a limitation of the tag system introduced above.
 
 NOTE: This is currently only used by the main application https://github.com/codefreak/codefreak[`codefreak/codefreak`].
 
-To release a new version, https://blog.travis-ci.com/2017-08-24-trigger-custom-build[trigger a custom CI build] with the following configuration (use actual version number).
+To release a new version, https://github.com/codefreak/codefreak/actions[manually trigger the `Publish Release` workflow] with the new release version.
 Run the task on the appropriate major version branch (currently only `master` is supported).
-
-[source]
-[source]
------
-env:
-  - RELEASE_VERSION=1.0.0
------
 
 === Simple release process
 
