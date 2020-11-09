@@ -19,6 +19,7 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.DockerUtil
 import org.codefreak.codefreak.util.NetUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -71,11 +72,16 @@ class IdeService : BaseService() {
    */
   @Throws(ResourceLimitException::class)
   fun startIdeContainer(answer: Answer, readOnly: Boolean = false): String {
-    return startIdeContainer(
-        answer.id,
-        if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID, answer.id,
-        answer.task.ideImage
-    )
+    val label = if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID
+    // apply custom cmd if present
+    val customizeCmd: ContainerConfigurator = {
+      containerConfig {
+        answer.task.ideArguments?.let { args ->
+          cmd(*DockerUtil.splitCommand(args))
+        }
+      }
+    }
+    return startIdeContainer(answer.id, label, answer.id, answer.task.ideImage, customizeCmd)
   }
 
   @Throws(ResourceLimitException::class)
@@ -85,7 +91,7 @@ class IdeService : BaseService() {
 
   @Synchronized
   @Throws(ResourceLimitException::class)
-  fun startIdeContainer(id: UUID, label: String, fileCollectionId: UUID, customImage: String? = null): String {
+  fun startIdeContainer(id: UUID, label: String, fileCollectionId: UUID, customImage: String? = null, customize: ContainerConfigurator = {}): String {
     // either take existing container or create a new one
     val container = containerService.getContainerWithLabel(label, id.toString())
     if (container != null && containerService.isContainerRunning(container.id())) {
@@ -100,7 +106,7 @@ class IdeService : BaseService() {
     return containerService.withCollectionFileLock(id) {
       if (container == null) {
         log.info("Creating new IDE container with $label=$id")
-        val containerId = this.createIdeContainer(label, id, customImage)
+        val containerId = this.createIdeContainer(label, id, customImage, customize)
         containerService.startContainer(containerId)
         // prepare the environment after the container has started
         this.copyFilesToIde(containerId, fileCollectionId)
@@ -210,7 +216,7 @@ class IdeService : BaseService() {
    * Configure and create a new IDE container.
    * Returns the ID of the created container
    */
-  protected fun createIdeContainer(label: String, id: UUID, customImage: String? = null): String {
+  protected fun createIdeContainer(label: String, id: UUID, customImage: String? = null, customize: ContainerConfigurator = {}): String {
     val image = customImage ?: config.ide.image
     val containerId = containerService.createContainer(image) {
       labels = mapOf(
@@ -224,6 +230,7 @@ class IdeService : BaseService() {
         memorySwap(config.ide.memory) // memory+swap = memory ==> 0 swap
         nanoCpus(config.ide.cpus * 1000000000L)
       }
+      customize()
     }
 
     // attach to network

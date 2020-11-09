@@ -15,6 +15,7 @@ import java.util.UUID
 import java.util.concurrent.locks.ReentrantLock
 import javax.ws.rs.ProcessingException
 import org.codefreak.codefreak.config.AppConfiguration
+import org.codefreak.codefreak.util.DockerUtil
 import org.glassfish.jersey.internal.LocalizationMessages
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,16 +42,6 @@ class ContainerService : BaseService() {
    * @see withCollectionFileLock
    */
   private val answerFileLockMap = MapMaker().weakValues().makeMap<UUID, ReentrantLock>()
-
-  /**
-   * Inherit behaviour of the standard Docker CLI and fallback to :latest if no tag is given
-   */
-  fun normalizeImageName(imageName: String) =
-      if (imageName.contains(':')) {
-        imageName
-      } else {
-        "$imageName:latest"
-      }
 
   fun pullDockerImage(image: String) {
     val imageInfo = try {
@@ -144,9 +135,9 @@ class ContainerService : BaseService() {
 
   fun createContainer(
     image: String,
-    configure: ContainerBuilder.() -> Unit = {}
+    configure: ContainerConfigurator
   ): String {
-    val normalizedImageName = normalizeImageName(image)
+    val normalizedImageName = DockerUtil.normalizeImageName(image)
     pullDockerImage(normalizedImageName)
 
     val builder = ContainerBuilder()

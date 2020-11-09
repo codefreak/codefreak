@@ -76,6 +76,7 @@ query GetTaskDetails($id: ID!, $teacher: Boolean = false) {
     body
     ideEnabled
     ideImage @include(if: $teacher)
+    ideArguments @include(if: $teacher)
     hiddenFiles @include(if: $teacher)
     protectedFiles @include(if: $teacher)
     assignment {
