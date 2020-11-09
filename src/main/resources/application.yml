@@ -39,6 +39,9 @@ server:
       # Set server-side timeout of cookies
       # The client session-cookie will expire on browser close by default
       timeout: 24h
+      # Do not persist sessions between server restarts
+      # This will lead to weird issues where Tomcat's and Spring's session storage get out of sync
+      persistent: false
 
 codefreak:
   instanceId: default

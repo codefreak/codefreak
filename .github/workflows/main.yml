@@ -1,0 +1,57 @@
+name: CI
+
+on: [push, pull_request, release]
+
+jobs:
+  main:
+    runs-on: ubuntu-20.04
+    env:
+      # webpack build needs a lot of memory
+      NODE_OPTIONS: --max_old_space_size=4096
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Cache gradle dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Test
+        run: ./gradlew jibDockerBuild -x bootJar
+
+      - name: Prepare cache
+        run: |
+          rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+          rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+      - name: Before Deploy
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags')
+        run: |
+          pip3 install --upgrade pip
+          pip3 install docker-ci-deploy
+          docker logout
+          docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
+
+      - name: Deploy master branch as latest
+        if: github.ref == 'refs/heads/master'
+        run: python -m docker_ci_deploy --tag canary -- cfreak/codefreak
+
+      # ${GITHUB_REF/refs\/tags\//} returns the tag name from 'refs/tags/TAG_NAME'
+      - name: Deploy tags
+        if: startsWith(github.ref, 'refs/tags')
+        run: python -m docker_ci_deploy --version-latest --version ${GITHUB_REF/refs\/tags\//} --version-semver cfreak/codefreak
