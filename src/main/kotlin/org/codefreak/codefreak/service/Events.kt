@@ -12,4 +12,4 @@ class PendingEvaluationUpdatedEvent(val answerId: UUID, val status: PendingEvalu
 
 class AssignmentStatusChangedEvent(val assignmentId: UUID, val status: AssignmentStatus) : ApplicationEvent(assignmentId)
 
-class AnswerDeadlineReachedEvent(val answerId: UUID) : ApplicationEvent(answerId)
+class SubmissionDeadlineReachedEvent(val submissionId: UUID) : ApplicationEvent(submissionId)

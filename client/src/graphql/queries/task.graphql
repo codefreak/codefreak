@@ -7,7 +7,6 @@ fragment taskListItem on Task {
   body
   editable
   inPool
-  timeLimit
 }
 
 query GetTaskList($assignmentId: ID!) {
@@ -19,7 +18,6 @@ query GetTaskList($assignmentId: ID!) {
       answer {
         id
         createdAt
-        deadline
       }
     }
   }
@@ -39,7 +37,7 @@ query GetTaskPool {
   }
 }
 
-query GetTask($id: ID!, $answerUserId: ID) {
+query GetTask($id: ID!, $userId: ID) {
   task(id: $id) {
     id
     title
@@ -53,14 +51,17 @@ query GetTask($id: ID!, $answerUserId: ID) {
       title
       deadline
       status
+      timeLimit
+      submission(userId: $userId) {
+        deadline
+      }
     }
-    timeLimit
-    answer(userId: $answerUserId) {
+    answer(userId: $userId) {
       id
       ideRunning
       createdAt
-      deadline
       submission {
+        deadline
         user {
           ...publicUserFields
         }

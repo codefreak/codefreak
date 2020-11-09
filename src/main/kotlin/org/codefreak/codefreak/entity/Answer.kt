@@ -41,25 +41,12 @@ class Answer(
   @UpdateTimestamp
   var updatedAt: Instant = Instant.now()
 
-  val deadline: Instant?
-    get() {
-      val assignmentDeadline = task.assignment?.deadline
-      val taskDeadline = task.timeLimit?.let { createdAt.plusSeconds(it) }
-      return when {
-        taskDeadline == null -> assignmentDeadline
-        assignmentDeadline == null -> taskDeadline
-        // never allow editing after assignment deadline
-        assignmentDeadline < taskDeadline -> assignmentDeadline
-        else -> taskDeadline
-      }
+  val isEditable
+    get() = when {
+      // only editable if the assignment is explicitly open
+      task.assignment?.status?.equals(AssignmentStatus.OPEN) == false -> false
+      submission.deadlineReached -> false
+      // no assignment, assignment is open or no time limit -> allow to edit
+      else -> true
     }
-
-  val deadlineReached get() = deadline?.let { Instant.now().isAfter(it) } ?: false
-
-  val isEditable get() = when {
-    task.assignment?.status?.equals(AssignmentStatus.OPEN) == false -> false
-    deadlineReached -> false
-    // no assignment or no time limit
-    else -> true
-  }
 }

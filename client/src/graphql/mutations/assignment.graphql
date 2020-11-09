@@ -36,6 +36,7 @@ mutation UpdateAssignment(
   $active: Boolean!
   $deadline: DateTime
   $openFrom: DateTime
+  $timeLimit: Long
 ) {
   updateAssignment(
     id: $id
@@ -43,5 +44,6 @@ mutation UpdateAssignment(
     active: $active
     deadline: $deadline
     openFrom: $openFrom
+    timeLimit: $timeLimit
   )
 }

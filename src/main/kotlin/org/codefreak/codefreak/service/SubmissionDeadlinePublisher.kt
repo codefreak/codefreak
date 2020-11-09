@@ -6,8 +6,8 @@ import java.util.concurrent.ScheduledFuture
 import javax.persistence.PostPersist
 import javax.persistence.PostUpdate
 import javax.persistence.PreRemove
-import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.EntityListener
+import org.codefreak.codefreak.entity.Submission
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,10 +22,10 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-@EntityListener(Answer::class)
-class AnswerDeadlinePublisher {
+@EntityListener(Submission::class)
+class SubmissionDeadlinePublisher {
   companion object {
-    private val log = LoggerFactory.getLogger(AnswerDeadlinePublisher::class.java)
+    private val log = LoggerFactory.getLogger(SubmissionDeadlinePublisher::class.java)
   }
 
   @Autowired
@@ -38,7 +38,7 @@ class AnswerDeadlinePublisher {
   @Autowired
   private lateinit var assignmentRepository: AssignmentRepository
 
-  val scheduledAnswerDeadlines: MutableMap<UUID, ScheduledFuture<*>> = mutableMapOf()
+  val scheduledDeadlines: MutableMap<UUID, ScheduledFuture<*>> = mutableMapOf()
 
   /**
    * Schedule deadlines on startup from database
@@ -47,51 +47,51 @@ class AnswerDeadlinePublisher {
   @Order(Ordered.LOWEST_PRECEDENCE)
   @Transactional(readOnly = true)
   fun onApplicationStartup() {
-    // find all answers of still open assignments
-    assignmentRepository.getByOpenFromAfterOrDeadlineAfter(Instant.now()).flatMap { assignment ->
-      assignment.submissions.flatMap { submission -> submission.answers }
-    }.forEach(this::scheduleAnswerDeadline)
+    // find all submissions of still open assignments
+    assignmentRepository.getByOpenFromAfterOrDeadlineAfter(Instant.now()).forEach { assignment ->
+      assignment.submissions.forEach(this::scheduleSubmissionDeadline)
+    }
   }
 
   @PostPersist
   @PostUpdate
-  fun onAnswerModify(answer: Answer) {
-    cancelAnswerDeadlineEvent(answer)
-    scheduleAnswerDeadline(answer)
+  fun onSubmissionModify(submission: Submission) {
+    cancelSubmissionDeadlineEvent(submission)
+    scheduleSubmissionDeadline(submission)
   }
 
   @PreRemove
-  fun onAnswerRemove(answer: Answer) {
-    cancelAnswerDeadlineEvent(answer)
+  fun onSubmissionRemove(submission: Submission) {
+    cancelSubmissionDeadlineEvent(submission)
   }
 
-  private fun cancelAnswerDeadlineEvent(answer: Answer) {
-    scheduledAnswerDeadlines.remove(answer.id)?.let {
+  private fun cancelSubmissionDeadlineEvent(submission: Submission) {
+    scheduledDeadlines.remove(submission.id)?.let {
       if (log.isDebugEnabled) {
-        log.debug("Cancelling deadline event for answer ${answer.id}")
+        log.debug("Cancelling deadline event for submission ${submission.id}")
       }
       it.cancel(true)
     }
   }
 
-  private fun scheduleAnswerDeadline(answer: Answer) {
-    if (answer.task.timeLimit == null) {
-      // Only trigger deadline events for answers of tasks with time limit
+  private fun scheduleSubmissionDeadline(submission: Submission) {
+    if (submission.assignment?.timeLimit == null) {
+      // Only trigger deadline events for submissions with assignment and time limit
       // If you need to listen for regular end of assignments check the AssignmentStatusChangedEvent.
       return
     }
 
-    val deadline = answer.deadline
+    val deadline = submission.deadline
     if (deadline == null || deadline <= Instant.now()) {
       // only schedule future deadlines
       return
     }
     if (log.isDebugEnabled) {
-      log.debug("Scheduling deadline event for answer ${answer.id} @ $deadline")
+      log.debug("Scheduling deadline event for submission ${submission.id} @ $deadline")
     }
-    scheduledAnswerDeadlines[answer.id] = taskScheduler.schedule({
-      eventPublisher.publishEvent(AnswerDeadlineReachedEvent(answer.id))
-      scheduledAnswerDeadlines.remove(answer.id)
+    scheduledDeadlines[submission.id] = taskScheduler.schedule({
+      eventPublisher.publishEvent(SubmissionDeadlineReachedEvent(submission.id))
+      scheduledDeadlines.remove(submission.id)
     }, deadline)
   }
 }

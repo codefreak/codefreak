@@ -27,6 +27,7 @@ import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.orNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
@@ -42,6 +43,7 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
   val owner by lazy { UserDto(entity.owner, ctx) }
   val createdAt = entity.createdAt
   val deadline = entity.deadline
+  val timeLimit = entity.timeLimit
   val status by lazy { entity.status }
   val active = entity.active
   val openFrom = entity.openFrom
@@ -59,6 +61,17 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
     serviceAccess.getService(SubmissionService::class)
         .findSubmissionsOfAssignment(id)
         .map { SubmissionDto(it, ctx) }
+  }
+
+  fun submission(userId: UUID?): SubmissionDto? {
+    val submissionService = serviceAccess.getService(SubmissionService::class)
+    val submission = if (userId == null || userId == authorization.currentUser.id) {
+      submissionService.findSubmission(entity.id, authorization.currentUser.id).orNull()
+    } else {
+      authorization.requireAuthority(Authority.ROLE_TEACHER)
+      submissionService.findSubmission(entity.id, userId).orNull()
+    }
+    return submission?.let { SubmissionDto(it, ctx) }
   }
 }
 
@@ -82,9 +95,9 @@ class AssignmentQuery : BaseResolver(), Query {
     val user = FrontendUtil.getCurrentUser()
     val assignments = when {
       authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
-          -> assignmentService.findAllAssignments()
+      -> assignmentService.findAllAssignments()
       authorization.currentUser.hasAuthority(Authority.ROLE_TEACHER)
-          -> assignmentService.findAssignmentsByOwner(authorization.currentUser)
+      -> assignmentService.findAssignmentsByOwner(authorization.currentUser)
       else -> assignmentService.findAllAssignmentsForUser(user.id)
     }
     assignments.map { AssignmentDto(it, this) }
@@ -133,13 +146,14 @@ class AssignmentMutation : BaseResolver(), Mutation {
     true
   }
 
-  fun updateAssignment(id: UUID, title: String, active: Boolean, deadline: Instant?, openFrom: Instant?): Boolean = context {
+  fun updateAssignment(id: UUID, title: String, active: Boolean, deadline: Instant?, openFrom: Instant?, timeLimit: Long?): Boolean = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
     assignment.title = title
     assignment.active = active
     assignment.deadline = deadline
     assignment.openFrom = openFrom
+    assignment.timeLimit = timeLimit
     serviceAccess.getService(AssignmentService::class).saveAssignment(assignment)
     true
   }

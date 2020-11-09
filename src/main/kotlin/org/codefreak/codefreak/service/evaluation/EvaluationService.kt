@@ -17,12 +17,11 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
-import org.codefreak.codefreak.service.AnswerDeadlineReachedEvent
-import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.IdeService
+import org.codefreak.codefreak.service.SubmissionDeadlineReachedEvent
 import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
@@ -51,9 +50,6 @@ class EvaluationService : BaseService() {
 
   @Autowired
   private lateinit var taskRepository: TaskRepository
-
-  @Autowired
-  private lateinit var answerService: AnswerService
 
   @Autowired
   private lateinit var taskService: TaskService
@@ -125,7 +121,13 @@ class EvaluationService : BaseService() {
   }
 
   fun createEvaluation(answer: Answer): Evaluation {
-    return evaluationRepository.save(Evaluation(answer, fileService.getCollectionMd5Digest(answer.id), answer.task.evaluationSettingsChangedAt))
+    return evaluationRepository.save(
+        Evaluation(
+            answer,
+            fileService.getCollectionMd5Digest(answer.id),
+            answer.task.evaluationSettingsChangedAt
+        )
+    )
   }
 
   fun createCommentFeedback(author: User, comment: String): Feedback {
@@ -188,12 +190,14 @@ class EvaluationService : BaseService() {
 
   @EventListener
   @Transactional
-  fun onAnswerDeadlineReached(event: AnswerDeadlineReachedEvent) {
-    log.info("Automatically trigger evaluation for answer ${event.answerId}")
-    try {
-      startEvaluation(answerService.findAnswer(event.answerId), forceSaveFiles = true)
-    } catch (e: IllegalStateException) {
-      // evaluation has already been triggered
+  fun onSubmissionDeadlineReached(event: SubmissionDeadlineReachedEvent) {
+    log.info("Automatically trigger evaluation for answers of submission ${event.submissionId}")
+    submissionService.findSubmission(event.submissionId).answers.forEach { answer ->
+      try {
+        startEvaluation(answer, forceSaveFiles = true)
+      } catch (e: IllegalStateException) {
+        // evaluation has already been triggered
+      }
     }
   }
 
