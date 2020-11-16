@@ -1,9 +1,9 @@
 package org.codefreak.codefreak.service.file
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.io.OutputStream
+import com.sun.org.apache.xpath.internal.operations.Bool
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.util.DigestUtils
+import java.io.*
+import java.lang.IllegalArgumentException
 
 @Service
 @ConditionalOnProperty(name = ["codefreak.files.adapter"], havingValue = "JPA")
@@ -47,5 +49,32 @@ class JpaFileService : FileService {
 
   override fun getCollectionMd5Digest(collectionId: UUID): ByteArray {
     return DigestUtils.md5Digest(getCollection(collectionId).tar)
+  }
+
+  override fun createFile(collectionId: UUID, path: String) {
+    if (path.isBlank()) {
+      throw IllegalArgumentException("No path was given")
+    }
+    if (containsPath(collectionId, path)) {
+      throw IllegalArgumentException("$path already exists")
+    }
+    TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
+      val entry = it.createArchiveEntry(File(path), path)
+      it.putArchiveEntry(entry)
+      it.closeArchiveEntry()
+    }
+  }
+
+  private fun containsPath(collectionId: UUID, path: String): Boolean {
+    TarArchiveInputStream(readCollectionTar(collectionId)).use {
+      do {
+        var entry = it.nextTarEntry
+        if (entry?.name == path) {
+          return true
+        }
+      } while (entry != null)
+    }
+
+    return false
   }
 }

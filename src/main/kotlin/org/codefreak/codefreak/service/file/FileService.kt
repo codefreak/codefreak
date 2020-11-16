@@ -21,4 +21,6 @@ interface FileService {
   fun getCollectionMd5Digest(collectionId: UUID): ByteArray {
     return readCollectionTar(collectionId).use { DigestUtils.md5Digest(it) }
   }
+
+  fun createFile(collectionId: UUID, path: String)
 }
