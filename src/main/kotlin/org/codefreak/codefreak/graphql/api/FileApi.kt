@@ -1,7 +1,9 @@
 package org.codefreak.codefreak.graphql.api
 
 import com.expediagroup.graphql.annotations.GraphQLName
+import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
+import org.apache.catalina.core.ApplicationPart
 import java.nio.charset.Charset
 import java.util.Base64
 import java.util.UUID
@@ -40,6 +42,13 @@ class FileDto(
   )
 }
 
+enum class FileContextType {
+  TASK,
+  ANSWER
+}
+
+data class FileContext(var contextType: FileContextType, var id: UUID)
+
 @Component
 class FileQuery : BaseResolver(), Query {
   fun answerFiles(answerId: UUID): List<FileDto> = context {
@@ -59,5 +68,32 @@ class FileQuery : BaseResolver(), Query {
     val file = serviceAccess.getService(FileContentService::class).getFile(answer.id, path)
     val digest = serviceAccess.getService(FileService::class).getCollectionMd5Digest(answerId)
     FileDto(answer.id, digest, file)
+  }
+}
+
+@Component
+class FileMutation : BaseResolver(), Mutation {
+  fun createFile(fileContext: FileContext, path: String): Boolean = context {
+    true
+  }
+
+  fun createDirectory(fileContext: FileContext, path: String): Boolean = context {
+    true
+  }
+
+  fun uploadFile(fileContext: FileContext, path: String, contents: Array<ApplicationPart>): Boolean = context {
+    true
+  }
+
+  fun moveFile(fileContext: FileContext, sourcePath: String, targetPath: String): Boolean = context {
+    true
+  }
+
+  fun deleteFile(fileContext: FileContext, path: String): Boolean = context {
+    true
+  }
+
+  fun deleteDirectory(fileContext: FileContext, path: String): Boolean = context {
+    true
   }
 }
