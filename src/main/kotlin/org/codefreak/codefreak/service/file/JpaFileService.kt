@@ -55,19 +55,37 @@ class JpaFileService : FileService {
 
   override fun createFile(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
-    val input = getTarInputStream(collectionId)
-    validatePath(collectionId, normalizedPath)
+
+    requireValidPattern(path)
+    requireFileDoesNotExist(collectionId, normalizedPath)
+
     getTarOutputStream(collectionId).use {
+      val input = getTarInputStream(collectionId)
       TarUtil.copyEntries(input, it)
       TarUtil.touch(normalizedPath, it)
     }
   }
 
-  private fun validatePath(collectionId: UUID, path: String) {
+  private fun requireValidPattern(path: String) {
     if (path.isBlank()) {
-      throw IllegalArgumentException("No path was given")
+      throw IllegalArgumentException("$path is not a valid path pattern")
     }
-    if (containsPath(collectionId, path)) {
+  }
+
+  private fun requireFileDoesExist(collectionId: UUID, path: String) {
+    if (!containsFile(collectionId, path)) {
+      throw IllegalArgumentException("$path does not exist")
+    }
+  }
+
+  private fun requireFileDoesNotExist(collectionId: UUID, path: String) {
+    if (containsFile(collectionId, path)) {
+      throw IllegalArgumentException("$path already exists")
+    }
+  }
+
+  private fun requireDirectoryDoesNotExist(collectionId: UUID, path: String) {
+    if (containsDirectory(collectionId, path)) {
       throw IllegalArgumentException("$path already exists")
     }
   }
@@ -105,24 +123,24 @@ class JpaFileService : FileService {
 
   override fun createDirectory(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
-    val input = getTarInputStream(collectionId)
-    validatePath(collectionId, normalizedPath)
+
+    requireValidPattern(normalizedPath)
+    requireDirectoryDoesNotExist(collectionId, normalizedPath)
+
     getTarOutputStream(collectionId).use {
+      val input = getTarInputStream(collectionId)
       TarUtil.copyEntries(input, it)
       TarUtil.mkdir(normalizedPath, it)
     }
   }
 
   override fun deleteFile(collectionId: UUID, path: String) {
-    val input = getTarInputStream(collectionId)
-    val output = getTarOutputStream(collectionId)
     val normalizedPath = TarUtil.normalizeEntryName(path)
 
-    if (!containsPath(collectionId, path)) {
-      throw IllegalArgumentException("$path does not exist")
-    }
+    requireFileDoesExist(collectionId, normalizedPath)
 
-    output.use {
+    getTarOutputStream(collectionId).use {
+      val input = getTarInputStream(collectionId)
       TarUtil.copyEntries(input, it, { entry -> entry.name != normalizedPath })
     }
   }
