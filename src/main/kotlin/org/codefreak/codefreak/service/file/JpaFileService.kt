@@ -56,9 +56,7 @@ class JpaFileService : FileService {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
     validatePath(collectionId, normalizedPath)
     TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
-      val entry = it.createArchiveEntry(File(path), normalizedPath)
-      it.putArchiveEntry(entry)
-      it.closeArchiveEntry()
+      TarUtil.touch(normalizedPath, it)
     }
   }
 
