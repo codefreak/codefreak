@@ -36,12 +36,7 @@ class JpaFileServiceTest {
   fun `createFile creates an empty file`() {
     fileService.createFile(id, filePath)
 
-    TarArchiveInputStream(fileService.readCollectionTar(id)).use {
-      val entry = it.nextTarEntry
-      assert(filePath == entry.name)
-      assert(entry.isFile)
-      assert(null == entry.file)
-    }
+    assert(fileService.containsFile(id, filePath))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -56,15 +51,23 @@ class JpaFileServiceTest {
   }
 
   @Test
+  fun `createFile keeps other files intact`() {
+    val otherFile = "other.txt"
+    val otherDirectory = "aDirectory"
+    fileService.createFile(id, otherFile)
+    fileService.createDirectory(id, otherDirectory)
+    fileService.createFile(id, filePath)
+
+    assert(fileService.containsFile(id, filePath))
+    assert(fileService.containsFile(id, otherFile))
+    assert(fileService.containsDirectory(id, otherDirectory))
+  }
+
+  @Test
   fun `createDirectory creates an empty directory`() {
     fileService.createDirectory(id, directoryPath)
 
-    TarArchiveInputStream(fileService.readCollectionTar(id)).use {
-      val entry = it.nextTarEntry
-      assert(directoryPath == entry.name)
-      assert(entry.isDirectory)
-      assert(null == entry.file)
-    }
+    assert(fileService.containsDirectory(id, directoryPath))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -76,5 +79,18 @@ class JpaFileServiceTest {
   @Test(expected = IllegalArgumentException::class)
   fun `createDirectory throws on empty path name`() {
     fileService.createFile(id, emptyPath)
+  }
+
+  @Test
+  fun `createDirectory keeps other files intact`() {
+    val otherFile = "other.txt"
+    val otherDirectory = "aDirectory"
+    fileService.createFile(id, otherFile)
+    fileService.createDirectory(id, otherDirectory)
+    fileService.createDirectory(id, directoryPath)
+
+    assert(fileService.containsDirectory(id, directoryPath))
+    assert(fileService.containsFile(id, otherFile))
+    assert(fileService.containsDirectory(id, otherDirectory))
   }
 }

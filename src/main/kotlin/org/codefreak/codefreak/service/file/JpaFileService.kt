@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service.file
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import java.util.UUID
@@ -54,8 +55,10 @@ class JpaFileService : FileService {
 
   override fun createFile(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+    val input = TarArchiveInputStream(readCollectionTar(collectionId))
     validatePath(collectionId, normalizedPath)
     TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
+      TarUtil.copyEntries(input, it)
       TarUtil.touch(normalizedPath, it)
     }
   }
@@ -69,11 +72,25 @@ class JpaFileService : FileService {
     }
   }
 
-  private fun containsPath(collectionId: UUID, path: String): Boolean {
+  fun containsFile(collectionId: UUID, path: String): Boolean {
+    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+    return containsPath(collectionId, normalizedPath) { it.isFile }
+  }
+
+  fun containsDirectory(collectionId: UUID, path: String): Boolean {
+    val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
+    return containsPath(collectionId, normalizedPath) { it.isDirectory }
+  }
+
+  private fun containsPath(
+      collectionId: UUID,
+      path: String,
+      restriction: (TarArchiveEntry) -> Boolean = { true }
+  ): Boolean {
     TarArchiveInputStream(readCollectionTar(collectionId)).use {
       do {
         val entry = it.nextTarEntry
-        if (entry?.name == path) {
+        if (entry?.name == path && restriction(entry)) {
           return true
         }
       } while (entry != null)
@@ -84,8 +101,10 @@ class JpaFileService : FileService {
 
   override fun createDirectory(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
+    val input = TarArchiveInputStream(readCollectionTar(collectionId))
     validatePath(collectionId, normalizedPath)
     TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
+      TarUtil.copyEntries(input, it)
       TarUtil.mkdir(normalizedPath, it)
     }
   }
