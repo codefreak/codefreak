@@ -84,6 +84,12 @@ class JpaFileService : FileService {
     }
   }
 
+  private fun requireDirectoryDoesExist(collectionId: UUID, path: String) {
+    if (!containsDirectory(collectionId, path)) {
+      throw IllegalArgumentException("$path already exists")
+    }
+  }
+
   private fun requireDirectoryDoesNotExist(collectionId: UUID, path: String) {
     if (containsDirectory(collectionId, path)) {
       throw IllegalArgumentException("$path already exists")
@@ -137,11 +143,24 @@ class JpaFileService : FileService {
   override fun deleteFile(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path)
 
+    requireValidPattern(normalizedPath)
     requireFileDoesExist(collectionId, normalizedPath)
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
       TarUtil.copyEntries(input, it, { entry -> entry.name != normalizedPath })
+    }
+  }
+
+  override fun deleteDirectory(collectionId: UUID, path: String) {
+    val normalizedPath = TarUtil.normalizeEntryName(path)
+
+    requireValidPattern(normalizedPath)
+    requireDirectoryDoesExist(collectionId, normalizedPath)
+
+    getTarOutputStream(collectionId).use {
+      val input = getTarInputStream(collectionId)
+      TarUtil.copyEntries(input, it, { entry -> !entry.name.startsWith(normalizedPath) })
     }
   }
 }

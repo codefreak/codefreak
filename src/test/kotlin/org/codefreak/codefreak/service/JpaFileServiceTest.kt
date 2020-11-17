@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.service
 
 import com.nhaarman.mockitokotlin2.any
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.file.JpaFileService
@@ -117,5 +116,51 @@ class JpaFileServiceTest {
     assert(!fileService.containsFile(collectionId, filePath))
     assert(fileService.containsFile(collectionId, intactFile))
     assert(fileService.containsDirectory(collectionId, directoryPath))
+  }
+
+  @Test
+  fun `deleteDirectory deletes existing directory`() {
+    fileService.createDirectory(collectionId, directoryPath)
+    fileService.deleteDirectory(collectionId, directoryPath)
+    assert(!fileService.containsDirectory(collectionId, directoryPath))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `deleteDirectory throws when path does not exist`() {
+    fileService.deleteDirectory(collectionId, directoryPath)
+  }
+
+  @Test
+  fun `deleteDirectory keeps other files and directories intact`() {
+    val intactDirectory = "DO_NOT_DELETE"
+    fileService.createFile(collectionId, filePath)
+    fileService.createDirectory(collectionId, intactDirectory)
+    fileService.createDirectory(collectionId, directoryPath)
+
+    fileService.deleteDirectory(collectionId, directoryPath)
+
+    assert(fileService.containsFile(collectionId, filePath))
+    assert(fileService.containsDirectory(collectionId, intactDirectory))
+    assert(!fileService.containsDirectory(collectionId, directoryPath))
+  }
+
+  @Test
+  fun `deleteDirectory deletes directory content recursively`() {
+    val directoryToDelete = directoryPath
+    val fileToRecursivelyDelete = "$directoryPath/$filePath"
+    val directoryToRecursivelyDelete = "$directoryPath/$directoryPath"
+    val fileToBeUnaffected = filePath
+
+    fileService.createDirectory(collectionId, directoryToDelete)
+    fileService.createFile(collectionId, fileToRecursivelyDelete)
+    fileService.createDirectory(collectionId, directoryToRecursivelyDelete)
+    fileService.createFile(collectionId, fileToBeUnaffected)
+
+    fileService.deleteDirectory(collectionId, directoryToDelete)
+
+    assert(!fileService.containsDirectory(collectionId, directoryToDelete))
+    assert(!fileService.containsFile(collectionId, fileToRecursivelyDelete))
+    assert(!fileService.containsDirectory(collectionId, directoryToRecursivelyDelete))
+    assert(fileService.containsFile(collectionId, fileToBeUnaffected))
   }
 }
