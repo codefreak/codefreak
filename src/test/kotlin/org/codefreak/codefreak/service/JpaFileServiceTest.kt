@@ -14,7 +14,7 @@ import org.mockito.MockitoAnnotations
 import java.util.*
 
 class JpaFileServiceTest {
-  private val id = UUID(0, 0)
+  private val collectionId = UUID(0, 0)
   private val filePath = "file.txt"
   private val directoryPath = "some/path/"
   private val emptyPath = ""
@@ -28,69 +28,94 @@ class JpaFileServiceTest {
   fun init() {
     MockitoAnnotations.initMocks(this)
 
-    val fileCollection = FileCollection(id)
+    val fileCollection = FileCollection(collectionId)
     `when`(fileCollectionRepository.findById(any())).thenReturn(Optional.of(fileCollection))
   }
 
   @Test
   fun `createFile creates an empty file`() {
-    fileService.createFile(id, filePath)
-
-    assert(fileService.containsFile(id, filePath))
+    fileService.createFile(collectionId, filePath)
+    assert(fileService.containsFile(collectionId, filePath))
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createFile throws when the path already exists`() {
-    fileService.createFile(id, filePath)
-    fileService.createFile(id, filePath)
+    fileService.createFile(collectionId, filePath)
+    fileService.createFile(collectionId, filePath)
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createFile throws on empty path name`() {
-    fileService.createFile(id, emptyPath)
+    fileService.createFile(collectionId, emptyPath)
   }
 
   @Test
   fun `createFile keeps other files intact`() {
     val otherFile = "other.txt"
     val otherDirectory = "aDirectory"
-    fileService.createFile(id, otherFile)
-    fileService.createDirectory(id, otherDirectory)
-    fileService.createFile(id, filePath)
+    fileService.createFile(collectionId, otherFile)
+    fileService.createDirectory(collectionId, otherDirectory)
+    fileService.createFile(collectionId, filePath)
 
-    assert(fileService.containsFile(id, filePath))
-    assert(fileService.containsFile(id, otherFile))
-    assert(fileService.containsDirectory(id, otherDirectory))
+    assert(fileService.containsFile(collectionId, filePath))
+    assert(fileService.containsFile(collectionId, otherFile))
+    assert(fileService.containsDirectory(collectionId, otherDirectory))
   }
 
   @Test
   fun `createDirectory creates an empty directory`() {
-    fileService.createDirectory(id, directoryPath)
+    fileService.createDirectory(collectionId, directoryPath)
 
-    assert(fileService.containsDirectory(id, directoryPath))
+    assert(fileService.containsDirectory(collectionId, directoryPath))
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createDirectory throws when the path already exists`() {
-    fileService.createFile(id, directoryPath)
-    fileService.createFile(id, directoryPath)
+    fileService.createFile(collectionId, directoryPath)
+    fileService.createFile(collectionId, directoryPath)
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createDirectory throws on empty path name`() {
-    fileService.createFile(id, emptyPath)
+    fileService.createFile(collectionId, emptyPath)
   }
 
   @Test
   fun `createDirectory keeps other files intact`() {
     val otherFile = "other.txt"
     val otherDirectory = "aDirectory"
-    fileService.createFile(id, otherFile)
-    fileService.createDirectory(id, otherDirectory)
-    fileService.createDirectory(id, directoryPath)
+    fileService.createFile(collectionId, otherFile)
+    fileService.createDirectory(collectionId, otherDirectory)
+    fileService.createDirectory(collectionId, directoryPath)
 
-    assert(fileService.containsDirectory(id, directoryPath))
-    assert(fileService.containsFile(id, otherFile))
-    assert(fileService.containsDirectory(id, otherDirectory))
+    assert(fileService.containsDirectory(collectionId, directoryPath))
+    assert(fileService.containsFile(collectionId, otherFile))
+    assert(fileService.containsDirectory(collectionId, otherDirectory))
+  }
+
+  @Test
+  fun `deleteFile deletes existing file`() {
+    fileService.createFile(collectionId, filePath)
+    fileService.deleteFile(collectionId, filePath)
+    assert(!fileService.containsFile(collectionId, filePath))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `deleteFile throws when path does not exist`() {
+    fileService.deleteFile(collectionId, filePath)
+  }
+
+  @Test
+  fun `deleteFile keeps other files and directories intact`() {
+    val intactFile = "DO_NOT_DELETE.txt"
+    fileService.createFile(collectionId, filePath)
+    fileService.createFile(collectionId, intactFile)
+    fileService.createDirectory(collectionId, directoryPath)
+
+    fileService.deleteFile(collectionId, filePath)
+
+    assert(!fileService.containsFile(collectionId, filePath))
+    assert(fileService.containsFile(collectionId, intactFile))
+    assert(fileService.containsDirectory(collectionId, directoryPath))
   }
 }

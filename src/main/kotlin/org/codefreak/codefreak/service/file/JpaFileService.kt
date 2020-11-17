@@ -55,9 +55,9 @@ class JpaFileService : FileService {
 
   override fun createFile(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
-    val input = TarArchiveInputStream(readCollectionTar(collectionId))
+    val input = getTarInputStream(collectionId)
     validatePath(collectionId, normalizedPath)
-    TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
+    getTarOutputStream(collectionId).use {
       TarUtil.copyEntries(input, it)
       TarUtil.touch(normalizedPath, it)
     }
@@ -87,7 +87,7 @@ class JpaFileService : FileService {
       path: String,
       restriction: (TarArchiveEntry) -> Boolean = { true }
   ): Boolean {
-    TarArchiveInputStream(readCollectionTar(collectionId)).use {
+    getTarInputStream(collectionId).use {
       do {
         val entry = it.nextTarEntry
         if (entry?.name == path && restriction(entry)) {
@@ -99,13 +99,31 @@ class JpaFileService : FileService {
     return false
   }
 
+  private fun getTarInputStream(collectionId: UUID) = TarArchiveInputStream(readCollectionTar(collectionId))
+
+  private fun getTarOutputStream(collectionId: UUID) = TarArchiveOutputStream(writeCollectionTar(collectionId))
+
   override fun createDirectory(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
-    val input = TarArchiveInputStream(readCollectionTar(collectionId))
+    val input = getTarInputStream(collectionId)
     validatePath(collectionId, normalizedPath)
-    TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
+    getTarOutputStream(collectionId).use {
       TarUtil.copyEntries(input, it)
       TarUtil.mkdir(normalizedPath, it)
+    }
+  }
+
+  override fun deleteFile(collectionId: UUID, path: String) {
+    val input = getTarInputStream(collectionId)
+    val output = getTarOutputStream(collectionId)
+    val normalizedPath = TarUtil.normalizeEntryName(path)
+
+    if (!containsPath(collectionId, path)) {
+      throw IllegalArgumentException("$path does not exist")
+    }
+
+    output.use {
+      TarUtil.copyEntries(input, it, { entry -> entry.name != normalizedPath })
     }
   }
 }
