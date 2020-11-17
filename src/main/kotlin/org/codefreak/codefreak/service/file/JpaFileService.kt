@@ -1,13 +1,14 @@
 package org.codefreak.codefreak.service.file
 
-import com.sun.org.apache.xpath.internal.operations.Bool
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
+import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.withTrailingSlash
+import org.codefreak.codefreak.util.withoutTrailingSlash
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
@@ -52,23 +53,28 @@ class JpaFileService : FileService {
   }
 
   override fun createFile(collectionId: UUID, path: String) {
+    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+    validatePath(collectionId, normalizedPath)
+    TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
+      val entry = it.createArchiveEntry(File(path), normalizedPath)
+      it.putArchiveEntry(entry)
+      it.closeArchiveEntry()
+    }
+  }
+
+  private fun validatePath(collectionId: UUID, path: String) {
     if (path.isBlank()) {
       throw IllegalArgumentException("No path was given")
     }
     if (containsPath(collectionId, path)) {
       throw IllegalArgumentException("$path already exists")
     }
-    TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
-      val entry = it.createArchiveEntry(File(path), path)
-      it.putArchiveEntry(entry)
-      it.closeArchiveEntry()
-    }
   }
 
   private fun containsPath(collectionId: UUID, path: String): Boolean {
     TarArchiveInputStream(readCollectionTar(collectionId)).use {
       do {
-        var entry = it.nextTarEntry
+        val entry = it.nextTarEntry
         if (entry?.name == path) {
           return true
         }
@@ -76,5 +82,13 @@ class JpaFileService : FileService {
     }
 
     return false
+  }
+
+  override fun createDirectory(collectionId: UUID, path: String) {
+    val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
+    validatePath(collectionId, normalizedPath)
+    TarArchiveOutputStream(writeCollectionTar(collectionId)).use {
+      TarUtil.mkdir(normalizedPath, it)
+    }
   }
 }

@@ -23,4 +23,5 @@ interface FileService {
   }
 
   fun createFile(collectionId: UUID, path: String)
+  fun createDirectory(collectionId: UUID, path: String)
 }

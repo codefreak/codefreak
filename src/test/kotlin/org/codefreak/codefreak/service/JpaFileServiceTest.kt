@@ -14,6 +14,11 @@ import org.mockito.MockitoAnnotations
 import java.util.*
 
 class JpaFileServiceTest {
+  private val id = UUID(0, 0)
+  private val filePath = "file.txt"
+  private val directoryPath = "some/path/"
+  private val emptyPath = ""
+
   @Mock
   lateinit var fileCollectionRepository: FileCollectionRepository
   @InjectMocks
@@ -23,18 +28,17 @@ class JpaFileServiceTest {
   fun init() {
     MockitoAnnotations.initMocks(this)
 
-    val fileCollection = FileCollection(UUID(0, 0))
+    val fileCollection = FileCollection(id)
     `when`(fileCollectionRepository.findById(any())).thenReturn(Optional.of(fileCollection))
   }
 
   @Test
   fun `createFile creates an empty file`() {
-    val path = "file.txt"
-    fileService.createFile(UUID(0, 0), path)
+    fileService.createFile(id, filePath)
 
-    TarArchiveInputStream(fileService.readCollectionTar(UUID(0, 0))).use {
+    TarArchiveInputStream(fileService.readCollectionTar(id)).use {
       val entry = it.nextTarEntry
-      assert(path == entry.name)
+      assert(filePath == entry.name)
       assert(entry.isFile)
       assert(null == entry.file)
     }
@@ -42,12 +46,35 @@ class JpaFileServiceTest {
 
   @Test(expected = IllegalArgumentException::class)
   fun `createFile throws when the path already exists`() {
-    fileService.createFile(UUID(0, 0), "file.txt")
-    fileService.createFile(UUID(0, 0), "file.txt")
+    fileService.createFile(id, filePath)
+    fileService.createFile(id, filePath)
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createFile throws on empty path name`() {
-    fileService.createFile(UUID(0, 0), "")
+    fileService.createFile(id, emptyPath)
+  }
+
+  @Test
+  fun `createDirectory creates an empty directory`() {
+    fileService.createDirectory(id, directoryPath)
+
+    TarArchiveInputStream(fileService.readCollectionTar(id)).use {
+      val entry = it.nextTarEntry
+      assert(directoryPath == entry.name)
+      assert(entry.isDirectory)
+      assert(null == entry.file)
+    }
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `createDirectory throws when the path already exists`() {
+    fileService.createFile(id, directoryPath)
+    fileService.createFile(id, directoryPath)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `createDirectory throws on empty path name`() {
+    fileService.createFile(id, emptyPath)
   }
 }
