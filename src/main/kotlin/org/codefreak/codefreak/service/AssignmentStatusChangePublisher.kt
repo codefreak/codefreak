@@ -29,6 +29,9 @@ class AssignmentStatusChangePublisher {
   @Autowired
   private lateinit var taskScheduler: TaskScheduler
 
+  @Autowired
+  private lateinit var submissionDeadlinePublisher: SubmissionDeadlinePublisher
+
   /**
    * Inject lazy because this is a cyclic dependency (sorry)
    */
@@ -59,6 +62,9 @@ class AssignmentStatusChangePublisher {
     if (status <= AssignmentStatus.ACTIVE) {
       eventPublisher.publishEvent(AssignmentStatusChangedEvent(assignment.id, status))
     }
+
+    // handle possible change of time limit by notifying the submission deadline publisher
+    assignment.submissions.forEach(submissionDeadlinePublisher::onSubmissionModify)
   }
 
   @PreRemove

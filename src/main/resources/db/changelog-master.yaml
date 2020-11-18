@@ -39,5 +39,8 @@ databaseChangeLog:
     file: changelogs/20201017115700-add-task-updated-at-date.yaml
     relativeToChangelogFile: true
 - include:
-      file: changelogs/20201009114158-configurable-ide.yaml
-      relativeToChangelogFile: true
+    file: changelogs/20201009114158-configurable-ide.yaml
+    relativeToChangelogFile: true
+- include:
+    file: changelogs/20201029140739-assignment-time-limit.yaml
+    relativeToChangelogFile: true

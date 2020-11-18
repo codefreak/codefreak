@@ -1,0 +1,38 @@
+databaseChangeLog:
+- changeSet:
+    id: 1603976898190-2
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: created_at
+            type: timestamp
+            defaultValueComputed: CURRENT_TIMESTAMP
+        tableName: submission
+- changeSet:
+    id: 1603976898190-3
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: time_limit
+            type: int8
+        tableName: assignment
+- changeSet:
+    id: 1603976898190-4
+    author: hkasch (generated)
+    changes:
+    - dropColumn:
+        columnName: time_limit
+        tableName: task
+- changeSet:
+    id: 1603976898190-1
+    author: hkasch (generated)
+    changes:
+    - dropDefaultValue:
+        columnDataType: boolean
+        columnName: ide_enabled
+        tableName: task
+

@@ -35,7 +35,6 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseD
   val sourceUrl by lazy { FrontendUtil.getUriBuilder().path("/api/answers/$id/source").build().toUriString() }
   val createdAt = entity.createdAt
   val updatedAt = entity.updatedAt
-  val deadline = entity.deadline
 
   val latestEvaluation by lazy {
     serviceAccess.getService(EvaluationService::class)

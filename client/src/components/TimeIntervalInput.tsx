@@ -1,4 +1,5 @@
-import { InputNumber } from 'antd'
+import { InputNumber, Switch } from 'antd'
+import { InputNumberProps } from 'antd/es/input-number'
 import React, { useState } from 'react'
 import { TimeComponents } from '../services/time'
 import './TimeIntervalInput.less'
@@ -6,7 +7,8 @@ import './TimeIntervalInput.less'
 const renderTimeIntervalInput = (
   suffix: string,
   value: number,
-  onChange: (value: number) => void
+  onChange: (value: number) => void,
+  additionalProps: InputNumberProps = {}
 ) => {
   const onChangeDefinitely = (val: number | undefined) =>
     val !== undefined ? onChange(val) : undefined
@@ -26,21 +28,27 @@ const renderTimeIntervalInput = (
       value={value}
       parser={parser}
       formatter={formatter}
+      {...additionalProps}
     />
   )
 }
 
 export interface TimeIntervalInputProps {
-  defaultValue?: TimeComponents
-  onChange?: (newComponents: TimeComponents) => void
+  defaultValue?: TimeComponents | undefined
+  onChange?: (newComponents: TimeComponents | undefined) => void
+  nullable?: boolean
 }
 
 const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
   defaultValue,
-  onChange
+  onChange,
+  nullable
 }) => {
   const [components, setComponents] = useState<TimeComponents>(
     defaultValue || { hours: 0, minutes: 0, seconds: 0 }
+  )
+  const [enabled, setEnabled] = useState<boolean>(
+    !nullable || defaultValue !== undefined
   )
 
   const createOnValueChange = (field: keyof TimeComponents) => (
@@ -49,26 +57,42 @@ const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
     const newComponents = { ...components, [field]: value }
     setComponents(newComponents)
     if (onChange) {
-      onChange(newComponents)
+      onChange(enabled ? newComponents : undefined)
     }
   }
+
+  const onEnabledChange = (state: boolean) => {
+    setEnabled(state)
+    if (onChange) {
+      onChange(state ? components : undefined)
+    }
+  }
+
   return (
     <div className="time-interval-input">
-      {renderTimeIntervalInput(
-        'h',
-        components.hours,
-        createOnValueChange('hours')
-      )}
-      {renderTimeIntervalInput(
-        'm',
-        components.minutes,
-        createOnValueChange('minutes')
-      )}
-      {renderTimeIntervalInput(
-        's',
-        components.seconds,
-        createOnValueChange('seconds')
-      )}
+      {nullable ? (
+        <Switch defaultChecked={enabled} onChange={onEnabledChange} />
+      ) : undefined}
+      <div className="time-interval-input-numbers">
+        {renderTimeIntervalInput(
+          'h',
+          components.hours,
+          createOnValueChange('hours'),
+          { disabled: !enabled }
+        )}
+        {renderTimeIntervalInput(
+          'm',
+          components.minutes,
+          createOnValueChange('minutes'),
+          { disabled: !enabled }
+        )}
+        {renderTimeIntervalInput(
+          's',
+          components.seconds,
+          createOnValueChange('seconds'),
+          { disabled: !enabled }
+        )}
+      </div>
     </div>
   )
 }

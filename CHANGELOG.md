@@ -17,5 +17,6 @@
 * The task pool can be exported and imported (#640)
 
 ### Changed
+* Time limit can be specified on assignments and not on individual tasks (#635)
 
 ### Removed

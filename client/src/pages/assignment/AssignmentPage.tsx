@@ -19,6 +19,7 @@ import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import moment, { Moment, unitOfTime } from 'moment'
 import React, { useCallback, useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
+import { debounce } from 'ts-debounce'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
@@ -26,6 +27,9 @@ import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
+import TimeIntervalInput, {
+  TimeIntervalInputProps
+} from '../../components/TimeIntervalInput'
 import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
@@ -44,7 +48,12 @@ import {
 } from '../../services/codefreak-api'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-import { momentToIsoCb } from '../../services/time'
+import {
+  componentsToSeconds,
+  momentToIsoCb,
+  secondsToComponents,
+  secondsToRelTime
+} from '../../services/time'
 import { makeUpdater, noop, Updater } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
@@ -59,6 +68,7 @@ import {
 } from '../../services/task'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
+import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
 
 const { Step } = Steps
 
@@ -102,13 +112,15 @@ const AssignmentPage: React.FC = () => {
   }
 
   const { assignment } = result.data
+  const { submission } = assignment
 
   const assignmentInput: UpdateAssignmentMutationVariables = {
     id: assignment.id,
     title: assignment.title,
     active: assignment.active,
     deadline: assignment.deadline,
-    openFrom: assignment.openFrom
+    openFrom: assignment.openFrom,
+    timeLimit: assignment.timeLimit
   }
 
   const updater = makeUpdater(assignmentInput, variables =>
@@ -138,6 +150,42 @@ const AssignmentPage: React.FC = () => {
     ) : null
   }
 
+  const updateTimeLimit = updater('timeLimit')
+  const onTimeLimitChange: TimeIntervalInputProps['onChange'] = async limit => {
+    const seconds = limit ? componentsToSeconds(limit) : 0
+    await updateTimeLimit(seconds > 0 ? seconds : null)
+  }
+
+  const timeLimitInput = (
+    <TimeIntervalInput
+      onChange={debounce(onTimeLimitChange, 500)}
+      defaultValue={
+        assignment.timeLimit
+          ? secondsToComponents(assignment.timeLimit)
+          : undefined
+      }
+      nullable
+    />
+  )
+
+  const deadline = submission?.deadline
+    ? moment(submission.deadline)
+    : undefined
+  const timeLimitTag = assignment.timeLimit
+    ? [
+        <TimeLimitTag
+          key="time-limit"
+          timeLimit={assignment.timeLimit}
+          deadline={deadline}
+        />
+      ]
+    : []
+
+  const assignmentTags = [
+    <AssignmentStatusTag key="assignment-status" status={assignment.status} />,
+    ...timeLimitTag
+  ]
+
   return (
     <>
       <SetTitle>{assignment.title}</SetTitle>
@@ -149,7 +197,7 @@ const AssignmentPage: React.FC = () => {
             onChange={updater('title')}
           />
         }
-        tags={<AssignmentStatusTag status={assignment.status} />}
+        tags={assignmentTags}
         tabList={tabs}
         tabActiveKey={subPath.get()}
         breadcrumb={createBreadcrumb(createRoutes.forAssignment(assignment))}
@@ -165,7 +213,7 @@ const AssignmentPage: React.FC = () => {
         }
         content={
           <>
-            <Descriptions size="small" column={4}>
+            <Descriptions className="assignment-dates" size="small" column={4}>
               <Descriptions.Item label="Created">
                 {formatter.date(assignment.createdAt)}
               </Descriptions.Item>
@@ -175,6 +223,13 @@ const AssignmentPage: React.FC = () => {
                 assignment.openFrom
               )}
               {renderDate('Deadline', updater('deadline'), assignment.deadline)}
+              <Descriptions.Item label="Time Limit">
+                {assignment.editable
+                  ? timeLimitInput
+                  : assignment.timeLimit
+                  ? secondsToRelTime(assignment.timeLimit)
+                  : 'none'}
+              </Descriptions.Item>
             </Descriptions>
             <Authorized condition={assignment.editable}>
               <StatusSteps

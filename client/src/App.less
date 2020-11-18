@@ -25,9 +25,13 @@
   background-size: 20px 20px;
 }
 
-.ant-pro-basicLayout-content {
+.ant-pro-basicLayout-content,
+.ant-pro-basicLayout-children-content-wrap,
+.ant-layout .ant-layout-header + div {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+  min-height: 0 !important; // for .ant-layout .ant-layout-header + div
 }
 
 .ide-iframe {
