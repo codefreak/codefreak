@@ -16,7 +16,7 @@ import java.util.UUID
 class JpaFileServiceTest {
   private val collectionId = UUID(0, 0)
   private val filePath = "file.txt"
-  private val directoryPath = "some/path/"
+  private val directoryPath = "some/path"
 
   @Mock
   lateinit var fileCollectionRepository: FileCollectionRepository
@@ -169,7 +169,7 @@ class JpaFileServiceTest {
     filePutContents(filePath, contents)
 
     assert(containsFile(filePath))
-    assert(equals(fileService.getFileContents(collectionId, filePath), contents))
+    assert(equals(getFileContents(filePath), contents))
   }
 
   private fun equals(a: ByteArray, b: ByteArray): Boolean {
@@ -198,6 +198,91 @@ class JpaFileServiceTest {
     filePutContents(filePath, byteArrayOf(42))
   }
 
+  @Test
+  fun `moveFile moves existing file`() {
+    createFile(filePath)
+
+    moveFile(filePath, "new.txt")
+
+    assert(!containsFile(filePath))
+    assert(containsFile("new.txt"))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `moveFile throws when source path does not exist`() {
+    moveFile(filePath, "new.txt")
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `moveFile throws when target path already exists`() {
+    createFile(filePath)
+    createFile("new.txt")
+
+    moveFile(filePath, "new.txt")
+  }
+
+  @Test
+  fun `moveFile does not change file contents`() {
+    createFile(filePath)
+    filePutContents(filePath, byteArrayOf(42))
+
+    moveFile(filePath, "new.txt")
+
+    assert(equals(byteArrayOf(42), getFileContents("new.txt")))
+  }
+
+  @Test
+  fun `moveDirectory moves existing directory`() {
+    createDirectory(directoryPath)
+
+    moveDirectory(directoryPath, "new")
+
+    assert(!containsDirectory(directoryPath))
+    assert(containsDirectory("new"))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `moveDirectory throws when source path does not exist`() {
+    moveDirectory(directoryPath, "new")
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `moveDirectory throws when target path already exists`() {
+    createDirectory(directoryPath)
+    createDirectory("new")
+
+    moveDirectory(directoryPath, "new")
+  }
+
+  @Test
+  fun `moveDirectory moves inner hierarchy correctly`() {
+    val innerDirectory = "$directoryPath/inner"
+    val innerFile1 = "$innerDirectory/$filePath"
+    val innerFile1Contents = byteArrayOf(42)
+    val innerFile2 = "$directoryPath/$filePath"
+    val innerFile2Contents = byteArrayOf(17)
+
+    createDirectory(directoryPath)
+    createDirectory(innerDirectory)
+    createFile(innerFile1)
+    filePutContents(innerFile1, innerFile1Contents)
+    createFile(innerFile2)
+    filePutContents(innerFile2, innerFile2Contents)
+
+    moveDirectory(directoryPath, "new")
+
+    assert(!containsDirectory(directoryPath))
+    assert(!containsDirectory(innerDirectory))
+    assert(!containsFile(innerFile1))
+    assert(!containsFile(innerFile2))
+    assert(containsDirectory("new"))
+    assert(containsDirectory("new/inner"))
+    assert(containsFile("new/inner/$filePath"))
+    assert(equals(getFileContents("new/inner/$filePath"), innerFile1Contents))
+    assert(containsFile("new/$filePath"))
+    assert(equals(getFileContents("new/$filePath"), innerFile2Contents))
+  }
+
   private fun createFile(path: String) = fileService.createFile(collectionId, path)
 
   private fun createDirectory(path: String) = fileService.createDirectory(collectionId, path)
@@ -211,4 +296,10 @@ class JpaFileServiceTest {
   private fun containsDirectory(path: String): Boolean = fileService.containsDirectory(collectionId, path)
 
   private fun filePutContents(path: String, contents: ByteArray) = fileService.filePutContents(collectionId, path, contents)
+
+  private fun getFileContents(path: String): ByteArray = fileService.getFileContents(collectionId, path)
+
+  private fun moveFile(from: String, to: String) = fileService.moveFile(collectionId, from, to)
+
+  private fun moveDirectory(from: String, to: String) = fileService.moveDirectory(collectionId, from ,to)
 }

@@ -211,4 +211,66 @@ class JpaFileService : FileService {
 
     return byteArrayOf()
   }
+
+  override fun moveFile(collectionId: UUID, from: String, to: String) {
+    val normalizedFrom = TarUtil.normalizeEntryName(from).withoutTrailingSlash()
+    val normalizedTo = TarUtil.normalizeEntryName(to).withoutTrailingSlash()
+
+    requireValidPattern(normalizedFrom)
+    requireValidPattern(normalizedTo)
+    requireFileDoesExist(collectionId, normalizedFrom)
+    requireFileDoesNotExist(collectionId, normalizedTo)
+
+    val contents = getFileContents(collectionId, normalizedFrom)
+    createFile(collectionId, normalizedTo)
+    filePutContents(collectionId, normalizedTo, contents)
+    deleteFile(collectionId, normalizedFrom)
+  }
+
+  override fun moveDirectory(collectionId: UUID, from: String, to: String) {
+    val normalizedFrom = TarUtil.normalizeEntryName(from).withTrailingSlash()
+    val normalizedTo = TarUtil.normalizeEntryName(to).withTrailingSlash()
+
+    requireValidPattern(normalizedFrom)
+    requireValidPattern(normalizedTo)
+    requireDirectoryDoesExist(collectionId, normalizedFrom)
+    requireDirectoryDoesNotExist(collectionId, normalizedTo)
+
+    val children = findDirectoryChildren(collectionId, normalizedFrom)
+
+    children.forEach {
+      val newPath = it.key.replace(normalizedFrom, normalizedTo)
+      val isDirectory = it.value == null
+
+      if (isDirectory) {
+        createDirectory(collectionId, newPath)
+      } else {
+        moveFile(collectionId, it.key, newPath)
+      }
+    }
+
+    createDirectory(collectionId, normalizedTo)
+    deleteDirectory(collectionId, normalizedFrom)
+  }
+
+  private fun findDirectoryChildren(collectionId: UUID, path: String): Map<String, ByteArray?> {
+    val children = mutableMapOf<String, ByteArray?>()
+
+    getTarInputStream(collectionId).use {
+      do {
+        val child = it.nextTarEntry
+        child?.let {
+          if (child.name.startsWith(path) && child.name != path) {
+            children[child.name] = if (child.isFile) {
+              getFileContents(collectionId, child.name)
+            } else {
+              null
+            }
+          }
+        }
+      } while (child != null)
+    }
+
+    return children
+  }
 }

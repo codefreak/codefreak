@@ -30,4 +30,6 @@ interface FileService {
   fun deleteDirectory(collectionId: UUID, path: String)
   fun filePutContents(collectionId: UUID, path: String, contents: ByteArray)
   fun getFileContents(collectionId: UUID, path: String): ByteArray
+  fun moveFile(collectionId: UUID, from: String, to: String)
+  fun moveDirectory(collectionId: UUID, from: String, to: String)
 }
