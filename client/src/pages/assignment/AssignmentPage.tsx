@@ -26,7 +26,6 @@ import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
-import CopyToClipboardButton from '../../components/CopyToClipboardButton'
 import useAssignmentStatusChange from '../../hooks/useAssignmentStatusChange'
 import { useFormatter } from '../../hooks/useFormatter'
 import useHasAuthority from '../../hooks/useHasAuthority'
@@ -59,6 +58,7 @@ import {
   TaskSortMethodNames
 } from '../../services/task'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
+import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
 
 const { Step } = Steps
 
@@ -156,9 +156,7 @@ const AssignmentPage: React.FC = () => {
         onTabChange={subPath.set}
         extra={
           <Authorized condition={assignment.editable}>
-            <CopyToClipboardButton icon="link" value={window.location.href}>
-              Share Assignment Link
-            </CopyToClipboardButton>
+            <ShareAssignmentButton />
             <ArchiveDownload url={assignment.exportUrl}>
               Export Assignment
             </ArchiveDownload>
