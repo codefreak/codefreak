@@ -12,9 +12,11 @@ import org.codefreak.codefreak.auth.hasAuthority
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.IdeService
+import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileContentService
 import org.codefreak.codefreak.service.file.FileService
 import org.springframework.stereotype.Component
+import java.io.ByteArrayOutputStream
 
 @GraphQLName("FileType")
 enum class FileDtoType {
@@ -74,26 +76,62 @@ class FileQuery : BaseResolver(), Query {
 @Component
 class FileMutation : BaseResolver(), Mutation {
   fun createFile(fileContext: FileContext, path: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).createFile(fileContext.id, path)
     true
   }
 
   fun createDirectory(fileContext: FileContext, path: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).createDirectory(fileContext.id, path)
     true
   }
 
   fun uploadFile(fileContext: FileContext, path: String, contents: Array<ApplicationPart>): Boolean = context {
+    authorize(fileContext)
+    val fileContents = ByteArrayOutputStream().use {
+      contents.forEach { part -> it.write(part.inputStream.readBytes()) }
+      it.toByteArray()
+    }
+    serviceAccess.getService(FileService::class).filePutContents(fileContext.id, path, fileContents)
     true
   }
 
   fun moveFile(fileContext: FileContext, sourcePath: String, targetPath: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).moveFile(fileContext.id, sourcePath, targetPath)
+    true
+  }
+
+  fun moveDirectory(fileContext: FileContext, sourcePath: String, targetPath: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).moveDirectory(fileContext.id, sourcePath, targetPath)
     true
   }
 
   fun deleteFile(fileContext: FileContext, path: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).deleteFile(fileContext.id, path)
     true
   }
 
   fun deleteDirectory(fileContext: FileContext, path: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).deleteDirectory(fileContext.id, path)
+    true
+  }
+
+  private fun authorize(fileContext: FileContext) = context {
+    when (fileContext.contextType) {
+      FileContextType.ANSWER -> {
+        val answer = serviceAccess.getService(AnswerService::class).findAnswer(fileContext.id)
+        authorization.requireAuthorityIfNotCurrentUser(answer.task.owner, Authority.ROLE_ADMIN)
+      }
+      FileContextType.TASK -> {
+        val task = serviceAccess.getService(TaskService::class).findTask(fileContext.id)
+        authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+      }
+    }
     true
   }
 }
