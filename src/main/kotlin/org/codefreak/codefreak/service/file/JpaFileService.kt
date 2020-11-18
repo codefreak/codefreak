@@ -1,10 +1,15 @@
 package org.codefreak.codefreak.service.file
 
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.lang.IllegalArgumentException
+import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
-import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
@@ -15,11 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.util.DigestUtils
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.io.OutputStream
-import java.lang.IllegalArgumentException
 
 @Service
 @ConditionalOnProperty(name = ["codefreak.files.adapter"], havingValue = "JPA")
@@ -111,15 +111,15 @@ class JpaFileService : FileService {
   }
 
   private fun containsPath(
-      collectionId: UUID,
-      path: String,
-      restriction: (TarArchiveEntry) -> Boolean = { true }
+    collectionId: UUID,
+    path: String,
+    restriction: (TarArchiveEntry) -> Boolean = { true }
   ): Boolean = findEntry(collectionId, path, restriction) != null
 
   private fun findEntry(
-      collectionId: UUID,
-      path: String,
-      restriction: (TarArchiveEntry) -> Boolean = { true }
+    collectionId: UUID,
+    path: String,
+    restriction: (TarArchiveEntry) -> Boolean = { true }
   ): TarArchiveEntry? {
     getTarInputStream(collectionId).use {
       do {

@@ -1,6 +1,8 @@
 package org.codefreak.codefreak.service
 
 import com.nhaarman.mockitokotlin2.any
+import java.util.Optional
+import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.file.JpaFileService
@@ -10,8 +12,6 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
-import java.util.UUID
 
 class JpaFileServiceTest {
   private val collectionId = UUID(0, 0)
@@ -301,5 +301,5 @@ class JpaFileServiceTest {
 
   private fun moveFile(from: String, to: String) = fileService.moveFile(collectionId, from, to)
 
-  private fun moveDirectory(from: String, to: String) = fileService.moveDirectory(collectionId, from ,to)
+  private fun moveDirectory(from: String, to: String) = fileService.moveDirectory(collectionId, from, to)
 }
