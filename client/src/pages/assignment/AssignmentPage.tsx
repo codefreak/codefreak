@@ -43,7 +43,6 @@ import {
   useGetTaskPoolForAddingQuery,
   useUpdateAssignmentMutation
 } from '../../services/codefreak-api'
-import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { momentToIsoCb } from '../../services/time'
@@ -59,6 +58,7 @@ import {
   TaskSortMethods,
   TaskSortMethodNames
 } from '../../services/task'
+import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 
 const { Step } = Steps
 
@@ -77,6 +77,7 @@ const AssignmentPage: React.FC = () => {
   })
   const subPath = useSubPath()
   const formatter = useFormatter()
+  const createRoutes = useCreateRoutes()
   const [updateMutation] = useUpdateAssignmentMutation({
     onCompleted: () => {
       result.refetch()
