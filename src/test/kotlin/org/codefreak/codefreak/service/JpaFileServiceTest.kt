@@ -161,6 +161,43 @@ class JpaFileServiceTest {
     assert(containsFile(fileToBeUnaffected))
   }
 
+  @Test
+  fun `filePutContents puts the file contents correctly`() {
+    val contents = byteArrayOf(42)
+    createFile(filePath)
+
+    filePutContents(filePath, contents)
+
+    assert(containsFile(filePath))
+    assert(equals(fileService.getFileContents(collectionId, filePath), contents))
+  }
+
+  private fun equals(a: ByteArray, b: ByteArray): Boolean {
+    if (a.size != b.size) {
+      return false
+    }
+
+    a.forEachIndexed { index, byte ->
+      if (byte != b[index]) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `filePutContents throws for directories`() {
+    createDirectory(directoryPath)
+
+    filePutContents(directoryPath, byteArrayOf(42))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `filePutContents throws if path does not exist`() {
+    filePutContents(filePath, byteArrayOf(42))
+  }
+
   private fun createFile(path: String) = fileService.createFile(collectionId, path)
 
   private fun createDirectory(path: String) = fileService.createDirectory(collectionId, path)
@@ -172,4 +209,6 @@ class JpaFileServiceTest {
   private fun containsFile(path: String): Boolean = fileService.containsFile(collectionId, path)
 
   private fun containsDirectory(path: String): Boolean = fileService.containsDirectory(collectionId, path)
+
+  private fun filePutContents(path: String, contents: ByteArray) = fileService.filePutContents(collectionId, path, contents)
 }

@@ -24,6 +24,10 @@ interface FileService {
 
   fun createFile(collectionId: UUID, path: String)
   fun createDirectory(collectionId: UUID, path: String)
+  fun containsFile(collectionId: UUID, path: String): Boolean
+  fun containsDirectory(collectionId: UUID, path: String): Boolean
   fun deleteFile(collectionId: UUID, path: String)
   fun deleteDirectory(collectionId: UUID, path: String)
+  fun filePutContents(collectionId: UUID, path: String, contents: ByteArray)
+  fun getFileContents(collectionId: UUID, path: String): ByteArray
 }

@@ -3,6 +3,7 @@ package org.codefreak.codefreak.service.file
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
+import org.apache.commons.compress.utils.IOUtils
 import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
@@ -74,7 +75,7 @@ class JpaFileService : FileService {
 
   private fun requireFileDoesExist(collectionId: UUID, path: String) {
     if (!containsFile(collectionId, path)) {
-      throw IllegalArgumentException("$path does not exist")
+      throw IllegalArgumentException("$path does not exist or is no file")
     }
   }
 
@@ -86,7 +87,7 @@ class JpaFileService : FileService {
 
   private fun requireDirectoryDoesExist(collectionId: UUID, path: String) {
     if (!containsDirectory(collectionId, path)) {
-      throw IllegalArgumentException("$path already exists")
+      throw IllegalArgumentException("$path does not exist or is no directory")
     }
   }
 
@@ -96,12 +97,12 @@ class JpaFileService : FileService {
     }
   }
 
-  fun containsFile(collectionId: UUID, path: String): Boolean {
+  override fun containsFile(collectionId: UUID, path: String): Boolean {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
     return containsPath(collectionId, normalizedPath) { it.isFile }
   }
 
-  fun containsDirectory(collectionId: UUID, path: String): Boolean {
+  override fun containsDirectory(collectionId: UUID, path: String): Boolean {
     val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
     return containsPath(collectionId, normalizedPath) { it.isDirectory }
   }
@@ -110,17 +111,23 @@ class JpaFileService : FileService {
       collectionId: UUID,
       path: String,
       restriction: (TarArchiveEntry) -> Boolean = { true }
-  ): Boolean {
+  ): Boolean = findEntry(collectionId, path, restriction) != null
+
+  private fun findEntry(
+      collectionId: UUID,
+      path: String,
+      restriction: (TarArchiveEntry) -> Boolean = { true }
+  ): TarArchiveEntry? {
     getTarInputStream(collectionId).use {
       do {
         val entry = it.nextTarEntry
         if (entry?.name == path && restriction(entry)) {
-          return true
+          return entry
         }
       } while (entry != null)
     }
 
-    return false
+    return null
   }
 
   private fun getTarInputStream(collectionId: UUID) = TarArchiveInputStream(readCollectionTar(collectionId))
@@ -141,7 +148,7 @@ class JpaFileService : FileService {
   }
 
   override fun deleteFile(collectionId: UUID, path: String) {
-    val normalizedPath = TarUtil.normalizeEntryName(path)
+    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
 
     requireValidPattern(normalizedPath)
     requireFileDoesExist(collectionId, normalizedPath)
@@ -153,7 +160,7 @@ class JpaFileService : FileService {
   }
 
   override fun deleteDirectory(collectionId: UUID, path: String) {
-    val normalizedPath = TarUtil.normalizeEntryName(path)
+    val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
 
     requireValidPattern(normalizedPath)
     requireDirectoryDoesExist(collectionId, normalizedPath)
@@ -162,5 +169,46 @@ class JpaFileService : FileService {
       val input = getTarInputStream(collectionId)
       TarUtil.copyEntries(input, it, { entry -> !entry.name.startsWith(normalizedPath) })
     }
+  }
+
+  override fun filePutContents(collectionId: UUID, path: String, contents: ByteArray) {
+    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+
+    requireValidPattern(normalizedPath)
+    requireFileDoesExist(collectionId, normalizedPath)
+
+    val entryToPut = findEntry(collectionId, normalizedPath)!!
+    entryToPut.size = contents.size.toLong()
+
+    getTarOutputStream(collectionId).use {
+      val tar = getTarInputStream(collectionId)
+      TarUtil.copyEntries(tar, it, { entry -> entry.name != normalizedPath })
+
+      val contentsInput = ByteArrayInputStream(contents)
+      it.putArchiveEntry(entryToPut)
+      IOUtils.copy(contentsInput, it)
+      it.closeArchiveEntry()
+    }
+  }
+
+  override fun getFileContents(collectionId: UUID, path: String): ByteArray {
+    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+
+    requireValidPattern(normalizedPath)
+    requireFileDoesExist(collectionId, normalizedPath)
+
+    val input = getTarInputStream(collectionId)
+    do {
+      val entry = input.nextTarEntry
+      entry?.let {
+        if (it.name == normalizedPath) {
+          val output = ByteArrayOutputStream()
+          IOUtils.copy(input, output)
+          return output.toByteArray()
+        }
+      }
+    } while (entry != null)
+
+    return byteArrayOf()
   }
 }
