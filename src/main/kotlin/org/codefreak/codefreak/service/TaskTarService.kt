@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.InputStream
 
 @Service
 class TaskTarService : BaseService() {
@@ -146,18 +147,28 @@ class TaskTarService : BaseService() {
     val tasks = mutableListOf<Task>()
     generateSequence { input.nextTarEntry }
         .filter { it.isFile }
-        .filter { it.name.endsWith(".tar", ignoreCase = true).or(it.name.endsWith(".zip", ignoreCase = true)) }
+        .filter { isArchive(it) }
         .forEach {
-          var content = IOUtils.toByteArray(input)
-          if (!it.name.endsWith(".tar")) {
-            val inputStream = ByteArrayInputStream(content)
-            val outputStream = ByteArrayOutputStream()
-            TarUtil.archiveToTar(inputStream, outputStream)
-            content = outputStream.toByteArray()
-          }
+          val content = getArchiveContent(it, input)
           tasks.add(createFromTar(content, owner, assignment))
         }
     return tasks
+  }
+
+  private fun isArchive(entry: TarArchiveEntry): Boolean = entry.name.endsWith(".tar", ignoreCase = true)
+      .or(entry.name.endsWith(".zip", ignoreCase = true))
+
+  private fun getArchiveContent(entry: TarArchiveEntry, inputStream: InputStream): ByteArray {
+    var content = IOUtils.toByteArray(inputStream)
+
+    if (!entry.name.endsWith(".tar")) {
+      val tmpInputStream = ByteArrayInputStream(content)
+      val tmpOutputStream = ByteArrayOutputStream()
+      TarUtil.archiveToTar(tmpInputStream, tmpOutputStream)
+      content = tmpOutputStream.toByteArray()
+    }
+
+    return content
   }
 
   /**
