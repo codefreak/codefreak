@@ -203,9 +203,8 @@ class TaskTarService : BaseService() {
    */
   fun getExportTar(task: Task): ByteArray {
     val out = ByteArrayOutputStream()
-    val tar = TarUtil.PosixTarArchiveOutputStream(out)
 
-    tar.use {
+    TarUtil.PosixTarArchiveOutputStream(out).use {
       copyTaskFiles(task, it)
       writeTaskDefinition(task, it)
     }
@@ -227,12 +226,7 @@ class TaskTarService : BaseService() {
 
   private fun writeTaskDefinition(task: Task, tar: TarArchiveOutputStream) {
     val definition = createTaskDefinition(task).let { yamlMapper.writeValueAsBytes(it) }
-
-    val entry = TarArchiveEntry(TarUtil.CODEFREAK_DEFINITION_NAME).also { it.size = definition.size.toLong() }
-
-    tar.putArchiveEntry(entry)
-    tar.write(definition)
-    tar.closeArchiveEntry()
+    writeArchiveEntry(tar, TarUtil.CODEFREAK_DEFINITION_NAME, definition)
   }
 
   private fun createTaskDefinition(task: Task) = TaskDefinition(
@@ -249,6 +243,14 @@ class TaskTarService : BaseService() {
       }
   )
 
+  private fun writeArchiveEntry(tar: TarArchiveOutputStream, entryName: String, content: ByteArray) {
+    val entry = TarArchiveEntry(entryName).also { it.size = content.size.toLong() }
+
+    tar.putArchiveEntry(entry)
+    tar.write(content)
+    tar.closeArchiveEntry()
+  }
+
   /**
    * Creates a tar archive containing the given tasks each as a tar archive.
    *
@@ -258,16 +260,19 @@ class TaskTarService : BaseService() {
   @Transactional(readOnly = true)
   fun getExportTar(tasks: Collection<Task>): ByteArray {
     val out = ByteArrayOutputStream()
-    val tar = TarUtil.PosixTarArchiveOutputStream(out)
 
-    tasks.forEach { task ->
-      val taskTar = getExportTar(taskService.findTask(task.id)) // use findTask() on each task so everything is lazy initialized correctly
-      tar.putArchiveEntry(TarArchiveEntry("${task.title}-${task.id}.tar").also { it.size = taskTar.size.toLong() })
-      tar.write(taskTar)
-      tar.closeArchiveEntry()
+    TarUtil.PosixTarArchiveOutputStream(out).use {
+      tasks.forEach { task ->
+        // use findTask() on each task so everything is lazy initialized correctly
+        val content = getExportTar(taskService.findTask(task.id))
+
+        // Use a combination of the task title and its id so tasks with the same name don't overwrite each other
+        val entryName = "${task.title}-${task.id}.tar"
+
+        writeArchiveEntry(it, entryName, content)
+      }
     }
 
-    tar.close()
     return out.toByteArray()
   }
 }
