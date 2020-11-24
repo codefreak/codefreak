@@ -118,6 +118,14 @@ class TaskTarService : BaseService() {
         }
       }
 
+  private fun addBuiltInEvaluationSteps(task: Task) {
+    if (task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME } == null) {
+      task.evaluationStepDefinitions.forEach { it.position++ }
+      val runner = evaluationService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
+      task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
+    }
+  }
+
   private fun copyTaskFilesFromTar(taskId: UUID, tarContent: ByteArray) {
     fileService.writeCollectionTar(taskId).use { fileCollection ->
       TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals(TarUtil.CODEFREAK_DEFINITION_NAME, true) })
@@ -150,14 +158,6 @@ class TaskTarService : BaseService() {
           tasks.add(createFromTar(content, owner, assignment))
         }
     return tasks
-  }
-
-  private fun addBuiltInEvaluationSteps(task: Task) {
-    if (task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME } == null) {
-      task.evaluationStepDefinitions.forEach { it.position++ }
-      val runner = evaluationService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
-      task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
-    }
   }
 
   /**
