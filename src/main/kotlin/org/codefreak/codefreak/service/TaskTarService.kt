@@ -57,40 +57,44 @@ class TaskTarService : BaseService() {
   fun createFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
     val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
 
-    var task = createNewTaskFromDefinition(definition, owner, assignment, position)
+    var task = createTaskFromDefinition(definition, owner, assignment, position)
 
+    task = taskService.saveTask(task)
+
+    addEvaluationStepsFromDefinition(definition, task)
+    validateEvaluationSteps(task)
     addBuiltInEvaluationSteps(task)
+
     evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
 
     task = taskService.saveTask(task)
+
     copyTaskFilesFromTar(task.id, tarContent)
 
     return task
   }
 
   /**
-   * Creates and saves a new task from a given TaskDefinition.
+   * Creates a new task from a given TaskDefinition without the evaluation steps and the file contents.
    */
-  private fun createNewTaskFromDefinition(definition: TaskDefinition, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
-    var task = Task(assignment, owner, position, definition.title, definition.description, 100)
+  private fun createTaskFromDefinition(
+    definition: TaskDefinition,
+    owner: User,
+    assignment: Assignment? = null,
+    position: Long = 0L
+  ): Task {
+    val task = Task(assignment, owner, position, definition.title, definition.description, 100)
 
     task.hiddenFiles = definition.hidden
     task.protectedFiles = definition.protected
     task.ideEnabled = definition.ide?.enabled ?: true
     task.ideImage = definition.ide?.image
 
-    task = taskService.saveTask(task)
-    task.evaluationStepDefinitions = getEvaluationStepDefinitions(definition, task)
-
-    task.evaluationStepDefinitions
-        .groupBy { it.runnerName }
-        .forEach { (runnerName, definitions) ->
-          if (definitions.size > 1 && evaluationService.getEvaluationRunner(runnerName).isBuiltIn()) {
-            throw IllegalArgumentException("Evaluation step '$runnerName' can only be added once!")
-          }
-        }
-
     return task
+  }
+
+  private fun addEvaluationStepsFromDefinition(definition: TaskDefinition, task: Task) {
+    task.evaluationStepDefinitions = getEvaluationStepDefinitions(definition, task)
   }
 
   /**
@@ -105,6 +109,14 @@ class TaskTarService : BaseService() {
         stepDefinition
       }
       .toMutableSet()
+
+  private fun validateEvaluationSteps(task: Task) = task.evaluationStepDefinitions
+      .groupBy { it.runnerName }
+      .forEach { (runnerName, definitions) ->
+        if (definitions.size > 1 && evaluationService.getEvaluationRunner(runnerName).isBuiltIn()) {
+          throw IllegalArgumentException("Evaluation step '$runnerName' can only be added once!")
+        }
+      }
 
   private fun copyTaskFilesFromTar(taskId: UUID, tarContent: ByteArray) {
     fileService.writeCollectionTar(taskId).use { fileCollection ->
