@@ -3,10 +3,12 @@ package org.codefreak.codefreak.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.util.UUID
 import liquibase.util.StreamUtil
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
@@ -24,7 +26,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.io.InputStream
 
 @Service
 class TaskTarService : BaseService() {
@@ -203,30 +204,50 @@ class TaskTarService : BaseService() {
   fun getExportTar(task: Task): ByteArray {
     val out = ByteArrayOutputStream()
     val tar = TarUtil.PosixTarArchiveOutputStream(out)
-    fileService.readCollectionTar(task.id).use { files ->
-      TarUtil.copyEntries(TarArchiveInputStream(files), tar, filter = { !TarUtil.isRoot(it) && it.name != TarUtil.CODEFREAK_DEFINITION_NAME })
+
+    tar.use {
+      copyTaskFiles(task, it)
+      writeTaskDefinition(task, it)
     }
 
-    val definition = TaskDefinition(
-        task.title,
-        task.body,
-        task.hiddenFiles,
-        task.protectedFiles,
-        task.evaluationStepDefinitions.map {
-          EvaluationDefinition(
-              it.runnerName,
-              it.options,
-              it.title
-          )
-        }
-    ).let { yamlMapper.writeValueAsBytes(it) }
-
-    tar.putArchiveEntry(TarArchiveEntry("codefreak.yml").also { it.size = definition.size.toLong() })
-    tar.write(definition)
-    tar.closeArchiveEntry()
-    tar.close()
     return out.toByteArray()
   }
+
+  private fun copyTaskFiles(task: Task, tar: TarUtil.PosixTarArchiveOutputStream) {
+    fileService.readCollectionTar(task.id).use { files ->
+      TarUtil.copyEntries(
+          TarArchiveInputStream(files),
+          tar,
+          filter = { !(TarUtil.isRoot(it).or(isCodefreakDefinition(it))) }
+      )
+    }
+  }
+
+  private fun isCodefreakDefinition(entry: TarArchiveEntry) = entry.name == TarUtil.CODEFREAK_DEFINITION_NAME
+
+  private fun writeTaskDefinition(task: Task, tar: TarArchiveOutputStream) {
+    val definition = createTaskDefinition(task).let { yamlMapper.writeValueAsBytes(it) }
+
+    val entry = TarArchiveEntry(TarUtil.CODEFREAK_DEFINITION_NAME).also { it.size = definition.size.toLong() }
+
+    tar.putArchiveEntry(entry)
+    tar.write(definition)
+    tar.closeArchiveEntry()
+  }
+
+  private fun createTaskDefinition(task: Task) = TaskDefinition(
+      task.title,
+      task.body,
+      task.hiddenFiles,
+      task.protectedFiles,
+      task.evaluationStepDefinitions.map {
+        EvaluationDefinition(
+            it.runnerName,
+            it.options,
+            it.title
+        )
+      }
+  )
 
   /**
    * Creates a tar archive containing the given tasks each as a tar archive.
