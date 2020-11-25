@@ -122,14 +122,12 @@ class JpaFileService : FileService {
     restriction: (TarArchiveEntry) -> Boolean = { true }
   ): TarArchiveEntry? {
     getTarInputStream(collectionId).use {
-      do {
-        val entry = it.nextTarEntry
-        if (entry?.name == path && restriction(entry)) {
+      generateSequence { it.nextTarEntry }.forEach { entry ->
+        if (entry.name == path && restriction(entry)) {
           return entry
         }
-      } while (entry != null)
+      }
     }
-
     return null
   }
 
@@ -200,17 +198,16 @@ class JpaFileService : FileService {
     requireValidPattern(normalizedPath)
     requireFileDoesExist(collectionId, normalizedPath)
 
-    val input = getTarInputStream(collectionId)
-    do {
-      val entry = input.nextTarEntry
-      entry?.let {
-        if (it.name == normalizedPath) {
+    getTarInputStream(collectionId).use {
+      generateSequence { it.nextTarEntry }.forEach { entry ->
+        if (entry.name == normalizedPath) {
           val output = ByteArrayOutputStream()
-          IOUtils.copy(input, output)
+          IOUtils.copy(it, output)
           return output.toByteArray()
         }
       }
-    } while (entry != null)
+    }
+
 
     return byteArrayOf()
   }
@@ -260,18 +257,15 @@ class JpaFileService : FileService {
     val children = mutableMapOf<String, ByteArray?>()
 
     getTarInputStream(collectionId).use {
-      do {
-        val child = it.nextTarEntry
-        child?.let {
-          if (child.name.startsWith(path) && child.name != path) {
-            children[child.name] = if (child.isFile) {
-              getFileContents(collectionId, child.name)
-            } else {
-              null
-            }
+      generateSequence { it.nextTarEntry }.forEach { child ->
+        if (child.name.startsWith(path) && child.name != path) {
+          children[child.name] = if (child.isFile) {
+            getFileContents(collectionId, child.name)
+          } else {
+            null
           }
         }
-      } while (child != null)
+      }
     }
 
     return children
