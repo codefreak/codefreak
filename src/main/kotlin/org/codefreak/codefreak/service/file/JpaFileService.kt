@@ -60,43 +60,13 @@ class JpaFileService : FileService {
   override fun createFile(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
 
-    requireValidPattern(path)
-    requireFileDoesNotExist(collectionId, normalizedPath)
+    require(normalizedPath.isNotBlank())
+    require(!containsFile(collectionId, normalizedPath))
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
       TarUtil.copyEntries(input, it)
       TarUtil.touch(normalizedPath, it)
-    }
-  }
-
-  private fun requireValidPattern(path: String) {
-    if (path.isBlank()) {
-      throw IllegalArgumentException("$path is not a valid path pattern")
-    }
-  }
-
-  private fun requireFileDoesExist(collectionId: UUID, path: String) {
-    if (!containsFile(collectionId, path)) {
-      throw IllegalArgumentException("$path does not exist or is no file")
-    }
-  }
-
-  private fun requireFileDoesNotExist(collectionId: UUID, path: String) {
-    if (containsFile(collectionId, path)) {
-      throw IllegalArgumentException("$path already exists")
-    }
-  }
-
-  private fun requireDirectoryDoesExist(collectionId: UUID, path: String) {
-    if (!containsDirectory(collectionId, path)) {
-      throw IllegalArgumentException("$path does not exist or is no directory")
-    }
-  }
-
-  private fun requireDirectoryDoesNotExist(collectionId: UUID, path: String) {
-    if (containsDirectory(collectionId, path)) {
-      throw IllegalArgumentException("$path already exists")
     }
   }
 
@@ -138,8 +108,8 @@ class JpaFileService : FileService {
   override fun createDirectory(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
 
-    requireValidPattern(normalizedPath)
-    requireDirectoryDoesNotExist(collectionId, normalizedPath)
+    require(normalizedPath.isNotBlank())
+    require(!containsDirectory(collectionId, normalizedPath))
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
@@ -151,8 +121,8 @@ class JpaFileService : FileService {
   override fun deleteFile(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
 
-    requireValidPattern(normalizedPath)
-    requireFileDoesExist(collectionId, normalizedPath)
+    require(normalizedPath.isNotBlank())
+    require(containsFile(collectionId, normalizedPath))
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
@@ -163,8 +133,8 @@ class JpaFileService : FileService {
   override fun deleteDirectory(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
 
-    requireValidPattern(normalizedPath)
-    requireDirectoryDoesExist(collectionId, normalizedPath)
+    require(normalizedPath.isNotBlank())
+    require(containsDirectory(collectionId, normalizedPath))
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
@@ -175,8 +145,8 @@ class JpaFileService : FileService {
   override fun filePutContents(collectionId: UUID, path: String, contents: ByteArray) {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
 
-    requireValidPattern(normalizedPath)
-    requireFileDoesExist(collectionId, normalizedPath)
+    require(normalizedPath.isNotBlank())
+    require(containsFile(collectionId, normalizedPath))
 
     val entryToPut = findEntry(collectionId, normalizedPath)!!
     entryToPut.size = contents.size.toLong()
@@ -195,8 +165,8 @@ class JpaFileService : FileService {
   override fun getFileContents(collectionId: UUID, path: String): ByteArray {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
 
-    requireValidPattern(normalizedPath)
-    requireFileDoesExist(collectionId, normalizedPath)
+    require(normalizedPath.isNotBlank())
+    require(containsFile(collectionId, normalizedPath))
 
     getTarInputStream(collectionId).use {
       generateSequence { it.nextTarEntry }.forEach { entry ->
@@ -216,10 +186,10 @@ class JpaFileService : FileService {
     val normalizedFrom = TarUtil.normalizeEntryName(from).withoutTrailingSlash()
     val normalizedTo = TarUtil.normalizeEntryName(to).withoutTrailingSlash()
 
-    requireValidPattern(normalizedFrom)
-    requireValidPattern(normalizedTo)
-    requireFileDoesExist(collectionId, normalizedFrom)
-    requireFileDoesNotExist(collectionId, normalizedTo)
+    require(normalizedFrom.isNotBlank())
+    require(normalizedTo.isNotBlank())
+    require(containsFile(collectionId, normalizedFrom))
+    require(!containsFile(collectionId, normalizedTo))
 
     val contents = getFileContents(collectionId, normalizedFrom)
     createFile(collectionId, normalizedTo)
@@ -231,10 +201,10 @@ class JpaFileService : FileService {
     val normalizedFrom = TarUtil.normalizeEntryName(from).withTrailingSlash()
     val normalizedTo = TarUtil.normalizeEntryName(to).withTrailingSlash()
 
-    requireValidPattern(normalizedFrom)
-    requireValidPattern(normalizedTo)
-    requireDirectoryDoesExist(collectionId, normalizedFrom)
-    requireDirectoryDoesNotExist(collectionId, normalizedTo)
+    require(normalizedFrom.isNotBlank())
+    require(normalizedTo.isNotBlank())
+    require(containsDirectory(collectionId, normalizedFrom))
+    require(!containsDirectory(collectionId, normalizedTo))
 
     val children = findDirectoryChildren(collectionId, normalizedFrom)
 
