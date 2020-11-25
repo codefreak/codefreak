@@ -1,6 +1,8 @@
 package org.codefreak.codefreak.service
 
 import com.nhaarman.mockitokotlin2.any
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import java.util.Optional
 import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
@@ -34,7 +36,7 @@ class JpaFileServiceTest {
   @Test
   fun `createFile creates an empty file`() {
     createFile(filePath)
-    assert(containsFile(filePath))
+    assertTrue(containsFile(filePath))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -54,15 +56,15 @@ class JpaFileServiceTest {
     createDirectory("aDirectory")
     createFile(filePath)
 
-    assert(fileService.containsFile(collectionId, filePath))
-    assert(fileService.containsFile(collectionId, "other.txt"))
-    assert(fileService.containsDirectory(collectionId, "aDirectory"))
+    assertTrue(containsFile(filePath))
+    assertTrue(containsFile("other.txt"))
+    assertTrue(containsDirectory("aDirectory"))
   }
 
   @Test
   fun `createDirectory creates an empty directory`() {
     createDirectory(directoryPath)
-    assert(containsDirectory(directoryPath))
+    assertTrue(containsDirectory(directoryPath))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -82,9 +84,9 @@ class JpaFileServiceTest {
     createDirectory("aDirectory")
     createDirectory(directoryPath)
 
-    assert(containsFile("other.txt"))
-    assert(containsDirectory("aDirectory"))
-    assert(containsDirectory(directoryPath))
+    assertTrue(containsFile("other.txt"))
+    assertTrue(containsDirectory("aDirectory"))
+    assertTrue(containsDirectory(directoryPath))
   }
 
   @Test
@@ -93,7 +95,7 @@ class JpaFileServiceTest {
 
     deleteFile(filePath)
 
-    assert(!containsFile(filePath))
+    assertFalse(containsFile(filePath))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -109,9 +111,9 @@ class JpaFileServiceTest {
 
     deleteFile(filePath)
 
-    assert(!containsFile(filePath))
-    assert(containsFile("DO_NOT_DELETE.txt"))
-    assert(containsDirectory(directoryPath))
+    assertFalse(containsFile(filePath))
+    assertTrue(containsFile("DO_NOT_DELETE.txt"))
+    assertTrue(containsDirectory(directoryPath))
   }
 
   @Test
@@ -120,7 +122,7 @@ class JpaFileServiceTest {
 
     deleteDirectory(directoryPath)
 
-    assert(!containsDirectory(directoryPath))
+    assertFalse(containsDirectory(directoryPath))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -136,9 +138,9 @@ class JpaFileServiceTest {
 
     deleteDirectory(directoryPath)
 
-    assert(containsFile(filePath))
-    assert(containsDirectory("DO_NOT_DELETE"))
-    assert(!containsDirectory(directoryPath))
+    assertTrue(containsFile(filePath))
+    assertTrue(containsDirectory("DO_NOT_DELETE"))
+    assertFalse(containsDirectory(directoryPath))
   }
 
   @Test
@@ -155,10 +157,10 @@ class JpaFileServiceTest {
 
     deleteDirectory(directoryToDelete)
 
-    assert(!containsDirectory(directoryToDelete))
-    assert(!containsFile(fileToRecursivelyDelete))
-    assert(!containsDirectory(directoryToRecursivelyDelete))
-    assert(containsFile(fileToBeUnaffected))
+    assertFalse(containsDirectory(directoryToDelete))
+    assertFalse(containsFile(fileToRecursivelyDelete))
+    assertFalse(containsDirectory(directoryToRecursivelyDelete))
+    assertTrue(containsFile(fileToBeUnaffected))
   }
 
   @Test
@@ -168,8 +170,8 @@ class JpaFileServiceTest {
 
     filePutContents(filePath, contents)
 
-    assert(containsFile(filePath))
-    assert(equals(getFileContents(filePath), contents))
+    assertTrue(containsFile(filePath))
+    assertTrue(equals(getFileContents(filePath), contents))
   }
 
   private fun equals(a: ByteArray, b: ByteArray): Boolean {
@@ -204,8 +206,8 @@ class JpaFileServiceTest {
 
     moveFile(filePath, "new.txt")
 
-    assert(!containsFile(filePath))
-    assert(containsFile("new.txt"))
+    assertFalse(containsFile(filePath))
+    assertTrue(containsFile("new.txt"))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -228,7 +230,7 @@ class JpaFileServiceTest {
 
     moveFile(filePath, "new.txt")
 
-    assert(equals(byteArrayOf(42), getFileContents("new.txt")))
+    assertTrue(equals(byteArrayOf(42), getFileContents("new.txt")))
   }
 
   @Test
@@ -237,8 +239,8 @@ class JpaFileServiceTest {
 
     moveDirectory(directoryPath, "new")
 
-    assert(!containsDirectory(directoryPath))
-    assert(containsDirectory("new"))
+    assertFalse(containsDirectory(directoryPath))
+    assertTrue(containsDirectory("new"))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -271,16 +273,16 @@ class JpaFileServiceTest {
 
     moveDirectory(directoryPath, "new")
 
-    assert(!containsDirectory(directoryPath))
-    assert(!containsDirectory(innerDirectory))
-    assert(!containsFile(innerFile1))
-    assert(!containsFile(innerFile2))
-    assert(containsDirectory("new"))
-    assert(containsDirectory("new/inner"))
-    assert(containsFile("new/inner/$filePath"))
-    assert(equals(getFileContents("new/inner/$filePath"), innerFile1Contents))
-    assert(containsFile("new/$filePath"))
-    assert(equals(getFileContents("new/$filePath"), innerFile2Contents))
+    assertFalse(containsDirectory(directoryPath))
+    assertFalse(containsDirectory(innerDirectory))
+    assertFalse(containsFile(innerFile1))
+    assertFalse(containsFile(innerFile2))
+    assertTrue(containsDirectory("new"))
+    assertTrue(containsDirectory("new/inner"))
+    assertTrue(containsFile("new/inner/$filePath"))
+    assertTrue(equals(getFileContents("new/inner/$filePath"), innerFile1Contents))
+    assertTrue(containsFile("new/$filePath"))
+    assertTrue(equals(getFileContents("new/$filePath"), innerFile2Contents))
   }
 
   private fun createFile(path: String) = fileService.createFile(collectionId, path)
