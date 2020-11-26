@@ -1,19 +1,20 @@
 package org.codefreak.codefreak.service
 
 import com.nhaarman.mockitokotlin2.any
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import java.util.Optional
-import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.file.JpaFileService
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.io.InputStream
+import java.util.Optional
+import java.util.UUID
 
 class JpaFileServiceTest {
   private val collectionId = UUID(0, 0)
@@ -168,10 +169,12 @@ class JpaFileServiceTest {
     val contents = byteArrayOf(42)
     createFile(filePath)
 
-    filePutContents(filePath, contents)
+    filePutContents(filePath).use {
+      it.write(contents)
+    }
 
     assertTrue(containsFile(filePath))
-    assertTrue(equals(getFileContents(filePath), contents))
+    assertTrue(equals(getFileContents(filePath).readBytes(), contents))
   }
 
   private fun equals(a: ByteArray, b: ByteArray): Boolean {
@@ -192,12 +195,16 @@ class JpaFileServiceTest {
   fun `filePutContents throws for directories`() {
     createDirectory(directoryPath)
 
-    filePutContents(directoryPath, byteArrayOf(42))
+    filePutContents(directoryPath).use {
+      it.write(byteArrayOf(42))
+    }
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `filePutContents throws if path does not exist`() {
-    filePutContents(filePath, byteArrayOf(42))
+    filePutContents(filePath).use {
+      it.write(byteArrayOf(42))
+    }
   }
 
   @Test
@@ -225,12 +232,15 @@ class JpaFileServiceTest {
 
   @Test
   fun `moveFile does not change file contents`() {
+    val contents = byteArrayOf(42)
     createFile(filePath)
-    filePutContents(filePath, byteArrayOf(42))
+    filePutContents(filePath).use {
+      it.write(contents)
+    }
 
     moveFile(filePath, "new.txt")
 
-    assertTrue(equals(byteArrayOf(42), getFileContents("new.txt")))
+    assertTrue(equals(contents, getFileContents("new.txt").readBytes()))
   }
 
   @Test
@@ -267,9 +277,13 @@ class JpaFileServiceTest {
     createDirectory(directoryPath)
     createDirectory(innerDirectory)
     createFile(innerFile1)
-    filePutContents(innerFile1, innerFile1Contents)
+    filePutContents(innerFile1).use {
+      it.write(innerFile1Contents)
+    }
     createFile(innerFile2)
-    filePutContents(innerFile2, innerFile2Contents)
+    filePutContents(innerFile2).use {
+      it.write(innerFile2Contents)
+    }
 
     moveDirectory(directoryPath, "new")
 
@@ -280,9 +294,9 @@ class JpaFileServiceTest {
     assertTrue(containsDirectory("new"))
     assertTrue(containsDirectory("new/inner"))
     assertTrue(containsFile("new/inner/$filePath"))
-    assertTrue(equals(getFileContents("new/inner/$filePath"), innerFile1Contents))
+    assertTrue(equals(getFileContents("new/inner/$filePath").readBytes(), innerFile1Contents))
     assertTrue(containsFile("new/$filePath"))
-    assertTrue(equals(getFileContents("new/$filePath"), innerFile2Contents))
+    assertTrue(equals(getFileContents("new/$filePath").readBytes(), innerFile2Contents))
   }
 
   private fun createFile(path: String) = fileService.createFile(collectionId, path)
@@ -297,9 +311,9 @@ class JpaFileServiceTest {
 
   private fun containsDirectory(path: String): Boolean = fileService.containsDirectory(collectionId, path)
 
-  private fun filePutContents(path: String, contents: ByteArray) = fileService.filePutContents(collectionId, path, contents)
+  private fun filePutContents(path: String) = fileService.filePutContents(collectionId, path)
 
-  private fun getFileContents(path: String): ByteArray = fileService.getFileContents(collectionId, path)
+  private fun getFileContents(path: String): InputStream = fileService.getFileContents(collectionId, path)
 
   private fun moveFile(from: String, to: String) = fileService.moveFile(collectionId, from, to)
 

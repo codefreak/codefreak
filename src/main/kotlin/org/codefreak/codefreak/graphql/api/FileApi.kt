@@ -3,10 +3,6 @@ package org.codefreak.codefreak.graphql.api
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
-import java.io.ByteArrayOutputStream
-import java.nio.charset.Charset
-import java.util.Base64
-import java.util.UUID
 import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.hasAuthority
@@ -17,6 +13,9 @@ import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileContentService
 import org.codefreak.codefreak.service.file.FileService
 import org.springframework.stereotype.Component
+import java.nio.charset.Charset
+import java.util.Base64
+import java.util.UUID
 
 @GraphQLName("FileType")
 enum class FileDtoType {
@@ -87,13 +86,11 @@ class FileMutation : BaseResolver(), Mutation {
     true
   }
 
-  fun uploadFile(fileContext: FileContext, path: String, contents: Array<ApplicationPart>): Boolean = context {
+  fun uploadFile(fileContext: FileContext, path: String, contents: ApplicationPart): Boolean = context {
     authorize(fileContext)
-    val fileContents = ByteArrayOutputStream().use {
-      contents.forEach { part -> it.write(part.inputStream.readBytes()) }
-      it.toByteArray()
+    serviceAccess.getService(FileService::class).filePutContents(fileContext.id, path).use {
+      it.write(contents.inputStream.readBytes())
     }
-    serviceAccess.getService(FileService::class).filePutContents(fileContext.id, path, fileContents)
     true
   }
 

@@ -1,10 +1,10 @@
 package org.codefreak.codefreak.service.file
 
+import org.springframework.util.DigestUtils
+import org.springframework.util.StreamUtils
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
-import org.springframework.util.DigestUtils
-import org.springframework.util.StreamUtils
 
 interface FileService {
   fun readCollectionTar(collectionId: UUID): InputStream
@@ -28,8 +28,8 @@ interface FileService {
   fun containsDirectory(collectionId: UUID, path: String): Boolean
   fun deleteFile(collectionId: UUID, path: String)
   fun deleteDirectory(collectionId: UUID, path: String)
-  fun filePutContents(collectionId: UUID, path: String, contents: ByteArray)
-  fun getFileContents(collectionId: UUID, path: String): ByteArray
+  fun filePutContents(collectionId: UUID, path: String): OutputStream
+  fun getFileContents(collectionId: UUID, path: String): InputStream
   fun moveFile(collectionId: UUID, from: String, to: String)
   fun moveDirectory(collectionId: UUID, from: String, to: String)
 }

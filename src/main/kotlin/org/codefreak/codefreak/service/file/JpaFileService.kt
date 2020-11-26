@@ -1,11 +1,5 @@
 package org.codefreak.codefreak.service.file
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.io.OutputStream
-import java.lang.IllegalArgumentException
-import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
@@ -20,6 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.util.DigestUtils
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.UUID
 
 @Service
 @ConditionalOnProperty(name = ["codefreak.files.adapter"], havingValue = "JPA")
@@ -142,27 +141,31 @@ class JpaFileService : FileService {
     }
   }
 
-  override fun filePutContents(collectionId: UUID, path: String, contents: ByteArray) {
+  override fun filePutContents(collectionId: UUID, path: String): OutputStream {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
 
     require(normalizedPath.isNotBlank())
     require(containsFile(collectionId, normalizedPath))
 
-    val entryToPut = findEntry(collectionId, normalizedPath)!!
-    entryToPut.size = contents.size.toLong()
+    return object : ByteArrayOutputStream() {
+      override fun close() {
+        val contents = toByteArray()
+        val entryToPut = findEntry(collectionId, normalizedPath)!!
+        entryToPut.size = contents.size.toLong()
 
-    getTarOutputStream(collectionId).use {
-      val tar = getTarInputStream(collectionId)
-      TarUtil.copyEntries(tar, it, { entry -> entry.name != normalizedPath })
+        getTarOutputStream(collectionId).use {
+          val tar = getTarInputStream(collectionId)
+          TarUtil.copyEntries(tar, it, { entry -> entry.name != normalizedPath })
 
-      val contentsInput = ByteArrayInputStream(contents)
-      it.putArchiveEntry(entryToPut)
-      IOUtils.copy(contentsInput, it)
-      it.closeArchiveEntry()
+          it.putArchiveEntry(entryToPut)
+          IOUtils.copy(contents.inputStream(), it)
+          it.closeArchiveEntry()
+        }
+      }
     }
   }
 
-  override fun getFileContents(collectionId: UUID, path: String): ByteArray {
+  override fun getFileContents(collectionId: UUID, path: String): InputStream {
     val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
 
     require(normalizedPath.isNotBlank())
@@ -173,13 +176,13 @@ class JpaFileService : FileService {
         if (entry.name == normalizedPath) {
           val output = ByteArrayOutputStream()
           IOUtils.copy(it, output)
-          return output.toByteArray()
+          return ByteArrayInputStream(output.toByteArray())
         }
       }
     }
 
 
-    return byteArrayOf()
+    return ByteArrayInputStream(byteArrayOf())
   }
 
   override fun moveFile(collectionId: UUID, from: String, to: String) {
@@ -193,7 +196,9 @@ class JpaFileService : FileService {
 
     val contents = getFileContents(collectionId, normalizedFrom)
     createFile(collectionId, normalizedTo)
-    filePutContents(collectionId, normalizedTo, contents)
+    filePutContents(collectionId, normalizedTo).use {
+      it.write(contents.readBytes())
+    }
     deleteFile(collectionId, normalizedFrom)
   }
 
@@ -223,8 +228,8 @@ class JpaFileService : FileService {
     deleteDirectory(collectionId, normalizedFrom)
   }
 
-  private fun findDirectoryChildren(collectionId: UUID, path: String): Map<String, ByteArray?> {
-    val children = mutableMapOf<String, ByteArray?>()
+  private fun findDirectoryChildren(collectionId: UUID, path: String): Map<String, InputStream?> {
+    val children = mutableMapOf<String, InputStream?>()
 
     getTarInputStream(collectionId).use {
       generateSequence { it.nextTarEntry }.forEach { child ->
