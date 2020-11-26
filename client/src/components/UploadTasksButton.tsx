@@ -41,8 +41,12 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
   )
 
   const beforeUpload = useCallback(
-    (_: RcFile, fileList: RcFile[]) => {
-      onUpload(fileList)
+    (file: RcFile, fileList: RcFile[]) => {
+      // this function is called for every file, but the upload of the whole file list should run only once
+      if (fileList.indexOf(file) === 0) {
+        onUpload(fileList)
+      }
+
       return false
     },
     [onUpload]
