@@ -183,6 +183,13 @@ class JpaFileService : FileService {
 
     require(normalizedFrom.isNotBlank())
     require(normalizedTo.isNotBlank())
+
+    val isDirectory = containsDirectory(collectionId, normalizedFrom.withTrailingSlash())
+    if (isDirectory) {
+      moveDirectory(collectionId, from, to)
+      return
+    }
+
     require(containsFile(collectionId, normalizedFrom))
     require(!containsFile(collectionId, normalizedTo))
 
@@ -194,7 +201,7 @@ class JpaFileService : FileService {
     deleteFile(collectionId, normalizedFrom)
   }
 
-  override fun moveDirectory(collectionId: UUID, from: String, to: String) {
+  private fun moveDirectory(collectionId: UUID, from: String, to: String) {
     val normalizedFrom = TarUtil.normalizeEntryName(from).withTrailingSlash()
     val normalizedTo = TarUtil.normalizeEntryName(to).withTrailingSlash()
 

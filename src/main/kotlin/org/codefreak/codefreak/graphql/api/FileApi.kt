@@ -100,19 +100,7 @@ class FileMutation : BaseResolver(), Mutation {
     true
   }
 
-  fun moveDirectory(fileContext: FileContext, sourcePath: String, targetPath: String): Boolean = context {
-    authorize(fileContext)
-    serviceAccess.getService(FileService::class).moveDirectory(fileContext.id, sourcePath, targetPath)
-    true
-  }
-
   fun deleteFile(fileContext: FileContext, path: String): Boolean = context {
-    authorize(fileContext)
-    serviceAccess.getService(FileService::class).deleteFile(fileContext.id, path)
-    true
-  }
-
-  fun deleteDirectory(fileContext: FileContext, path: String): Boolean = context {
     authorize(fileContext)
     serviceAccess.getService(FileService::class).deleteFile(fileContext.id, path)
     true

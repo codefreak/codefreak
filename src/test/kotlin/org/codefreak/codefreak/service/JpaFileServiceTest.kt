@@ -218,7 +218,7 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `moveFile throws when target path already exists`() {
+  fun `moveFile throws when target file path already exists`() {
     createFile(filePath)
     createFile("new.txt")
 
@@ -239,30 +239,25 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `moveDirectory moves existing directory`() {
+  fun `moveFile moves existing directory`() {
     createDirectory(directoryPath)
 
-    moveDirectory(directoryPath, "new")
+    moveFile(directoryPath, "new")
 
     assertFalse(containsDirectory(directoryPath))
     assertTrue(containsDirectory("new"))
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `moveDirectory throws when source path does not exist`() {
-    moveDirectory(directoryPath, "new")
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `moveDirectory throws when target path already exists`() {
+  fun `moveFile throws when target directory path already exists`() {
     createDirectory(directoryPath)
     createDirectory("new")
 
-    moveDirectory(directoryPath, "new")
+    moveFile(directoryPath, "new")
   }
 
   @Test
-  fun `moveDirectory moves inner hierarchy correctly`() {
+  fun `moveFile moves inner hierarchy correctly`() {
     val innerDirectory = "$directoryPath/inner"
     val innerFile1 = "$innerDirectory/$filePath"
     val innerFile1Contents = byteArrayOf(42)
@@ -280,7 +275,7 @@ class JpaFileServiceTest {
       it.write(innerFile2Contents)
     }
 
-    moveDirectory(directoryPath, "new")
+    moveFile(directoryPath, "new")
 
     assertFalse(containsDirectory(directoryPath))
     assertFalse(containsDirectory(innerDirectory))
@@ -309,6 +304,4 @@ class JpaFileServiceTest {
   private fun getFileContents(path: String): InputStream = fileService.getFileContents(collectionId, path)
 
   private fun moveFile(from: String, to: String) = fileService.moveFile(collectionId, from, to)
-
-  private fun moveDirectory(from: String, to: String) = fileService.moveDirectory(collectionId, from, to)
 }

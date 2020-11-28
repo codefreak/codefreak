@@ -30,5 +30,4 @@ interface FileService {
   fun filePutContents(collectionId: UUID, path: String): OutputStream
   fun getFileContents(collectionId: UUID, path: String): InputStream
   fun moveFile(collectionId: UUID, from: String, to: String)
-  fun moveDirectory(collectionId: UUID, from: String, to: String)
 }
