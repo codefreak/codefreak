@@ -105,7 +105,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `deleteFile keeps other files and directories intact`() {
+  fun `deleteFile keeps other files and directories intact when deleting a file`() {
     createFile(filePath)
     createFile("DO_NOT_DELETE.txt")
     createDirectory(directoryPath)
@@ -118,26 +118,21 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `deleteDirectory deletes existing directory`() {
+  fun `deleteFile deletes existing directory`() {
     createDirectory(directoryPath)
 
-    deleteDirectory(directoryPath)
+    deleteFile(directoryPath)
 
     assertFalse(containsDirectory(directoryPath))
   }
 
-  @Test(expected = IllegalArgumentException::class)
-  fun `deleteDirectory throws when path does not exist`() {
-    deleteDirectory(directoryPath)
-  }
-
   @Test
-  fun `deleteDirectory keeps other files and directories intact`() {
+  fun `deleteFile keeps other files and directories intact when deleting a directory`() {
     createFile(filePath)
     createDirectory("DO_NOT_DELETE")
     createDirectory(directoryPath)
 
-    deleteDirectory(directoryPath)
+    deleteFile(directoryPath)
 
     assertTrue(containsFile(filePath))
     assertTrue(containsDirectory("DO_NOT_DELETE"))
@@ -145,7 +140,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `deleteDirectory deletes directory content recursively`() {
+  fun `deleteFile deletes directory content recursively`() {
     val directoryToDelete = directoryPath
     val fileToRecursivelyDelete = "$directoryPath/$filePath"
     val directoryToRecursivelyDelete = "$directoryPath/$directoryPath"
@@ -156,7 +151,7 @@ class JpaFileServiceTest {
     createDirectory(directoryToRecursivelyDelete)
     createFile(fileToBeUnaffected)
 
-    deleteDirectory(directoryToDelete)
+    deleteFile(directoryToDelete)
 
     assertFalse(containsDirectory(directoryToDelete))
     assertFalse(containsFile(fileToRecursivelyDelete))
@@ -304,8 +299,6 @@ class JpaFileServiceTest {
   private fun createDirectory(path: String) = fileService.createDirectory(collectionId, path)
 
   private fun deleteFile(path: String) = fileService.deleteFile(collectionId, path)
-
-  private fun deleteDirectory(path: String) = fileService.deleteDirectory(collectionId, path)
 
   private fun containsFile(path: String): Boolean = fileService.containsFile(collectionId, path)
 

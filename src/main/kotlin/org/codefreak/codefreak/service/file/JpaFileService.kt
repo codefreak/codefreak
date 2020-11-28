@@ -118,22 +118,14 @@ class JpaFileService : FileService {
   }
 
   override fun deleteFile(collectionId: UUID, path: String) {
-    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+    var normalizedPath = TarUtil.normalizeEntryName(path)
 
     require(normalizedPath.isNotBlank())
-    require(containsFile(collectionId, normalizedPath))
+    val fileExists = containsFile(collectionId, normalizedPath.withoutTrailingSlash())
+    val directoryExists = containsDirectory(collectionId, normalizedPath.withoutTrailingSlash())
+    require(fileExists.or(directoryExists))
 
-    getTarOutputStream(collectionId).use {
-      val input = getTarInputStream(collectionId)
-      TarUtil.copyEntries(input, it, { entry -> entry.name != normalizedPath })
-    }
-  }
-
-  override fun deleteDirectory(collectionId: UUID, path: String) {
-    val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
-
-    require(normalizedPath.isNotBlank())
-    require(containsDirectory(collectionId, normalizedPath))
+    normalizedPath = if (fileExists) normalizedPath.withoutTrailingSlash() else normalizedPath.withTrailingSlash()
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
@@ -225,7 +217,7 @@ class JpaFileService : FileService {
     }
 
     createDirectory(collectionId, normalizedTo)
-    deleteDirectory(collectionId, normalizedFrom)
+    deleteFile(collectionId, normalizedFrom)
   }
 
   private fun findDirectoryChildren(collectionId: UUID, path: String): Map<String, InputStream?> {

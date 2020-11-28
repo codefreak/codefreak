@@ -114,7 +114,7 @@ class FileMutation : BaseResolver(), Mutation {
 
   fun deleteDirectory(fileContext: FileContext, path: String): Boolean = context {
     authorize(fileContext)
-    serviceAccess.getService(FileService::class).deleteDirectory(fileContext.id, path)
+    serviceAccess.getService(FileService::class).deleteFile(fileContext.id, path)
     true
   }
 
