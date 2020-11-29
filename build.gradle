@@ -59,7 +59,7 @@ dependencies {
   implementation 'com.expediagroup:graphql-kotlin-spring-server:2.1.2'
   implementation 'com.vladmihalcea:hibernate-types-52:2.10.0'
   implementation 'com.github.codefreak:templates:1.2.2'
-  implementation 'com.networknt:json-schema-validator:1.0.44'
+  implementation 'com.networknt:json-schema-validator:1.0.45'
   implementation 'javax.validation:validation-api:2.0.1.Final'
   implementation 'org.hibernate:hibernate-validator:6.1.6.Final'
   implementation 'com.google.guava:guava:30.0-jre'
