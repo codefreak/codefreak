@@ -34,13 +34,15 @@ const renderTimeIntervalInput = (
 }
 
 export interface TimeIntervalInputProps {
-  defaultValue?: TimeComponents | undefined
+  defaultValue?: TimeComponents
+  placeholder?: TimeComponents
   onChange?: (newComponents: TimeComponents | undefined) => void
   nullable?: boolean
 }
 
 const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
   defaultValue,
+  placeholder,
   onChange,
   nullable
 }) => {
@@ -68,30 +70,31 @@ const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
     }
   }
 
+  const hours = enabled
+    ? components.hours
+    : placeholder?.hours || components.hours
+  const minutes = enabled
+    ? components.minutes
+    : placeholder?.minutes || components.minutes
+  const seconds = enabled
+    ? components.seconds
+    : placeholder?.seconds || components.seconds
+
   return (
     <div className="time-interval-input">
       {nullable ? (
         <Switch defaultChecked={enabled} onChange={onEnabledChange} />
       ) : undefined}
       <div className="time-interval-input-numbers">
-        {renderTimeIntervalInput(
-          'h',
-          components.hours,
-          createOnValueChange('hours'),
-          { disabled: !enabled }
-        )}
-        {renderTimeIntervalInput(
-          'm',
-          components.minutes,
-          createOnValueChange('minutes'),
-          { disabled: !enabled }
-        )}
-        {renderTimeIntervalInput(
-          's',
-          components.seconds,
-          createOnValueChange('seconds'),
-          { disabled: !enabled }
-        )}
+        {renderTimeIntervalInput('h', hours, createOnValueChange('hours'), {
+          disabled: !enabled
+        })}
+        {renderTimeIntervalInput('m', minutes, createOnValueChange('minutes'), {
+          disabled: !enabled
+        })}
+        {renderTimeIntervalInput('s', seconds, createOnValueChange('seconds'), {
+          disabled: !enabled
+        })}
       </div>
     </div>
   )

@@ -252,7 +252,7 @@ class EvaluationService : BaseService() {
   }
 
   @Transactional
-  fun updateEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition, title: String?, active: Boolean?, options: Map<String, Any>?): EvaluationStepDefinition {
+  fun updateEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition, title: String?, active: Boolean?, timeout: Long?, options: Map<String, Any>?): EvaluationStepDefinition {
     title?.let {
       evaluationStepDefinition.title = it
     }
@@ -262,6 +262,7 @@ class EvaluationService : BaseService() {
     options?.let {
       evaluationStepDefinition.options = it
     }
+    evaluationStepDefinition.timeout = timeout
     validateRunnerOptions(evaluationStepDefinition)
     saveEvaluationStepDefinition(evaluationStepDefinition)
     taskService.invalidateLatestEvaluations(evaluationStepDefinition.task)

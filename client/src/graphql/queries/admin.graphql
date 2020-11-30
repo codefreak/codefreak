@@ -3,6 +3,7 @@ query GetSystemConfig {
     motd
     maxFileUploadSize
     defaultIdeImage
+    defaultEvaluationTimeout
   }
 }
 

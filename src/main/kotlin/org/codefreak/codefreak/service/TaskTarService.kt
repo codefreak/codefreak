@@ -127,7 +127,7 @@ class TaskTarService : BaseService() {
       val stepDefinition = newStepDefinitions.find { it == existingStepDefinition }
 
       if (stepDefinition != null) {
-        evaluationService.updateEvaluationStepDefinition(existingStepDefinition, stepDefinition.title, stepDefinition.active, stepDefinition.options)
+        evaluationService.updateEvaluationStepDefinition(existingStepDefinition, stepDefinition.title, stepDefinition.active, stepDefinition.timeout, stepDefinition.options)
       } else {
         try {
           evaluationService.deleteEvaluationStepDefinition(existingStepDefinition)
