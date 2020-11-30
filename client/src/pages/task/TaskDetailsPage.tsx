@@ -94,6 +94,21 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
 
   const { task } = result.data
 
+  const details = (
+    <Card title="Instructions">
+      {task.body ? (
+        <ReactMarkdown source={task.body} />
+      ) : (
+        <Empty description="This task has no extra instructions. Take a look at the provided files." />
+      )}
+    </Card>
+  )
+
+  // hiddenFiles and protectedFiles are null if task is not editable
+  if (!task.hiddenFiles || !task.protectedFiles) {
+    return details
+  }
+
   const taskDetailsInput: TaskDetailsInput = {
     id: task.id,
     body: task.body,
@@ -106,20 +121,6 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const updater = makeUpdater(taskDetailsInput, input =>
     updateMutation({ variables: { input } })
   )
-
-  const details = (
-    <Card title="Instructions">
-      {task.body ? (
-        <ReactMarkdown source={task.body} />
-      ) : (
-        <Empty description="This task has no extra instructions. Take a look at the provided files." />
-      )}
-    </Card>
-  )
-
-  if (!editable) {
-    return details
-  }
 
   const assignmentOpen = task.assignment?.status === 'OPEN'
 
