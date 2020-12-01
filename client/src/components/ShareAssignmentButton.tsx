@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Popover, Button, Checkbox, Typography } from 'antd'
 import { extractTargetChecked } from '../services/util'
 import { HIDE_NAVIGATION_QUERY_PARAM } from '../hooks/useHideNavigation'
+import CopyableInput from './CopyableInput'
 
 const { Paragraph } = Typography
 
@@ -19,9 +20,7 @@ export const ShareAssignmentButton: React.FC = () => {
               Single assignment view (hide navigation)
             </Checkbox>
           </Paragraph>
-          <Paragraph copyable ellipsis underline style={{ maxWidth: 300 }}>
-            {url}
-          </Paragraph>
+          <CopyableInput value={url} />
         </Typography>
       }
       title="Share Assignment"
