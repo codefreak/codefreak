@@ -212,7 +212,7 @@ class TaskTarService : BaseService() {
       TarUtil.copyEntries(
           TarArchiveInputStream(files),
           tar,
-          filter = { !(TarUtil.isRoot(it).or(isCodefreakDefinition(it))) }
+          filter = { !TarUtil.isRoot(it) && !isCodefreakDefinition(it) }
       )
     }
   }
