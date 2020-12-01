@@ -48,7 +48,7 @@ enum class FileContextType {
   ANSWER
 }
 
-data class FileContext(var contextType: FileContextType, var id: UUID)
+data class FileContext(var type: FileContextType, var id: UUID)
 
 @Component
 class FileQuery : BaseResolver(), Query {
@@ -107,7 +107,7 @@ class FileMutation : BaseResolver(), Mutation {
   }
 
   private fun authorize(fileContext: FileContext) = context {
-    when (fileContext.contextType) {
+    when (fileContext.type) {
       FileContextType.ANSWER -> {
         val answer = serviceAccess.getService(AnswerService::class).findAnswer(fileContext.id)
         authorization.requireAuthorityIfNotCurrentUser(answer.task.owner, Authority.ROLE_ADMIN)
