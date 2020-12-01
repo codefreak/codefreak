@@ -62,3 +62,28 @@ ide:
 <2> Optionally, you can provide a custom Docker image like described in the previous section.
 
 You can configure the same settings in the UI at `Task > Edit Details > Online IDE`.
+
+== Customizing the default IDE image
+The default IDE Docker image based on VSCode ist published as
+https://hub.docker.com/r/cfreak/ide[`cfreak/ide`] on Docker Hub.
+Check out https://github.com/codefreak/ide[our official source repository on GitHub] to find out which extensions come preinstalled with this image.
+
+Based on this image you can create your own customized IDE with additional plugins or other default settings. The following example Dockerfile installs an additional Extension https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin[`TSLint`] from the VSCode Marketplace.
+
+[source,dockerfile]
+-----
+FROM cfreak/ide:1
+
+RUN code-server --install-extension ms-vscode.vscode-typescript-tslint-plugin <1>
+-----
+
+<1> You will find the unique identifier of your desired extension on the VSCode Marketplace
+
+Place you custom `Dockerfile` in a dedicated directory on your machine and build it. Please check out the official Docker documentation on how to create, build and publish your first image https://docs.docker.com/get-started/part2/[here].
+
+If you build your image successfully, e.g. with the tag `my-ide-image`, you can try it out locally with the following command. This will launch a VSCode instance on port 3000 that you can open in your browser via `http://localhost:3000`.
+
+[source,shell script]
+-----
+docker run --rm -itv$PWD:/home/coder/project -p3000:3000 my-ide-image
+-----
