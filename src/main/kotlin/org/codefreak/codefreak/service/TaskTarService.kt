@@ -148,7 +148,6 @@ class TaskTarService : BaseService() {
     val tasks = mutableListOf<Task>()
     generateSequence { input.nextTarEntry }
         .filter { it.isFile }
-        .filter { isArchive(it) }
         .forEach {
           val content = getArchiveContent(it, input)
           tasks.add(createFromTar(content, owner, assignment))
@@ -156,20 +155,16 @@ class TaskTarService : BaseService() {
     return tasks
   }
 
-  private fun isArchive(entry: TarArchiveEntry): Boolean = entry.name.endsWith(".tar", ignoreCase = true)
-      .or(entry.name.endsWith(".zip", ignoreCase = true))
-
   private fun getArchiveContent(entry: TarArchiveEntry, inputStream: InputStream): ByteArray {
-    var content = IOUtils.toByteArray(inputStream)
-
     if (!entry.name.endsWith(".tar")) {
-      val tmpInputStream = ByteArrayInputStream(content)
-      val tmpOutputStream = ByteArrayOutputStream()
-      TarUtil.archiveToTar(tmpInputStream, tmpOutputStream)
-      content = tmpOutputStream.toByteArray()
+      ByteArrayOutputStream().use {
+        // Throws an exception if it is an unsupported archive type
+        TarUtil.archiveToTar(inputStream, it)
+        return it.toByteArray()
+      }
     }
 
-    return content
+    return IOUtils.toByteArray(inputStream)
   }
 
   /**
