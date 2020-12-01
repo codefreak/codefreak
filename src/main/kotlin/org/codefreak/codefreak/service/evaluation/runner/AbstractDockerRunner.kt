@@ -7,7 +7,7 @@ import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
-abstract class CommonDockerRunner : StoppableEvaluationRunner {
+abstract class AbstractDockerRunner : StoppableEvaluationRunner {
 
   @Autowired
   private lateinit var containerService: ContainerService

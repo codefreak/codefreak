@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class CodeclimateRunner : CommonDockerRunner() {
+class CodeclimateRunner : AbstractDockerRunner() {
   companion object {
     /**
      * Map from CodeClimate severities to Feedback severity

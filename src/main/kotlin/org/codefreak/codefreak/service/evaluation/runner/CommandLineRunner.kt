@@ -13,7 +13,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 
 @Component
-class CommandLineRunner : CommonDockerRunner() {
+class CommandLineRunner : AbstractDockerRunner() {
 
   data class Execution(val command: String, val result: ExecResult)
 
