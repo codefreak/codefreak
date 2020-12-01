@@ -130,7 +130,7 @@ class TaskTarService : BaseService() {
 
   private fun copyTaskFilesFromTar(taskId: UUID, tarContent: ByteArray) {
     fileService.writeCollectionTar(taskId).use { fileCollection ->
-      TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !it.name.equals(TarUtil.CODEFREAK_DEFINITION_NAME, true) })
+      TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !TarUtil.isCodefreakDefinition(it) })
     }
   }
 
@@ -212,16 +212,14 @@ class TaskTarService : BaseService() {
       TarUtil.copyEntries(
           TarArchiveInputStream(files),
           tar,
-          filter = { !TarUtil.isRoot(it) && !isCodefreakDefinition(it) }
+          filter = { !TarUtil.isRoot(it) && !TarUtil.isCodefreakDefinition(it) }
       )
     }
   }
 
-  private fun isCodefreakDefinition(entry: TarArchiveEntry) = entry.name == TarUtil.CODEFREAK_DEFINITION_NAME
-
   private fun writeTaskDefinition(task: Task, tar: TarArchiveOutputStream) {
     val definition = createTaskDefinition(task).let { yamlMapper.writeValueAsBytes(it) }
-    writeArchiveEntry(tar, TarUtil.CODEFREAK_DEFINITION_NAME, definition)
+    writeArchiveEntry(tar, TarUtil.CODEFREAK_DEFINITION_YML, definition)
   }
 
   private fun createTaskDefinition(task: Task) = TaskDefinition(

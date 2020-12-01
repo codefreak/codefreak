@@ -24,7 +24,8 @@ import org.apache.commons.compress.utils.IOUtils
 import org.springframework.util.StreamUtils
 
 object TarUtil {
-  val CODEFREAK_DEFINITION_NAME = "codefreak.yml"
+  const val CODEFREAK_DEFINITION_YML = "codefreak.yml"
+  const val CODEFREAK_DEFINITION_YAML = "codefreak.yaml"
 
   class PosixTarArchiveOutputStream(out: OutputStream) : TarArchiveOutputStream(out) {
     init {
@@ -176,9 +177,20 @@ object TarUtil {
 
   @Throws(IllegalArgumentException::class)
   inline fun <reified T> ObjectMapper.getCodefreakDefinition(`in`: InputStream): T {
-    findFile(`in`, CODEFREAK_DEFINITION_NAME) { _, fileStream ->
-      return readValue(fileStream, T::class.java)
+    try {
+      findFile(`in`, CODEFREAK_DEFINITION_YML) { _, fileStream ->
+        return readValue(fileStream, T::class.java)
+      }
+    } catch (e: IllegalArgumentException) {
+      findFile(`in`, CODEFREAK_DEFINITION_YAML) { _, fileStream ->
+        return readValue(fileStream, T::class.java)
+      }
     }
+  }
+
+  fun isCodefreakDefinition(entry: TarArchiveEntry): Boolean {
+    val normalizedName = normalizeEntryName(entry.name)
+    return normalizedName == CODEFREAK_DEFINITION_YML || normalizedName == CODEFREAK_DEFINITION_YAML
   }
 
   fun extractSubdirectory(`in`: InputStream, out: OutputStream, path: String) {
