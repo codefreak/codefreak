@@ -5,7 +5,6 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import java.util.Date
 import java.util.UUID
-import net.minidev.json.JSONArray
 import org.codefreak.codefreak.entity.CachedJwtClaimsSet
 import org.codefreak.codefreak.repository.CachedJwtClaimsSetRepository
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService
@@ -45,8 +44,7 @@ class LtiService {
    */
   fun buildDeepLinkingResponse(requestJwt: JWTClaimsSet, url: String, title: String): SignedJWT {
     val jwsAlgorithm = signingAndValidationService.defaultSigningAlgorithm
-    val contentItems = JSONArray()
-    contentItems.appendElement(
+    val contentItems = arrayListOf(
         mapOf(
             "type" to "link",
             "title" to title,
