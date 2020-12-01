@@ -15,6 +15,7 @@
 * Tasks show the dates they were created and last updated (#617)
 * The task pool list and the 'add tasks to assignment' list are now sortable and filterable (#616)
 * The task pool can be exported and imported (#640)
+* Evaluation steps will now be canceled after a configurable timeout (#647)
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)
