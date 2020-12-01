@@ -15,6 +15,7 @@ import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileContentService
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.exhaustive
 import org.springframework.stereotype.Component
 
 @GraphQLName("FileType")
@@ -116,7 +117,8 @@ class FileMutation : BaseResolver(), Mutation {
         val task = serviceAccess.getService(TaskService::class).findTask(fileContext.id)
         authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
       }
-    }
+    }.exhaustive
+
     true
   }
 }
