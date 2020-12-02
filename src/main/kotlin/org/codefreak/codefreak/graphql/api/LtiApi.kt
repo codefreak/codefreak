@@ -26,7 +26,7 @@ class LtiMutation : BaseResolver(), Mutation {
 
   @Transactional
   @Secured(Authority.ROLE_TEACHER)
-  fun ltiCreateDeepLinkResponse(assignmentId: UUID, jwtId: UUID): LtiDeepLinkResponse {
+  fun ltiCreateDeepLinkResponse(assignmentId: UUID, additionalQuery: String?, jwtId: UUID): LtiDeepLinkResponse {
     requireLtiEnabled()
     return context {
       val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(assignmentId)
@@ -34,6 +34,7 @@ class LtiMutation : BaseResolver(), Mutation {
       val requestJwt = ltiService.findCachedJwtClaimsSet(jwtId)
       val launchUrl = ServletUriComponentsBuilder.fromCurrentRequestUri()
           .replacePath("/lti/launch/" + assignment.id)
+          .replaceQuery(additionalQuery)
           .toUriString()
       val responseJwt = ltiService.buildDeepLinkingResponse(requestJwt, url = launchUrl, title = assignment.title)
       ltiService.removeCachedJwtClaimSet(jwtId)

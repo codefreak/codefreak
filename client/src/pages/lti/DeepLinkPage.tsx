@@ -1,5 +1,5 @@
-import { Button, Icon, List, Typography } from 'antd'
-import React, { createRef, useEffect } from 'react'
+import { Button, Checkbox, Icon, List, Typography } from 'antd'
+import React, { createRef, useEffect, useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import {
   Assignment,
@@ -8,6 +8,8 @@ import {
 } from '../../generated/graphql'
 import { useQueryParam } from '../../hooks/useQuery'
 import NotFoundPage from '../NotFoundPage'
+import { extractTargetChecked } from '../../services/util'
+import { HIDE_NAVIGATION_QUERY_PARAM } from '../../hooks/useHideNavigation'
 
 const DeepLinkPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
@@ -17,6 +19,7 @@ const DeepLinkPage: React.FC = () => {
     { data: deepLinkData }
   ] = useCreateLtiDeepLinkResponseMutation()
   const formRef = createRef<HTMLFormElement>()
+  const [hideNavigation, setHideNavigation] = useState(true)
 
   useEffect(() => {
     if (
@@ -37,8 +40,11 @@ const DeepLinkPage: React.FC = () => {
   }
 
   const onItemSelection = (assignmentId: string) => () => {
+    const additionalQuery = hideNavigation
+      ? HIDE_NAVIGATION_QUERY_PARAM + '=true'
+      : null
     createLtiDeepLinkResponse({
-      variables: { assignmentId, jwtId }
+      variables: { assignmentId, additionalQuery, jwtId }
     }).then(({ data }) => {
       if (!data || !data.ltiCreateDeepLinkResponse) {
         return
@@ -78,6 +84,14 @@ const DeepLinkPage: React.FC = () => {
       <p>
         Create link to an assignment by clicking the <Icon type="link" />{' '}
         button.
+      </p>
+      <p>
+        <Checkbox
+          checked={hideNavigation}
+          onChange={extractTargetChecked(setHideNavigation)}
+        >
+          Single assignment view (hide navigation)
+        </Checkbox>
       </p>
       <List
         style={{ backgroundColor: 'white' }}

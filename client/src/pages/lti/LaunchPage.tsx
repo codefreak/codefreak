@@ -4,6 +4,8 @@ import { Redirect } from 'react-router-dom'
 import Centered from '../../components/Centered'
 import useIdParam from '../../hooks/useIdParam'
 import { shorten } from '../../services/short-id'
+import { useQueryParam } from '../../hooks/useQuery'
+import { HIDE_NAVIGATION_QUERY_PARAM } from '../../hooks/useHideNavigation'
 
 const isDisplayedInIframe = () => {
   try {
@@ -23,8 +25,12 @@ const isDisplayedInIframe = () => {
  * at the moment.
  */
 const LaunchPage: React.FC = () => {
+  const hideNavigation = useQueryParam(HIDE_NAVIGATION_QUERY_PARAM)
   const assignmentId = useIdParam()
-  const assignmentUrl = `/assignments/${shorten(assignmentId)}`
+  let assignmentUrl = `/assignments/${shorten(assignmentId)}`
+  if (hideNavigation === 'true') {
+    assignmentUrl += `?${HIDE_NAVIGATION_QUERY_PARAM}=true`
+  }
 
   if (!isDisplayedInIframe()) {
     return <Redirect to={assignmentUrl} />
