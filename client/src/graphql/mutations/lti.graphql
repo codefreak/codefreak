@@ -1,5 +1,13 @@
-mutation CreateLtiDeepLinkResponse($assignmentId: ID!, $jwtId: ID!) {
-  ltiCreateDeepLinkResponse(assignmentId: $assignmentId, jwtId: $jwtId) {
+mutation CreateLtiDeepLinkResponse(
+  $assignmentId: ID!
+  $additionalQuery: String
+  $jwtId: ID!
+) {
+  ltiCreateDeepLinkResponse(
+    assignmentId: $assignmentId
+    additionalQuery: $additionalQuery
+    jwtId: $jwtId
+  ) {
     redirectUrl
     signedJwt
   }
