@@ -17,6 +17,7 @@
 * The task pool can be exported and imported (#640)
 * Navigation can be hidden when giving assignment links to students (#667)
 * Add API for individual file operations (#666)
+* Admins can see the author of each assignment (#691)
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)
