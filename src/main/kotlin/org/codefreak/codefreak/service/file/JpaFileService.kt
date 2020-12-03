@@ -1,10 +1,5 @@
 package org.codefreak.codefreak.service.file
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
@@ -13,12 +8,15 @@ import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.util.TarUtil
-import org.codefreak.codefreak.util.withTrailingSlash
-import org.codefreak.codefreak.util.withoutTrailingSlash
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.util.DigestUtils
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.UUID
 
 @Service
 @ConditionalOnProperty(name = ["codefreak.files.adapter"], havingValue = "JPA")
@@ -57,7 +55,7 @@ class JpaFileService : FileService {
   }
 
   override fun createFile(collectionId: UUID, path: String) {
-    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+    val normalizedPath = TarUtil.normalizeFileName(path)
 
     require(normalizedPath.isNotBlank())
     require(!containsFile(collectionId, normalizedPath))
@@ -70,12 +68,12 @@ class JpaFileService : FileService {
   }
 
   override fun containsFile(collectionId: UUID, path: String): Boolean {
-    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+    val normalizedPath = TarUtil.normalizeFileName(path)
     return containsPath(collectionId, normalizedPath) { it.isFile }
   }
 
   override fun containsDirectory(collectionId: UUID, path: String): Boolean {
-    val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
+    val normalizedPath = TarUtil.normalizeDirectoryName(path)
     return containsPath(collectionId, normalizedPath) { it.isDirectory }
   }
 
@@ -105,7 +103,7 @@ class JpaFileService : FileService {
   private fun getTarOutputStream(collectionId: UUID) = TarArchiveOutputStream(writeCollectionTar(collectionId))
 
   override fun createDirectory(collectionId: UUID, path: String) {
-    val normalizedPath = TarUtil.normalizeEntryName(path).withTrailingSlash()
+    val normalizedPath = TarUtil.normalizeDirectoryName(path)
 
     require(normalizedPath.isNotBlank())
     require(!containsDirectory(collectionId, normalizedPath))
@@ -118,14 +116,12 @@ class JpaFileService : FileService {
   }
 
   override fun deleteFile(collectionId: UUID, path: String) {
-    var normalizedPath = TarUtil.normalizeEntryName(path)
-
-    require(normalizedPath.isNotBlank())
-    val fileExists = containsFile(collectionId, normalizedPath.withoutTrailingSlash())
-    val directoryExists = containsDirectory(collectionId, normalizedPath.withoutTrailingSlash())
+    require(TarUtil.normalizeEntryName(path).isNotBlank())
+    val fileExists = containsFile(collectionId, TarUtil.normalizeFileName(path))
+    val directoryExists = containsDirectory(collectionId, TarUtil.normalizeDirectoryName(path))
     require(fileExists.or(directoryExists))
 
-    normalizedPath = if (fileExists) normalizedPath.withoutTrailingSlash() else normalizedPath.withTrailingSlash()
+    val normalizedPath = if (fileExists) TarUtil.normalizeFileName(path) else TarUtil.normalizeDirectoryName(path)
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
@@ -134,7 +130,7 @@ class JpaFileService : FileService {
   }
 
   override fun filePutContents(collectionId: UUID, path: String): OutputStream {
-    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+    val normalizedPath = TarUtil.normalizeFileName(path)
 
     require(normalizedPath.isNotBlank())
     require(containsFile(collectionId, normalizedPath))
@@ -158,7 +154,7 @@ class JpaFileService : FileService {
   }
 
   override fun getFileContents(collectionId: UUID, path: String): InputStream {
-    val normalizedPath = TarUtil.normalizeEntryName(path).withoutTrailingSlash()
+    val normalizedPath = TarUtil.normalizeFileName(path)
 
     require(normalizedPath.isNotBlank())
     require(containsFile(collectionId, normalizedPath))
@@ -177,70 +173,40 @@ class JpaFileService : FileService {
   }
 
   override fun moveFile(collectionId: UUID, from: String, to: String) {
-    val normalizedFrom = TarUtil.normalizeEntryName(from).withoutTrailingSlash()
-    val normalizedTo = TarUtil.normalizeEntryName(to).withoutTrailingSlash()
+    var normalizedFrom = TarUtil.normalizeEntryName(from)
+    var normalizedTo = TarUtil.normalizeEntryName(to)
 
     require(normalizedFrom.isNotBlank())
     require(normalizedTo.isNotBlank())
 
-    val isDirectory = containsDirectory(collectionId, normalizedFrom.withTrailingSlash())
+    val isDirectory = containsDirectory(collectionId, TarUtil.normalizeDirectoryName(from))
     if (isDirectory) {
-      moveDirectory(collectionId, from, to)
-      return
+      normalizedFrom = TarUtil.normalizeDirectoryName(from)
+      normalizedTo = TarUtil.normalizeDirectoryName(to)
+
+      require(containsDirectory(collectionId, normalizedFrom))
+      require(!containsDirectory(collectionId, normalizedTo))
+    } else {
+      require(containsFile(collectionId, normalizedFrom))
+      require(!containsFile(collectionId, normalizedTo))
     }
 
-    require(containsFile(collectionId, normalizedFrom))
-    require(!containsFile(collectionId, normalizedTo))
-
-    val contents = getFileContents(collectionId, normalizedFrom)
-    createFile(collectionId, normalizedTo)
-    filePutContents(collectionId, normalizedTo).use {
-      it.write(contents.readBytes())
-    }
-    deleteFile(collectionId, normalizedFrom)
+    moveFileOrDirectory(collectionId, normalizedFrom, normalizedTo)
   }
 
-  private fun moveDirectory(collectionId: UUID, from: String, to: String) {
-    val normalizedFrom = TarUtil.normalizeEntryName(from).withTrailingSlash()
-    val normalizedTo = TarUtil.normalizeEntryName(to).withTrailingSlash()
-
-    require(normalizedFrom.isNotBlank())
-    require(normalizedTo.isNotBlank())
-    require(containsDirectory(collectionId, normalizedFrom))
-    require(!containsDirectory(collectionId, normalizedTo))
-
-    val children = findDirectoryChildren(collectionId, normalizedFrom)
-
-    children.forEach {
-      val newPath = it.key.replace(normalizedFrom, normalizedTo)
-      val isDirectory = it.value == null
-
-      if (isDirectory) {
-        createDirectory(collectionId, newPath)
-      } else {
-        moveFile(collectionId, it.key, newPath)
-      }
-    }
-
-    createDirectory(collectionId, normalizedTo)
-    deleteFile(collectionId, normalizedFrom)
-  }
-
-  private fun findDirectoryChildren(collectionId: UUID, path: String): Map<String, InputStream?> {
-    val children = mutableMapOf<String, InputStream?>()
-
-    getTarInputStream(collectionId).use {
-      generateSequence { it.nextTarEntry }.forEach { child ->
-        if (child.name.startsWith(path) && child.name != path) {
-          children[child.name] = if (child.isFile) {
-            getFileContents(collectionId, child.name)
-          } else {
-            null
+  private fun moveFileOrDirectory(collectionId: UUID, from: String, to: String) {
+    getTarOutputStream(collectionId).use { tar ->
+      getTarInputStream(collectionId).use { input ->
+        generateSequence { input.nextTarEntry }.forEach { entry ->
+          if (entry.name.startsWith(from)) {
+            entry.name = entry.name.replace(from, to)
           }
+
+          tar.putArchiveEntry(entry)
+          IOUtils.copy(input, tar)
+          tar.closeArchiveEntry()
         }
       }
     }
-
-    return children
   }
 }
