@@ -28,7 +28,7 @@ mutation UploadTask($files: [Upload!]!) {
 
 mutation UploadTasks($files: [Upload!]!) {
   uploadTasks(files: $files) {
-    ...taskListItem
+    id
   }
 }
 

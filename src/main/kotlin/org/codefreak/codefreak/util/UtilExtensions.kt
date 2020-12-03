@@ -36,3 +36,9 @@ fun Logger.error(e: Throwable) {
 }
 
 fun <T> Optional<T>.orNull(): T? = orElse(null)
+
+/**
+ * Requires when() to be exhaustive at compile time
+ */
+val <T> T.exhaustive: T
+  get() = this
