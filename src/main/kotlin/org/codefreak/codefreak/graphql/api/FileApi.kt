@@ -1,17 +1,21 @@
 package org.codefreak.codefreak.graphql.api
 
 import com.expediagroup.graphql.annotations.GraphQLName
+import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import java.nio.charset.Charset
 import java.util.Base64
 import java.util.UUID
+import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.hasAuthority
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.IdeService
+import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileContentService
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.exhaustive
 import org.springframework.stereotype.Component
 
 @GraphQLName("FileType")
@@ -40,6 +44,13 @@ class FileDto(
   )
 }
 
+enum class FileContextType {
+  TASK,
+  ANSWER
+}
+
+data class FileContext(var type: FileContextType, var id: UUID)
+
 @Component
 class FileQuery : BaseResolver(), Query {
   fun answerFiles(answerId: UUID): List<FileDto> = context {
@@ -60,4 +71,60 @@ class FileQuery : BaseResolver(), Query {
     val digest = serviceAccess.getService(FileService::class).getCollectionMd5Digest(answerId)
     FileDto(answer.id, digest, file)
   }
+
+  /**
+   * Files ending with a slash are directories
+   */
+  fun listFiles(fileContext: FileContext): List<String> = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).listFiles(fileContext.id)
+  }
+}
+
+@Component
+class FileMutation : BaseResolver(), Mutation {
+  fun createFile(fileContext: FileContext, path: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).createFile(fileContext.id, path)
+    true
+  }
+
+  fun createDirectory(fileContext: FileContext, path: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).createDirectory(fileContext.id, path)
+    true
+  }
+
+  fun uploadFile(fileContext: FileContext, path: String, contents: ApplicationPart): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).filePutContents(fileContext.id, path).use {
+      it.write(contents.inputStream.readBytes())
+    }
+    true
+  }
+
+  fun moveFile(fileContext: FileContext, sourcePath: String, targetPath: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).moveFile(fileContext.id, sourcePath, targetPath)
+    true
+  }
+
+  fun deleteFile(fileContext: FileContext, path: String): Boolean = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).deleteFile(fileContext.id, path)
+    true
+  }
+}
+
+private fun BaseResolver.authorize(fileContext: FileContext) = context {
+  when (fileContext.type) {
+    FileContextType.ANSWER -> {
+      val answer = serviceAccess.getService(AnswerService::class).findAnswer(fileContext.id)
+      authorization.requireAuthorityIfNotCurrentUser(answer.task.owner, Authority.ROLE_ADMIN)
+    }
+    FileContextType.TASK -> {
+      val task = serviceAccess.getService(TaskService::class).findTask(fileContext.id)
+      authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    }
+  }.exhaustive
 }

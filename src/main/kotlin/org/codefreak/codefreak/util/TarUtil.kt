@@ -233,8 +233,17 @@ object TarUtil {
   }
 
   fun mkdir(name: String, outputStream: TarArchiveOutputStream) {
-    TarArchiveEntry(name, TarConstants.LF_DIR, false).also {
-      it.mode = TarArchiveEntry.DEFAULT_DIR_MODE
+    createEntryInTar(name, outputStream, EntryType.DIRECTORY)
+  }
+
+  private enum class EntryType(val linkFlag: Byte, val mode: Int) {
+    FILE(TarConstants.LF_NORMAL, TarArchiveEntry.DEFAULT_FILE_MODE),
+    DIRECTORY(TarConstants.LF_DIR, TarArchiveEntry.DEFAULT_DIR_MODE)
+  }
+
+  private fun createEntryInTar(name: String, outputStream: TarArchiveOutputStream, type: EntryType) {
+    TarArchiveEntry(name, type.linkFlag, false).also {
+      it.mode = type.mode
       outputStream.putArchiveEntry(it)
       outputStream.closeArchiveEntry()
     }
@@ -245,4 +254,13 @@ object TarUtil {
       return if (isEmpty()) "" else last()
     }
   }
+
+  fun touch(name: String, outputStream: TarArchiveOutputStream) {
+    createEntryInTar(name, outputStream, EntryType.FILE)
+  }
+
+  fun normalizeFileName(name: String) = normalizeEntryName(name).withoutTrailingSlash()
+  fun normalizeDirectoryName(name: String) = normalizeEntryName(name).withTrailingSlash()
+
+  fun TarArchiveInputStream.entrySequence() = generateSequence { nextTarEntry }
 }
