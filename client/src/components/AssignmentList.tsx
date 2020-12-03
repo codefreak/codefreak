@@ -9,6 +9,7 @@ import {
 } from '../services/codefreak-api'
 import { compare } from '../services/util'
 import { matches } from '../services/strings'
+import { displayName } from '../services/user'
 
 const { confirm } = Modal
 
@@ -82,6 +83,13 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
         await props.delete(assignment.id)
       }
     })
+
+  const authorTag = (
+    <span style={{ marginRight: '1em' }}>
+      Author: {displayName(assignment.owner)}
+    </span>
+  )
+
   return (
     <Card
       title={
@@ -92,16 +100,19 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
       key={assignment.id}
       style={{ marginBottom: 16 }}
       extra={
-        assignment.deletable ? (
-          <Tooltip title={'Delete assignment'} placement="left">
-            <Button
-              onClick={confirmDelete}
-              type="dashed"
-              shape="circle"
-              icon="delete"
-            />
-          </Tooltip>
-        ) : null
+        <>
+          <Authorized authority={'ROLE_ADMIN'}>{authorTag}</Authorized>
+          {assignment.deletable ? (
+            <Tooltip title={'Delete assignment'} placement="left">
+              <Button
+                onClick={confirmDelete}
+                type="dashed"
+                shape="circle"
+                icon="delete"
+              />
+            </Tooltip>
+          ) : null}
+        </>
       }
     >
       <Descriptions>
