@@ -13,6 +13,7 @@ import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
@@ -52,6 +53,18 @@ class JpaFileService : FileService {
 
   override fun getCollectionMd5Digest(collectionId: UUID): ByteArray {
     return DigestUtils.md5Digest(getCollection(collectionId).tar)
+  }
+
+  override fun listFiles(collectionId: UUID): List<String> {
+    getTarInputStream(collectionId).use {
+      return it.entrySequence().map { entry ->
+        if (entry.isDirectory) {
+          TarUtil.normalizeDirectoryName(entry.name)
+        } else {
+          TarUtil.normalizeFileName(entry.name)
+        }
+      }.toList()
+    }
   }
 
   override fun createFile(collectionId: UUID, path: String) {
@@ -101,14 +114,9 @@ class JpaFileService : FileService {
     path: String,
     restriction: (TarArchiveEntry) -> Boolean = { true }
   ): TarArchiveEntry? {
-    getTarInputStream(collectionId).use {
-      generateSequence { it.nextTarEntry }.forEach { entry ->
-        if (entry.name == path && restriction(entry)) {
-          return entry
-        }
-      }
+    getTarInputStream(collectionId).use { archive ->
+      return archive.entrySequence().firstOrNull { it.name == path && restriction(it) }
     }
-    return null
   }
 
   private fun getTarInputStream(collectionId: UUID) = TarArchiveInputStream(readCollectionTar(collectionId))
@@ -173,7 +181,7 @@ class JpaFileService : FileService {
     requireFileDoesExist(collectionId, normalizedPath)
 
     getTarInputStream(collectionId).use {
-      generateSequence { it.nextTarEntry }.forEach { entry ->
+      it.entrySequence().forEach { entry ->
         if (entry.name == normalizedPath) {
           val output = ByteArrayOutputStream()
           IOUtils.copy(it, output)
@@ -210,7 +218,7 @@ class JpaFileService : FileService {
   private fun moveFileOrDirectory(collectionId: UUID, from: String, to: String) {
     getTarOutputStream(collectionId).use { tar ->
       getTarInputStream(collectionId).use { input ->
-        generateSequence { input.nextTarEntry }.forEach { entry ->
+        input.entrySequence().forEach { entry ->
           if (entry.name.startsWith(from)) {
             entry.name = entry.name.replace(from, to)
           }

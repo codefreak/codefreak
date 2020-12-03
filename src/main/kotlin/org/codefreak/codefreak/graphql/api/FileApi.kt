@@ -71,6 +71,14 @@ class FileQuery : BaseResolver(), Query {
     val digest = serviceAccess.getService(FileService::class).getCollectionMd5Digest(answerId)
     FileDto(answer.id, digest, file)
   }
+
+  /**
+   * Files ending with a slash are directories
+   */
+  fun listFiles(fileContext: FileContext): List<String> = context {
+    authorize(fileContext)
+    serviceAccess.getService(FileService::class).listFiles(fileContext.id)
+  }
 }
 
 @Component
@@ -106,19 +114,17 @@ class FileMutation : BaseResolver(), Mutation {
     serviceAccess.getService(FileService::class).deleteFile(fileContext.id, path)
     true
   }
+}
 
-  private fun authorize(fileContext: FileContext) = context {
-    when (fileContext.type) {
-      FileContextType.ANSWER -> {
-        val answer = serviceAccess.getService(AnswerService::class).findAnswer(fileContext.id)
-        authorization.requireAuthorityIfNotCurrentUser(answer.task.owner, Authority.ROLE_ADMIN)
-      }
-      FileContextType.TASK -> {
-        val task = serviceAccess.getService(TaskService::class).findTask(fileContext.id)
-        authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
-      }
-    }.exhaustive
-
-    true
-  }
+private fun BaseResolver.authorize(fileContext: FileContext) = context {
+  when (fileContext.type) {
+    FileContextType.ANSWER -> {
+      val answer = serviceAccess.getService(AnswerService::class).findAnswer(fileContext.id)
+      authorization.requireAuthorityIfNotCurrentUser(answer.task.owner, Authority.ROLE_ADMIN)
+    }
+    FileContextType.TASK -> {
+      val task = serviceAccess.getService(TaskService::class).findTask(fileContext.id)
+      authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    }
+  }.exhaustive
 }

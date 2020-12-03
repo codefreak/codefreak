@@ -22,6 +22,7 @@ interface FileService {
     return readCollectionTar(collectionId).use { DigestUtils.md5Digest(it) }
   }
 
+  fun listFiles(collectionId: UUID): List<String>
   fun createFile(collectionId: UUID, path: String)
   fun createDirectory(collectionId: UUID, path: String)
   fun containsFile(collectionId: UUID, path: String): Boolean

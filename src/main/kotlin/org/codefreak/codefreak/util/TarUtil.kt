@@ -249,4 +249,6 @@ object TarUtil {
 
   fun normalizeFileName(name: String) = normalizeEntryName(name).withoutTrailingSlash()
   fun normalizeDirectoryName(name: String) = normalizeEntryName(name).withTrailingSlash()
+
+  fun TarArchiveInputStream.entrySequence() = generateSequence { nextTarEntry }
 }
