@@ -3,3 +3,4 @@
 ** xref:for-teachers:assignments.adoc[Creating Assignments]
 ** xref:for-teachers:evaluation-types.adoc[Evaluation Types]
 ** xref:for-teachers:definitions.adoc[Definition Files]
+** xref:for-teachers:ide.adoc[Online IDE]

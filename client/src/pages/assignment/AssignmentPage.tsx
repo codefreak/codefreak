@@ -27,7 +27,6 @@ import Authorized from '../../components/Authorized'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
-import CopyToClipboardButton from '../../components/CopyToClipboardButton'
 import TimeIntervalInput, {
   TimeIntervalInputProps
 } from '../../components/TimeIntervalInput'
@@ -47,7 +46,6 @@ import {
   useGetTaskPoolForAddingQuery,
   useUpdateAssignmentMutation
 } from '../../services/codefreak-api'
-import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import {
@@ -68,6 +66,8 @@ import {
   TaskSortMethods,
   TaskSortMethodNames
 } from '../../services/task'
+import { useCreateRoutes } from '../../hooks/useCreateRoutes'
+import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
 
 const { Step } = Steps
@@ -87,6 +87,7 @@ const AssignmentPage: React.FC = () => {
   })
   const subPath = useSubPath()
   const formatter = useFormatter()
+  const createRoutes = useCreateRoutes()
   const [updateMutation] = useUpdateAssignmentMutation({
     onCompleted: () => {
       result.refetch()
@@ -203,9 +204,7 @@ const AssignmentPage: React.FC = () => {
         onTabChange={subPath.set}
         extra={
           <Authorized condition={assignment.editable}>
-            <CopyToClipboardButton icon="link" value={window.location.href}>
-              Share Assignment Link
-            </CopyToClipboardButton>
+            <ShareAssignmentButton />
             <ArchiveDownload url={assignment.exportUrl}>
               Export Assignment
             </ArchiveDownload>
