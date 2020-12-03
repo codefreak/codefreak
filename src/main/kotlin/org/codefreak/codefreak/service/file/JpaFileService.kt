@@ -57,8 +57,8 @@ class JpaFileService : FileService {
   override fun createFile(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeFileName(path)
 
-    require(normalizedPath.isNotBlank())
-    require(!containsFile(collectionId, normalizedPath))
+    requireValidPath(normalizedPath)
+    requireFileDoesNotExist(collectionId, normalizedPath)
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
@@ -66,6 +66,19 @@ class JpaFileService : FileService {
       TarUtil.touch(normalizedPath, it)
     }
   }
+
+  private fun requireValidPath(path: String) = require(path.isNotBlank()) { "`$path` is not a valid path" }
+  private fun requireFileDoesExist(collectionId: UUID, path: String) =
+    require(containsFile(collectionId, path)) { "File `$path` does not exist" }
+
+  private fun requireFileDoesNotExist(collectionId: UUID, path: String) =
+    require(!containsFile(collectionId, path)) { "File `$path` already exists" }
+
+  private fun requireDirectoryDoesExist(collectionId: UUID, path: String) =
+    require(containsDirectory(collectionId, path)) { "Directory `$path` does not exist" }
+
+  private fun requireDirectoryDoesNotExist(collectionId: UUID, path: String) =
+    require(!containsDirectory(collectionId, path)) { "Directory `$path` already exists" }
 
   override fun containsFile(collectionId: UUID, path: String): Boolean {
     val normalizedPath = TarUtil.normalizeFileName(path)
@@ -105,8 +118,8 @@ class JpaFileService : FileService {
   override fun createDirectory(collectionId: UUID, path: String) {
     val normalizedPath = TarUtil.normalizeDirectoryName(path)
 
-    require(normalizedPath.isNotBlank())
-    require(!containsDirectory(collectionId, normalizedPath))
+    requireValidPath(normalizedPath)
+    requireDirectoryDoesNotExist(collectionId, normalizedPath)
 
     getTarOutputStream(collectionId).use {
       val input = getTarInputStream(collectionId)
@@ -116,10 +129,10 @@ class JpaFileService : FileService {
   }
 
   override fun deleteFile(collectionId: UUID, path: String) {
-    require(TarUtil.normalizeEntryName(path).isNotBlank())
+    requireValidPath(TarUtil.normalizeEntryName(path))
     val fileExists = containsFile(collectionId, TarUtil.normalizeFileName(path))
     val directoryExists = containsDirectory(collectionId, TarUtil.normalizeDirectoryName(path))
-    require(fileExists.or(directoryExists))
+    require(fileExists.or(directoryExists)) { "`$path` does not exist" }
 
     val normalizedPath = if (fileExists) TarUtil.normalizeFileName(path) else TarUtil.normalizeDirectoryName(path)
 
@@ -132,8 +145,8 @@ class JpaFileService : FileService {
   override fun filePutContents(collectionId: UUID, path: String): OutputStream {
     val normalizedPath = TarUtil.normalizeFileName(path)
 
-    require(normalizedPath.isNotBlank())
-    require(containsFile(collectionId, normalizedPath))
+    requireValidPath(normalizedPath)
+    requireFileDoesExist(collectionId, normalizedPath)
 
     return object : ByteArrayOutputStream() {
       override fun close() {
@@ -156,8 +169,8 @@ class JpaFileService : FileService {
   override fun getFileContents(collectionId: UUID, path: String): InputStream {
     val normalizedPath = TarUtil.normalizeFileName(path)
 
-    require(normalizedPath.isNotBlank())
-    require(containsFile(collectionId, normalizedPath))
+    requireValidPath(normalizedPath)
+    requireFileDoesExist(collectionId, normalizedPath)
 
     getTarInputStream(collectionId).use {
       generateSequence { it.nextTarEntry }.forEach { entry ->
@@ -176,19 +189,19 @@ class JpaFileService : FileService {
     var normalizedFrom = TarUtil.normalizeEntryName(from)
     var normalizedTo = TarUtil.normalizeEntryName(to)
 
-    require(normalizedFrom.isNotBlank())
-    require(normalizedTo.isNotBlank())
+    requireValidPath(normalizedFrom)
+    requireValidPath(normalizedTo)
 
     val isDirectory = containsDirectory(collectionId, TarUtil.normalizeDirectoryName(from))
     if (isDirectory) {
       normalizedFrom = TarUtil.normalizeDirectoryName(from)
       normalizedTo = TarUtil.normalizeDirectoryName(to)
 
-      require(containsDirectory(collectionId, normalizedFrom))
-      require(!containsDirectory(collectionId, normalizedTo))
+      requireDirectoryDoesExist(collectionId, normalizedFrom)
+      requireDirectoryDoesNotExist(collectionId, normalizedTo)
     } else {
-      require(containsFile(collectionId, normalizedFrom))
-      require(!containsFile(collectionId, normalizedTo))
+      requireFileDoesExist(collectionId, normalizedFrom)
+      requireFileDoesNotExist(collectionId, normalizedTo)
     }
 
     moveFileOrDirectory(collectionId, normalizedFrom, normalizedTo)
