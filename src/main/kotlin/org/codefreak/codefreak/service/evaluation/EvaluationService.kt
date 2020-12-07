@@ -142,6 +142,15 @@ class EvaluationService : BaseService() {
     }
   }
 
+  fun stopEvaluation(answer: Answer, runnerName: String) {
+    val runner = getEvaluationRunner(runnerName)
+    if (runner is StoppableEvaluationRunner) {
+      runner.stop(answer)
+    } else {
+      log.warn("Cannot stop evaluation of runner ${runner.getName()}")
+    }
+  }
+
   fun addCommentFeedback(answer: Answer, digest: ByteArray, feedback: Feedback): Feedback {
     // find out if evaluation has a comment step definition
     val stepDefinition = answer.task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME }
@@ -150,7 +159,7 @@ class EvaluationService : BaseService() {
 
     // either take existing comments step on evaluation or create a new one
     val evaluationStep = evaluation.evaluationSteps.find { it.definition == stepDefinition }
-        ?: EvaluationStep(stepDefinition).also { evaluation.addStep(it) }
+        ?: EvaluationStep(stepDefinition, evaluation).also { evaluation.addStep(it) }
 
     evaluationStep.addFeedback(feedback)
     evaluationRepository.save(evaluation)
@@ -243,7 +252,7 @@ class EvaluationService : BaseService() {
   }
 
   @Transactional
-  fun updateEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition, title: String?, active: Boolean?, options: Map<String, Any>?): EvaluationStepDefinition {
+  fun updateEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition, title: String?, active: Boolean?, timeout: Long?, options: Map<String, Any>?): EvaluationStepDefinition {
     title?.let {
       evaluationStepDefinition.title = it
     }
@@ -253,6 +262,7 @@ class EvaluationService : BaseService() {
     options?.let {
       evaluationStepDefinition.options = it
     }
+    evaluationStepDefinition.timeout = timeout
     validateRunnerOptions(evaluationStepDefinition)
     saveEvaluationStepDefinition(evaluationStepDefinition)
     taskService.invalidateLatestEvaluations(evaluationStepDefinition.task)

@@ -5,17 +5,18 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.Feedback.FileContext
 import org.codefreak.codefreak.entity.Feedback.Severity
+import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.ContainerService
-import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-class CodeclimateRunner : EvaluationRunner {
+class CodeclimateRunner : AbstractDockerRunner() {
   companion object {
     /**
      * Map from CodeClimate severities to Feedback severity
@@ -31,6 +32,12 @@ class CodeclimateRunner : EvaluationRunner {
   }
 
   @Autowired
+  lateinit var config: AppConfiguration
+
+  @Autowired
+  private lateinit var answerService: AnswerService
+
+  @Autowired
   private lateinit var containerService: ContainerService
 
   override fun getName(): String {
@@ -42,7 +49,7 @@ class CodeclimateRunner : EvaluationRunner {
   override fun getDocumentationUrl() = "https://docs.codefreak.org/codefreak/for-teachers/definitions.html#codeclimate"
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
-    val codeclimateJson = containerService.runCodeclimate(answer)
+    val codeclimateJson = analyzeInDocker(answer)
     return this.parseCodeclimateJson(codeclimateJson).map { issue ->
       Feedback(issue.description).apply {
         group = "${issue.engine_name}/${issue.check_name}"
@@ -55,6 +62,28 @@ class CodeclimateRunner : EvaluationRunner {
             lineEnd = issue.location.lines.end
         )
       }
+    }
+  }
+
+  fun analyzeInDocker(answer: Answer): String {
+    val containerId = containerService.createContainer(config.evaluation.codeclimate.image) {
+      name = "codeclimate_orchestrator_${answer.id}"
+      labels += getContainerLabelMap(answer)
+      doNothingAndKeepAlive()
+      hostConfig {
+        appendBinds("/var/run/docker.sock:/var/run/docker.sock", "/tmp/cc:/tmp/cc")
+      }
+      containerConfig {
+        env("CODECLIMATE_ORCHESTRATOR=$name", "CODECLIMATE_CODE=/code")
+      }
+    }
+    containerService.useContainer(containerId) {
+      answerService.copyFilesForEvaluation(answer).use {
+        containerService.copyToContainer(it, containerId, "/code")
+      }
+      // `analyze` would also install missing engines but may time out in the process. Also `engines:install` will update images.
+      containerService.exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "engines:install"))
+      return containerService.exec(containerId, arrayOf("/usr/src/app/bin/codeclimate", "analyze", "-f", "json")).output
     }
   }
 

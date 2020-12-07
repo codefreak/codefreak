@@ -91,6 +91,7 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       title
       options
       active
+      timeout
     }
   }
   evaluationRunners {
@@ -99,5 +100,6 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
     builtIn
     optionsSchema
     documentationUrl
+    stoppable
   }
 }

@@ -18,11 +18,11 @@ import org.hibernate.annotations.Type
 @Entity
 class EvaluationStep(
   @ManyToOne(optional = false)
-  var definition: EvaluationStepDefinition
-) : BaseEntity() {
-  @ManyToOne(optional = false)
-  var evaluation: Evaluation? = null
+  var definition: EvaluationStepDefinition,
 
+  @ManyToOne(optional = false)
+  var evaluation: Evaluation
+) : BaseEntity() {
   @OneToMany(mappedBy = "evaluationStep", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
   var feedback = mutableSetOf<Feedback>()
 

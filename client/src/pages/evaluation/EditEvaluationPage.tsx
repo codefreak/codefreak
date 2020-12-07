@@ -32,6 +32,15 @@ import {
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import { makeUpdater } from '../../services/util'
+import TimeIntervalInput from '../../components/TimeIntervalInput'
+import useSystemConfig from '../../hooks/useSystemConfig'
+import {
+  componentsToSeconds,
+  secondsToComponents,
+  secondsToRelTime
+} from '../../services/time'
+import HelpTooltip from '../../components/HelpTooltip'
+import { debounce } from 'ts-debounce'
 
 type EvaluationStepDefinition = NonNullable<
   GetEvaluationStepDefinitionsQueryResult['data']
@@ -60,6 +69,9 @@ const stringifyOptions = (options: any, optionsSchema: JSONSchema6) => {
 
 const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const result = useGetEvaluationStepDefinitionsQuery({ variables: { taskId } })
+  const { data: defaultEvaluationTimeout } = useSystemConfig(
+    'defaultEvaluationTimeout'
+  )
   const [deleteStep] = useDeleteEvaluationStepDefinitionMutation({
     onCompleted: () => {
       messageService.success('Evaluation step deleted')
@@ -145,6 +157,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
 
     const updateOptions = (newOptions: any) =>
       updater('options')(stringifyOptions(newOptions, optionsSchema))
+    const updateTimeout = debounce(updater('timeout'), 500)
 
     const configureButtonProps: ButtonProps = {
       type: 'primary',
@@ -221,18 +234,55 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 </>
               ) : null}
             </Descriptions.Item>
-            <Descriptions.Item label="Active">
-              <Tooltip
-                placement="right"
-                title="If disabled, this evaluation step will not be run in future evaluation. Feedback for this step is hidden from students in existing evaluations."
-              >
-                <Switch
-                  checked={definition.active}
-                  onChange={updater('active')}
-                  disabled={assignmentOpen && !sureToEdit}
-                />
-              </Tooltip>
+            <Descriptions.Item
+              label={
+                <HelpTooltip
+                  placement="right"
+                  title="If disabled, this evaluation step will not be run in future evaluation. Feedback for this step is hidden from students in existing evaluations."
+                >
+                  Active
+                </HelpTooltip>
+              }
+            >
+              <Switch
+                checked={definition.active}
+                onChange={updater('active')}
+                disabled={assignmentOpen && !sureToEdit}
+              />
             </Descriptions.Item>
+            {runner.stoppable ? (
+              <Descriptions.Item
+                label={
+                  <HelpTooltip
+                    title={`There is always a default time limit of ${secondsToRelTime(
+                      defaultEvaluationTimeout || 0
+                    )}. You can modify this timeout here.`}
+                  >
+                    Custom Time Limit
+                  </HelpTooltip>
+                }
+              >
+                <TimeIntervalInput
+                  nullable
+                  onChange={timeoutComps => {
+                    const timeout = timeoutComps
+                      ? componentsToSeconds(timeoutComps)
+                      : undefined
+                    return updateTimeout(timeout)
+                  }}
+                  defaultValue={
+                    definition.timeout
+                      ? secondsToComponents(definition.timeout)
+                      : undefined
+                  }
+                  placeholder={
+                    defaultEvaluationTimeout
+                      ? secondsToComponents(defaultEvaluationTimeout)
+                      : undefined
+                  }
+                />
+              </Descriptions.Item>
+            ) : null}
           </Descriptions>
           {definition.options === '{}' ? (
             <i>Default configuration</i>

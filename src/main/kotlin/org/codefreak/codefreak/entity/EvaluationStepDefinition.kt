@@ -21,6 +21,12 @@ class EvaluationStepDefinition(
 ) : BaseEntity() {
   var active: Boolean = true
 
+  /**
+   * Timeout of this task in seconds
+   * If null the global default timeout will be used
+   */
+  var timeout: Long? = null
+
   override fun equals(other: Any?): Boolean {
     if (other is EvaluationStepDefinition) {
       return other.id == id && other.runnerName == runnerName

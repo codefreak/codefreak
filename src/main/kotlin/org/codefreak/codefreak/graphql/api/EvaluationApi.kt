@@ -30,6 +30,7 @@ import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.PendingEvaluationStatus
+import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
@@ -68,11 +69,12 @@ class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: Res
     ctx.authorization.requireAuthority(Authority.ROLE_TEACHER)
     ctx.serviceAccess.getService(EvaluationService::class).getEvaluationRunner(runnerName).let { EvaluationRunnerDto(it) }
   }
+  val timeout = definition.timeout
 }
 
 @GraphQLName("EvaluationStepDefinitionInput")
-class EvaluationStepDefinitionInputDto(var id: UUID, var title: String, var active: Boolean, var options: String) {
-  constructor() : this(UUID.randomUUID(), "", true, "")
+class EvaluationStepDefinitionInputDto(var id: UUID, var title: String, var active: Boolean, var timeout: Long?, var options: String) {
+  constructor() : this(UUID.randomUUID(), "", true, null, "")
 }
 
 @GraphQLName("Evaluation")
@@ -107,6 +109,7 @@ class EvaluationRunnerDto(runner: EvaluationRunner) {
   val defaultTitle = runner.getDefaultTitle()
   val optionsSchema = runner.getOptionsSchema()
   val documentationUrl = runner.getDocumentationUrl()
+  val stoppable = runner is StoppableEvaluationRunner
 }
 
 @GraphQLName("EvaluationStepResult")
@@ -238,7 +241,11 @@ class EvaluationMutation : BaseResolver(), Mutation {
       Authorization.deny()
     }
     val options = objectMapper.readValue(input.options, object : TypeReference<HashMap<String, Any>>() {})
-    evaluationService.updateEvaluationStepDefinition(definition, input.title, input.active, options)
+    evaluationService.updateEvaluationStepDefinition(definition,
+        title = input.title,
+        active = input.active,
+        timeout = input.timeout,
+        options = options)
     true
   }
 

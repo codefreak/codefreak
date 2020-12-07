@@ -114,6 +114,10 @@ Runners take the student submissions and execute e.g. static code analysis. They
 |`string`
 |An optional human readable name for the evaluation step. Summarize briefly for your students what this evaluation step checks (e.g. "Test functions.py", "Class XYZ Tests", "Code Style", ...). The default title depends on the runner.
 
+|timeout
+|`integer`
+|An optional custom timeout in seconds after which the evaluation step will be canceled and marked as failed. There is a system-wide default timeout of 5min.
+
 |options
 |Map[`string`, ?]
 |Runner-specific configuration. See below for details.

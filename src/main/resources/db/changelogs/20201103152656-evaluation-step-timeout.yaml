@@ -1,0 +1,11 @@
+databaseChangeLog:
+- changeSet:
+    id: 1604413629401-2
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: timeout
+            type: INT
+        tableName: evaluation_step_definition

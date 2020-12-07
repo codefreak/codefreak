@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component
 class SystemConfigDto(
   val motd: String?,
   val maxFileUploadSize: Long,
-  val defaultIdeImage: String
+  val defaultIdeImage: String,
+  val defaultEvaluationTimeout: Long
 )
 
 @GraphQLName("TimeSync")
@@ -32,7 +33,8 @@ class AdministrationQuery : BaseResolver(), Query {
     return SystemConfigDto(
         motd = adminService.getMotd(),
         maxFileUploadSize = adminService.getMaxUploadSize(),
-        defaultIdeImage = adminService.getDefaultIdeDockerImageName()
+        defaultIdeImage = adminService.getDefaultIdeDockerImageName(),
+        defaultEvaluationTimeout = adminService.getDefaultEvaluationTimeout()
     )
   }
 
