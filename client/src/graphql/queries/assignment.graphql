@@ -4,6 +4,9 @@ query GetAssignmentList {
     title
     deletable
     status
+    owner {
+      ...publicUserFields
+    }
     createdAt
     deadline
     openFrom
