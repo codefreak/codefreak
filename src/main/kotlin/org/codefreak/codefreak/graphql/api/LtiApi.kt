@@ -26,7 +26,7 @@ class LtiMutation : BaseResolver(), Mutation {
 
   @Transactional
   @Secured(Authority.ROLE_TEACHER)
-  fun ltiCreateDeepLinkResponse(assignmentId: UUID, jwtId: UUID): LtiDeepLinkResponse {
+  fun ltiCreateDeepLinkResponse(assignmentId: UUID, additionalQuery: String?, jwtId: UUID): LtiDeepLinkResponse {
     requireLtiEnabled()
     return context {
       val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(assignmentId)
@@ -34,15 +34,19 @@ class LtiMutation : BaseResolver(), Mutation {
       val requestJwt = ltiService.findCachedJwtClaimsSet(jwtId)
       val launchUrl = ServletUriComponentsBuilder.fromCurrentRequestUri()
           .replacePath("/lti/launch/" + assignment.id)
+          .replaceQuery(additionalQuery)
           .toUriString()
       val responseJwt = ltiService.buildDeepLinkingResponse(requestJwt, url = launchUrl, title = assignment.title)
       ltiService.removeCachedJwtClaimSet(jwtId)
-      val redirectUrl = requestJwt.getJSONObjectClaim("https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings")?.getAsString(
+      val redirectUrl = requestJwt.getJSONObjectClaim("https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings")?.get(
           "deep_link_return_url"
       )
-          ?: throw IllegalStateException("No 'deep_link_return_url' found in 'deep_linking_settings'")
 
-      LtiDeepLinkResponse(responseJwt.serialize(), redirectUrl)
+      return@context when (redirectUrl) {
+        null -> throw IllegalStateException("No 'deep_link_return_url' found in JWT claim")
+        !is String -> throw IllegalStateException("Expected 'deep_link_return_url' to be a string but is ${redirectUrl.javaClass.canonicalName}")
+        else -> LtiDeepLinkResponse(responseJwt.serialize(), redirectUrl)
+      }
     }
   }
 }

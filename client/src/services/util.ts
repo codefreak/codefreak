@@ -25,6 +25,10 @@ export function extractTargetValue<V, T>(fn: (value: V) => T) {
   return (e: { target: { value: V } }) => fn(e.target.value)
 }
 
+export function extractTargetChecked<T>(fn: (value: boolean) => T) {
+  return (e: { target: { checked: boolean } }) => fn(e.target.checked)
+}
+
 /**
  * Compares two values with the given transformation method.
  * Returns a positive number, if a is greater than b.

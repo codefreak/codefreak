@@ -18,12 +18,10 @@ function JsonSchemaEditButton<T>(
   props: React.PropsWithChildren<JsonSchemaEditButtonProps<T>>
 ) {
   const [idPrefix] = useState(Math.random().toString(36).substring(2))
-  const formRef = createRef<Form<any>>()
   const [modalVisible, setModalVisible] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const showModal = () => setModalVisible(true)
   const hideModal = () => setModalVisible(false)
-  const trySubmit = () => formRef.current && formRef.current.submit()
   const onSubmit = ({ formData }: { formData: T }) => {
     setSubmitting(true)
     props
@@ -31,6 +29,17 @@ function JsonSchemaEditButton<T>(
       .then(hideModal)
       .finally(() => setSubmitting(false))
   }
+
+  // react-jsonschema-form does not support programmatic form submission
+  // so we have to add a hidden submit button and trigger a click on it
+  // @see https://github.com/rjsf-team/react-jsonschema-form/issues/500
+  const submitRef = createRef<HTMLButtonElement>()
+  const trySubmit = () => submitRef.current && submitRef.current.click()
+  const fakeSubmit = (
+    <button className="fake-submit" type="submit" ref={submitRef}>
+      Submit
+    </button>
+  )
 
   return (
     <>
@@ -51,12 +60,11 @@ function JsonSchemaEditButton<T>(
         <div className="bootstrap">
           <Form
             showErrorList={false}
-            ref={formRef}
             schema={props.schema}
             formData={props.value}
             idPrefix={idPrefix}
             onSubmit={onSubmit}
-            children={<></>} // hide submit button
+            children={fakeSubmit}
           />
         </div>
       </Modal>

@@ -31,6 +31,7 @@ import {
 import { messageService } from './services/message'
 import { displayName } from './services/user'
 import { noop } from './services/util'
+import { HideNavigationProvider } from './hooks/useHideNavigation'
 
 const App: React.FC<{ onUserChanged?: () => void }> = props => {
   const onUserChanged = props.onUserChanged || noop
@@ -92,12 +93,14 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
             <Route path="/ide/:type/:id" component={IdePage} />
             <Route path="/lti" component={LtiPage} />
             <Route>
-              <DefaultLayout logout={logout}>
-                <Switch>
-                  {routes.map(renderRoute())}
-                  <Route component={NotFoundPage} />
-                </Switch>
-              </DefaultLayout>
+              <HideNavigationProvider>
+                <DefaultLayout logout={logout}>
+                  <Switch>
+                    {routes.map(renderRoute())}
+                    <Route component={NotFoundPage} />
+                  </Switch>
+                </DefaultLayout>
+              </HideNavigationProvider>
             </Route>
           </Switch>
         </Router>

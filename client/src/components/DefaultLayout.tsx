@@ -15,6 +15,7 @@ import Authorized from './Authorized'
 import './DefaultLayout.less'
 import Logo from './Logo'
 import RightHeader from './RightHeader'
+import { useHideNavigation } from '../hooks/useHideNavigation'
 
 export const appName = 'Code FREAK'
 
@@ -48,7 +49,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
   const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsedState(
     false
   )
-
+  const hideNavigation = useHideNavigation()
   const { data: motd } = useSystemConfig('motd')
 
   const renderRightHeader = () => <RightHeader logout={logout} />
@@ -74,6 +75,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
       rightContentRender={renderRightHeader}
       footerRender={renderFooter}
       headerRender={renderHeader}
+      menuRender={hideNavigation ? false : undefined}
       {...additionProps}
     >
       {children}

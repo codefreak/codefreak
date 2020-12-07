@@ -33,7 +33,6 @@ import {
   useGetTaskQuery,
   useUpdateTaskMutation
 } from '../../services/codefreak-api'
-import { createRoutes } from '../../services/custom-breadcrump'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { unshorten } from '../../services/short-id'
@@ -43,6 +42,7 @@ import AnswerPage from '../answer/AnswerPage'
 import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
+import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 
 export const DifferentUserContext = createContext<
   PublicUserFieldsFragment | undefined
@@ -60,6 +60,7 @@ const TaskPage: React.FC = () => {
   const isTeacher = useHasAuthority('ROLE_TEACHER')
   const userId = useQueryParam('user')
   const history = useHistory()
+  const createRoutes = useCreateRoutes()
 
   const result = useGetTaskQuery({
     variables: {

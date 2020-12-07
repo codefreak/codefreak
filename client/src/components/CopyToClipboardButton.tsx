@@ -3,7 +3,7 @@ import { ButtonProps } from 'antd/es/button'
 import React, { useCallback, useEffect, useState } from 'react'
 import copyToClipboard from 'copy-to-clipboard'
 
-interface CopyValueButtonProps extends ButtonProps {
+export interface CopyToClipboardButtonProps extends ButtonProps {
   value: string
   // the Options interface is not exported from the package. welp...
   options?: Parameters<typeof copyToClipboard>[1]
@@ -12,7 +12,7 @@ interface CopyValueButtonProps extends ButtonProps {
   copiedIcon?: ButtonProps['icon']
 }
 
-const CopyToClipboardButton: React.FC<CopyValueButtonProps> = ({
+const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
   value,
   options,
   copiedMessage,
@@ -49,7 +49,7 @@ const CopyToClipboardButton: React.FC<CopyValueButtonProps> = ({
   }
   return (
     <Button onClick={onClick} {...buttonProps}>
-      {copied ? copiedMessage ?? 'Copied to clipboard!' : originalChildren}
+      {copied ? copiedMessage : originalChildren}
     </Button>
   )
 }

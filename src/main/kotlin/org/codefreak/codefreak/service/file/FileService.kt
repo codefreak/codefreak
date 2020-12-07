@@ -21,4 +21,14 @@ interface FileService {
   fun getCollectionMd5Digest(collectionId: UUID): ByteArray {
     return readCollectionTar(collectionId).use { DigestUtils.md5Digest(it) }
   }
+
+  fun listFiles(collectionId: UUID): List<String>
+  fun createFile(collectionId: UUID, path: String)
+  fun createDirectory(collectionId: UUID, path: String)
+  fun containsFile(collectionId: UUID, path: String): Boolean
+  fun containsDirectory(collectionId: UUID, path: String): Boolean
+  fun deleteFile(collectionId: UUID, path: String)
+  fun filePutContents(collectionId: UUID, path: String): OutputStream
+  fun getFileContents(collectionId: UUID, path: String): InputStream
+  fun moveFile(collectionId: UUID, from: String, to: String)
 }
