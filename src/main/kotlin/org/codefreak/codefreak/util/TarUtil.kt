@@ -165,26 +165,27 @@ object TarUtil {
   }
 
   inline fun <T> findFile(`in`: InputStream, path: String, consumer: (TarArchiveEntry, TarArchiveInputStream) -> T): T {
+    return findFile(`in`, listOf(path), consumer)
+  }
+
+  inline fun <T> findFile(`in`: InputStream, possiblePaths: List<String>, consumer: (TarArchiveEntry, TarArchiveInputStream) -> T): T {
     TarArchiveInputStream(`in`).let { tar ->
       generateSequence { tar.nextTarEntry }.forEach {
-        if (it.isFile && normalizeEntryName(it.name) == normalizeEntryName(path)) {
-          return consumer(it, tar)
+        possiblePaths.forEach { path ->
+          if (it.isFile && normalizeEntryName(it.name) == normalizeEntryName(path)) {
+            return consumer(it, tar)
+          }
         }
       }
     }
-    throw IllegalArgumentException("$path does not exist")
+
+    throw IllegalArgumentException("None of $possiblePaths does exist")
   }
 
   @Throws(IllegalArgumentException::class)
   inline fun <reified T> ObjectMapper.getCodefreakDefinition(`in`: InputStream): T {
-    try {
-      findFile(`in`, CODEFREAK_DEFINITION_YML) { _, fileStream ->
-        return readValue(fileStream, T::class.java)
-      }
-    } catch (e: IllegalArgumentException) {
-      findFile(`in`, CODEFREAK_DEFINITION_YAML) { _, fileStream ->
-        return readValue(fileStream, T::class.java)
-      }
+    findFile(`in`, listOf(CODEFREAK_DEFINITION_YML, CODEFREAK_DEFINITION_YAML)) { _, fileStream ->
+      return readValue(fileStream, T::class.java)
     }
   }
 
