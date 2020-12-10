@@ -1,6 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Alert, Button, Card, Col, Row } from 'antd'
-import React from 'react'
+import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import FileImport from '../../components/FileImport'
 import {
@@ -13,6 +13,7 @@ import {
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { getAllTemplates } from '../../services/templates'
+import InlineError from '../../components/InlineError'
 
 const CreateTaskPage: React.FC = () => {
   const taskTemplates = getAllTemplates()
@@ -22,9 +23,15 @@ const CreateTaskPage: React.FC = () => {
   ] = useCreateTaskMutation()
   const history = useHistory()
 
-  const [uploadTask, { loading: uploading }] = useUploadTaskMutation()
+  const [uploadTask, { loading: uploading }] = useUploadTaskMutation({
+    context: { disableGlobalErrorHandling: true }
+  })
 
-  const [importTask, { loading: importing }] = useImportTaskMutation()
+  const [importTask, { loading: importing }] = useImportTaskMutation({
+    context: { disableGlobalErrorHandling: true }
+  })
+
+  const [inlineErrorMessage, setInlineErrorMessage] = useState('')
 
   const onTaskCreated = (task: Entity) => {
     history.push(getEntityPath(task))
@@ -41,14 +48,14 @@ const CreateTaskPage: React.FC = () => {
   }
 
   const onUpload = (files: File[]) =>
-    uploadTask({ variables: { files } }).then(r =>
-      uploadOrImportCompleted(r.data ? r.data.uploadTask : null)
-    )
+    uploadTask({ variables: { files } })
+      .then(r => uploadOrImportCompleted(r.data ? r.data.uploadTask : null))
+      .catch(reason => setInlineErrorMessage(reason.message))
 
   const onImport = (url: string) =>
-    importTask({ variables: { url } }).then(r =>
-      uploadOrImportCompleted(r.data ? r.data.importTask : null)
-    )
+    importTask({ variables: { url } })
+      .then(r => uploadOrImportCompleted(r.data ? r.data.importTask : null))
+      .catch(reason => setInlineErrorMessage(reason.message))
 
   const createTask = (template?: TaskTemplate) => async () => {
     const result = await createTaskMutation({ variables: { template } })
@@ -56,6 +63,15 @@ const CreateTaskPage: React.FC = () => {
       onTaskCreated(result.data.createTask)
     }
   }
+
+  const inlineError =
+    inlineErrorMessage.length > 0 ? (
+      <InlineError
+        title="Error while importing task"
+        message={inlineErrorMessage}
+      />
+    ) : null
+
   return (
     <>
       <PageHeaderWrapper />
@@ -104,6 +120,7 @@ const CreateTaskPage: React.FC = () => {
         <i>All trademarks are the property of their respective owners.</i>
       </div>
       <Card title="Import" style={{ marginBottom: 16 }}>
+        {inlineError}
         <FileImport
           uploading={uploading}
           onUpload={onUpload}
