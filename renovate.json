@@ -3,12 +3,22 @@
     "config:base"
   ],
   "stabilityDays": 7,
+  "timezone": "Europe/Berlin",
   "schedule": [
     "before 6am"
   ],
   "prCreation": "not-pending",
   "dependencyDashboard": true,
+  "labels": ["dependencies"],
   "packageRules": [
+    {
+      "paths": ["+(/client/**)"],
+      "addLabels": ["client"]
+    },
+    {
+      "paths": ["+(**/*.gradle)"],
+      "addLabels": ["backend"]
+    },
     {
       "packagePatterns": [
         "^com\\.github\\.codefreak\\.",
