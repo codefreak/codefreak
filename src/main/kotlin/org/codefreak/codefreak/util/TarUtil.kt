@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.util
 
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
@@ -182,10 +183,14 @@ object TarUtil {
     throw IllegalArgumentException("None of $possiblePaths does exist")
   }
 
-  @Throws(IllegalArgumentException::class)
+  @Throws(IllegalArgumentException::class, InvalidCodefreakDefinitionException::class)
   inline fun <reified T> ObjectMapper.getCodefreakDefinition(`in`: InputStream): T {
     findFile(`in`, listOf(CODEFREAK_DEFINITION_YML, CODEFREAK_DEFINITION_YAML)) { _, fileStream ->
-      return readValue(fileStream, T::class.java)
+      try {
+        return readValue(fileStream, T::class.java)
+      } catch (e: JsonMappingException) {
+        throw InvalidCodefreakDefinitionException(e.originalMessage)
+      }
     }
   }
 
