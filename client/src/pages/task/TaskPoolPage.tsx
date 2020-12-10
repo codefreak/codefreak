@@ -2,11 +2,14 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import Emoji from 'a11y-react-emoji'
 import { Button, Col, Row } from 'antd'
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EmptyListCallToAction from '../../components/EmptyListCallToAction'
 import TaskList from '../../components/TaskList'
-import { useGetTaskPoolQuery } from '../../services/codefreak-api'
+import {
+  UploadTasksMutationResult,
+  useGetTaskPoolQuery
+} from '../../services/codefreak-api'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import { messageService } from '../../services/message'
 import UploadTasksButton from '../../components/UploadTasksButton'
@@ -17,12 +20,15 @@ import {
 } from '../../services/task'
 import SortSelect from '../../components/SortSelect'
 import SearchBar from '../../components/SearchBar'
+import { getEntityPath } from '../../services/entity-path'
 
 const TaskPoolPage: React.FC = () => {
   const result = useGetTaskPoolQuery({ fetchPolicy: 'cache-and-network' })
 
   const [sortMethod, setSortMethod] = useState(TaskSortMethodNames[0])
   const [filterCriteria, setFilterCriteria] = useState('')
+
+  const history = useHistory()
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -65,15 +71,28 @@ const TaskPoolPage: React.FC = () => {
 
   const update = () => result.refetch()
 
-  const handleUploadCompleted = (createdTasks: { id: string }[]) => {
-    if (createdTasks.length === 0) {
-      messageService.error('Tasks could not be created')
-    } else {
-      messageService.success(
-        `${createdTasks.length} task(s) successfully created`
-      )
+  const handleUploadCompleted = (
+    createdTasks:
+      | NonNullable<UploadTasksMutationResult['data']>['uploadTasks']
+      | null
+  ) => {
+    if (createdTasks) {
+      switch (createdTasks.length) {
+        case 0:
+          messageService.error('Tasks could not be created')
+          break
+        case 1:
+          history.push(getEntityPath(createdTasks[0]))
+          messageService.success('Task created')
+          break
+        default:
+          messageService.success(
+            `${createdTasks.length} task(s) successfully created`
+          )
+          result.refetch()
+          break
+      }
     }
-    result.refetch()
   }
 
   const exportButton = (

@@ -1,12 +1,16 @@
-import React, { useCallback, useState } from 'react'
-import { useUploadTasksMutation } from '../services/codefreak-api'
-import { Alert, Button, Icon, Modal, Spin, Upload } from 'antd'
-import { RcFile } from 'antd/lib/upload/interface'
-
-const { Dragger } = Upload
+import React, { useState } from 'react'
+import {
+  UploadTasksMutationResult,
+  useImportTasksMutation,
+  useUploadTasksMutation
+} from '../services/codefreak-api'
+import { Alert, Button, Modal } from 'antd'
+import FileImport from './FileImport'
 
 interface UploadTasksButtonProps {
-  onUploadCompleted: (tasks: { id: string }[]) => void
+  onUploadCompleted: (
+    result: NonNullable<UploadTasksMutationResult['data']>['uploadTasks'] | null
+  ) => void
 }
 
 const UploadTasksButton = (props: UploadTasksButtonProps) => {
@@ -16,37 +20,25 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
 
   const [uploadTasks, { loading: uploading }] = useUploadTasksMutation()
 
-  const onUploadCompleted = props.onUploadCompleted
+  const [importTasks, { loading: importing }] = useImportTasksMutation()
 
-  const onUpload = useCallback(
-    (files: File[]) => {
-      uploadTasks({ variables: { files } }).then(r => {
+  const onUpload = (files: File[]) =>
+    uploadTasks({ variables: { files } }).then(r => {
+      const data = r.data ? r.data.uploadTasks : null
+      if (data) {
         hideModal()
-        if (r.data) {
-          onUploadCompleted(
-            r.data.uploadTasks.map(task => {
-              return {
-                id: task.id
-              }
-            })
-          )
-        }
-      })
-    },
-    [onUploadCompleted, uploadTasks]
-  )
-
-  const beforeUpload = useCallback(
-    (file: RcFile, fileList: RcFile[]) => {
-      // this function is called for every file, but the upload of the whole file list should run only once
-      if (fileList.indexOf(file) === 0) {
-        onUpload(fileList)
       }
+      props.onUploadCompleted(data)
+    })
 
-      return false
-    },
-    [onUpload]
-  )
+  const onImport = (url: string) =>
+    importTasks({ variables: { url } }).then(r => {
+      const data = r.data ? r.data.importTasks : null
+      if (data) {
+        hideModal()
+      }
+      props.onUploadCompleted(data)
+    })
 
   return (
     <>
@@ -62,30 +54,18 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
             Cancel
           </Button>
         ]}
+        width="80%"
       >
         <Alert
           message="This action will create the imported tasks as new tasks and will not alter or delete existing tasks."
           style={{ marginBottom: 16, marginTop: 16 }}
         />
-        <Dragger
-          accept=".tar,.tar.gz,.zip"
-          height={170}
-          multiple
-          showUploadList={false}
-          beforeUpload={beforeUpload}
-          disabled={uploading}
-        >
-          <p className="ant-upload-drag-icon">
-            {uploading ? <Spin size="large" /> : <Icon type="inbox" />}
-          </p>
-          <p className="ant-upload-text">
-            Click or drag file to this area to upload
-          </p>
-          <p className="ant-upload-hint">
-            The individual tasks should be .zip, .tar or .tar.gz archives. You
-            can also upload a single archive containing the tasks (as archives).
-          </p>
-        </Dragger>
+        <FileImport
+          uploading={uploading}
+          onUpload={onUpload}
+          importing={importing}
+          onImport={onImport}
+        />
       </Modal>
     </>
   )
