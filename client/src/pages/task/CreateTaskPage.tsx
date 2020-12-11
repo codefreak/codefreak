@@ -2,10 +2,7 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Alert, Button, Card, Col, Row } from 'antd'
 import React from 'react'
 import { useHistory } from 'react-router-dom'
-import {
-  TaskTemplate,
-  useCreateTaskMutation
-} from '../../generated/graphql'
+import { TaskTemplate, useCreateTaskMutation } from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { getAllTemplates } from '../../services/templates'
@@ -41,36 +38,13 @@ const CreateTaskPage: React.FC = () => {
         {(Object.keys(taskTemplates) as TaskTemplate[]).map(templateKey => {
           const template = taskTemplates[templateKey]
           return (
-            <Col
-              xs={24}
-              sm={12}
-              md={6}
-              xl={4}
-              style={{ marginBottom: 16 }}
+            <TaskTemplateCard
               key={templateKey}
-            >
-              <Card
-                cover={
-                  <div style={{ padding: '2em 2em 0' }}>
-                    <template.logo className="language-logo" />
-                  </div>
-                }
-                actions={[
-                  <Button
-                    key="1"
-                    type="primary"
-                    onClick={createTask(templateKey)}
-                  >
-                    Use this template
-                  </Button>
-                ]}
-              >
-                <Card.Meta
-                  title={template.title}
-                  description={template.description}
-                />
-              </Card>
-            </Col>
+              title={template.title}
+              description={template.description}
+              logo={<template.logo className="language-logo" />}
+              onUseTemplate={createTask(templateKey)}
+            />
           )
         })}
       </Row>
@@ -92,5 +66,35 @@ const CreateTaskPage: React.FC = () => {
     </>
   )
 }
+
+interface TaskTemplateCardProps {
+  key: string
+  title: string
+  description: string
+  logo: JSX.Element
+  onUseTemplate: () => void
+}
+
+const TaskTemplateCard = (props: TaskTemplateCardProps) => (
+  <Col
+    xs={24}
+    sm={12}
+    md={6}
+    xl={4}
+    style={{ marginBottom: 16 }}
+    key={props.key}
+  >
+    <Card
+      cover={<div style={{ padding: '2em 2em 0' }}>{props.logo}</div>}
+      actions={[
+        <Button key="1" type="primary" onClick={props.onUseTemplate}>
+          Use this template
+        </Button>
+      ]}
+    >
+      <Card.Meta title={props.title} description={props.description} />
+    </Card>
+  </Col>
+)
 
 export default CreateTaskPage
