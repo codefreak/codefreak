@@ -2,13 +2,9 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Alert, Button, Card, Col, Row } from 'antd'
 import React from 'react'
 import { useHistory } from 'react-router-dom'
-import FileImport from '../../components/FileImport'
 import {
   TaskTemplate,
-  UploadTaskMutationResult,
-  useCreateTaskMutation,
-  useImportTaskMutation,
-  useUploadTaskMutation
+  useCreateTaskMutation
 } from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
@@ -22,33 +18,10 @@ const CreateTaskPage: React.FC = () => {
   ] = useCreateTaskMutation()
   const history = useHistory()
 
-  const [uploadTask, { loading: uploading }] = useUploadTaskMutation()
-
-  const [importTask, { loading: importing }] = useImportTaskMutation()
-
   const onTaskCreated = (task: Entity) => {
     history.push(getEntityPath(task))
     messageService.success('Task created')
   }
-
-  const uploadOrImportCompleted = (
-    result: NonNullable<UploadTaskMutationResult['data']>['uploadTask'] | null
-  ) => {
-    if (result) {
-      history.push(getEntityPath(result))
-      messageService.success('Task created')
-    }
-  }
-
-  const onUpload = (files: File[]) =>
-    uploadTask({ variables: { files } }).then(r =>
-      uploadOrImportCompleted(r.data ? r.data.uploadTask : null)
-    )
-
-  const onImport = (url: string) =>
-    importTask({ variables: { url } }).then(r =>
-      uploadOrImportCompleted(r.data ? r.data.importTask : null)
-    )
 
   const createTask = (template?: TaskTemplate) => async () => {
     const result = await createTaskMutation({ variables: { template } })
@@ -56,6 +29,7 @@ const CreateTaskPage: React.FC = () => {
       onTaskCreated(result.data.createTask)
     }
   }
+
   return (
     <>
       <PageHeaderWrapper />
@@ -103,14 +77,6 @@ const CreateTaskPage: React.FC = () => {
       <div style={{ marginBottom: 16 }}>
         <i>All trademarks are the property of their respective owners.</i>
       </div>
-      <Card title="Import" style={{ marginBottom: 16 }}>
-        <FileImport
-          uploading={uploading}
-          onUpload={onUpload}
-          importing={importing}
-          onImport={onImport}
-        />
-      </Card>
       <Card title="From Scratch">
         <div style={{ textAlign: 'center' }}>
           <Button
