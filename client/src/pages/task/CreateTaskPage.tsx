@@ -9,10 +9,7 @@ import { getAllTemplates } from '../../services/templates'
 
 const CreateTaskPage: React.FC = () => {
   const taskTemplates = getAllTemplates()
-  const [
-    createTaskMutation,
-    { loading: creatingTask }
-  ] = useCreateTaskMutation()
+  const [createTaskMutation] = useCreateTaskMutation()
   const history = useHistory()
 
   const onTaskCreated = (task: Entity) => {
@@ -35,6 +32,19 @@ const CreateTaskPage: React.FC = () => {
         style={{ marginBottom: 16 }}
       />
       <Row gutter={16}>
+        <TaskTemplateCard
+          key="empty-task"
+          title="Empty"
+          description="Start from scratch"
+          logo={
+            <img
+              alt="Empty task logo"
+              src={`${process.env.PUBLIC_URL}/from-scratch-logo.svg`}
+            />
+          }
+          callToActionTitle="Create empty task"
+          onCallToAction={createTask()}
+        />
         {(Object.keys(taskTemplates) as TaskTemplate[]).map(templateKey => {
           const template = taskTemplates[templateKey]
           return (
@@ -43,7 +53,8 @@ const CreateTaskPage: React.FC = () => {
               title={template.title}
               description={template.description}
               logo={<template.logo className="language-logo" />}
-              onUseTemplate={createTask(templateKey)}
+              callToActionTitle="Use this template"
+              onCallToAction={createTask(templateKey)}
             />
           )
         })}
@@ -51,18 +62,6 @@ const CreateTaskPage: React.FC = () => {
       <div style={{ marginBottom: 16 }}>
         <i>All trademarks are the property of their respective owners.</i>
       </div>
-      <Card title="From Scratch">
-        <div style={{ textAlign: 'center' }}>
-          <Button
-            onClick={createTask()}
-            size="large"
-            loading={creatingTask}
-            block
-          >
-            Create Empty Task
-          </Button>
-        </div>
-      </Card>
     </>
   )
 }
@@ -72,7 +71,8 @@ interface TaskTemplateCardProps {
   title: string
   description: string
   logo: JSX.Element
-  onUseTemplate: () => void
+  callToActionTitle: string
+  onCallToAction: () => void
 }
 
 const TaskTemplateCard = (props: TaskTemplateCardProps) => (
@@ -87,8 +87,8 @@ const TaskTemplateCard = (props: TaskTemplateCardProps) => (
     <Card
       cover={<div style={{ padding: '2em 2em 0' }}>{props.logo}</div>}
       actions={[
-        <Button key="1" type="primary" onClick={props.onUseTemplate}>
-          Use this template
+        <Button key="1" type="primary" onClick={props.onCallToAction}>
+          {props.callToActionTitle}
         </Button>
       ]}
     >
