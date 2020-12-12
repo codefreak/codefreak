@@ -35,9 +35,10 @@ import { HideNavigationProvider } from './hooks/useHideNavigation'
 
 const App: React.FC<{ onUserChanged?: () => void }> = props => {
   const onUserChanged = props.onUserChanged || noop
-  const [authenticatedUser, setAuthenticatedUser] = useState<
-    AuthenticatedUser
-  >()
+  const [
+    authenticatedUser,
+    setAuthenticatedUser
+  ] = useState<AuthenticatedUser>()
   const timeOffset = useCalculatedServerTimeOffset()
 
   const { data: authResult, loading } = useGetAuthenticatedUserQuery({
