@@ -6,6 +6,7 @@ import {
 } from '../services/codefreak-api'
 import { Alert, Button, Modal } from 'antd'
 import FileImport from './FileImport'
+import InlineError from './InlineError'
 
 interface UploadTasksButtonProps {
   onUploadCompleted: (
@@ -15,30 +16,47 @@ interface UploadTasksButtonProps {
 
 const UploadTasksButton = (props: UploadTasksButtonProps) => {
   const [modalVisible, setModalVisible] = useState(false)
+  const [inlineErrorMessage, setInlineErrorMessage] = useState('')
   const showModal = () => setModalVisible(true)
   const hideModal = () => setModalVisible(false)
 
-  const [uploadTasks, { loading: uploading }] = useUploadTasksMutation()
+  const [uploadTasks, { loading: uploading }] = useUploadTasksMutation({
+    context: { disableGlobalErrorHandling: true }
+  })
 
-  const [importTasks, { loading: importing }] = useImportTasksMutation()
+  const [importTasks, { loading: importing }] = useImportTasksMutation({
+    context: { disableGlobalErrorHandling: true }
+  })
 
   const onUpload = (files: File[]) =>
-    uploadTasks({ variables: { files } }).then(r => {
-      const data = r.data ? r.data.uploadTasks : null
-      if (data) {
-        hideModal()
-      }
-      props.onUploadCompleted(data)
-    })
+    uploadTasks({ variables: { files } })
+      .then(r => {
+        const data = r.data ? r.data.uploadTasks : null
+        if (data) {
+          hideModal()
+        }
+        props.onUploadCompleted(data)
+      })
+      .catch(reason => setInlineErrorMessage(reason.message))
 
   const onImport = (url: string) =>
-    importTasks({ variables: { url } }).then(r => {
-      const data = r.data ? r.data.importTasks : null
-      if (data) {
-        hideModal()
-      }
-      props.onUploadCompleted(data)
-    })
+    importTasks({ variables: { url } })
+      .then(r => {
+        const data = r.data ? r.data.importTasks : null
+        if (data) {
+          hideModal()
+        }
+        props.onUploadCompleted(data)
+      })
+      .catch(reason => setInlineErrorMessage(reason.message))
+
+  const inlineError =
+    inlineErrorMessage.length > 0 ? (
+      <InlineError
+        title="Error while importing assignment"
+        message={inlineErrorMessage}
+      />
+    ) : null
 
   return (
     <>
@@ -60,6 +78,7 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
           message="This action will create the imported tasks as new tasks and will not alter or delete existing tasks."
           style={{ marginBottom: 16, marginTop: 16 }}
         />
+        {inlineError}
         <FileImport
           uploading={uploading}
           onUpload={onUpload}
