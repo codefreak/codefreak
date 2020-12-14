@@ -37,3 +37,9 @@ mutation ImportTask($url: String!) {
     id
   }
 }
+
+mutation ImportTasks($url: String!) {
+  importTasks(url: $url) {
+    id
+  }
+}

@@ -12,6 +12,7 @@ import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
 import org.codefreak.codefreak.entity.Task
+import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
@@ -142,9 +143,24 @@ class TaskMutation : BaseResolver(), Mutation {
   fun uploadTasks(files: Array<ApplicationPart>): List<TaskDto> = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-      val tasks = serviceAccess.getService(TaskTarService::class).createMultipleFromTar(it.toByteArray(), authorization.currentUser)
-      tasks.map { task -> TaskDto(task, this) }
+      val tarContent = it.toByteArray()
+
+      try {
+        createSingleTask(tarContent, authorization.currentUser)
+      } catch (e: IllegalArgumentException) {
+        createMultipleTasks(tarContent, authorization.currentUser)
+      }
     }
+  }
+
+  private fun createSingleTask(tarContent: ByteArray, owner: User): List<TaskDto> = context {
+    val task = serviceAccess.getService(TaskTarService::class).createFromTar(tarContent, owner)
+    listOf(TaskDto(task, this))
+  }
+
+  private fun createMultipleTasks(tarContent: ByteArray, owner: User): List<TaskDto> = context {
+    val tasks = serviceAccess.getService(TaskTarService::class).createMultipleFromTar(tarContent, owner)
+    tasks.map { task -> TaskDto(task, this) }
   }
 
   @Secured(Authority.ROLE_TEACHER)
@@ -153,6 +169,20 @@ class TaskMutation : BaseResolver(), Mutation {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
       val task = serviceAccess.getService(TaskTarService::class).createFromTar(it.toByteArray(), authorization.currentUser)
       TaskDto(task, this)
+    }
+  }
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun importTasks(url: String): List<TaskDto> = context {
+    ByteArrayOutputStream().use {
+      serviceAccess.getService(GitImportService::class).importFiles(url, it)
+      val tarContent = it.toByteArray()
+
+      try {
+        createSingleTask(tarContent, authorization.currentUser)
+      } catch (e: IllegalArgumentException) {
+        createMultipleTasks(tarContent, authorization.currentUser)
+      }
     }
   }
 
