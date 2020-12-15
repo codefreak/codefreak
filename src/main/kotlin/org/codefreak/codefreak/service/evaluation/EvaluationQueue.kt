@@ -3,11 +3,13 @@ package org.codefreak.codefreak.service.evaluation
 import java.util.Date
 import java.util.UUID
 import org.codefreak.codefreak.config.EvaluationConfiguration
+import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.ExitStatus
 import org.springframework.batch.core.Job
+import org.springframework.batch.core.JobExecution
 import org.springframework.batch.core.JobParameters
 import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.StepExecution
@@ -45,8 +47,8 @@ class EvaluationQueue : StepExecutionListener {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  private var queuedEvaluations = mutableSetOf<UUID>()
-  private var runningEvaluations = mutableSetOf<UUID>()
+  private var queuedEvaluations = mutableMapOf<UUID, JobExecution>()
+  private var runningEvaluations = mutableMapOf<UUID, JobExecution>()
 
   @EventListener(ApplicationStartedEvent::class)
   fun truncatePendingEvaluationsAfterStartup() {
@@ -70,23 +72,26 @@ class EvaluationQueue : StepExecutionListener {
    * Mark as Propagation.NOT_SUPPORTED to prevent exceptions from JobRepository
    */
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  fun insert(answerId: UUID) {
-    val params = JobParametersBuilder().apply {
-      addString(EvaluationConfiguration.PARAM_ANSWER_ID, answerId.toString())
-      addDate("date", Date()) // we need this so that we can create a job with the same answer id multiple times
-    }.toJobParameters()
-    log.debug("Queuing evaluation for answer $answerId")
-    queuedEvaluations.add(answerId)
-    jobLauncher.run(job, params)
+  fun insert(evaluation: Evaluation) {
+    val answerId = evaluation.answer.id
+    for (step in evaluation.evaluationSteps) {
+      val params = JobParametersBuilder().apply {
+        addString(EvaluationConfiguration.PARAM_ANSWER_ID, answerId.toString())
+        addString(EvaluationConfiguration.PARAM_EVALUATION_STEP_ID, step.id.toString())
+        addDate("date", Date()) // we need this so that we can create a job with the same answer id multiple times
+      }.toJobParameters()
+      log.debug("Queuing evaluation for answer $answerId")
+      queuedEvaluations[answerId] = jobLauncher.run(job, params)
+    }
     eventPublisher.publishEvent(PendingEvaluationUpdatedEvent(answerId, PendingEvaluationStatus.QUEUED))
   }
 
   override fun beforeStep(stepExecution: StepExecution) {
     if (stepExecution.stepName == EvaluationConfiguration.STEP_NAME) {
-      stepExecution.jobParameters.answerId?.let {
-        queuedEvaluations.remove(it)
-        runningEvaluations.add(it)
-        eventPublisher.publishEvent(PendingEvaluationUpdatedEvent(it, PendingEvaluationStatus.RUNNING))
+      stepExecution.jobParameters.answerId?.let { answerId ->
+        queuedEvaluations.remove(answerId)
+        runningEvaluations[answerId] = stepExecution.jobExecution
+        eventPublisher.publishEvent(PendingEvaluationUpdatedEvent(answerId, PendingEvaluationStatus.RUNNING))
       }
     }
   }
@@ -99,6 +104,15 @@ class EvaluationQueue : StepExecutionListener {
       }
     }
     return null
+  }
+
+  fun stop(answerId: UUID) {
+    runningEvaluations.remove(answerId)?.let {
+      jobOperator.stop(it.id)
+    }
+    queuedEvaluations.remove(answerId)?.let {
+      jobOperator.abandon(it.id)
+    }
   }
 
   fun isRunning(answerId: UUID): Boolean = runningEvaluations.contains(answerId)

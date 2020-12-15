@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1608038769
+      author: hkasch (generated)
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+                  defaultValue: 'FINISHED'
+            tableName: evaluation_step
