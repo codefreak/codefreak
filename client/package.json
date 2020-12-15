@@ -6,7 +6,7 @@
     "@ant-design/pro-layout": "4.11.4",
     "@apollo/client": "3.2.5",
     "@codefreak/docs": "file:../docs",
-    "@craco/craco": "5.9.0",
+    "@craco/craco": "6.0.0",
     "@graphql-codegen/cli": "1.19.4",
     "@graphql-codegen/typescript": "1.19.0",
     "@graphql-codegen/typescript-operations": "1.17.12",
