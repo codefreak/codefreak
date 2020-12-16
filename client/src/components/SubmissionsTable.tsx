@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import {
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult,
-  PendingEvaluationStatus
+  EvaluationStepStatus
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { useFormatter } from '../hooks/useFormatter'
@@ -178,17 +178,13 @@ const AnswerEvaluationSummary: React.FC<{
     latestEvaluation,
     pendingEvaluationStatus,
     loading
-  } = useAnswerEvaluation(
-    answer.id,
-    answer.latestEvaluation,
-    answer.pendingEvaluation?.status
-  )
+  } = useAnswerEvaluation(answer.id, answer.latestEvaluation)
 
   // prevent flashing of old evaluation result by also showing loading indicator for fetching new results
   if (
     loading ||
-    pendingEvaluationStatus === PendingEvaluationStatus.Queued ||
-    pendingEvaluationStatus === PendingEvaluationStatus.Running
+    pendingEvaluationStatus === EvaluationStepStatus.Queued ||
+    pendingEvaluationStatus === EvaluationStepStatus.Running
   ) {
     return (
       <Tooltip title="Evaluating answer…">

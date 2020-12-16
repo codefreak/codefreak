@@ -1,6 +1,6 @@
 mutation StartEvaluation($answerId: ID!) {
   startEvaluation(answerId: $answerId) {
-    status
+    stepsStatusSummary
   }
 }
 
@@ -17,7 +17,7 @@ mutation StartAssignmentEvaluation(
     answer {
       id
     }
-    status
+    stepsStatusSummary
   }
 }
 

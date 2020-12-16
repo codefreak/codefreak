@@ -144,7 +144,7 @@ class AppConfiguration {
   }
 
   class Evaluation {
-    var maxConcurrentExecutions = 5
+    var maxConcurrentExecutions = Runtime.getRuntime().availableProcessors()
     var maxQueueSize = 1000
     var defaultTimeout = 5L * 60L
 

@@ -39,6 +39,7 @@ fragment latestEvaluation on Evaluation {
   id
   createdAt
   stepsResultSummary
+  stepsStatusSummary
   steps {
     id
     definition {
@@ -68,9 +69,6 @@ query GetAssignmentWithSubmissions($id: ID!) {
         task {
           id
           title
-        }
-        pendingEvaluation {
-          status
         }
         latestEvaluation {
           ...latestEvaluation

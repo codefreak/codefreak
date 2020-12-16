@@ -43,14 +43,6 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseD
         .orNull()
   }
 
-  val pendingEvaluation by lazy {
-    if (serviceAccess.getService(EvaluationService::class).isEvaluationPending(id)) {
-      PendingEvaluationDto(entity, ctx)
-    } else {
-      null
-    }
-  }
-
   val evaluations by lazy {
     entity.evaluations.sortedBy { it.createdAt }.map { EvaluationDto(it, ctx) }
   }
@@ -97,7 +89,7 @@ class AnswerMutation : BaseResolver(), Mutation {
   fun deleteAnswer(id: UUID): Boolean = context {
     val answer = serviceAccess.getService(AnswerService::class).findAnswer(id)
     authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_ADMIN)
-    check(!serviceAccess.getService(EvaluationService::class).isEvaluationPending(answer.id)) {
+    check(!serviceAccess.getService(EvaluationService::class).isEvaluationScheduled(answer.id)) {
       "Answer cannot be deleted while evaluation is running"
     }
     // If this is the only answer, delete the whole submission. This makes sense for testing mode.

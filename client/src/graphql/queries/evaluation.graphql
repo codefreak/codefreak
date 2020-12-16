@@ -5,8 +5,8 @@ query GetEvaluationOverview($answerId: ID!) {
       id
       createdAt
     }
-    pendingEvaluation {
-      status
+    latestEvaluation {
+      stepsStatusSummary
     }
   }
 }
@@ -25,8 +25,8 @@ query GetEvaluationHistory($answerId: ID!) {
 query GetPendingEvaluation($answerId: ID!) {
   answer(id: $answerId) {
     id
-    pendingEvaluation {
-      status
+    latestEvaluation {
+      stepsStatusSummary
     }
   }
 }

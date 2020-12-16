@@ -29,14 +29,24 @@ class Evaluation(
    * Represents the worst result from all steps
    * If no evaluation has been run or all results are unknown it is successful by default
    */
-  val stepsResultSummary: EvaluationStep.EvaluationStepResult
+  val stepsResultSummary: EvaluationStepResult
     @Transient
-    get() = evaluationSteps.fold(EvaluationStep.EvaluationStepResult.SUCCESS) { acc, step ->
+    get() = evaluationSteps.fold(EvaluationStepResult.SUCCESS) { acc, step ->
       val result = step.result
       when {
         result != null && result > acc -> result
         else -> acc
       }
+    }
+
+  val stepStatusSummary: EvaluationStepStatus
+    @Transient
+    get() = when {
+      evaluationSteps.any { it.status == EvaluationStepStatus.CANCELED } -> EvaluationStepStatus.CANCELED
+      evaluationSteps.any { it.status == EvaluationStepStatus.RUNNING } -> EvaluationStepStatus.RUNNING
+      evaluationSteps.any { it.status == EvaluationStepStatus.QUEUED } -> EvaluationStepStatus.QUEUED
+      evaluationSteps.all { it.status == EvaluationStepStatus.FINISHED } -> EvaluationStepStatus.FINISHED
+      else -> EvaluationStepStatus.PENDING
     }
 
   @CreationTimestamp

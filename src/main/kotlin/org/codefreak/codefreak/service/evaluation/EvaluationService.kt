@@ -11,6 +11,8 @@ import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
+import org.codefreak.codefreak.entity.EvaluationStepResult
+import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
@@ -55,6 +57,9 @@ class EvaluationService : BaseService() {
   private lateinit var taskService: TaskService
 
   @Autowired
+  private lateinit var stepService: EvaluationStepService
+
+  @Autowired
   private lateinit var evaluationQueue: EvaluationQueue
 
   @Autowired
@@ -72,13 +77,12 @@ class EvaluationService : BaseService() {
   }
 
   @Transactional
-  fun startAssignmentEvaluation(assignmentId: UUID): List<Answer> {
+  fun startAssignmentEvaluation(assignmentId: UUID): List<Evaluation> {
     val submissions = submissionService.findSubmissionsOfAssignment(assignmentId)
     return submissions.flatMap { it.answers }.mapNotNull {
       try {
         // this will never be run by a student so force file saving should be safe
         startEvaluation(it, forceSaveFiles = true)
-        it
       } catch (e: IllegalStateException) {
         // evaluation is already fresh or running
         log.debug("Not queuing evaluation for answer ${it.id}: ${e.message}")
@@ -88,18 +92,37 @@ class EvaluationService : BaseService() {
   }
 
   @Synchronized
-  fun startEvaluation(answer: Answer, forceSaveFiles: Boolean = false) {
+  fun startEvaluation(answer: Answer, forceSaveFiles: Boolean = false): Evaluation {
     ideService.saveAnswerFiles(answer, forceSaveFiles)
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
-    check(!isEvaluationPending(answer.id)) { "Evaluation is already running or queued." }
-    evaluationQueue.insert(answer.id)
+    check(!isEvaluationScheduled(answer.id)) { "Evaluation is already scheduled." }
+    val evaluation = createPendingEvaluation(answer)
+    evaluationQueue.insert(evaluation)
+    return evaluation
+  }
+
+  private fun createPendingEvaluation(answer: Answer): Evaluation {
+    val digest = fileService.getCollectionMd5Digest(answer.id)
+    val evaluation = getOrCreateValidEvaluationByDigest(answer, digest)
+    answer.task.evaluationStepDefinitions.filter { it.active }.forEach {
+      stepService.addPendingEvaluationStep(evaluation, it)
+    }
+    return saveEvaluation(evaluation)
   }
 
   fun getLatestEvaluation(answerId: UUID) = evaluationRepository.findFirstByAnswerIdOrderByCreatedAtDesc(answerId)
 
-  fun isEvaluationPending(answerId: UUID) = isEvaluationInQueue(answerId) || evaluationQueue.isRunning(answerId)
+  /**
+   * Check if we are still waiting for evaluation steps to be finished
+   */
+  fun isEvaluationScheduled(answerId: UUID): Boolean {
+    val status = getLatestEvaluationStatus(answerId) ?: return false
+    return status > EvaluationStepStatus.PENDING && status < EvaluationStepStatus.FINISHED
+  }
 
-  fun isEvaluationInQueue(answerId: UUID) = evaluationQueue.isQueued(answerId)
+  fun getLatestEvaluationStatus(answerId: UUID): EvaluationStepStatus? {
+    return getLatestEvaluation(answerId).map { it.stepStatusSummary }.orNull()
+  }
 
   fun getOrCreateValidEvaluationByDigest(answer: Answer, digest: ByteArray): Evaluation {
     return evaluationRepository.findFirstByAnswerIdAndFilesDigestOrderByCreatedAtDesc(answer.id, digest)
@@ -121,7 +144,7 @@ class EvaluationService : BaseService() {
   }
 
   fun createEvaluation(answer: Answer): Evaluation {
-    return evaluationRepository.save(
+    return saveEvaluation(
         Evaluation(
             answer,
             fileService.getCollectionMd5Digest(answer.id),
@@ -129,6 +152,8 @@ class EvaluationService : BaseService() {
         )
     )
   }
+
+  fun saveEvaluation(evaluation: Evaluation) = evaluationRepository.save(evaluation)
 
   fun createCommentFeedback(author: User, comment: String): Feedback {
     // use the first 10 words of the first line or max. 100 chars as summary
@@ -142,7 +167,9 @@ class EvaluationService : BaseService() {
     }
   }
 
-  fun stopEvaluation(answer: Answer, runnerName: String) {
+  fun stopEvaluationStep(evaluationStep: EvaluationStep) {
+    val runnerName = evaluationStep.definition.runnerName
+    val answer = evaluationStep.evaluation.answer
     val runner = getEvaluationRunner(runnerName)
     if (runner is StoppableEvaluationRunner) {
       runner.stop(answer)
@@ -159,10 +186,12 @@ class EvaluationService : BaseService() {
 
     // either take existing comments step on evaluation or create a new one
     val evaluationStep = evaluation.evaluationSteps.find { it.definition == stepDefinition }
-        ?: EvaluationStep(stepDefinition, evaluation).also { evaluation.addStep(it) }
+        ?: EvaluationStep(stepDefinition, evaluation, EvaluationStepStatus.FINISHED).also {
+          evaluation.addStep(it)
+        }
 
     evaluationStep.addFeedback(feedback)
-    evaluationRepository.save(evaluation)
+    saveEvaluation(evaluation)
     return feedback
   }
 
@@ -182,7 +211,7 @@ class EvaluationService : BaseService() {
       return false
     }
     // allow to re-run if any of the steps errored
-    if (evaluation.stepsResultSummary === EvaluationStep.EvaluationStepResult.ERRORED) {
+    if (evaluation.stepsResultSummary === EvaluationStepResult.ERRORED) {
       return false
     }
     return true
