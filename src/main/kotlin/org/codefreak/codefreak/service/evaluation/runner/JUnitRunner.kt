@@ -74,8 +74,8 @@ class JUnitRunner : CommandLineRunner() {
     } catch (e: Exception) {
       throw EvaluationStepException(
           "Failed to parse jUnit XML:\n${e.message ?: e.cause?.message}",
-          EvaluationStepResult.ERRORED,
-          e
+          result = EvaluationStepResult.ERRORED,
+          cause = e
       )
     }
 

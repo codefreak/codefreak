@@ -99,7 +99,13 @@ class EvaluationQueue : StepExecutionListener {
   override fun afterStep(stepExecution: StepExecution): ExitStatus? {
     if (stepExecution.stepName == EvaluationConfiguration.STEP_NAME) {
       stepExecution.jobParameters.evaluationStepId?.let {
-        evaluationStepService.updateEvaluationStepStatus(it, EvaluationStepStatus.FINISHED)
+        val evaluationStep = evaluationStepService.getEvaluationStep(it)
+        // keep the finished/canceled status that may have been set by the runner
+        val status = when {
+          evaluationStep.status >= EvaluationStepStatus.FINISHED -> evaluationStep.status
+          else -> EvaluationStepStatus.FINISHED
+        }
+        evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
       }
     }
     return null

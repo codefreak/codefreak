@@ -142,7 +142,7 @@ enum class StatusDto {
   FAILED
 }
 
-@GraphQLName("PendingEvaluationUpdatedEventDto")
+@GraphQLName("EvaluationStatusUpdatedEvent")
 class EvaluationStatusUpdatedEventDto(event: EvaluationStatusUpdatedEvent, ctx: ResolverContext) {
   val evaluation = EvaluationDto(event.evaluation, ctx)
   val status = event.status.let { EvaluationStepStatusDto.valueOf(it.name) }
@@ -320,7 +320,7 @@ class EvaluationSubscription : BaseResolver(), Subscription {
 
   fun evaluationFinished(env: DataFetchingEnvironment): Flux<EvaluationDto> = context(env) {
     evaluationStatusUpdatedEventPublisher.eventStream
-        .filter { it.status === EvaluationStepStatus.FINISHED && it.evaluation.answer.submission.user == authorization.currentUser }
+        .filter { it.status >= EvaluationStepStatus.FINISHED && it.evaluation.answer.submission.user == authorization.currentUser }
         .map { EvaluationDto(it.evaluation, this) }
   }
 }

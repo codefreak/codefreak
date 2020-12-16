@@ -54,7 +54,6 @@ class EvaluationStepService {
     evaluation.evaluationSteps.find { it.definition == stepDefinition }?.let { existingStep ->
       // reset existing step to non-finished
       existingStep.status = EvaluationStepStatus.PENDING
-      existingStep.result = null
       return existingStep
     }
     // create a new pending step in case there was no existing one

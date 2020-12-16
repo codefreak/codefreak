@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepResult
+import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemProcessor
@@ -50,6 +51,9 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep> {
     } catch (e: EvaluationStepException) {
       evaluationStep.result = e.result
       evaluationStep.summary = e.message
+      if (e.status != null) {
+        evaluationStep.status = e.status
+      }
     } catch (e: Exception) {
       log.error("Evaluation step $runnerName of answer ${answer.id} failed unexpectedly:", e)
       evaluationStep.result = EvaluationStepResult.ERRORED
@@ -80,7 +84,10 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep> {
     } catch (e: TimeoutException) {
       log.info("Timeout for evaluation step $runnerName of answer ${answer.id} occurred after ${timeout}sec")
       evaluationService.stopEvaluationStep(step)
-      throw EvaluationStepException("Evaluation timed out after $timeout seconds", EvaluationStepResult.ERRORED)
+      throw EvaluationStepException("Evaluation timed out after $timeout seconds",
+          result = EvaluationStepResult.ERRORED,
+          status = EvaluationStepStatus.CANCELED
+      )
     } catch (e: ExecutionException) {
       // unwrap exceptions from EvaluationRunner#run() to catch them properly
       throw e.cause ?: e
