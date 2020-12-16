@@ -215,7 +215,7 @@ const FeedbackSortMethods: Record<
 
 const EvaluationStepPanel: React.FC<{
   answerId: string
-  step: Omit<EvaluationStep, 'definition'> & {
+  step: Omit<EvaluationStep, 'definition' | 'status'> & {
     definition: Pick<EvaluationStep['definition'], 'title'>
   }
 }> = ({ answerId, step }) => {

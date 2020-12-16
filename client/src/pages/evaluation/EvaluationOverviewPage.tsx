@@ -4,7 +4,6 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import EvaluationHistory from '../../components/EvaluationHistory'
 import EvaluationResult from '../../components/EvaluationResult'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
-import usePendingEvaluation from '../../hooks/usePendingEvaluation'
 import useSubPath from '../../hooks/useSubPath'
 import {
   EvaluationStepStatus,
@@ -12,6 +11,7 @@ import {
 } from '../../services/codefreak-api'
 import { shorten } from '../../services/short-id'
 import { DifferentUserContext } from '../task/TaskPage'
+import useEvaluationStatus from '../../hooks/useEvaluationStatus'
 
 const { Step } = Steps
 const { TabPane } = Tabs
@@ -23,14 +23,12 @@ const EvaluationPage: React.FC<{
   const result = useGetEvaluationOverviewQuery({ variables: { answerId } })
   const [step, setStep] = useState(0)
   const [extendedSteps, setExtendedSteps] = useState(false)
-  const pendingEvaluation = usePendingEvaluation(answerId, result.refetch)
+  const evaluationStatus = useEvaluationStatus(answerId)
   const differentUser = useContext(DifferentUserContext)
+  const { refetch } = result
 
   useEffect(() => {
-    if (pendingEvaluation.loading) {
-      return
-    }
-    switch (pendingEvaluation.status) {
+    switch (evaluationStatus) {
       case null:
         setStep(0)
         break
@@ -44,7 +42,13 @@ const EvaluationPage: React.FC<{
         setStep(3)
         break
     }
-  }, [pendingEvaluation, setStep, result])
+  }, [evaluationStatus, setStep])
+
+  useEffect(() => {
+    if (evaluationStatus === EvaluationStepStatus.Finished) {
+      refetch()
+    }
+  }, [evaluationStatus, refetch])
 
   useEffect(() => {
     if (result.data && !result.data.answer.latestEvaluation) {

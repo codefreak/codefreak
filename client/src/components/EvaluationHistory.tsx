@@ -3,24 +3,25 @@ import { Button, Card, Modal, Timeline } from 'antd'
 import React from 'react'
 import {
   EvaluationStepResult,
+  EvaluationStepStatus,
   GetEvaluationHistoryQueryResult,
   useGetEvaluationHistoryQuery
 } from '../generated/graphql'
-import usePendingEvaluation from '../hooks/usePendingEvaluation'
 import AsyncPlaceholder from './AsyncContainer'
 import './EvaluationHistory.less'
 import EvaluationResult from './EvaluationResult'
 import { EvaluationErrorIcon } from './Icons'
+import useEvaluationStatus from '../hooks/useEvaluationStatus'
 
 const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
   const result = useGetEvaluationHistoryQuery({ variables: { answerId } })
   const apolloClient = useApolloClient()
 
-  const pendingEvaluation = usePendingEvaluation(answerId, result.refetch)
+  const evaluationStatus = useEvaluationStatus(answerId)
 
   const isPending =
-    pendingEvaluation.status === 'RUNNING' ||
-    pendingEvaluation.status === 'QUEUED'
+    evaluationStatus === EvaluationStepStatus.Running ||
+    evaluationStatus === EvaluationStepStatus.Queued
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />

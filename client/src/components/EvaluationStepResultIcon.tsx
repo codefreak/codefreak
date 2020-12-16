@@ -7,7 +7,6 @@ import './EvaluationStepResultIcon.less'
 const EvaluationStepResultIcon: React.FC<{
   stepResult?: EvaluationStepResult | null
 }> = ({ stepResult }) => {
-  // in case the evaluation step has not been finished, yet
   let iconType = 'question-circle'
   if (stepResult === EvaluationStepResult.Success) {
     iconType = 'check-circle'
