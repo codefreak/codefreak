@@ -95,7 +95,7 @@ class EvaluationService : BaseService() {
   fun startEvaluation(answer: Answer, forceSaveFiles: Boolean = false): Evaluation {
     ideService.saveAnswerFiles(answer, forceSaveFiles)
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
-    check(!isEvaluationPending(answer.id)) { "Evaluation is already running or queued." }
+    check(!isEvaluationScheduled(answer.id)) { "Evaluation is already scheduled." }
     val evaluation = createPendingEvaluation(answer)
     evaluationQueue.insert(evaluation)
     return evaluation
@@ -112,7 +112,10 @@ class EvaluationService : BaseService() {
 
   fun getLatestEvaluation(answerId: UUID) = evaluationRepository.findFirstByAnswerIdOrderByCreatedAtDesc(answerId)
 
-  fun isEvaluationPending(answerId: UUID): Boolean {
+  /**
+   * Check if we are still waiting for evaluation steps to be finished
+   */
+  fun isEvaluationScheduled(answerId: UUID): Boolean {
     val status = getLatestEvaluationStatus(answerId) ?: return false
     return status > EvaluationStepStatus.PENDING && status < EvaluationStepStatus.FINISHED
   }
