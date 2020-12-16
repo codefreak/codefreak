@@ -51,12 +51,8 @@ class EvaluationStepService {
    * Get the existing evaluation step from the evaluation or create a new one
    */
   fun addPendingEvaluationStep(evaluation: Evaluation, stepDefinition: EvaluationStepDefinition): EvaluationStep {
-    evaluation.evaluationSteps.find { it.definition == stepDefinition }?.let { existingStep ->
-      // reset existing step to non-finished
-      existingStep.status = EvaluationStepStatus.PENDING
-      return existingStep
-    }
-    // create a new pending step in case there was no existing one
+    // remove existing step with this definition from evaluation
+    evaluation.evaluationSteps.removeIf { it.definition == stepDefinition }
     return EvaluationStep(stepDefinition, evaluation, EvaluationStepStatus.PENDING).also {
       evaluation.addStep(it)
     }
