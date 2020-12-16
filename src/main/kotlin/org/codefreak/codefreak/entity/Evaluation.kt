@@ -1,26 +1,26 @@
 package org.codefreak.codefreak.entity
 
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.Type
 import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.Transient
-import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.Type
 
 @Entity
 class Evaluation(
-  /**
-   * The submission of which this task is part of
-   */
-  @ManyToOne
-  var answer: Answer,
+    /**
+     * The submission of which this task is part of
+     */
+    @ManyToOne
+    var answer: Answer,
 
-  @Type(type = "image")
-  var filesDigest: ByteArray,
+    @Type(type = "image")
+    var filesDigest: ByteArray,
 
-  var evaluationSettingsFrom: Instant
+    var evaluationSettingsFrom: Instant
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL], orphanRemoval = true)
   var evaluationSteps = mutableSetOf<EvaluationStep>()
@@ -42,10 +42,10 @@ class Evaluation(
   val stepStatusSummary: EvaluationStepStatus
     @Transient
     get() = when {
-      hasStatus(EvaluationStepStatus.CANCELED) -> EvaluationStepStatus.CANCELED
-      hasStatus(EvaluationStepStatus.RUNNING) -> EvaluationStepStatus.RUNNING
-      hasStatus(EvaluationStepStatus.QUEUED) -> EvaluationStepStatus.QUEUED
-      hasStatus(EvaluationStepStatus.FINISHED) -> EvaluationStepStatus.FINISHED
+      evaluationSteps.any { it.status == EvaluationStepStatus.CANCELED } -> EvaluationStepStatus.CANCELED
+      evaluationSteps.any { it.status == EvaluationStepStatus.RUNNING } -> EvaluationStepStatus.RUNNING
+      evaluationSteps.any { it.status == EvaluationStepStatus.QUEUED } -> EvaluationStepStatus.QUEUED
+      evaluationSteps.all { it.status == EvaluationStepStatus.FINISHED } -> EvaluationStepStatus.FINISHED
       else -> EvaluationStepStatus.PENDING
     }
 
@@ -56,6 +56,4 @@ class Evaluation(
     evaluationSteps.add(step)
     step.evaluation = this
   }
-
-  fun hasStatus(status: EvaluationStepStatus) = evaluationSteps.any { it.status == status }
 }
