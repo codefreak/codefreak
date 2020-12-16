@@ -1,26 +1,16 @@
 import { useEffect, useState } from 'react'
 import {
-  LatestEvaluationFragment,
   EvaluationStepStatus,
-  useGetLatestEvaluationStatusLazyQuery
+  LatestEvaluationFragment,
+  useGetLatestEvaluationLazyQuery
 } from '../generated/graphql'
-import useEvaluationStatusUpdated from './useEvaluationStatusUpdated'
+import useEvaluationStatus from './useEvaluationStatus'
 
 const useAnswerEvaluation = (
   answerId: string,
   initialLatestEvaluation: LatestEvaluationFragment | undefined | null
 ) => {
-  const [pendingEvaluationStatus, setPendingEvaluationStatus] = useState<
-    EvaluationStepStatus | null | undefined
-  >(initialLatestEvaluation?.stepsStatusSummary)
-
-  useEvaluationStatusUpdated(answerId, newStatus => {
-    setPendingEvaluationStatus(newStatus)
-    // start fetching new evaluation results if status changed to finished
-    if (newStatus === EvaluationStepStatus.Finished) {
-      fetchLatestEvaluation()
-    }
-  })
+  const evaluationStatus = useEvaluationStatus(answerId)
 
   const [latestEvaluation, setLatestEvaluation] = useState<
     LatestEvaluationFragment | null | undefined
@@ -28,10 +18,16 @@ const useAnswerEvaluation = (
   const [
     fetchLatestEvaluation,
     latestEvaluationQuery
-  ] = useGetLatestEvaluationStatusLazyQuery({
+  ] = useGetLatestEvaluationLazyQuery({
     variables: { answerId },
     fetchPolicy: 'network-only'
   })
+
+  useEffect(() => {
+    if (evaluationStatus === EvaluationStepStatus.Finished) {
+      fetchLatestEvaluation()
+    }
+  }, [evaluationStatus, fetchLatestEvaluation])
 
   useEffect(() => {
     if (
@@ -44,7 +40,7 @@ const useAnswerEvaluation = (
 
   return {
     latestEvaluation,
-    pendingEvaluationStatus,
+    evaluationStatus,
     loading: latestEvaluationQuery.loading
   }
 }

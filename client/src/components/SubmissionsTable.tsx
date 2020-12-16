@@ -174,17 +174,16 @@ const AnswerEvaluationSummary: React.FC<{
   user: Submission['user']
   answer: Answer
 }> = ({ task, user, answer }) => {
-  const {
-    latestEvaluation,
-    pendingEvaluationStatus,
-    loading
-  } = useAnswerEvaluation(answer.id, answer.latestEvaluation)
+  const { latestEvaluation, evaluationStatus, loading } = useAnswerEvaluation(
+    answer.id,
+    answer.latestEvaluation
+  )
 
   // prevent flashing of old evaluation result by also showing loading indicator for fetching new results
   if (
     loading ||
-    pendingEvaluationStatus === EvaluationStepStatus.Queued ||
-    pendingEvaluationStatus === EvaluationStepStatus.Running
+    evaluationStatus === EvaluationStepStatus.Queued ||
+    evaluationStatus === EvaluationStepStatus.Running
   ) {
     return (
       <Tooltip title="Evaluating answer…">

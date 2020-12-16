@@ -86,7 +86,7 @@ class EvaluationQueue : StepExecutionListener {
     }
   }
 
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   override fun beforeStep(stepExecution: StepExecution) {
     if (stepExecution.stepName == EvaluationConfiguration.STEP_NAME) {
       stepExecution.jobParameters.evaluationStepId?.let {
@@ -95,7 +95,7 @@ class EvaluationQueue : StepExecutionListener {
     }
   }
 
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   override fun afterStep(stepExecution: StepExecution): ExitStatus? {
     if (stepExecution.stepName == EvaluationConfiguration.STEP_NAME) {
       stepExecution.jobParameters.evaluationStepId?.let {

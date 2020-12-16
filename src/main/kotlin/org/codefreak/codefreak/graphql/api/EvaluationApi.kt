@@ -8,13 +8,13 @@ import com.expediagroup.graphql.spring.operations.Subscription
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetchingEnvironment
-import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
+import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.graphql.BaseDto
@@ -24,18 +24,22 @@ import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentService
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
+import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationService
+import org.codefreak.codefreak.service.evaluation.EvaluationStepService
 import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
+import org.codefreak.codefreak.util.exhaustive
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import reactor.core.publisher.Flux
+import java.util.UUID
 
 @GraphQLName("EvaluationStepDefinition")
 class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: ResolverContext) {
@@ -76,8 +80,8 @@ class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
         .map { EvaluationStepDto(it, ctx) }
         .sortedBy { it.definition.position }
   }
-  val stepsResultSummary by lazy { entity.stepsResultSummary.let { EvaluationStepResultDto.valueOf(it.name) } }
-  val stepsStatusSummary by lazy { entity.stepStatusSummary.let { EvaluationStepStatusDto.valueOf(it.name) } }
+  val stepsResultSummary by lazy { EvaluationStepResultDto(entity.stepsResultSummary) }
+  val stepsStatusSummary by lazy { EvaluationStepStatusDto(entity.stepStatusSummary) }
 }
 
 @GraphQLName("EvaluationStep")
@@ -85,9 +89,10 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   @GraphQLID
   val id = entity.id
   val definition by lazy { EvaluationStepDefinitionDto(entity.definition, ctx) }
-  val result = entity.result?.let { EvaluationStepResultDto.valueOf(it.name) }
+  val result = entity.result?.let { EvaluationStepResultDto(it) }
   val summary = entity.summary
   val feedback by lazy { entity.feedback.map { FeedbackDto(it) } }
+  val status = EvaluationStepStatusDto(entity.status)
 }
 
 @GraphQLName("EvaluationRunner")
@@ -103,8 +108,22 @@ class EvaluationRunnerDto(runner: EvaluationRunner) {
 @GraphQLName("EvaluationStepResult")
 enum class EvaluationStepResultDto { SUCCESS, FAILED, ERRORED }
 
+fun EvaluationStepResultDto(entity: EvaluationStepResult) = when (entity) {
+  EvaluationStepResult.SUCCESS -> EvaluationStepResultDto.SUCCESS
+  EvaluationStepResult.FAILED -> EvaluationStepResultDto.FAILED
+  EvaluationStepResult.ERRORED -> EvaluationStepResultDto.ERRORED
+}.exhaustive
+
 @GraphQLName("EvaluationStepStatus")
 enum class EvaluationStepStatusDto { PENDING, QUEUED, RUNNING, FINISHED, CANCELED }
+
+fun EvaluationStepStatusDto(entity: EvaluationStepStatus) = when (entity) {
+  EvaluationStepStatus.PENDING -> EvaluationStepStatusDto.PENDING
+  EvaluationStepStatus.QUEUED -> EvaluationStepStatusDto.QUEUED
+  EvaluationStepStatus.RUNNING -> EvaluationStepStatusDto.RUNNING
+  EvaluationStepStatus.FINISHED -> EvaluationStepStatusDto.FINISHED
+  EvaluationStepStatus.CANCELED -> EvaluationStepStatusDto.CANCELED
+}.exhaustive
 
 @GraphQLName("Feedback")
 class FeedbackDto(entity: Feedback) {
@@ -114,8 +133,8 @@ class FeedbackDto(entity: Feedback) {
   val fileContext = entity.fileContext?.let { FileContextDto(it) }
   val longDescription = entity.longDescription
   val group = entity.group
-  val status = entity.status?.let { StatusDto.valueOf(it.name) }
-  val severity = entity.severity?.let { SeverityDto.valueOf(it.name) }
+  val status = entity.status?.let { StatusDto(it) }
+  val severity = entity.severity?.let { SeverityDto(it) }
 }
 
 @GraphQLName("FileContext")
@@ -135,6 +154,13 @@ enum class SeverityDto {
   CRITICAL
 }
 
+fun SeverityDto(entity: Feedback.Severity) = when (entity) {
+  Feedback.Severity.INFO -> SeverityDto.INFO
+  Feedback.Severity.MINOR -> SeverityDto.MINOR
+  Feedback.Severity.MAJOR -> SeverityDto.MAJOR
+  Feedback.Severity.CRITICAL -> SeverityDto.CRITICAL
+}.exhaustive
+
 @GraphQLName("FeedbackStatus")
 enum class StatusDto {
   IGNORE,
@@ -142,10 +168,16 @@ enum class StatusDto {
   FAILED
 }
 
+fun StatusDto(entity: Feedback.Status) = when (entity) {
+  Feedback.Status.IGNORE -> StatusDto.IGNORE
+  Feedback.Status.SUCCESS -> StatusDto.SUCCESS
+  Feedback.Status.FAILED -> StatusDto.FAILED
+}.exhaustive
+
 @GraphQLName("EvaluationStatusUpdatedEvent")
 class EvaluationStatusUpdatedEventDto(event: EvaluationStatusUpdatedEvent, ctx: ResolverContext) {
   val evaluation = EvaluationDto(event.evaluation, ctx)
-  val status = event.status.let { EvaluationStepStatusDto.valueOf(it.name) }
+  val status = EvaluationStepStatusDto(event.status)
 }
 
 @Component

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   EvaluationStepResult,
   useEvaluationFinishedSubscription,
-  useGetLatestEvaluationStatusQuery
+  useGetLatestEvaluationQuery
 } from '../services/codefreak-api'
 
 const useLatestEvaluation = (
@@ -10,7 +10,7 @@ const useLatestEvaluation = (
 ): { summary: EvaluationStepResult | null; loading: boolean } => {
   const [summary, setSummary] = useState<EvaluationStepResult | null>(null)
 
-  const latestEvaluation = useGetLatestEvaluationStatusQuery({
+  const latestEvaluation = useGetLatestEvaluationQuery({
     variables: { answerId },
     fetchPolicy: 'cache-and-network'
   })
