@@ -43,14 +43,6 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseD
         .orNull()
   }
 
-  val pendingEvaluation by lazy {
-    if (serviceAccess.getService(EvaluationService::class).isEvaluationPending(id)) {
-      PendingEvaluationDto(entity, ctx)
-    } else {
-      null
-    }
-  }
-
   val evaluations by lazy {
     entity.evaluations.sortedBy { it.createdAt }.map { EvaluationDto(it, ctx) }
   }

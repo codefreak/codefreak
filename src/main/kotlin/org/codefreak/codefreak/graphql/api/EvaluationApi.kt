@@ -12,10 +12,10 @@ import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
-import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
+import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
@@ -23,13 +23,11 @@ import org.codefreak.codefreak.graphql.ResolverContext
 import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentService
-import org.codefreak.codefreak.service.EvaluationFinishedEvent
+import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
-import org.codefreak.codefreak.service.PendingEvaluationUpdatedEvent
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationService
-import org.codefreak.codefreak.service.evaluation.PendingEvaluationStatus
 import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,23 +37,12 @@ import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import reactor.core.publisher.Flux
 
-@GraphQLName("PendingEvaluation")
-class PendingEvaluationDto(answerEntity: Answer, ctx: ResolverContext) : BaseDto(ctx) {
-  val answer by lazy { AnswerDto(answerEntity, ctx) }
-  val status by lazy {
-    if (serviceAccess.getService(EvaluationService::class).isEvaluationInQueue(answerEntity.id)) {
-      PendingEvaluationStatus.QUEUED
-    } else {
-      PendingEvaluationStatus.RUNNING
-    }
-  }
-}
-
 @GraphQLName("EvaluationStepDefinition")
 class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: ResolverContext) {
   companion object {
     private val objectMapper = ObjectMapper()
   }
+
   val id = definition.id
   val runnerName = definition.runnerName
   val active = definition.active
@@ -90,6 +77,7 @@ class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
         .sortedBy { it.definition.position }
   }
   val stepsResultSummary by lazy { entity.stepsResultSummary.let { EvaluationStepResultDto.valueOf(it.name) } }
+  val stepsStatusSummary by lazy { entity.stepStatusSummary.let { EvaluationStepStatusDto.valueOf(it.name) } }
 }
 
 @GraphQLName("EvaluationStep")
@@ -114,6 +102,9 @@ class EvaluationRunnerDto(runner: EvaluationRunner) {
 
 @GraphQLName("EvaluationStepResult")
 enum class EvaluationStepResultDto { SUCCESS, FAILED, ERRORED }
+
+@GraphQLName("EvaluationStepStatus")
+enum class EvaluationStepStatusDto { PENDING, QUEUED, RUNNING, FINISHED, CANCELED }
 
 @GraphQLName("Feedback")
 class FeedbackDto(entity: Feedback) {
@@ -152,9 +143,9 @@ enum class StatusDto {
 }
 
 @GraphQLName("PendingEvaluationUpdatedEventDto")
-class PendingEvaluationUpdatedEventDto(event: PendingEvaluationUpdatedEvent) {
-  val answerId = event.answerId
-  val status = event.status
+class EvaluationStatusUpdatedEventDto(event: EvaluationStatusUpdatedEvent, ctx: ResolverContext) {
+  val evaluation = EvaluationDto(event.evaluation, ctx)
+  val status = event.status.let { EvaluationStepStatusDto.valueOf(it.name) }
 }
 
 @Component
@@ -183,12 +174,12 @@ class EvaluationMutation : BaseResolver(), Mutation {
   }
 
   @Secured(Authority.ROLE_STUDENT)
-  fun startEvaluation(answerId: UUID): PendingEvaluationDto = context {
+  fun startEvaluation(answerId: UUID): EvaluationDto = context {
     val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
     authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
     val forceSaveFiles = authorization.isCurrentUser(answer.task.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
-    serviceAccess.getService(EvaluationService::class).startEvaluation(answer, forceSaveFiles)
-    PendingEvaluationDto(answer, this)
+    val evaluation = serviceAccess.getService(EvaluationService::class).startEvaluation(answer, forceSaveFiles)
+    EvaluationDto(evaluation, this)
   }
 
   @Secured(Authority.ROLE_TEACHER)
@@ -196,7 +187,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     assignmentId: UUID,
     invalidateAll: Boolean?,
     invalidateTask: UUID?
-  ): List<PendingEvaluationDto> = context {
+  ): List<EvaluationDto> = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(assignmentId)
     authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
     val evaluationService = serviceAccess.getService(EvaluationService::class)
@@ -212,7 +203,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     }
 
     evaluationService.startAssignmentEvaluation(assignmentId).map {
-      PendingEvaluationDto(it, this)
+      EvaluationDto(it, this)
     }
   }
 
@@ -310,32 +301,26 @@ class EvaluationMutation : BaseResolver(), Mutation {
 }
 
 @Component
-class EvaluationFinishedEventPublisher : SubscriptionEventPublisher<EvaluationFinishedEvent>()
-
-@Component
-class PendingEvaluationUpdatedEventPublisher : SubscriptionEventPublisher<PendingEvaluationUpdatedEvent>()
+class EvaluationStatusUpdatedEventPublisher : SubscriptionEventPublisher<EvaluationStatusUpdatedEvent>()
 
 @Component
 class EvaluationSubscription : BaseResolver(), Subscription {
 
   @Autowired
-  private lateinit var evaluationFinishedEventPublisher: EvaluationFinishedEventPublisher
+  private lateinit var evaluationStatusUpdatedEventPublisher: EvaluationStatusUpdatedEventPublisher
 
-  @Autowired
-  private lateinit var pendingEvaluationUpdatedEventPublisher: PendingEvaluationUpdatedEventPublisher
-
-  fun pendingEvaluationUpdated(answerId: UUID, env: DataFetchingEnvironment): Flux<PendingEvaluationUpdatedEventDto> =
+  fun evaluationStatusUpdated(answerId: UUID, env: DataFetchingEnvironment): Flux<EvaluationStatusUpdatedEventDto> =
       context(env) {
         val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
         authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
-        pendingEvaluationUpdatedEventPublisher.eventStream
-            .filter { it.answerId == answerId }
-            .map { PendingEvaluationUpdatedEventDto(it) }
+        evaluationStatusUpdatedEventPublisher.eventStream
+            .filter { it.evaluation.answer.id == answerId }
+            .map { EvaluationStatusUpdatedEventDto(it, this) }
       }
 
   fun evaluationFinished(env: DataFetchingEnvironment): Flux<EvaluationDto> = context(env) {
-    evaluationFinishedEventPublisher.eventStream
-        .filter { it.evaluation.answer.submission.user == authorization.currentUser }
+    evaluationStatusUpdatedEventPublisher.eventStream
+        .filter { it.status === EvaluationStepStatus.FINISHED && it.evaluation.answer.submission.user == authorization.currentUser }
         .map { EvaluationDto(it.evaluation, this) }
   }
 }

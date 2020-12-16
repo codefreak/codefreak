@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 import {
-  PendingEvaluationStatus,
+  EvaluationStepStatus,
   useGetPendingEvaluationQuery
 } from '../services/codefreak-api'
 import { noop } from '../services/util'
-import usePendingEvaluationUpdated from './usePendingEvaluationUpdated'
+import useEvaluationStatusUpdated from './useEvaluationStatusUpdated'
 
 const usePendingEvaluation = (
   answerId: string,
   onFinish: () => void = noop
-): { status: PendingEvaluationStatus | null; loading: boolean } => {
-  const [status, setStatus] = useState<PendingEvaluationStatus | null>(null)
+): { status: EvaluationStepStatus | null; loading: boolean } => {
+  const [status, setStatus] = useState<EvaluationStepStatus | null>(null)
 
   const pendingEvaluation = useGetPendingEvaluationQuery({
     variables: { answerId },
@@ -20,14 +20,16 @@ const usePendingEvaluation = (
   useEffect(() => {
     if (
       pendingEvaluation.data &&
-      pendingEvaluation.data.answer.pendingEvaluation
+      pendingEvaluation.data.answer.latestEvaluation
     ) {
-      setStatus(pendingEvaluation.data.answer.pendingEvaluation.status)
+      setStatus(
+        pendingEvaluation.data.answer.latestEvaluation.stepsStatusSummary
+      )
       // if there is no pending evaluation, stay at null
     }
   }, [setStatus, pendingEvaluation.data])
 
-  usePendingEvaluationUpdated(answerId, newStatus => {
+  useEvaluationStatusUpdated(answerId, newStatus => {
     if (newStatus === 'FINISHED' && status !== 'FINISHED') {
       onFinish()
     }

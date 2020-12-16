@@ -28,7 +28,6 @@ class EvaluationConfiguration {
   companion object {
     const val JOB_NAME = "evaluation"
     const val STEP_NAME = "evaluation"
-    const val PARAM_ANSWER_ID = "answerId"
     const val PARAM_EVALUATION_STEP_ID = "evaluationStepId"
   }
 

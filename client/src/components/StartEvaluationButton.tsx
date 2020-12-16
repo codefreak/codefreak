@@ -2,7 +2,7 @@ import Button, { ButtonProps } from 'antd/lib/button'
 import React from 'react'
 import usePendingEvaluation from '../hooks/usePendingEvaluation'
 import {
-  PendingEvaluationStatus,
+  EvaluationStepStatus,
   useStartEvaluationMutation
 } from '../services/codefreak-api'
 
@@ -26,8 +26,8 @@ const StartEvaluationButton: React.FC<StartEvaluationButtonProps> = props => {
       loading={startResult.loading}
       disabled={
         loading ||
-        status === PendingEvaluationStatus.Queued ||
-        status === PendingEvaluationStatus.Running
+        status === EvaluationStepStatus.Queued ||
+        status === EvaluationStepStatus.Running
       }
       {...restProps}
     >

@@ -47,7 +47,4 @@ class EvaluationStep(
   }
 
   fun addAllFeedback(feedbackList: List<Feedback>) = feedbackList.forEach(this::addFeedback)
-
-  enum class EvaluationStepResult { SUCCESS, FAILED, ERRORED }
-  enum class EvaluationStepStatus { PENDING, QUEUED, FINISHED, CANCELED }
 }

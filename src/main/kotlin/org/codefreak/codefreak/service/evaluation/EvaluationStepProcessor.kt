@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import org.codefreak.codefreak.entity.EvaluationStep
-import org.codefreak.codefreak.entity.EvaluationStep.EvaluationStepResult
+import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.Feedback
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemProcessor

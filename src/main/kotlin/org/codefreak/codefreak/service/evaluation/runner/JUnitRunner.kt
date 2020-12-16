@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlRootElement
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.entity.Answer
-import org.codefreak.codefreak.entity.EvaluationStep
+import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.service.evaluation.EvaluationStepException
 import org.codefreak.codefreak.util.TarUtil
@@ -56,7 +56,7 @@ class JUnitRunner : CommandLineRunner() {
         // e.g. sources failed to compile or other runtime error
         throw EvaluationStepException(
             firstFailingCommand.result.output.trim(),
-            EvaluationStep.EvaluationStepResult.FAILED
+            EvaluationStepResult.FAILED
         )
       }
     }
@@ -74,7 +74,7 @@ class JUnitRunner : CommandLineRunner() {
     } catch (e: Exception) {
       throw EvaluationStepException(
           "Failed to parse jUnit XML:\n${e.message ?: e.cause?.message}",
-          EvaluationStep.EvaluationStepResult.ERRORED,
+          EvaluationStepResult.ERRORED,
           e
       )
     }

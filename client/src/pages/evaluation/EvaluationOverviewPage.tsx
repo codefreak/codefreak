@@ -7,7 +7,7 @@ import StartEvaluationButton from '../../components/StartEvaluationButton'
 import usePendingEvaluation from '../../hooks/usePendingEvaluation'
 import useSubPath from '../../hooks/useSubPath'
 import {
-  PendingEvaluationStatus,
+  EvaluationStepStatus,
   useGetEvaluationOverviewQuery
 } from '../../services/codefreak-api'
 import { shorten } from '../../services/short-id'
@@ -34,13 +34,13 @@ const EvaluationPage: React.FC<{
       case null:
         setStep(0)
         break
-      case PendingEvaluationStatus.Queued:
+      case EvaluationStepStatus.Queued:
         setStep(1)
         break
-      case PendingEvaluationStatus.Running:
+      case EvaluationStepStatus.Running:
         setStep(2)
         break
-      case PendingEvaluationStatus.Finished:
+      case EvaluationStepStatus.Finished:
         setStep(3)
         break
     }
