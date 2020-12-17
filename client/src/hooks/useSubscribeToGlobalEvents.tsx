@@ -15,7 +15,7 @@ const useSubscribeToEvaluationFinished = () => {
   useEvaluationFinishedSubscription({
     onSubscriptionData: res => {
       if (res.subscriptionData.data) {
-        const evaluation = res.subscriptionData.data.evaluationFinished
+        const { evaluation } = res.subscriptionData.data.evaluationStatusUpdated
         const openResults = () => {
           history.push(getEntityPath(evaluation.answer.task) + '/evaluation')
         }

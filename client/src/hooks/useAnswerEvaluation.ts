@@ -1,46 +1,42 @@
 import { useEffect, useState } from 'react'
 import {
-  EvaluationStepStatus,
   LatestEvaluationFragment,
-  useGetLatestEvaluationLazyQuery
+  useEvaluationStatusUpdatedSubscription,
+  useGetLatestEvaluationQuery
 } from '../generated/graphql'
-import useEvaluationStatus from './useEvaluationStatus'
 
 const useAnswerEvaluation = (
   answerId: string,
-  initialLatestEvaluation: LatestEvaluationFragment | undefined | null
+  initialLatestEvaluation?: LatestEvaluationFragment
 ) => {
-  const evaluationStatus = useEvaluationStatus(answerId)
-
   const [latestEvaluation, setLatestEvaluation] = useState<
-    LatestEvaluationFragment | null | undefined
+    LatestEvaluationFragment | undefined
   >(initialLatestEvaluation)
-  const [
-    fetchLatestEvaluation,
-    latestEvaluationQuery
-  ] = useGetLatestEvaluationLazyQuery({
+
+  // fetch the last evaluation if no initial data was supplied
+  const latestEvaluationQuery = useGetLatestEvaluationQuery({
     variables: { answerId },
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'network-only',
+    skip: initialLatestEvaluation !== undefined
   })
-
   useEffect(() => {
-    if (evaluationStatus === EvaluationStepStatus.Finished) {
-      fetchLatestEvaluation()
-    }
-  }, [evaluationStatus, fetchLatestEvaluation])
-
-  useEffect(() => {
-    if (
-      latestEvaluationQuery.data &&
-      latestEvaluationQuery.data.answer.latestEvaluation
-    ) {
+    if (latestEvaluationQuery.data?.answer.latestEvaluation) {
       setLatestEvaluation(latestEvaluationQuery.data.answer.latestEvaluation)
     }
   }, [setLatestEvaluation, latestEvaluationQuery, latestEvaluationQuery.data])
 
+  const { data: pushData } = useEvaluationStatusUpdatedSubscription({
+    variables: { answerId }
+  })
+  useEffect(() => {
+    if (pushData) {
+      setLatestEvaluation(pushData?.evaluationStatusUpdated.evaluation)
+    }
+  }, [pushData])
+
   return {
     latestEvaluation,
-    evaluationStatus,
+    evaluationStatus: latestEvaluation?.stepsStatusSummary,
     loading: latestEvaluationQuery.loading
   }
 }

@@ -35,23 +35,6 @@ query GetAssignment($id: ID!) {
   }
 }
 
-fragment latestEvaluation on Evaluation {
-  id
-  createdAt
-  stepsResultSummary
-  stepsStatusSummary
-  steps {
-    id
-    definition {
-      position
-      runnerName
-      title
-    }
-    result
-    summary
-  }
-}
-
 query GetAssignmentWithSubmissions($id: ID!) {
   assignment(id: $id) {
     id

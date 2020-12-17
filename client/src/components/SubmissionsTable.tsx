@@ -14,9 +14,9 @@ import { shorten } from '../services/short-id'
 import { matches } from '../services/strings'
 import ArchiveDownload from './ArchiveDownload'
 import EvaluationResultPopover from './EvaluationResultPopover'
-import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
 import SearchBar from './SearchBar'
+import EvaluationStepIcon from './EvaluationStepIcon'
 
 type Assignment = NonNullable<
   GetAssignmentWithSubmissionsQueryResult['data']
@@ -176,7 +176,7 @@ const AnswerEvaluationSummary: React.FC<{
 }> = ({ task, user, answer }) => {
   const { latestEvaluation, evaluationStatus, loading } = useAnswerEvaluation(
     answer.id,
-    answer.latestEvaluation
+    answer.latestEvaluation || undefined
   )
 
   // prevent flashing of old evaluation result by also showing loading indicator for fetching new results
@@ -229,7 +229,11 @@ const EvaluationStepOverview: React.FC<{
     <>
       <div className="evaluation-step-results">
         {evaluation.steps.map(step => (
-          <EvaluationStepResultIcon key={step.id} stepResult={step.result} />
+          <EvaluationStepIcon
+            key={step.id}
+            result={step.result || undefined}
+            status={step.status}
+          />
         ))}
         <EvaluationResultPopover
           task={task}

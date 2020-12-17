@@ -1,12 +1,15 @@
 subscription EvaluationFinished {
-  evaluationFinished {
-    id
-    stepsResultSummary
-    answer {
+  evaluationStatusUpdated(status: FINISHED) {
+    status
+    evaluation {
       id
-      task {
+      stepsResultSummary
+      answer {
         id
-        title
+        task {
+          id
+          title
+        }
       }
     }
   }
@@ -15,5 +18,14 @@ subscription EvaluationFinished {
 subscription EvaluationStatusUpdated($answerId: ID!) {
   evaluationStatusUpdated(answerId: $answerId) {
     status
+    evaluation {
+      ...latestEvaluation
+    }
+  }
+}
+
+subscription EvaluationStepStatusUpdated($stepId: ID!) {
+  evaluationStepStatusUpdated(stepId: $stepId) {
+    ...evaluationStepBasics
   }
 }

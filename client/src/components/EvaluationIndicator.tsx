@@ -1,9 +1,11 @@
 import { Badge } from 'antd'
 import React from 'react'
-import useLatestEvaluation from '../hooks/useLatestEvaluation'
 import { EvaluationErrorIcon } from './Icons'
-import useEvaluationStatus from '../hooks/useEvaluationStatus'
-import { EvaluationStepStatus } from '../generated/graphql'
+import {
+  EvaluationStepResult,
+  EvaluationStepStatus
+} from '../generated/graphql'
+import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 
 interface EvaluationIndicatorProps {
   style?: React.CSSProperties
@@ -12,25 +14,24 @@ interface EvaluationIndicatorProps {
 
 const EvaluationIndicator: React.FC<EvaluationIndicatorProps> = props => {
   const { answerId, style } = props
-  const latest = useLatestEvaluation(answerId)
-  const status = useEvaluationStatus(answerId)
+  const { latestEvaluation, evaluationStatus } = useAnswerEvaluation(answerId)
 
   if (
-    status === EvaluationStepStatus.Running ||
-    status === EvaluationStepStatus.Queued
+    evaluationStatus === EvaluationStepStatus.Running ||
+    evaluationStatus === EvaluationStepStatus.Queued
   ) {
     return <Badge style={style} status="processing" />
   }
 
-  if (latest.summary === 'SUCCESS') {
+  if (latestEvaluation?.stepsResultSummary === EvaluationStepResult.Success) {
     return <Badge style={style} status="success" />
   }
 
-  if (latest.summary === 'FAILED') {
+  if (latestEvaluation?.stepsResultSummary === EvaluationStepResult.Failed) {
     return <Badge style={style} status="error" />
   }
 
-  if (latest.summary === 'ERRORED') {
+  if (latestEvaluation?.stepsResultSummary === EvaluationStepResult.Errored) {
     return <EvaluationErrorIcon style={style} />
   }
 
