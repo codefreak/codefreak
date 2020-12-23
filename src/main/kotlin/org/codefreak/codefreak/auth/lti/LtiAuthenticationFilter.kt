@@ -15,16 +15,12 @@ import java.util.Date
 import java.util.UUID
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import org.apache.http.client.HttpClient
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.impl.client.HttpClientBuilder
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService
 import org.mitre.openid.connect.client.OIDCAuthenticationFilter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.security.authentication.AuthenticationServiceException
 import org.springframework.security.core.Authentication
 import org.springframework.util.LinkedMultiValueMap
@@ -33,9 +29,7 @@ import org.springframework.web.client.RestTemplate
 
 class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
 
-  @Autowired(required = false)
-  var httpClient: HttpClient? = null
-
+  @Autowired
   lateinit var restClient: RestTemplate
 
   @Autowired
@@ -295,21 +289,5 @@ class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
         throw AuthenticationServiceException("Couldn't parse id_token: ", e)
       }
     }
-  }
-
-  override fun afterPropertiesSet() {
-    val http: HttpClient = httpClient ?: HttpClientBuilder.create()
-        .useSystemProperties()
-        .setDefaultRequestConfig(
-            RequestConfig.custom()
-                .setSocketTimeout(httpSocketTimeout)
-                .build()
-        )
-        .build()
-
-    restClient = RestTemplate(
-        HttpComponentsClientHttpRequestFactory(http)
-    )
-    super.afterPropertiesSet()
   }
 }

@@ -4,9 +4,15 @@ import com.spotify.docker.client.DockerClient.ListContainersParam
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.ContainerInfo
 import com.spotify.docker.client.messages.HostConfig
+import java.net.SocketException
+import java.net.SocketTimeoutException
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
+import org.apache.http.client.HttpClient
+import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.conn.ConnectTimeoutException
+import org.apache.http.util.EntityUtils
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Task
@@ -28,6 +34,7 @@ class IdeService : BaseService() {
     const val LABEL_READ_ONLY_ANSWER_ID = ContainerService.LABEL_PREFIX + "answer-id-read-only"
     const val LABEL_ANSWER_ID = ContainerService.LABEL_PREFIX + "answer-id"
     const val LABEL_TASK_ID = ContainerService.LABEL_PREFIX + "task-id"
+
     // directory inside the IDE container with project files
     const val PROJECT_PATH = "/home/coder/project"
   }
@@ -52,6 +59,9 @@ class IdeService : BaseService() {
 
   @Autowired
   lateinit var config: AppConfiguration
+
+  @Autowired
+  lateinit var httpClient: HttpClient
 
   private var idleContainers: Map<String, Long> = mapOf()
 
@@ -102,6 +112,39 @@ class IdeService : BaseService() {
         this.copyFilesToIde(container.id(), fileCollectionId)
         getIdeUrl(container.id())
       }
+    }
+  }
+
+  fun checkIdeLiveliness(task: Task): Boolean {
+    val container = containerService.getContainerWithLabel(LABEL_TASK_ID, task.id.toString()) ?: return false
+    return checkIdeLiveliness(container.id())
+  }
+
+  fun checkIdeLiveliness(answer: Answer, readOnly: Boolean): Boolean {
+    val containerId = getAnswerIdeContainer(answer.id, readOnly) ?: return false
+    return checkIdeLiveliness(containerId)
+  }
+
+  /**
+   * Check if IDEs HTTP server is reachable and returns an okayish status code
+   */
+  private fun checkIdeLiveliness(containerId: String): Boolean {
+    val ideUrl = getIdeUrl(containerId)
+    val request = RequestBuilder.get(ideUrl).build()
+    return try {
+      val response = httpClient.execute(request)
+      // make sure the connection is released even if we do not use the response content
+      EntityUtils.consumeQuietly(response.entity)
+      response.statusLine.statusCode < 400
+    } catch (e: ConnectTimeoutException) {
+      // no connection from pool
+      false
+    } catch (e: SocketTimeoutException) {
+      // TCP connection timed out
+      false
+    } catch (e: SocketException) {
+      // could not connect at all
+      false
     }
   }
 

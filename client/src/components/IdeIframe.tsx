@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import Centered from './Centered'
 import LaunchIdeSteps from './LaunchIdeSteps'
+import { IdeType } from '../generated/graphql'
 
-const IdeIframe: React.FC<{ type: string; id: string }> = ({ type, id }) => {
+const IdeIframe: React.FC<{ type: IdeType; id: string }> = ({ type, id }) => {
   const [ideUrl, setIdeUrl] = useState<string | undefined>()
 
   return ideUrl ? (

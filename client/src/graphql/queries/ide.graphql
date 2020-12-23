@@ -1,0 +1,3 @@
+query CheckIdeLiveliness($type: IdeType!, $id: ID!) {
+  checkIdeLiveliness(type: $type, id: $id)
+}
