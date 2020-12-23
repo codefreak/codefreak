@@ -1,8 +1,9 @@
 import React from 'react'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
-import { Alert, Icon, Result, Spin } from 'antd'
+import { Alert, Icon, Result } from 'antd'
 import EvaluationResult from './EvaluationResult'
 import StartEvaluationButton from './StartEvaluationButton'
+import LoadingIndicator from './LoadingIndicator'
 
 export interface LatestEvaluationProps {
   answerId: string
@@ -14,11 +15,7 @@ const LatestEvaluation: React.FC<LatestEvaluationProps> = props => {
   const { latestEvaluation, loading } = useAnswerEvaluation(answerId)
 
   if (loading) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <Spin size="large" />
-      </div>
-    )
+    return <LoadingIndicator />
   }
 
   if (!latestEvaluation) {
