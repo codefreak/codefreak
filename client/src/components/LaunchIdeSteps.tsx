@@ -2,7 +2,7 @@ import { Alert, Card, Icon, Steps } from 'antd'
 import React, { useEffect, useState } from 'react'
 import {
   IdeType,
-  useCheckIdeLivelinessLazyQuery,
+  useIsIdeLiveLazyQuery,
   useStartIdeMutation
 } from '../generated/graphql'
 import { extractErrorMessage } from '../services/codefreak-api'
@@ -22,35 +22,32 @@ const LaunchIdeSteps: React.FC<{
     variables: { type, id },
     onError: e => setError(extractErrorMessage(e))
   })
-  const [
-    checkIdeLiveliness,
-    { data, loading }
-  ] = useCheckIdeLivelinessLazyQuery({
+  const [checkIsIdeLive, { data, loading }] = useIsIdeLiveLazyQuery({
     variables: { type, id },
     fetchPolicy: 'network-only'
   })
 
   useEffect(() => {
     if (error || loading || !ideUrl) return
-    if (data?.checkIdeLiveliness === true) {
+    if (data?.isIdeLive === true) {
       setCurrentStep(2)
       onReady(ideUrl)
     } else {
       window.setTimeout(() => {
-        checkIdeLiveliness()
+        checkIsIdeLive()
       }, 1000)
     }
-  }, [onReady, error, ideUrl, data, loading, checkIdeLiveliness])
+  }, [onReady, error, ideUrl, data, loading, checkIsIdeLive])
 
   useEffect(() => {
     startIde().then(res => {
       if (res && res.data) {
         setCurrentStep(1)
         setIdeUrl(res.data.startIde)
-        checkIdeLiveliness()
+        checkIsIdeLive()
       }
     })
-  }, [startIde, checkIdeLiveliness])
+  }, [startIde, checkIsIdeLive])
 
   const icon = (iconType: string, step: number) => (
     <Icon type={step === currentStep && !error ? 'loading' : iconType} />

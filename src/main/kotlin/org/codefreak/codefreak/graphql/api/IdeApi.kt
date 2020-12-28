@@ -37,7 +37,7 @@ class IdeMutation : BaseResolver(), Mutation {
 
 @Component
 class IdeQuery : BaseResolver(), Query {
-  fun checkIdeLiveliness(type: IdeType, id: UUID): Boolean = context {
+  fun isIdeLive(type: IdeType, id: UUID): Boolean = context {
     when (type) {
       IdeType.ANSWER -> {
         val (answer, readOnly) = getAnswer(id)
