@@ -1,49 +1,53 @@
 import { Alert, Card, Icon, Steps } from 'antd'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useStartIdeMutation } from '../generated/graphql'
+import React, { useEffect, useState } from 'react'
+import {
+  IdeType,
+  useIsIdeLiveLazyQuery,
+  useStartIdeMutation
+} from '../generated/graphql'
 import { extractErrorMessage } from '../services/codefreak-api'
 
 const { Step } = Steps
 
 const LaunchIdeSteps: React.FC<{
-  type: string
+  type: IdeType
   id: string
   onReady: (url: string) => void
 }> = ({ onReady, type, id }) => {
   const [currentStep, setCurrentStep] = useState(0)
+  const [ideUrl, setIdeUrl] = useState<string>()
   const [error, setError] = useState<string>()
 
   const [startIde] = useStartIdeMutation({
     variables: { type, id },
     onError: e => setError(extractErrorMessage(e))
   })
+  const [checkIsIdeLive, { data, loading }] = useIsIdeLiveLazyQuery({
+    variables: { type, id },
+    fetchPolicy: 'network-only'
+  })
 
-  const checkIde = useCallback(
-    async (url: string) => {
-      try {
-        const res = await fetch(url, {
-          mode: 'no-cors'
-        })
-        if (res.ok || res.type === 'opaque') {
-          onReady(url)
-        } else {
-          throw new Error()
-        }
-      } catch (e) {
-        setTimeout(checkIde.bind(null, url), 1000)
-      }
-    },
-    [onReady]
-  )
+  useEffect(() => {
+    if (error || loading || !ideUrl) return
+    if (data?.isIdeLive === true) {
+      setCurrentStep(2)
+      onReady(ideUrl)
+    } else {
+      window.setTimeout(() => {
+        checkIsIdeLive()
+      }, 1000)
+    }
+  }, [onReady, error, ideUrl, data, loading, checkIsIdeLive])
 
   useEffect(() => {
     startIde().then(res => {
       if (res && res.data) {
-        setCurrentStep(c => c + 1)
-        checkIde(res.data.startIde)
+        setCurrentStep(1)
+        setIdeUrl(res.data.startIde)
+        checkIsIdeLive()
       }
     })
-  }, [startIde, checkIde])
+  }, [startIde, checkIsIdeLive])
 
   const icon = (iconType: string, step: number) => (
     <Icon type={step === currentStep && !error ? 'loading' : iconType} />

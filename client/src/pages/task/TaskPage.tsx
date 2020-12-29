@@ -1,11 +1,15 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button, Icon, Tooltip } from 'antd'
-import { Switch as AntSwitch } from 'antd'
+import { Button, Icon, Switch as AntSwitch, Tooltip } from 'antd'
 import Tag from 'antd/es/tag'
 import moment from 'moment'
 import React, { createContext, useCallback } from 'react'
-import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom'
-import { useHistory } from 'react-router-dom'
+import {
+  Redirect,
+  Route,
+  Switch,
+  useHistory,
+  useRouteMatch
+} from 'react-router-dom'
 import AnswerBlocker from '../../components/AnswerBlocker'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
@@ -26,6 +30,7 @@ import useSubPath from '../../hooks/useSubPath'
 import {
   GetTaskListDocument,
   GetTaskPoolDocument,
+  IdeType,
   PublicUserFieldsFragment,
   TaskInput,
   useCreateAnswerMutation,
@@ -297,7 +302,7 @@ const TaskPage: React.FC = () => {
                   submission?.deadline ? moment(submission.deadline) : undefined
                 }
               >
-                <IdeIframe type="answer" id={answer.id} />
+                <IdeIframe type={IdeType.Answer} id={answer.id} />
               </AnswerBlocker>
             </div>
           ) : (
