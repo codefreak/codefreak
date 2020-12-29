@@ -70,7 +70,7 @@ class TaskTarServiceTest {
   fun `EvaluationStepDefinitions keep positions on import`() {
     val user = User("Dummy user")
     val task = Task(null, user, 0, "Dummy task")
-    task.evaluationStepDefinitions = createUnorderedEvaluationStepDefinitionSet(task)
+    task.evaluationStepDefinitions = createUnorderedEvaluationStepDefinitionSet(task).toMutableSet()
 
     val exportedTar = taskTarService.getExportTar(task)
     val importedTask = taskTarService.createFromTar(exportedTar, user)
@@ -85,7 +85,7 @@ class TaskTarServiceTest {
     }
   }
 
-  private fun createUnorderedEvaluationStepDefinitionSet(task: Task) = mutableSetOf(
+  private fun createUnorderedEvaluationStepDefinitionSet(task: Task) = setOf(
     EvaluationStepDefinition(task, "comments", 0, "Comments"),
     EvaluationStepDefinition(task, "codeclimate", 1, "Code Quality 1"),
     EvaluationStepDefinition(task, "junit", 5, "Unit tests 1"),
