@@ -1,10 +1,9 @@
 package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
+import com.nhaarman.mockitokotlin2.any
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.util.Optional
-import java.util.UUID
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Feedback
@@ -17,63 +16,54 @@ import org.codefreak.codefreak.service.file.FileService
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
 
 class TaskTarServiceTest {
   private lateinit var taskTarService: TaskTarService
 
+  @Mock
+  private lateinit var mockTaskService: TaskService
+
+  @Mock
+  private lateinit var mockEvaluationService: EvaluationService
+
+  @Mock
+  private lateinit var mockEvaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
+
+  @Mock
+  private lateinit var mockFileService: FileService
+
   @Before
   fun setUp() {
+    // Note that the use of Mockito here encapsulates the tests of the
+    // implementation details of the dependencies at the cost of performance,
+    // because Mockito seems to trigger the garbage collector
+    MockitoAnnotations.openMocks(this)
+
     taskTarService = TaskTarService()
+
     taskTarService.yamlMapper = YAMLMapper()
-    taskTarService.taskService = createMockTaskService()
-    taskTarService.evaluationService = createMockEvaluationService()
-    taskTarService.evaluationStepDefinitionRepository = createMockEvaluationStepDefinitionRepository()
-    taskTarService.fileService = createMockFileService()
-  }
 
-  // Create own mock object instead of using mockito, because it is quite slow, might be the garbage collector
-  private fun createMockFileService() = object : FileService {
-    override fun readCollectionTar(collectionId: UUID) = ByteArrayInputStream(byteArrayOf())
-    override fun writeCollectionTar(collectionId: UUID) = ByteArrayOutputStream()
-    override fun collectionExists(collectionId: UUID) = true
-    override fun deleteCollection(collectionId: UUID) {}
-    override fun listFiles(collectionId: UUID) = listOf<String>()
-    override fun createFile(collectionId: UUID, path: String) {}
-    override fun createDirectory(collectionId: UUID, path: String) {}
-    override fun containsFile(collectionId: UUID, path: String) = true
-    override fun containsDirectory(collectionId: UUID, path: String) = true
-    override fun deleteFile(collectionId: UUID, path: String) {}
-    override fun filePutContents(collectionId: UUID, path: String) = ByteArrayOutputStream()
-    override fun getFileContents(collectionId: UUID, path: String) = ByteArrayInputStream(byteArrayOf())
-    override fun moveFile(collectionId: UUID, from: String, to: String) {}
-  }
+    `when`(mockTaskService.saveTask(any())).thenAnswer { it.arguments[0] }
+    taskTarService.taskService = mockTaskService
 
-  // Create own mock object instead of using mockito, because it is quite slow, might be the garbage collector
-  private fun createMockTaskService() = object : TaskService() {
-    override fun saveTask(task: Task) = task
-  }
-
-  // Create own mock object instead of using mockito, because it is quite slow, might be the garbage collector
-  private fun createMockEvaluationService() = object : EvaluationService() {
-    override fun getEvaluationRunner(name: String) = object : EvaluationRunner {
-      override fun getName() = name
-      override fun run(answer: Answer, options: Map<String, Any>) = listOf<Feedback>()
+    `when`(mockEvaluationService.getEvaluationRunner(any())).thenAnswer {
+      object : EvaluationRunner {
+        override fun getName(): String { return it.arguments[0] as String }
+        override fun run(answer: Answer, options: Map<String, Any>) = listOf<Feedback>()
+      }
     }
-  }
+    taskTarService.evaluationService = mockEvaluationService
 
-  // Create own mock object instead of using mockito, because it is quite slow, might be the garbage collector
-  private fun createMockEvaluationStepDefinitionRepository() = object : EvaluationStepDefinitionRepository {
-    override fun <S : EvaluationStepDefinition?> save(entity: S) = entity
-    override fun <S : EvaluationStepDefinition?> saveAll(entities: MutableIterable<S>) = entities
-    override fun findById(id: UUID): Optional<EvaluationStepDefinition> = Optional.empty()
-    override fun existsById(id: UUID) = true
-    override fun findAll() = mutableListOf<EvaluationStepDefinition>()
-    override fun findAllById(ids: MutableIterable<UUID>) = mutableListOf<EvaluationStepDefinition>()
-    override fun count() = 0L
-    override fun deleteById(id: UUID) {}
-    override fun delete(entity: EvaluationStepDefinition) {}
-    override fun deleteAll(entities: MutableIterable<EvaluationStepDefinition>) {}
-    override fun deleteAll() {}
+    `when`(mockEvaluationStepDefinitionRepository.save(any())).thenAnswer { it.arguments[0] }
+    `when`(mockEvaluationStepDefinitionRepository.saveAll(any())).thenAnswer { it.arguments[0] }
+    taskTarService.evaluationStepDefinitionRepository = mockEvaluationStepDefinitionRepository
+
+    `when`(mockFileService.readCollectionTar(any())).thenReturn(ByteArrayInputStream(byteArrayOf()))
+    `when`(mockFileService.writeCollectionTar(any())).thenReturn(ByteArrayOutputStream())
+    taskTarService.fileService = mockFileService
   }
 
   @Test
