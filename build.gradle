@@ -61,7 +61,7 @@ dependencies {
   implementation 'com.github.codefreak:templates:1.2.2'
   implementation 'com.networknt:json-schema-validator:1.0.45'
   implementation 'javax.validation:validation-api:2.0.1.Final'
-  implementation 'org.hibernate:hibernate-validator:6.2.0.Final'
+  implementation 'org.hibernate:hibernate-validator:7.0.0.Final'
   implementation 'com.google.guava:guava:30.1-jre'
   kapt 'org.springframework.boot:spring-boot-configuration-processor'
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
