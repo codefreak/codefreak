@@ -18,7 +18,7 @@ class EvaluationStepDefinition(
   @Column(length = 1024)
   @ColumnDefault("'{}'")
   var options: Map<String, Any> = mapOf()
-) : BaseEntity() {
+) : BaseEntity(), Comparable<EvaluationStepDefinition> {
   var active: Boolean = true
 
   /**
@@ -33,4 +33,6 @@ class EvaluationStepDefinition(
     }
     return super.equals(other)
   }
+
+  override fun compareTo(other: EvaluationStepDefinition) = position - other.position
 }
