@@ -1,0 +1,3 @@
+query IsIdeLive($type: IdeType!, $id: ID!) {
+  isIdeLive(type: $type, id: $id)
+}

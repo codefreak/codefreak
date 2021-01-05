@@ -8,6 +8,7 @@ import com.expediagroup.graphql.spring.operations.Subscription
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetchingEnvironment
+import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
@@ -24,12 +25,10 @@ import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentService
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
-import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationService
-import org.codefreak.codefreak.service.evaluation.EvaluationStepService
 import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
 import org.codefreak.codefreak.util.exhaustive
@@ -39,7 +38,6 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.util.Base64Utils
 import reactor.core.publisher.Flux
-import java.util.UUID
 
 @GraphQLName("EvaluationStepDefinition")
 class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: ResolverContext) {
