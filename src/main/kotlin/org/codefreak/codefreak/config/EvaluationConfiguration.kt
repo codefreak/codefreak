@@ -1,16 +1,17 @@
 package org.codefreak.codefreak.config
 
-import org.codefreak.codefreak.entity.Answer
-import org.codefreak.codefreak.entity.Evaluation
-import org.codefreak.codefreak.service.evaluation.AnswerProcessor
-import org.codefreak.codefreak.service.evaluation.AnswerReader
+import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.service.evaluation.EvaluationQualifier
 import org.codefreak.codefreak.service.evaluation.EvaluationQueue
-import org.codefreak.codefreak.service.evaluation.EvaluationWriter
+import org.codefreak.codefreak.service.evaluation.EvaluationStepProcessor
+import org.codefreak.codefreak.service.evaluation.EvaluationStepReader
+import org.codefreak.codefreak.service.evaluation.EvaluationStepWriter
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.StepExecutionListener
+import org.springframework.batch.core.configuration.JobRegistry
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
+import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.core.launch.support.SimpleJobLauncher
@@ -27,7 +28,7 @@ class EvaluationConfiguration {
   companion object {
     const val JOB_NAME = "evaluation"
     const val STEP_NAME = "evaluation"
-    const val PARAM_ANSWER_ID = "answerId"
+    const val PARAM_EVALUATION_STEP_ID = "evaluationStepId"
   }
 
   @Autowired
@@ -59,14 +60,14 @@ class EvaluationConfiguration {
   fun evaluationJob(
     jobBuilderFactory: JobBuilderFactory,
     stepBuilderFactory: StepBuilderFactory,
-    reader: AnswerReader,
-    processor: AnswerProcessor,
-    writer: EvaluationWriter,
+    reader: EvaluationStepReader,
+    processor: EvaluationStepProcessor,
+    writer: EvaluationStepWriter,
     queue: EvaluationQueue
   ): Job {
 
     val step = stepBuilderFactory.get(STEP_NAME)
-        .chunk<Answer, Evaluation>(5)
+        .chunk<EvaluationStep, EvaluationStep>(5)
         .reader(reader)
         .processor(processor)
         .writer(writer)
@@ -77,5 +78,12 @@ class EvaluationConfiguration {
         .incrementer(RunIdIncrementer())
         .start(step)
         .build()
+  }
+
+  @Bean
+  fun jobRegistryBeanPostProcessor(jobRegistry: JobRegistry): JobRegistryBeanPostProcessor? {
+    val jobRegistryBeanPostProcessor = JobRegistryBeanPostProcessor()
+    jobRegistryBeanPostProcessor.setJobRegistry(jobRegistry)
+    return jobRegistryBeanPostProcessor
   }
 }

@@ -12,8 +12,8 @@ subscription EvaluationFinished {
   }
 }
 
-subscription PendingEvaluationUpdated($answerId: ID!) {
-  pendingEvaluationUpdated(answerId: $answerId) {
+subscription EvaluationStatusUpdated($answerId: ID!) {
+  evaluationStatusUpdated(answerId: $answerId) {
     status
   }
 }

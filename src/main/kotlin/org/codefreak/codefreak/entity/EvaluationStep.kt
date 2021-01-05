@@ -21,7 +21,10 @@ class EvaluationStep(
   var definition: EvaluationStepDefinition,
 
   @ManyToOne(optional = false)
-  var evaluation: Evaluation
+  var evaluation: Evaluation,
+
+  @Enumerated(EnumType.STRING)
+  var status: EvaluationStepStatus
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluationStep", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
   var feedback = mutableSetOf<Feedback>()
@@ -44,6 +47,4 @@ class EvaluationStep(
   }
 
   fun addAllFeedback(feedbackList: List<Feedback>) = feedbackList.forEach(this::addFeedback)
-
-  enum class EvaluationStepResult { SUCCESS, FAILED, ERRORED }
 }

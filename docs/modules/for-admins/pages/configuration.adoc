@@ -141,3 +141,14 @@ If you are using a reverse proxy (Traefik, Nginx, …) to pass traffic to Code F
 server:
   forward-headers-strategy: framework
 ----
+
+== Evaluation
+Code FREAK has a queue-based system to limit the number of evaluation steps running in parallel. By default, the number of steps running in parallel is the number of CPU cores of the underlying host. You can adjust this value in the `application.yml`:
+
+.application.yml
+[source,yaml]
+----
+codefreak:
+  evaluation:
+    max-concurrent-executions: 12
+----
