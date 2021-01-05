@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { useQueryParam } from './useQuery'
 
 const HideNavigationContext = createContext(false)

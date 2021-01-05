@@ -1,5 +1,4 @@
 import Emoji from 'a11y-react-emoji'
-import React from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EmptyListCallToAction from '../../components/EmptyListCallToAction'
 import TaskList from '../../components/TaskList'

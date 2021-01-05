@@ -1,5 +1,5 @@
 import { Alert, Icon, Result, Steps, Tabs } from 'antd'
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EvaluationHistory from '../../components/EvaluationHistory'
 import EvaluationResult from '../../components/EvaluationResult'

@@ -1,4 +1,3 @@
-import React from 'react'
 import { useParams } from 'react-router-dom'
 import Centered from '../components/Centered'
 import LaunchIdeSteps from '../components/LaunchIdeSteps'
