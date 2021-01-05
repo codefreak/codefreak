@@ -16,11 +16,14 @@ import org.codefreak.codefreak.service.file.FileService
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.Spy
 
 class TaskTarServiceTest {
+  @InjectMocks
   private lateinit var taskTarService: TaskTarService
 
   @Mock
@@ -35,19 +38,13 @@ class TaskTarServiceTest {
   @Mock
   private lateinit var mockFileService: FileService
 
+  @Spy
+  internal lateinit var yamlMapper: YAMLMapper
+
   @Before
   fun setUp() {
-    // Note that the use of Mockito here encapsulates the tests of the
-    // implementation details of the dependencies at the cost of performance,
-    // because Mockito seems to trigger the garbage collector
     MockitoAnnotations.openMocks(this)
-
-    taskTarService = TaskTarService()
-
-    taskTarService.yamlMapper = YAMLMapper()
-
     `when`(mockTaskService.saveTask(any())).thenAnswer { it.arguments[0] }
-    taskTarService.taskService = mockTaskService
 
     `when`(mockEvaluationService.getEvaluationRunner(any())).thenAnswer {
       object : EvaluationRunner {
@@ -55,15 +52,12 @@ class TaskTarServiceTest {
         override fun run(answer: Answer, options: Map<String, Any>) = listOf<Feedback>()
       }
     }
-    taskTarService.evaluationService = mockEvaluationService
 
     `when`(mockEvaluationStepDefinitionRepository.save(any())).thenAnswer { it.arguments[0] }
     `when`(mockEvaluationStepDefinitionRepository.saveAll(any())).thenAnswer { it.arguments[0] }
-    taskTarService.evaluationStepDefinitionRepository = mockEvaluationStepDefinitionRepository
 
     `when`(mockFileService.readCollectionTar(any())).thenReturn(ByteArrayInputStream(byteArrayOf()))
     `when`(mockFileService.writeCollectionTar(any())).thenReturn(ByteArrayOutputStream())
-    taskTarService.fileService = mockFileService
   }
 
   @Test

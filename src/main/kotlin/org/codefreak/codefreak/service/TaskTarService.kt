@@ -32,19 +32,19 @@ class TaskTarService : BaseService() {
 
   @Autowired
   @Qualifier("yamlObjectMapper")
-  internal lateinit var yamlMapper: ObjectMapper
+  private lateinit var yamlMapper: ObjectMapper
 
   @Autowired
-  internal lateinit var taskService: TaskService
+  private lateinit var taskService: TaskService
 
   @Autowired
-  internal lateinit var evaluationService: EvaluationService
+  private lateinit var evaluationService: EvaluationService
 
   @Autowired
-  internal lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
+  private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
 
   @Autowired
-  internal lateinit var fileService: FileService
+  private lateinit var fileService: FileService
 
   /**
    * Creates and saves a new task from the given tar.
