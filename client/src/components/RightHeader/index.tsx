@@ -22,7 +22,7 @@ const Index: React.FC<RightHeaderProps> = ({ logout }) => {
 
   return (
     <div style={{ float: 'right', paddingRight: 14 }}>
-      <Dropdown overlay={userMenu} disabled={!userMenu}>
+      <Dropdown overlay={userMenu} disabled={!userMenu} trigger={['click']}>
         <div style={{ padding: '0 10px' }}>
           <Avatar size="small" user={user} />
           {displayName(user)}
