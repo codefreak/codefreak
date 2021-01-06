@@ -1,5 +1,4 @@
 import { Button, Card, Icon } from 'antd'
-import React from 'react'
 import { Redirect } from 'react-router-dom'
 import Centered from '../../components/Centered'
 import useIdParam from '../../hooks/useIdParam'

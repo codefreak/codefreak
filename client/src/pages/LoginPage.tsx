@@ -1,6 +1,6 @@
 import { Button, Card, Form, Icon, Input } from 'antd'
 import { FormComponentProps } from 'antd/lib/form'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import Centered from '../components/Centered'
 import Logo from '../components/Logo'
 import { AuthenticatedUser } from '../hooks/useAuthenticatedUser'

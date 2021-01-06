@@ -1,5 +1,5 @@
 import { Button, Checkbox, Icon, List, Typography } from 'antd'
-import React, { createRef, useEffect, useState } from 'react'
+import { createRef, useEffect, useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import {
   Assignment,

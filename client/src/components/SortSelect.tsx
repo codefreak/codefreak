@@ -1,5 +1,4 @@
 import { Select } from 'antd'
-import React from 'react'
 import { capitalize } from '../services/strings'
 
 interface SortSelectProps {

@@ -2,7 +2,7 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Icon, Switch as AntSwitch, Tooltip } from 'antd'
 import Tag from 'antd/es/tag'
 import moment from 'moment'
-import React, { createContext, useCallback } from 'react'
+import { createContext, useCallback } from 'react'
 import {
   Redirect,
   Route,

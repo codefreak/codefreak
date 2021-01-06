@@ -1,5 +1,5 @@
 import moment from 'moment'
-import React, { HTMLProps } from 'react'
+import { HTMLProps } from 'react'
 import { Tooltip } from 'antd'
 import { useFormatter } from '../hooks/useFormatter'
 import { useServerMoment } from '../hooks/useServerTimeOffset'
