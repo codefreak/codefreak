@@ -4,8 +4,7 @@ import React, { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   EvaluationStepResult,
-  GetAssignmentWithSubmissionsQueryResult,
-  EvaluationStepStatus
+  GetAssignmentWithSubmissionsQueryResult
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { useFormatter } from '../hooks/useFormatter'
@@ -17,6 +16,7 @@ import EvaluationResultPopover from './EvaluationResultPopover'
 import './SubmissionsTable.less'
 import SearchBar from './SearchBar'
 import EvaluationStepIcon from './EvaluationStepIcon'
+import { isEvaluationInProgress } from '../services/evaluation'
 
 type Assignment = NonNullable<
   GetAssignmentWithSubmissionsQueryResult['data']
@@ -180,11 +180,7 @@ const AnswerEvaluationSummary: React.FC<{
   )
 
   // prevent flashing of old evaluation result by also showing loading indicator for fetching new results
-  if (
-    loading ||
-    evaluationStatus === EvaluationStepStatus.Queued ||
-    evaluationStatus === EvaluationStepStatus.Running
-  ) {
+  if (loading || isEvaluationInProgress(evaluationStatus)) {
     return (
       <Tooltip title="Evaluating answer…">
         <Icon type="loading" />

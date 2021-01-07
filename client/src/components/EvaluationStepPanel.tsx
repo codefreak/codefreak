@@ -15,6 +15,8 @@ import SyntaxHighlighter from './code/SyntaxHighlighter'
 import { compare } from '../services/util'
 import renderFeedbackPanel from './FeedbackPanel'
 import EvaluationStepIcon from './EvaluationStepIcon'
+import { isEvaluationInProgress } from '../services/evaluation'
+import EvaluationProcessingIcon from './EvaluationProcessingIcon'
 
 export const EvaluationStepPanel: React.FC<{
   answerId: string
@@ -104,6 +106,15 @@ export const EvaluationStepPanel: React.FC<{
       .map(renderFeedback)
 
     body = <Collapse>{renderedFeedbackList}</Collapse>
+  }
+
+  if (!body && isEvaluationInProgress(stepStatus)) {
+    body = (
+      <Result
+        icon={<EvaluationProcessingIcon />}
+        title={`"${stepBasics.definition.title}" is in progress…`}
+      />
+    )
   }
 
   if (!body) {

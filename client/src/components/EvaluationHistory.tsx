@@ -3,7 +3,6 @@ import { Button, Card, Modal, Timeline } from 'antd'
 import React from 'react'
 import {
   EvaluationStepResult,
-  EvaluationStepStatus,
   GetEvaluationHistoryQueryResult,
   useGetEvaluationHistoryQuery
 } from '../generated/graphql'
@@ -12,16 +11,13 @@ import './EvaluationHistory.less'
 import EvaluationResult from './EvaluationResult'
 import { EvaluationErrorIcon } from './Icons'
 import useEvaluationStatus from '../hooks/useEvaluationStatus'
+import { isEvaluationInProgress } from '../services/evaluation'
 
 const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
   const result = useGetEvaluationHistoryQuery({ variables: { answerId } })
   const apolloClient = useApolloClient()
 
   const evaluationStatus = useEvaluationStatus(answerId)
-
-  const isPending =
-    evaluationStatus === EvaluationStepStatus.Running ||
-    evaluationStatus === EvaluationStepStatus.Queued
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -33,7 +29,12 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
 
   return (
     <Card className="evaluation-history">
-      <Timeline reverse pending={isPending ? 'Running...' : undefined}>
+      <Timeline
+        reverse
+        pending={
+          isEvaluationInProgress(evaluationStatus) ? 'Running...' : undefined
+        }
+      >
         {evaluations.map(renderEvaluation(apolloClient))}
       </Timeline>
     </Card>

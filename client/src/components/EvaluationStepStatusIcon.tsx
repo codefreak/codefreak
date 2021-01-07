@@ -1,6 +1,8 @@
 import React from 'react'
 import { EvaluationStepStatus } from '../generated/graphql'
 import { Icon } from 'antd'
+import { isEvaluationInProgress } from '../services/evaluation'
+import EvaluationProcessingIcon from './EvaluationProcessingIcon'
 
 const stepStatusIconMap: Record<EvaluationStepStatus, string> = {
   [EvaluationStepStatus.Pending]: 'question-circle',
@@ -18,14 +20,13 @@ const EvaluationStepStatusIcon: React.FC<EvaluationStepStatusIconProps> = props 
   const { status } = props
 
   const iconType = stepStatusIconMap[status]
-  const className = `evaluation-step-status-icon-${status.toLowerCase()}`
+  const className = `evaluation-step-status-icon evaluation-step-status-icon-${status.toLowerCase()}`
 
-  return (
-    <Icon
-      type={iconType}
-      className={`evaluation-step-status-icon ${className}`}
-    />
-  )
+  if (isEvaluationInProgress(status)) {
+    return <EvaluationProcessingIcon className={className} />
+  }
+
+  return <Icon type={iconType} className={className} />
 }
 
 export default EvaluationStepStatusIcon

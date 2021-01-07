@@ -1,11 +1,9 @@
 import { Badge } from 'antd'
 import React from 'react'
 import { EvaluationErrorIcon } from './Icons'
-import {
-  EvaluationStepResult,
-  EvaluationStepStatus
-} from '../generated/graphql'
+import { EvaluationStepResult } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
+import { isEvaluationInProgress } from '../services/evaluation'
 
 interface EvaluationIndicatorProps {
   style?: React.CSSProperties
@@ -16,10 +14,7 @@ const EvaluationIndicator: React.FC<EvaluationIndicatorProps> = props => {
   const { answerId, style } = props
   const { latestEvaluation, evaluationStatus } = useAnswerEvaluation(answerId)
 
-  if (
-    evaluationStatus === EvaluationStepStatus.Running ||
-    evaluationStatus === EvaluationStepStatus.Queued
-  ) {
+  if (isEvaluationInProgress(evaluationStatus)) {
     return <Badge style={style} status="processing" />
   }
 
