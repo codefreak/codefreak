@@ -2,7 +2,7 @@ import React from 'react'
 import { FeedbackStatus } from '../generated/graphql'
 import { Icon } from 'antd'
 
-interface FeedbackStatusIcon {
+interface FeedbackStatusIconProps {
   status: FeedbackStatus
 }
 
@@ -12,7 +12,7 @@ const statusIconMap: Record<FeedbackStatus, string> = {
   [FeedbackStatus.Ignore]: 'forward'
 }
 
-const FeedbackStatusIcon: React.FC<FeedbackStatusIcon> = props => {
+const FeedbackStatusIcon: React.FC<FeedbackStatusIconProps> = props => {
   const { status } = props
 
   const iconType = statusIconMap[status]
