@@ -13,7 +13,7 @@ import { CardProps } from 'antd/lib/card'
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { JSONSchema6 } from 'json-schema'
 import YAML from 'json-to-pretty-yaml'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { deepEquals } from 'react-jsonschema-form/lib/utils'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CardList from '../../components/CardList'
@@ -37,7 +37,8 @@ import useSystemConfig from '../../hooks/useSystemConfig'
 import {
   componentsToSeconds,
   secondsToComponents,
-  secondsToRelTime
+  secondsToRelTime,
+  TimeComponents
 } from '../../services/time'
 import HelpTooltip from '../../components/HelpTooltip'
 import { debounce } from 'ts-debounce'
@@ -165,6 +166,12 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       icon: 'setting'
     }
 
+    const onTimeIntervalChange = (timeoutComps?: TimeComponents) => {
+      const timeout = timeoutComps
+        ? componentsToSeconds(timeoutComps)
+        : undefined
+      return updateTimeout(timeout)
+    }
     const cardProps: CardProps = {
       title: (
         <EditableTitle
@@ -264,12 +271,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
               >
                 <TimeIntervalInput
                   nullable
-                  onChange={timeoutComps => {
-                    const timeout = timeoutComps
-                      ? componentsToSeconds(timeoutComps)
-                      : undefined
-                    return updateTimeout(timeout)
-                  }}
+                  onChange={onTimeIntervalChange}
                   defaultValue={
                     definition.timeout
                       ? secondsToComponents(definition.timeout)

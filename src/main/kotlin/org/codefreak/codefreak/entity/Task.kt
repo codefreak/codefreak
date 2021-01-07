@@ -6,6 +6,7 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OrderBy
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
@@ -69,7 +70,11 @@ class Task(
   var updatedAt: Instant = Instant.now()
 
   @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
-  var evaluationStepDefinitions: MutableSet<EvaluationStepDefinition> = mutableSetOf()
+  @OrderBy("position ASC")
+  var evaluationStepDefinitions: MutableSet<EvaluationStepDefinition> = sortedSetOf()
+    set(evaluationStepDefinitions) {
+      field = evaluationStepDefinitions.toSortedSet()
+    }
 
   var evaluationSettingsChangedAt: Instant = Instant.now()
 

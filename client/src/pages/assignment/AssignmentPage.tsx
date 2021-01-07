@@ -17,7 +17,7 @@ import {
 import { DropdownButtonProps } from 'antd/es/dropdown/dropdown-button'
 import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import moment, { Moment, unitOfTime } from 'moment'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
 import { debounce } from 'ts-debounce'
 import ArchiveDownload from '../../components/ArchiveDownload'

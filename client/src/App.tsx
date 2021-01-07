@@ -1,6 +1,6 @@
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
 import { Spin } from 'antd'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   BrowserRouter as Router,
   Redirect,

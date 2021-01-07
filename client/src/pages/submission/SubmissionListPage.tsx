@@ -1,4 +1,3 @@
-import React from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import SubmissionsTable from '../../components/SubmissionsTable'
 import { useGetAssignmentWithSubmissionsQuery } from '../../generated/graphql'

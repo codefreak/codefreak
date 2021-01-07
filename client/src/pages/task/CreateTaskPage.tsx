@@ -1,6 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Alert, Button, Card, Col, Row } from 'antd'
-import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { TaskTemplate, useCreateTaskMutation } from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'

@@ -111,7 +111,7 @@ class TaskTarService : BaseService() {
         evaluationService.validateRunnerOptions(stepDefinition)
         stepDefinition
       }
-      .toMutableSet()
+      .toSortedSet()
 
   private fun validateEvaluationSteps(task: Task) = task.evaluationStepDefinitions
       .groupBy { it.runnerName }
@@ -228,7 +228,9 @@ class TaskTarService : BaseService() {
       task.body,
       task.hiddenFiles,
       task.protectedFiles,
-      task.evaluationStepDefinitions.map {
+      task.evaluationStepDefinitions
+        .toSortedSet()
+        .map {
         EvaluationDefinition(
             it.runnerName,
             it.options,

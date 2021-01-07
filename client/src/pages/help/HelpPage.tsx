@@ -1,6 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Card } from 'antd'
-import React from 'react'
 import { Link } from 'react-router-dom'
 import useHasAuthority from '../../hooks/useHasAuthority'
 import BasicHelpPage from './BasicHelpPage'
