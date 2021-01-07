@@ -3,13 +3,13 @@ import { ButtonProps } from 'antd/es/button'
 import React, { useEffect } from 'react'
 import { useStartAssignmentEvaluationMutation } from '../generated/graphql'
 
-interface StartSubmissionEvaluationButton extends ButtonProps {
+interface StartSubmissionEvaluationButtonProps extends ButtonProps {
   assignmentId: string
   invalidateAll?: boolean
   invalidateTask?: string
 }
 
-const StartSubmissionEvaluationButton: React.FC<StartSubmissionEvaluationButton> = ({
+const StartSubmissionEvaluationButton: React.FC<StartSubmissionEvaluationButtonProps> = ({
   assignmentId,
   invalidateAll,
   invalidateTask,

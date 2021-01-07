@@ -1,5 +1,5 @@
 import { Tabs } from 'antd'
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import EvaluationHistory from '../../components/EvaluationHistory'
 import useSubPath from '../../hooks/useSubPath'
 import { shorten } from '../../services/short-id'

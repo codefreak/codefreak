@@ -1,6 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import content from '@codefreak/docs/modules/for-teachers/pages/definitions.adoc'
-import React from 'react'
 import Asciidoc from 'react-asciidoc'
 
 const DefinitionsHelpPage: React.FC = () => (

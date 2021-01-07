@@ -1,6 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Button, Col, Row } from 'antd'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'

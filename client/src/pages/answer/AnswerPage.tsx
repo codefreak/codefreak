@@ -1,6 +1,6 @@
 import { Alert, Button, Card, Col, Icon, Modal, Row } from 'antd'
 import moment from 'moment'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import AnswerBlocker from '../../components/AnswerBlocker'
 import AnswerFileBrowser from '../../components/AnswerFileBrowser'
 import ArchiveDownload from '../../components/ArchiveDownload'

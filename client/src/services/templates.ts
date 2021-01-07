@@ -1,4 +1,4 @@
-import React, { HTMLAttributes } from 'react'
+import { HTMLAttributes } from 'react'
 import { TaskTemplate } from '../generated/graphql'
 
 interface Template {

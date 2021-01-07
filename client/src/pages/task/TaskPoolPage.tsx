@@ -1,7 +1,7 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import Emoji from 'a11y-react-emoji'
 import { Button, Col, Row } from 'antd'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EmptyListCallToAction from '../../components/EmptyListCallToAction'

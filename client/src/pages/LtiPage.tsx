@@ -1,4 +1,3 @@
-import React from 'react'
 import { Route, Switch } from 'react-router-dom'
 import EmbeddedLayout from '../components/EmbeddedLayout'
 import DeepLinkPage from '../pages/lti/DeepLinkPage'
