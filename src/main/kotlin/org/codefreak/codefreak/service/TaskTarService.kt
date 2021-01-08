@@ -235,7 +235,7 @@ class TaskTarService : BaseService() {
             it.runnerName,
             it.options,
             it.title,
-            it.active
+            if (it.active) null else false
         )
       }
   )
