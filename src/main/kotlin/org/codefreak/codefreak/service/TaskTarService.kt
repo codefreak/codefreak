@@ -107,6 +107,7 @@ class TaskTarService : BaseService() {
         val runner = evaluationService.getEvaluationRunner(it.step)
         val title = it.title ?: runner.getDefaultTitle()
         val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
+        stepDefinition.active = it.active ?: true
         evaluationService.validateRunnerOptions(stepDefinition)
         stepDefinition
       }
@@ -239,7 +240,8 @@ class TaskTarService : BaseService() {
         EvaluationDefinition(
             it.runnerName,
             options,
-            it.title
+            it.title,
+            if (it.active) null else false
         )
       }
   )
