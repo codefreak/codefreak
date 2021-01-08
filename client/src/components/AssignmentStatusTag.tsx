@@ -1,4 +1,10 @@
-import { Icon, Tag, Tooltip } from 'antd'
+import {
+  EyeInvisibleOutlined,
+  HourglassOutlined,
+  LockOutlined,
+  UnlockOutlined
+} from '@ant-design/icons'
+import { Tag, Tooltip } from 'antd'
 import React from 'react'
 import { AssignmentStatus } from '../generated/graphql'
 
@@ -10,7 +16,7 @@ interface AssignmentStatusInfo {
   title: string
   description: string
   color?: string
-  iconType?: string
+  iconType?: JSX.Element
 }
 
 const AssignmentStatusInfoMapping: {
@@ -19,27 +25,27 @@ const AssignmentStatusInfoMapping: {
   [AssignmentStatus.Inactive]: {
     title: 'Inactive',
     description: 'This assignment is only visible for you.',
-    iconType: 'eye-invisible'
+    iconType: <EyeInvisibleOutlined />
   },
   [AssignmentStatus.Active]: {
     title: 'Not open yet',
     description:
       'This assignment is already visible but not open for submissions yet.',
     color: 'orange',
-    iconType: 'hourglass'
+    iconType: <HourglassOutlined />
   },
   [AssignmentStatus.Open]: {
     title: 'Open',
     description: 'The assignment is open for submissions.',
     color: 'green',
-    iconType: 'unlock'
+    iconType: <UnlockOutlined />
   },
   [AssignmentStatus.Closed]: {
     title: 'Closed',
     description:
       'The assignment is closed. You cannot modify your answers anymore.',
     color: 'red',
-    iconType: 'lock'
+    iconType: <LockOutlined />
   }
 }
 
@@ -53,7 +59,7 @@ const AssignmentStatusTag: React.FC<AssignmentStatusTagProps> = ({
   return (
     <Tooltip title={statusInfo.description}>
       <Tag color={statusInfo.color}>
-        {statusInfo.iconType ? <Icon type={statusInfo.iconType} /> : undefined}{' '}
+        {statusInfo.iconType ? statusInfo.iconType : undefined}{' '}
         {statusInfo.title}
       </Tag>
     </Tooltip>

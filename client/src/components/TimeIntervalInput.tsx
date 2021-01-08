@@ -7,10 +7,10 @@ import './TimeIntervalInput.less'
 const renderTimeIntervalInput = (
   suffix: string,
   value: number,
-  onChange: (value: number) => void,
+  onChange: (value: number | string) => void,
   additionalProps: InputNumberProps = {}
 ) => {
-  const onChangeDefinitely = (val: number | undefined) =>
+  const onChangeDefinitely = (val: string | number | undefined) =>
     val !== undefined ? onChange(val) : undefined
 
   const parser = (val: string | undefined) => {
@@ -54,7 +54,7 @@ const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
   )
 
   const createOnValueChange = (field: keyof TimeComponents) => (
-    value: number
+    value: number | string
   ) => {
     const newComponents = { ...components, [field]: value }
     setComponents(newComponents)

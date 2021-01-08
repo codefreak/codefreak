@@ -1,5 +1,8 @@
-import { Button, Card, Form, Icon, Input } from 'antd'
-import { FormComponentProps } from 'antd/lib/form'
+import { LockOutlined, UserOutlined } from '@ant-design/icons'
+import { Form } from '@ant-design/compatible'
+import '@ant-design/compatible/assets/index.css'
+import { Button, Card, Input } from 'antd'
+import { FormComponentProps } from '@ant-design/compatible/lib/form'
 import { useEffect } from 'react'
 import Centered from '../components/Centered'
 import Logo from '../components/Logo'
@@ -60,9 +63,7 @@ const LoginPage: React.FC<LoginProps> = props => {
               ]
             })(
               <Input
-                prefix={
-                  <Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />
-                }
+                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
                 autoComplete="username"
                 autoFocus
                 placeholder="Username / Mail Address"
@@ -76,9 +77,7 @@ const LoginPage: React.FC<LoginProps> = props => {
               ]
             })(
               <Input
-                prefix={
-                  <Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />
-                }
+                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
                 autoComplete="password"
                 type="password"
                 placeholder="Password"

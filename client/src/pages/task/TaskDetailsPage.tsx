@@ -1,11 +1,17 @@
 import {
+  EditOutlined,
+  InfoCircleFilled,
+  InfoCircleTwoTone,
+  PoweroffOutlined,
+  SaveOutlined
+} from '@ant-design/icons'
+import {
   Alert,
   Button,
   Card,
   Checkbox,
   Col,
   Empty,
-  Icon,
   Input,
   List,
   Row,
@@ -138,9 +144,8 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
               This is what your students will see when they open the task. Check
               out the "edit" tabs that are only visible to you.
               <br />
-              <Icon type="info-circle" theme="twoTone" /> To try out what your
-              students see when they start working on this task, enable{' '}
-              <i>testing mode</i>.
+              <InfoCircleTwoTone /> To try out what your students see when they
+              start working on this task, enable <i>testing mode</i>.
             </>
           }
           style={{ marginBottom: 16 }}
@@ -165,7 +170,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
           extra={
             <Switch
               defaultChecked={task.ideEnabled}
-              unCheckedChildren={<Icon type="poweroff" />}
+              unCheckedChildren={<PoweroffOutlined />}
               onChange={updater('ideEnabled')}
             />
           }
@@ -188,7 +193,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             defaultValue={task.ideImage || ''}
             placeholder="e.g. foo/bar:latest"
             allowClear
-            enterButton={<Icon type="save" />}
+            enterButton={<SaveOutlined />}
             onSearch={updater('ideImage')}
           />
         </Card>
@@ -229,7 +234,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             >
               <Button
                 type="primary"
-                icon="edit"
+                icon={<EditOutlined />}
                 disabled={assignmentOpen && !sureToEditFiles}
               >
                 Edit task files in IDE
@@ -267,7 +272,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                         }
                         placement="bottom"
                       >
-                        <Icon type="info-circle" theme="filled" />
+                        <InfoCircleFilled />
                       </Tooltip>
                     </span>
                     <JsonSchemaEditButton
@@ -303,7 +308,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                         }
                         placement="bottom"
                       >
-                        <Icon type="info-circle" theme="filled" />
+                        <InfoCircleFilled />
                       </Tooltip>
                     </span>
                     <JsonSchemaEditButton

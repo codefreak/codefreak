@@ -1,4 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
+import { PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Row } from 'antd'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -63,7 +64,7 @@ const AssignmentListPage: React.FC = () => {
   const createButton = (
     <Authorized authority="ROLE_TEACHER">
       <Link to="/assignments/create" key="1">
-        <Button type="primary" icon="plus">
+        <Button type="primary" icon={<PlusOutlined />}>
           Create Assignment
         </Button>
       </Link>
@@ -74,7 +75,7 @@ const AssignmentListPage: React.FC = () => {
     <>
       <PageHeaderWrapper
         extra={
-          <Row justify="end" gutter={16} type="flex">
+          <Row justify="end" gutter={16}>
             <Col>{searchBar}</Col>
             <Col>{sorter}</Col>
             <Col>{createButton}</Col>

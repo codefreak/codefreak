@@ -1,4 +1,5 @@
-import { Button, Checkbox, Icon, List, Typography } from 'antd'
+import { LinkOutlined } from '@ant-design/icons'
+import { Button, Checkbox, List, Typography } from 'antd'
 import { createRef, useEffect, useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import {
@@ -69,7 +70,7 @@ const DeepLinkPage: React.FC = () => {
         <Button
           key={item.id}
           type="default"
-          icon="link"
+          icon={<LinkOutlined />}
           onClick={onItemSelection(item.id)}
         />
       ]}
@@ -82,8 +83,7 @@ const DeepLinkPage: React.FC = () => {
     <>
       <Typography.Title level={2}>Select assignment</Typography.Title>
       <p>
-        Create link to an assignment by clicking the <Icon type="link" />{' '}
-        button.
+        Create link to an assignment by clicking the <LinkOutlined /> button.
       </p>
       <p>
         <Checkbox

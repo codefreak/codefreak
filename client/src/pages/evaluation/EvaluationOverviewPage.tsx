@@ -1,4 +1,5 @@
-import { Alert, Icon, Result, Steps, Tabs } from 'antd'
+import { LoadingOutlined, RocketTwoTone } from '@ant-design/icons'
+import { Alert, Result, Steps, Tabs } from 'antd'
 import { useContext, useEffect, useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EvaluationHistory from '../../components/EvaluationHistory'
@@ -83,7 +84,7 @@ const EvaluationPage: React.FC<{
             />
             <Step
               title="Queue"
-              icon={step === 1 ? <Icon type="loading" /> : undefined}
+              icon={step === 1 ? <LoadingOutlined /> : undefined}
               description={
                 extendedSteps
                   ? 'Wait for free resources on the server'
@@ -92,7 +93,7 @@ const EvaluationPage: React.FC<{
             />
             <Step
               title="Execute Evaluation"
-              icon={step === 2 ? <Icon type="loading" /> : undefined}
+              icon={step === 2 ? <LoadingOutlined /> : undefined}
               description={
                 extendedSteps
                   ? 'Run a set of checks on your proposed solution'
@@ -116,7 +117,7 @@ const EvaluationPage: React.FC<{
             <EvaluationResult evaluationId={answer.latestEvaluation.id} />
           ) : !differentUser ? (
             <Result
-              icon={<Icon type="rocket" theme="twoTone" />}
+              icon={<RocketTwoTone />}
               title="Wondering if your solution is correct? ✨"
               extra={
                 <StartEvaluationButton

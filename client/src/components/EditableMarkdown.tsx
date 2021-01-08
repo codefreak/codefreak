@@ -1,4 +1,5 @@
-import { Button, Empty, Icon } from 'antd'
+import { EditOutlined } from '@ant-design/icons'
+import { Button, Empty } from 'antd'
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import ReactMde from 'react-mde'
@@ -57,7 +58,7 @@ const EditableMarkdown: React.FC<{
         onClick={editable ? edit : undefined}
         className={editable ? 'markdown-wrapper editable' : 'markdown-wrapper'}
       >
-        <Icon type="edit" className="edit-icon" />
+        <EditOutlined className="edit-icon" />
         {content || !editable ? (
           <ReactMarkdown source={content || ''} />
         ) : (

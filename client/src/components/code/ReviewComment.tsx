@@ -1,5 +1,8 @@
-import { Button, Card, Col, Form, Icon, Popconfirm, Row, Select } from 'antd'
-import { FormComponentProps } from 'antd/es/form'
+import { CloseOutlined } from '@ant-design/icons'
+import { Form } from '@ant-design/compatible'
+import '@ant-design/compatible/assets/index.css'
+import { Button, Card, Col, Popconfirm, Row, Select } from 'antd'
+import { FormComponentProps } from '@ant-design/compatible/es/form'
 import TextArea from 'antd/es/input/TextArea'
 import React, { FormEvent, useState } from 'react'
 import { FeedbackSeverity } from '../../generated/graphql'
@@ -57,7 +60,7 @@ const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
 
   // confirm close if comment contains a value
   const onChange = () => setHasValue(!!props.form.getFieldValue('comment'))
-  let close = <Icon type="close" onClick={!hasValue ? onClose : undefined} />
+  let close = <CloseOutlined onClick={!hasValue ? onClose : undefined} />
   if (hasValue) {
     close = (
       <Popconfirm title="Discard comment?" onConfirm={onClose}>
@@ -73,7 +76,7 @@ const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
       title={props.title}
       extra={close}
     >
-      <Row type="flex">
+      <Row>
         <Col>
           <Avatar user={user} />
         </Col>

@@ -1,3 +1,4 @@
+import { EditOutlined } from '@ant-design/icons'
 import { Button, Modal } from 'antd'
 import { ButtonProps } from 'antd/lib/button'
 import { JSONSchema6 } from 'json-schema'
@@ -44,7 +45,7 @@ function JsonSchemaEditButton<T>(
   return (
     <>
       <Button
-        icon="edit"
+        icon={<EditOutlined />}
         type="link"
         onClick={showModal}
         {...props.buttonProps}

@@ -4,6 +4,7 @@ import {
   useImportTasksMutation,
   useUploadTasksMutation
 } from '../services/codefreak-api'
+import { UploadOutlined } from '@ant-design/icons'
 import { Alert, Button, Modal } from 'antd'
 import FileImport from './FileImport'
 import InlineError from './InlineError'
@@ -60,7 +61,7 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
 
   return (
     <>
-      <Button icon="upload" type="default" onClick={showModal}>
+      <Button icon={<UploadOutlined />} type="default" onClick={showModal}>
         Import Tasks
       </Button>
       <Modal

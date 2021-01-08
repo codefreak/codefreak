@@ -105,7 +105,6 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = props => {
       return (
         <Alert
           type="warning"
-          iconType="warning"
           showIcon
           message={`You only have ${assignmentRelDeadline} left!`}
           description={

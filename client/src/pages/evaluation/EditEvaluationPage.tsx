@@ -1,3 +1,4 @@
+import { DeleteOutlined } from '@ant-design/icons'
 import {
   Alert,
   Button,
@@ -189,7 +190,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 onClick={confirmDelete}
                 type="dashed"
                 shape="circle"
-                icon="delete"
+                icon={<DeleteOutlined />}
               />
             </Tooltip>
           )}

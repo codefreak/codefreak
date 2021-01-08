@@ -1,4 +1,5 @@
-import { Button, Icon } from 'antd'
+import { CaretDownOutlined, CaretUpOutlined } from '@ant-design/icons'
+import { Button } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import useElementDimensions from '../hooks/useElementDimensions'
 
@@ -52,11 +53,11 @@ const CropContainer: React.FC<{ maxHeight: number }> = ({
         >
           {isExpanded ? (
             <>
-              Show less <Icon type="caret-up" />
+              Show less <CaretUpOutlined />
             </>
           ) : (
             <>
-              Show more <Icon type="caret-down" />
+              Show more <CaretDownOutlined />
             </>
           )}
         </Button>

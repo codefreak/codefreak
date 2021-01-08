@@ -1,4 +1,5 @@
-import { Button, Card, Icon } from 'antd'
+import { InfoCircleOutlined } from '@ant-design/icons'
+import { Button, Card } from 'antd'
 import { Redirect } from 'react-router-dom'
 import Centered from '../../components/Centered'
 import useIdParam from '../../hooks/useIdParam'
@@ -40,7 +41,7 @@ const LaunchPage: React.FC = () => {
   return (
     <Centered style={{ flexGrow: 1 }}>
       <Card
-        extra={<Icon type="info-circle" />}
+        extra={<InfoCircleOutlined />}
         title="Embedding is not allowed"
         actions={[
           <Button key="blank" type="link" onClick={openInNewWindow}>

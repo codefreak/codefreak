@@ -1,4 +1,15 @@
-import { Card, Collapse, Empty, Icon, Result, Typography } from 'antd'
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ExclamationCircleOutlined,
+  ForwardOutlined,
+  InfoCircleOutlined,
+  QuestionCircleOutlined,
+  SmileTwoTone,
+  WarningOutlined
+} from '@ant-design/icons'
+
+import { Card, Collapse, Empty, Result, Typography } from 'antd'
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
@@ -48,25 +59,42 @@ const LongDescriptionMarkdown: React.FC<{ source: string }> = ({ source }) => {
   )
 }
 
-const severityIconMap: Record<FeedbackSeverity, string> = {
-  INFO: 'info-circle',
-  MINOR: 'warning',
-  MAJOR: 'exclamation-circle',
-  CRITICAL: 'close-circle'
+const severityIconMap: Record<FeedbackSeverity, JSX.Element> = {
+  INFO: (
+    <InfoCircleOutlined
+      className={`feedback-icon feedback-icon-severity-info`}
+    />
+  ),
+  MINOR: (
+    <WarningOutlined className={`feedback-icon feedback-icon-severity-minor`} />
+  ),
+  MAJOR: (
+    <ExclamationCircleOutlined
+      className={`feedback-icon feedback-icon-severity-major`}
+    />
+  ),
+  CRITICAL: (
+    <CloseCircleOutlined
+      className={`feedback-icon feedback-icon-severity-critical`}
+    />
+  )
 }
 const FeedbackSeverityIcon: React.FC<{ severity: FeedbackSeverity }> = ({
   severity
 }) => {
-  let iconType = 'question-circle'
+  let iconType = (
+    <QuestionCircleOutlined
+      className={`feedback-icon feedback-icon-severity-default`}
+    />
+  )
   if (severity && severityIconMap[severity]) {
     iconType = severityIconMap[severity]
   }
   const severityClass = severity ? severity.toString().toLowerCase() : 'default'
   return (
-    <Icon
-      type={iconType}
-      className={`feedback-icon feedback-icon-severity-${severityClass}`}
-    />
+    <span className={`feedback-icon feedback-icon-severity-${severityClass}`}>
+      {iconType}
+    </span>
   )
 }
 
@@ -79,25 +107,17 @@ const renderFeedbackPanel = (answerId: string, feedback: Feedback) => {
         icon = <FeedbackSeverityIcon severity={feedback.severity} />
       } else {
         icon = (
-          <Icon
-            type="exclamation-circle"
-            className="feedback-icon feedback-icon-failed"
-          />
+          <ExclamationCircleOutlined className="feedback-icon feedback-icon-failed" />
         )
       }
       break
     case FeedbackStatus.Success:
       icon = (
-        <Icon
-          type="check-circle"
-          className="feedback-icon feedback-icon-success"
-        />
+        <CheckCircleOutlined className="feedback-icon feedback-icon-success" />
       )
       break
     case FeedbackStatus.Ignore:
-      icon = (
-        <Icon type="forward" className="feedback-icon feedback-icon-ignore" />
-      )
+      icon = <ForwardOutlined className="feedback-icon feedback-icon-ignore" />
       break
   }
 
@@ -250,10 +270,7 @@ const EvaluationStepPanel: React.FC<{
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
       body = (
-        <Result
-          icon={<Icon type="smile" theme="twoTone" />}
-          title="All checks passed – good job!"
-        />
+        <Result icon={<SmileTwoTone />} title="All checks passed – good job!" />
       )
     } else if (step.summary) {
       body = <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>

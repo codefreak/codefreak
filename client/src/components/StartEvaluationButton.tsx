@@ -5,6 +5,7 @@ import {
   useStartEvaluationMutation
 } from '../services/codefreak-api'
 import useEvaluationStatus from '../hooks/useEvaluationStatus'
+import { CaretRightOutlined } from '@ant-design/icons'
 
 interface StartEvaluationButtonProps extends ButtonProps {
   answerId: string
@@ -21,7 +22,7 @@ const StartEvaluationButton: React.FC<StartEvaluationButtonProps> = props => {
 
   return (
     <Button
-      icon="caret-right"
+      icon={<CaretRightOutlined />}
       onClick={start as () => void}
       loading={startResult.loading}
       disabled={

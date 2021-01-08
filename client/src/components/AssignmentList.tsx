@@ -1,3 +1,8 @@
+import {
+  DeleteOutlined,
+  FolderOpenOutlined,
+  TableOutlined
+} from '@ant-design/icons'
 import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
 import AssignmentStatusTag from './AssignmentStatusTag'
 import EntityLink from './EntityLink'
@@ -108,7 +113,7 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
                 onClick={confirmDelete}
                 type="dashed"
                 shape="circle"
-                icon="delete"
+                icon={<DeleteOutlined />}
               />
             </Tooltip>
           ) : null}
@@ -121,14 +126,14 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
         </Descriptions.Item>
       </Descriptions>
       <EntityLink to={assignment}>
-        <Button icon="folder-open" type="primary">
+        <Button icon={<FolderOpenOutlined />} type="primary">
           Details
         </Button>
       </EntityLink>
       <Authorized authority="ROLE_TEACHER">
         {' '}
         <EntityLink to={assignment} sub="/submissions">
-          <Button icon="table">Student Submissions</Button>
+          <Button icon={<TableOutlined />}>Student Submissions</Button>
         </EntityLink>
       </Authorized>
     </Card>

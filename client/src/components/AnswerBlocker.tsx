@@ -1,4 +1,5 @@
-import { Icon, Result } from 'antd'
+import { ClockCircleOutlined } from '@ant-design/icons'
+import { Result } from 'antd'
 import { Moment } from 'moment'
 import React, { PropsWithChildren } from 'react'
 import useMomentReached from '../hooks/useMomentReached'
@@ -22,7 +23,7 @@ const AnswerBlocker: React.FC<PropsWithChildren<AnswerBlockerProps>> = ({
       <Result
         status="info"
         title="Time's up!"
-        icon={<Icon type="clock-circle" />}
+        icon={<ClockCircleOutlined />}
         subTitle={
           <>
             The deadline has been reached {relativeTime}. <br />
