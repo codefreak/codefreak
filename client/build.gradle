@@ -26,10 +26,12 @@ task test(type: NpmTask) {
 task lint(type: NpmTask) {
   args = ['run', 'lint']
   dependsOn npmInstall
+  dependsOn generate
 }
 
 task check {
   dependsOn lint
+  // Don't run tests for now because they are not configured correctly
   // dependsOn test
 }
 
