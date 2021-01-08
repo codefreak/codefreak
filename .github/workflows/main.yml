@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Test
-        run: ./gradlew jibDockerBuild -x bootJar
+        run: ./gradlew check jibDockerBuild -x bootJar
 
       - name: Prepare cache
         run: |
