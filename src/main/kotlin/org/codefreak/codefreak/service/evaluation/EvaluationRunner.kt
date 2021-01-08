@@ -18,6 +18,11 @@ interface EvaluationRunner {
   fun getOptionsSchema() = "{}"
 
   /**
+   * Returns the default options for the runner
+   */
+  fun getDefaultOptions() = mapOf<String, Any>()
+
+  /**
    * Default feedback summary is the number of each severities
    */
   fun summarize(feedbackList: List<Feedback>): String {
