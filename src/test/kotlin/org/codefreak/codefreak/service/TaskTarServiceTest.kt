@@ -23,6 +23,9 @@ import org.mockito.MockitoAnnotations
 import org.mockito.Spy
 
 class TaskTarServiceTest {
+  private val user = User("Dummy user")
+  private val task = Task(null, user, 0, "Dummy task")
+
   @InjectMocks
   private lateinit var taskTarService: TaskTarService
 
@@ -62,12 +65,9 @@ class TaskTarServiceTest {
 
   @Test
   fun `EvaluationStepDefinitions keep positions on import`() {
-    val user = User("Dummy user")
-    val task = Task(null, user, 0, "Dummy task")
     task.evaluationStepDefinitions = createUnorderedEvaluationStepDefinitionSet(task).toMutableSet()
 
-    val exportedTar = taskTarService.getExportTar(task)
-    val importedTask = taskTarService.createFromTar(exportedTar, user)
+    val importedTask = exportAndReimportTask(task, user)
 
     task.evaluationStepDefinitions.forEach {
       val importedDefinition = findDefinition(it.title, importedTask.evaluationStepDefinitions)
@@ -91,6 +91,40 @@ class TaskTarServiceTest {
     EvaluationStepDefinition(task, "codeclimate", 4, "Code Quality 4")
   )
 
+  private fun exportAndReimportTask(task: Task, user: User): Task {
+    val exportedTar = taskTarService.getExportTar(task)
+    return taskTarService.createFromTar(exportedTar, user)
+  }
+
   private fun findDefinition(title: String, definitions: Set<EvaluationStepDefinition>): EvaluationStepDefinition =
     definitions.find { it.title == title } ?: throw IllegalStateException("Definition $title does not exist")
+
+  @Test
+  fun `EvaluationStepDefinitions keep (in-)active status`() {
+    task.evaluationStepDefinitions = createEvaluationStepDefinitionSetWithInactiveSteps(task).toMutableSet()
+
+    val importedTask = exportAndReimportTask(task, user)
+
+    task.evaluationStepDefinitions.forEach {
+      val importedDefinition = findDefinition(it.title, importedTask.evaluationStepDefinitions)
+      assertEquals(
+        "Step ${it.title} has an incorrect active state",
+        it.active,
+        importedDefinition.active
+      )
+    }
+  }
+
+  private fun createEvaluationStepDefinitionSetWithInactiveSteps(task: Task): Set<EvaluationStepDefinition> {
+    val definitions = setOf(
+      EvaluationStepDefinition(task, "comments", 0, "Comments"),
+      EvaluationStepDefinition(task, "codeclimate", 1, "Code Quality 1"),
+      EvaluationStepDefinition(task, "junit", 2, "Unit tests 1")
+    )
+
+    definitions.first().active = false
+    definitions.last().active = false
+
+    return definitions
+  }
 }
