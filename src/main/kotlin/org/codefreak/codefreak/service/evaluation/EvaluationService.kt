@@ -222,6 +222,11 @@ class EvaluationService : BaseService() {
 
   fun getAllEvaluationRunners() = runners
 
+  /**
+   * Returns the default options for the given evaluation runner
+   */
+  fun getDefaultOptions(runnerName: String) = getEvaluationRunner(runnerName).getDefaultOptions()
+
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
   }
