@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.service.evaluation
 
 import java.util.UUID
-import javax.transaction.Transactional
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
@@ -13,6 +12,7 @@ import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class EvaluationStepService {

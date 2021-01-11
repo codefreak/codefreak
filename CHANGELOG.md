@@ -22,6 +22,8 @@
 * Individual evaluation steps are now run in parallel to make evaluation faster (#710)
 * Make the IDE liveliness check work with URLs from other origin
 * Evaluation step status is shown in real time (#714)
+* If an evaluation step is marked inactive, export this too (#748)
+* The options of evaluation steps are exported regardless of whether they are the default options or not (#750)
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)

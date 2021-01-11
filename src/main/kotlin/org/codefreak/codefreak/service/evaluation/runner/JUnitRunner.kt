@@ -28,15 +28,17 @@ class JUnitRunner : CommandLineRunner() {
 
   override fun getOptionsSchema() = ClassPathResource("evaluation/junit.schema.json").inputStream.use { String(it.readBytes()) }
 
+  override fun getDefaultOptions() = mapOf(
+    "image" to "gradle",
+    "project-path" to "/home/gradle/project",
+    "stop-on-fail" to true,
+    "commands" to listOf("gradle testClasses", "gradle test")
+  )
+
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     val resultsPath = options.get("results-path", String::class) ?: "build/test-results/test"
     val resultsPattern = TarUtil.normalizeEntryName(resultsPath.withTrailingSlash() + "TEST-.+\\.xml").toRegex()
-    val defaultOptions = mapOf(
-        "image" to "gradle",
-        "project-path" to "/home/gradle/project",
-        "stop-on-fail" to true,
-        "commands" to listOf("gradle testClasses", "gradle test")
-    )
+    val defaultOptions = getDefaultOptions()
     val feedback = mutableListOf<Feedback>()
     super.executeCommands(answer, defaultOptions + options) { files ->
       val tar = TarArchiveInputStream(files)
