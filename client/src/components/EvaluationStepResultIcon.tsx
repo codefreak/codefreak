@@ -4,15 +4,18 @@ import { EvaluationStepResult } from '../generated/graphql'
 
 import './EvaluationStepResultIcon.less'
 
-const EvaluationStepResultIcon: React.FC<{
-  stepResult?: EvaluationStepResult | null
-}> = ({ stepResult }) => {
+interface EvaluationStepResultIconProps {
+  result: EvaluationStepResult
+}
+
+const EvaluationStepResultIcon: React.FC<EvaluationStepResultIconProps> = props => {
+  const { result } = props
   let iconType = 'question-circle'
-  if (stepResult === EvaluationStepResult.Success) {
+  if (result === EvaluationStepResult.Success) {
     iconType = 'check-circle'
-  } else if (stepResult === EvaluationStepResult.Errored) {
+  } else if (result === EvaluationStepResult.Errored) {
     iconType = 'close-circle'
-  } else if (stepResult === EvaluationStepResult.Failed) {
+  } else if (result === EvaluationStepResult.Failed) {
     iconType = 'exclamation-circle'
   }
 

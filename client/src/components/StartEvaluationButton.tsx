@@ -1,10 +1,8 @@
 import Button, { ButtonProps } from 'antd/lib/button'
 import React from 'react'
-import {
-  EvaluationStepStatus,
-  useStartEvaluationMutation
-} from '../services/codefreak-api'
+import { useStartEvaluationMutation } from '../services/codefreak-api'
 import useEvaluationStatus from '../hooks/useEvaluationStatus'
+import { isEvaluationInProgress } from '../services/evaluation'
 
 interface StartEvaluationButtonProps extends ButtonProps {
   answerId: string
@@ -24,10 +22,7 @@ const StartEvaluationButton: React.FC<StartEvaluationButtonProps> = props => {
       icon="caret-right"
       onClick={start as () => void}
       loading={startResult.loading}
-      disabled={
-        status === EvaluationStepStatus.Queued ||
-        status === EvaluationStepStatus.Running
-      }
+      disabled={isEvaluationInProgress(status)}
       {...restProps}
     >
       Start Evaluation
