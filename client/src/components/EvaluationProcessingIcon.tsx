@@ -1,9 +1,7 @@
 import { Icon } from 'antd'
 import { IconProps } from 'antd/es/icon'
 
-interface EvaluationProcessingIconProps extends IconProps {}
-
-const EvaluationProcessingIcon: React.FC<EvaluationProcessingIconProps> = ({
+const EvaluationProcessingIcon: React.FC<IconProps> = ({
   className,
   ...props
 }) => {
