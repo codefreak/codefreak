@@ -55,8 +55,12 @@ const LaunchIdeSteps: React.FC<{
     })
   }, [startIde, checkIsIdeLive])
 
-  const icon = (iconType: JSX.Element, step: number) =>
-    step === currentStep && !error ? <LoadingOutlined /> : iconType
+  const icon = (IconType: React.ElementType, step: number) => {
+    if (step === currentStep && !error) {
+      return <LoadingOutlined />
+    }
+    return <IconType />
+  }
 
   return (
     <Card style={{ width: '100%', maxWidth: 800 }}>
@@ -64,9 +68,9 @@ const LaunchIdeSteps: React.FC<{
         <Alert message={error} type="error" style={{ marginBottom: 16 }} />
       ) : null}
       <Steps current={currentStep} status={error ? 'error' : 'process'}>
-        <Step title="Launch Container" icon={icon(<RocketTwoTone />, 0)} />
-        <Step title="Wait for IDE Startup" icon={icon(<CloudOutlined />, 1)} />
-        <Step title="Redirect" icon={icon(<ForwardOutlined />, 2)} />
+        <Step title="Launch Container" icon={icon(RocketTwoTone, 0)} />
+        <Step title="Wait for IDE Startup" icon={icon(CloudOutlined, 1)} />
+        <Step title="Redirect" icon={icon(ForwardOutlined, 2)} />
       </Steps>
     </Card>
   )

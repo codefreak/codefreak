@@ -16,7 +16,7 @@ interface AssignmentStatusInfo {
   title: string
   description: string
   color?: string
-  iconType?: JSX.Element
+  iconType?: React.ElementType
 }
 
 const AssignmentStatusInfoMapping: {
@@ -25,27 +25,27 @@ const AssignmentStatusInfoMapping: {
   [AssignmentStatus.Inactive]: {
     title: 'Inactive',
     description: 'This assignment is only visible for you.',
-    iconType: <EyeInvisibleOutlined />
+    iconType: EyeInvisibleOutlined
   },
   [AssignmentStatus.Active]: {
     title: 'Not open yet',
     description:
       'This assignment is already visible but not open for submissions yet.',
     color: 'orange',
-    iconType: <HourglassOutlined />
+    iconType: HourglassOutlined
   },
   [AssignmentStatus.Open]: {
     title: 'Open',
     description: 'The assignment is open for submissions.',
     color: 'green',
-    iconType: <UnlockOutlined />
+    iconType: UnlockOutlined
   },
   [AssignmentStatus.Closed]: {
     title: 'Closed',
     description:
       'The assignment is closed. You cannot modify your answers anymore.',
     color: 'red',
-    iconType: <LockOutlined />
+    iconType: LockOutlined
   }
 }
 
@@ -56,11 +56,11 @@ const AssignmentStatusTag: React.FC<AssignmentStatusTagProps> = ({
   if (statusInfo === undefined) {
     return null
   }
+  const Icon = statusInfo.iconType
   return (
     <Tooltip title={statusInfo.description}>
       <Tag color={statusInfo.color}>
-        {statusInfo.iconType ? statusInfo.iconType : undefined}{' '}
-        {statusInfo.title}
+        {Icon ? <Icon /> : undefined} {statusInfo.title}
       </Tag>
     </Tooltip>
   )
