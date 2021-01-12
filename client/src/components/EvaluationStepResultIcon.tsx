@@ -1,27 +1,28 @@
 import React from 'react'
 import { EvaluationStepResult } from '../generated/graphql'
-
-import './EvaluationStepResultIcon.less'
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
-  ExclamationCircleOutlined,
-  QuestionCircleOutlined
+  ExclamationCircleOutlined
 } from '@ant-design/icons'
 
-const EvaluationStepResultIcon: React.FC<{
-  stepResult?: EvaluationStepResult | null
-}> = ({ stepResult }) => {
-  let icon = <QuestionCircleOutlined className="evaluation-step-result-icon" />
-  if (stepResult === EvaluationStepResult.Success) {
-    icon = <CheckCircleOutlined className="evaluation-step-result-icon" />
-  } else if (stepResult === EvaluationStepResult.Errored) {
-    icon = <CloseCircleOutlined className="evaluation-step-result-icon" />
-  } else if (stepResult === EvaluationStepResult.Failed) {
-    icon = <ExclamationCircleOutlined className="evaluation-step-result-icon" />
-  }
+import './EvaluationStepResultIcon.less'
 
-  return icon
+const stepResultIconMap: Record<EvaluationStepResult, React.ElementType> = {
+  [EvaluationStepResult.Success]: CheckCircleOutlined,
+  [EvaluationStepResult.Failed]: ExclamationCircleOutlined,
+  [EvaluationStepResult.Errored]: CloseCircleOutlined
+}
+
+interface EvaluationStepResultIconProps {
+  result: EvaluationStepResult
+}
+
+const EvaluationStepResultIcon: React.FC<EvaluationStepResultIconProps> = props => {
+  const { result } = props
+
+  const IconType = stepResultIconMap[result]
+  return <IconType className="evaluation-step-result-icon" />
 }
 
 export default EvaluationStepResultIcon

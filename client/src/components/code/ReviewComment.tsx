@@ -1,13 +1,11 @@
 import { CloseOutlined } from '@ant-design/icons'
-import { Form } from '@ant-design/compatible'
-import '@ant-design/compatible/assets/index.css'
-import { Button, Card, Col, Popconfirm, Row, Select } from 'antd'
-import { FormComponentProps } from '@ant-design/compatible/es/form'
+import { Button, Card, Col, Form, Popconfirm, Row, Select } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
-import React, { FormEvent, useState } from 'react'
+import React, { useState } from 'react'
 import { FeedbackSeverity } from '../../generated/graphql'
 import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
 import Avatar from '../user/Avatar'
+import { FormProps } from 'antd/es/form'
 
 const renderSeveritySelect = () => {
   return (
@@ -32,24 +30,19 @@ export interface ReviewCommentValues {
   severity?: FeedbackSeverity
 }
 
-export interface ReviewCommentFormProps extends FormComponentProps {
+export interface ReviewCommentFormProps extends FormProps {
   title?: string
   onSubmit?: (values: ReviewCommentValues) => void
   onClose?: () => void
 }
 
 const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
-  const { getFieldDecorator } = props.form
   const [hasValue, setHasValue] = useState<boolean>(false)
   const user = useAuthenticatedUser()
+  const [form] = Form.useForm()
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    props.form.validateFieldsAndScroll((err, values) => {
-      if (!err && props.onSubmit) {
-        props.onSubmit(values)
-      }
-    })
+  const onSubmitFailed: FormProps['onFinishFailed'] = ({ errorFields }) => {
+    form.scrollToField(errorFields[0].name)
   }
 
   const onClose = () => {
@@ -59,7 +52,7 @@ const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
   }
 
   // confirm close if comment contains a value
-  const onChange = () => setHasValue(!!props.form.getFieldValue('comment'))
+  const onChange = () => setHasValue(form.getFieldValue('comment'))
   let close = <CloseOutlined onClick={!hasValue ? onClose : undefined} />
   if (hasValue) {
     close = (
@@ -81,26 +74,31 @@ const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
           <Avatar user={user} />
         </Col>
         <Col style={{ flexGrow: 1 }}>
-          <Form onSubmit={onSubmit} onChange={onChange}>
-            <Form.Item hasFeedback>
-              {getFieldDecorator('comment', {
-                rules: [
-                  {
-                    required: true,
-                    message: 'Please enter a comment'
-                  }
-                ]
-              })(
-                <TextArea
-                  autoSize={{ minRows: 3, maxRows: 6 }}
-                  placeholder={`Add a useful comment…`}
-                />
-              )}
+          <Form
+            onFinish={props.onSubmit}
+            onFinishFailed={onSubmitFailed}
+            onChange={onChange}
+            name="review-comment"
+          >
+            <Form.Item
+              hasFeedback
+              name="comment"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter a comment'
+                }
+              ]}
+            >
+              <TextArea
+                autoSize={{ minRows: 3, maxRows: 6 }}
+                placeholder={`Add a useful comment…`}
+              />
             </Form.Item>
             <Row>
               <Col span={12}>
-                <Form.Item hasFeedback>
-                  {getFieldDecorator('severity')(renderSeveritySelect())}
+                <Form.Item hasFeedback name="severity">
+                  {renderSeveritySelect()}
                 </Form.Item>
               </Col>
               <Col span={12} style={{ textAlign: 'right' }}>
@@ -116,6 +114,4 @@ const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
   )
 }
 
-export default Form.create<ReviewCommentFormProps>({ name: 'review-comment' })(
-  ReviewCommentForm
-)
+export default ReviewCommentForm

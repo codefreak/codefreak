@@ -6,15 +6,15 @@ import {
   Task
 } from '../generated/graphql'
 import { displayName } from '../services/user'
-import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 
 import { ellipsis } from '../services/strings'
 import './EvaluationResultPopover.less'
+import EvaluationStepIcon from './EvaluationStepIcon'
 
 const EvaluationResultPopover: React.FC<{
   task: Pick<Task, 'title'>
   user: PublicUserFieldsFragment
-  steps: (Pick<EvaluationStep, 'id' | 'summary' | 'result'> & {
+  steps: (Pick<EvaluationStep, 'id' | 'summary' | 'result' | 'status'> & {
     definition: { title: string }
   })[]
 }> = ({ task, user, steps, children }) => {
@@ -25,7 +25,12 @@ const EvaluationResultPopover: React.FC<{
         return (
           <List.Item key={step.id}>
             <List.Item.Meta
-              avatar={<EvaluationStepResultIcon stepResult={step.result} />}
+              avatar={
+                <EvaluationStepIcon
+                  status={step.status}
+                  result={step.result || undefined}
+                />
+              }
               title={step.definition.title}
               description={summary}
             />

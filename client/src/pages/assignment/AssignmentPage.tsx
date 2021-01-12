@@ -1,5 +1,4 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import '@ant-design/compatible/assets/index.css'
 import {
   CaretDownOutlined,
   PlusOutlined,

@@ -1,25 +1,22 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Form } from '@ant-design/compatible'
-import '@ant-design/compatible/assets/index.css'
-import { Button, Card, Input } from 'antd'
-import { FormComponentProps } from '@ant-design/compatible/lib/form'
+import { Button, Card, Form, Input } from 'antd'
 import { useEffect } from 'react'
 import Centered from '../components/Centered'
 import Logo from '../components/Logo'
 import { AuthenticatedUser } from '../hooks/useAuthenticatedUser'
 import { useLoginMutation } from '../services/codefreak-api'
+import { FormProps } from 'antd/es/form'
 
 interface Credentials {
   username: string
   password: string
 }
 
-interface LoginProps extends FormComponentProps<Credentials> {
+interface LoginProps extends FormProps<Credentials> {
   onSuccessfulLogin: (user: AuthenticatedUser) => void
 }
 
 const LoginPage: React.FC<LoginProps> = props => {
-  const { getFieldDecorator } = props.form
   const { onSuccessfulLogin } = props
 
   const [login, { data, loading }] = useLoginMutation()
@@ -30,13 +27,8 @@ const LoginPage: React.FC<LoginProps> = props => {
     }
   }, [onSuccessfulLogin, data])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    props.form.validateFields((err, values) => {
-      if (!err) {
-        login({ variables: values })
-      }
-    })
+  const handleSubmit: FormProps['onFinish'] = async values => {
+    await login({ variables: values })
   }
 
   return (
@@ -55,34 +47,38 @@ const LoginPage: React.FC<LoginProps> = props => {
         style={{ width: '100%', maxWidth: 300, margin: 16 }}
         headStyle={{ borderBottom: 'none' }}
       >
-        <Form onSubmit={handleSubmit}>
-          <Form.Item>
-            {getFieldDecorator('username', {
-              rules: [
-                { required: true, message: 'Please input your username!' }
-              ]
-            })(
-              <Input
-                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
-                autoComplete="username"
-                autoFocus
-                placeholder="Username / Mail Address"
-              />
-            )}
+        <Form onFinish={handleSubmit} name="login">
+          <Form.Item
+            name="username"
+            rules={[
+              {
+                required: true,
+                message: 'Please input your username!'
+              }
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+              autoComplete="username"
+              autoFocus
+              placeholder="Username / Mail Address"
+            />
           </Form.Item>
-          <Form.Item>
-            {getFieldDecorator('password', {
-              rules: [
-                { required: true, message: 'Please input your password!' }
-              ]
-            })(
-              <Input
-                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
-                autoComplete="password"
-                type="password"
-                placeholder="Password"
-              />
-            )}
+          <Form.Item
+            name="password"
+            rules={[
+              {
+                required: true,
+                message: 'Please input your password!'
+              }
+            ]}
+          >
+            <Input
+              prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+              autoComplete="password"
+              type="password"
+              placeholder="Password"
+            />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0 }}>
             <Button
@@ -100,4 +96,4 @@ const LoginPage: React.FC<LoginProps> = props => {
   )
 }
 
-export default Form.create<LoginProps>({ name: 'login' })(LoginPage)
+export default LoginPage

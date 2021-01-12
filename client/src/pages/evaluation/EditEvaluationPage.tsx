@@ -1,4 +1,4 @@
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, SettingOutlined } from '@ant-design/icons'
 import {
   Alert,
   Button,
@@ -164,7 +164,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
     const configureButtonProps: ButtonProps = {
       type: 'primary',
       shape: 'circle',
-      icon: 'setting'
+      icon: <SettingOutlined />
     }
 
     const onTimeIntervalChange = (timeoutComps?: TimeComponents) => {

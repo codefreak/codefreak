@@ -231,9 +231,15 @@ class TaskTarService : BaseService() {
       task.evaluationStepDefinitions
         .toSortedSet()
         .map {
+          val options =
+            if (it.options.isEmpty())
+              evaluationService.getDefaultOptions(it.runnerName)
+            else
+              it.options
+
         EvaluationDefinition(
             it.runnerName,
-            it.options,
+            options,
             it.title,
             if (it.active) null else false
         )
