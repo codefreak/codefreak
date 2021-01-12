@@ -60,7 +60,7 @@ export const DifferentUserContext = createContext<
   PublicUserFieldsFragment | undefined
 >(undefined)
 
-const tab = (title: string, icon: JSX.Element) => (
+const tab = (title: string, icon: React.ReactNode) => (
   <>
     {icon} {title}
   </>

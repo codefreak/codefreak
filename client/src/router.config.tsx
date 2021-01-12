@@ -13,6 +13,12 @@ import {
 import CreateTaskPage from './pages/task/CreateTaskPage'
 import TaskPage from './pages/task/TaskPage'
 import TaskPoolPage from './pages/task/TaskPoolPage'
+import {
+  ContainerOutlined,
+  FileTextOutlined,
+  QuestionCircleOutlined,
+  SettingOutlined
+} from '@ant-design/icons'
 
 export const routerConfig: Route = {
   path: '/',
@@ -20,7 +26,7 @@ export const routerConfig: Route = {
     {
       path: '/assignments',
       name: 'Assignments',
-      icon: 'container',
+      icon: <ContainerOutlined />,
       hideChildrenInMenu: true,
       component: AssignmentListPage,
       children: [
@@ -39,7 +45,7 @@ export const routerConfig: Route = {
     {
       path: '/tasks/pool',
       name: 'Task Pool',
-      icon: 'file-text',
+      icon: <FileTextOutlined />,
       component: TaskPoolPage,
       authority: AUTHORITIES.ROLE_TEACHER,
       hideChildrenInMenu: true,
@@ -58,7 +64,7 @@ export const routerConfig: Route = {
     },
     {
       name: 'Help',
-      icon: 'question-circle',
+      icon: <QuestionCircleOutlined />,
       path: '/help',
       hideChildrenInMenu: true,
       component: HelpPage,
@@ -86,7 +92,7 @@ export const routerConfig: Route = {
     {
       path: '/admin',
       name: 'Administration',
-      icon: 'setting',
+      icon: <SettingOutlined />,
       authority: AUTHORITIES.ROLE_ADMIN,
       component: AdminPage
     }

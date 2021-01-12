@@ -1,4 +1,8 @@
-import { DeleteOutlined, SettingOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  SettingOutlined
+} from '@ant-design/icons'
 import {
   Alert,
   Button,
@@ -361,7 +365,7 @@ const renderAddStepButton = (
   const { optionsSchema, hasProperties } = parseSchema(runner.optionsSchema)
   const buttonProps: ButtonProps = {
     type: 'dashed',
-    icon: 'plus',
+    icon: <PlusOutlined />,
     children: runner.defaultTitle,
     style: { margin: '0 4px' }
   }

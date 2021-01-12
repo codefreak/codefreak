@@ -3,7 +3,8 @@ import {
   InfoCircleFilled,
   InfoCircleTwoTone,
   PoweroffOutlined,
-  SaveOutlined
+  SaveOutlined,
+  SyncOutlined
 } from '@ant-design/icons'
 import {
   Alert,
@@ -246,7 +247,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                 invalidateTask={task.id}
                 disabled={assignmentOpen && !sureToEditFiles}
                 type="primary"
-                icon="sync"
+                icon={<SyncOutlined />}
               >
                 Evaluate all answers of this task
               </StartSubmissionEvaluationButton>
