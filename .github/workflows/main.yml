@@ -16,6 +16,11 @@ jobs:
           # Ensures all refs and tags are fetched so "git describe --always" is working as expected
           fetch-depth: 0
 
+      # A workaround for annotated tags with actions/checkout@v2
+      # see https://github.com/actions/checkout/issues/290
+      - name: Fetch Tags correctly
+        run: git fetch --force --tags
+
       - name: Cache gradle dependencies
         uses: actions/cache@v2
         with:
