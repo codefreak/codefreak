@@ -62,6 +62,7 @@ dependencies {
   implementation 'com.networknt:json-schema-validator:1.0.43'
   implementation 'javax.validation:validation-api:2.0.1.Final'
   implementation 'org.hibernate:hibernate-validator:6.1.5.Final'
+  implementation 'com.google.guava:guava:29.0-jre'
   kapt 'org.springframework.boot:spring-boot-configuration-processor'
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
   runtimeOnly 'org.postgresql:postgresql'
@@ -75,6 +76,23 @@ dependencies {
 
   // workaround for https://github.com/spotify/docker-client/issues/1030
   implementation 'org.glassfish.jersey.inject:jersey-hk2:2.31'
+
+  // Docker Client doesn't work with jersey-common >=2.29 because of missing Base64 class
+  implementation('org.glassfish.jersey.core:jersey-common') {
+    version {
+      strictly '2.28'
+    }
+  }
+  implementation('org.glassfish.jersey.core:jersey-client') {
+    version {
+      strictly '2.28'
+    }
+  }
+  implementation('org.glassfish.jersey.connectors:jersey-apache-connector') {
+    version {
+      strictly '2.28'
+    }
+  }
 
   // workaround for https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server/issues/1468
   implementation 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
@@ -139,15 +157,6 @@ task vagrantTest(type: Test) {
   testLogging {
     events "failed"
     exceptionFormat "full"
-  }
-}
-
-// Tests reports are required or Sonar will show 0% coverage
-tasks.sonarqube.dependsOn jacocoTestReport
-sonarqube {
-  properties {
-    property "sonar.projectKey", "code-freak_code-freak"
-    property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
   }
 }
 
