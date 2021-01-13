@@ -27,5 +27,4 @@ jobs:
           git remote set-url origin https://$GITHUBTOKEN@github.com/${{ github.repository }}.git
           git config --global user.email "$GITHUBUSER"
           git config --global user.name "CI"
-          git checkout ${{ github.ref }}
           ./gradlew release -x check -x bootJar -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ github.event.inputs.releaseVersion }}
