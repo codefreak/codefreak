@@ -1,4 +1,11 @@
-import { Button, Col, Icon, Radio, Row, Table, Tooltip } from 'antd'
+import {
+  BarsOutlined,
+  LoadingOutlined,
+  QuestionCircleOutlined,
+  StopOutlined,
+  TableOutlined
+} from '@ant-design/icons'
+import { Button, Col, Radio, Row, Table, Tooltip } from 'antd'
 import { RadioGroupProps } from 'antd/es/radio'
 import React, { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -103,7 +110,7 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
           <Button
             type="default"
             href={`${assignment.submissionsDownloadUrl}.csv`}
-            icon="table"
+            icon={<TableOutlined />}
           >
             Download results as .csv
           </Button>
@@ -183,7 +190,7 @@ const AnswerEvaluationSummary: React.FC<{
   if (loading || isEvaluationInProgress(evaluationStatus)) {
     return (
       <Tooltip title="Evaluating answer…">
-        <Icon type="loading" />
+        <LoadingOutlined />
       </Tooltip>
     )
   }
@@ -205,7 +212,7 @@ const EvaluationStepOverview: React.FC<{
   const detailsLink = (
     <Link to={getEntityPath(task) + '/evaluation?user=' + shorten(user.id)}>
       <Button type="primary">
-        <Icon type="bars" /> Details
+        <BarsOutlined /> Details
       </Button>
     </Link>
   )
@@ -213,7 +220,7 @@ const EvaluationStepOverview: React.FC<{
   if (!evaluation) {
     return (
       <div className="evaluation-step-results">
-        <Icon type="question-circle" />
+        <QuestionCircleOutlined />
         <Tooltip title="Answer has not been evaluated, yet">
           {detailsLink}
         </Tooltip>
@@ -245,7 +252,7 @@ const EvaluationStepOverview: React.FC<{
 
 // TODO: Multiple filters are not working. filterValues is always a single value
 const buildEvaluationFilter = (task: Task) => (
-  filterValue: string,
+  filterValue: string | number | boolean,
   submission: Submission
 ) => {
   const answer = getAnswerFromSubmission(submission, task)
@@ -284,7 +291,7 @@ const taskColumnRenderer = (
     if (!answer) {
       return (
         <Tooltip title="No answer submitted">
-          <Icon type="stop" className="no-answer" />
+          <StopOutlined className="no-answer" />
         </Tooltip>
       )
     }

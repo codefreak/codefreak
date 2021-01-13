@@ -9,7 +9,8 @@ import {
   useEvaluationStepStatusUpdatedSubscription,
   useGetEvaluationStepQuery
 } from '../generated/graphql'
-import { Card, Collapse, Empty, Icon, Result, Skeleton } from 'antd'
+import { SmileTwoTone } from '@ant-design/icons'
+import { Card, Collapse, Empty, Result, Skeleton } from 'antd'
 import SortSelect from './SortSelect'
 import SyntaxHighlighter from './code/SyntaxHighlighter'
 import { compare } from '../services/util'
@@ -86,10 +87,7 @@ export const EvaluationStepPanel: React.FC<{
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
       body = (
-        <Result
-          icon={<Icon type="smile" theme="twoTone" />}
-          title="All checks passed – good job!"
-        />
+        <Result icon={<SmileTwoTone />} title="All checks passed – good job!" />
       )
     } else if (step.summary) {
       body = <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>

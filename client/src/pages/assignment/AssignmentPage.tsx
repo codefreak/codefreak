@@ -1,5 +1,10 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import {
+  CaretDownOutlined,
+  PlusOutlined,
+  CaretRightOutlined
+} from '@ant-design/icons'
+import {
   Alert,
   Button,
   Checkbox,
@@ -269,11 +274,14 @@ const StatusSteps: React.FC<{
   const activate = () => updater('active')(true)
   const deactivate = () => updater('active')(false)
 
+  const caretDown = <CaretDownOutlined />
+  const caretRight = <CaretRightOutlined />
+
   return (
     <div className="statusSteps">
       <Button
         onClick={toggleStepsExpanded}
-        icon={stepsExpanded ? 'caret-down' : 'caret-right'}
+        icon={stepsExpanded ? caretDown : caretRight}
         size="small"
         style={{ marginRight: 16, marginTop: 4 }}
       />
@@ -415,7 +423,7 @@ const AddTasksButton: React.FC<{
 
   return (
     <>
-      <Button type="primary" icon="plus" onClick={showModal}>
+      <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
         Add Tasks
       </Button>
       <Modal
@@ -429,7 +437,7 @@ const AddTasksButton: React.FC<{
         }}
         onOk={submit}
       >
-        <Row gutter={16} type="flex">
+        <Row gutter={16}>
           <Col>{searchBar}</Col>
           <Col>{sorter}</Col>
         </Row>
@@ -499,6 +507,13 @@ const OpenAssignmentButton: React.FC<
   const serverMoment = useServerMoment()
   const [from, setFrom] = useState(serverMoment())
   const [period, setPeriod] = useState(moment('00:30:00', 'HH:mm:ss'))
+
+  const onPeriodChange = (value: Moment | null) => {
+    if (value) {
+      setPeriod(value)
+    }
+  }
+
   const showModal = () => {
     setFrom(serverMoment())
     setPeriod(moment('00:30:00', 'HH:mm:ss'))
@@ -577,7 +592,7 @@ const OpenAssignmentButton: React.FC<
           <Form.Item style={{ marginBottom: 0 }} label="For">
             <TimePicker
               allowClear={false}
-              onChange={setPeriod}
+              onChange={onPeriodChange}
               value={period}
             />
           </Form.Item>

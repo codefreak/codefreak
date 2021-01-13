@@ -1,12 +1,11 @@
-import { Icon } from 'antd'
-import { IconProps } from 'antd/es/icon'
+import { SettingOutlined } from '@ant-design/icons'
+import React, { ComponentProps } from 'react'
 
-const EvaluationProcessingIcon: React.FC<IconProps> = ({
-  className,
-  ...props
-}) => {
+const EvaluationProcessingIcon: React.FC<
+  ComponentProps<typeof SettingOutlined>
+> = ({ className, ...props }) => {
   const classes = 'spin-slow ' + (className ? className : '')
-  return <Icon type="setting" spin className={classes} {...props} />
+  return <SettingOutlined spin className={classes} {...props} />
 }
 
 export default EvaluationProcessingIcon

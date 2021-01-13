@@ -1,12 +1,17 @@
 import React from 'react'
 import { FeedbackSeverity } from '../generated/graphql'
-import { Icon } from 'antd'
+import {
+  CloseCircleOutlined,
+  ExclamationCircleOutlined,
+  InfoCircleOutlined,
+  WarningOutlined
+} from '@ant-design/icons'
 
-const severityIconMap: Record<FeedbackSeverity, string> = {
-  [FeedbackSeverity.Info]: 'info-circle',
-  [FeedbackSeverity.Minor]: 'warning',
-  [FeedbackSeverity.Major]: 'exclamation-circle',
-  [FeedbackSeverity.Critical]: 'close-circle'
+const severityIconMap: Record<FeedbackSeverity, React.ElementType> = {
+  [FeedbackSeverity.Info]: InfoCircleOutlined,
+  [FeedbackSeverity.Minor]: WarningOutlined,
+  [FeedbackSeverity.Major]: ExclamationCircleOutlined,
+  [FeedbackSeverity.Critical]: CloseCircleOutlined
 }
 
 interface FeedbackSeverityIconProps {
@@ -15,14 +20,10 @@ interface FeedbackSeverityIconProps {
 
 const FeedbackSeverityIcon: React.FC<FeedbackSeverityIconProps> = props => {
   const { severity } = props
-  let iconType = 'question-circle'
-  if (severity && severityIconMap[severity]) {
-    iconType = severityIconMap[severity]
-  }
+  const IconType = severityIconMap[severity]
   const severityClass = severity ? severity.toString().toLowerCase() : 'default'
   return (
-    <Icon
-      type={iconType}
+    <IconType
       className={`feedback-icon feedback-icon-severity-${severityClass}`}
     />
   )

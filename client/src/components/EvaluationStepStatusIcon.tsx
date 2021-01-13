@@ -1,15 +1,19 @@
 import React from 'react'
 import { EvaluationStepStatus } from '../generated/graphql'
-import { Icon } from 'antd'
+import {
+  QuestionCircleOutlined,
+  LoadingOutlined,
+  CheckCircleOutlined
+} from '@ant-design/icons'
 import { isEvaluationInProgress } from '../services/evaluation'
 import EvaluationProcessingIcon from './EvaluationProcessingIcon'
 
-const stepStatusIconMap: Record<EvaluationStepStatus, string> = {
-  [EvaluationStepStatus.Pending]: 'question-circle',
-  [EvaluationStepStatus.Queued]: 'loading',
-  [EvaluationStepStatus.Running]: 'loading',
-  [EvaluationStepStatus.Finished]: 'check-circle',
-  [EvaluationStepStatus.Canceled]: 'close-circle'
+const stepStatusIconMap: Record<EvaluationStepStatus, React.ElementType> = {
+  [EvaluationStepStatus.Pending]: QuestionCircleOutlined,
+  [EvaluationStepStatus.Queued]: LoadingOutlined,
+  [EvaluationStepStatus.Running]: LoadingOutlined,
+  [EvaluationStepStatus.Finished]: CheckCircleOutlined,
+  [EvaluationStepStatus.Canceled]: CheckCircleOutlined
 }
 
 interface EvaluationStepStatusIconProps {
@@ -19,14 +23,14 @@ interface EvaluationStepStatusIconProps {
 const EvaluationStepStatusIcon: React.FC<EvaluationStepStatusIconProps> = props => {
   const { status } = props
 
-  const iconType = stepStatusIconMap[status]
   const className = `evaluation-step-status-icon evaluation-step-status-icon-${status.toLowerCase()}`
 
   if (isEvaluationInProgress(status)) {
     return <EvaluationProcessingIcon className={className} />
   }
 
-  return <Icon type={iconType} className={className} />
+  const IconType = stepStatusIconMap[status]
+  return <IconType className={className} />
 }
 
 export default EvaluationStepStatusIcon

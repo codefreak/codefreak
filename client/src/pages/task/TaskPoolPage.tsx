@@ -1,5 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import Emoji from 'a11y-react-emoji'
+import { PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Row } from 'antd'
 import { useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
@@ -63,7 +64,7 @@ const TaskPoolPage: React.FC = () => {
 
   const createButton = (
     <Link to="/tasks/pool/create">
-      <Button type="primary" icon="plus">
+      <Button type="primary" icon={<PlusOutlined />}>
         Create Task
       </Button>
     </Link>
@@ -107,7 +108,7 @@ const TaskPoolPage: React.FC = () => {
     <>
       <PageHeaderWrapper
         extra={
-          <Row justify="end" gutter={16} type="flex">
+          <Row justify="end" gutter={16}>
             <Col>{searchBar}</Col>
             <Col>{sorter}</Col>
             <Col>{exportButton}</Col>

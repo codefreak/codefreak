@@ -1,4 +1,5 @@
-import { Card, Icon, Result } from 'antd'
+import { FileUnknownOutlined } from '@ant-design/icons'
+import { Card, Result } from 'antd'
 import { basename, extname } from 'path'
 import React from 'react'
 import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
@@ -21,7 +22,7 @@ interface CodeViewerProps {
 const codeViewerMessage = (message: React.ReactNode) => {
   return (
     <Centered>
-      <Result title={message} icon={<Icon type="file-unknown" />} />
+      <Result title={message} icon={<FileUnknownOutlined />} />
     </Centered>
   )
 }

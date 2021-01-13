@@ -1,4 +1,9 @@
 import {
+  DeleteOutlined,
+  PlusOutlined,
+  SettingOutlined
+} from '@ant-design/icons'
+import {
   Alert,
   Button,
   Checkbox,
@@ -163,7 +168,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
     const configureButtonProps: ButtonProps = {
       type: 'primary',
       shape: 'circle',
-      icon: 'setting'
+      icon: <SettingOutlined />
     }
 
     const onTimeIntervalChange = (timeoutComps?: TimeComponents) => {
@@ -189,7 +194,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 onClick={confirmDelete}
                 type="dashed"
                 shape="circle"
-                icon="delete"
+                icon={<DeleteOutlined />}
               />
             </Tooltip>
           )}
@@ -360,7 +365,7 @@ const renderAddStepButton = (
   const { optionsSchema, hasProperties } = parseSchema(runner.optionsSchema)
   const buttonProps: ButtonProps = {
     type: 'dashed',
-    icon: 'plus',
+    icon: <PlusOutlined />,
     children: runner.defaultTitle,
     style: { margin: '0 4px' }
   }

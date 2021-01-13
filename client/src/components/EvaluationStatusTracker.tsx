@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Icon, Steps } from 'antd'
+import { Steps } from 'antd'
 import { EvaluationStepStatus } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
+import { LoadingOutlined } from '@ant-design/icons'
 
 const { Step } = Steps
 
@@ -46,14 +47,14 @@ const EvaluationStatusTracker: React.FC<EvaluationStatusTrackerProps> = props =>
       />
       <Step
         title="Queue"
-        icon={step === 1 ? <Icon type="loading" /> : undefined}
+        icon={step === 1 ? <LoadingOutlined /> : undefined}
         description={
           extendedSteps ? 'Wait for free resources on the server' : undefined
         }
       />
       <Step
         title="Execute Evaluation"
-        icon={step === 2 ? <Icon type="loading" /> : undefined}
+        icon={step === 2 ? <LoadingOutlined /> : undefined}
         description={
           extendedSteps
             ? 'Run a set of checks on your proposed solution'

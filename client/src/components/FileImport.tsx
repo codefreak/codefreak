@@ -1,4 +1,5 @@
-import { Button, Col, Form, Icon, Input, Row, Spin, Upload } from 'antd'
+import { DownloadOutlined, InboxOutlined } from '@ant-design/icons'
+import { Button, Col, Form, Input, Row, Spin, Upload } from 'antd'
 import { RcFile } from 'antd/lib/upload/interface'
 import filesize from 'filesize'
 import React, { useCallback, useState } from 'react'
@@ -54,7 +55,7 @@ const FileImport: React.FC<FileImportProps> = props => {
           disabled={uploading}
         >
           <p className="ant-upload-drag-icon">
-            {uploading ? <Spin size="large" /> : <Icon type="inbox" />}
+            {uploading ? <Spin size="large" /> : <InboxOutlined />}
           </p>
           <p className="ant-upload-text">
             Click or drag file to this area to upload
@@ -87,7 +88,7 @@ const FileImport: React.FC<FileImportProps> = props => {
             <Form.Item>
               <div style={{ textAlign: 'center' }}>
                 <Button
-                  icon="download"
+                  icon={<DownloadOutlined />}
                   loading={importing}
                   onClick={importSource}
                 >

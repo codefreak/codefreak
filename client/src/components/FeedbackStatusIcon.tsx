@@ -1,24 +1,28 @@
 import React from 'react'
 import { FeedbackStatus } from '../generated/graphql'
-import { Icon } from 'antd'
+import {
+  CheckCircleOutlined,
+  ExclamationCircleOutlined,
+  ForwardOutlined
+} from '@ant-design/icons'
 
 interface FeedbackStatusIconProps {
   status: FeedbackStatus
 }
 
-const statusIconMap: Record<FeedbackStatus, string> = {
-  [FeedbackStatus.Failed]: 'exclamation-circle',
-  [FeedbackStatus.Success]: 'check-circle',
-  [FeedbackStatus.Ignore]: 'forward'
+const statusIconMap: Record<FeedbackStatus, React.ElementType> = {
+  [FeedbackStatus.Failed]: ExclamationCircleOutlined,
+  [FeedbackStatus.Success]: CheckCircleOutlined,
+  [FeedbackStatus.Ignore]: ForwardOutlined
 }
 
 const FeedbackStatusIcon: React.FC<FeedbackStatusIconProps> = props => {
   const { status } = props
 
-  const iconType = statusIconMap[status]
+  const IconType = statusIconMap[status]
   const className = `feedback-icon-${status.toLowerCase()}`
 
-  return <Icon type={iconType} className={`feedback-icon ${className}`} />
+  return <IconType className={`feedback-icon ${className}`} />
 }
 
 export default FeedbackStatusIcon

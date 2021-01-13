@@ -1,9 +1,10 @@
 import React from 'react'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
-import { Alert, Icon, Result } from 'antd'
+import { Alert, Result } from 'antd'
 import EvaluationResult from './EvaluationResult'
 import StartEvaluationButton from './StartEvaluationButton'
 import LoadingIndicator from './LoadingIndicator'
+import { RocketTwoTone } from '@ant-design/icons'
 
 export interface LatestEvaluationProps {
   answerId: string
@@ -22,7 +23,7 @@ const LatestEvaluation: React.FC<LatestEvaluationProps> = props => {
     if (showTrigger) {
       return (
         <Result
-          icon={<Icon type="rocket" theme="twoTone" />}
+          icon={<RocketTwoTone />}
           title="Wondering if your solution is correct? ✨"
           extra={
             <StartEvaluationButton
