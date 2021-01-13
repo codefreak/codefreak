@@ -13,8 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # We use a custom token to be able to write back to GitHub master branch without checking for permissions
+      # This token belongs to the CodeFreakBot user
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUBTOKEN }}
 
       - name: Publish release
         if: github.event_name == 'workflow_dispatch'
