@@ -8,8 +8,6 @@ jobs:
     env:
       # webpack build needs a lot of memory
       NODE_OPTIONS: --max_old_space_size=4096
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -42,18 +40,18 @@ jobs:
           rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 
       - name: Before Deploy
-        if: github.ref == 'refs/head/master' || startsWith(github.ref, 'refs/tags')
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags')
         run: |
-          pip3 install --user --upgrade pip
-          pip3 install --user docker-ci-deploy
+          pip3 install --upgrade pip
+          pip3 install docker-ci-deploy
           docker logout
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
 
       - name: Deploy master branch as latest
-        if: github.ref == 'refs/head/master'
-        run: docker-ci-deploy --tag canary -- cfreak/codefreak
+        if: github.ref == 'refs/heads/master'
+        run: python -m docker_ci_deploy --tag canary -- cfreak/codefreak
 
       # ${GITHUB_REF/refs\/tags\//} returns the tag name from 'refs/tags/TAG_NAME'
       - name: Deploy tags
         if: startsWith(github.ref, 'refs/tags')
-        run: docker-ci-deploy --version-latest --version ${GITHUB_REF/refs\/tags\//} --version-semver cfreak/codefreak
+        run: python -m docker_ci_deploy --version-latest --version ${GITHUB_REF/refs\/tags\//} --version-semver cfreak/codefreak
