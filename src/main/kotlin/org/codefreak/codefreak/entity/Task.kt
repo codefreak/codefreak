@@ -82,5 +82,7 @@ class Task(
 
   var ideImage: String? = null
 
+  var ideArguments: String? = null
+
   override fun compareTo(other: Task) = position.compareTo(other.position)
 }

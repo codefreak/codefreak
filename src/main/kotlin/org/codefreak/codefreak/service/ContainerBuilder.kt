@@ -18,3 +18,5 @@ class ContainerBuilder {
       .labels(labels)
       .build()
 }
+
+typealias ContainerConfigurator = ContainerBuilder.() -> Unit

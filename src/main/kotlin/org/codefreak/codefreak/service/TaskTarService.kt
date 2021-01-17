@@ -91,6 +91,7 @@ class TaskTarService : BaseService() {
     task.protectedFiles = definition.protected
     task.ideEnabled = definition.ide?.enabled ?: true
     task.ideImage = definition.ide?.image
+    task.ideArguments = definition.ide?.cmd
 
     return task
   }
@@ -243,7 +244,12 @@ class TaskTarService : BaseService() {
             it.title,
             if (it.active) null else false
         )
-      }
+      },
+      IdeDefinition(
+          enabled = task.ideEnabled,
+          image = task.ideImage,
+          cmd = task.ideArguments
+      )
   )
 
   private fun writeArchiveEntry(tar: TarArchiveOutputStream, entryName: String, content: ByteArray) {

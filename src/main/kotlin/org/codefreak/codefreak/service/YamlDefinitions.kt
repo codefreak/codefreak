@@ -29,7 +29,8 @@ data class AssignmentDefinition(
 
 data class IdeDefinition(
   val enabled: Boolean,
-  val image: String?
+  val image: String?,
+  val cmd: String?
 ) {
-  constructor() : this(true, null)
+  constructor() : this(true, null, null)
 }
