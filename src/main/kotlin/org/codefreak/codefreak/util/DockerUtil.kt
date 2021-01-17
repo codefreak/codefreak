@@ -30,4 +30,14 @@ object DockerUtil {
       } else {
         "$imageName:latest"
       }
+
+  /**
+   * Get the image name without tag
+   */
+  fun getImageNameWithoutTag(imageName: String) =
+    if (imageName.contains(':')) {
+      imageName.substringBefore(':')
+    } else {
+      imageName
+    }
 }

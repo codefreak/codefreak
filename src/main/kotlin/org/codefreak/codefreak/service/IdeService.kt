@@ -73,15 +73,34 @@ class IdeService : BaseService() {
   @Throws(ResourceLimitException::class)
   fun startIdeContainer(answer: Answer, readOnly: Boolean = false): String {
     val label = if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID
-    // apply custom cmd if present
-    val customizeCmd: ContainerConfigurator = {
+    val configureContainer: ContainerConfigurator = {
       containerConfig {
+        // apply custom cmd if present
         answer.task.ideArguments?.let { args ->
           cmd(*DockerUtil.splitCommand(args))
         }
       }
+      hostConfig {
+        // mount docker daemon if image requires it
+        if (shouldMountDockerDaemon(answer.task.ideImage)) {
+          log.debug("Mounting Docker daemon to IDE for answer ${answer.id}")
+          appendBinds(
+              HostConfig.Bind.builder()
+                  .from("/var/run/docker.sock")
+                  .to("/var/run/docker.sock")
+                  .build()
+          )
+        }
+      }
     }
-    return startIdeContainer(answer.id, label, answer.id, answer.task.ideImage, customizeCmd)
+    return startIdeContainer(answer.id, label, answer.id, answer.task.ideImage, configureContainer)
+  }
+
+  private fun shouldMountDockerDaemon(customImage: String?): Boolean {
+    val image = customImage ?: config.ide.image
+    return config.ide.dockerDaemonWhitelist.contains(
+        DockerUtil.getImageNameWithoutTag(image)
+    )
   }
 
   @Throws(ResourceLimitException::class)
