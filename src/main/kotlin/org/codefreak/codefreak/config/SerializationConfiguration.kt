@@ -23,7 +23,9 @@ class SerializationConfiguration {
     builder: Jackson2ObjectMapperBuilder
   ): ObjectMapper {
     val yamlFactory = YAMLFactoryBuilder(YAMLFactory())
-        .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+        .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // do not use quotes when not needed
+        .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // but always quote numbers if they are stored as string
+        .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines as this will cause hard to read strings
         .build()
     return ObjectMapper(yamlFactory).apply {
       setSerializationInclusion(JsonInclude.Include.NON_NULL)
