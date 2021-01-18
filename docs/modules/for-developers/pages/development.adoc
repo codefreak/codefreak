@@ -12,6 +12,12 @@ Code FREAK uses Spring/Kotlin for its backend code and React/Typescript for the 
 Frontend and backend communicate over a GraphQL API.
 Because Code FREAK makes heavy use of containers some basic Docker knowledge can be useful.
 
+Before you start developing, please install the following tools/software on your computer:
+
+* Java JDK 8 or later (we recommend https://adoptopenjdk.net/[OpenJDK])
+* NodeJS 14 or later (https://nodejs.org/en/)
+* Docker (Linux) or Docker Desktop (Windows, MacOS) (https://docs.docker.com/get-docker/)
+
 == Directory Structure
 
 At its root the Code FREAK code base is a Gradle project.
@@ -28,7 +34,7 @@ Please install the official Docker (Desktop) distribution for your operating sys
 
 1. Obtain the source code of Code FREAK from GitHub: `git clone https://github.com/codefreak/codefreak.git`
 2. Generate the GraphQL schema: `./gradlew client:generate` (this will also install all backend and frontend dependencies)
-3. Start the backend with `./gradlew bootRun`
+3. Start the backend with `./gradlew bootRun`. The task may stop at 88% but if you see a log line like "Code FREAK instance id: default" the backend is running! You can check this if you point your browser to `http://localhost:8080` and see a 404 error page.
 4. Start the frontend inside the `client` directory with `npm start` (initial compilation make take some time)
 
 The frontend should open automatically.
@@ -150,7 +156,7 @@ Make sure to use one that is based on `bash`.
 
 == Releasing a new version
 
-The project is split up into a main application and some auxiliary that have there own repositories (e.g. the IDE).
+The project is split up into a main application and some auxiliaries that have their own repositories (e.g. the IDE).
 There are different release processes depending on the project.
 All repositories use https://semver.org/[semantic versioning].
 
