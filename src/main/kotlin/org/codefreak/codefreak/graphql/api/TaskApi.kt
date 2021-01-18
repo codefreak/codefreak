@@ -208,10 +208,10 @@ class TaskMutation : BaseResolver(), Mutation {
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     task.body = input.body
     task.ideEnabled = input.ideEnabled
-    task.ideImage = input.ideImage
+    task.ideImage = input.ideImage?.takeIf { it.isNotBlank() }
     task.ideArguments = input.ideArguments?.takeIf { it.isNotBlank() }
-    task.hiddenFiles = input.hiddenFiles.map { it.trim() }.filter { it.isNotEmpty() }
-    task.protectedFiles = input.protectedFiles.map { it.trim() }.filter { it.isNotEmpty() }
+    task.hiddenFiles = input.hiddenFiles.filter { it.isNotBlank() }
+    task.protectedFiles = input.protectedFiles.filter { it.isNotBlank() }
     serviceAccess.getService(TaskService::class).saveTask(task)
     true
   }
