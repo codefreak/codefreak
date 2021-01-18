@@ -82,6 +82,14 @@ class AppConfiguration {
      * Default is the "bridge" network (Docker default)
      */
     lateinit var network: String
+
+    /**
+     * List of IDE image names that will receive the docker daemon as mount
+     * This should only be used for Breeze
+     */
+    var dockerDaemonAllowlist = arrayListOf(
+        "cfreak/breeze"
+    )
   }
 
   class Docker {
