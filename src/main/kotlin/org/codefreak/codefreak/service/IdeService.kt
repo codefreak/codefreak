@@ -98,7 +98,7 @@ class IdeService : BaseService() {
 
   private fun shouldMountDockerDaemon(customImage: String?): Boolean {
     val image = customImage ?: config.ide.image
-    return config.ide.dockerDaemonWhitelist.contains(
+    return config.ide.dockerDaemonAllowlist.contains(
         DockerUtil.getImageNameWithoutTag(image)
     )
   }
