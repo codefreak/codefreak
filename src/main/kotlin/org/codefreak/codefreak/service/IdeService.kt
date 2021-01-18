@@ -4,14 +4,12 @@ import com.spotify.docker.client.DockerClient.ListContainersParam
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.ContainerInfo
 import com.spotify.docker.client.messages.HostConfig
-import java.net.SocketException
-import java.net.SocketTimeoutException
+import java.io.IOException
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.RequestBuilder
-import org.apache.http.conn.ConnectTimeoutException
 import org.apache.http.util.EntityUtils
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
@@ -142,14 +140,7 @@ class IdeService : BaseService() {
       // make sure the connection is released even if we do not use the response content
       EntityUtils.consumeQuietly(response.entity)
       response.statusLine.statusCode < 400
-    } catch (e: ConnectTimeoutException) {
-      // no connection from pool
-      false
-    } catch (e: SocketTimeoutException) {
-      // TCP connection timed out
-      false
-    } catch (e: SocketException) {
-      // could not connect at all
+    } catch (e: IOException) {
       false
     }
   }
