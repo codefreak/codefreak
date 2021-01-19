@@ -32,6 +32,8 @@ We recommend using an IDE that can handle both Kotlin and Typescript (e.g. Intel
 TIP: You need Docker to run and build Code FREAK!
 Please install the official Docker (Desktop) distribution for your operating system before you run the steps below.
 
+WARNING: Currently, you cannot use Docker Desktop on Windows because of a problem with our underlying Docker library. On Windows please use the Vagrant virtual machine as described in section <<docker, Docker>>.
+
 1. Obtain the source code of Code FREAK from GitHub: `git clone https://github.com/codefreak/codefreak.git`
 2. Generate the GraphQL schema: `./gradlew client:generate` (this will also install all backend and frontend dependencies)
 3. Start the backend with `./gradlew bootRun`. The task may stop at 88% but if you see a log line like "Code FREAK instance id: default" the backend is running! You can check this if you point your browser to `http://localhost:8080` and see a 404 error page.
@@ -73,16 +75,19 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 -----
 
+[#docker]
 === Docker
 
 For many parts of the application we need connection to a (dedicated) Docker daemon.
-By default we use the default socket for your platform.
+By default, we use the default socket for your platform.
 If you are on Linux please follow the installation guidelines for your distribution.
-For Windows, MacOS and other OS that cannot run Docker natively you will either need the official Docker for Windows/MacOS software stacks or use the Vagrant machine that is included in this repository.
-The Vagrant machine will make the Docker daemon available at `127.0.0.1:2375` (the official Docker port).
-If you setup Docker for Windows/MacOS the Daemon should be reachable on the same address.
-So if you are on Windows or MacOS adjust your `application-dev.properties` file so it points at a Docker daemon.
+For Windows and MacOS we recommend using the virtual machine setup we ship with the Code FREAK source code.
+Please install https://www.virtualbox.org/[Virtual Box] and https://www.vagrantup.com/[Vagrant] on Windows/MacOS.
+After installing both you create the virtual machine by running `vagrant up` in the root directory containing the file `Vagrantfile`.
+The initial setup may take some time.
+When the machine is running (can be confirmed by running `vagrant status`) you can update the Code FREAK configuration to use the Docker daemon of the virtual machine:
 
+.src/main/resources/application-dev.yml
 [source,yaml]
 [source]
 -----
@@ -90,6 +95,11 @@ codefreak:
   docker:
     host: "tcp://127.0.0.1:2375"
 -----
+
+The Code FREAK backend and frontend can still be run locally from your Windows or MacOS machine!
+The virtual machine will only be used by Code FREAK for Docker related jobs.
+For running `docker` CLI commands (like `docker ps`) you can connect to the virtual machines terminal with `vagrant ssh`.
+In the established connection all docker commands will point the the VM's Docker daemon.
 
 == Run the application
 
