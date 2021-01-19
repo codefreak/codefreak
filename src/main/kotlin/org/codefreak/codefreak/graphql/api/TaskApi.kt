@@ -23,6 +23,8 @@ import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.TaskTarService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.TaskTemplate
+import org.codefreak.codefreak.util.TaskTemplateUtil
 import org.springframework.core.io.ClassPathResource
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
@@ -82,10 +84,6 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   }
 }
 
-enum class TaskTemplate {
-  JAVA, PYTHON, CSHARP, JAVASCRIPT
-}
-
 class TaskInput(var id: UUID, var title: String, var timeLimit: Long?) {
   constructor() : this(UUID.randomUUID(), "", null)
 }
@@ -124,7 +122,7 @@ class TaskMutation : BaseResolver(), Mutation {
   @Secured(Authority.ROLE_TEACHER)
   fun createTask(template: TaskTemplate?): TaskDto = context {
     if (template != null) {
-      val templateTar = ClassPathResource("org/codefreak/templates/${template.name.toLowerCase()}.tar").inputStream.use { it.readBytes() }
+      val templateTar = TaskTemplateUtil.readTemplateTar(template)
       serviceAccess.getService(TaskTarService::class).createFromTar(templateTar, authorization.currentUser)
           .let { TaskDto(it, this) }
     } else {
