@@ -1,6 +1,5 @@
 package org.codefreak.codefreak.service
 
-import java.io.ByteArrayOutputStream
 import java.time.Instant
 import org.codefreak.codefreak.Env
 import org.codefreak.codefreak.auth.Role
@@ -8,7 +7,6 @@ import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.UserRepository
-import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TaskTemplate
 import org.codefreak.codefreak.util.TaskTemplateUtil
 import org.slf4j.LoggerFactory
@@ -18,7 +16,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 
 /**
@@ -69,11 +66,11 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
       val task = taskTarService.createFromTar(templateTar, teacher)
 
       val templateName = it.name.toLowerCase().capitalize()
-      task.title = "Program in ${templateName}"
+      task.title = "Program in $templateName"
       taskService.saveTask(task)
       tasks.add(task)
 
-      val assignment = Assignment("${templateName} Assignment", teacher, Instant.now(), active = true)
+      val assignment = Assignment("$templateName Assignment", teacher, Instant.now(), active = true)
       assignmentService.saveAssignment(assignment)
       assignmentService.addTasksToAssignment(assignment, listOf(task))
     }

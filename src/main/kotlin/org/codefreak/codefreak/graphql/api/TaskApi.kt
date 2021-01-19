@@ -25,7 +25,6 @@ import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TaskTemplate
 import org.codefreak.codefreak.util.TaskTemplateUtil
-import org.springframework.core.io.ClassPathResource
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
