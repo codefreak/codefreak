@@ -27,5 +27,6 @@
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)
+* The database of the development server is now seeded with the task templates and not from examples in the main repository (#771)
 
 ### Removed
