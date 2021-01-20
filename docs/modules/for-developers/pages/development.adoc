@@ -94,6 +94,9 @@ When the machine is running (can be confirmed by running `vagrant status`) you c
 codefreak:
   docker:
     host: "http://127.0.0.1:2375"
+  reverse-proxy:
+    type: traefik
+    url: "http://localhost:8081"
 -----
 
 The Code FREAK backend and frontend can still be run locally from your Windows or MacOS machine!
