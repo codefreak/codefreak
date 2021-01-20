@@ -12,11 +12,18 @@
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "paths": ["+(/client/**)"],
+      "paths": ["+(client/package.json)"],
+      "packageNames": [
+        "webpack"
+      ],
+      "enabled": false
+    },
+    {
+      "paths": ["+(client/package.json)"],
       "addLabels": ["client"]
     },
     {
-      "paths": ["+(**/*.gradle)"],
+      "paths": ["+(build.gradle)"],
       "addLabels": ["backend"]
     },
     {
