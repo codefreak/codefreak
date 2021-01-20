@@ -93,7 +93,7 @@ When the machine is running (can be confirmed by running `vagrant status`) you c
 -----
 codefreak:
   docker:
-    host: "tcp://127.0.0.1:2375"
+    host: "http://127.0.0.1:2375"
 -----
 
 The Code FREAK backend and frontend can still be run locally from your Windows or MacOS machine!
