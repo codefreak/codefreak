@@ -160,14 +160,14 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
       />
       <Column
         title="First Name"
-        dataIndex={["user", "firstName"]}
+        dataIndex={['user', 'firstName']}
         width={200}
         fixed="left"
         sorter={alphabeticSorter(submission => submission.user.firstName)}
       />
       <Column
         title="Username"
-        dataIndex={["user", "username"]}
+        dataIndex={['user', 'username']}
         width={300}
         sorter={alphabeticSorter(submission => submission.user.username)}
       />
