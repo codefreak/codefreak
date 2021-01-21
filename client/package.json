@@ -5,7 +5,7 @@
   "dependencies": {
     "@ant-design/pro-layout": "5.0.19",
     "@ant-design/icons": "4.3.0",
-    "@apollo/client": "3.3.6",
+    "@apollo/client": "3.3.7",
     "@codefreak/docs": "file:../docs",
     "@craco/craco": "6.0.0",
     "@graphql-codegen/cli": "1.20.0",
