@@ -54,7 +54,7 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
   const inlineError =
     inlineErrorMessage.length > 0 ? (
       <InlineError
-        title="Error while importing assignment"
+        title="Error while importing task(s)"
         message={inlineErrorMessage}
       />
     ) : null
