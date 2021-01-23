@@ -12,6 +12,7 @@ import java.io.OutputStream
 import java.util.UUID
 import javax.servlet.http.Part
 import org.apache.commons.compress.archivers.ArchiveException
+import org.apache.commons.compress.archivers.ArchiveInputStream
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -97,6 +98,7 @@ object TarUtil {
     outputStream.closeArchiveEntry()
   }
 
+  @Throws(InvalidArchiveFormatException::class)
   fun archiveToTar(`in`: InputStream, out: OutputStream) {
     var input = BufferedInputStream(`in`)
     try {
@@ -106,7 +108,14 @@ object TarUtil {
       // input is not compressed or maybe even not an archive at all
       // createArchiveInputStream() will fail if it's not an uncompressed archive
     }
-    val archive = ArchiveStreamFactory().createArchiveInputStream(input)
+
+    val archive: ArchiveInputStream
+    try {
+      archive = ArchiveStreamFactory().createArchiveInputStream(input)
+    } catch (e: ArchiveException) {
+      throw InvalidArchiveFormatException()
+    }
+
     val tar = PosixTarArchiveOutputStream(out)
     createTarRootDirectory(tar)
     generateSequence { archive.nextEntry }
