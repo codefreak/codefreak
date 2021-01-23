@@ -12,6 +12,7 @@ import {
   DatePicker,
   Descriptions,
   Dropdown,
+  Empty,
   Form,
   Menu,
   Modal,
@@ -74,6 +75,7 @@ import {
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
+import { Link } from 'react-router-dom'
 
 const { Step } = Steps
 
@@ -421,6 +423,28 @@ const AddTasksButton: React.FC<{
     />
   )
 
+  const taskSelection = (
+    <>
+      <Row gutter={16}>
+        <Col>{searchBar}</Col>
+        <Col>{sorter}</Col>
+      </Row>
+      <Alert
+        message={
+          'When a task from the pool is added to an assignment, an independent copy is created. ' +
+          'Editing the task in the pool will have no effect on the assignment and vice versa.'
+        }
+        style={{ marginBottom: 16, marginTop: 16 }}
+      />
+      <TaskSelection
+        value={taskIds}
+        setValue={setTaskIds}
+        sortMethod={sortMethod}
+        filterCriteria={filterCriteria}
+      />
+    </>
+  )
+
   return (
     <>
       <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
@@ -437,23 +461,7 @@ const AddTasksButton: React.FC<{
         }}
         onOk={submit}
       >
-        <Row gutter={16}>
-          <Col>{searchBar}</Col>
-          <Col>{sorter}</Col>
-        </Row>
-        <Alert
-          message={
-            'When a task from the pool is added to an assignment, an independent copy is created. ' +
-            'Editing the task in the pool will have no effect on the assignment and vice versa.'
-          }
-          style={{ marginBottom: 16, marginTop: 16 }}
-        />
-        <TaskSelection
-          value={taskIds}
-          setValue={setTaskIds}
-          sortMethod={sortMethod}
-          filterCriteria={filterCriteria}
-        />
+        {taskSelection}
       </Modal>
     </>
   )
@@ -472,6 +480,15 @@ const TaskSelection: React.FC<{
   }
 
   let taskPool = result.data.taskPool.slice()
+
+  if (taskPool.length === 0) {
+    return (
+      <Empty description={<span>Your task pool is empty.</span>}>
+        <Link to="/tasks/pool">Go to the task pool</Link> and create or import
+        your first task!
+      </Empty>
+    )
+  }
 
   if (props.filterCriteria) {
     taskPool = filterTasks(taskPool, props.filterCriteria)
