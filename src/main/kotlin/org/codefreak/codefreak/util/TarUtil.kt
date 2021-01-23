@@ -226,7 +226,7 @@ object TarUtil {
       try {
         // try to read upload as archive
         return files[0].inputStream.use { archiveToTar(it, out) }
-      } catch (e: ArchiveException) {
+      } catch (e: InvalidArchiveFormatException) {
         // unknown archive type or no archive at all
         // create a new tar archive that contains only the uploaded file
       }
