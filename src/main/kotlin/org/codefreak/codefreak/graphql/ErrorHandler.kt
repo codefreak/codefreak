@@ -8,6 +8,7 @@ import graphql.language.SourceLocation
 import org.codefreak.codefreak.auth.NotAuthenticatedException
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.ResourceLimitException
+import org.codefreak.codefreak.util.InvalidArchiveFormatException
 import org.codefreak.codefreak.util.InvalidCodefreakDefinitionException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.BadCredentialsException
@@ -32,7 +33,7 @@ class ErrorHandler : DefaultGraphQLErrorHandler() {
           is AccessDeniedException -> CustomError(it, "Access Denied", "403")
           is BadCredentialsException -> CustomError(it, "Bad Credentials", "422")
           is ResourceLimitException -> CustomError(it, it.message, "503")
-          is IllegalArgumentException, is IllegalStateException, is InvalidCodefreakDefinitionException -> CustomError(it, it.exception.message ?: it.message, "422")
+          is IllegalArgumentException, is IllegalStateException, is InvalidCodefreakDefinitionException, is InvalidArchiveFormatException -> CustomError(it, it.exception.message ?: it.message, "422")
           else -> it
         }
       } else it
