@@ -1,8 +1,7 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Col, Modal, Row } from 'antd'
+import { Col, Modal, Row } from 'antd'
 import { useState } from 'react'
-import { Link, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import {
@@ -18,6 +17,7 @@ import AssignmentList, {
 import SearchBar from '../../components/SearchBar'
 import UploadAssignmentButton from '../../components/UploadAssignmentButton'
 import { getEntityPath } from '../../services/entity-path'
+import CreateAssignmentButton from '../../components/CreateAssignmentButton'
 
 const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
@@ -101,11 +101,7 @@ const AssignmentListPage: React.FC = () => {
 
   const createButton = (
     <Authorized authority="ROLE_TEACHER">
-      <Link to="/assignments/create" key="1">
-        <Button type="primary" icon={<PlusOutlined />}>
-          Create Assignment
-        </Button>
-      </Link>
+      <CreateAssignmentButton />
     </Authorized>
   )
 
