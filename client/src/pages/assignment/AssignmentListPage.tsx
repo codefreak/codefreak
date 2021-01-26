@@ -1,11 +1,12 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Col, Row } from 'antd'
+import { Button, Col, Modal, Row } from 'antd'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import Authorized from '../../components/Authorized'
 import {
+  UploadAssignmentMutationResult,
   useDeleteAssignmentMutation,
   useGetAssignmentListQuery
 } from '../../services/codefreak-api'
@@ -15,6 +16,8 @@ import AssignmentList, {
   sortMethodNames
 } from '../../components/AssignmentList'
 import SearchBar from '../../components/SearchBar'
+import UploadAssignmentButton from '../../components/UploadAssignmentButton'
+import { getEntityPath } from '../../services/entity-path'
 
 const AssignmentListPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
@@ -22,6 +25,8 @@ const AssignmentListPage: React.FC = () => {
 
   const [sortMethod, setSortMethod] = useState(sortMethodNames[0])
   const [filterCriteria, setFilterCriteria] = useState('')
+
+  const history = useHistory()
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -61,6 +66,39 @@ const AssignmentListPage: React.FC = () => {
     />
   )
 
+  const renderTaskError = (error: string, index: number) => (
+    <p key={index}>{error}</p>
+  )
+
+  const handleUploadCompleted = (
+    uploadResult:
+      | NonNullable<UploadAssignmentMutationResult['data']>['uploadAssignment']
+      | null
+  ) => {
+    if (uploadResult) {
+      const assignment = uploadResult.assignment
+      const taskCreationErrors = uploadResult.taskErrors
+
+      history.push(getEntityPath(assignment))
+
+      if (taskCreationErrors.length > 0) {
+        Modal.error({
+          title:
+            'The assigment has been created but not all tasks have been created successfully',
+          content: <>{taskCreationErrors.map(renderTaskError)}</>
+        })
+      } else {
+        messageService.success('Assignment created')
+      }
+    }
+  }
+
+  const uploadButton = (
+    <Authorized authority="ROLE_TEACHER">
+      <UploadAssignmentButton onUploadCompleted={handleUploadCompleted} />
+    </Authorized>
+  )
+
   const createButton = (
     <Authorized authority="ROLE_TEACHER">
       <Link to="/assignments/create" key="1">
@@ -78,6 +116,7 @@ const AssignmentListPage: React.FC = () => {
           <Row justify="end" gutter={16}>
             <Col>{searchBar}</Col>
             <Col>{sorter}</Col>
+            <Col>{uploadButton}</Col>
             <Col>{createButton}</Col>
           </Row>
         }
