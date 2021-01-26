@@ -22,18 +22,18 @@ import Countdown from './Countdown'
 import moment from 'moment'
 import { momentDifferenceToRelTime } from '../services/time'
 
-function timer(queuedOn?: string, finishedOn?: string) {
-  if (queuedOn && !finishedOn) {
+function timer(queuedAt?: string, finishedAt?: string) {
+  if (queuedAt && !finishedAt) {
     return (
       <Tag>
-        <Countdown date={moment(queuedOn)} overTime />
+        <Countdown date={moment(queuedAt)} overtime />
       </Tag>
     )
   }
-  if (queuedOn && finishedOn) {
+  if (queuedAt && finishedAt) {
     return (
       <Tag>
-        {momentDifferenceToRelTime(moment(finishedOn), moment(queuedOn))}
+        {momentDifferenceToRelTime(moment(finishedAt), moment(queuedAt))}
       </Tag>
     )
   }
@@ -82,8 +82,8 @@ export const EvaluationStepPanel: React.FC<{
       {stepBasics.definition.title + ' '}
       {stepBasics.definition.runner.stoppable &&
         timer(
-          stepBasics.queuedOn || undefined,
-          stepBasics.finishedOn || undefined
+          stepBasics.queuedAt || undefined,
+          stepBasics.finishedAt || undefined
         )}
     </>
   )

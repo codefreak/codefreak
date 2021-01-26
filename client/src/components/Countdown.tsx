@@ -20,11 +20,11 @@ const defaultCountdownRenderer = (
 interface CountdownProps {
   date: Moment
   onComplete?: ReactCountdownProps['onComplete']
-  overTime?: boolean
+  overtime?: boolean
 }
 
 const Countdown: React.FC<CountdownProps> = props => {
-  const { date, onComplete, overTime } = props
+  const { date, onComplete, overtime } = props
   const serverNow = useServerNow()
 
   return (
@@ -33,7 +33,7 @@ const Countdown: React.FC<CountdownProps> = props => {
       renderer={defaultCountdownRenderer}
       onComplete={onComplete}
       now={serverNow}
-      overtime={overTime}
+      overtime={overtime}
     />
   )
 }

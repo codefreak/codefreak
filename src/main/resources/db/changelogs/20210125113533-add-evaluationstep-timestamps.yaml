@@ -6,7 +6,7 @@ databaseChangeLog:
     - addColumn:
         columns:
         - column:
-            name: finished_on
+            name: finished_at
             type: timestamp
         tableName: evaluation_step
 - changeSet:
@@ -16,6 +16,6 @@ databaseChangeLog:
     - addColumn:
         columns:
         - column:
-            name: queued_on
+            name: queued_at
             type: timestamp
         tableName: evaluation_step

@@ -83,7 +83,7 @@ class EvaluationQueue : StepExecutionListener {
       log.debug("Queuing evaluation step ${step.definition.runnerName} for answer $answerId")
       val params = buildJobParameters(step)
       jobLauncher.run(job, params)
-      step.queuedOn = Instant.now()
+      step.queuedAt = Instant.now()
       evaluationStepService.updateEvaluationStepStatus(step, EvaluationStepStatus.QUEUED)
     }
   }
@@ -107,7 +107,7 @@ class EvaluationQueue : StepExecutionListener {
           evaluationStep.status >= EvaluationStepStatus.FINISHED -> evaluationStep.status
           else -> EvaluationStepStatus.FINISHED
         }
-        evaluationStep.finishedOn = Instant.now()
+        evaluationStep.finishedAt = Instant.now()
         evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
       }
     }

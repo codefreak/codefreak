@@ -33,9 +33,9 @@ class EvaluationStep(
   @Enumerated(EnumType.STRING)
   var result: EvaluationStepResult? = null
 
-  var queuedOn: Instant? = null
+  var queuedAt: Instant? = null
 
-  var finishedOn: Instant? = null
+  var finishedAt: Instant? = null
 
   /**
    * Optional summary for the step result

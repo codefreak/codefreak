@@ -3,8 +3,8 @@ fragment evaluationStepBasics on EvaluationStep {
   status
   result
   summary
-  queuedOn
-  finishedOn
+  queuedAt
+  finishedAt
   definition {
     position
     runnerName
