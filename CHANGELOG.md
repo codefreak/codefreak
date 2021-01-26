@@ -25,6 +25,7 @@
 * If an evaluation step is marked inactive, export this too (#748)
 * The options of evaluation steps are exported regardless of whether they are the default options or not (#750)
 * When adding tasks to an assignment show whether the task pool is empty (#779)
+* Evaluation time is shown in real time and elapsed time after completion
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)

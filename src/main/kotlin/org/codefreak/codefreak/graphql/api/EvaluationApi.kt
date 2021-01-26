@@ -93,6 +93,8 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   val summary = entity.summary
   val feedback by lazy { entity.feedback.map { FeedbackDto(it) } }
   val status = EvaluationStepStatusDto(entity.status)
+  val queuedAt = entity.queuedAt
+  val finishedAt = entity.finishedAt
 }
 
 @GraphQLName("EvaluationRunner")
