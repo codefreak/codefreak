@@ -53,3 +53,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20201106113159-add-ide-arguments.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20210125113533-add-evaluationstep-timestamps.yaml
+    relativeToChangelogFile: true

@@ -3,10 +3,15 @@ fragment evaluationStepBasics on EvaluationStep {
   status
   result
   summary
+  queuedOn
+  finishedOn
   definition {
     position
     runnerName
     title
+    runner {
+      stoppable
+    }
   }
 }
 

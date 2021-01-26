@@ -1,0 +1,21 @@
+databaseChangeLog:
+- changeSet:
+    id: 1611570992476-2
+    author: Glen (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: finished_on
+            type: timestamp
+        tableName: evaluation_step
+- changeSet:
+    id: 1611570992476-3
+    author: Glen (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: queued_on
+            type: timestamp
+        tableName: evaluation_step

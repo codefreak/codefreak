@@ -10,7 +10,7 @@ import {
   useGetEvaluationStepQuery
 } from '../generated/graphql'
 import { SmileTwoTone } from '@ant-design/icons'
-import { Card, Collapse, Empty, Result, Skeleton } from 'antd'
+import { Card, Collapse, Empty, Result, Skeleton, Tag } from 'antd'
 import SortSelect from './SortSelect'
 import SyntaxHighlighter from './code/SyntaxHighlighter'
 import { compare } from '../services/util'
@@ -18,6 +18,26 @@ import renderFeedbackPanel from './FeedbackPanel'
 import EvaluationStepIcon from './EvaluationStepIcon'
 import { isEvaluationInProgress } from '../services/evaluation'
 import EvaluationProcessingIcon from './EvaluationProcessingIcon'
+import Countdown from './Countdown'
+import moment from 'moment'
+import { momentDifferenceToRelTime } from '../services/time'
+
+function timer(queuedOn?: string, finishedOn?: string) {
+  if (queuedOn && !finishedOn) {
+    return (
+      <Tag>
+        <Countdown date={moment(queuedOn)} overTime />
+      </Tag>
+    )
+  }
+  if (queuedOn && finishedOn) {
+    return (
+      <Tag>
+        {momentDifferenceToRelTime(moment(finishedOn), moment(queuedOn))}
+      </Tag>
+    )
+  }
+}
 
 export const EvaluationStepPanel: React.FC<{
   answerId: string
@@ -59,7 +79,12 @@ export const EvaluationStepPanel: React.FC<{
   const title = (
     <>
       <EvaluationStepIcon status={stepStatus} result={stepResult} />{' '}
-      {stepBasics.definition.title}
+      {stepBasics.definition.title + ' '}
+      {stepBasics.definition.runner.stoppable &&
+        timer(
+          stepBasics.queuedOn || undefined,
+          stepBasics.finishedOn || undefined
+        )}
     </>
   )
 

@@ -10,7 +10,7 @@ import { componentsToRelTime } from '../services/time'
 const defaultCountdownRenderer = (
   props: CountdownRenderProps
 ): React.ReactNode => {
-  if (props.completed) {
+  if (props.completed && !props.props.overtime) {
     return componentsToRelTime({ hours: 0, minutes: 0, seconds: 0 })
   }
 
@@ -20,9 +20,11 @@ const defaultCountdownRenderer = (
 interface CountdownProps {
   date: Moment
   onComplete?: ReactCountdownProps['onComplete']
+  overTime?: boolean
 }
 
-const Countdown: React.FC<CountdownProps> = ({ date, onComplete }) => {
+const Countdown: React.FC<CountdownProps> = props => {
+  const { date, onComplete, overTime } = props
   const serverNow = useServerNow()
 
   return (
@@ -31,6 +33,7 @@ const Countdown: React.FC<CountdownProps> = ({ date, onComplete }) => {
       renderer={defaultCountdownRenderer}
       onComplete={onComplete}
       now={serverNow}
+      overtime={overTime}
     />
   )
 }
