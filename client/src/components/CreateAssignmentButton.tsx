@@ -10,7 +10,7 @@ import {
   useUpdateAssignmentMutation
 } from '../generated/graphql'
 import { extractTargetValue } from '../services/util'
-import InlineError from './InlineError'
+import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
 
 type Assignment = NonNullable<
   CreateAssignmentMutationResult['data']
@@ -28,7 +28,9 @@ const CreateAssignmentButton = () => {
   const showModal = () => setModalVisible(true)
   const hideModal = () => setModalVisible(false)
   const [title, setTitle] = useState<string>('')
-  const [inlineErrorMessage, setInlineErrorMessage] = useState<string>('')
+  const [inlineError, setErrorMessage] = useInlineErrorMessage(
+    'Error while creating assignment'
+  )
 
   const createAssignment = async () => {
     createEmptyAssignment()
@@ -38,22 +40,24 @@ const CreateAssignmentButton = () => {
           updateAssignmentTitle(assignment, title)
         }
       })
-      .catch(error => setInlineErrorMessage(error.message))
+      .catch(error => setErrorMessage(error.message))
   }
 
-  const updateAssignmentTitle = (assignment: Assignment, title: string) => {
+  const updateAssignmentTitle = (assignment: Assignment, newTitle: string) => {
     updateAssignment({
       variables: {
         id: assignment.id,
-        title,
+        title: newTitle,
         active: false
       }
     })
       .then(result => {
         const updatedSuccessfully = result.data && result.data.updateAssignment
-        updatedSuccessfully && redirectToAssignmentPage(assignment)
+        if (updatedSuccessfully) {
+          redirectToAssignmentPage(assignment)
+        }
       })
-      .catch(error => setInlineErrorMessage(error.message))
+      .catch(error => setErrorMessage(error.message))
   }
 
   const redirectToAssignmentPage = (assignment: Assignment) => {
@@ -70,14 +74,6 @@ const CreateAssignmentButton = () => {
       onChange={extractTargetValue(setTitle)}
     />
   ) : null
-
-  const inlineError =
-    inlineErrorMessage.length > 0 ? (
-      <InlineError
-        title="Error while creating assignment"
-        message={inlineErrorMessage}
-      />
-    ) : null
 
   const createAssignmentButton = (
     <Button icon={<PlusOutlined />} type="primary" onClick={showModal}>

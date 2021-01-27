@@ -7,7 +7,7 @@ import {
 import { UploadOutlined } from '@ant-design/icons'
 import { Button, Modal } from 'antd'
 import FileImport from './FileImport'
-import InlineError from './InlineError'
+import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
 
 interface UploadAssignmentButtonProps {
   onUploadCompleted: (
@@ -19,9 +19,11 @@ interface UploadAssignmentButtonProps {
 
 const UploadAssignmentButton = (props: UploadAssignmentButtonProps) => {
   const [modalVisible, setModalVisible] = useState(false)
-  const [inlineErrorMessage, setInlineErrorMessage] = useState('')
   const showModal = () => setModalVisible(true)
   const hideModal = () => setModalVisible(false)
+  const [inlineError, setErrorMessage] = useInlineErrorMessage(
+    'Error while importing assignment'
+  )
 
   const [uploadTasks, { loading: uploading }] = useUploadAssignmentMutation({
     context: { disableGlobalErrorHandling: true }
@@ -40,7 +42,7 @@ const UploadAssignmentButton = (props: UploadAssignmentButtonProps) => {
         }
         props.onUploadCompleted(data)
       })
-      .catch(reason => setInlineErrorMessage(reason.message))
+      .catch(reason => setErrorMessage(reason.message))
 
   const onImport = (url: string) =>
     importTasks({ variables: { url } })
@@ -51,15 +53,7 @@ const UploadAssignmentButton = (props: UploadAssignmentButtonProps) => {
         }
         props.onUploadCompleted(data)
       })
-      .catch(reason => setInlineErrorMessage(reason.message))
-
-  const inlineError =
-    inlineErrorMessage.length > 0 ? (
-      <InlineError
-        title="Error while importing assignment"
-        message={inlineErrorMessage}
-      />
-    ) : null
+      .catch(reason => setErrorMessage(reason.message))
 
   return (
     <>
