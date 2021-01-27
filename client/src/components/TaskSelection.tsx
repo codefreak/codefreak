@@ -17,6 +17,7 @@ const TaskSelectionList: React.FC<{
   setSelectedTaskIds: (value: string[]) => void
   sortMethod: string
   filterCriteria: string
+  maxHeight?: string | number | undefined
 }> = props => {
   const result = useGetTaskPoolForAddingQuery()
 
@@ -50,12 +51,14 @@ const TaskSelectionList: React.FC<{
     props.setSelectedTaskIds(value as string[])
 
   return (
-    <Checkbox.Group
-      className="vertical-checkbox-group"
-      options={options}
-      onChange={onChange}
-      value={props.selectedTaskIds}
-    />
+    <div style={{ maxHeight: props.maxHeight, overflowY: 'auto' }}>
+      <Checkbox.Group
+        className="vertical-checkbox-group"
+        options={options}
+        onChange={onChange}
+        value={props.selectedTaskIds}
+      />
+    </div>
   )
 }
 
@@ -103,6 +106,7 @@ const TaskSelection: React.FC<{
         setSelectedTaskIds={props.setSelectedTaskIds}
         sortMethod={sortMethod}
         filterCriteria={filterCriteria}
+        maxHeight="200px"
       />
     </>
   )
