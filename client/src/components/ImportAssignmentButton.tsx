@@ -9,15 +9,15 @@ import { Button, Modal } from 'antd'
 import FileImport from './FileImport'
 import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
 
-interface UploadAssignmentButtonProps {
-  onUploadCompleted: (
+interface ImportAssignmentButtonProps {
+  onImportCompleted: (
     result:
       | NonNullable<UploadAssignmentMutationResult['data']>['uploadAssignment']
       | null
   ) => void
 }
 
-const UploadAssignmentButton = (props: UploadAssignmentButtonProps) => {
+const ImportAssignmentButton = (props: ImportAssignmentButtonProps) => {
   const [modalVisible, setModalVisible] = useState(false)
   const showModal = () => setModalVisible(true)
   const hideModal = () => setModalVisible(false)
@@ -40,7 +40,7 @@ const UploadAssignmentButton = (props: UploadAssignmentButtonProps) => {
         if (data) {
           hideModal()
         }
-        props.onUploadCompleted(data)
+        props.onImportCompleted(data)
       })
       .catch(reason => setErrorMessage(reason.message))
 
@@ -51,7 +51,7 @@ const UploadAssignmentButton = (props: UploadAssignmentButtonProps) => {
         if (data) {
           hideModal()
         }
-        props.onUploadCompleted(data)
+        props.onImportCompleted(data)
       })
       .catch(reason => setErrorMessage(reason.message))
 
@@ -83,4 +83,4 @@ const UploadAssignmentButton = (props: UploadAssignmentButtonProps) => {
   )
 }
 
-export default UploadAssignmentButton
+export default ImportAssignmentButton

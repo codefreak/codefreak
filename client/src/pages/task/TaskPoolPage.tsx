@@ -13,7 +13,7 @@ import {
 } from '../../services/codefreak-api'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import { messageService } from '../../services/message'
-import UploadTasksButton from '../../components/UploadTasksButton'
+import ImportTasksButton from '../../components/ImportTasksButton'
 import {
   filterTasks,
   TaskSortMethodNames,
@@ -72,7 +72,7 @@ const TaskPoolPage: React.FC = () => {
 
   const update = () => result.refetch()
 
-  const handleUploadCompleted = (
+  const handleImportCompleted = (
     createdTasks:
       | NonNullable<UploadTasksMutationResult['data']>['uploadTasks']
       | null
@@ -101,7 +101,7 @@ const TaskPoolPage: React.FC = () => {
   )
 
   const importButton = (
-    <UploadTasksButton onUploadCompleted={handleUploadCompleted} />
+    <ImportTasksButton onImportCompleted={handleImportCompleted} />
   )
 
   return (

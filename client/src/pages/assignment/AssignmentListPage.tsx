@@ -15,7 +15,7 @@ import AssignmentList, {
   sortMethodNames
 } from '../../components/AssignmentList'
 import SearchBar from '../../components/SearchBar'
-import UploadAssignmentButton from '../../components/UploadAssignmentButton'
+import ImportAssignmentButton from '../../components/ImportAssignmentButton'
 import { getEntityPath } from '../../services/entity-path'
 import CreateAssignmentButton from '../../components/CreateAssignmentButton'
 
@@ -70,7 +70,7 @@ const AssignmentListPage: React.FC = () => {
     <p key={index}>{error}</p>
   )
 
-  const handleUploadCompleted = (
+  const handleImportCompleted = (
     uploadResult:
       | NonNullable<UploadAssignmentMutationResult['data']>['uploadAssignment']
       | null
@@ -93,9 +93,9 @@ const AssignmentListPage: React.FC = () => {
     }
   }
 
-  const uploadButton = (
+  const importButton = (
     <Authorized authority="ROLE_TEACHER">
-      <UploadAssignmentButton onUploadCompleted={handleUploadCompleted} />
+      <ImportAssignmentButton onImportCompleted={handleImportCompleted} />
     </Authorized>
   )
 
@@ -112,7 +112,7 @@ const AssignmentListPage: React.FC = () => {
           <Row justify="end" gutter={16}>
             <Col>{searchBar}</Col>
             <Col>{sorter}</Col>
-            <Col>{uploadButton}</Col>
+            <Col>{importButton}</Col>
             <Col>{createButton}</Col>
           </Row>
         }

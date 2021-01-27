@@ -9,13 +9,13 @@ import { Alert, Button, Modal } from 'antd'
 import FileImport from './FileImport'
 import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
 
-interface UploadTasksButtonProps {
-  onUploadCompleted: (
+interface ImportTasksButtonProps {
+  onImportCompleted: (
     result: NonNullable<UploadTasksMutationResult['data']>['uploadTasks'] | null
   ) => void
 }
 
-const UploadTasksButton = (props: UploadTasksButtonProps) => {
+const ImportTasksButton = (props: ImportTasksButtonProps) => {
   const [modalVisible, setModalVisible] = useState(false)
   const [inlineError, setErrorMessage] = useInlineErrorMessage(
     'Error while creating task(s)'
@@ -38,7 +38,7 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
         if (data) {
           hideModal()
         }
-        props.onUploadCompleted(data)
+        props.onImportCompleted(data)
       })
       .catch(reason => setErrorMessage(reason.message))
 
@@ -49,7 +49,7 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
         if (data) {
           hideModal()
         }
-        props.onUploadCompleted(data)
+        props.onImportCompleted(data)
       })
       .catch(reason => setErrorMessage(reason.message))
 
@@ -85,4 +85,4 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
   )
 }
 
-export default UploadTasksButton
+export default ImportTasksButton
