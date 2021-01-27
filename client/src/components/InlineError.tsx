@@ -1,12 +1,12 @@
 import { ReactNode } from 'react'
 import { Alert } from 'antd'
 
-type InineErrorProps = {
+type InlineErrorProps = {
   title: string | ReactNode
   message: string | ReactNode
 }
 
-const InlineError = (props: InineErrorProps) => {
+const InlineError = (props: InlineErrorProps) => {
   // Wrap error message to retain formatting
   const formattedErrorMessage = (
     <code>
