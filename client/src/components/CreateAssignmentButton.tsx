@@ -1,16 +1,18 @@
 import React, { useState } from 'react'
-import { Button, Input, Modal } from 'antd'
+import { Button, Card, Input, Modal, Space } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { getEntityPath } from '../services/entity-path'
 import { messageService } from '../services/message'
 import { useHistory } from 'react-router-dom'
 import {
   CreateAssignmentMutationResult,
+  useAddTasksToAssignmentMutation,
   useCreateAssignmentMutation,
   useUpdateAssignmentMutation
-} from '../generated/graphql'
+} from '../services/codefreak-api'
 import { extractTargetValue, noop } from '../services/util'
 import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
+import TaskSelection from './TaskSelection'
 
 type Assignment = NonNullable<
   CreateAssignmentMutationResult['data']
@@ -29,10 +31,16 @@ const CreateAssignmentButton = () => {
       context: { disableGlobalErrorHandling: true }
     }
   )
+  const [addTasks, { loading: addingTasks }] = useAddTasksToAssignmentMutation()
   const [modalVisible, setModalVisible] = useState(false)
-  const showModal = () => setModalVisible(true)
+  const showModal = () => {
+    setTitle('')
+    setSelectedTaskIds([])
+    setModalVisible(true)
+  }
   const hideModal = () => setModalVisible(false)
   const [title, setTitle] = useState<string>('')
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([])
   const [inlineError, setErrorMessage] = useInlineErrorMessage(
     'Error while creating assignment'
   )
@@ -43,27 +51,32 @@ const CreateAssignmentButton = () => {
       .then(result => {
         if (result.data) {
           const assignment = result.data.createAssignment
-          updateAssignmentTitle(assignment, title)
+          if (title.length > 0) {
+            updateAssignmentTitle(assignment)
+          }
+          if (selectedTaskIds.length > 0) {
+            addTasksToAssignment(assignment)
+          }
+          redirectToAssignmentPage(assignment)
         }
       })
       .catch(error => setErrorMessage(error.message))
   }
 
-  const updateAssignmentTitle = (assignment: Assignment, newTitle: string) => {
+  const updateAssignmentTitle = (assignment: Assignment) => {
     updateAssignment({
       variables: {
         id: assignment.id,
-        title: newTitle,
+        title,
         active: false
       }
-    })
-      .then(result => {
-        const updatedSuccessfully = result.data && result.data.updateAssignment
-        if (updatedSuccessfully) {
-          redirectToAssignmentPage(assignment)
-        }
-      })
-      .catch(error => setErrorMessage(error.message))
+    }).catch(error => setErrorMessage(error.message))
+  }
+
+  const addTasksToAssignment = (assignment: Assignment) => {
+    addTasks({
+      variables: { assignmentId: assignment.id, taskIds: selectedTaskIds }
+    }).catch(error => setErrorMessage(error.message))
   }
 
   const redirectToAssignmentPage = (assignment: Assignment) => {
@@ -87,20 +100,32 @@ const CreateAssignmentButton = () => {
     </Button>
   )
 
+  const taskSelection = (
+    <TaskSelection
+      selectedTaskIds={selectedTaskIds}
+      setSelectedTaskIds={setSelectedTaskIds}
+    />
+  )
+
   const modal = (
     <Modal
       title="Create assignment"
       visible={modalVisible}
       onOk={createAssignment}
+      okText="Done"
       okButtonProps={{
         disabled: okButtonDisabled,
-        loading: creating || updating,
+        loading: creating || updating || addingTasks,
         title: okButtonDisabled ? 'The assignment needs a title!' : undefined
       }}
       onCancel={hideModal}
+      width={800}
     >
-      {inlineError}
-      {titleInput}
+      <Space direction={'vertical'}>
+        {inlineError}
+        {titleInput}
+        <Card>{taskSelection}</Card>
+      </Space>
     </Modal>
   )
 
