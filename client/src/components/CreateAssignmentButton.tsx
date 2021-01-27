@@ -112,7 +112,7 @@ const CreateAssignmentButton = () => {
       title="Create assignment"
       visible={modalVisible}
       onOk={createAssignment}
-      okText="Done"
+      okText="Create Assignment"
       okButtonProps={{
         disabled: okButtonDisabled,
         loading: creating || updating || addingTasks,
