@@ -1,0 +1,104 @@
+<html lang="en">
+<!--
+  This file will serve as a placeholder during development when the React frontend is not served via Spring.
+  When building the application the gradle task "deployFrontend" will replace this file with client/build/index.html.
+-->
+<head>
+  <title>Code FREAK</title>
+  <style>
+    html {
+      box-sizing: border-box;
+      font-size: 16px;
+      font-family: sans-serif;
+    }
+
+    body, h1, h2, h3, h4, h5, h6, ol, ul {
+      margin: 0;
+      padding: 0;
+      font-weight: normal;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    pre {
+      overflow-x: auto;
+    }
+
+    code, pre {
+      font-family: monospace;
+      font-size: 90%;
+    }
+
+    code {
+      background-color: lightgray;
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    h1, h2 {
+      margin-bottom: 1em;
+    }
+
+    .wrapper {
+      max-width: 1200px;
+      margin: auto;
+      padding-top: 50px;
+    }
+
+    .info {
+      margin: 2em 0;
+      padding: 10px;
+      border: 2px solid lightgray;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <h1 style="text-align: center">
+    <img alt="Code FREAK" src="https://raw.githubusercontent.com/codefreak/codefreak/master/client/public/logo192.png"
+         width="192"/>
+  </h1>
+  <div id="root"></div>
+  <div class="info">
+    <p>You should only ever see this as a developer if you are running the Code FREAK backend and frontend
+      separately!</p>
+    <p>If you are looking for the frontend it should be available at <a href="http://localhost:3000">http://localhost:3000</a>
+      after running <code>npm start</code> in <code>/client</code>.
+    </p>
+    <p>On a production system this site is replaced by the React frontend. You can try this during development by
+      running
+      the
+      <code>gradle deployFrontend</code> task and restarting the Spring application.</p>
+  </div>
+  <script>
+    // small helper to create elements with content
+    const element = (tag, content) => {
+      const element = document.createElement(tag);
+      if (typeof content === "string") {
+        element.innerText = content;
+      } else if (content instanceof HTMLElement) {
+        element.appendChild(content);
+      }
+      return element;
+    };
+    /** @var {Object} __CODEFREAK_ERROR **/
+    const root = document.getElementById("root");
+    if (typeof __CODEFREAK_ERROR !== "undefined") {
+      // the following lines render the key-value-pairs of __CODEFREAK_ERROR in a <dl/>
+      const statusCode = __CODEFREAK_ERROR["status"];
+      document.getElementsByTagName("title")[0].innerText = `Error ${statusCode} | Code FREAK`;
+      root.innerHTML = `<h2>The following error occurred (<code>__CODEFREAK_ERROR</code>)</h2>`;
+      const dl = root.appendChild(element("dl", ""));
+      for (let key of Object.keys(__CODEFREAK_ERROR)) {
+        dl.appendChild(element("dt", element("code", key)));
+        dl.appendChild(element("dd", element("pre", __CODEFREAK_ERROR[key])));
+      }
+    }
+  </script>
+</div>
+</body>
+</html>
