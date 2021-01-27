@@ -24,7 +24,7 @@ class InjectedScriptErrorView : View {
 
   private fun buildErrorJsonScriptTag(data: Map<String, *>?): String {
     val json = objectMapper.writeValueAsString(data)
-    return "<script>const __CODEFREAK_ERROR = $json;</script>"
+    return "<script>window.__CODEFREAK_ERROR = $json;</script>"
   }
 
   override fun render(model: MutableMap<String, *>?, request: HttpServletRequest, response: HttpServletResponse) {
