@@ -9,7 +9,7 @@ import {
   useCreateAssignmentMutation,
   useUpdateAssignmentMutation
 } from '../generated/graphql'
-import { extractTargetValue } from '../services/util'
+import { extractTargetValue, noop } from '../services/util'
 import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
 
 type Assignment = NonNullable<
@@ -18,12 +18,17 @@ type Assignment = NonNullable<
 
 const CreateAssignmentButton = () => {
   const history = useHistory()
-  const [createEmptyAssignment] = useCreateAssignmentMutation({
+  const [
+    createEmptyAssignment,
+    { loading: creating }
+  ] = useCreateAssignmentMutation({
     context: { disableGlobalErrorHandling: true }
   })
-  const [updateAssignment] = useUpdateAssignmentMutation({
-    context: { disableGlobalErrorHandling: true }
-  })
+  const [updateAssignment, { loading: updating }] = useUpdateAssignmentMutation(
+    {
+      context: { disableGlobalErrorHandling: true }
+    }
+  )
   const [modalVisible, setModalVisible] = useState(false)
   const showModal = () => setModalVisible(true)
   const hideModal = () => setModalVisible(false)
@@ -31,6 +36,7 @@ const CreateAssignmentButton = () => {
   const [inlineError, setErrorMessage] = useInlineErrorMessage(
     'Error while creating assignment'
   )
+  const okButtonDisabled = title.length === 0
 
   const createAssignment = async () => {
     createEmptyAssignment()
@@ -67,7 +73,7 @@ const CreateAssignmentButton = () => {
 
   const titleInput = modalVisible ? ( // re-create for autoFocus
     <Input
-      onPressEnter={createAssignment}
+      onPressEnter={okButtonDisabled ? noop : createAssignment}
       autoFocus
       value={title}
       placeholder="Set the title of the assignment here"
@@ -86,6 +92,11 @@ const CreateAssignmentButton = () => {
       title="Create assignment"
       visible={modalVisible}
       onOk={createAssignment}
+      okButtonProps={{
+        disabled: okButtonDisabled,
+        loading: creating || updating,
+        title: okButtonDisabled ? 'The assignment needs a title!' : undefined
+      }}
       onCancel={hideModal}
     >
       {inlineError}
