@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.entity
 
+import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -31,6 +32,10 @@ class EvaluationStep(
 
   @Enumerated(EnumType.STRING)
   var result: EvaluationStepResult? = null
+
+  var queuedAt: Instant? = null
+
+  var finishedAt: Instant? = null
 
   /**
    * Optional summary for the step result
