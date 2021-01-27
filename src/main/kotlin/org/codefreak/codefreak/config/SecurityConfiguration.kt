@@ -20,7 +20,9 @@ import org.springframework.security.core.session.SessionRegistry
 import org.springframework.security.core.session.SessionRegistryImpl
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider
+import org.springframework.security.web.firewall.RequestRejectedHandler
 import org.springframework.security.web.session.HttpSessionEventPublisher
+import javax.servlet.http.HttpServletResponse
 
 @Configuration
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
@@ -106,5 +108,13 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         ?.groupSearchFilter(config.ldap.groupSearchFilter)
         ?.contextSource()
             ?.url(url.withTrailingSlash() + config.ldap.rootDn)
+  }
+
+  @Bean
+  fun requestRejectedHandler(): RequestRejectedHandler {
+    // return 400 instead of 500 for firewalled requests
+    return RequestRejectedHandler { _, response, requestRejectedException ->
+      response.sendError(HttpServletResponse.SC_BAD_REQUEST, requestRejectedException.message)
+    }
   }
 }
