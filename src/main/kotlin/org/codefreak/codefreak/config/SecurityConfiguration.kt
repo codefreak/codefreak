@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.config
 
+import javax.servlet.http.HttpServletResponse
 import org.codefreak.codefreak.auth.AuthenticationMethod
 import org.codefreak.codefreak.auth.LdapUserDetailsContextMapper
 import org.codefreak.codefreak.auth.SimpleUserDetailsService
@@ -22,7 +23,6 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider
 import org.springframework.security.web.firewall.RequestRejectedHandler
 import org.springframework.security.web.session.HttpSessionEventPublisher
-import javax.servlet.http.HttpServletResponse
 
 @Configuration
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
