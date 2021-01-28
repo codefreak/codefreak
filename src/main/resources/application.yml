@@ -34,6 +34,9 @@ graphql:
     - "org.codefreak.codefreak.graphql.api"
 
 server:
+  error:
+    # there is a custom ErrorController that will include the stacktrace in dev environment
+    include-stacktrace: never
   servlet:
     session:
       # Set server-side timeout of cookies
