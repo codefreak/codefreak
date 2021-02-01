@@ -26,6 +26,7 @@ function timer(queuedAt?: string, finishedAt?: string) {
   if (queuedAt && !finishedAt) {
     return (
       <Tag>
+        {"Running since "}
         <Countdown date={moment(queuedAt)} overtime />
       </Tag>
     )
@@ -33,6 +34,7 @@ function timer(queuedAt?: string, finishedAt?: string) {
   if (queuedAt && finishedAt) {
     return (
       <Tag>
+        {"Duration "}
         {momentDifferenceToRelTime(moment(finishedAt), moment(queuedAt))}
       </Tag>
     )
