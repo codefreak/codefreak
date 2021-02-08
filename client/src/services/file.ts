@@ -31,3 +31,58 @@ export const sliceLines = (input: string, start?: number, end?: number) => {
   const startIndex = start ? Math.max(start - 1, 0) : undefined
   return split.slice(startIndex, end).join('\n')
 }
+
+/**
+ * Matches the given files with the accepted file extensions and returns the list of files with invalid extensions.
+ *
+ * @param fileNames The file names
+ * @param acceptedExtensions The accepted file extensions, e.g. [ '.zip' ]
+ */
+export const findFilesWithInvalidExtension = (
+  fileNames: string[],
+  acceptedExtensions: string[]
+) => {
+  const invalidFiles: string[] = []
+
+  fileNames.forEach(fileName => {
+    if (!validateFileExtension(fileName, acceptedExtensions)) {
+      invalidFiles.push(fileName)
+    }
+  })
+
+  return invalidFiles
+}
+
+/**
+ * Matches a file name against a list of accepted file extensions and returns whether the file has an accepted extension.
+ *
+ * @param fileName The file name
+ * @param acceptedExtensions The accepted file extensions, e.g. [ '.zip' ]
+ */
+const validateFileExtension = (
+  fileName: string,
+  acceptedExtensions: string[]
+) => {
+  const fileExtension = extractExtension(fileName)
+  let isFileExtensionValid = false
+
+  acceptedExtensions.forEach(extension => {
+    if (extension === fileExtension) {
+      isFileExtensionValid = true
+    }
+  })
+
+  return isFileExtensionValid
+}
+
+/**
+ * Extracts the extension from a file name.
+ * Returns an empty string if the file has no extension.
+ *
+ * @param fileName The file name
+ */
+const extractExtension = (fileName: string) => {
+  const extensionIndex = fileName.lastIndexOf('.')
+  // The index has to be greater than 0 because files can start with a '.' but have no extension
+  return extensionIndex > 0 ? fileName.substring(extensionIndex) : ''
+}
