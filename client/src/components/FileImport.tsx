@@ -14,6 +14,7 @@ interface FileImportProps {
   onUpload: (files: File[]) => void
   importing: boolean
   onImport: (url: string) => void
+  acceptedTypes?: string[]
 }
 
 const FileImport: React.FC<FileImportProps> = props => {
@@ -49,6 +50,7 @@ const FileImport: React.FC<FileImportProps> = props => {
       <Col span={12}>
         <Dragger
           multiple
+          accept={props.acceptedTypes?.join(',')}
           showUploadList={false}
           beforeUpload={beforeUpload}
           disabled={uploading}

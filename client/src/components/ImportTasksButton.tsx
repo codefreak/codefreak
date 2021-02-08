@@ -79,6 +79,18 @@ const ImportTasksButton = (props: ImportTasksButtonProps) => {
           onUpload={onUpload}
           importing={importing}
           onImport={onImport}
+          acceptedTypes={[
+            '.zip',
+            '.tar',
+            '.gz',
+            '.xz',
+            '.Z',
+            '.bz2',
+            '.tbz2',
+            '.tgz',
+            '.txz',
+            '.jar'
+          ]}
         />
       </Modal>
     </>
