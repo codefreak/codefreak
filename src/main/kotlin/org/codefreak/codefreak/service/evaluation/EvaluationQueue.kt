@@ -6,6 +6,8 @@ import org.codefreak.codefreak.config.EvaluationConfiguration
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepStatus
+import org.codefreak.codefreak.entity.Grade
+import org.codefreak.codefreak.repository.FeedbackRepository
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.ExitStatus
@@ -106,6 +108,10 @@ class EvaluationQueue : StepExecutionListener {
           else -> EvaluationStepStatus.FINISHED
         }
         evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
+        //Autograder processing.
+        val evalStepUpdated = evaluationStepService.getEvaluationStep(it)
+        evaluationStepService.startCalculation(evaluationStepService.configureEvaluationStepForAutoGrading(evalStepUpdated))
+
       }
     }
     return null
