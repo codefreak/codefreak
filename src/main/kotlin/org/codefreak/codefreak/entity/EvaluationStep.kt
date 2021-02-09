@@ -1,15 +1,7 @@
 package org.codefreak.codefreak.entity
 
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.Lob
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
 import org.hibernate.annotations.Type
+import javax.persistence.*
 
 /**
  * Each Evaluation is made up of several EvaluationSteps that ar running in parallel.
@@ -28,6 +20,12 @@ class EvaluationStep(
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluationStep", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
   var feedback = mutableSetOf<Feedback>()
+
+  @OneToOne(mappedBy ="evaluationStep", cascade = [CascadeType.ALL])
+  var pointsOfEvaluationStep : PointsOfEvaluationStep?=null
+
+  @ManyToOne
+  var gradeDefinition : GradeDefinition?=null
 
   @Enumerated(EnumType.STRING)
   var result: EvaluationStepResult? = null
