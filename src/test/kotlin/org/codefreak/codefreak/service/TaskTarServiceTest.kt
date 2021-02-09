@@ -57,7 +57,9 @@ class TaskTarServiceTest {
     }
 
     `when`(mockEvaluationStepDefinitionRepository.save(any())).thenAnswer { it.arguments[0] }
-    `when`(mockEvaluationStepDefinitionRepository.saveAll(any())).thenAnswer { it.arguments[0] }
+    // circumvent impossible type inference with "Nothing" in Kotlin 1.4.30
+    // https://youtrack.jetbrains.com/issue/KT-44045
+    `when`(mockEvaluationStepDefinitionRepository.saveAll<Nothing>(any())).thenAnswer { it.arguments[0] }
 
     `when`(mockFileService.readCollectionTar(any())).thenReturn(ByteArrayInputStream(byteArrayOf()))
     `when`(mockFileService.writeCollectionTar(any())).thenReturn(ByteArrayOutputStream())
