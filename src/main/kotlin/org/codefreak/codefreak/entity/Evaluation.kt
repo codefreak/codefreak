@@ -3,6 +3,7 @@ package org.codefreak.codefreak.entity
 import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.Transient
@@ -22,7 +23,7 @@ class Evaluation(
 
   var evaluationSettingsFrom: Instant
 ) : BaseEntity() {
-  @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL], orphanRemoval = true)
+  @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
   var evaluationSteps = mutableSetOf<EvaluationStep>()
 
   /**
