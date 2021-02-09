@@ -1,10 +1,7 @@
 package org.codefreak.codefreak.service.evaluation
 
+import org.codefreak.codefreak.entity.*
 import java.util.UUID
-import org.codefreak.codefreak.entity.Evaluation
-import org.codefreak.codefreak.entity.EvaluationStep
-import org.codefreak.codefreak.entity.EvaluationStepDefinition
-import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.repository.EvaluationStepRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
@@ -22,6 +19,12 @@ class EvaluationStepService {
 
   @Autowired
   private lateinit var stepRepository: EvaluationStepRepository
+
+  @Autowired
+  private lateinit var gradeDefinitionService: GradeDefinitionService
+
+  @Autowired
+  private lateinit var poeStepService: PointsOfEvaluationStepService
 
   fun getEvaluationStep(stepId: UUID): EvaluationStep {
     return stepRepository.findById(stepId).orElseThrow {
@@ -58,7 +61,41 @@ class EvaluationStepService {
     }
   }
 
-  fun saveEvaluationStep(step: EvaluationStep) {
-    stepRepository.save(step)
+  fun saveEvaluationStep(step: EvaluationStep) = stepRepository.save(step)
+
+  fun configureEvaluationStepForAutoGrading(step : EvaluationStep) : EvaluationStep{
+    step.gradeDefinition = gradeDefinitionService.findByEvaluationStepDefinition(step.definition.id)
+    var updatedStep = stepRepository.save(step)
+
+    //Check Consistency. Might throw errors due save function get access from different sources. Missing named updatefunction to make things clear
+    if(updatedStep.gradeDefinition==null){
+      updatedStep.gradeDefinition = gradeDefinitionService.findByEvaluationStep(updatedStep)
+      stepRepository.save(updatedStep)
+    }
+    if(updatedStep.pointsOfEvaluationStep==null){
+      poeStepService.save(PointsOfEvaluationStep(evaluationStep = updatedStep, updatedStep.gradeDefinition!!))
+    }
+    return updatedStep
+  }
+
+  fun startCalculation(step: EvaluationStep){
+    poeStepService.calculate(step)
+  }
+
+  /**
+   * This function should be called if a teacher has edited an invalid PointsOfEvaluation
+   * If he set up points from zero the and the pointsOfEvaluationStep is still errored / failed
+   * it will become successful.
+   */
+  fun updateResultFromPointsOfEvaluationStep(poe : PointsOfEvaluationStep) : Boolean {
+    return if(poe.edited){
+
+//      val step = stepRepository.findByPointsOfEvaluationStep(poe).get()
+      poe.evaluationStep.result = EvaluationStepResult.SUCCESS
+      stepRepository.save(poe.evaluationStep)
+      true
+    }else{
+      false
+    }
   }
 }
