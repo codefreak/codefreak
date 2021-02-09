@@ -62,6 +62,18 @@ query GetDetailedEvaluaton($evaluationId: ID!) {
           columnEnd
         }
       }
+      pointsOfEvaluationStep{
+        id
+        bOfT
+        pOfE
+        calcCheck
+        edited
+        resultCheck
+        gradeDefinitionMax{
+          id
+          pEvalMax
+        }
+      }
     }
   }
 }
@@ -81,6 +93,14 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       options
       active
       timeout
+      gradeDefinition{
+        id
+        active
+        pEvalMax
+        bOnMinor
+        bOnMajor
+        bOnCritical
+      }
     }
   }
   evaluationRunners {
