@@ -1,0 +1,93 @@
+query GetGradeDefinition($gradeDefinition: ID!){
+  gradeDefinition(id: $gradeDefinition){
+    id
+    active
+    pEvalMax
+    bOnMinor
+    bOnMajor
+    bOnCritical
+  }
+}
+
+query GetPointsOfEvaluation($pointsOfEvaluation: ID!){
+  pointsOfEvaluation(id : $pointsOfEvaluation){
+    id
+    bOfT
+    pOfE
+    calcCheck
+    edited
+    resultCheck
+  }
+}
+
+
+fragment pointsOfEvaluationStep on PointsOfEvaluationStep{
+  id
+  bOfT
+  pOfE
+  calcCheck
+  edited
+  resultCheck
+}
+
+query GetPointsOfEvaluationStepByEvaluationStepId($evaluationStepId: ID!){
+  pointsOfEvaluationStepByEvaluationStepId(id: $evaluationStepId){
+    id
+    bOfT
+    pOfE
+    calcCheck
+    edited
+    resultCheck
+    gradeDefinitionMax{
+      id
+      pEvalMax
+    }
+  }
+}
+
+query GetGrade($evaluationId:ID!){
+  grade(id: $evaluationId){
+    id
+    gradePercentage
+    calculated
+  }
+}
+
+query GetScoreboardByAssignmentId($id: ID!){
+  scoreboardByAssignmentId(id: $id){
+    id
+    title
+    submissionsScoreboard{
+      id
+      #skip user in tree. We dont need him
+      useralias{
+        id
+        alias
+      }
+      answersScoreboard{
+        id
+        taskScoreboard{
+          id
+          title
+        }
+        gradeScoreboard{
+          id
+          gradePercentage
+          calculated
+        }
+      }
+    }
+    tasksScoreboard{
+      id
+      title
+    }
+  }
+}
+
+query GetUserAliasByUserId($userId:ID!){
+  userAliasByUserId(id:$userId){
+    id
+    alias
+  }
+}
+
