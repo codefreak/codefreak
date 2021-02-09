@@ -16,16 +16,16 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableAsync
 @EnableAspectJAutoProxy
 @EnableBatchProcessing
-class CodeFreakApplication : CommandLineRunner {
+class CodeFreakApplication {
 
-  private val log = LoggerFactory.getLogger(this::class.java)
-
-  @Autowired
-  private lateinit var config: AppConfiguration
-
-  override fun run(vararg args: String?) {
-    log.info("Code FREAK instance id: ${config.instanceId}")
-  }
+//  private val log = LoggerFactory.getLogger(this::class.java)
+//
+//  @Autowired
+//  private lateinit var config: AppConfiguration
+//
+//  override fun run(vararg args: String?) {
+//    log.info("Code FREAK instance id: ${config.instanceId}")
+//  }
 }
 
 fun main(args: Array<String>) {
