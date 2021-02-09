@@ -50,3 +50,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20201215142521-add-evaluation-step-status.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20210208153801-add-autograder-schema.yaml
+    relativeToChangelogFile: true
