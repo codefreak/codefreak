@@ -10,10 +10,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
-import org.codefreak.codefreak.entity.Assignment
-import org.codefreak.codefreak.entity.EvaluationStepDefinition
-import org.codefreak.codefreak.entity.Task
-import org.codefreak.codefreak.entity.User
+import org.codefreak.codefreak.entity.*
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
@@ -107,6 +104,7 @@ class TaskTarService : BaseService() {
         val runner = evaluationService.getEvaluationRunner(it.step)
         val title = it.title ?: runner.getDefaultTitle()
         val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
+        stepDefinition.gradeDefinition = GradeDefinition(stepDefinition)
         stepDefinition.active = it.active ?: true
         evaluationService.validateRunnerOptions(stepDefinition)
         stepDefinition
@@ -126,7 +124,15 @@ class TaskTarService : BaseService() {
       task.evaluationStepDefinitions.forEach { it.position++ }
       val runner = evaluationService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
       task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
+      addGradeDefinition(task)
     }
+  }
+
+  /**
+   * adds an default GradeDefinition to every EvaluationStepDefinition
+   */
+  private fun addGradeDefinition(task : Task){
+    task.evaluationStepDefinitions.forEach { it.gradeDefinition = GradeDefinition(it) }
   }
 
   private fun copyTaskFilesFromTar(taskId: UUID, tarContent: ByteArray) {
