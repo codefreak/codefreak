@@ -48,14 +48,14 @@ const CreateAssignmentButton = () => {
 
   const createAssignment = async () => {
     createEmptyAssignment()
-      .then(result => {
+      .then(async result => {
         if (result.data) {
           const assignment = result.data.createAssignment
           if (title.length > 0) {
-            updateAssignmentTitle(assignment)
+            await updateAssignmentTitle(assignment)
           }
           if (selectedTaskIds.length > 0) {
-            addTasksToAssignment(assignment)
+            await addTasksToAssignment(assignment)
           }
           redirectToAssignmentPage(assignment)
         }
@@ -63,8 +63,8 @@ const CreateAssignmentButton = () => {
       .catch(error => setErrorMessage(error.message))
   }
 
-  const updateAssignmentTitle = (assignment: Assignment) => {
-    updateAssignment({
+  const updateAssignmentTitle = async (assignment: Assignment) => {
+    await updateAssignment({
       variables: {
         id: assignment.id,
         title,
@@ -73,8 +73,8 @@ const CreateAssignmentButton = () => {
     }).catch(error => setErrorMessage(error.message))
   }
 
-  const addTasksToAssignment = (assignment: Assignment) => {
-    addTasks({
+  const addTasksToAssignment = async (assignment: Assignment) => {
+    await addTasks({
       variables: { assignmentId: assignment.id, taskIds: selectedTaskIds }
     }).catch(error => setErrorMessage(error.message))
   }
