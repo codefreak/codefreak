@@ -12,12 +12,7 @@ import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.auth.hasAuthority
-import org.codefreak.codefreak.entity.Evaluation
-import org.codefreak.codefreak.entity.EvaluationStep
-import org.codefreak.codefreak.entity.EvaluationStepDefinition
-import org.codefreak.codefreak.entity.EvaluationStepResult
-import org.codefreak.codefreak.entity.EvaluationStepStatus
-import org.codefreak.codefreak.entity.Feedback
+import org.codefreak.codefreak.entity.*
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
@@ -27,10 +22,7 @@ import org.codefreak.codefreak.service.AssignmentService
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
-import org.codefreak.codefreak.service.evaluation.EvaluationRunner
-import org.codefreak.codefreak.service.evaluation.EvaluationService
-import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
-import org.codefreak.codefreak.service.evaluation.isBuiltIn
+import org.codefreak.codefreak.service.evaluation.*
 import org.codefreak.codefreak.util.exhaustive
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
@@ -50,6 +42,11 @@ class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: Res
   val active = definition.active
   val position = definition.position
   val title = definition.title
+
+  /**
+   * added Gradedefinition
+   */
+  val gradeDefinition by lazy { GradeDefinitionDto(ctx.serviceAccess.getService(GradeDefinitionService::class).findByEvaluationStepDefinition(definition.id),ctx) }
   val options: String by lazy {
     ctx.authorization.requireAuthorityIfNotCurrentUser(definition.task.owner, Authority.ROLE_ADMIN)
     objectMapper.writeValueAsString(definition.options)
@@ -91,6 +88,11 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   val summary = entity.summary
   val feedback by lazy { entity.feedback.map { FeedbackDto(it) } }
   val status = EvaluationStepStatusDto(entity.status)
+
+  /**
+   * Added PointsOfEvaluationStep
+   */
+  val pointsOfEvaluationStep by lazy { PointsOfEvaluationStepDto(entity.pointsOfEvaluationStep!!,ctx)}
 }
 
 @GraphQLName("EvaluationRunner")
@@ -247,6 +249,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     }
     val optionsMap = objectMapper.readValue(options, object : TypeReference<HashMap<String, Any>>() {})
     val definition = EvaluationStepDefinition(task, runner.getName(), task.evaluationStepDefinitions.size, runner.getDefaultTitle(), optionsMap)
+    definition.gradeDefinition = GradeDefinition(definition)
     evaluationService.validateRunnerOptions(definition)
     task.evaluationStepDefinitions.add(definition)
     evaluationService.saveEvaluationStepDefinition(definition)
