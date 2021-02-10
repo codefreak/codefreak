@@ -86,3 +86,16 @@ const extractExtension = (fileName: string) => {
   // The index has to be greater than 0 because files can start with a '.' but have no extension
   return extensionIndex > 0 ? fileName.substring(extensionIndex) : ''
 }
+
+export const supportedArchiveExtensions = [
+  '.zip',
+  '.tar',
+  '.gz',
+  '.xz',
+  '.Z',
+  '.bz2',
+  '.tbz2',
+  '.tgz',
+  '.txz',
+  '.jar'
+]

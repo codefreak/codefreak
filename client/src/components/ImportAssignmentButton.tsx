@@ -8,6 +8,7 @@ import { UploadOutlined } from '@ant-design/icons'
 import { Button, Modal } from 'antd'
 import FileImport from './FileImport'
 import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
+import { supportedArchiveExtensions } from '../services/file'
 
 interface ImportAssignmentButtonProps {
   onImportCompleted: (
@@ -77,18 +78,7 @@ const ImportAssignmentButton = (props: ImportAssignmentButtonProps) => {
           onUpload={onUpload}
           importing={importing}
           onImport={onImport}
-          acceptedTypes={[
-            '.zip',
-            '.tar',
-            '.gz',
-            '.xz',
-            '.Z',
-            '.bz2',
-            '.tbz2',
-            '.tgz',
-            '.txz',
-            '.jar'
-          ]}
+          acceptedTypes={supportedArchiveExtensions}
         />
       </Modal>
     </>
