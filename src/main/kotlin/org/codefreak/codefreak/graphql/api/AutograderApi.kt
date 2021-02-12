@@ -46,6 +46,7 @@ class GradeDefinitionMaxDto(@GraphQLIgnore val entity: GradeDefinition,ctx: Reso
   @GraphQLID
   val id = entity.id
   val pEvalMax = entity.pEvalMax
+  val active = entity.active
 
 }
 
@@ -70,12 +71,12 @@ class PointsOfEvaluationStepDto(@GraphQLIgnore val entity : PointsOfEvaluationSt
  * Grade Dto for query
  */
 @GraphQLName("Grade")
-class GradeDto(@GraphQLIgnore val entity: Grade, ctx : ResolverContext) : BaseDto(ctx){
+class GradeDto(@GraphQLIgnore val entity: Grade?, ctx : ResolverContext) : BaseDto(ctx){
 
   @GraphQLID
-  val id = entity.id
-  val gradePercentage = entity.gradePercentage
-  val calculated = entity.calculated
+  val id = entity?.id
+  val gradePercentage = entity?.gradePercentage
+  val calculated = entity?.calculated
 }
 
 @GraphQLName("UserAlias")
@@ -144,8 +145,13 @@ class TaskScoreboardDto(@GraphQLIgnore val entity : Task, ctx : ResolverContext)
  * Dto to receive input for Gradedefinitions
  */
 @GraphQLName("GradeDefinitionInput")
-class GradeDefinitionInputDto(var id:UUID, var active: Boolean, var pEvalMax: Float, var bOnMinor: Float, var bOnMajor: Float, var bOnCritical: Float){
-  constructor() : this(UUID.randomUUID(),false,0f,0f,0f,0f)
+class GradeDefinitionInputDto(var id:UUID, var pEvalMax: Float, var bOnMinor: Float, var bOnMajor: Float, var bOnCritical: Float){
+  constructor() : this(UUID.randomUUID(),0f,0f,0f,0f)
+}
+
+@GraphQLName("GradeDefinitionActiveInput")
+class GradeDefinitionActiveInputDto(var id:UUID,var active:Boolean){
+  constructor() : this(UUID.randomUUID(),false)
 }
 
 /**
@@ -215,20 +221,37 @@ class GradeDefinitionMutation : BaseResolver(),Mutation{
    * May take some time. Thread candidate
    */
   @Secured(Authority.ROLE_TEACHER)
-  fun updateGradeDefinition(input : GradeDefinitionInputDto) : Boolean = context{
+  fun updateGradeDefinitionValues(input : GradeDefinitionInputDto) : Boolean = context{
+    val gradeDefinitionService = serviceAccess.getService(GradeDefinitionService::class)
+    val gradeDefinition = gradeDefinitionService.findGradeDefinition(input.id)
+
+    if(input.id == gradeDefinition.id) {
+      gradeDefinitionService.updateGradeDefinitionValues(
+        gradeDefinition,
+        pEvalMax = input.pEvalMax,
+        bOnMinor = input.bOnMinor,
+        bOnMajor = input.bOnMajor,
+        bOnCritical = input.bOnCritical
+      )
+      LOG.info("GradeDefinition updated")
+      true
+    }else
+      LOG.error("failed to update GradeDefinition of id " + input.id)
+      false
+  }
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun updateGradeDefinitionStatus(input : GradeDefinitionActiveInputDto) : Boolean = context{
     val gradeDefinitionService = serviceAccess.getService(GradeDefinitionService::class)
     val gradeDefinition = gradeDefinitionService.findGradeDefinition(input.id)
 
     if(input.id == gradeDefinition.id){
-      gradeDefinitionService.updateGradeDefinition(gradeDefinition,
-      active = input.active,
-      pEvalMax = input.pEvalMax,
-      bOnMinor = input.bOnMinor,
-      bOnMajor = input.bOnMajor,
-      bOnCritical = input.bOnCritical)
+      gradeDefinitionService.updateGradeDefinitionStatus(gradeDefinition,
+        active = input.active)
       LOG.info("GradeDefinition updated")
       true
-    }else
+    }
+    else
       LOG.error("failed to update GradeDefinition of id " + input.id)
       false
   }
@@ -249,7 +272,9 @@ class PointsOfEvaluationStepQuery : BaseResolver(), Query{
   fun pointsOfEvaluation(id : UUID) : PointsOfEvaluationStepDto = context {
     val pointsOfEvaluationStepService = serviceAccess.getService(PointsOfEvaluationStepService::class)
     LOG.info("generate PointsOfEvaluationStepDto for Query")
-    PointsOfEvaluationStepDto(pointsOfEvaluationStepService.getEvaluationStepId(id),this)
+    val poe = pointsOfEvaluationStepService.getEvaluationStepId(id)!!
+    PointsOfEvaluationStepDto(poe,this)
+
   }
 
   /**
@@ -258,7 +283,7 @@ class PointsOfEvaluationStepQuery : BaseResolver(), Query{
   @Secured(Authority.ROLE_STUDENT)
   fun pointsOfEvaluationStepByEvaluationStepId(id : UUID) : PointsOfEvaluationStepDto = context {
     val pointsOfEvaluationStepService = serviceAccess.getService(PointsOfEvaluationStepService::class)
-    PointsOfEvaluationStepDto(pointsOfEvaluationStepService.getEvaluationStepId(id),this)
+    PointsOfEvaluationStepDto(pointsOfEvaluationStepService.getEvaluationStepId(id)!!,this)
   }
 }
 
@@ -287,7 +312,7 @@ class PointsOfEvaluationStepMutation : BaseResolver(), Mutation{
       )
       LOG.info("PointsOfEvaluationStep Updated ")
       //Moved to PointsOfEvaluationService
-//      serviceAccess.getService(GradeService::class).createOrUpdateGradeFromPointsOfEvaluation(updatedPoe)
+      //serviceAccess.getService(GradeService::class).createOrUpdateGradeFromPointsOfEvaluation(updatedPoe)
       true
     }else{
       LOG.error("failed to update PointsOfEvaluationStep of id ${input.id}")
@@ -314,7 +339,7 @@ class GradeQuery : BaseResolver(),Query{
     val evaluationService = serviceAccess.getService(EvaluationService::class)
     val evaluation= evaluationService.getEvaluation(id)
     val gradeService = serviceAccess.getService(GradeService::class)
-    GradeDto(gradeService.findOrCreateGrade(evaluation),this)
+    GradeDto(gradeService.findGrade(evaluation),this)
   }
 
 }
