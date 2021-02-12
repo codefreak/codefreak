@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Steps } from 'antd'
 import { EvaluationStepStatus } from '../generated/graphql'
-import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
+import useLiveAnswerEvaluation from '../hooks/useLiveAnswerEvaluation'
 import { LoadingOutlined } from '@ant-design/icons'
 
 const { Step } = Steps
@@ -12,7 +12,9 @@ interface EvaluationStatusTrackerProps {
 
 const EvaluationStatusTracker: React.FC<EvaluationStatusTrackerProps> = props => {
   const { answerId } = props
-  const { evaluationStatus, latestEvaluation } = useAnswerEvaluation(answerId)
+  const { evaluationStatus, latestEvaluation } = useLiveAnswerEvaluation(
+    answerId
+  )
 
   const [step, setStep] = useState(0)
 
