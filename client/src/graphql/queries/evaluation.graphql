@@ -72,6 +72,7 @@ query GetDetailedEvaluaton($evaluationId: ID!) {
         gradeDefinitionMax{
           id
           pEvalMax
+          active
         }
       }
     }
