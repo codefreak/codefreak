@@ -110,7 +110,7 @@ class EvaluationQueue : StepExecutionListener {
         evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
         //Autograder processing.
         val evalStepUpdated = evaluationStepService.getEvaluationStep(it)
-        evaluationStepService.startCalculation(evaluationStepService.configureEvaluationStepForAutoGrading(evalStepUpdated))
+        evaluationStepService.startCalculation(evalStepUpdated)
 
       }
     }
