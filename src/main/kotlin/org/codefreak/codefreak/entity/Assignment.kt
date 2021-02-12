@@ -47,6 +47,11 @@ class Assignment(
     else -> AssignmentStatus.CLOSED
   }
 
+  /**
+   * Let the teacher enable/disable the scoreboard
+   */
+  var scoreboard : Boolean = false
+
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
 
