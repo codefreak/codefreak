@@ -41,6 +41,7 @@ query GetPointsOfEvaluationStepByEvaluationStepId($evaluationStepId: ID!){
     gradeDefinitionMax{
       id
       pEvalMax
+      active
     }
   }
 }
