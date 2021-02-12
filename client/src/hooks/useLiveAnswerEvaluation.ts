@@ -27,7 +27,7 @@ const useLiveAnswerEvaluation = (answerId: string) => {
         }
       })
     }
-  }, [latestEvaluationQuery.data])
+  }, [answerId, latestEvaluationQuery])
 
   const latestEvaluation = latestEvaluationQuery.data?.answer.latestEvaluation
   const evaluationStatus = latestEvaluation?.stepsStatusSummary

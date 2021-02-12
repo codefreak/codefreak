@@ -18,7 +18,7 @@ const useLiveEvaluationStep = (stepId: string) => {
         }
       })
     }
-  }, [stepDetailsQuery])
+  }, [stepId, stepDetailsQuery])
 
   return stepDetailsQuery
 }
