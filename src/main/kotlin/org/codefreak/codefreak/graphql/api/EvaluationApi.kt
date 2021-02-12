@@ -92,7 +92,12 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   /**
    * Added PointsOfEvaluationStep
    */
-  val pointsOfEvaluationStep by lazy { PointsOfEvaluationStepDto(entity.pointsOfEvaluationStep!!,ctx)}
+  val pointsOfEvaluationStep by lazy {
+    entity.pointsOfEvaluationStep?.let {
+      PointsOfEvaluationStepDto(it,ctx)
+    }
+
+  }
 }
 
 @GraphQLName("EvaluationRunner")
