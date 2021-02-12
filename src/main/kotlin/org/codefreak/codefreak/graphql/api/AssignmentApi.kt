@@ -47,6 +47,7 @@ class AssignmentDto(@GraphQLIgnore val entity: Assignment, ctx: ResolverContext)
   val status by lazy { entity.status }
   val active = entity.active
   val openFrom = entity.openFrom
+  val scoreboard = entity.scoreboard
   val tasks by lazy { entity.tasks.map { TaskDto(it, ctx) } }
   val editable by lazy { entity.isEditable(authorization) }
   val exportUrl by lazy { FrontendUtil.getUriBuilder().path("/api/assignments/$id/export").build().toUriString() }
@@ -83,6 +84,10 @@ class AssignmentCreationResultDto(@GraphQLIgnore val result: AssignmentService.A
 
 class AssignmentInput(val id: UUID, val active: Boolean, val deadline: Instant?, val openFrom: Instant?) {
   constructor() : this(UUID.randomUUID(), true, null, null)
+}
+@GraphQLName("AssignmentScoreboardInput")
+class AssignmentScoreboardInputDto(val id:UUID, val scoreboard : Boolean){
+  constructor() : this(UUID.randomUUID(),false)
 }
 
 @Component
@@ -167,6 +172,18 @@ class AssignmentMutation : BaseResolver(), Mutation {
     require(assignment.isEditable(authorization)) { "Assignment is not editable" }
     serviceAccess.getService(AssignmentService::class).addTasksToAssignment(assignment, tasks)
     true
+  }
+
+  fun assignmentScoreboard(input: AssignmentScoreboardInputDto) : Boolean = context{
+    val service = serviceAccess.getService(AssignmentService::class)
+    val assignment = service.findAssignment(input.id)
+    if(assignment.id == input.id){
+      assignment.scoreboard = input.scoreboard
+      service.saveAssignment(assignment)
+      true
+    }else{
+      false
+    }
   }
 }
 
