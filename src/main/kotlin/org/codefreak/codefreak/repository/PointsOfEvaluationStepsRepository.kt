@@ -16,4 +16,5 @@ import java.util.*
 @Repository
 interface PointsOfEvaluationStepsRepository : CrudRepository<PointsOfEvaluationStep,UUID>{
   fun findByEvaluationStep(evaluationStep : EvaluationStep) : Optional<PointsOfEvaluationStep>
+  fun findByEvaluationStepId(id : UUID) : Optional<PointsOfEvaluationStep>
 }
