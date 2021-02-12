@@ -1,5 +1,5 @@
-import { Card, Collapse, Empty, Icon, Result, Typography } from 'antd'
-import React, { useState } from 'react'
+import {Card, Collapse, Empty, Icon, Result, Typography} from 'antd'
+import React, {useState} from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   EvaluationStep,
@@ -12,11 +12,14 @@ import {
 } from '../generated/graphql'
 import AsyncPlaceholder from './AsyncContainer'
 import SyntaxHighlighter from './code/SyntaxHighlighter'
-import { CodeViewerCard } from './CodeViewer'
+import {CodeViewerCard} from './CodeViewer'
 import './EvaluationResult.less'
+import './autograder/Points.less'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
-import { compare } from '../services/util'
+import {compare} from '../services/util'
 import SortSelect from './SortSelect'
+import PointsEdit from "./autograder/PointsEdit";
+import GradeView from "./autograder/GradeView";
 
 const { Text } = Typography
 
@@ -163,8 +166,20 @@ const EvaluationResult: React.FC<{ evaluationId: string }> = ({
   }
 
   const { evaluation } = result.data
+
+
+  const gradeView=(
+    <p className="grade-view-container">
+      <GradeView
+        evaluationId={evaluation.id}
+      />
+    </p>
+  )
+
+
+
   return (
-    <>
+    <>{gradeView? gradeView : null}
       {evaluation.steps.map(step => (
         <EvaluationStepPanel
           answerId={evaluation.answer.id}
@@ -172,6 +187,7 @@ const EvaluationResult: React.FC<{ evaluationId: string }> = ({
           key={step.id}
         />
       ))}
+
     </>
   )
 }
@@ -246,24 +262,40 @@ const EvaluationStepPanel: React.FC<{
     .sort(FeedbackSortMethods[sortValue])
     .map(renderFeedback)
 
+
+  const pointsField =(<p>
+    <PointsEdit
+      evaluationStepId={step.id}
+    />
+  </p>)
+
   let body
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
-      body = (
+      body = ([
         <Result
           icon={<Icon type="smile" theme="twoTone" />}
           title="All checks passed – good job!"
-        />
+        />,pointsField]
       )
     } else if (step.summary) {
-      body = <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>
+      body = [<SyntaxHighlighter>{step.summary}</SyntaxHighlighter>,pointsField]
     }
   } else {
-    body = <Collapse>{renderedFeedbackList}</Collapse>
+    body = [<Collapse>{renderedFeedbackList}</Collapse>,pointsField]
   }
 
   if (!body) {
-    body = <Empty />
+    if(step.result === EvaluationStepResult.Failed){
+      body = ([
+          <Result
+            icon={<Icon type="smile" theme="twoTone" />}
+            title="Most checks passed – good job!"
+          />,pointsField]
+      )
+    }else{
+      body = <Empty />
+    }
   }
 
   return (
