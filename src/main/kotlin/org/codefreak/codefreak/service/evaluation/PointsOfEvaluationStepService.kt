@@ -53,6 +53,17 @@ class PointsOfEvaluationStepService : BaseService(){
     }
     evaluationStepsRepository.saveAll(esList)
   }
+//  @PostConstruct
+//  fun checkFeedbacks(){
+//    feedbackRepository.findAll().toMutableList().map {
+//      LOG.info(
+//        "servity: " + it.severity!!.name +
+//        " is failed? "+ it.isFafiled +
+//            " status? " + it.status?.name
+//
+//      )
+//    }
+//  }
 
 
   /**
@@ -86,8 +97,12 @@ class PointsOfEvaluationStepService : BaseService(){
   /**
    * Get a save entity.
    */
-  fun getEvaluationStepId(id: UUID) : PointsOfEvaluationStep{
-    return poeRepository.findByEvaluationStep(evaluationStepsRepository.findById(id).get()).get()
+  fun getEvaluationStepId(id: UUID) : PointsOfEvaluationStep?{
+    return poeRepository.findByEvaluationStepId(id).let {
+      return if(it.isPresent) it.get()
+      else
+        null
+    }
   }
 
 
@@ -109,7 +124,7 @@ class PointsOfEvaluationStepService : BaseService(){
     es.result?.let {
       when(it){
         EvaluationStepResult.SUCCESS -> onSuccess(es)
-        EvaluationStepResult.FAILED -> onFailed(es)
+        EvaluationStepResult.FAILED -> onSuccess(es) //try it. Should be the same path if flaws were found
         EvaluationStepResult.ERRORED -> onErrored(es)
       }
     }
@@ -137,7 +152,7 @@ class PointsOfEvaluationStepService : BaseService(){
     val successfeedbacks = feedbackRepository.findByEvaluationStepAndStatusAndSeverityNot(es,Feedback.Status.SUCCESS,Feedback.Severity.INFO)
     LOG.info("We gathered ${successfeedbacks.size} Success Feedbacks")
     //Second feedbacks which failed in the first place
-    val failedFeedbacks = feedbackRepository.findByEvaluationStepAndStatusNot(es,Feedback.Status.FAILED)
+    val failedFeedbacks = feedbackRepository.findByEvaluationStepAndStatusNot(es,Feedback.Status.SUCCESS)
     LOG.info("We gathered ${failedFeedbacks.size} Failed Feedbacks")
 
     //merge both lists
@@ -171,16 +186,14 @@ class PointsOfEvaluationStepService : BaseService(){
    * If Result Errored
    */
   fun onErrored(es : EvaluationStep) {
-
+    //Nothings happen. Teacher has to take a look.
   }
 
   fun collectMistakes(finalList : List<Feedback>, gradeDefinition : GradeDefinition) : Float {
     var bOfT = 0f
     for(f in finalList){
       if(f.isFailed){
-        bOfT += gradeDefinition.pEvalMax
-      }
-      if(f.status == Feedback.Status.SUCCESS){
+//        bOfT += gradeDefinition.bOnCritical
         when(f.severity){
           Feedback.Severity.MINOR -> bOfT +=gradeDefinition.bOnMinor
           Feedback.Severity.MAJOR -> bOfT +=gradeDefinition.bOnMajor
@@ -188,6 +201,15 @@ class PointsOfEvaluationStepService : BaseService(){
           else -> LOG.info("Feedback shows no errors / flaws")
         }
       }
+      //Success seem to be always on Severity.INFO We wont recognize it that way
+//      if(f.status == Feedback.Status.SUCCESS){
+//        when(f.severity){
+//          Feedback.Severity.MINOR -> bOfT +=gradeDefinition.bOnMinor
+//          Feedback.Severity.MAJOR -> bOfT +=gradeDefinition.bOnMajor
+//          Feedback.Severity.CRITICAL -> bOfT +=gradeDefinition.bOnCritical
+//          else -> LOG.info("Feedback shows no errors / flaws")
+//        }
+//      }
     }
     return bOfT
   }

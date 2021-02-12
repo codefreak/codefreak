@@ -97,7 +97,7 @@ class GradeService : BaseService() {
    */
   private fun validateEvaluationSteps(steps : MutableList<EvaluationStep>) : Boolean{
     for(s in steps){
-      if(s.result!! != EvaluationStepResult.SUCCESS) return false
+      if(s.result!! == EvaluationStepResult.ERRORED) return false
     }
     return true
   }
@@ -124,11 +124,12 @@ class GradeService : BaseService() {
    * Returns the best answer if one exists.
    */
   fun getBestGradeOfAnswer(answer : UUID) : Grade?{
-    return if(gradeRepository.findFirstByAnswerIdOrderByGradePercentageDesc(answer).isPresent){
-      gradeRepository.findFirstByAnswerIdOrderByGradePercentageDesc(answer).get()
-    }else{
-      null
-    }
+    return gradeRepository.findFirstByAnswerIdOrderByGradePercentageDesc(answer).let {
+      if(it.isPresent)
+        it.get()
+      else
+        null
+      }
   }
 
   /**
@@ -156,5 +157,14 @@ class GradeService : BaseService() {
 //      evaluationRepository.save(evaluation)
       }
     return gradeRepository.findByEvaluation(evaluation).get()
+  }
+
+  fun findGrade(evaluation: Evaluation) : Grade?{
+    return gradeRepository.findByEvaluation(evaluation).let {
+      if(it.isPresent)
+        it.get()
+      else
+        null
+    }
   }
 }

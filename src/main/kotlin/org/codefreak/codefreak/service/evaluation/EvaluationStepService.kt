@@ -79,19 +79,23 @@ class EvaluationStepService {
   }
 
   fun startCalculation(step: EvaluationStep){
-    poeStepService.calculate(step)
+    val updatedStep = configureEvaluationStepForAutoGrading(step)
+    if(updatedStep.gradeDefinition!!.active)
+        poeStepService.calculate(step)
   }
 
   /**
    * This function should be called if a teacher has edited an invalid PointsOfEvaluation
-   * If he set up points from zero the and the pointsOfEvaluationStep is still errored / failed
-   * it will become successful.
+   * If he set up points from zero the and the pointsOfEvaluationStep is still errored
+   * it will become failed.
    */
   fun updateResultFromPointsOfEvaluationStep(poe : PointsOfEvaluationStep) : Boolean {
     return if(poe.edited){
-
-//      val step = stepRepository.findByPointsOfEvaluationStep(poe).get()
-      poe.evaluationStep.result = EvaluationStepResult.SUCCESS
+      if(poe.pOfE==poe.gradeDefinition.pEvalMax){
+        poe.evaluationStep.result = EvaluationStepResult.SUCCESS
+      }else{
+        poe.evaluationStep.result = EvaluationStepResult.FAILED
+      }
       stepRepository.save(poe.evaluationStep)
       true
     }else{
