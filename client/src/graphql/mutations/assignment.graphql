@@ -47,3 +47,7 @@ mutation UpdateAssignment(
     timeLimit: $timeLimit
   )
 }
+
+mutation UpdateAssignmentScoreboard($assignmentScoreboardInput : AssignmentScoreboardInput!){
+  assignmentScoreboard(input:$assignmentScoreboardInput)
+}
