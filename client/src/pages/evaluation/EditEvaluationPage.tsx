@@ -23,12 +23,12 @@ import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import {
   EvaluationRunner,
   EvaluationStepDefinitionInput,
-  GetEvaluationStepDefinitionsQueryResult,
+  GetEvaluationStepDefinitionsQueryResult, GradeDefinitionActiveInput,
   useCreateEvaluationStepDefinitionMutation,
   useDeleteEvaluationStepDefinitionMutation,
   useGetEvaluationStepDefinitionsQuery,
   useSetEvaluationStepDefinitionPositonMutation,
-  useUpdateEvaluationStepDefinitionMutation
+  useUpdateEvaluationStepDefinitionMutation, useUpdateGradeDefinitionStatusMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import { makeUpdater } from '../../services/util'
@@ -42,6 +42,7 @@ import {
 } from '../../services/time'
 import HelpTooltip from '../../components/HelpTooltip'
 import { debounce } from 'ts-debounce'
+import GradeDefinitionInputField from "../../components/autograder/GradeDefinitionInputField";
 
 type EvaluationStepDefinition = NonNullable<
   GetEvaluationStepDefinitionsQueryResult['data']
@@ -89,6 +90,15 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       messageService.success('Step updated')
     }
   })
+  const [UpdateGradeDefinitionActiveMutation] = useUpdateGradeDefinitionStatusMutation({
+    onCompleted: () => {
+      result.refetch()
+      messageService.success('autograder status updated')
+    }
+  })
+  const fetchForUpdate=()=>{
+    return result.refetch() as any
+  }
 
   const [createStep] = useCreateEvaluationStepDefinitionMutation()
 
@@ -172,6 +182,29 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         : undefined
       return updateTimeout(timeout)
     }
+
+
+
+    const gradeDefinitionActiveInput : GradeDefinitionActiveInput ={
+      id: definition.gradeDefinition.id,
+      active: definition.gradeDefinition.active
+    }
+
+    const onGradeActiveChange = (state : boolean) =>{
+      gradeDefinitionActiveInput.active = state
+      return UpdateGradeDefinitionActiveMutation({variables: {gradeDefinitionActiveInput}})
+    }
+
+
+
+    // const gradeUpdater = makeUpdater(gradeDefinitionInput,{gradeDefinitionInput})
+
+    // const updater = makeUpdater(definitionInput, input =>
+    //   updateMutation({ variables: { input } })
+    // )
+
+
+
     const cardProps: CardProps = {
       title: (
         <EditableTitle
@@ -257,6 +290,30 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 disabled={assignmentOpen && !sureToEdit}
               />
             </Descriptions.Item>
+            <Descriptions.Item>
+              <p>
+                <div>Automatic Grading</div>
+                <Switch
+                defaultChecked={gradeDefinitionActiveInput.active}
+                onChange={onGradeActiveChange}
+                disabled={assignmentOpen && !sureToEdit}/>
+              </p>
+              {(definition.gradeDefinition.active && (!sureToEdit)) ? (
+              <p>
+                <GradeDefinitionInputField
+                  gradeDefinition={definition.gradeDefinition}
+                  fetchForUpdate={fetchForUpdate}
+                  disable={assignmentOpen && !sureToEdit}
+                   // placeholder={
+                   //   gradeDefinitionInput
+                   //     ? defaultGradeDefinitionComponent()
+                   //     : undefined
+                   // }
+                />
+              </p>
+            ) : null}
+            </Descriptions.Item>
+
             {runner.stoppable ? (
               <Descriptions.Item
                 label={
@@ -387,5 +444,7 @@ const renderAddStepButton = (
     />
   )
 }
+
+
 
 export default EditEvaluationPage
