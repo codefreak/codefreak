@@ -1,0 +1,48 @@
+.grade-definition-input {
+  display: inline-block;
+  //display: flex;
+
+  .ant-switch {
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+
+  .grade-definition-input-numbers {
+    display: flex;
+
+    .ant-input-number {
+      width: 70px;
+
+      &:not(:first-of-type) {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left-width: 0;
+      }
+
+      &:not(:last-of-type) {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+      .ant-input-number-handler-wrap {
+        opacity: 1;
+      }
+    }
+  }
+  .grade-definition-input-edit{
+    display:flex;
+    justify-content: space-between;
+  }
+}
+
+.grade-definition-unlock{
+  display: inline-block;
+  //display: flex;
+
+
+  .ant-switch {
+    margin-right: 5px;
+    margin-top: 5px;
+  }
+}
+
+
