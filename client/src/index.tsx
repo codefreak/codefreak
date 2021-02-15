@@ -25,9 +25,9 @@ const renderApp = () => {
     websocket.connect()
   }
 
-  const onUserChanged = () => {
+  const onUserChanged = async () => {
     resetWebsocket()
-    apolloClient.clearStore()
+    await apolloClient.clearStore()
   }
 
   return (

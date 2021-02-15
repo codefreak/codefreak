@@ -66,10 +66,10 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
   }
 
   if (authenticatedUser === undefined) {
-    const onLogin = (user: AuthenticatedUser) => {
+    const onLogin = async (user: AuthenticatedUser) => {
       messageService.success(`Welcome back, ${displayName(user)}!`)
+      await onUserChanged()
       setAuthenticatedUser(user)
-      onUserChanged()
     }
     return <LoginPage onSuccessfulLogin={onLogin} />
   }
