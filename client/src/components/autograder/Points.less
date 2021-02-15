@@ -1,0 +1,43 @@
+.points-view {
+  float: right;
+  padding: 1em;
+  margin: 1em;
+  //background-color: rgba(240,242,245,1.0);
+  color:#52c41a;
+  background: #f6ffed;
+  border-color:#b7eb8f;
+
+}
+
+.points-view-yellow{
+  background-color: #1890ff;
+}
+
+.points-edit {
+  float: right;
+  padding: 1em;
+  margin: 1em;
+  .ant-switch{
+    margin-left: 1em;
+    margin-right: 1em;
+  }
+  .ant-input-number {
+    width: 70px;
+
+    &:not(:first-of-type) {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-left-width: 0;
+    }
+
+    &:not(:last-of-type) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .ant-input-number-handler-wrap {
+      opacity: 1;
+    }
+  }
+
+}
