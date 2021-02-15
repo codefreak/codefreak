@@ -1,0 +1,58 @@
+---
+title: "Laboraufgabe 2.3"
+description: "# Laboraufgabe 2.3\n---\n#### Code - `main.c`:\n - Schreiben Sie ein\
+  \ Programm, das den Benutzer auffordert, seinen Vornamen,\nNachnamen, Geburtsdatum\
+  \ und Steuersatz nacheinander in getrennten Eingaben\neinzugeben. Das Programm soll\
+  \ jedoch nur den ersten Buchstaben des\nVornamens, den Nachnamen auf exakt 8 Buchstaben,\
+  \ das Geburtsdatum und den\nSteuersatz speichern, um diese Werte dann in einem gegebenen\
+  \ Format wieder\nauf dem Bildschirm auszugeben.\nDer Programmlauf sollte dabei wie\
+  \ folgt aussehen:\n\n\n    Bitte geben Sie Ihren Vornamen ein: Donald\n    Bitte\
+  \ geben Sie Ihren Nachnamen ein (mit Leerzeichen auf 8 Buchstaben):\n    Duck\n\
+  \    Bitte geben Sie Ihr Geburtsdatum im Format dd.mm.yyyy ein: 12.3.1876\n    Bitte\
+  \ geben Sie Ihren Steuersatz ein: 48.9\n    **********************\n    Name: D.\
+  \ Duck\n    Geburtsdatum: 12.3.1876\n    Steuersatz: 48.90\n    \nHierzu einige\
+  \ Erläuterungen:\n\n - Lesen Sie die Eingabe des Vornamens mit scanf in eine einzelne\
+  \ char\nVariable ein; danach sollte der (gesuchte) erste Buchstabe des Vornamens\n\
+  in dieser Variable stehen. Ein Problem ist, dass die weiteren Buchstaben\ndes Vornamens\
+  \ nun noch im Puffer des Eingabestroms stehen. Diese\nweiteren Buchstaben würden\
+  \ bei den folgenden scanf-Befehlen in die\njeweiligen nächsten Variablen eingelesen\
+  \ und folglich Probleme bereiten.\nDaher können Sie die zusätzlichen Buchstaben\
+  \ des\nVornamens entfernen, indem Sie den Puffer des Eingabestroms nach der\nEingabe\
+  \ des Vornamens mit gegebenen `clean()` Funktion leeren.\nACHTUNG: Der Befehl „\
+  `fflush()`“ funktioniert nicht auf Linux-Systemen!\nErläuterungen zu `fflush` finden\
+  \ Sie auch im Buch „C von A bis Z“ von Jürgen\nWolf.\n\n - Der Nachname soll „vollstä\
+  ndig“ eingelesen werden. Da wir noch keine\nZeichenketten einlesen können, nehmen\
+  \ Sie bitte zur Vereinfachung an,\ndass der Nachname aus exakt 8 Buchstaben besteht.\
+  \ Falls der tatsächliche\nNachname länger ist, werden die folgenden Buchstaben der\
+  \ Eingabe\neinfach ignoriert (also nach dem scanf-Befehl wieder – wie oben –\n`clean()`;\
+  \ einfügen). Falls der tatsächliche Nachname kürzer ist als 8\nBuchstaben, müssen\
+  \ bei der Eingabe zusätzliche Leerzeichen eingefügt\nwerden, so dass insgesamt genau\
+  \ 8 Buchstaben eingegeben werden.\n\n - Bei der Ausgabe soll der Name als \\<erster\
+  \ Buchstabe Vorname\\>.\n\\<Nachname\\> ausgegeben werden (Beispiel siehe oben).\
+  \ Der Nachname besteht\n bei der Ausgabe aus exakt den 8 gespeicherten Buchstaben\
+  \ des\nNachnamens.\n\n - Das Geburtsdatum soll im Format dd.mm.yyyy eingegeben und\
+  \ später\nauch wieder ausgegeben werden."
+hidden:
+- "**/*_test.py"
+- ".codeclimate.yml"
+- "requirements.txt"
+- "headercheck.py"
+- "Exercise.txt"
+- "args.txt"
+protected: []
+evaluation:
+- step: "codeclimate"
+  options: {}
+  title: "Code Quality"
+- step: "junit"
+  options:
+    commands:
+    - "pip install -r requirements.txt"
+    - "pytest --junitxml=test-results/TEST-suite.xml main_test.py"
+    image: "python:3.7"
+    project-path: "/code"
+    results-path: "test-results"
+  title: "Unit Tests"
+- step: "comments"
+  options: {}
+  title: "Comments"

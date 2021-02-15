@@ -1,8 +1,5 @@
-title: "Sample Assignment"
+title: "Labor 2 - Gruppen 1, 3, 5"
 tasks:
-  - java-add
-  - java-add
-  - java-add
-  - c-add
-  - c-add
-  - c-add
+  - "task-0"
+  - "task-1"
+  - "task-2"
