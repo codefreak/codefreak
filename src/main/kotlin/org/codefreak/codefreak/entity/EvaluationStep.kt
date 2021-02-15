@@ -10,6 +10,7 @@ import javax.persistence.FetchType
 import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 
 /**
@@ -25,6 +26,7 @@ class EvaluationStep(
   var evaluation: Evaluation,
 
   @Enumerated(EnumType.STRING)
+  @ColumnDefault("'FINISHED'")
   var status: EvaluationStepStatus
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluationStep", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
