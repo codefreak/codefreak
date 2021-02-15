@@ -57,7 +57,6 @@ class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: Res
     objectMapper.writeValueAsString(definition.options)
   }
   val runner by lazy {
-    ctx.authorization.requireAuthority(Authority.ROLE_TEACHER)
     ctx.serviceAccess.getService(EvaluationService::class).getEvaluationRunner(runnerName).let { EvaluationRunnerDto(it) }
   }
   val timeout = definition.timeout
