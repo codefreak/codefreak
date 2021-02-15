@@ -56,3 +56,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20210125113533-add-evaluationstep-timestamps.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20210215184015-evaluation-settings-from-default.yaml
+    relativeToChangelogFile: true

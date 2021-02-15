@@ -1,0 +1,10 @@
+databaseChangeLog:
+- changeSet:
+    id: 1613410830555-1
+    author: hkasch (generated)
+    changes:
+    - addDefaultValue:
+        columnDataType: timestamp
+        columnName: evaluation_settings_from
+        defaultValue: "1970-01-01 00:00:00"
+        tableName: evaluation
