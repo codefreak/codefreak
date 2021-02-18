@@ -25,8 +25,13 @@ const renderApp = () => {
     websocket.connect()
   }
 
-  const onUserChanged = async () => {
-    resetWebsocket()
+  const onUserChanged = async (type: 'login' | 'logout') => {
+    // on logout the server will close the connection and apollo will reconnect
+    // automatically. On login we have to reconnect because we just received our
+    // cookie from the server and this will be passed to the server when reconnecting
+    if (type === 'login') {
+      resetWebsocket()
+    }
     await apolloClient.clearStore()
   }
 

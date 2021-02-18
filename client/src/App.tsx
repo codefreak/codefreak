@@ -32,46 +32,61 @@ import { noop } from './services/util'
 import { HideNavigationProvider } from './hooks/useHideNavigation'
 import LoadingIndicator from './components/LoadingIndicator'
 
-const App: React.FC<{ onUserChanged?: () => void }> = props => {
+interface AppProps {
+  /**
+   * Will be called immediately after either a login our logout mutation has been
+   * performed.
+   */
+  onUserChanged?: (type: 'login' | 'logout') => Promise<void>
+}
+
+const App: React.FC<AppProps> = props => {
   const onUserChanged = props.onUserChanged || noop
   const [
     authenticatedUser,
     setAuthenticatedUser
   ] = useState<AuthenticatedUser>()
   const timeOffset = useCalculatedServerTimeOffset()
-
+  const [loggingOut, setLoggingOut] = useState<boolean>(false)
   const { data: authResult, loading } = useGetAuthenticatedUserQuery({
     context: { disableGlobalErrorHandling: true },
     fetchPolicy: 'network-only'
   })
+  const [logoutMutation] = useLogoutMutation()
 
-  const [logout, { data: logoutSucceeded }] = useLogoutMutation()
-
+  // the user might already been authenticated. We query the backend for the
+  // current user and while the auth status is undefined we will show a spinner
   useEffect(() => {
     if (authResult !== undefined) {
       setAuthenticatedUser(authResult.me)
     }
   }, [authResult])
 
-  useEffect(() => {
-    if (logoutSucceeded) {
-      messageService.success('Successfully signed out. Goodbye 👋')
-      setAuthenticatedUser(undefined)
-      onUserChanged()
-    }
-  }, [logoutSucceeded, onUserChanged])
-
   if (loading || timeOffset === undefined) {
     return <LoadingIndicator />
   }
 
-  if (authenticatedUser === undefined) {
+  // this will show the login dialog while logout is in progress with all
+  // fields disabled. Otherwise the user would not get any feedback after
+  // clicking the logout button
+  if (loggingOut || authenticatedUser === undefined) {
     const onLogin = async (user: AuthenticatedUser) => {
+      await onUserChanged('login')
       messageService.success(`Welcome back, ${displayName(user)}!`)
-      await onUserChanged()
       setAuthenticatedUser(user)
     }
-    return <LoginPage onSuccessfulLogin={onLogin} />
+    return <LoginPage loggingOut={loggingOut} onSuccessfulLogin={onLogin} />
+  }
+
+  const logout = async () => {
+    // show the login dialog immediately after clicking logout. Both, the logout
+    // mutation and onUserChanged() may take some time to complete.
+    setLoggingOut(true)
+    await logoutMutation()
+    await onUserChanged('logout')
+    setAuthenticatedUser(undefined)
+    messageService.success('Successfully signed out. Goodbye 👋')
+    setLoggingOut(false)
   }
 
   const routes: MenuDataItem[] = []
