@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@ant-design/pro-layout": "5.0.19",
-    "@ant-design/icons": "4.4.0",
+    "@ant-design/icons": "4.5.0",
     "@apollo/client": "3.3.7",
     "@codefreak/docs": "file:../docs",
     "@craco/craco": "6.1.1",
