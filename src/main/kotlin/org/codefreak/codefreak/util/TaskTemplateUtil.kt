@@ -3,7 +3,7 @@ package org.codefreak.codefreak.util
 import org.springframework.core.io.ClassPathResource
 
 enum class TaskTemplate {
-  JAVA, PYTHON, CSHARP, JAVASCRIPT
+  JAVA, PYTHON, CSHARP, JAVASCRIPT, CPP
 }
 
 object TaskTemplateUtil {

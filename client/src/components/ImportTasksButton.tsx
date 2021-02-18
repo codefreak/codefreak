@@ -8,6 +8,7 @@ import { UploadOutlined } from '@ant-design/icons'
 import { Alert, Button, Modal } from 'antd'
 import FileImport from './FileImport'
 import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
+import { supportedArchiveExtensions } from '../services/file'
 
 interface ImportTasksButtonProps {
   onImportCompleted: (
@@ -79,6 +80,7 @@ const ImportTasksButton = (props: ImportTasksButtonProps) => {
           onUpload={onUpload}
           importing={importing}
           onImport={onImport}
+          acceptedTypes={supportedArchiveExtensions}
         />
       </Modal>
     </>

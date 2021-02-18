@@ -6,6 +6,7 @@ import React, { useCallback, useState } from 'react'
 import useSystemConfig from '../hooks/useSystemConfig'
 import { messageService } from '../services/message'
 import Centered from './Centered'
+import { findFilesWithInvalidExtension } from '../services/file'
 
 const { Dragger } = Upload
 
@@ -14,6 +15,7 @@ interface FileImportProps {
   onUpload: (files: File[]) => void
   importing: boolean
   onImport: (url: string) => void
+  acceptedTypes?: string[]
 }
 
 const FileImport: React.FC<FileImportProps> = props => {
@@ -25,6 +27,20 @@ const FileImport: React.FC<FileImportProps> = props => {
     (file: RcFile, fileList: RcFile[]) => {
       // this function is called for every file
       if (fileList.indexOf(file) === 0) {
+        // The user might have switched to 'all files' instead of 'supported types' in the upload dialog
+        if (props.acceptedTypes) {
+          const invalidFiles = findFilesWithInvalidExtension(
+            fileList.map(f => f.name),
+            props.acceptedTypes
+          )
+          if (invalidFiles.length > 0) {
+            messageService.error(
+              `The following files have unsupported types: ${invalidFiles}`
+            )
+            return false
+          }
+        }
+
         if (maxFileSize && file.size > maxFileSize) {
           messageService.error(
             `Selected file is too large. Maximum allowed size is ${filesize(
@@ -37,7 +53,7 @@ const FileImport: React.FC<FileImportProps> = props => {
       }
       return false
     },
-    [onUpload, maxFileSize]
+    [onUpload, maxFileSize, props.acceptedTypes]
   )
 
   const onUrlChange = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -49,6 +65,7 @@ const FileImport: React.FC<FileImportProps> = props => {
       <Col span={12}>
         <Dragger
           multiple
+          accept={props.acceptedTypes?.join(',')}
           showUploadList={false}
           beforeUpload={beforeUpload}
           disabled={uploading}
