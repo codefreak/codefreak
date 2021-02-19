@@ -29,6 +29,7 @@
 * Assignments can now be imported from the assignment list (#787)
 * When creating an assignment users can now directly set the title and tasks (#787)
 * Create project directory in IDE container before extracting files
+* Add task template for C++
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)

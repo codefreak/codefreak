@@ -1,11 +1,11 @@
 import { EvaluationStepStatus } from '../generated/graphql'
-import useAnswerEvaluation from './useAnswerEvaluation'
+import useLiveAnswerEvaluation from './useLiveAnswerEvaluation'
 
 const useEvaluationStatus = (
   answerId: string,
   initialStatus?: EvaluationStepStatus
 ) => {
-  const { evaluationStatus } = useAnswerEvaluation(answerId)
+  const { evaluationStatus } = useLiveAnswerEvaluation(answerId)
   return evaluationStatus || initialStatus
 }
 

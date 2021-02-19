@@ -15,6 +15,11 @@ const ALL_TEMPLATES: {
     description: '.NET, NUnit, Code Climate',
     logo: require('devicon/icons/csharp/csharp-plain.svg')
   },
+  CPP: {
+    title: 'C++',
+    description: 'Google Test (gtest)',
+    logo: require('devicon/icons/cplusplus/cplusplus-plain.svg')
+  },
   JAVA: {
     title: 'Java',
     description: 'JUnit, Code Climate',
