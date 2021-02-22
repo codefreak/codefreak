@@ -1,5 +1,5 @@
 import React from 'react'
-import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
+import useLiveAnswerEvaluation from '../hooks/useLiveAnswerEvaluation'
 import { Alert, Result } from 'antd'
 import EvaluationResult from './EvaluationResult'
 import StartEvaluationButton from './StartEvaluationButton'
@@ -13,7 +13,7 @@ export interface LatestEvaluationProps {
 
 const LatestEvaluation: React.FC<LatestEvaluationProps> = props => {
   const { answerId, showTrigger } = props
-  const { latestEvaluation, loading } = useAnswerEvaluation(answerId)
+  const { latestEvaluation, loading } = useLiveAnswerEvaluation(answerId)
 
   if (loading) {
     return <LoadingIndicator />
