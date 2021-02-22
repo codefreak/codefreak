@@ -33,7 +33,7 @@ The following command will start the latest development version of Code FREAK ba
 
 ```shell script
 docker run -it --rm \
-    -eSPRING_PROFILES_ACTIVE=dev \
+    -e SPRING_PROFILES_ACTIVE=dev \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -p 8080:8080 \
     cfreak/codefreak:canary
