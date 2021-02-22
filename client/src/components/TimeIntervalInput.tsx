@@ -10,8 +10,8 @@ const renderTimeIntervalInput = (
   onChange: (value: number | string) => void,
   additionalProps: InputNumberProps = {}
 ) => {
-  const onChangeDefinitely = (val: string | number | undefined) =>
-    val !== undefined ? onChange(val) : undefined
+  const onChangeDefinitely = (val?: string | number | null) =>
+    val !== undefined && val !== null ? onChange(val) : undefined
 
   const parser = (val: string | undefined) => {
     if (!val) {
