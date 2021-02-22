@@ -31,15 +31,29 @@ We currently only support installation via Docker. The image name is [`cfreak/co
 You can try out Code FREAK locally. The only requirement is a working installation of Docker on your computer.
 The following command will start the latest development version of Code FREAK based on the `master` branch.
 
+**Docker for Windows / MacOS**
 ```shell script
 docker run -it --rm \
     -e SPRING_PROFILES_ACTIVE=dev \
+    # host.docker.internal is a special hostname of the host machine on Docker for Windows/MacOS
+    -e CODEFREAK_REVERSE_PROXY_URL="http://host.docker.internal" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -p 8080:8080 \
     cfreak/codefreak:canary
 ```
 
-The UI is accessible at http://localhost:8080.
+**Docker on Linux**
+```shell script
+docker run -it --rm \
+    -e SPRING_PROFILES_ACTIVE=dev \
+    # This will pick the gateway IP of the default network which is the IP of your host machine
+    -e CODEFREAK_REVERSE_PROXY_URL="http://$(docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}')" \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -p 8080:8080 \
+    cfreak/codefreak:canary
+```
+
+Afterwards, the UI is accessible in your browser at http://localhost:8080.
 Log in using `teacher` and password `123`.
 Additionally, the users `admin` and `student` are available with their corresponding roles and the same password `123`.
 Using the "dev" environment will seed the database with some example assignments and tasks.
