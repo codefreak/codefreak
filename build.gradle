@@ -188,7 +188,7 @@ jib {
     // set image build date to current timestamp
     creationTime = "USE_CURRENT_TIMESTAMP"
     environment = [
-      ENV: "prod",
+      // default active profile is "dev"
       SPRING_PROFILES_ACTIVE: "prod",
       SENTRY_ENVIRONMENT: "prod",
       SENTRY_RELEASE: project.version.toString()
