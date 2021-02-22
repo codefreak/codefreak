@@ -35,7 +35,6 @@ The following command will start the latest development version of Code FREAK ba
 ```shell script
 docker run -it --rm \
     -e SPRING_PROFILES_ACTIVE=dev \
-    # host.docker.internal is a special hostname of the host machine on Docker for Windows/MacOS
     -e CODEFREAK_REVERSE_PROXY_URL="http://host.docker.internal" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -p 8080:8080 \
@@ -46,7 +45,6 @@ docker run -it --rm \
 ```shell script
 docker run -it --rm \
     -e SPRING_PROFILES_ACTIVE=dev \
-    # This will pick the gateway IP of the default network which is the IP of your host machine
     -e CODEFREAK_REVERSE_PROXY_URL="http://$(docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}')" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -p 8080:8080 \
