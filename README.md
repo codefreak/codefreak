@@ -31,23 +31,11 @@ We currently only support installation via Docker. The image name is [`cfreak/co
 You can try out Code FREAK locally. The only requirement is a working installation of Docker on your computer.
 The following command will start the latest development version of Code FREAK based on the `master` branch.
 
-**Docker for Windows / MacOS**
 ```shell script
 docker run -it --rm \
+    --network=host \
     -e SPRING_PROFILES_ACTIVE=dev \
-    -e CODEFREAK_REVERSE_PROXY_URL="http://host.docker.internal" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -p 8080:8080 \
-    cfreak/codefreak:canary
-```
-
-**Docker on Linux**
-```shell script
-docker run -it --rm \
-    -e SPRING_PROFILES_ACTIVE=dev \
-    -e CODEFREAK_REVERSE_PROXY_URL="http://$(docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}')" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -p 8080:8080 \
     cfreak/codefreak:canary
 ```
 
