@@ -7,15 +7,15 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-class EvaluationStepWriter : ItemWriter<EvaluationStep> {
+class EvaluationStepWriter : ItemWriter<EvaluationStep?> {
 
   @Autowired
   private lateinit var evaluationStepService: EvaluationStepService
 
   @Transactional
-  override fun write(items: MutableList<out EvaluationStep>) {
-    for (step in items) {
-      // cascade persist the un
+  override fun write(items: MutableList<out EvaluationStep?>) {
+    // if the application shuts down the processor might return null
+    items.filterNotNull().forEach { step ->
       evaluationStepService.saveEvaluationStep(step)
     }
   }
