@@ -58,7 +58,9 @@ class EvaluationQueue : StepExecutionListener {
     val params = buildJobParameters(step)
     jobLauncher.run(job, params)
     step.queuedAt = Instant.now()
-    evaluationStepService.updateEvaluationStepStatus(step, EvaluationStepStatus.QUEUED)
+    // Warning: the step entity is detached because of Propagation.NOT_SUPPORTED (citation needed)
+    // by passing only the id this will cause a re-fetch from the database
+    evaluationStepService.updateEvaluationStepStatus(step.id, EvaluationStepStatus.QUEUED)
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)

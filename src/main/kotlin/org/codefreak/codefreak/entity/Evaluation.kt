@@ -25,7 +25,7 @@ class Evaluation(
   @ColumnDefault("1970-01-01 00:00:00")
   var evaluationSettingsFrom: Instant
 ) : BaseEntity() {
-  @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL], orphanRemoval = true)
   var evaluationSteps = mutableSetOf<EvaluationStep>()
 
   /**
