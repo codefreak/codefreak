@@ -29,7 +29,6 @@ class User(private val username: String) : BaseEntity(), UserDetails, Credential
   var password: String? = null
     @JvmName("_getPassword") get
 
-  fun getDisplayName() = listOfNotNull(firstName, lastName).ifEmpty { listOf(username) }.joinToString(" ")
   override fun getUsername() = username
   override fun getPassword() = password
   override fun getAuthorities() = roles.flatMap { it.allGrantedAuthorities }.toMutableList()

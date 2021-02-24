@@ -30,6 +30,7 @@
 * When creating an assignment users can now directly set the title and tasks (#787)
 * Create project directory in IDE container before extracting files
 * Add task template for C++
+* Expose environment variables with information about the answer and user for commandline and junit runner
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)

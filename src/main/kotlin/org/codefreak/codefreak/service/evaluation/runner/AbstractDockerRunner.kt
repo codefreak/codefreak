@@ -33,4 +33,20 @@ abstract class AbstractDockerRunner : StoppableEvaluationRunner {
       ContainerService.LABEL_PREFIX + "eval.runner" to getName(),
       ContainerService.LABEL_PREFIX + "eval.answer-id" to answer.id.toString()
   )
+
+  protected fun buildEnvVariables(answer: Answer): List<String> {
+    val submission = answer.submission
+    val user = submission.user
+    return listOf(
+        "CI=true",
+        "CODEFREAK_USER_USERNAME=${user.usernameCanonical}",
+        "CODEFREAK_USER_FIRST_NAME=${user.firstName}",
+        "CODEFREAK_USER_LAST_NAME=${user.lastName}",
+        "CODEFREAK_USER_ID=${user.id}",
+        "CODEFREAK_ANSWER_ID=${answer.id}",
+        "CODEFREAK_TASK_ID=${answer.task.id}",
+        "CODEFREAK_SUBMISSION_ID=${submission.id}",
+        "CODEFREAK_ASSIGNMENT_ID=${submission.assignment?.id ?: ""}"
+    )
+  }
 }
