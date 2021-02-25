@@ -7,7 +7,6 @@ import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
 import AssignmentStatusTag from './AssignmentStatusTag'
 import EntityLink from './EntityLink'
 import Authorized from './Authorized'
-import React from 'react'
 import {
   AssignmentStatus,
   GetAssignmentListQueryResult
