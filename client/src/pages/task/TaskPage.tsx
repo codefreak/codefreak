@@ -270,6 +270,12 @@ const TaskPage: React.FC = () => {
     renderTimeLimit()
   ].filter((it): it is React.ReactElement<TagType> => it !== undefined)
 
+  const goToAssignment = () => {
+    if (assignment) {
+      history.push(getEntityPath(assignment))
+    }
+  }
+
   return (
     <DifferentUserContext.Provider value={differentUser}>
       <SetTitle>{task.title}</SetTitle>
@@ -291,6 +297,7 @@ const TaskPage: React.FC = () => {
             {teacherControls} {buttons}
           </>
         }
+        onBack={goToAssignment}
       />
       <Switch>
         <Route exact path={path}>
