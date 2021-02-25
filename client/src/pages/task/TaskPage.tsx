@@ -45,7 +45,7 @@ import {
   useGetTaskQuery,
   useUpdateTaskMutation
 } from '../../services/codefreak-api'
-import { getEntityPath } from '../../services/entity-path'
+import { BASE_PATHS, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
@@ -270,6 +270,13 @@ const TaskPage: React.FC = () => {
     renderTimeLimit()
   ].filter((it): it is React.ReactElement<TagType> => it !== undefined)
 
+  const goToAssignment = () => {
+    const previousPath = assignment
+      ? getEntityPath(assignment)
+      : BASE_PATHS.Task + '/pool'
+    history.push(previousPath)
+  }
+
   return (
     <DifferentUserContext.Provider value={differentUser}>
       <SetTitle>{task.title}</SetTitle>
@@ -291,6 +298,7 @@ const TaskPage: React.FC = () => {
             {teacherControls} {buttons}
           </>
         }
+        onBack={goToAssignment}
       />
       <Switch>
         <Route exact path={path}>

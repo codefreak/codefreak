@@ -32,6 +32,7 @@
 * Create project directory in IDE container before extracting files
 * Add task template for C++
 * Expose environment variables with information about the answer and user for commandline and junit runner
+* Add a button to the task page to get back to the assignment (#844)
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)
