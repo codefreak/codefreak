@@ -28,6 +28,7 @@
 * Evaluation time is shown in real time and elapsed time after completion
 * Assignments can now be imported from the assignment list (#787)
 * When creating an assignment users can now directly set the title and tasks (#787)
+* Reschedule non-finished evaluation steps on backend startup (#804)
 * Create project directory in IDE container before extracting files
 * Add task template for C++
 * Expose environment variables with information about the answer and user for commandline and junit runner

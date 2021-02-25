@@ -3,9 +3,12 @@ package org.codefreak.codefreak.util
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.Optional
+import java.util.UUID
 import org.apache.commons.io.input.ProxyInputStream
 import org.apache.commons.io.output.ProxyOutputStream
+import org.codefreak.codefreak.config.EvaluationConfiguration
 import org.slf4j.Logger
+import org.springframework.batch.core.JobParameters
 
 fun String.withoutTrailingSlash(): String = trimEnd('/')
 fun String.withTrailingSlash(): String = if (endsWith("/")) this else "$this/"
@@ -42,3 +45,6 @@ fun <T> Optional<T>.orNull(): T? = orElse(null)
  */
 val <T> T.exhaustive: T
   get() = this
+
+val JobParameters.evaluationStepId: UUID?
+  get() = getString(EvaluationConfiguration.PARAM_EVALUATION_STEP_ID)?.let { id -> UUID.fromString(id) }

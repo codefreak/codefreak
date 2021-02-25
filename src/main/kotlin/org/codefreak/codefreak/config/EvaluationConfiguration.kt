@@ -67,7 +67,7 @@ class EvaluationConfiguration {
   ): Job {
 
     val step = stepBuilderFactory.get(STEP_NAME)
-        .chunk<EvaluationStep, EvaluationStep>(5)
+        .chunk<EvaluationStep, EvaluationStep?>(5)
         .reader(reader)
         .processor(processor)
         .writer(writer)

@@ -21,8 +21,8 @@ abstract class AbstractDockerRunner : StoppableEvaluationRunner {
       log.debug("Cannot find any evaluation container of type ${getName()} for answer ${answer.id}")
       return
     }
-    log.debug("Stopping container $containerId running step ${getName()} for answer ${answer.id}")
-    containerService.stopContainer(containerId, 2)
+    log.debug("Removing container $containerId running step ${getName()} for answer ${answer.id}")
+    containerService.removeContainer(containerId, force = true, removeVolumes = true)
   }
 
   private fun getEvalContainerListParams(answer: Answer) = getContainerLabelMap(answer).entries.map { (key, value) ->
