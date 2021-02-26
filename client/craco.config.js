@@ -1,5 +1,4 @@
 const CracoAntDesignPlugin = require('craco-antd')
-const CracoRawLoaderPlugin = require('craco-raw-loader')
 const CracoSvgReactLoaderPlugin = require('./craco/craco-svg-loader-plugin')
 const CracoDefinePlugin = require('./craco/craco-define-plugin')
 const GitRevisionPlugin = require('git-revision-webpack-plugin')
@@ -20,7 +19,6 @@ const createBuildDefinitions = () => {
 module.exports = {
   plugins: [
     { plugin: CracoAntDesignPlugin },
-    { plugin: CracoRawLoaderPlugin, options: { test: /\.adoc$/ } },
     {
       plugin: CracoSvgReactLoaderPlugin,
       options: {
@@ -30,7 +28,12 @@ module.exports = {
     {
       plugin: CracoDefinePlugin,
       options: {
-        definitions: [createBuildDefinitions]
+        definitions: [
+          createBuildDefinitions,
+          {
+            'process.env.CODEFREAK_DOCS_BASE_URL': JSON.stringify('https://docs.codefreak.org/codefreak/')
+          }
+        ]
       }
     }
   ]
