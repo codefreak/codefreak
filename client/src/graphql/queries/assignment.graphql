@@ -8,6 +8,7 @@ query GetAssignmentList {
       ...publicUserFields
     }
     createdAt
+    updatedAt
     deadline
     openFrom
     tasks {

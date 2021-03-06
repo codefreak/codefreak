@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: 1615041814776-1
+    author: hannes (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: updated_at
+            type: timestamp
+        tableName: assignment
+
