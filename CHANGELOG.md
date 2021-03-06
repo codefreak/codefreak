@@ -33,6 +33,7 @@
 * Add task template for C++
 * Expose environment variables with information about the answer and user for commandline and junit runner
 * Add a button to the task page to get back to the assignment (#844)
+* Assignments show the dates they were created and last updated (#865)
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)
