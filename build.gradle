@@ -62,7 +62,7 @@ dependencies {
   implementation 'org.liquibase:liquibase-core:4.3.1'
   implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:7.2.0'
   implementation 'com.expediagroup:graphql-kotlin-spring-server:2.1.2'
-  implementation 'com.vladmihalcea:hibernate-types-52:2.10.2'
+  implementation 'com.vladmihalcea:hibernate-types-52:2.10.3'
   implementation 'com.github.codefreak:templates:1.4.1'
   implementation 'com.networknt:json-schema-validator:1.0.49'
   implementation 'javax.validation:validation-api:2.0.1.Final'
