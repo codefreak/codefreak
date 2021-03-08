@@ -47,5 +47,5 @@ task bundle(type: NpmTask) {
 
 // set the version in package.json to the same version as the gradle project
 task updateVersionFromGradle(type: NpmTask) {
-  args = ['version', rootProject.version.toString()]
+  args = ['version', '--no-git-tag-version', rootProject.version.toString()]
 }
