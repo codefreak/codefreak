@@ -14,6 +14,7 @@ import {
 import { compare } from '../services/util'
 import { matches } from '../services/strings'
 import { displayName } from '../services/user'
+import RelativeDateTime from './RelativeDateTime'
 
 const { confirm } = Modal
 
@@ -94,6 +95,18 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
     </span>
   )
 
+  const createdAtTag = (
+    <span style={{ marginRight: '1em' }}>
+      Created: <RelativeDateTime date={new Date(assignment.createdAt)} />
+    </span>
+  )
+
+  const updatedAtTag = (
+    <span style={{ marginRight: '1em' }}>
+      Updated: <RelativeDateTime date={new Date(assignment.updatedAt)} />
+    </span>
+  )
+
   return (
     <Card
       title={
@@ -105,7 +118,11 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
       style={{ marginBottom: 16 }}
       extra={
         <>
-          <Authorized authority={'ROLE_ADMIN'}>{authorTag}</Authorized>
+          <Authorized authority="ROLE_ADMIN">{authorTag}</Authorized>
+          <Authorized authority="ROLE_TEACHER">
+            {createdAtTag}
+            {updatedAtTag}
+          </Authorized>
           {assignment.deletable ? (
             <Tooltip title={'Delete assignment'} placement="left">
               <Button
