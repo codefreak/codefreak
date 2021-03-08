@@ -1,6 +1,6 @@
 {
   "name": "@codefreak/codefreak",
-  "version": "0.1.0",
+  "version": "5.0.3",
   "private": true,
   "dependencies": {
     "@ant-design/icons": "4.5.0",
