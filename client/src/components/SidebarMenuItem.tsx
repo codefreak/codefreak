@@ -11,7 +11,7 @@ export interface SidebarMenuItemProps {
  * Custom menu item that renders internal links as react-router links
  * and external links with proper target and rel attributes
  */
-export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = props => {
+const SidebarMenuItem: React.FC<SidebarMenuItemProps> = props => {
   const { isUrl, path, target, children } = props
 
   if (isUrl) {
@@ -28,3 +28,5 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = props => {
 
   return <Link to={path}>{children}</Link>
 }
+
+export default SidebarMenuItem

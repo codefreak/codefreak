@@ -16,7 +16,7 @@ import './DefaultLayout.less'
 import Logo from './Logo'
 import RightHeader from './RightHeader'
 import { useHideNavigation } from '../hooks/useHideNavigation'
-import { SidebarMenuItem } from './SidebarMenuItem'
+import SidebarMenuItem from './SidebarMenuItem'
 
 export const appName = 'Code FREAK'
 
