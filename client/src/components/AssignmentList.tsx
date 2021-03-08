@@ -118,9 +118,11 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
       style={{ marginBottom: 16 }}
       extra={
         <>
-          <Authorized authority={'ROLE_ADMIN'}>{authorTag}</Authorized>
-          {createdAtTag}
-          {updatedAtTag}
+          <Authorized authority="ROLE_ADMIN">{authorTag}</Authorized>
+          <Authorized authority="ROLE_TEACHER">
+            {createdAtTag}
+            {updatedAtTag}
+          </Authorized>
           {assignment.deletable ? (
             <Tooltip title={'Delete assignment'} placement="left">
               <Button
