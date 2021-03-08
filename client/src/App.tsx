@@ -130,6 +130,10 @@ const flattenRoutes = (items: MenuDataItem[], routes: MenuDataItem[]) => {
 
 const renderRoute = (item: MenuDataItem, index: number): React.ReactNode => {
   const { component: Component, ...props } = item
+  // external links will not be rendered via component
+  if (!Component) {
+    return null
+  }
   return (
     <Route key={index} {...props}>
       <Component />
