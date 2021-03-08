@@ -41,3 +41,12 @@ export const capitalize = (s: string) => {
 
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 }
+
+/**
+ * Remove one or more trailing slashes from a string
+ *
+ * @param str
+ */
+export const trimTrailingSlashes = (str: string): string => {
+  return str.replace(/\/+$/, '')
+}

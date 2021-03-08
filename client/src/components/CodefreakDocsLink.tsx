@@ -1,4 +1,5 @@
 import React from 'react'
+import { trimTrailingSlashes } from '../services/strings'
 
 export interface CodefreakDocsLinkProps {
   category?: 'for-admins' | 'for-teachers' | 'for-students' | 'for-developers'
@@ -9,8 +10,7 @@ export interface CodefreakDocsLinkProps {
 const CodefreakDocsLink: React.FC<CodefreakDocsLinkProps> = props => {
   const { category, page = 'index', section, children } = props
 
-  // strip trailing slashes from the base URL
-  let link = process.env.CODEFREAK_DOCS_BASE_URL.replace(/^\/+/, '')
+  let link = trimTrailingSlashes(process.env.CODEFREAK_DOCS_BASE_URL)
   if (category) link += `/${category}`
   link += `/${page}.html`
   if (section) link += `#${section}`
