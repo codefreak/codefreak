@@ -16,7 +16,7 @@ const CodefreakDocsLink: React.FC<CodefreakDocsLinkProps> = props => {
   if (section) link += `#${section}`
 
   return (
-    <a href={link} target="_blank" rel="noreferrer">
+    <a href={link} target="_blank" rel="noreferrer noopener">
       {children}
     </a>
   )
