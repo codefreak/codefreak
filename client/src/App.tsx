@@ -1,5 +1,5 @@
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   BrowserRouter as Router,
   Redirect,
@@ -107,7 +107,7 @@ const App: React.FC<AppProps> = props => {
               <HideNavigationProvider>
                 <DefaultLayout logout={logout}>
                   <Switch>
-                    {routes.map(renderRoute())}
+                    {routes.map(renderRoute)}
                     <Route component={NotFoundPage} />
                   </Switch>
                 </DefaultLayout>
@@ -122,17 +122,18 @@ const App: React.FC<AppProps> = props => {
 
 const flattenRoutes = (items: MenuDataItem[], routes: MenuDataItem[]) => {
   for (const item of items) {
-    const { children = [], ...itemWihtoutChildren } = item
+    const { children = [], ...itemWithoutChildren } = item
     flattenRoutes(children, routes)
-    routes.push(itemWihtoutChildren)
+    routes.push(itemWithoutChildren)
   }
 }
 
-const renderRoute = () => (
-  item: MenuDataItem,
-  index: number
-): React.ReactNode => {
+const renderRoute = (item: MenuDataItem, index: number): React.ReactNode => {
   const { component: Component, ...props } = item
+  // external links will not be rendered via component
+  if (!Component) {
+    return null
+  }
   return (
     <Route key={index} {...props}>
       <Component />

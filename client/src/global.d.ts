@@ -15,6 +15,19 @@ declare global {
   interface Window {
     __CODEFREAK_ERROR: CodefreakError
   }
+
+  /**
+   * Make TS aware of our custom environment variables defined
+   * via Webpack's DefinePlugin (see craco.config.js)
+   */
+  namespace NodeJS {
+    interface ProcessEnv {
+      CODEFREAK_DOCS_BASE_URL: string
+      BUILD_YEAR: string
+      BUILD_VERSION: string
+      BUILD_HASH: string
+    }
+  }
 }
 
 export {}

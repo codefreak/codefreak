@@ -27,7 +27,7 @@ import ReactMarkdown from 'react-markdown'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
-import HelpLink from '../../components/HelpLink'
+import CodefreakDocsLink from '../../components/CodefreakDocsLink'
 import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import StartSubmissionEvaluationButton from '../../components/StartSubmissionEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
@@ -187,7 +187,10 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                 Optionally, you can specify a custom Docker image for the
                 student Online IDE. You will most likely <em>not</em> need this!
                 Read more about custom IDE images{' '}
-                <HelpLink category="ide">here</HelpLink>.
+                <CodefreakDocsLink category="for-teachers" page="ide">
+                  here
+                </CodefreakDocsLink>
+                .
               </p>
               <p>
                 Leave blank to use the default image{' '}
