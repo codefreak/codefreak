@@ -9,4 +9,6 @@ databaseChangeLog:
             name: updated_at
             type: timestamp
         tableName: assignment
-
+    -  sql:
+        comment: Set default value for new updated_at column
+        sql: UPDATE assignment SET updated_at = created_at WHERE updated_at IS NULL
