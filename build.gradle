@@ -35,8 +35,9 @@ release {
     requireBranch = 'master|v\\d+'
   }
 }
-project.tasks.preTagCommit.dependsOn ":client:updateVersionFromGradle"
-project.tasks.commitNewVersion.dependsOn ":client:updateVersionFromGradle"
+// This following is not working properly ATM but is required to keep the gradle and package.json version in sync
+//project.tasks.preTagCommit.dependsOn ":client:updateVersionFromGradle"
+//project.tasks.commitNewVersion.dependsOn ":client:updateVersionFromGradle"
 
 dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-aop'
