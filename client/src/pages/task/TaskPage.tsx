@@ -271,9 +271,16 @@ const TaskPage: React.FC = () => {
   ].filter((it): it is React.ReactElement<TagType> => it !== undefined)
 
   const goToAssignment = () => {
-    const previousPath = assignment
-      ? getEntityPath(assignment)
-      : BASE_PATHS.Task + '/pool'
+    let previousPath
+
+    if (assignment && differentUser) {
+      previousPath = getEntityPath(assignment) + '/submissions'
+    } else if (assignment) {
+      previousPath = getEntityPath(assignment)
+    } else {
+      previousPath = BASE_PATHS.Task + '/pool'
+    }
+
     history.push(previousPath)
   }
 
