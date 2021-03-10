@@ -28,6 +28,7 @@ const PointsEdit: React.FC<{
   }
   const [updatePointsOfEvaluationStep] = useUpdatePointsOfEvaluationStepMutation({
     onCompleted:()=>{
+      result.refetch()
       props.fetchGrade()
     }
   })
@@ -55,7 +56,7 @@ const PointsEdit: React.FC<{
         console.log("value is: " + value)
         input.pOfE = value
         input.edited = true
-        debounce(updatePointsOfEvaluationStep({variables: {input}}).then(r=> result.refetch()).then,500)
+        debounce(updatePointsOfEvaluationStep({variables: {input}}).then,500)
 
       }
     }
@@ -95,8 +96,10 @@ const renderEdit : React.FC<{
     changeable : boolean
 }>=props=>{
 
-  const onChangeDefinitely = (val: number | undefined) =>
+  const onChangeDefinitely = (val: string | number | undefined) =>{
     val !== undefined ? (val>props.poe.gradeDefinitionMax.pEvalMax ? props.onChange(props.poe.gradeDefinitionMax.pEvalMax) : props.onChange(val)) : undefined
+
+  }
   const parser = (val: string | undefined) => {
     if (!val) {
       return '0'
