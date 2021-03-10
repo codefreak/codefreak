@@ -66,6 +66,9 @@ class EvaluationService : BaseService() {
   private lateinit var runners: List<EvaluationRunner>
 
   @Autowired
+  private lateinit var gradeService : GradeService
+
+  @Autowired
   private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
 
   private val runnersByName by lazy { runners.map { it.getName() to it }.toMap() }

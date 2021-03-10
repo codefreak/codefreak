@@ -12,4 +12,5 @@ import java.util.*
 @Repository
 interface UserAliasRepository : CrudRepository<UserAlias, UUID> {
   fun findByUserId(id : UUID) : Optional<UserAlias>
+  fun existsByAlias(alias : String) : Boolean
 }

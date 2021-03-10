@@ -23,7 +23,10 @@ const EditNickname: React.FC<{
 
   const [updateUserAlias] = useUpdateUserAliasMutation({
     onCompleted:()=>{
-      messageService.success('Useralias updated')
+      messageService.success('Nickname Updated')
+    },
+    onError:()=>{
+      messageService.error('Nickname already exists')
     }
   })
 
@@ -47,7 +50,6 @@ const EditNickname: React.FC<{
 
   const submit = () => {
     if (newAlias && newAlias.trim()) {
-      // props.onChange(newAlias.trim())
       updateUserAlias({variables:{input}}).then(r=>result.refetch())
       props.onChange()
       hideModal()

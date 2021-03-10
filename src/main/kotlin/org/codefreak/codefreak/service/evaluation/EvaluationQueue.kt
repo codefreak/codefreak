@@ -108,10 +108,9 @@ class EvaluationQueue : StepExecutionListener {
           else -> EvaluationStepStatus.FINISHED
         }
         evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
-        //Autograder processing.
-        val evalStepUpdated = evaluationStepService.getEvaluationStep(it)
-        evaluationStepService.startCalculation(evalStepUpdated)
-
+        //retrieve a fresh instance of the current EvaluationStep. Start Autograding.
+        //TODO GradeCalculation missing. It was here, but it has to start if all Evaluationsteps are finished.
+        evaluationStepService.startAutograding(evaluationStepService.getEvaluationStep(it))
       }
     }
     return null

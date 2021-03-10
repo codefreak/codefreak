@@ -21,4 +21,6 @@ class UserAliasService : BaseService() {
 
   fun save(userAlias : UserAlias) = userAliasRepository.save(userAlias)
 
+  fun existsByAlias(alias : String) = userAliasRepository.existsByAlias(alias)
+
 }

@@ -40,31 +40,6 @@ class PointsOfEvaluationStepService : BaseService(){
   private lateinit var gradeService : GradeService
 
 
-  //  @PostConstruct
-  fun initialize(){
-    //Purpose to load on startup -> e. g. adjust database if changes were done.
-    val esList = evaluationStepsRepository.findAll()
-    //proceed to check if every entry has a points of evaluation relation.
-    for(es in esList){
-      if(es.pointsOfEvaluationStep==null) {
-        es.pointsOfEvaluationStep = PointsOfEvaluationStep(es,es.gradeDefinition!!)
-        LOG.info("added relation to EvaluationStep with id $es.id")
-      }
-    }
-    evaluationStepsRepository.saveAll(esList)
-  }
-//  @PostConstruct
-//  fun checkFeedbacks(){
-//    feedbackRepository.findAll().toMutableList().map {
-//      LOG.info(
-//        "servity: " + it.severity!!.name +
-//        " is failed? "+ it.isFafiled +
-//            " status? " + it.status?.name
-//
-//      )
-//    }
-//  }
-
 
   /**
    * Save Call of PointsOfEvaluationStep by EvaluationStepId
@@ -91,6 +66,7 @@ class PointsOfEvaluationStepService : BaseService(){
 
   fun findByEvaluationStep(evalStep : EvaluationStep) : PointsOfEvaluationStep{
     val poe = poeRepository.findByEvaluationStep(evalStep)
+
     poe.isPresent.let { return poe.get() }
   }
 
@@ -113,7 +89,7 @@ class PointsOfEvaluationStepService : BaseService(){
     val list: MutableList<T> = ArrayList()
     list.addAll(first)
     list.addAll(second)
-    return list
+    return list.toSet().toMutableList()
   }
 
   /**
@@ -124,7 +100,7 @@ class PointsOfEvaluationStepService : BaseService(){
     es.result?.let {
       when(it){
         EvaluationStepResult.SUCCESS -> onSuccess(es)
-        EvaluationStepResult.FAILED -> onSuccess(es) //try it. Should be the same path if flaws were found
+        EvaluationStepResult.FAILED -> onFailed(es) //try it. Should be the same path if flaws were found
         EvaluationStepResult.ERRORED -> onErrored(es)
       }
     }
@@ -134,9 +110,7 @@ class PointsOfEvaluationStepService : BaseService(){
    * If Result was a success
    */
   fun onSuccess(es : EvaluationStep) {
-//    val poe = poeRepository.findByEvaluationStep(es).get()
     val poe = findByEvaluationStepId(es.id) ?: return
-    //interrupts the calculation of this PointsOfEvaluation if a teacher has set points manually.
     if(poe.edited){
       return
     }
@@ -147,18 +121,10 @@ class PointsOfEvaluationStepService : BaseService(){
 
     val gradeDefinition = es.gradeDefinition!!
 
-    //gather all Feedbacks
-    //First list provides all Successful Feedbacks who dont have Severity Info from this EvaluationStep
-    val successfeedbacks = feedbackRepository.findByEvaluationStepAndStatusAndSeverityNot(es,Feedback.Status.SUCCESS,Feedback.Severity.INFO)
-    LOG.info("We gathered ${successfeedbacks.size} Success Feedbacks")
-    //Second feedbacks which failed in the first place
     val failedFeedbacks = feedbackRepository.findByEvaluationStepAndStatusNot(es,Feedback.Status.SUCCESS)
     LOG.info("We gathered ${failedFeedbacks.size} Failed Feedbacks")
 
-    //merge both lists
-    val finalList = merge(successfeedbacks,failedFeedbacks).toSet().toMutableList()
-    //sum up errors / flaws
-    var bOfT = collectMistakes(finalList,gradeDefinition)
+    var bOfT = collectMistakes(failedFeedbacks,gradeDefinition)
 
     LOG.info("we collected $bOfT mistakepoints")
 
@@ -179,7 +145,7 @@ class PointsOfEvaluationStepService : BaseService(){
    * if Result Failed badly
    */
   fun onFailed(es : EvaluationStep) {
-
+    //Nothing happens here. Teacher has to take a look.
   }
 
   /**
@@ -193,7 +159,6 @@ class PointsOfEvaluationStepService : BaseService(){
     var bOfT = 0f
     for(f in finalList){
       if(f.isFailed){
-//        bOfT += gradeDefinition.bOnCritical
         when(f.severity){
           Feedback.Severity.MINOR -> bOfT +=gradeDefinition.bOnMinor
           Feedback.Severity.MAJOR -> bOfT +=gradeDefinition.bOnMajor
@@ -201,15 +166,6 @@ class PointsOfEvaluationStepService : BaseService(){
           else -> LOG.info("Feedback shows no errors / flaws")
         }
       }
-      //Success seem to be always on Severity.INFO We wont recognize it that way
-//      if(f.status == Feedback.Status.SUCCESS){
-//        when(f.severity){
-//          Feedback.Severity.MINOR -> bOfT +=gradeDefinition.bOnMinor
-//          Feedback.Severity.MAJOR -> bOfT +=gradeDefinition.bOnMajor
-//          Feedback.Severity.CRITICAL -> bOfT +=gradeDefinition.bOnCritical
-//          else -> LOG.info("Feedback shows no errors / flaws")
-//        }
-//      }
     }
     return bOfT
   }
@@ -218,12 +174,11 @@ class PointsOfEvaluationStepService : BaseService(){
    * If a GradeDefinition receives an Upgrade, all related evaluationSteps will update their respective Points
    *
    */
-  fun recalculatePoints(gradeDefinition : GradeDefinition) : GradeDefinition{
+  fun recalculatePoints(gradeDefinition : GradeDefinition) {
     var stepList = evaluationStepsRepository.findAllByGradeDefinition(gradeDefinition)
     for(step in stepList){
       calculate(step)
     }
-    return gradeDefinition
   }
 
 
@@ -270,7 +225,7 @@ class PointsOfEvaluationStepService : BaseService(){
     edited?.let { poe.edited = edited }
     resultCheck?.let { poe.resultCheck = resultCheck }
     LOG.info("processing update : ${poe.evaluationStep}")
-    val updatedPoE = save(changeEvaluationStepStatus(poe))
+    val updatedPoE = save(changeEdited(poe))
     gradeService.createOrUpdateGradeFromPointsOfEvaluation(updatedPoE)
 
     return updatedPoE
@@ -282,7 +237,7 @@ class PointsOfEvaluationStepService : BaseService(){
    * This will turn the attribute poe.edited to true and keep its attribute calcCheck false.
    *
    */
-  fun changeEvaluationStepStatus(poe : PointsOfEvaluationStep) : PointsOfEvaluationStep{
+  fun changeEdited(poe : PointsOfEvaluationStep) : PointsOfEvaluationStep{
     if(poe.edited){
       //Check if operation was successful -> proceed to adjust the calcCheck to prevent further adjustments of the EvaluationStep Result
       if(esService.updateResultFromPointsOfEvaluationStep(poe)){

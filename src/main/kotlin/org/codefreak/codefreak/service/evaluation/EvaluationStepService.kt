@@ -63,25 +63,38 @@ class EvaluationStepService {
 
   fun saveEvaluationStep(step: EvaluationStep) = stepRepository.save(step)
 
+  /**
+   * Configure a EvaluationStep and prepare it for Autograding.
+   * Adds missing relations and puts them together
+   */
   fun configureEvaluationStepForAutoGrading(step : EvaluationStep) : EvaluationStep{
     step.gradeDefinition = gradeDefinitionService.findByEvaluationStepDefinition(step.definition.id)
     var updatedStep = stepRepository.save(step)
 
-    //Check Consistency. Might throw errors due save function get access from different sources. Missing named updatefunction to make things clear
+    //Check Consistency. Might throw errors due entity not persistent (lazy load)
     if(updatedStep.gradeDefinition==null){
       updatedStep.gradeDefinition = gradeDefinitionService.findByEvaluationStep(updatedStep)
       stepRepository.save(updatedStep)
+      //Create a PointsOfEvaluationStep Relation between this EvaluationStep and the recent obtained gradeDefinition
+      if(updatedStep.pointsOfEvaluationStep==null){
+        poeStepService.save(PointsOfEvaluationStep(evaluationStep = updatedStep, updatedStep.gradeDefinition!!))
+      }
     }
-    if(updatedStep.pointsOfEvaluationStep==null){
-      poeStepService.save(PointsOfEvaluationStep(evaluationStep = updatedStep, updatedStep.gradeDefinition!!))
-    }
+    //returns the updatedStep. If it contains a gradeDefinition it will be considered for Autograding. If not it will be ignored.
     return updatedStep
   }
 
-  fun startCalculation(step: EvaluationStep){
+  /**
+   * Starts an possible autograding process. If requirements are met a grade might be calculated.
+   */
+  fun startAutograding(step: EvaluationStep){
     val updatedStep = configureEvaluationStepForAutoGrading(step)
-    if(updatedStep.gradeDefinition!!.active)
-        poeStepService.calculate(step)
+    //Only Autograde if a gradeDefinition is present. Otherwise this Task is not eligible for Autograding
+    updatedStep.gradeDefinition?.let {
+        if(it.active){
+          poeStepService.calculate(step)
+        }
+      }
   }
 
   /**

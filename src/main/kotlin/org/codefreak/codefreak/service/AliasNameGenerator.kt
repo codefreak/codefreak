@@ -26,6 +26,8 @@ class AliasNameGenerator {
 
   @Autowired
   private lateinit var userRepository : UserRepository
+  @Autowired
+  private lateinit var userAliasService: UserAliasService
 
 
   /**
@@ -85,7 +87,12 @@ class AliasNameGenerator {
     //Build name - looks nice
     val fullAliasName = "$animalName#$seedNumber"
     //Create and Build on User
-    user.userAlias = UserAlias(user,fullAliasName)
+    if(!userAliasService.existsByAlias(fullAliasName)){
+      user.userAlias = UserAlias(user,fullAliasName)
+    }else{
+      //Recursion
+      applyAliasName(user)
+    }
     log.info("aliasName set to $fullAliasName")
     userRepository.save(user)
   }

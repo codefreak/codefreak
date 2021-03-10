@@ -7,12 +7,12 @@ import {
 } from "../../generated/graphql";
 import useHasAuthority from "../../hooks/useHasAuthority";
 import {Empty, InputNumber, Switch} from "antd";
-import {messageService} from "../../services/message";
 import {debounce} from "ts-debounce";
 
 
 const PointsEdit: React.FC<{
   evaluationStepId: string
+  fetchGrade : any
 }> = props=> {
 
   const evaluationStepId = props.evaluationStepId
@@ -28,7 +28,7 @@ const PointsEdit: React.FC<{
   }
   const [updatePointsOfEvaluationStep] = useUpdatePointsOfEvaluationStepMutation({
     onCompleted:()=>{
-      messageService.success('Points updated')
+      props.fetchGrade()
     }
   })
 
@@ -50,80 +50,78 @@ const PointsEdit: React.FC<{
 
     if(result.error) return (<div>an error occurred on </div>)
 
-
     const onPoEStepChange = (value : number) => {
       if(value!==undefined){
         console.log("value is: " + value)
         input.pOfE = value
         input.edited = true
-        if(debounce(updatePointsOfEvaluationStep({variables: {input}}).then(r => result.refetch()).then,200))return
-        // updatePointsOfEvaluationStep({variables: {input}}).then(r => refetch())
-        // return
+        debounce(updatePointsOfEvaluationStep({variables: {input}}).then(r=> result.refetch()).then,500)
+
       }
     }
 
     if(!data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax.active)return (<div> </div>)
 
     if (auth) {
-      // return renderEdit(data.poe!,onPoEStepChange,onEnabledChange,changeable)
-      return (<React.Fragment>
-        {renderEdit(data.pointsOfEvaluationStepByEvaluationStepId,onPoEStepChange,onEnabledChange,changeable)}
-      </React.Fragment>)
-
+      return (renderEdit({
+        poe:data.pointsOfEvaluationStepByEvaluationStepId,
+        onChange:onPoEStepChange,
+        onSwitch:onEnabledChange,
+        changeable:changeable
+      }))
     } else {
-      // return renderView(data.poe!.pOfE, data.poe!.gradeDefinitionMax.pEvalMax)
-      return (<React.Fragment>
-        { renderView(data.pointsOfEvaluationStepByEvaluationStepId.pOfE, data.pointsOfEvaluationStepByEvaluationStepId!.gradeDefinitionMax.pEvalMax)}
-      </React.Fragment>)
+      return (renderView({
+        reachedPoints:data.pointsOfEvaluationStepByEvaluationStepId.pOfE,
+        maxPoints:data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax.pEvalMax
+      }))
     }
   }else{
-    return (<React.Fragment><Empty/></React.Fragment>)
+    return (<Empty/>)
   }
 }
 
 
-const renderView=(
-  reachedPoints:number |undefined,
+const renderView : React.FC<{
+  reachedPoints: number,
   maxPoints: number | undefined
-)=>{
-  return (<div className="points-view">{reachedPoints}/{maxPoints} Points</div>)
+}>=props=>{
+  return (<div className="points-view">{props.reachedPoints}/{props.maxPoints} Points</div>)
 }
 
-const renderEdit=(
-  poe:PointsOfEvaluationStep,
-  onChange:(value:number)=>void,
-  onSwitch:(changeable:boolean)=>void,
-  changeable : boolean
-)=>{
+const renderEdit : React.FC<{
+    poe:PointsOfEvaluationStep,
+    onChange:(value:number)=>void,
+    onSwitch:(changeable:boolean)=>void,
+    changeable : boolean
+}>=props=>{
 
-
-  //InputNumber Config
   const onChangeDefinitely = (val: number | undefined) =>
-    val !== undefined ? onChange(val) : undefined
+    val !== undefined ? (val>props.poe.gradeDefinitionMax.pEvalMax ? props.onChange(props.poe.gradeDefinitionMax.pEvalMax) : props.onChange(val)) : undefined
   const parser = (val: string | undefined) => {
     if (!val) {
-      return ''
+      return '0'
     }
-    return val.replace(/[^\d]+/, '')
+    return val.replace(/[^\d]+/, '0')
   }
   const formatter = (val: string | number | undefined) => `${val}`
+  if(props.poe.gradeDefinitionMax.pEvalMax==0)return(<></>)
 
   const input =(    <InputNumber
     title={"Points"}
     min={0}
-    max={poe.gradeDefinitionMax.pEvalMax}
+    max={props.poe.gradeDefinitionMax.pEvalMax}
     onChange={onChangeDefinitely}
-    value={poe.pOfE}
+    value={props.poe.pOfE}
     parser={parser}
     formatter={formatter}
-    disabled={!changeable}
+    disabled={!props.changeable}
   />)
 
   const lever =(
-    <Switch defaultChecked={changeable} onChange={onSwitch} />
+    <Switch defaultChecked={props.changeable} onChange={props.onSwitch} />
     )
 
-  return(<div className="points-edit">{lever}{input}</div>)
+  return(<div className="points-edit">{lever}{input} / {props.poe.gradeDefinitionMax.pEvalMax}</div>)
 
 }
 

@@ -1,25 +1,29 @@
 import {Grade, useGetGradeQuery} from "../generated/graphql";
-import {  useEffect, useState } from 'react'
+import {useEffect, useState} from 'react'
 
 
-const useGetGrade =(
-  evaluationId : string
-) : { grade : Grade | null } =>{
-
-  const [grade,setGrade] = useState<Grade | null>(null)
+const useGetGrade = (
+  evaluationId: string
+): { grade: Grade | undefined, fetchGrade: any } => {
 
   const result = useGetGradeQuery({
     variables: {evaluationId}
   })
-  useEffect(()=>{
-    if(result.data?.grade){
+
+  const [grade, setGrade] = useState<Grade | undefined>(undefined)
+
+  useEffect(() => {
+    if(result.data?.grade!=null || result.data?.grade!==undefined){
       setGrade(result.data.grade)
-      }
-    },[result.data])
+    }
+  },[result])
+
+  function fetchGrade(){
+    return result.refetch()
+  }
 
 
-
-  return {grade}
+  return {grade,fetchGrade}
 }
 
 export default useGetGrade

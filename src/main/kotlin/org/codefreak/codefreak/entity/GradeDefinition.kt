@@ -18,7 +18,7 @@ class GradeDefinition(
 
 
   /**
-   * boolean for UI-Slider. Will be set to true if evaluation is wanted for a task
+   * boolean for UI-Slider. Will be set to true if Autograding is wanted for a task
    */
   var active : Boolean = false
   /**
@@ -29,17 +29,17 @@ class GradeDefinition(
   /**
    * Point reduction on minor errors
    */
-  var bOnMinor = 1f
+  var bOnMinor = 0f
 
   /**
    * Point reduction on major errors
    */
-  var bOnMajor = 2f
+  var bOnMajor = 0f
 
   /**
    * Point reduction on Critical Errors.
    */
-  var bOnCritical = 3f
+  var bOnCritical = 0f
 
   /**
    * A Grade definition is valid for many EvaluationSteps.

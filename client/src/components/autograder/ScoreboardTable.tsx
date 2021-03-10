@@ -8,7 +8,7 @@ import React from "react";
 
 type AssignmentScoreboard = NonNullable<
   GetScoreboardByAssignmentIdQuery['scoreboardByAssignmentId']
-  >//['']
+  >
 
 type SubmissionsScoreboard = AssignmentScoreboard['submissionsScoreboard'][number]
 type AnswersScoreboard = SubmissionsScoreboard['answersScoreboard'][number]
@@ -49,7 +49,7 @@ const ScoreboardTable: React.FC<{
 
   // 700px = width of first columns
   // 200px = min width for each task column
-  const scrollX = assignments.submissionsScoreboard.length * 200
+  const scrollX = assignments.submissionsScoreboard.length * 100
 
   return (
     <Table
@@ -93,8 +93,7 @@ const taskColumnRenderer = (
     //There should always be a grade defined
     if(getAnswerFromSubmission(submission,task)!==undefined){
       const grade = getAnswerFromSubmission(submission, task)!!.gradeScoreboard
-
-      if (grade==null || !grade.calculated) {
+      if (grade==null || !grade.calculated ) {
         return (
           <Tooltip title="No Grade Calculated">
             <Icon type="stop" className="no-answer" />

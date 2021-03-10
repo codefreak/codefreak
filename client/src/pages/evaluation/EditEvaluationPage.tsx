@@ -93,7 +93,6 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const [UpdateGradeDefinitionActiveMutation] = useUpdateGradeDefinitionStatusMutation({
     onCompleted: () => {
       result.refetch()
-      messageService.success('autograder status updated')
     }
   })
   const fetchForUpdate=()=>{
@@ -196,15 +195,6 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
     }
 
 
-
-    // const gradeUpdater = makeUpdater(gradeDefinitionInput,{gradeDefinitionInput})
-
-    // const updater = makeUpdater(definitionInput, input =>
-    //   updateMutation({ variables: { input } })
-    // )
-
-
-
     const cardProps: CardProps = {
       title: (
         <EditableTitle
@@ -290,6 +280,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 disabled={assignmentOpen && !sureToEdit}
               />
             </Descriptions.Item>
+
             <Descriptions.Item>
               <p>
                 <div>Automatic Grading</div>
@@ -298,7 +289,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 onChange={onGradeActiveChange}
                 disabled={assignmentOpen && !sureToEdit}/>
               </p>
-              {(definition.gradeDefinition.active && (!sureToEdit)) ? (
+              {(definition.gradeDefinition.active) ? (
               <p>
                 <GradeDefinitionInputField
                   gradeDefinition={definition.gradeDefinition}

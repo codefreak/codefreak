@@ -78,8 +78,38 @@ class SeedDummyUsersService : ApplicationListener<ContextRefreshedEvent> {
       lastName = "Student"
       password = DEV_USER_PASSWORD_HASH
     }
+    val student6 = User("student6").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Klaus"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student7 = User("student7").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Hannes"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student8 = User("student8").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Richard"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student9 = User("student9").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Lena"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student10 = User("student10").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Emily"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
 
-    val allUsers = listOf(admin, teacher, student,student2,student3,student4,student5)
+    val allUsers = listOf(admin, teacher, student,student2,student3,student4,student5,student6,student7,student8,student9,student10)
   }
 
   override fun onApplicationEvent(event: ContextRefreshedEvent) {

@@ -74,9 +74,9 @@ class PointsOfEvaluationStepDto(@GraphQLIgnore val entity : PointsOfEvaluationSt
 class GradeDto(@GraphQLIgnore val entity: Grade?, ctx : ResolverContext) : BaseDto(ctx){
 
   @GraphQLID
-  val id = entity?.id
-  val gradePercentage = entity?.gradePercentage
-  val calculated = entity?.calculated
+  val id = entity?.let { it.id }
+  val gradePercentage = entity?.let { it.gradePercentage }
+  val calculated = entity?.let { it.calculated }
 }
 
 @GraphQLName("UserAlias")
@@ -218,7 +218,7 @@ class GradeDefinitionMutation : BaseResolver(),Mutation{
 
   /**
    * Updates a Gradedefinition from its InputDto. This function fires a recalculation from all related grades.
-   * May take some time. Thread candidate
+   * May take some time. Thread candidate?
    */
   @Secured(Authority.ROLE_TEACHER)
   fun updateGradeDefinitionValues(input : GradeDefinitionInputDto) : Boolean = context{
@@ -371,9 +371,13 @@ class UserAliasMutation : BaseResolver(),Mutation{
     val service = serviceAccess.getService(UserAliasService::class)
     val userAlias = service.getById(input.id)
     if(input.id == userAlias.id){
-      userAlias.alias = input.alias
-      service.save(userAlias)
-      true
+      if(!service.existsByAlias(input.alias)){
+        userAlias.alias = input.alias
+        service.save(userAlias)
+        true
+      }else{
+        false
+      }
     }else{
       false
     }

@@ -1,35 +1,38 @@
 .grade-definition-input {
-  display: inline-block;
-  //display: flex;
+  //display: inline-block;
+  //display: inline-grid;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 3em 3em 3em 3em;
+  gap: 5px 5px;
+  //grid-template-areas:
+  //  "maxPoints maxPointsInput"
+  //  "minorError minorErrorInput"
+  //  "majorError MajorErrorInput"
+  //  "criticalError criticalErrorInput";
+  grid-template-areas:
+    "maxPointsInput maxPoints"
+    "minorErrorInput minorError"
+    "MajorErrorInput majorError"
+    "criticalErrorInput criticalError";
+
 
   .ant-switch {
     margin-right: 5px;
     margin-bottom: 5px;
   }
 
-  .grade-definition-input-numbers {
-    display: flex;
 
-    .ant-input-number {
-      width: 70px;
+  .ant-input-number {
+    width: 80px;
+    border-radius:0;
 
-      &:not(:first-of-type) {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-        border-left-width: 0;
-      }
-
-      &:not(:last-of-type) {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-      }
-      .ant-input-number-handler-wrap {
-        opacity: 1;
-      }
+    .ant-input-number-handler-wrap {
+      opacity: 1;
     }
   }
   .grade-definition-input-edit{
-    display:flex;
+    display:inline-block;
     justify-content: space-between;
   }
 }

@@ -20,6 +20,7 @@ import {compare} from '../services/util'
 import SortSelect from './SortSelect'
 import PointsEdit from "./autograder/PointsEdit";
 import GradeView from "./autograder/GradeView";
+import useGetGrade from "../hooks/useGetGrade";
 
 const { Text } = Typography
 
@@ -160,22 +161,31 @@ const EvaluationResult: React.FC<{ evaluationId: string }> = ({
   evaluationId
 }) => {
   const result = useGetDetailedEvaluatonQuery({ variables: { evaluationId } })
+  const gradeData = useGetGrade(evaluationId)
+  // function fetchGrade(){
+  //       return grade.refetch() as any
+  // }
 
-  if (result.data === undefined) {
+//|| gradeResult.grade === undefined
+  if (result.data === undefined ) {
     return <AsyncPlaceholder result={result} />
   }
 
   const { evaluation } = result.data
 
 
-  const gradeView=(
-    <p className="grade-view-container">
-      <GradeView
-        evaluationId={evaluation.id}
-      />
-    </p>
-  )
+  //On Init
+  let gradeView
 
+  if(gradeData.grade!=null){
+    gradeView=(
+      <p className="grade-view-container">
+        <GradeView
+          grade={gradeData.grade}
+        />
+      </p>
+    )
+  }
 
 
   return (
@@ -185,6 +195,7 @@ const EvaluationResult: React.FC<{ evaluationId: string }> = ({
           answerId={evaluation.answer.id}
           step={step}
           key={step.id}
+          fetchGrade={gradeData.fetchGrade}
         />
       ))}
 
@@ -234,7 +245,8 @@ const EvaluationStepPanel: React.FC<{
   step: Omit<EvaluationStep, 'definition' | 'status'> & {
     definition: Pick<EvaluationStep['definition'], 'title'>
   }
-}> = ({ answerId, step }) => {
+  fetchGrade : any
+}> = ({ answerId, step ,fetchGrade}) => {
   const title = (
     <>
       <EvaluationStepResultIcon stepResult={step.result} />{' '}
@@ -266,6 +278,7 @@ const EvaluationStepPanel: React.FC<{
   const pointsField =(<p>
     <PointsEdit
       evaluationStepId={step.id}
+      fetchGrade={fetchGrade}
     />
   </p>)
 

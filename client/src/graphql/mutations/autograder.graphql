@@ -1,5 +1,5 @@
-mutation UpdateGradeDefinitionValues($gradeDefinitionInput : GradeDefinitionInput!){
-  updateGradeDefinitionValues(input: $gradeDefinitionInput)
+mutation UpdateGradeDefinitionValues($input : GradeDefinitionInput!){
+  updateGradeDefinitionValues(input: $input)
 }
 
 mutation UpdateGradeDefinitionStatus($gradeDefinitionActiveInput : GradeDefinitionActiveInput!){
