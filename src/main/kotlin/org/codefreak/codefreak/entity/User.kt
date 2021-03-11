@@ -1,9 +1,18 @@
 package org.codefreak.codefreak.entity
 
+import javax.persistence.CascadeType
+import javax.persistence.CollectionTable
+import javax.persistence.Column
+import javax.persistence.ElementCollection
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.FetchType
+import javax.persistence.JoinColumn
+import javax.persistence.OneToOne
 import org.codefreak.codefreak.auth.Role
 import org.springframework.security.core.CredentialsContainer
 import org.springframework.security.core.userdetails.UserDetails
-import javax.persistence.*
 
 @Entity
 class User(private val username: String) : BaseEntity(), UserDetails, CredentialsContainer {
@@ -36,6 +45,6 @@ class User(private val username: String) : BaseEntity(), UserDetails, Credential
   }
 
   @OneToOne(cascade = [CascadeType.ALL])
-  @JoinColumn(name="userAlias", referencedColumnName = "id")
-  var userAlias : UserAlias?=null
+  @JoinColumn(name = "userAlias", referencedColumnName = "id")
+  var userAlias: UserAlias? = null
 }

@@ -1,8 +1,13 @@
 package org.codefreak.codefreak.entity
 
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToOne
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
-import javax.persistence.*
 
 @Entity
 class EvaluationStepDefinition(
@@ -19,10 +24,9 @@ class EvaluationStepDefinition(
 ) : BaseEntity(), Comparable<EvaluationStepDefinition> {
   var active: Boolean = true
 
-
   @OneToOne(cascade = [CascadeType.ALL])
-  @JoinColumn(name="gradeDefinition", referencedColumnName = "id")
-  var gradeDefinition : GradeDefinition?=null
+  @JoinColumn(name = "gradeDefinition", referencedColumnName = "id")
+  var gradeDefinition: GradeDefinition? = null
 
   /**
    * Timeout of this task in seconds

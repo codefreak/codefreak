@@ -86,8 +86,8 @@ class AssignmentInput(val id: UUID, val active: Boolean, val deadline: Instant?,
   constructor() : this(UUID.randomUUID(), true, null, null)
 }
 @GraphQLName("AssignmentScoreboardInput")
-class AssignmentScoreboardInputDto(val id:UUID, val scoreboard : Boolean){
-  constructor() : this(UUID.randomUUID(),false)
+class AssignmentScoreboardInputDto(val id: UUID, val scoreboard: Boolean) {
+  constructor() : this(UUID.randomUUID(), false)
 }
 
 @Component
@@ -174,14 +174,14 @@ class AssignmentMutation : BaseResolver(), Mutation {
     true
   }
 
-  fun assignmentScoreboard(input: AssignmentScoreboardInputDto) : Boolean = context{
+  fun assignmentScoreboard(input: AssignmentScoreboardInputDto): Boolean = context {
     val service = serviceAccess.getService(AssignmentService::class)
     val assignment = service.findAssignment(input.id)
-    if(assignment.id == input.id){
+    if (assignment.id == input.id) {
       assignment.scoreboard = input.scoreboard
       service.saveAssignment(assignment)
       true
-    }else{
+    } else {
       false
     }
   }

@@ -10,7 +10,11 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
-import org.codefreak.codefreak.entity.*
+import org.codefreak.codefreak.entity.Assignment
+import org.codefreak.codefreak.entity.EvaluationStepDefinition
+import org.codefreak.codefreak.entity.GradeDefinition
+import org.codefreak.codefreak.entity.Task
+import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
@@ -131,7 +135,7 @@ class TaskTarService : BaseService() {
   /**
    * adds an default GradeDefinition to every EvaluationStepDefinition
    */
-  private fun addGradeDefinition(task : Task){
+  private fun addGradeDefinition(task: Task) {
     task.evaluationStepDefinitions.forEach { it.gradeDefinition = GradeDefinition(it) }
   }
 

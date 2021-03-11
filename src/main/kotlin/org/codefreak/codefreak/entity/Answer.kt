@@ -40,7 +40,7 @@ class Answer(
    * This makes it easier to get the best grade of an answer for the scoreboard
    * Otherwise too much cascading
    */
-  @OneToMany(mappedBy ="answer",cascade = [CascadeType.ALL])
+  @OneToMany(mappedBy = "answer", cascade = [CascadeType.ALL])
   var grades = mutableSetOf<Grade>()
 
   @CreationTimestamp

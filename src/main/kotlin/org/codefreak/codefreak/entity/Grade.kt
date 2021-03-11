@@ -1,7 +1,12 @@
 package org.codefreak.codefreak.entity
 
-import javax.persistence.*
-
+import javax.persistence.CascadeType
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 
 @Entity
 class Grade(
@@ -11,34 +16,30 @@ class Grade(
    */
   @OneToOne
   @JoinColumn(name = "evaluation", referencedColumnName = "id")
-  var evaluation : Evaluation,
+  var evaluation: Evaluation,
 
   /**
    * A Grade is always part of a set in answer entity.
    */
   @ManyToOne
-  var answer : Answer
+  var answer: Answer
 
-) : BaseEntity(){
-
-
+) : BaseEntity() {
 
   /**
    * Percentage of 100 how much a student reached. defined as float because value will be:  1>=x>=0
    */
-  var gradePercentage : Float = 0f
+  var gradePercentage: Float = 0f
 
   /**
    * Checks if a Grade is actually calculated. Otherwise a formatted zero might be shown in frontend due to a possible
    * grade applied to their respective evaluation but no grade was calculated.
    */
-  var calculated : Boolean= false
-
+  var calculated: Boolean = false
 
   /**
    * A Grade is calculated of multiply PointsOfEvaluationSteps.
    */
-  @OneToMany(mappedBy = "grade", cascade = [CascadeType.ALL],orphanRemoval = true, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "grade", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
   var pointsOfEvaluationStep = mutableSetOf<PointsOfEvaluationStep>()
-
 }

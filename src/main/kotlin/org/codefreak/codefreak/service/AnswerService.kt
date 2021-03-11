@@ -103,7 +103,7 @@ class AnswerService : BaseService() {
     return ByteArrayInputStream(out.toByteArray())
   }
 
-  fun findAllBySubmissionId(id : UUID) : MutableList<Answer>{
+  fun findAllBySubmissionId(id: UUID): MutableList<Answer> {
     return answerRepository.findAllBySubmissionId(id)
   }
 

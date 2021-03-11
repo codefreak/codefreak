@@ -50,7 +50,7 @@ class Assignment(
   /**
    * Let the teacher enable/disable the scoreboard
    */
-  var scoreboard : Boolean = false
+  var scoreboard: Boolean = false
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()

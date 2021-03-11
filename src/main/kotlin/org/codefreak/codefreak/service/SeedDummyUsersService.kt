@@ -109,7 +109,7 @@ class SeedDummyUsersService : ApplicationListener<ContextRefreshedEvent> {
       password = DEV_USER_PASSWORD_HASH
     }
 
-    val allUsers = listOf(admin, teacher, student,student2,student3,student4,student5,student6,student7,student8,student9,student10)
+    val allUsers = listOf(admin, teacher, student, student2, student3, student4, student5, student6, student7, student8, student9, student10)
   }
 
   override fun onApplicationEvent(event: ContextRefreshedEvent) {
@@ -122,7 +122,7 @@ class SeedDummyUsersService : ApplicationListener<ContextRefreshedEvent> {
     )
 
     val users = userRepository.saveAll(allUsers)
-    users.forEach{
+    users.forEach {
       aliasNameGenerator.applyAliasName(it)
     }
   }

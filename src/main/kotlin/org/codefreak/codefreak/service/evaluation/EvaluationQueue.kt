@@ -6,8 +6,6 @@ import org.codefreak.codefreak.config.EvaluationConfiguration
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepStatus
-import org.codefreak.codefreak.entity.Grade
-import org.codefreak.codefreak.repository.FeedbackRepository
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.BatchStatus
 import org.springframework.batch.core.ExitStatus
@@ -107,9 +105,9 @@ class EvaluationQueue : StepExecutionListener {
           evaluationStep.status >= EvaluationStepStatus.FINISHED -> evaluationStep.status
           else -> EvaluationStepStatus.FINISHED
         }
-        //retrieve a fresh instance of the current EvaluationStep. Start Autograding.
-        //This function needs a call right before updateEvaluationStepStatus, because afterwards there
-        //might be a GradeCalculation
+        // retrieve a fresh instance of the current EvaluationStep. Start Autograding.
+        // This function needs a call right before updateEvaluationStepStatus, because afterwards there
+        // might be a GradeCalculation
         evaluationStepService.startAutograding(evaluationStepService.getEvaluationStep(it))
 
         evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)

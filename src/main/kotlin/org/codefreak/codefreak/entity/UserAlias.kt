@@ -6,12 +6,12 @@ import javax.persistence.OneToOne
 @Entity
 class UserAlias(
 
-  @OneToOne(mappedBy ="userAlias")
+  @OneToOne(mappedBy = "userAlias")
   var user: User,
 
   /**
    * Some Rng Name
    */
-  var alias : String
+  var alias: String
 
 ) : BaseEntity()

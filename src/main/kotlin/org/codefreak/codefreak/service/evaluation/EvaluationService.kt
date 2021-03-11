@@ -66,7 +66,7 @@ class EvaluationService : BaseService() {
   private lateinit var runners: List<EvaluationRunner>
 
   @Autowired
-  private lateinit var gradeService : GradeService
+  private lateinit var gradeService: GradeService
 
   @Autowired
   private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository

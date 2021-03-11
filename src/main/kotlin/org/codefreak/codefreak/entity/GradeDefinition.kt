@@ -1,26 +1,28 @@
 package org.codefreak.codefreak.entity
 
-
-import javax.persistence.*
+import javax.persistence.CascadeType
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 
 @Entity
 class GradeDefinition(
   /**
    * Lets enhance every EvaluationStepDefinition with some GradeDefinition
    */
-  @OneToOne(mappedBy ="gradeDefinition")
+  @OneToOne(mappedBy = "gradeDefinition")
   var evaluationStepDefinition: EvaluationStepDefinition
 
-): BaseEntity(){
+) : BaseEntity() {
 
   @OneToMany(mappedBy = "gradeDefinition", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
-  var pointsOfEvaluationStep : MutableList<PointsOfEvaluationStep> = mutableListOf()
-
+  var pointsOfEvaluationStep: MutableList<PointsOfEvaluationStep> = mutableListOf()
 
   /**
    * boolean for UI-Slider. Will be set to true if Autograding is wanted for a task
    */
-  var active : Boolean = false
+  var active: Boolean = false
   /**
    * Maximum of points reachable by its Grade definition
    */
@@ -46,5 +48,4 @@ class GradeDefinition(
    */
   @OneToMany(mappedBy = "gradeDefinition", cascade = [CascadeType.ALL], orphanRemoval = true)
   var evaluationStep: MutableList<EvaluationStep> = mutableListOf()
-
 }

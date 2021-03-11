@@ -1,7 +1,12 @@
 package org.codefreak.codefreak.service.evaluation
 
-import org.codefreak.codefreak.entity.*
 import java.util.UUID
+import org.codefreak.codefreak.entity.Evaluation
+import org.codefreak.codefreak.entity.EvaluationStep
+import org.codefreak.codefreak.entity.EvaluationStepDefinition
+import org.codefreak.codefreak.entity.EvaluationStepResult
+import org.codefreak.codefreak.entity.EvaluationStepStatus
+import org.codefreak.codefreak.entity.PointsOfEvaluationStep
 import org.codefreak.codefreak.repository.EvaluationStepRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
@@ -27,7 +32,7 @@ class EvaluationStepService {
   private lateinit var poeStepService: PointsOfEvaluationStepService
 
   @Autowired
-  private lateinit var gradeService : GradeService
+  private lateinit var gradeService: GradeService
 
   fun getEvaluationStep(stepId: UUID): EvaluationStep {
     return stepRepository.findById(stepId).orElseThrow {
@@ -46,8 +51,8 @@ class EvaluationStepService {
     val originalEvaluationStatus = evaluation.stepStatusSummary
     step.status = status
     val newEvaluationStatus = evaluation.stepStatusSummary
-    if(evaluation.stepStatusSummary == EvaluationStepStatus.FINISHED){
-      //If all steps are finished, calc a grade for the given evaluation
+    if (evaluation.stepStatusSummary == EvaluationStepStatus.FINISHED) {
+      // If all steps are finished, calc a grade for the given evaluation
       gradeService.createOrUpdateGradeFromEvaluation(evaluation)
     }
     eventPublisher.publishEvent(EvaluationStepStatusUpdatedEvent(step, status))
@@ -74,31 +79,31 @@ class EvaluationStepService {
    * Configure a EvaluationStep and prepare it for Autograding.
    * Adds missing relations and puts them together
    */
-  fun configureEvaluationStepForAutoGrading(step : EvaluationStep) : EvaluationStep{
+  fun configureEvaluationStepForAutoGrading(step: EvaluationStep): EvaluationStep {
     step.gradeDefinition = gradeDefinitionService.findByEvaluationStepDefinition(step.definition.id)
     var updatedStep = stepRepository.save(step)
 
-    //Check Consistency. Might throw errors due entity not persistent (lazy load)
-    if(updatedStep.gradeDefinition==null){
+    // Check Consistency. Might throw errors due entity not persistent (lazy load)
+    if (updatedStep.gradeDefinition == null) {
       updatedStep.gradeDefinition = gradeDefinitionService.findByEvaluationStep(updatedStep)
       stepRepository.save(updatedStep)
-      //Create a PointsOfEvaluationStep Relation between this EvaluationStep and the recent obtained gradeDefinition
-      if(updatedStep.pointsOfEvaluationStep==null){
+      // Create a PointsOfEvaluationStep Relation between this EvaluationStep and the recent obtained gradeDefinition
+      if (updatedStep.pointsOfEvaluationStep == null) {
         poeStepService.save(PointsOfEvaluationStep(evaluationStep = updatedStep, updatedStep.gradeDefinition!!))
       }
     }
-    //returns the updatedStep. If it contains a gradeDefinition it will be considered for Autograding. If not it will be ignored.
+    // returns the updatedStep. If it contains a gradeDefinition it will be considered for Autograding. If not it will be ignored.
     return updatedStep
   }
 
   /**
    * Starts an possible autograding process. If requirements are met a grade might be calculated.
    */
-  fun startAutograding(step: EvaluationStep){
+  fun startAutograding(step: EvaluationStep) {
     val updatedStep = configureEvaluationStepForAutoGrading(step)
-    //Only Autograde if a gradeDefinition is present. Otherwise this Task is not eligible for Autograding
+    // Only Autograde if a gradeDefinition is present. Otherwise this Task is not eligible for Autograding
     updatedStep.gradeDefinition?.let {
-        if(it.active){
+        if (it.active) {
           poeStepService.calculate(step)
         }
       }
@@ -109,16 +114,16 @@ class EvaluationStepService {
    * If he set up points from zero the and the pointsOfEvaluationStep is still errored
    * it will become failed.
    */
-  fun updateResultFromPointsOfEvaluationStep(poe : PointsOfEvaluationStep) : Boolean {
-    return if(poe.edited){
-      if(poe.pOfE==poe.gradeDefinition.pEvalMax){
+  fun updateResultFromPointsOfEvaluationStep(poe: PointsOfEvaluationStep): Boolean {
+    return if (poe.edited) {
+      if (poe.pOfE == poe.gradeDefinition.pEvalMax) {
         poe.evaluationStep.result = EvaluationStepResult.SUCCESS
-      }else{
+      } else {
         poe.evaluationStep.result = EvaluationStepResult.FAILED
       }
       stepRepository.save(poe.evaluationStep)
       true
-    }else{
+    } else {
       false
     }
   }
