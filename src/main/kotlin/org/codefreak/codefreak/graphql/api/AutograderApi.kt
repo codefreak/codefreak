@@ -5,19 +5,24 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
+import com.expediagroup.graphql.spring.operations.Subscription
+import graphql.schema.DataFetchingEnvironment
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.entity.*
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
+import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.*
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.GradeDefinitionService
 import org.codefreak.codefreak.service.evaluation.GradeService
 import org.codefreak.codefreak.service.evaluation.PointsOfEvaluationStepService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
 import java.util.*
 
 
@@ -54,16 +59,22 @@ class GradeDefinitionMaxDto(@GraphQLIgnore val entity: GradeDefinition,ctx: Reso
  * PointsOfEvaluation Dto for query
  */
 @GraphQLName("PointsOfEvaluationStep")
-class PointsOfEvaluationStepDto(@GraphQLIgnore val entity : PointsOfEvaluationStep, ctx : ResolverContext) : BaseDto(ctx){
+class PointsOfEvaluationStepDto(@GraphQLIgnore val entity : PointsOfEvaluationStep?, ctx : ResolverContext) : BaseDto(ctx){
 
   @GraphQLID
-  val id = entity.id
-  val bOfT = entity.bOfT
-  val pOfE = entity.pOfE
-  val calcCheck = entity.calcCheck
-  val edited = entity.edited
-  val resultCheck = entity.resultCheck
-  val gradeDefinitionMax by lazy {GradeDefinitionMaxDto(ctx.serviceAccess.getService(GradeDefinitionService::class).findByPointsOfEvaluationStepId(entity.id),ctx)}
+  val id = entity?.id
+  val bOfT = entity?.bOfT
+  val pOfE = entity?.pOfE
+  val calcCheck = entity?.calcCheck
+  val edited = entity?.edited
+  val resultCheck = entity?.resultCheck
+  val gradeDefinitionMax by lazy {
+    entity?.id?.let {
+      ctx.serviceAccess.getService(GradeDefinitionService::class).findByPointsOfEvaluationStepId(
+        it
+      )
+    }?.let { GradeDefinitionMaxDto(it,ctx) }
+  }
 }
 
 
@@ -74,7 +85,7 @@ class PointsOfEvaluationStepDto(@GraphQLIgnore val entity : PointsOfEvaluationSt
 class GradeDto(@GraphQLIgnore val entity: Grade?, ctx : ResolverContext) : BaseDto(ctx){
 
   @GraphQLID
-  val id = entity?.let { it.id }
+  val id = entity?.id
   val gradePercentage = entity?.let { it.gradePercentage }
   val calculated = entity?.let { it.calculated }
 }
@@ -283,7 +294,7 @@ class PointsOfEvaluationStepQuery : BaseResolver(), Query{
   @Secured(Authority.ROLE_STUDENT)
   fun pointsOfEvaluationStepByEvaluationStepId(id : UUID) : PointsOfEvaluationStepDto = context {
     val pointsOfEvaluationStepService = serviceAccess.getService(PointsOfEvaluationStepService::class)
-    PointsOfEvaluationStepDto(pointsOfEvaluationStepService.getEvaluationStepId(id)!!,this)
+    PointsOfEvaluationStepDto(pointsOfEvaluationStepService.getEvaluationStepId(id),this)
   }
 }
 

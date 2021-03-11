@@ -61,6 +61,7 @@ class GradeService : BaseService() {
    */
   fun createOrUpdateGradeFromEvaluation(eval : Evaluation) : Boolean{
     return run {
+      LOG.info("start gradeCalc")
       startGradeCalculation(eval)
       true
     }
@@ -71,16 +72,22 @@ class GradeService : BaseService() {
    */
   fun startGradeCalculation(eval : Evaluation) : Grade?{
     val stepList = stepRepository.findAllByEvaluation(eval)
+
+    LOG.info("findOrCreateGrade")
     val grade = findOrCreateGrade(eval)
 
+    LOG.info("validate")
     return if(validateEvaluationSteps(stepList)){
       val poeList = mutableListOf<PointsOfEvaluationStep>()
-
+      LOG.info("Listsize: " + stepList.size)
       //Add grade to PointsOfEvaluationStep. Afterwards an existing grade just can collects its PointsOfEvaluationStep Child and recalculate the grade
       for(s in stepList){
         var poe = poeStepService.findByEvaluationStep(s)
-        poe.grade = grade
-        poeList.add(poeStepService.save(poe))
+        //There might be Steps without a PoE due to deactivated Autograding for it
+        if(poe!=null){
+          poe.grade = grade
+          poeList.add(poeStepService.save(poe))
+        }
       }
        calcGrade(grade,poeList)
     }else{

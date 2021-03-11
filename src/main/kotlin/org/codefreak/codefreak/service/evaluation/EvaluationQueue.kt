@@ -107,10 +107,12 @@ class EvaluationQueue : StepExecutionListener {
           evaluationStep.status >= EvaluationStepStatus.FINISHED -> evaluationStep.status
           else -> EvaluationStepStatus.FINISHED
         }
-        evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
         //retrieve a fresh instance of the current EvaluationStep. Start Autograding.
-        //TODO GradeCalculation missing. It was here, but it has to start if all Evaluationsteps are finished.
+        //This function needs a call right before updateEvaluationStepStatus, because afterwards there
+        //might be a GradeCalculation
         evaluationStepService.startAutograding(evaluationStepService.getEvaluationStep(it))
+
+        evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
       }
     }
     return null

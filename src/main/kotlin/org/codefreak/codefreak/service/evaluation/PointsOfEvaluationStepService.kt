@@ -64,10 +64,16 @@ class PointsOfEvaluationStepService : BaseService(){
     return null
   }
 
-  fun findByEvaluationStep(evalStep : EvaluationStep) : PointsOfEvaluationStep{
+  /**
+   * Finds a PointsOfEvaluationStep if present. Otherwise return null.
+   */
+  fun findByEvaluationStep(evalStep : EvaluationStep) : PointsOfEvaluationStep?{
     val poe = poeRepository.findByEvaluationStep(evalStep)
-
-    poe.isPresent.let { return poe.get() }
+    return if(poe.isPresent){
+      poe.get()
+    }else{
+      null
+    }
   }
 
   /**
@@ -100,7 +106,7 @@ class PointsOfEvaluationStepService : BaseService(){
     es.result?.let {
       when(it){
         EvaluationStepResult.SUCCESS -> onSuccess(es)
-        EvaluationStepResult.FAILED -> onFailed(es) //try it. Should be the same path if flaws were found
+        EvaluationStepResult.FAILED -> onSuccess(es) //try it. Should be the same path if flaws were found
         EvaluationStepResult.ERRORED -> onErrored(es)
       }
     }

@@ -26,6 +26,9 @@ class EvaluationStepService {
   @Autowired
   private lateinit var poeStepService: PointsOfEvaluationStepService
 
+  @Autowired
+  private lateinit var gradeService : GradeService
+
   fun getEvaluationStep(stepId: UUID): EvaluationStep {
     return stepRepository.findById(stepId).orElseThrow {
       EntityNotFoundException("EvaluationStep $stepId could not be found")
@@ -43,6 +46,10 @@ class EvaluationStepService {
     val originalEvaluationStatus = evaluation.stepStatusSummary
     step.status = status
     val newEvaluationStatus = evaluation.stepStatusSummary
+    if(evaluation.stepStatusSummary == EvaluationStepStatus.FINISHED){
+      //If all steps are finished, calc a grade for the given evaluation
+      gradeService.createOrUpdateGradeFromEvaluation(evaluation)
+    }
     eventPublisher.publishEvent(EvaluationStepStatusUpdatedEvent(step, status))
     // check if status of evaluation has changed
     if (originalEvaluationStatus !== newEvaluationStatus) {

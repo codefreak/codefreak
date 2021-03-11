@@ -113,7 +113,7 @@ const EvaluationPage: React.FC<{
       <Tabs defaultActiveKey={subPath.get()} onChange={onTabChange}>
         <TabPane tab="Latest Evaluation" key="">
           {answer.latestEvaluation ? (
-            <EvaluationResult evaluationId={answer.latestEvaluation.id} />
+            <EvaluationResult evaluationId={answer.latestEvaluation.id} evaluationStepStatus={evaluationStatus}/>
           ) : !differentUser ? (
             <Result
               icon={<Icon type="rocket" theme="twoTone" />}

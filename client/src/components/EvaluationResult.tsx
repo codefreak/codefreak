@@ -3,7 +3,7 @@ import React, {useState} from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   EvaluationStep,
-  EvaluationStepResult,
+  EvaluationStepResult, EvaluationStepStatus,
   Feedback,
   Feedback as FeedbackEntity,
   FeedbackSeverity,
@@ -157,22 +157,17 @@ const renderFeedbackPanel = (answerId: string, feedback: Feedback) => {
   )
 }
 
-const EvaluationResult: React.FC<{ evaluationId: string }> = ({
-  evaluationId
+const EvaluationResult: React.FC<{ evaluationId: string, evaluationStepStatus?:EvaluationStepStatus }> = ({
+  evaluationId,evaluationStepStatus
 }) => {
   const result = useGetDetailedEvaluatonQuery({ variables: { evaluationId } })
-  const gradeData = useGetGrade(evaluationId)
-  // function fetchGrade(){
-  //       return grade.refetch() as any
-  // }
+  const gradeData = useGetGrade(evaluationId,evaluationStepStatus)
 
-//|| gradeResult.grade === undefined
   if (result.data === undefined ) {
     return <AsyncPlaceholder result={result} />
   }
 
   const { evaluation } = result.data
-
 
   //On Init
   let gradeView

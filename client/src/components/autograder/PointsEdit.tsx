@@ -60,8 +60,12 @@ const PointsEdit: React.FC<{
 
       }
     }
+    if(data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax==null){
+      return (<div></div>)
+    }else{
+      if(!data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax.active)return (<div> </div>)
+    }
 
-    if(!data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax.active)return (<div> </div>)
 
     if (auth) {
       return (renderEdit({
@@ -96,8 +100,15 @@ const renderEdit : React.FC<{
     changeable : boolean
 }>=props=>{
 
-  const onChangeDefinitely = (val: string | number | undefined) =>{
-    val !== undefined ? (val>props.poe.gradeDefinitionMax.pEvalMax ? props.onChange(props.poe.gradeDefinitionMax.pEvalMax) : props.onChange(val)) : undefined
+  const onChangeDefinitely = (val: number | undefined) =>{
+    if(val!==undefined){
+      if(val>props.poe.gradeDefinitionMax.pEvalMax ){
+        props.onChange(props.poe.gradeDefinitionMax.pEvalMax)
+      }else{
+        props.onChange(val)
+      }
+    }
+    // val !== undefined ? (val>props.poe.gradeDefinitionMax.pEvalMax ? props.onChange(props.poe.gradeDefinitionMax.pEvalMax) : props.onChange(val)) : undefined
 
   }
   const parser = (val: string | undefined) => {
