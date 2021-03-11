@@ -1,7 +1,0 @@
-plugins:
-  cpplint:
-    enabled: true
-    config:
-      filter: "-,+whitespace,+readability,-whitespace/ending_newline,-readability/multiline_string,-whitespace/operators"
-exclude_patterns:
-- "*.py"

@@ -1,3 +1,0 @@
-plugins:
-  sonar-java:
-    enabled: true
