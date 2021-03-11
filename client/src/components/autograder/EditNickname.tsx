@@ -1,10 +1,14 @@
 import { Button, Input, Modal } from 'antd'
-import React, { useState} from 'react'
+import React, { useState } from 'react'
 import { extractTargetValue } from '../../services/util'
-import useAuthenticatedUser from "../../hooks/useAuthenticatedUser";
-import {useGetUserAliasByUserIdQuery, UserAliasInput, useUpdateUserAliasMutation} from "../../generated/graphql";
-import AsyncPlaceholder from "../AsyncContainer";
-import {messageService} from "../../services/message";
+import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
+import {
+  useGetUserAliasByUserIdQuery,
+  UserAliasInput,
+  useUpdateUserAliasMutation
+} from '../../generated/graphql'
+import AsyncPlaceholder from '../AsyncContainer'
+import { messageService } from '../../services/message'
 import './EditNickname.less'
 
 const EditNickname: React.FC<{
@@ -16,31 +20,28 @@ const EditNickname: React.FC<{
 
   const userId = useAuthenticatedUser().id
 
-
   const result = useGetUserAliasByUserIdQuery({
-    variables: {userId}
+    variables: { userId }
   })
 
   const [updateUserAlias] = useUpdateUserAliasMutation({
-    onCompleted:()=>{
-      messageService.success('Nickname Updated')
+    onCompleted: () => {
+      messageService.success('Nickname may have Updated')
     },
-    onError:()=>{
+    onError: () => {
       messageService.error('Nickname already exists')
     }
   })
 
-  if(result.data==null){
-    return <AsyncPlaceholder result={result}/>
+  if (result.data === null || result.data === undefined) {
+    return <AsyncPlaceholder result={result} />
   }
-  const userAlias= result.data.userAliasByUserId
+  const userAlias = result.data.userAliasByUserId
 
-
-  const input : UserAliasInput={
+  const input: UserAliasInput = {
     id: userAlias.id,
-    alias: newAlias? newAlias : userAlias.alias
+    alias: newAlias ? newAlias : userAlias.alias
   }
-
 
   const showModal = () => {
     setNewAlias(userAlias.alias)
@@ -50,7 +51,7 @@ const EditNickname: React.FC<{
 
   const submit = () => {
     if (newAlias && newAlias.trim()) {
-      updateUserAlias({variables:{input}}).then(r=>result.refetch())
+      updateUserAlias({ variables: { input } }).then(r => result.refetch())
       props.onChange()
       hideModal()
     }
@@ -59,8 +60,12 @@ const EditNickname: React.FC<{
     return <>{userAlias.alias}</>
   }
   return (
-    <><div className={"edit-alias-caption"}><h2>Your Nickname</h2>{userAlias.alias}
-        <Button icon="edit" type="link" onClick={showModal}/></div>
+    <>
+      <div className={'edit-alias-caption'}>
+        <h2>Your Nickname</h2>
+        {userAlias.alias}
+        <Button icon="edit" type="link" onClick={showModal} />
+      </div>
       <Modal
         visible={modalVisible}
         onCancel={hideModal}

@@ -244,7 +244,7 @@ class GradeDefinitionMutation : BaseResolver(),Mutation{
         bOnMajor = input.bOnMajor,
         bOnCritical = input.bOnCritical
       )
-      LOG.info("GradeDefinition updated")
+      LOG.info("GradeDefinition values of $gradeDefinition updated")
       true
     }else
       LOG.error("failed to update GradeDefinition of id " + input.id)
@@ -259,7 +259,7 @@ class GradeDefinitionMutation : BaseResolver(),Mutation{
     if(input.id == gradeDefinition.id){
       gradeDefinitionService.updateGradeDefinitionStatus(gradeDefinition,
         active = input.active)
-      LOG.info("GradeDefinition updated")
+      LOG.info("GradeDefinition status of $gradeDefinition updated")
       true
     }
     else

@@ -38,14 +38,16 @@ import useIdParam from '../../hooks/useIdParam'
 import { useServerMoment } from '../../hooks/useServerTimeOffset'
 import useSubPath from '../../hooks/useSubPath'
 import {
-  Assignment, AssignmentScoreboardInput,
+  Assignment,
+  AssignmentScoreboardInput,
   AssignmentStatus,
   GetTaskListDocument,
   UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
   useGetTaskPoolForAddingQuery,
-  useUpdateAssignmentMutation, useUpdateAssignmentScoreboardMutation
+  useUpdateAssignmentMutation,
+  useUpdateAssignmentScoreboardMutation
 } from '../../services/codefreak-api'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
@@ -70,7 +72,7 @@ import {
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
-import ScoreboardPage from "../submission/ScoreboardPage";
+import ScoreboardPage from '../submission/ScoreboardPage'
 
 const { Step } = Steps
 
@@ -119,8 +121,8 @@ const AssignmentPage: React.FC = () => {
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
-  if(result.data.assignment.scoreboard){
-    tabs.push({key: '/scoreboard', tab: 'Scoreboard'})
+  if (result.data.assignment.scoreboard) {
+    tabs.push({ key: '/scoreboard', tab: 'Scoreboard' })
   }
 
   const { assignment } = result.data
@@ -135,19 +137,17 @@ const AssignmentPage: React.FC = () => {
     timeLimit: assignment.timeLimit
   }
 
-  const assignmentScoreboardInput : AssignmentScoreboardInput ={
+  const assignmentScoreboardInput: AssignmentScoreboardInput = {
     id: assignment.id,
     scoreboard: assignment.scoreboard
   }
 
-  const onScoreboardChange = (value : boolean) =>{
-    if(value!==undefined){
+  const onScoreboardChange = (value: boolean) => {
+    if (value !== undefined) {
       assignmentScoreboardInput.scoreboard = value
-      updateScoreboardMutation({variables : {assignmentScoreboardInput}})
+      updateScoreboardMutation({ variables: { assignmentScoreboardInput } })
     }
   }
-
-
 
   const updater = makeUpdater(assignmentInput, variables =>
     updateMutation({ variables })
@@ -256,11 +256,14 @@ const AssignmentPage: React.FC = () => {
                   ? secondsToRelTime(assignment.timeLimit)
                   : 'none'}
               </Descriptions.Item>
-                {assignment.editable?
-                  <Descriptions.Item label="Scoreboard" >
-                    <AntSwitch defaultChecked={assignment.scoreboard} onChange={onScoreboardChange} />
-                  </Descriptions.Item>
-                  : null}
+              {assignment.editable ? (
+                <Descriptions.Item label="Scoreboard">
+                  <AntSwitch
+                    defaultChecked={assignment.scoreboard}
+                    onChange={onScoreboardChange}
+                  />
+                </Descriptions.Item>
+              ) : null}
             </Descriptions>
             <Authorized condition={assignment.editable}>
               <StatusSteps
@@ -276,7 +279,9 @@ const AssignmentPage: React.FC = () => {
       <Switch>
         <Route exact path={path} component={TaskListPage} />
         <Route path={`${path}/submissions`} component={SubmissionListPage} />
-        {result.data.assignment.scoreboard? <Route path={`${path}/scoreboard`} component={ScoreboardPage} /> : null}
+        {result.data.assignment.scoreboard ? (
+          <Route path={`${path}/scoreboard`} component={ScoreboardPage} />
+        ) : null}
         <Route component={NotFoundPage} />
       </Switch>
     </>

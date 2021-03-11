@@ -1,15 +1,17 @@
-mutation UpdateGradeDefinitionValues($input : GradeDefinitionInput!){
+mutation UpdateGradeDefinitionValues($input: GradeDefinitionInput!) {
   updateGradeDefinitionValues(input: $input)
 }
 
-mutation UpdateGradeDefinitionStatus($gradeDefinitionActiveInput : GradeDefinitionActiveInput!){
+mutation UpdateGradeDefinitionStatus(
+  $gradeDefinitionActiveInput: GradeDefinitionActiveInput!
+) {
   updateGradeDefinitionStatus(input: $gradeDefinitionActiveInput)
 }
 
-mutation UpdatePointsOfEvaluationStep($input : PointsOfEvaluationStepInput!){
+mutation UpdatePointsOfEvaluationStep($input: PointsOfEvaluationStepInput!) {
   updatePointsOfEvaluationStep(input: $input)
 }
 
-mutation UpdateUserAlias($input : UserAliasInput!){
+mutation UpdateUserAlias($input: UserAliasInput!) {
   updateUserAlias(input: $input)
 }

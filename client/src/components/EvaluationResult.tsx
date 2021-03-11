@@ -1,9 +1,10 @@
-import {Card, Collapse, Empty, Icon, Result, Typography} from 'antd'
-import React, {useState} from 'react'
+import { Card, Collapse, Empty, Icon, Result, Typography } from 'antd'
+import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import {
   EvaluationStep,
-  EvaluationStepResult, EvaluationStepStatus,
+  EvaluationStepResult,
+  EvaluationStepStatus,
   Feedback,
   Feedback as FeedbackEntity,
   FeedbackSeverity,
@@ -12,15 +13,15 @@ import {
 } from '../generated/graphql'
 import AsyncPlaceholder from './AsyncContainer'
 import SyntaxHighlighter from './code/SyntaxHighlighter'
-import {CodeViewerCard} from './CodeViewer'
+import { CodeViewerCard } from './CodeViewer'
 import './EvaluationResult.less'
 import './autograder/Points.less'
 import EvaluationStepResultIcon from './EvaluationStepResultIcon'
-import {compare} from '../services/util'
+import { compare } from '../services/util'
 import SortSelect from './SortSelect'
-import PointsEdit from "./autograder/PointsEdit";
-import GradeView from "./autograder/GradeView";
-import useGetGrade from "../hooks/useGetGrade";
+import PointsEdit from './autograder/PointsEdit'
+import GradeView from './autograder/GradeView'
+import useGetGrade from '../hooks/useGetGrade'
 
 const { Text } = Typography
 
@@ -157,34 +158,34 @@ const renderFeedbackPanel = (answerId: string, feedback: Feedback) => {
   )
 }
 
-const EvaluationResult: React.FC<{ evaluationId: string, evaluationStepStatus?:EvaluationStepStatus }> = ({
-  evaluationId,evaluationStepStatus
-}) => {
+const EvaluationResult: React.FC<{
+  evaluationId: string
+  evaluationStepStatus?: EvaluationStepStatus
+}> = ({ evaluationId, evaluationStepStatus }) => {
   const result = useGetDetailedEvaluatonQuery({ variables: { evaluationId } })
-  const gradeData = useGetGrade(evaluationId,evaluationStepStatus)
+  const gradeData = useGetGrade(evaluationId, evaluationStepStatus)
 
-  if (result.data === undefined ) {
+  if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
   const { evaluation } = result.data
 
-  //On Init
+  // On Init
   let gradeView
-
-  if(gradeData.grade!=null){
-    gradeView=(
-      <p className="grade-view-container">
-        <GradeView
-          grade={gradeData.grade}
-        />
-      </p>
-    )
+  if (gradeData.grade !== undefined) {
+    if (gradeData.grade !== null) {
+      gradeView = (
+        <p className="grade-view-container">
+          <GradeView grade={gradeData.grade} />
+        </p>
+      )
+    }
   }
 
-
   return (
-    <>{gradeView? gradeView : null}
+    <>
+      {gradeView ? gradeView : null}
       {evaluation.steps.map(step => (
         <EvaluationStepPanel
           answerId={evaluation.answer.id}
@@ -193,7 +194,6 @@ const EvaluationResult: React.FC<{ evaluationId: string, evaluationStepStatus?:E
           fetchGrade={gradeData.fetchGrade}
         />
       ))}
-
     </>
   )
 }
@@ -240,8 +240,8 @@ const EvaluationStepPanel: React.FC<{
   step: Omit<EvaluationStep, 'definition' | 'status'> & {
     definition: Pick<EvaluationStep['definition'], 'title'>
   }
-  fetchGrade : any
-}> = ({ answerId, step ,fetchGrade}) => {
+  fetchGrade: any
+}> = ({ answerId, step, fetchGrade }) => {
   const title = (
     <>
       <EvaluationStepResultIcon stepResult={step.result} />{' '}
@@ -269,39 +269,51 @@ const EvaluationStepPanel: React.FC<{
     .sort(FeedbackSortMethods[sortValue])
     .map(renderFeedback)
 
-
-  const pointsField =(<p>
-    <PointsEdit
-      evaluationStepId={step.id}
-      fetchGrade={fetchGrade}
-    />
-  </p>)
+  const pointsField = (
+    <p>
+      <PointsEdit evaluationStepId={step.id} fetchGrade={fetchGrade} />
+    </p>
+  )
 
   let body
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
-      body = ([
+      body = [
         <Result
+          key={step.result}
           icon={<Icon type="smile" theme="twoTone" />}
           title="All checks passed – good job!"
-        />,pointsField]
-      )
+        />,
+        pointsField
+      ]
     } else if (step.summary) {
-      body = [<SyntaxHighlighter>{step.summary}</SyntaxHighlighter>,pointsField]
+      body = [
+        <SyntaxHighlighter key={step.summary}>
+          {step.summary}
+        </SyntaxHighlighter>,
+        pointsField
+      ]
     }
   } else {
-    body = [<Collapse>{renderedFeedbackList}</Collapse>,pointsField]
+    body = [
+      <Collapse key={renderedFeedbackList.toString()}>
+        {renderedFeedbackList}
+      </Collapse>,
+      pointsField
+    ]
   }
 
   if (!body) {
-    if(step.result === EvaluationStepResult.Failed){
-      body = ([
-          <Result
-            icon={<Icon type="smile" theme="twoTone" />}
-            title="Most checks passed – good job!"
-          />,pointsField]
-      )
-    }else{
+    if (step.result === EvaluationStepResult.Failed) {
+      body = [
+        <Result
+          key={step.result}
+          icon={<Icon type="smile" theme="twoTone" />}
+          title="Most checks passed – good job!"
+        />,
+        pointsField
+      ]
+    } else {
       body = <Empty />
     }
   }

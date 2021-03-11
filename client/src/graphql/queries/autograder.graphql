@@ -1,5 +1,5 @@
-query GetGradeDefinition($gradeDefinition: ID!){
-  gradeDefinition(id: $gradeDefinition){
+query GetGradeDefinition($gradeDefinition: ID!) {
+  gradeDefinition(id: $gradeDefinition) {
     id
     active
     pEvalMax
@@ -9,8 +9,8 @@ query GetGradeDefinition($gradeDefinition: ID!){
   }
 }
 
-query GetPointsOfEvaluation($pointsOfEvaluation: ID!){
-  pointsOfEvaluation(id : $pointsOfEvaluation){
+query GetPointsOfEvaluation($pointsOfEvaluation: ID!) {
+  pointsOfEvaluation(id: $pointsOfEvaluation) {
     id
     bOfT
     pOfE
@@ -20,8 +20,7 @@ query GetPointsOfEvaluation($pointsOfEvaluation: ID!){
   }
 }
 
-
-fragment pointsOfEvaluationStep on PointsOfEvaluationStep{
+fragment pointsOfEvaluationStep on PointsOfEvaluationStep {
   id
   bOfT
   pOfE
@@ -30,15 +29,15 @@ fragment pointsOfEvaluationStep on PointsOfEvaluationStep{
   resultCheck
 }
 
-query GetPointsOfEvaluationStepByEvaluationStepId($evaluationStepId: ID!){
-  pointsOfEvaluationStepByEvaluationStepId(id: $evaluationStepId){
+query GetPointsOfEvaluationStepByEvaluationStepId($evaluationStepId: ID!) {
+  pointsOfEvaluationStepByEvaluationStepId(id: $evaluationStepId) {
     id
     bOfT
     pOfE
     calcCheck
     edited
     resultCheck
-    gradeDefinitionMax{
+    gradeDefinitionMax {
       id
       pEvalMax
       active
@@ -46,49 +45,48 @@ query GetPointsOfEvaluationStepByEvaluationStepId($evaluationStepId: ID!){
   }
 }
 
-query GetGrade($evaluationId:ID!){
-  grade(id: $evaluationId){
+query GetGrade($evaluationId: ID!) {
+  grade(id: $evaluationId) {
     id
     gradePercentage
     calculated
   }
 }
 
-query GetScoreboardByAssignmentId($id: ID!){
-  scoreboardByAssignmentId(id: $id){
+query GetScoreboardByAssignmentId($id: ID!) {
+  scoreboardByAssignmentId(id: $id) {
     id
     title
-    submissionsScoreboard{
+    submissionsScoreboard {
       id
       #skip user in tree. We dont need him
-      useralias{
+      useralias {
         id
         alias
       }
-      answersScoreboard{
+      answersScoreboard {
         id
-        taskScoreboard{
+        taskScoreboard {
           id
           title
         }
-        gradeScoreboard{
+        gradeScoreboard {
           id
           gradePercentage
           calculated
         }
       }
     }
-    tasksScoreboard{
+    tasksScoreboard {
       id
       title
     }
   }
 }
 
-query GetUserAliasByUserId($userId:ID!){
-  userAliasByUserId(id:$userId){
+query GetUserAliasByUserId($userId: ID!) {
+  userAliasByUserId(id: $userId) {
     id
     alias
   }
 }
-

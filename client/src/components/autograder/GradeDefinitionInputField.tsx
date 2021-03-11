@@ -1,24 +1,21 @@
-import {Descriptions, InputNumber, Switch, Typography} from 'antd'
+import { InputNumber, Switch } from 'antd'
 import { InputNumberProps } from 'antd/es/input-number'
-import React, {useEffect, useState} from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import './GradeDefinitionInputField.less'
 import {
   GradeDefinition,
   GradeDefinitionInput,
-  useUpdateEvaluationStepDefinitionMutation, useUpdateGradeDefinitionValuesMutation
-} from "../../generated/graphql";
-import HelpTooltip from '../HelpTooltip';
-import {messageService} from "../../services/message";
-import {makeUpdater} from "../../services/util";
-import {debounce} from "ts-debounce";
-import Title from "antd/es/typography/Title";
+  useUpdateGradeDefinitionValuesMutation
+} from '../../generated/graphql'
+import HelpTooltip from '../HelpTooltip'
+import { debounce } from 'ts-debounce'
 
-const renderGradePoints =(
+const renderGradePoints = (
   title: string,
   value: number,
-  onChange : (value: number) => void,
+  onChange: (value: number) => void,
   additionalProps: InputNumberProps = {}
-) =>{
+) => {
   const onChangeValid = (val: number | undefined) =>
     val !== undefined ? onChange(val) : undefined
 
@@ -26,32 +23,32 @@ const renderGradePoints =(
     if (!val) {
       return '0'
     }
-    //(?:\d+(?:\.\d*)?|\.\d+) <- für Float
-    ///[^\d]+/ <- decimal
 
     return val.replace(/[^\d]+/, '0')
   }
-    const formatter = (val: string | number | undefined) => `${val}`
+  const formatter = (val: string | number | undefined) => `${val}`
 
-    return (
-      <InputNumber
-        title={title}
-        min={0}
-        onChange={onChangeValid}
-        value={value}
-        inputMode={"numeric"}
-        {...additionalProps}
-      />
-    )
+  return (
+    <InputNumber
+      title={title}
+      min={0}
+      onChange={onChangeValid}
+      value={value}
+      parser={parser}
+      formatter={formatter}
+      inputMode={'numeric'}
+      {...additionalProps}
+    />
+  )
 }
 
-const renderGradeErrors =(
+const renderGradeErrors = (
   title: string,
   value: number,
   max: number,
-  onChange : (value: number) => void,
+  onChange: (value: number) => void,
   additionalProps: InputNumberProps = {}
-) =>{
+) => {
   const onChangeValid = (val: number | undefined) =>
     val !== undefined ? onChange(val) : undefined
 
@@ -59,8 +56,8 @@ const renderGradeErrors =(
     if (!val) {
       return '0'
     }
-    //(?:\d+(?:\.\d*)?|\.\d+) <- für Float
-    ///[^\d]+/ <- decimal
+    // (?:\d+(?:\.\d*)?|\.\d+) <- für Float
+    /// [^\d]+/ <- decimal
     return val.replace(/[^\d]+/, '0')
   }
   const formatter = (val: string | number | undefined) => `${val}`
@@ -79,7 +76,6 @@ const renderGradeErrors =(
   )
 }
 
-
 /**
  * Inputform to Enter and Mutate a GradeDefinition
  *
@@ -88,101 +84,120 @@ const GradeDefinitionInputField: React.FC<{
   gradeDefinition: GradeDefinition
   fetchForUpdate: any
   disable: boolean
-}> =props => {
-
+}> = props => {
   const [updateMutation] = useUpdateGradeDefinitionValuesMutation({
     onCompleted: () => {
       props.fetchForUpdate()
     }
   })
 
-  const [globalField, setglobalField] = useState<keyof GradeDefinitionInput | null>(null)
-
+  const [globalField, setGlobalField] = useState<
+    keyof GradeDefinitionInput | null
+  >(null)
 
   const [gradeDefinition, setGradeDefinition] = useState<GradeDefinition>(
-    props.gradeDefinition || {pEvalMax: 0, bOnMinor: 0, bOnMajor: 0, bOnCritical: 0}
+    props.gradeDefinition || {
+      pEvalMax: 0,
+      bOnMinor: 0,
+      bOnMajor: 0,
+      bOnCritical: 0
+    }
   )
 
-  const input: GradeDefinitionInput = {
-    id: gradeDefinition.id,
-    pEvalMax: gradeDefinition.pEvalMax,
-    bOnMinor: gradeDefinition.bOnMinor,
-    bOnMajor: gradeDefinition.bOnMajor,
-    bOnCritical: gradeDefinition.bOnCritical
-  }
-
+  const [input, setGradeDefinitionInput] = useState<GradeDefinitionInput>()
+  // TODO updates two times, due to gradeDefinition Dependency her and useEffekt for memorizeCallback. Better approach required.
   useEffect(() => {
-    if (globalField != null) {
-      debounce(updateMutation({variables: {input}}).then, 500)
-    }
+    setGradeDefinitionInput({
+      bOnCritical: gradeDefinition.bOnCritical,
+      bOnMajor: gradeDefinition.bOnMajor,
+      bOnMinor: gradeDefinition.bOnMinor,
+      id: gradeDefinition.id,
+      pEvalMax: gradeDefinition.pEvalMax
+    })
   }, [gradeDefinition])
 
-  const [changeable, setChangeable] = useState<boolean>(
-    false
-  )
+  const memoizedCallback = useCallback(() => {
+    if (globalField !== null) {
+      if (input !== undefined)
+        debounce(updateMutation({ variables: { input } }).then, 500)
+    }
+  }, [globalField, updateMutation, input])
+
+  useEffect(() => {
+    memoizedCallback()
+  }, [gradeDefinition, memoizedCallback])
+
+  const [changeable, setChangeable] = useState<boolean>(false)
 
   const onEnabledChange = (state: boolean) => {
     setChangeable(state)
   }
 
-  const updater = makeUpdater(input, input =>
-    updateMutation({variables: {input}})
-  )
-
-
   const createOnValueChange = (field: keyof GradeDefinitionInput) => (
     value: number
   ) => {
-    const valueOfKey = {...gradeDefinition, [field]: value}
-    if (typeof value == "number") {
-      setglobalField(field)
-      setGradeDefinition(valueOfKey)
-    } else {
-    }
+    const valueOfKey = { ...gradeDefinition, [field]: value }
+    setGlobalField(field)
+    setGradeDefinition(valueOfKey)
   }
-
-  const printObject = () => {
-    console.log("gradeDefinition -> " +
-      " pEvalMax: " + gradeDefinition.pEvalMax,
-      " bOnMinor: " + gradeDefinition.bOnMinor,
-      " bOnMajor: " + gradeDefinition.bOnMajor,
-      " bOnCritical:" + gradeDefinition.bOnCritical)
-  }
-
 
   return (
     <div className="grade-definition-input">
       <div className="maxPointsInput">
-        {renderGradePoints("Max-Points", gradeDefinition.pEvalMax, createOnValueChange('pEvalMax'), {
-          disabled: !changeable
-        })}</div>
+        {renderGradePoints(
+          'Max-Points',
+          gradeDefinition.pEvalMax,
+          createOnValueChange('pEvalMax'),
+          {
+            disabled: !changeable
+          }
+        )}
+      </div>
       <div className="maxPoints">Max-Points</div>
       <div className="minorErrorInput">
-        {renderGradeErrors("Minor-Error", gradeDefinition.bOnMinor, gradeDefinition.pEvalMax, createOnValueChange('bOnMinor'), {
-          disabled: !changeable
-        })}
+        {renderGradeErrors(
+          'Minor-Error',
+          gradeDefinition.bOnMinor,
+          gradeDefinition.pEvalMax,
+          createOnValueChange('bOnMinor'),
+          {
+            disabled: !changeable
+          }
+        )}
       </div>
       <div className="minorError">Minor-Error</div>
       <div className="majorErrorInput">
-        {renderGradeErrors("Major-Error", gradeDefinition.bOnMajor, gradeDefinition.pEvalMax, createOnValueChange('bOnMajor'), {
-          disabled: !changeable
-        })}
+        {renderGradeErrors(
+          'Major-Error',
+          gradeDefinition.bOnMajor,
+          gradeDefinition.pEvalMax,
+          createOnValueChange('bOnMajor'),
+          {
+            disabled: !changeable
+          }
+        )}
       </div>
       <div className="majorError">Major-Error</div>
       <div className="criticalErrorInput">
-        {renderGradeErrors("Critical-Error", gradeDefinition.bOnCritical, gradeDefinition.pEvalMax, createOnValueChange('bOnCritical'), {
-          disabled: !changeable
-        })}
+        {renderGradeErrors(
+          'Critical-Error',
+          gradeDefinition.bOnCritical,
+          gradeDefinition.pEvalMax,
+          createOnValueChange('bOnCritical'),
+          {
+            disabled: !changeable
+          }
+        )}
       </div>
       <div className="criticalError">Critical-Error</div>
       <div className="grade-definition-unlock">
-        <Switch defaultChecked={changeable} onChange={onEnabledChange} disabled={props.disable}/>
-        <HelpTooltip
-          placement="top"
-          title="unlock fields"
+        <Switch
+          defaultChecked={changeable}
+          onChange={onEnabledChange}
+          disabled={props.disable}
         />
+        <HelpTooltip placement="top" title="unlock fields" />
       </div>
-
     </div>
   )
 }

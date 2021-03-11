@@ -72,6 +72,16 @@ class GradeService : BaseService() {
    */
   fun startGradeCalculation(eval : Evaluation) : Grade?{
     val stepList = stepRepository.findAllByEvaluation(eval)
+    //Since the grade calculation is uncoupled from the previous approach to perform it after PointsOfEvaluationStep
+    //points calculation, we need to check if there is a gradeCalculation wanted.
+    //Only continue, if there is any Autograder of an EvaluationStep.GradeDefinition activated.
+    var exit = false
+    for(s in stepList){
+      s.gradeDefinition?.let { if(it.active) exit = true}
+    }
+    //If there is any evaluationStep with an GradeDefinition who has its active attribute on true
+    //We can proceed to GradeCalculation, otherwise we exit
+    if(exit)return null
 
     LOG.info("findOrCreateGrade")
     val grade = findOrCreateGrade(eval)

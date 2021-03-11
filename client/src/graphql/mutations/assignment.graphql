@@ -48,6 +48,8 @@ mutation UpdateAssignment(
   )
 }
 
-mutation UpdateAssignmentScoreboard($assignmentScoreboardInput : AssignmentScoreboardInput!){
-  assignmentScoreboard(input:$assignmentScoreboardInput)
+mutation UpdateAssignmentScoreboard(
+  $assignmentScoreboardInput: AssignmentScoreboardInput!
+) {
+  assignmentScoreboard(input: $assignmentScoreboardInput)
 }

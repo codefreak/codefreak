@@ -62,14 +62,14 @@ query GetDetailedEvaluaton($evaluationId: ID!) {
           columnEnd
         }
       }
-      pointsOfEvaluationStep{
+      pointsOfEvaluationStep {
         id
         bOfT
         pOfE
         calcCheck
         edited
         resultCheck
-        gradeDefinitionMax{
+        gradeDefinitionMax {
           id
           pEvalMax
           active
@@ -94,7 +94,7 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       options
       active
       timeout
-      gradeDefinition{
+      gradeDefinition {
         id
         active
         pEvalMax
