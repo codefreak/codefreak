@@ -23,11 +23,15 @@ const LoginPage: React.FC<LoginProps> = props => {
 
   const handleSubmit = async (values: Credentials) => {
     setLoading(true)
-    const { data } = await login({ variables: values })
-    if (data?.login) {
-      await onSuccessfulLogin(data.login.user)
+    try {
+      const { data } = await login({ variables: values })
+      if (data?.login) {
+        await onSuccessfulLogin(data.login.user)
+      }
+    } finally {
+      // get out of loading mode even if something goes wrong
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
