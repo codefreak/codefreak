@@ -5,7 +5,7 @@ import { useFormatter } from '../hooks/useFormatter'
 import { useServerMoment } from '../hooks/useServerTimeOffset'
 
 interface AbsoluteDateTimeProps extends HTMLProps<HTMLTimeElement> {
-  created: Date,
+  created: Date
   updated: Date
 }
 
@@ -18,9 +18,12 @@ const AbsoluteDateTime = (props: AbsoluteDateTimeProps) => {
   const updatedFormattedAbsoluteDate = dateTime(updated)
   const createdFormattedRelativeDate = createdDateMoment.from(serverMoment())
 
+  // show relative createdAt date only in the tooltip and absolute updatedAt date directly
   return (
     <time dateTime={updatedDateMoment.toISOString()} {...timeProps}>
-      <Tooltip title={`Created ${createdFormattedRelativeDate}`}>{updatedFormattedAbsoluteDate}</Tooltip>
+      <Tooltip title={`Created ${createdFormattedRelativeDate}`}>
+        {updatedFormattedAbsoluteDate}
+      </Tooltip>
     </time>
   )
 }

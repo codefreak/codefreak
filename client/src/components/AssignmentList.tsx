@@ -97,7 +97,11 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
 
   const updatedAtTag = (
     <span style={{ marginRight: '1em' }}>
-      Updated: <AbsoluteDateTime updated={new Date(assignment.updatedAt)} created={new Date(assignment.createdAt)} />
+      Last Updated:{' '}
+      <AbsoluteDateTime
+        updated={new Date(assignment.updatedAt)}
+        created={new Date(assignment.createdAt)}
+      />
     </span>
   )
 
@@ -113,9 +117,7 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
       extra={
         <>
           <Authorized authority="ROLE_ADMIN">{authorTag}</Authorized>
-          <Authorized authority="ROLE_TEACHER">
-            {updatedAtTag}
-          </Authorized>
+          <Authorized authority="ROLE_TEACHER">{updatedAtTag}</Authorized>
           {assignment.deletable ? (
             <Tooltip title={'Delete assignment'} placement="left">
               <Button

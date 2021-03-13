@@ -40,7 +40,11 @@ const renderTask = (props: RenderProps) => (task: Task) => {
 
   const updatedAtTag = (
     <span style={{ marginRight: '1em' }}>
-      Last Updated: <AbsoluteDateTime updated={new Date(task.updatedAt)} created={new Date(task.createdAt)} />
+      Last Updated:{' '}
+      <AbsoluteDateTime
+        updated={new Date(task.updatedAt)}
+        created={new Date(task.createdAt)}
+      />
     </span>
   )
 
@@ -58,9 +62,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
     ),
     extra: (
       <>
-        <Authorized authority="ROLE_TEACHER">
-          {updatedAtTag}
-        </Authorized>
+        <Authorized authority="ROLE_TEACHER">{updatedAtTag}</Authorized>
         {task.editable ? (
           <Tooltip
             title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
