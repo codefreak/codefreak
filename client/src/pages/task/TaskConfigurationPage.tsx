@@ -72,7 +72,7 @@ const filePatternHelp = (
   />
 )
 
-const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
+const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
   })
@@ -343,4 +343,4 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   )
 }
 
-export default TaskDetailsPage
+export default TaskConfigurationPage

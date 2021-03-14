@@ -46,6 +46,7 @@ query GetTask($id: ID!, $userId: ID) {
     editable
     ideEnabled
     exportUrl
+    body
     assignment {
       id
       title

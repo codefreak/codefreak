@@ -3,6 +3,7 @@ import {
   CloudOutlined,
   DashboardOutlined,
   FileTextOutlined,
+  SettingOutlined,
   SolutionOutlined
 } from '@ant-design/icons'
 import { Switch as AntSwitch, Tooltip } from 'antd'
@@ -52,8 +53,9 @@ import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
 import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
-import TaskDetailsPage from './TaskDetailsPage'
+import TaskConfigurationPage from './TaskConfigurationPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
+import TaskInstructionsPage from "./TaskInstructionsPage";
 
 export const DifferentUserContext = createContext<
   PublicUserFieldsFragment | undefined
@@ -180,7 +182,8 @@ const TaskPage: React.FC = () => {
     : []
 
   const tabs = [
-    { key: '/details', tab: tab('Configuration', <FileTextOutlined />) },
+    { key: '/details', tab: tab('Configuration', <SettingOutlined />) },
+    { key: '/instructions', tab: tab('Instructions', <FileTextOutlined />) },
     ...testingModeSwitch,
     {
       key: '/answer',
@@ -305,7 +308,10 @@ const TaskPage: React.FC = () => {
           <Redirect to={`${url}/details`} />
         </Route>
         <Route path={`${path}/details`}>
-          <TaskDetailsPage editable={editable} />
+          <TaskConfigurationPage editable={editable} />
+        </Route>
+        <Route path={`${path}/instructions`}>
+          <TaskInstructionsPage />
         </Route>
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
