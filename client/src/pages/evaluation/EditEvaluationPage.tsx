@@ -317,9 +317,10 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       <Alert
         message={
           <>
-            Here you can configure the automatic evaluation. Only you as a
-            teacher can see this. To try it out, enable testing mode and start
-            the evaluation.
+            You can configure the automatic evaluation here. The configuration
+            is only visible to teachers. To check the configuration, enable
+            "Testing Mode" on the top of the page and click the "Start Evaluation"
+            button on the top right.
             <br />
             The order of evaluation steps determines the order of the feedback
             displayed to students.
