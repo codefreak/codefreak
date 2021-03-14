@@ -182,7 +182,7 @@ const TaskPage: React.FC = () => {
     : []
 
   const tabs = [
-    { key: '/details', tab: tab('Configuration', <SettingOutlined />) },
+    { key: '/configuration', tab: tab('Configuration', <SettingOutlined />) },
     { key: '/instructions', tab: tab('Instructions', <FileTextOutlined />) },
     ...testingModeSwitch,
     {
@@ -305,9 +305,9 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path}>
-          <Redirect to={`${url}/details`} />
+          <Redirect to={`${url}/configuration`} />
         </Route>
-        <Route path={`${path}/details`}>
+        <Route path={`${path}/configuration`}>
           <TaskConfigurationPage editable={editable} />
         </Route>
         <Route path={`${path}/instructions`}>
