@@ -166,71 +166,35 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             <Empty description="This task has no extra instructions. Take a look at the provided files." />
           )}
         </Card>
-        <Card
-          title="Online IDE"
-          style={{ marginTop: 16 }}
-          extra={
-            <Switch
-              defaultChecked={task.ideEnabled}
-              unCheckedChildren={<PoweroffOutlined />}
-              onChange={updater('ideEnabled')}
-            />
-          }
-          bodyStyle={{
-            display: !task.ideEnabled ? 'none' : ''
-          }}
-        >
-          <Row gutter={16}>
-            <Col span={12}>
-              <h3>Image</h3>
-              <p>
-                Optionally, you can specify a custom Docker image for the
-                student Online IDE. You will most likely <em>not</em> need this!
-                Read more about custom IDE images{' '}
-                <CodefreakDocsLink category="for-teachers" page="ide">
-                  here
-                </CodefreakDocsLink>
-                .
-              </p>
-              <p>
-                Leave blank to use the default image{' '}
-                <code>{defaultIdeImage}</code>.
-              </p>
-              <Input.Search
-                style={{
-                  maxWidth: 400
-                }}
-                defaultValue={task.ideImage || ''}
-                placeholder="e.g. foo/bar:latest"
-                allowClear
-                enterButton={<SaveOutlined />}
-                onSearch={updater('ideImage')}
-              />
-            </Col>
-            <Col span={12}>
-              <h3>CMD / Arguments</h3>
-              <p>
-                You can customize the CMD on the container to alter either the
-                container CMD or pass additional arguments to the container.
-                Only use this if you know what you are doing.
-                <br />
-                <strong>Warning:</strong> These values are NOT parameters for{' '}
-                <code>docker run</code>!
-              </p>
-              <Input.Search
-                style={{
-                  maxWidth: 400
-                }}
-                defaultValue={task.ideArguments || ''}
-                placeholder="--option=value --verbose"
-                allowClear
-                enterButton={<SaveOutlined />}
-                onSearch={updater('ideArguments')}
-              />
-            </Col>
-          </Row>
-        </Card>
-        <Card title="Files" style={{ marginTop: 16 }}>
+
+        <Card title="Files" style={{ marginTop: 16 }}
+              extra={
+                <>
+                <Link
+                  to={'/ide/task/' + shorten(task.id)}
+                  target={'task-ide-' + task.id}
+                >
+                  <Button
+                    type="primary"
+                    icon={<EditOutlined />}
+                    disabled={assignmentOpen && !sureToEditFiles}
+                  >
+                    Edit task files in IDE
+                  </Button>
+                </Link>{' '}
+                {task.assignment?.id && (
+                  <StartSubmissionEvaluationButton
+                  assignmentId={task.assignment.id}
+                  invalidateTask={task.id}
+                  disabled={assignmentOpen && !sureToEditFiles}
+                  type="primary"
+                  icon={<SyncOutlined />}
+                  >
+                  Evaluate all answers of this task
+                  </StartSubmissionEvaluationButton>
+                  )}
+                  </>
+              }>
           {assignmentOpen ? (
             <Alert
               style={{ marginBottom: 16 }}
@@ -260,31 +224,6 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
               showIcon
             />
           ) : null}
-          <p>
-            <Link
-              to={'/ide/task/' + shorten(task.id)}
-              target={'task-ide-' + task.id}
-            >
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                disabled={assignmentOpen && !sureToEditFiles}
-              >
-                Edit task files in IDE
-              </Button>
-            </Link>{' '}
-            {task.assignment?.id && (
-              <StartSubmissionEvaluationButton
-                assignmentId={task.assignment.id}
-                invalidateTask={task.id}
-                disabled={assignmentOpen && !sureToEditFiles}
-                type="primary"
-                icon={<SyncOutlined />}
-              >
-                Evaluate all answers of this task
-              </StartSubmissionEvaluationButton>
-            )}
-          </p>
           <Row gutter={16}>
             <Col span={12}>
               <List
@@ -356,6 +295,71 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                 bordered
                 dataSource={task.protectedFiles}
                 renderItem={renderFilePattern}
+              />
+            </Col>
+          </Row>
+        </Card>
+        <Card
+          title="Online IDE"
+          style={{ marginTop: 16 }}
+          extra={
+
+            <Switch
+              defaultChecked={task.ideEnabled}
+              unCheckedChildren={<PoweroffOutlined />}
+              onChange={updater('ideEnabled')}
+            />
+          }
+          bodyStyle={{
+            display: !task.ideEnabled ? 'none' : ''
+          }}
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <h3>Image</h3>
+              <p>
+                Optionally, you can specify a custom Docker image for the
+                student Online IDE. You will most likely <em>not</em> need this!
+                Read more about custom IDE images{' '}
+                <CodefreakDocsLink category="for-teachers" page="ide">
+                  here
+                </CodefreakDocsLink>
+                .
+              </p>
+              <p>
+                Leave blank to use the default image{' '}
+                <code>{defaultIdeImage}</code>.
+              </p>
+              <Input.Search
+                style={{
+                  maxWidth: 400
+                }}
+                defaultValue={task.ideImage || ''}
+                placeholder="e.g. foo/bar:latest"
+                allowClear
+                enterButton={<SaveOutlined />}
+                onSearch={updater('ideImage')}
+              />
+            </Col>
+            <Col span={12}>
+              <h3>CMD / Arguments</h3>
+              <p>
+                You can customize the CMD on the container to alter either the
+                container CMD or pass additional arguments to the container.
+                Only use this if you know what you are doing.
+                <br />
+                <strong>Warning:</strong> These values are NOT parameters for{' '}
+                <code>docker run</code>!
+              </p>
+              <Input.Search
+                style={{
+                  maxWidth: 400
+                }}
+                defaultValue={task.ideArguments || ''}
+                placeholder="--option=value --verbose"
+                allowClear
+                enterButton={<SaveOutlined />}
+                onSearch={updater('ideArguments')}
               />
             </Col>
           </Row>
