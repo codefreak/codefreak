@@ -180,7 +180,7 @@ const TaskPage: React.FC = () => {
     : []
 
   const tabs = [
-    { key: '/details', tab: tab('Task', <FileTextOutlined />) },
+    { key: '/details', tab: tab('Configuration', <FileTextOutlined />) },
     ...testingModeSwitch,
     {
       key: '/answer',
