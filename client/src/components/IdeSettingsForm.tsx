@@ -44,14 +44,9 @@ const renderPresetOptionGroups = () => {
 }
 
 const IdeSettingsForm: React.FC<IdeSettingsFormProps> = props => {
-  const { defaultValue, onChange } = props
+  const { defaultValue = {}, onChange } = props
   const { data: defaultIdeImage } = useSystemConfig('defaultIdeImage')
-  const [values, setValues] = useState<IdeSettingsModel>(
-    defaultValue || {
-      ideImage: undefined,
-      ideArguments: undefined
-    }
-  )
+  const [values, setValues] = useState<IdeSettingsModel>(defaultValue)
 
   const setValue = <K extends keyof IdeSettingsModel>(
     field: K
