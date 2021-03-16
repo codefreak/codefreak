@@ -13,7 +13,7 @@ import CardList from './CardList'
 import CropContainer from './CropContainer'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
-import AbsoluteDateTime from './AbsoluteDateTime'
+import ModificationTime from './ModificationTime'
 import Authorized from './Authorized'
 
 const { confirm } = Modal
@@ -41,7 +41,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
   const updatedAtTag = (
     <span style={{ marginRight: '1em' }}>
       Last Updated:{' '}
-      <AbsoluteDateTime
+      <ModificationTime
         updated={new Date(task.updatedAt)}
         created={new Date(task.createdAt)}
       />

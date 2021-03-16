@@ -4,12 +4,12 @@ import { Tooltip } from 'antd'
 import { useFormatter } from '../hooks/useFormatter'
 import { useServerMoment } from '../hooks/useServerTimeOffset'
 
-interface AbsoluteDateTimeProps extends HTMLProps<HTMLTimeElement> {
+interface ModificationTimeProps extends HTMLProps<HTMLTimeElement> {
   created: Date
   updated: Date
 }
 
-const AbsoluteDateTime = (props: AbsoluteDateTimeProps) => {
+const ModificationTime = (props: ModificationTimeProps) => {
   const { created, updated, ...timeProps } = props
   const { dateTime } = useFormatter()
   const createdDateMoment = moment(props.created)
@@ -28,4 +28,4 @@ const AbsoluteDateTime = (props: AbsoluteDateTimeProps) => {
   )
 }
 
-export default AbsoluteDateTime
+export default ModificationTime

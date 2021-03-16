@@ -14,7 +14,7 @@ import {
 import { compare } from '../services/util'
 import { matches } from '../services/strings'
 import { displayName } from '../services/user'
-import AbsoluteDateTime from './AbsoluteDateTime'
+import ModificationTime from './ModificationTime'
 
 const { confirm } = Modal
 
@@ -98,7 +98,7 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
   const updatedAtTag = (
     <span style={{ marginRight: '1em' }}>
       Last Updated:{' '}
-      <AbsoluteDateTime
+      <ModificationTime
         updated={new Date(assignment.updatedAt)}
         created={new Date(assignment.createdAt)}
       />
