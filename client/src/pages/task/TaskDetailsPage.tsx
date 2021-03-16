@@ -3,7 +3,6 @@ import {
   InfoCircleFilled,
   InfoCircleTwoTone,
   PoweroffOutlined,
-  SaveOutlined,
   SyncOutlined
 } from '@ant-design/icons'
 import {
@@ -13,7 +12,6 @@ import {
   Checkbox,
   Col,
   Empty,
-  Input,
   List,
   Row,
   Switch,
@@ -27,12 +25,12 @@ import ReactMarkdown from 'react-markdown'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
-import CodefreakDocsLink from '../../components/CodefreakDocsLink'
 import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import StartSubmissionEvaluationButton from '../../components/StartSubmissionEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import {
+  GetTaskDetailsDocument,
   TaskDetailsInput,
   useGetTaskDetailsQuery,
   useUpdateTaskDetailsMutation
@@ -41,7 +39,9 @@ import { messageService } from '../../services/message'
 import { shorten } from '../../services/short-id'
 import { makeUpdater } from '../../services/util'
 import EditEvaluationPage from '../evaluation/EditEvaluationPage'
-import useSystemConfig from '../../hooks/useSystemConfig'
+import IdeSettingsForm, {
+  IdeSettingsModel
+} from '../../components/IdeSettingsForm'
 
 const { TabPane } = Tabs
 
@@ -82,13 +82,17 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
   })
-  const { data: defaultIdeImage } = useSystemConfig('defaultIdeImage')
 
   const [updateMutation] = useUpdateTaskDetailsMutation({
     onCompleted: () => {
-      result.refetch()
       messageService.success('Task updated')
-    }
+    },
+    refetchQueries: [
+      {
+        query: GetTaskDetailsDocument,
+        variables: { id: useIdParam(), teacher: editable }
+      }
+    ]
   })
 
   const [sureToEditFiles, setSureToEditFiles] = useState(false)
@@ -131,6 +135,17 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   )
 
   const assignmentOpen = task.assignment?.status === 'OPEN'
+
+  const onIdeSettingsChange = (values: IdeSettingsModel) => {
+    updateMutation({
+      variables: {
+        input: {
+          ...taskDetailsInput,
+          ...values
+        }
+      }
+    })
+  }
 
   return (
     <Tabs
@@ -180,55 +195,13 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             display: !task.ideEnabled ? 'none' : ''
           }}
         >
-          <Row gutter={16}>
-            <Col span={12}>
-              <h3>Image</h3>
-              <p>
-                Optionally, you can specify a custom Docker image for the
-                student Online IDE. You will most likely <em>not</em> need this!
-                Read more about custom IDE images{' '}
-                <CodefreakDocsLink category="for-teachers" page="ide">
-                  here
-                </CodefreakDocsLink>
-                .
-              </p>
-              <p>
-                Leave blank to use the default image{' '}
-                <code>{defaultIdeImage}</code>.
-              </p>
-              <Input.Search
-                style={{
-                  maxWidth: 400
-                }}
-                defaultValue={task.ideImage || ''}
-                placeholder="e.g. foo/bar:latest"
-                allowClear
-                enterButton={<SaveOutlined />}
-                onSearch={updater('ideImage')}
-              />
-            </Col>
-            <Col span={12}>
-              <h3>CMD / Arguments</h3>
-              <p>
-                You can customize the CMD on the container to alter either the
-                container CMD or pass additional arguments to the container.
-                Only use this if you know what you are doing.
-                <br />
-                <strong>Warning:</strong> These values are NOT parameters for{' '}
-                <code>docker run</code>!
-              </p>
-              <Input.Search
-                style={{
-                  maxWidth: 400
-                }}
-                defaultValue={task.ideArguments || ''}
-                placeholder="--option=value --verbose"
-                allowClear
-                enterButton={<SaveOutlined />}
-                onSearch={updater('ideArguments')}
-              />
-            </Col>
-          </Row>
+          <IdeSettingsForm
+            defaultValue={{
+              ideImage: taskDetailsInput.ideImage || undefined,
+              ideArguments: taskDetailsInput.ideArguments || undefined
+            }}
+            onChange={onIdeSettingsChange}
+          />
         </Card>
         <Card title="Files" style={{ marginTop: 16 }}>
           {assignmentOpen ? (
