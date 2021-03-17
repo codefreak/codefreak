@@ -1,0 +1,74 @@
+vscode:
+  title: Visual Studio Code
+  items:
+    default:
+      title: Default
+      ideImage: ''
+      ideArguments: ''
+    canary:
+      title: Latest unstable IDE release
+      ideImage: cfreak/ide:canary
+      ideArguments: ''
+
+breeze:
+  title: Breeze (Simple IDE – Alpha Test)
+  items:
+    generic:
+      title: Generic (Ubuntu 20.04)
+      ideImage: cfreak/breeze
+      ideArguments: >-
+        --image ubuntu:20.04
+    python2:
+      title: Python 2
+      ideImage: cfreak/breeze
+      ideArguments: >-
+        --image python:2
+        --main-file main.py
+        --run-cmd 'python2 main.py'
+    python3:
+      title: Python 3
+      ideImage: cfreak/breeze
+      ideArguments: >-
+        --image python:3
+        --main-file main.py
+        --run-cmd 'python3 main.py'
+    jdk8:
+      title: Java 8 (OpenJDK 8 + Gradle 6.8)
+      ideImage: cfreak/breeze
+      ideArguments: >-
+        --image gradle:6.8-jdk8
+        --enable-network true
+        --memory 256m
+        --main-file src/main/java/Main.java
+        --run-cmd 'gradle run'
+    jdk12:
+      title: Java 15 (OpenJDK 15 + Gradle 6.8)
+      ideImage: cfreak/breeze
+      ideArguments: >-
+        --image gradle:6.8-jdk15
+        --enable-network true
+        --memory 256m
+        --main-file src/main/java/Main.java
+        --run-cmd 'gradle run'
+    node-14:
+      title: JavaScript (NodeJS 14.16 LTS)
+      ideImage: cfreak/breeze
+      ideArguments: >-
+        --image node:14.16
+        --main-file src/index.js
+        --run-cmd 'node src/index.js'
+    cmake:
+      title: CMake
+      ideImage: cfreak/breeze
+      ideArguments: >-
+        --image rikorose/gcc-cmake
+        --main-file src/main.cpp
+        --run-cmd 'sh -c"cmake . -B build && cd build && make && src/ExampleProject_run"'
+    csharp:
+      title: C# (.NET Core 3.1)
+      ideImage: cfreak/breeze
+      ideArguments: >-
+        --image mcr.microsoft.com/dotnet/core/sdk:3.1
+        --main-file src/AddFunction/AddFunction.cs
+        --enable-network true
+        --run-cmd 'dotnet run --project src/AddFunction'
