@@ -28,6 +28,7 @@ query GetTaskPoolForAdding {
     id
     title
     createdAt
+    updatedAt
   }
 }
 
