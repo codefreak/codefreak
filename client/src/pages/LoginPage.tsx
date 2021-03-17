@@ -19,10 +19,13 @@ interface LoginProps {
 const LoginPage: React.FC<LoginProps> = props => {
   const { onSuccessfulLogin, loggingOut } = props
   const [loading, setLoading] = useState<boolean>(false)
-  const [login] = useLoginMutation()
+  const [login] = useLoginMutation({
+    errorPolicy: 'ignore' // prevents unhandled rejection errors
+  })
 
   const handleSubmit = async (values: Credentials) => {
     setLoading(true)
+    // errors during login are shown by our global error handling
     try {
       const { data } = await login({ variables: values })
       if (data?.login) {
