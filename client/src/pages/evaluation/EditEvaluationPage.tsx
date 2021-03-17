@@ -19,7 +19,6 @@ import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { JSONSchema6 } from 'json-schema'
 import YAML from 'json-to-pretty-yaml'
 import { useState } from 'react'
-import { deepEquals } from 'react-jsonschema-form/lib/utils'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CardList from '../../components/CardList'
 import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
@@ -57,20 +56,6 @@ const parseSchema = (schema: string) => {
   const hasProperties =
     optionsSchema.properties && Object.keys(optionsSchema.properties).length > 0
   return { optionsSchema, hasProperties }
-}
-
-const stringifyOptions = (options: any, optionsSchema: JSONSchema6) => {
-  const optionsCopy = { ...options }
-  if (optionsSchema.properties) {
-    // remove values if they are same as default
-    for (const propName of Object.keys(optionsSchema.properties)) {
-      const propSchema = optionsSchema.properties[propName] as any
-      if (deepEquals(propSchema.default, optionsCopy[propName])) {
-        delete optionsCopy[propName]
-      }
-    }
-  }
-  return JSON.stringify(optionsCopy)
 }
 
 const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
@@ -162,7 +147,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       })
 
     const updateOptions = (newOptions: any) =>
-      updater('options')(stringifyOptions(newOptions, optionsSchema))
+      updater('options')(JSON.stringify(newOptions))
     const updateTimeout = debounce(updater('timeout'), 500)
 
     const configureButtonProps: ButtonProps = {
@@ -371,7 +356,7 @@ const renderAddStepButton = (
   }
   const createStepWithoutOptions = () => createStep({})
   const createStep = (options: unknown) =>
-    onCreate(runner.name, stringifyOptions(options, optionsSchema))
+    onCreate(runner.name, JSON.stringify(options))
   if (!hasProperties) {
     return (
       <Button
