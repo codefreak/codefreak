@@ -103,7 +103,12 @@ class TaskQuery : BaseResolver(), Query {
   @Secured(Authority.ROLE_STUDENT)
   fun task(id: UUID): TaskDto = context {
     val taskService = serviceAccess.getService(TaskService::class)
-    TaskDto(taskService.findTask(id), this)
+    val task = taskService.findTask(id)
+    // only allow owner and admin to access tasks from the pool
+    if (task.assignment == null) {
+      authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
+    }
+    TaskDto(task, this)
   }
 
   @Transactional
