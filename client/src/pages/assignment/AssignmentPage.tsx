@@ -62,7 +62,7 @@ import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
 import TaskSelection from '../../components/TaskSelection'
-import ModificationTime from "../../components/ModificationTime";
+import ModificationTime from '../../components/ModificationTime'
 
 const { Step } = Steps
 
