@@ -1,8 +1,7 @@
-import {Alert, Col, List, Row, Tooltip} from "antd";
-import {InfoCircleFilled} from "@ant-design/icons";
-import JsonSchemaEditButton from "./JsonSchemaEditButton";
-import {JSONSchema6} from "json-schema";
-
+import { Alert, Col, List, Row, Tooltip } from 'antd'
+import { InfoCircleFilled } from '@ant-design/icons'
+import JsonSchemaEditButton from './JsonSchemaEditButton'
+import { JSONSchema6 } from 'json-schema'
 
 const FilePermissions = (props: any) => {
   const { task, updater } = props
@@ -23,8 +22,8 @@ const FilePermissions = (props: any) => {
       style={{ marginBottom: 16 }}
       message={
         <>
-          File patterns use the Ant pattern syntax. For more information refer to
-          the{' '}
+          File patterns use the Ant pattern syntax. For more information refer
+          to the{' '}
           <a
             href="https://ant.apache.org/manual/dirtasks.html#patterns"
             target="_blank"
@@ -52,17 +51,17 @@ const FilePermissions = (props: any) => {
                 alignItems: 'center'
               }}
             >
-                    <span>
-                      <b>Hidden files</b>{' '}
-                      <Tooltip
-                        title={
-                          'Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation.'
-                        }
-                        placement="bottom"
-                      >
-                        <InfoCircleFilled />
-                      </Tooltip>
-                    </span>
+              <span>
+                <b>Hidden files</b>{' '}
+                <Tooltip
+                  title={
+                    'Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation.'
+                  }
+                  placement="bottom"
+                >
+                  <InfoCircleFilled />
+                </Tooltip>
+              </span>
               <JsonSchemaEditButton
                 title="Edit hidden files"
                 extraContent={filePatternHelp}
@@ -88,17 +87,17 @@ const FilePermissions = (props: any) => {
                 alignItems: 'center'
               }}
             >
-                    <span>
-                      <b>Protected files</b>{' '}
-                      <Tooltip
-                        title={
-                          'Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.'
-                        }
-                        placement="bottom"
-                      >
-                        <InfoCircleFilled />
-                      </Tooltip>
-                    </span>
+              <span>
+                <b>Protected files</b>{' '}
+                <Tooltip
+                  title={
+                    'Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.'
+                  }
+                  placement="bottom"
+                >
+                  <InfoCircleFilled />
+                </Tooltip>
+              </span>
               <JsonSchemaEditButton
                 title="Edit protected files"
                 extraContent={filePatternHelp}

@@ -1,8 +1,4 @@
-import {
-  EditOutlined,
-  PoweroffOutlined,
-  SyncOutlined
-} from '@ant-design/icons'
+import { EditOutlined, PoweroffOutlined, SyncOutlined } from '@ant-design/icons'
 import {
   Alert,
   Button,
@@ -34,13 +30,9 @@ import EditEvaluationPage from '../evaluation/EditEvaluationPage'
 import IdeSettingsForm, {
   IdeSettingsModel
 } from '../../components/IdeSettingsForm'
-import FilePermissions from "../../components/FilePermissions";
+import FilePermissions from '../../components/FilePermissions'
 
 const { Panel } = Collapse
-
-
-
-
 
 const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
   editable
