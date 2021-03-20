@@ -64,14 +64,14 @@ query GetDetailedEvaluaton($evaluationId: ID!) {
       }
       pointsOfEvaluationStep {
         id
-        bOfT
-        pOfE
+        mistakePoints
+        reachedPoints
         calcCheck
         edited
         resultCheck
         gradeDefinitionMax {
           id
-          pEvalMax
+          maxPoints
           active
         }
       }
@@ -97,10 +97,10 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       gradeDefinition {
         id
         active
-        pEvalMax
-        bOnMinor
-        bOnMajor
-        bOnCritical
+        maxPoints
+        minorError
+        majorError
+        criticalError
       }
     }
   }

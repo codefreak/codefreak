@@ -26,22 +26,22 @@ class GradeDefinition(
   /**
    * Maximum of points reachable by its Grade definition
    */
-  var pEvalMax = 10f
+  var maxPoints = 10f
 
   /**
    * Point reduction on minor errors
    */
-  var bOnMinor = 0f
+  var minorError = 0f
 
   /**
    * Point reduction on major errors
    */
-  var bOnMajor = 0f
+  var majorError = 0f
 
   /**
    * Point reduction on Critical Errors.
    */
-  var bOnCritical = 0f
+  var criticalError = 0f
 
   /**
    * A Grade definition is valid for many EvaluationSteps.

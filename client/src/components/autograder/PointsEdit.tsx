@@ -45,20 +45,21 @@ const PointsEdit: React.FC<{
     if (result.data !== undefined) {
       const data = result.data
 
+
       const input: PointsOfEvaluationStepInput = {
-        bOfT: data.pointsOfEvaluationStepByEvaluationStepId.bOfT,
-        calcCheck: data.pointsOfEvaluationStepByEvaluationStepId.calcCheck,
-        edited: data.pointsOfEvaluationStepByEvaluationStepId.edited,
-        id: data.pointsOfEvaluationStepByEvaluationStepId.id,
-        pOfE: data.pointsOfEvaluationStepByEvaluationStepId.pOfE,
-        resultCheck: data.pointsOfEvaluationStepByEvaluationStepId.resultCheck
+        calcCheck: data.pointsOfEvaluationStepByEvaluationStepId.calcCheck!!,
+        mistakePoints: data.pointsOfEvaluationStepByEvaluationStepId.mistakePoints!!,
+        edited: data.pointsOfEvaluationStepByEvaluationStepId.edited!!,
+        id: data.pointsOfEvaluationStepByEvaluationStepId.id!!,
+        reachedPoints: data.pointsOfEvaluationStepByEvaluationStepId.reachedPoints!!,
+        resultCheck: data.pointsOfEvaluationStepByEvaluationStepId.resultCheck!!
       }
 
       if (result.error) return <div>Error!</div>
 
       const onPoEStepChange = (value: number) => {
         if (value !== undefined) {
-          input.pOfE = value
+          input.reachedPoints = value
           input.edited = true
           debounce(
             updatePointsOfEvaluationStep({ variables: { input } }).then,
@@ -73,7 +74,7 @@ const PointsEdit: React.FC<{
         return <div />
       } else {
         if (
-          !data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax
+          !data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax!
             .active
         )
           return <div />
@@ -88,10 +89,10 @@ const PointsEdit: React.FC<{
         })
       } else {
         return renderView({
-          reachedPoints: data.pointsOfEvaluationStepByEvaluationStepId.pOfE,
+          reachedPoints: data.pointsOfEvaluationStepByEvaluationStepId!.reachedPoints!!,
           maxPoints:
-            data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax
-              .pEvalMax
+            data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax!
+              .maxPoints
         })
       }
     } else {
@@ -121,8 +122,8 @@ const renderEdit: React.FC<{
 }> = props => {
   const onChangeDefinitely = (val: number | undefined) => {
     if (val !== undefined) {
-      if (val > props.poe.gradeDefinitionMax.pEvalMax) {
-        props.onChange(props.poe.gradeDefinitionMax.pEvalMax)
+      if (val > props.poe.gradeDefinitionMax!.maxPoints) {
+        props.onChange(props.poe.gradeDefinitionMax!.maxPoints)
       } else {
         props.onChange(val)
       }
@@ -136,15 +137,15 @@ const renderEdit: React.FC<{
     return val.replace(/[^\d]+/, '0')
   }
   const formatter = (val: string | number | undefined) => `${val}`
-  if (props.poe.gradeDefinitionMax.pEvalMax === 0) return <></>
+  if (props.poe.gradeDefinitionMax!.maxPoints === 0) return <></>
 
   const input = (
     <InputNumber
       title={'Points'}
       min={0}
-      max={props.poe.gradeDefinitionMax.pEvalMax}
+      max={props.poe.gradeDefinitionMax!.maxPoints}
       onChange={onChangeDefinitely}
-      value={props.poe.pOfE}
+      value={props.poe.reachedPoints!!}
       parser={parser}
       formatter={formatter}
       disabled={!props.changeable}
@@ -158,7 +159,7 @@ const renderEdit: React.FC<{
   return (
     <div className="points-edit">
       {lever}
-      {input} / {props.poe.gradeDefinitionMax.pEvalMax}
+      {input} / {props.poe.gradeDefinitionMax!.maxPoints}
     </div>
   )
 }

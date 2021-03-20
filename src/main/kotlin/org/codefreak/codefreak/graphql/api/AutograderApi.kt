@@ -39,10 +39,10 @@ class GradeDefinitionDto(@GraphQLIgnore val entity: GradeDefinition, ctx: Resolv
   @GraphQLID
   val id = entity.id
   val active = entity.active
-  val pEvalMax = entity.pEvalMax
-  val bOnMinor = entity.bOnMinor
-  val bOnMajor = entity.bOnMajor
-  val bOnCritical = entity.bOnCritical
+  val maxPoints = entity.maxPoints
+  val minorError = entity.minorError
+  val majorError = entity.majorError
+  val criticalError = entity.criticalError
 }
 
 /**
@@ -53,7 +53,7 @@ class GradeDefinitionMaxDto(@GraphQLIgnore val entity: GradeDefinition, ctx: Res
 
   @GraphQLID
   val id = entity.id
-  val pEvalMax = entity.pEvalMax
+  val maxPoints = entity.maxPoints
   val active = entity.active
 }
 
@@ -65,8 +65,8 @@ class PointsOfEvaluationStepDto(@GraphQLIgnore val entity: PointsOfEvaluationSte
 
   @GraphQLID
   val id = entity?.id
-  val bOfT = entity?.bOfT
-  val pOfE = entity?.pOfE
+  val mistakePoints = entity?.mistakePoints
+  val reachedPoints = entity?.reachedPoints
   val calcCheck = entity?.calcCheck
   val edited = entity?.edited
   val resultCheck = entity?.resultCheck
@@ -152,7 +152,7 @@ class TaskScoreboardDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) :
  * Dto to receive input for Gradedefinitions
  */
 @GraphQLName("GradeDefinitionInput")
-class GradeDefinitionInputDto(var id: UUID, var pEvalMax: Float, var bOnMinor: Float, var bOnMajor: Float, var bOnCritical: Float) {
+class GradeDefinitionInputDto(var id: UUID, var maxPoints: Float, var minorError: Float, var majorError: Float, var criticalError: Float) {
   constructor() : this(UUID.randomUUID(), 0f, 0f, 0f, 0f)
 }
 
@@ -165,7 +165,7 @@ class GradeDefinitionActiveInputDto(var id: UUID, var active: Boolean) {
  * Dto to receive input for PointsOfEvaluationSteps
  */
 @GraphQLName("PointsOfEvaluationStepInput")
-class PointsOfEvaluationStepInputDto(var id: UUID, var pOfE: Float, var bOfT: Float, var calcCheck: Boolean, var edited: Boolean, var resultCheck: Boolean) {
+class PointsOfEvaluationStepInputDto(var id: UUID, var reachedPoints: Float, var mistakePoints: Float, var calcCheck: Boolean, var edited: Boolean, var resultCheck: Boolean) {
   constructor() : this(UUID.randomUUID(), 0f, 0f, false, false, false)
 }
 
@@ -226,10 +226,10 @@ class GradeDefinitionMutation : BaseResolver(), Mutation {
     if (input.id == gradeDefinition.id) {
       gradeDefinitionService.updateGradeDefinitionValues(
         gradeDefinition,
-        pEvalMax = input.pEvalMax,
-        bOnMinor = input.bOnMinor,
-        bOnMajor = input.bOnMajor,
-        bOnCritical = input.bOnCritical
+        maxPoints = input.maxPoints,
+        minorError = input.minorError,
+        majorError = input.majorError,
+        criticalError = input.criticalError
       )
       LOG.info("GradeDefinition values of $gradeDefinition updated")
       true
@@ -299,8 +299,8 @@ class PointsOfEvaluationStepMutation : BaseResolver(), Mutation {
     val poe = poeService.findById(input.id)
     if (poe.id == input.id) {
       var updatedPoe = poeService.updatePointsOfEvaluationStep(poe,
-        pOfE = input.pOfE,
-        bOfT = input.bOfT,
+        reachedPoints = input.reachedPoints,
+        mistakePoints = input.mistakePoints,
         calcCheck = input.calcCheck,
         edited = input.edited,
         resultCheck = input.resultCheck

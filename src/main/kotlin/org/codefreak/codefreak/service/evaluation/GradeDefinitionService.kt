@@ -85,11 +85,11 @@ class GradeDefinitionService : BaseService() {
    * function to update an existing GradeDefinition
    */
   @Transactional
-  fun updateGradeDefinitionValues(gradeDefinition: GradeDefinition, pEvalMax: Float?, bOnMinor: Float?, bOnMajor: Float?, bOnCritical: Float?): GradeDefinition {
-    pEvalMax?.let { gradeDefinition.pEvalMax = pEvalMax }
-    bOnMinor?.let { gradeDefinition.bOnMinor = bOnMinor }
-    bOnMajor?.let { gradeDefinition.bOnMajor = bOnMajor }
-    bOnCritical?.let { gradeDefinition.bOnCritical = bOnCritical }
+  fun updateGradeDefinitionValues(gradeDefinition: GradeDefinition, maxPoints: Float?, minorError: Float?, majorError: Float?, criticalError: Float?): GradeDefinition {
+    maxPoints?.let { gradeDefinition.maxPoints = maxPoints }
+    minorError?.let { gradeDefinition.minorError = minorError }
+    majorError?.let { gradeDefinition.majorError = majorError }
+    criticalError?.let { gradeDefinition.criticalError = criticalError }
     val def = save(gradeDefinition)
     pointsOfEvaluationStepService.recalculatePoints(gradeDefinition)
     return def

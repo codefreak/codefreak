@@ -87,15 +87,6 @@ class PointsOfEvaluationStepService : BaseService() {
     }
   }
 
-  /**
-   * Function to merge two lists.
-   */
-  fun <T> merge(first: List<T>, second: List<T>): List<T> {
-    val list: MutableList<T> = ArrayList()
-    list.addAll(first)
-    list.addAll(second)
-    return list.toSet().toMutableList()
-  }
 
   /**
    * starts calculation in depend of its associated EvaluationStepResult
@@ -129,19 +120,19 @@ class PointsOfEvaluationStepService : BaseService() {
     val failedFeedbacks = feedbackRepository.findByEvaluationStepAndStatusNot(es, Feedback.Status.SUCCESS)
     LOG.info("We gathered ${failedFeedbacks.size} Failed Feedbacks")
 
-    var bOfT = collectMistakes(failedFeedbacks, gradeDefinition)
+    var mistakePoints = collectMistakes(failedFeedbacks, gradeDefinition)
 
-    LOG.info("we collected $bOfT mistakepoints")
+    LOG.info("we collected $mistakePoints mistakepoints")
 
-    poe.bOfT = bOfT
-    if (bOfT >= gradeDefinition.pEvalMax) {
-      poe.pOfE = 0f
+    poe.mistakePoints = mistakePoints
+    if (mistakePoints >= gradeDefinition.maxPoints) {
+      poe.reachedPoints = 0f
     } else {
-      poe.pOfE = gradeDefinition.pEvalMax - poe.bOfT
+      poe.reachedPoints = gradeDefinition.maxPoints - poe.mistakePoints
     }
     poe.calcCheck = true
     // print poe
-    LOG.info("just calculated: ${poe.pOfE} points! Did ${poe.bOfT} mistakes. CalcCheck is set to ${poe.calcCheck} ")
+    LOG.info("just calculated: ${poe.reachedPoints} points! Did ${poe.mistakePoints} mistakes. CalcCheck is set to ${poe.calcCheck} ")
     // Save poe
     poeRepository.save(poe)
   }
@@ -161,18 +152,18 @@ class PointsOfEvaluationStepService : BaseService() {
   }
 
   fun collectMistakes(finalList: List<Feedback>, gradeDefinition: GradeDefinition): Float {
-    var bOfT = 0f
+    var mistakePoints = 0f
     for (f in finalList) {
       if (f.isFailed) {
         when (f.severity) {
-          Feedback.Severity.MINOR -> bOfT += gradeDefinition.bOnMinor
-          Feedback.Severity.MAJOR -> bOfT += gradeDefinition.bOnMajor
-          Feedback.Severity.CRITICAL -> bOfT += gradeDefinition.bOnCritical
+          Feedback.Severity.MINOR -> mistakePoints += gradeDefinition.minorError
+          Feedback.Severity.MAJOR -> mistakePoints += gradeDefinition.majorError
+          Feedback.Severity.CRITICAL -> mistakePoints += gradeDefinition.criticalError
           else -> LOG.info("Feedback shows no errors / flaws")
         }
       }
     }
-    return bOfT
+    return mistakePoints
   }
 
   /**
@@ -220,9 +211,9 @@ class PointsOfEvaluationStepService : BaseService() {
    * Updatefunction. Checks what is transmitted and updated values
    * Save when done
    */
-  fun updatePointsOfEvaluationStep(poe: PointsOfEvaluationStep, pOfE: Float?, bOfT: Float?, calcCheck: Boolean?, edited: Boolean?, resultCheck: Boolean?): PointsOfEvaluationStep {
-    pOfE?.let { poe.pOfE = pOfE }
-    bOfT?.let { poe.bOfT = bOfT }
+  fun updatePointsOfEvaluationStep(poe: PointsOfEvaluationStep, reachedPoints: Float?, mistakePoints: Float?, calcCheck: Boolean?, edited: Boolean?, resultCheck: Boolean?): PointsOfEvaluationStep {
+    reachedPoints?.let { poe.reachedPoints = reachedPoints }
+    mistakePoints?.let { poe.mistakePoints = mistakePoints }
     calcCheck?.let { poe.calcCheck = calcCheck }
     edited?.let { poe.edited = edited }
     resultCheck?.let { poe.resultCheck = resultCheck }

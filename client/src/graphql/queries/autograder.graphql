@@ -2,18 +2,18 @@ query GetGradeDefinition($gradeDefinition: ID!) {
   gradeDefinition(id: $gradeDefinition) {
     id
     active
-    pEvalMax
-    bOnMinor
-    bOnMajor
-    bOnCritical
+    maxPoints
+    minorError
+    majorError
+    criticalError
   }
 }
 
 query GetPointsOfEvaluation($pointsOfEvaluation: ID!) {
   pointsOfEvaluation(id: $pointsOfEvaluation) {
     id
-    bOfT
-    pOfE
+    mistakePoints
+    reachedPoints
     calcCheck
     edited
     resultCheck
@@ -22,8 +22,8 @@ query GetPointsOfEvaluation($pointsOfEvaluation: ID!) {
 
 fragment pointsOfEvaluationStep on PointsOfEvaluationStep {
   id
-  bOfT
-  pOfE
+  mistakePoints
+  reachedPoints
   calcCheck
   edited
   resultCheck
@@ -32,14 +32,14 @@ fragment pointsOfEvaluationStep on PointsOfEvaluationStep {
 query GetPointsOfEvaluationStepByEvaluationStepId($evaluationStepId: ID!) {
   pointsOfEvaluationStepByEvaluationStepId(id: $evaluationStepId) {
     id
-    bOfT
-    pOfE
+    mistakePoints
+    reachedPoints
     calcCheck
     edited
     resultCheck
     gradeDefinitionMax {
       id
-      pEvalMax
+      maxPoints
       active
     }
   }

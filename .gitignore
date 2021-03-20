@@ -29,3 +29,6 @@ src/main/resources/application-dev.*
 src/main/resources/git.properties
 .asscache
 .vagrant
+/src/main/resources/init/tasks/task-0/
+/src/main/resources/init/tasks/task-1/
+/src/main/resources/init/tasks/task-2/

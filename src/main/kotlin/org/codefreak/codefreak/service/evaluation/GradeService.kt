@@ -131,8 +131,8 @@ class GradeService : BaseService() {
     var points = 0f
     var maxPoints = 0f
     for (poe in poeList) {
-      points += poe.pOfE
-      maxPoints += poe.gradeDefinition.pEvalMax
+      points += poe.reachedPoints
+      maxPoints += poe.gradeDefinition.maxPoints
     }
     LOG.info("points are $points and maxPoints are $maxPoints")
     grade.gradePercentage = (100 / maxPoints * points)

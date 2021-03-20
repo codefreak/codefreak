@@ -116,7 +116,7 @@ class EvaluationStepService {
    */
   fun updateResultFromPointsOfEvaluationStep(poe: PointsOfEvaluationStep): Boolean {
     return if (poe.edited) {
-      if (poe.pOfE == poe.gradeDefinition.pEvalMax) {
+      if (poe.reachedPoints == poe.gradeDefinition.maxPoints) {
         poe.evaluationStep.result = EvaluationStepResult.SUCCESS
       } else {
         poe.evaluationStep.result = EvaluationStepResult.FAILED

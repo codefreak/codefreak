@@ -108,11 +108,11 @@ const GradeDefinitionInputField: React.FC<{
   // TODO updates two times, due to gradeDefinition Dependency her and useEffekt for memorizeCallback. Better approach required.
   useEffect(() => {
     setGradeDefinitionInput({
-      bOnCritical: gradeDefinition.bOnCritical,
-      bOnMajor: gradeDefinition.bOnMajor,
-      bOnMinor: gradeDefinition.bOnMinor,
+      criticalError: gradeDefinition.criticalError,
+      majorError: gradeDefinition.majorError,
+      minorError: gradeDefinition.minorError,
       id: gradeDefinition.id,
-      pEvalMax: gradeDefinition.pEvalMax
+      maxPoints: gradeDefinition.maxPoints
     })
   }, [gradeDefinition])
 
@@ -146,8 +146,8 @@ const GradeDefinitionInputField: React.FC<{
       <div className="maxPointsInput">
         {renderGradePoints(
           'Max-Points',
-          gradeDefinition.pEvalMax,
-          createOnValueChange('pEvalMax'),
+          gradeDefinition.maxPoints,
+          createOnValueChange('maxPoints'),
           {
             disabled: !changeable
           }
@@ -157,9 +157,9 @@ const GradeDefinitionInputField: React.FC<{
       <div className="minorErrorInput">
         {renderGradeErrors(
           'Minor-Error',
-          gradeDefinition.bOnMinor,
-          gradeDefinition.pEvalMax,
-          createOnValueChange('bOnMinor'),
+          gradeDefinition.minorError,
+          gradeDefinition.maxPoints,
+          createOnValueChange('minorError'),
           {
             disabled: !changeable
           }
@@ -169,9 +169,9 @@ const GradeDefinitionInputField: React.FC<{
       <div className="majorErrorInput">
         {renderGradeErrors(
           'Major-Error',
-          gradeDefinition.bOnMajor,
-          gradeDefinition.pEvalMax,
-          createOnValueChange('bOnMajor'),
+          gradeDefinition.majorError,
+          gradeDefinition.maxPoints,
+          createOnValueChange('majorError'),
           {
             disabled: !changeable
           }
@@ -181,9 +181,9 @@ const GradeDefinitionInputField: React.FC<{
       <div className="criticalErrorInput">
         {renderGradeErrors(
           'Critical-Error',
-          gradeDefinition.bOnCritical,
-          gradeDefinition.pEvalMax,
-          createOnValueChange('bOnCritical'),
+          gradeDefinition.criticalError,
+          gradeDefinition.maxPoints,
+          createOnValueChange('criticalError'),
           {
             disabled: !changeable
           }

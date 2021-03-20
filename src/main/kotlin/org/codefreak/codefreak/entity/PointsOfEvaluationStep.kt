@@ -60,11 +60,11 @@ class PointsOfEvaluationStep(
   /**
    * sum of all mistakes refered to all flawed feedbacks
    */
-  var bOfT: Float = 0f
+  var mistakePoints: Float = 0f
 
   /**
    * Points reached in this Evaluation.
    */
 
-  var pOfE: Float = 0f
+  var reachedPoints: Float = 0f
 }
