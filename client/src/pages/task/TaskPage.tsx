@@ -148,8 +148,11 @@ const TaskPage: React.FC = () => {
   const testingModeSwitch =
     editable && !differentUser
       ? [
-        { key: '/configuration', tab: tab('Configuration', <SettingOutlined />) },
-        {
+          {
+            key: '/configuration',
+            tab: tab('Configuration', <SettingOutlined />)
+          },
+          {
             key: 'testing-mode',
             tab: (
               <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>

@@ -38,5 +38,6 @@
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)
 * The database of the development server is now seeded with the task templates and not from examples in the main repository (#771)
+* Usability: Removed second level menu (Detail, Edit Details, Edit Configuration) from task configuration page, renamed task configuration page (#534)
 
 ### Removed
