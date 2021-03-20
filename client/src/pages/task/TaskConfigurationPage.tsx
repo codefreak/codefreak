@@ -1,7 +1,6 @@
 import {
   EditOutlined,
-  InfoCircleFilled,
-  SaveOutlined,
+  InfoCircleFilled, PoweroffOutlined,
   SyncOutlined
 } from '@ant-design/icons'
 import {
@@ -12,24 +11,23 @@ import {
   Col,
   Collapse,
   Empty,
-  Input,
   List,
   Row,
-  Space,
+  Space, Switch,
   Tooltip
 } from 'antd'
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { JSONSchema6 } from 'json-schema'
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncPlaceholder'
 import EditableMarkdown from '../../components/EditableMarkdown'
-import CodefreakDocsLink from '../../components/CodefreakDocsLink'
 import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import StartSubmissionEvaluationButton from '../../components/StartSubmissionEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
 import {
+  GetTaskDetailsDocument,
   TaskDetailsInput,
   useGetTaskDetailsQuery,
   useUpdateTaskDetailsMutation
@@ -38,7 +36,9 @@ import { messageService } from '../../services/message'
 import { shorten } from '../../services/short-id'
 import { makeUpdater } from '../../services/util'
 import EditEvaluationPage from '../evaluation/EditEvaluationPage'
-import useSystemConfig from '../../hooks/useSystemConfig'
+import IdeSettingsForm, {
+  IdeSettingsModel
+} from '../../components/IdeSettingsForm'
 
 const { Panel } = Collapse
 
@@ -80,13 +80,17 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
   })
-  const { data: defaultIdeImage } = useSystemConfig('defaultIdeImage')
 
   const [updateMutation] = useUpdateTaskDetailsMutation({
     onCompleted: () => {
-      result.refetch()
       messageService.success('Task updated')
-    }
+    },
+    refetchQueries: [
+      {
+        query: GetTaskDetailsDocument,
+        variables: { id: useIdParam(), teacher: editable }
+      }
+    ]
   })
 
   const [sureToEditFiles, setSureToEditFiles] = useState(false)
@@ -129,6 +133,17 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
   )
 
   const assignmentOpen = task.assignment?.status === 'OPEN'
+
+  const onIdeSettingsChange = (values: IdeSettingsModel) => {
+    updateMutation({
+      variables: {
+        input: {
+          ...taskDetailsInput,
+          ...values
+        }
+      }
+    })
+  }
 
   return (
     <Space direction="vertical">
@@ -288,56 +303,22 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
         </Panel>
       </Collapse>
       <Collapse>
-        <Panel header={'Online IDE'} key={4}>
-          <Row gutter={16}>
-            <Col span={12}>
-              <h3>Image</h3>
-              <p>
-                Optionally, you can specify a custom Docker image for the
-                student Online IDE. You will most likely <em>not</em> need this!
-                Read more about custom IDE images{' '}
-                <CodefreakDocsLink category="for-teachers" page="ide">
-                  here
-                </CodefreakDocsLink>
-                .
-              </p>
-              <p>
-                Leave blank to use the default image{' '}
-                <code>{defaultIdeImage}</code>.
-              </p>
-              <Input.Search
-                style={{
-                  maxWidth: 400
-                }}
-                defaultValue={task.ideImage || ''}
-                placeholder="e.g. foo/bar:latest"
-                allowClear
-                enterButton={<SaveOutlined />}
-                onSearch={updater('ideImage')}
-              />
-            </Col>
-            <Col span={12}>
-              <h3>CMD / Arguments</h3>
-              <p>
-                You can customize the CMD on the container to alter either the
-                container CMD or pass additional arguments to the container.
-                Only use this if you know what you are doing.
-                <br />
-                <strong>Warning:</strong> These values are NOT parameters for{' '}
-                <code>docker run</code>!
-              </p>
-              <Input.Search
-                style={{
-                  maxWidth: 400
-                }}
-                defaultValue={task.ideArguments || ''}
-                placeholder="--option=value --verbose"
-                allowClear
-                enterButton={<SaveOutlined />}
-                onSearch={updater('ideArguments')}
-              />
-            </Col>
-          </Row>
+        <Panel header={'Online IDE'} key={4}
+              extra={
+                 <Switch
+                   defaultChecked={task.ideEnabled}
+                   unCheckedChildren={<PoweroffOutlined />}
+                   onChange={updater('ideEnabled')}
+                 />
+               }>
+
+          <IdeSettingsForm
+            defaultValue={{
+              ideImage: taskDetailsInput.ideImage || undefined,
+              ideArguments: taskDetailsInput.ideArguments || undefined
+            }}
+            onChange={onIdeSettingsChange}
+          />
         </Panel>
       </Collapse>
     </Space>

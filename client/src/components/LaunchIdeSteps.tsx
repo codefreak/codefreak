@@ -5,7 +5,7 @@ import {
   useIsIdeLiveLazyQuery,
   useStartIdeMutation
 } from '../generated/graphql'
-import { extractErrorMessage } from '../services/codefreak-api'
+import { getErrorMessageFromApolloError } from '../services/codefreak-api'
 import {
   CloudOutlined,
   ForwardOutlined,
@@ -26,7 +26,7 @@ const LaunchIdeSteps: React.FC<{
 
   const [startIde] = useStartIdeMutation({
     variables: { type, id },
-    onError: e => setError(extractErrorMessage(e))
+    onError: e => setError(getErrorMessageFromApolloError(e))
   })
   const [checkIsIdeLive, { data, loading }] = useIsIdeLiveLazyQuery({
     variables: { type, id },

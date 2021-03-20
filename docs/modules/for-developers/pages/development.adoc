@@ -150,6 +150,8 @@ $ ./gradlew vagrantTest   # for testing with Vagrant Docker daemon
 [source]
 -----
 $ ./gradlew spotlessApply
+$ cd client
+$ npm run fix
 -----
 
 == Making changes to the database schema
