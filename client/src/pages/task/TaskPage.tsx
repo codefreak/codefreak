@@ -148,7 +148,8 @@ const TaskPage: React.FC = () => {
   const testingModeSwitch =
     editable && !differentUser
       ? [
-          {
+        { key: '/configuration', tab: tab('Configuration', <SettingOutlined />) },
+        {
             key: 'testing-mode',
             tab: (
               <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
@@ -182,9 +183,8 @@ const TaskPage: React.FC = () => {
     : []
 
   const tabs = [
-    { key: '/configuration', tab: tab('Configuration', <SettingOutlined />) },
-    { key: '/instructions', tab: tab('Instructions', <FileTextOutlined />) },
     ...testingModeSwitch,
+    { key: '/instructions', tab: tab('Instructions', <FileTextOutlined />) },
     {
       key: '/answer',
       tab: tab('Answer', <SolutionOutlined />),
@@ -305,7 +305,7 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path}>
-          <Redirect to={`${url}/configuration`} />
+          <Redirect to={`${url}/instructions`} />
         </Route>
         <Route path={`${path}/configuration`}>
           <TaskConfigurationPage editable={editable} />
