@@ -1,4 +1,9 @@
-import { Alert, Button, Card, Col, Icon, Modal, Row } from 'antd'
+import {
+  ExclamationCircleTwoTone,
+  UpCircleOutlined,
+  DownCircleOutlined
+} from '@ant-design/icons'
+import { Alert, Button, Card, Col, Modal, Row } from 'antd'
 import moment from 'moment'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import AnswerBlocker from '../../components/AnswerBlocker'
@@ -52,13 +57,7 @@ const DangerZone: React.FC<DangerZoneProps> = props => {
   const onResetClick = () => {
     Modal.confirm({
       title: 'Really reset files?',
-      icon: (
-        <Icon
-          type="exclamation-circle"
-          theme="twoTone"
-          twoToneColor="#ff4d4f"
-        />
-      ),
+      icon: <ExclamationCircleTwoTone twoToneColor="#ff4d4f" />,
       okType: 'danger',
       content: (
         <>
@@ -77,12 +76,15 @@ const DangerZone: React.FC<DangerZoneProps> = props => {
     })
   }
 
+  const upCircle = <UpCircleOutlined />
+  const downCircle = <DownCircleOutlined />
+
   return (
     <Card
       title="Danger Zone"
       extra={
         <Button
-          icon={showDangerZone ? 'up-circle' : 'down-circle'}
+          icon={showDangerZone ? upCircle : downCircle}
           onClick={toggleDangerZone}
         >
           {showDangerZone ? 'Hide' : 'Show'}
@@ -105,7 +107,7 @@ const DangerZone: React.FC<DangerZoneProps> = props => {
               </>
             }
           />
-          <Button type="danger" onClick={onResetClick} loading={resetLoading}>
+          <Button danger onClick={onResetClick} loading={resetLoading}>
             Reset all files
           </Button>
         </Col>

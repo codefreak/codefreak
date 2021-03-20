@@ -23,7 +23,8 @@ import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.TaskTarService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
-import org.springframework.core.io.ClassPathResource
+import org.codefreak.codefreak.util.TaskTemplate
+import org.codefreak.codefreak.util.TaskTemplateUtil
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -46,6 +47,10 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val ideImage by lazy {
     authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
     entity.ideImage
+  }
+  val ideArguments by lazy {
+    authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
+    entity.ideArguments
   }
   val hiddenFiles by lazy {
     authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
@@ -78,16 +83,17 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   }
 }
 
-enum class TaskTemplate {
-  JAVA, PYTHON, CSHARP, JAVASCRIPT
-}
-
 class TaskInput(var id: UUID, var title: String, var timeLimit: Long?) {
   constructor() : this(UUID.randomUUID(), "", null)
 }
 
-class TaskDetailsInput(var id: UUID, var body: String?, var hiddenFiles: Array<String>, var protectedFiles: Array<String>, var ideEnabled: Boolean, var ideImage: String?) {
-  constructor() : this(UUID.randomUUID(), null, arrayOf(), arrayOf(), true, null)
+class TaskDetailsInput(var id: UUID = UUID.randomUUID()) {
+  var body: String? = null
+  var hiddenFiles: Array<String> = arrayOf()
+  var protectedFiles: Array<String> = arrayOf()
+  var ideEnabled: Boolean = true
+  var ideImage: String? = null
+  var ideArguments: String? = null
 }
 
 @Component
@@ -115,7 +121,7 @@ class TaskMutation : BaseResolver(), Mutation {
   @Secured(Authority.ROLE_TEACHER)
   fun createTask(template: TaskTemplate?): TaskDto = context {
     if (template != null) {
-      val templateTar = ClassPathResource("org/codefreak/templates/${template.name.toLowerCase()}.tar").inputStream.use { it.readBytes() }
+      val templateTar = TaskTemplateUtil.readTemplateTar(template)
       serviceAccess.getService(TaskTarService::class).createFromTar(templateTar, authorization.currentUser)
           .let { TaskDto(it, this) }
     } else {
@@ -199,9 +205,10 @@ class TaskMutation : BaseResolver(), Mutation {
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     task.body = input.body
     task.ideEnabled = input.ideEnabled
-    task.ideImage = input.ideImage
-    task.hiddenFiles = input.hiddenFiles.map { it.trim() }.filter { it.isNotEmpty() }
-    task.protectedFiles = input.protectedFiles.map { it.trim() }.filter { it.isNotEmpty() }
+    task.ideImage = input.ideImage?.takeIf { it.isNotBlank() }
+    task.ideArguments = input.ideArguments?.takeIf { it.isNotBlank() }
+    task.hiddenFiles = input.hiddenFiles.filter { it.isNotBlank() }
+    task.protectedFiles = input.protectedFiles.filter { it.isNotBlank() }
     serviceAccess.getService(TaskService::class).saveTask(task)
     true
   }

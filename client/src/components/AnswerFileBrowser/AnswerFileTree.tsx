@@ -1,6 +1,6 @@
 import { Tree } from 'antd'
 import { relative, resolve } from 'path'
-import React from 'react'
+import React, { ReactText } from 'react'
 import { FileType } from '../../services/codefreak-api'
 import {
   fileTree,
@@ -53,7 +53,7 @@ const AnswerFileTree: React.FC<AnswerFileTreeProps> = ({
     rootNodes = rootNodes[0].children || []
   }
 
-  const onSelect = (selectedKeys: string[]) => {
+  const onSelect = (selectedKeys: ReactText[]) => {
     if (!onFileSelect) {
       return
     }

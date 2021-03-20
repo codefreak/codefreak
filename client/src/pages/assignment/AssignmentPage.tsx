@@ -1,22 +1,22 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import {
-  Alert,
+  CaretDownOutlined,
+  PlusOutlined,
+  CaretRightOutlined
+} from '@ant-design/icons'
+import {
   Button,
-  Checkbox,
-  Col,
   DatePicker,
   Descriptions,
   Dropdown,
   Form,
   Menu,
   Modal,
-  Row,
   Steps,
   TimePicker,
   Switch as AntSwitch
 } from 'antd'
 import { DropdownButtonProps } from 'antd/es/dropdown/dropdown-button'
-import { CheckboxValueType } from 'antd/lib/checkbox/Group'
 import moment, { Moment, unitOfTime } from 'moment'
 import { useCallback, useState } from 'react'
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom'
@@ -45,9 +45,7 @@ import {
   UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
-  useGetTaskPoolForAddingQuery,
-  useUpdateAssignmentMutation,
-  useUpdateAssignmentScoreboardMutation
+  useUpdateAssignmentMutation
 } from '../../services/codefreak-api'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
@@ -62,16 +60,10 @@ import NotFoundPage from '../NotFoundPage'
 import SubmissionListPage from '../submission/SubmissionListPage'
 import TaskListPage from '../task/TaskListPage'
 import './AssignmentPage.less'
-import SortSelect from '../../components/SortSelect'
-import SearchBar from '../../components/SearchBar'
-import {
-  filterTasks,
-  TaskSortMethods,
-  TaskSortMethodNames
-} from '../../services/task'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
+import TaskSelection from '../../components/TaskSelection'
 import ScoreboardPage from '../submission/ScoreboardPage'
 
 const { Step } = Steps
@@ -306,11 +298,14 @@ const StatusSteps: React.FC<{
   const activate = () => updater('active')(true)
   const deactivate = () => updater('active')(false)
 
+  const caretDown = <CaretDownOutlined />
+  const caretRight = <CaretRightOutlined />
+
   return (
     <div className="statusSteps">
       <Button
         onClick={toggleStepsExpanded}
-        icon={stepsExpanded ? 'caret-down' : 'caret-right'}
+        icon={stepsExpanded ? caretDown : caretRight}
         size="small"
         style={{ marginRight: 16, marginTop: 4 }}
       />
@@ -428,31 +423,13 @@ const AddTasksButton: React.FC<{
     }
   }
 
-  const [sortMethod, setSortMethod] = useState(TaskSortMethodNames[0])
-  const [filterCriteria, setFilterCriteria] = useState('')
-
-  const handleSortChange = (value: string) => setSortMethod(value)
-  const handleFilterChange = (value: string) => setFilterCriteria(value)
-
-  const sorter = (
-    <SortSelect
-      defaultValue={TaskSortMethodNames[0]}
-      values={TaskSortMethodNames}
-      onSortChange={handleSortChange}
-    />
-  )
-
-  const searchBar = (
-    <SearchBar
-      searchType="Task"
-      placeholder="by name..."
-      onChange={handleFilterChange}
-    />
+  const taskSelection = (
+    <TaskSelection selectedTaskIds={taskIds} setSelectedTaskIds={setTaskIds} />
   )
 
   return (
     <>
-      <Button type="primary" icon="plus" onClick={showModal}>
+      <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
         Add Tasks
       </Button>
       <Modal
@@ -462,67 +439,15 @@ const AddTasksButton: React.FC<{
         title={`Add tasks to ${assignment.title}`}
         okButtonProps={{
           disabled: taskIds.length === 0,
-          loading: addTasksResult.loading
+          loading: addTasksResult.loading,
+          title:
+            taskIds.length === 0 ? "You haven't selected any tasks!" : undefined
         }}
         onOk={submit}
       >
-        <Row gutter={16} type="flex">
-          <Col>{searchBar}</Col>
-          <Col>{sorter}</Col>
-        </Row>
-        <Alert
-          message={
-            'When a task from the pool is added to an assignment, an independent copy is created. ' +
-            'Editing the task in the pool will have no effect on the assignment and vice versa.'
-          }
-          style={{ marginBottom: 16, marginTop: 16 }}
-        />
-        <TaskSelection
-          value={taskIds}
-          setValue={setTaskIds}
-          sortMethod={sortMethod}
-          filterCriteria={filterCriteria}
-        />
+        {taskSelection}
       </Modal>
     </>
-  )
-}
-
-const TaskSelection: React.FC<{
-  value: string[]
-  setValue: (value: string[]) => void
-  sortMethod: string
-  filterCriteria: string
-}> = props => {
-  const result = useGetTaskPoolForAddingQuery()
-
-  if (result.data === undefined) {
-    return <AsyncPlaceholder result={result} />
-  }
-
-  let taskPool = result.data.taskPool.slice()
-
-  if (props.filterCriteria) {
-    taskPool = filterTasks(taskPool, props.filterCriteria)
-  }
-
-  taskPool = taskPool.sort(TaskSortMethods[props.sortMethod])
-
-  const options = taskPool.map(task => ({
-    label: task.title,
-    value: task.id
-  }))
-
-  const onChange = (value: CheckboxValueType[]) =>
-    props.setValue(value as string[])
-
-  return (
-    <Checkbox.Group
-      className="vertical-checkbox-group"
-      options={options}
-      onChange={onChange}
-      value={props.value}
-    />
   )
 }
 
@@ -536,6 +461,13 @@ const OpenAssignmentButton: React.FC<
   const serverMoment = useServerMoment()
   const [from, setFrom] = useState(serverMoment())
   const [period, setPeriod] = useState(moment('00:30:00', 'HH:mm:ss'))
+
+  const onPeriodChange = (value: Moment | null) => {
+    if (value) {
+      setPeriod(value)
+    }
+  }
+
   const showModal = () => {
     setFrom(serverMoment())
     setPeriod(moment('00:30:00', 'HH:mm:ss'))
@@ -614,7 +546,7 @@ const OpenAssignmentButton: React.FC<
           <Form.Item style={{ marginBottom: 0 }} label="For">
             <TimePicker
               allowClear={false}
-              onChange={setPeriod}
+              onChange={onPeriodChange}
               value={period}
             />
           </Form.Item>

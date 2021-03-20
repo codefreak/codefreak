@@ -2,6 +2,7 @@ import { Button } from 'antd'
 import { ButtonProps } from 'antd/es/button'
 import React, { useCallback, useEffect, useState } from 'react'
 import copyToClipboard from 'copy-to-clipboard'
+import { CheckOutlined, CopyOutlined } from '@ant-design/icons'
 
 export interface CopyToClipboardButtonProps extends ButtonProps {
   value: string
@@ -44,7 +45,9 @@ const CopyToClipboardButton: React.FC<CopyToClipboardButtonProps> = ({
   )
 
   const buttonProps: ButtonProps = {
-    icon: copied ? copiedIcon ?? 'check' : originalIcon ?? 'copy',
+    icon: copied
+      ? copiedIcon ?? <CheckOutlined />
+      : originalIcon ?? <CopyOutlined />,
     ...additionalButtonProps
   }
   return (

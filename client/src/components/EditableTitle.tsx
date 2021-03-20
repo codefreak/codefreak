@@ -1,3 +1,4 @@
+import { EditOutlined } from '@ant-design/icons'
 import { Button, Input, Modal } from 'antd'
 import React, { useState } from 'react'
 import { extractTargetValue } from '../services/util'
@@ -26,7 +27,7 @@ const EditableTitle: React.FC<{
   return (
     <>
       {props.title}
-      <Button icon="edit" type="link" onClick={showModal} />
+      <Button icon={<EditOutlined />} type="link" onClick={showModal} />
       <Modal
         visible={modalVisible}
         onCancel={hideModal}

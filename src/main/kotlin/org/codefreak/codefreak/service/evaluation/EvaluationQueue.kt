@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service.evaluation
 
+import java.time.Instant
 import java.util.Date
 import java.util.UUID
 import org.codefreak.codefreak.config.EvaluationConfiguration
@@ -105,11 +106,11 @@ class EvaluationQueue : StepExecutionListener {
           evaluationStep.status >= EvaluationStepStatus.FINISHED -> evaluationStep.status
           else -> EvaluationStepStatus.FINISHED
         }
+        evaluationStep.finishedAt = Instant.now()
         // retrieve a fresh instance of the current EvaluationStep. Start Autograding.
         // This function needs a call right before updateEvaluationStepStatus, because afterwards there
         // might be a GradeCalculation
         evaluationStepService.startAutograding(evaluationStepService.getEvaluationStep(it))
-
         evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
       }
     }

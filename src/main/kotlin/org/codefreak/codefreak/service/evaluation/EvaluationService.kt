@@ -22,6 +22,7 @@ import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException
+import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionDeadlineReachedEvent
 import org.codefreak.codefreak.service.SubmissionService
@@ -32,6 +33,7 @@ import org.codefreak.codefreak.util.PositionUtil
 import org.codefreak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -64,6 +66,9 @@ class EvaluationService : BaseService() {
 
   @Autowired
   private lateinit var runners: List<EvaluationRunner>
+
+  @Autowired
+  private lateinit var eventPublisher: ApplicationEventPublisher
 
   @Autowired
   private lateinit var gradeService: GradeService
@@ -110,7 +115,9 @@ class EvaluationService : BaseService() {
     answer.task.evaluationStepDefinitions.filter { it.active }.forEach {
       stepService.addPendingEvaluationStep(evaluation, it)
     }
-    return saveEvaluation(evaluation)
+    return saveEvaluation(evaluation).also {
+      eventPublisher.publishEvent(EvaluationStatusUpdatedEvent(evaluation, evaluation.stepStatusSummary))
+    }
   }
 
   fun getLatestEvaluation(answerId: UUID) = evaluationRepository.findFirstByAnswerIdOrderByCreatedAtDesc(answerId)
@@ -224,6 +231,11 @@ class EvaluationService : BaseService() {
       ?: throw IllegalArgumentException("Evaluation runner '$name' not found")
 
   fun getAllEvaluationRunners() = runners
+
+  /**
+   * Returns the default options for the given evaluation runner
+   */
+  fun getDefaultOptions(runnerName: String) = getEvaluationRunner(runnerName).getDefaultOptions()
 
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }

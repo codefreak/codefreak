@@ -1,4 +1,5 @@
-import { Icon, Tag, Tooltip } from 'antd'
+import { ClockCircleOutlined } from '@ant-design/icons'
+import { Tag, Tooltip } from 'antd'
 import { TagProps } from 'antd/es/tag'
 import { TooltipProps } from 'antd/es/tooltip'
 import { Moment } from 'moment'
@@ -57,7 +58,7 @@ const TimeLimitTag: React.FC<TimeLimitTagProps> = ({
   return (
     <Tooltip {...tooltipProps}>
       <Tag {...tagProps}>
-        <Icon type="clock-circle" /> {tagProps.children} {suffix}
+        <ClockCircleOutlined /> {tagProps.children} {suffix}
       </Tag>
     </Tooltip>
   )

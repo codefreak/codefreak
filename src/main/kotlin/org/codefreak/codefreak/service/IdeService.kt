@@ -4,14 +4,12 @@ import com.spotify.docker.client.DockerClient.ListContainersParam
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.ContainerInfo
 import com.spotify.docker.client.messages.HostConfig
-import java.net.SocketException
-import java.net.SocketTimeoutException
+import java.io.IOException
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
 import org.apache.http.client.HttpClient
 import org.apache.http.client.methods.RequestBuilder
-import org.apache.http.conn.ConnectTimeoutException
 import org.apache.http.util.EntityUtils
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
@@ -19,6 +17,7 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.DockerUtil
 import org.codefreak.codefreak.util.NetUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -71,10 +70,34 @@ class IdeService : BaseService() {
    */
   @Throws(ResourceLimitException::class)
   fun startIdeContainer(answer: Answer, readOnly: Boolean = false): String {
-    return startIdeContainer(
-        answer.id,
-        if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID, answer.id,
-        answer.task.ideImage
+    val label = if (readOnly) LABEL_READ_ONLY_ANSWER_ID else LABEL_ANSWER_ID
+    val configureContainer: ContainerConfigurator = {
+      containerConfig {
+        // apply custom cmd if present
+        answer.task.ideArguments?.let { args ->
+          cmd(*DockerUtil.splitCommand(args))
+        }
+      }
+      hostConfig {
+        // mount docker daemon if image requires it
+        if (shouldMountDockerDaemon(answer.task.ideImage)) {
+          log.debug("Mounting Docker daemon to IDE for answer ${answer.id}")
+          appendBinds(
+              HostConfig.Bind.builder()
+                  .from("/var/run/docker.sock")
+                  .to("/var/run/docker.sock")
+                  .build()
+          )
+        }
+      }
+    }
+    return startIdeContainer(answer.id, label, answer.id, answer.task.ideImage, configureContainer)
+  }
+
+  private fun shouldMountDockerDaemon(customImage: String?): Boolean {
+    val image = customImage ?: config.ide.image
+    return config.ide.dockerDaemonAllowlist.contains(
+        DockerUtil.getImageNameWithoutTag(image)
     )
   }
 
@@ -85,7 +108,7 @@ class IdeService : BaseService() {
 
   @Synchronized
   @Throws(ResourceLimitException::class)
-  fun startIdeContainer(id: UUID, label: String, fileCollectionId: UUID, customImage: String? = null): String {
+  fun startIdeContainer(id: UUID, label: String, fileCollectionId: UUID, customImage: String? = null, customize: ContainerConfigurator = {}): String {
     // either take existing container or create a new one
     val container = containerService.getContainerWithLabel(label, id.toString())
     if (container != null && containerService.isContainerRunning(container.id())) {
@@ -100,7 +123,7 @@ class IdeService : BaseService() {
     return containerService.withCollectionFileLock(id) {
       if (container == null) {
         log.info("Creating new IDE container with $label=$id")
-        val containerId = this.createIdeContainer(label, id, customImage)
+        val containerId = this.createIdeContainer(label, id, customImage, customize)
         containerService.startContainer(containerId)
         // prepare the environment after the container has started
         this.copyFilesToIde(containerId, fileCollectionId)
@@ -136,14 +159,7 @@ class IdeService : BaseService() {
       // make sure the connection is released even if we do not use the response content
       EntityUtils.consumeQuietly(response.entity)
       response.statusLine.statusCode < 400
-    } catch (e: ConnectTimeoutException) {
-      // no connection from pool
-      false
-    } catch (e: SocketTimeoutException) {
-      // TCP connection timed out
-      false
-    } catch (e: SocketException) {
-      // could not connect at all
+    } catch (e: IOException) {
       false
     }
   }
@@ -210,7 +226,7 @@ class IdeService : BaseService() {
    * Configure and create a new IDE container.
    * Returns the ID of the created container
    */
-  protected fun createIdeContainer(label: String, id: UUID, customImage: String? = null): String {
+  protected fun createIdeContainer(label: String, id: UUID, customImage: String? = null, customize: ContainerConfigurator = {}): String {
     val image = customImage ?: config.ide.image
     val containerId = containerService.createContainer(image) {
       labels = mapOf(
@@ -224,6 +240,7 @@ class IdeService : BaseService() {
         memorySwap(config.ide.memory) // memory+swap = memory ==> 0 swap
         nanoCpus(config.ide.cpus * 1000000000L)
       }
+      customize()
     }
 
     // attach to network

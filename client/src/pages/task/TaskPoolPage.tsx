@@ -1,5 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import Emoji from 'a11y-react-emoji'
+import { PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Row } from 'antd'
 import { useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
@@ -12,7 +13,7 @@ import {
 } from '../../services/codefreak-api'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import { messageService } from '../../services/message'
-import UploadTasksButton from '../../components/UploadTasksButton'
+import ImportTasksButton from '../../components/ImportTasksButton'
 import {
   filterTasks,
   TaskSortMethodNames,
@@ -63,7 +64,7 @@ const TaskPoolPage: React.FC = () => {
 
   const createButton = (
     <Link to="/tasks/pool/create">
-      <Button type="primary" icon="plus">
+      <Button type="primary" icon={<PlusOutlined />}>
         Create Task
       </Button>
     </Link>
@@ -71,7 +72,7 @@ const TaskPoolPage: React.FC = () => {
 
   const update = () => result.refetch()
 
-  const handleUploadCompleted = (
+  const handleImportCompleted = (
     createdTasks:
       | NonNullable<UploadTasksMutationResult['data']>['uploadTasks']
       | null
@@ -100,14 +101,14 @@ const TaskPoolPage: React.FC = () => {
   )
 
   const importButton = (
-    <UploadTasksButton onUploadCompleted={handleUploadCompleted} />
+    <ImportTasksButton onImportCompleted={handleImportCompleted} />
   )
 
   return (
     <>
       <PageHeaderWrapper
         extra={
-          <Row justify="end" gutter={16} type="flex">
+          <Row justify="end" gutter={16}>
             <Col>{searchBar}</Col>
             <Col>{sorter}</Col>
             <Col>{exportButton}</Col>

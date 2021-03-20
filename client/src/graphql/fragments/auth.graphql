@@ -1,0 +1,6 @@
+fragment publicUserFields on User {
+  id
+  username
+  firstName
+  lastName
+}

@@ -10,22 +10,18 @@ on:
 
 jobs:
   main:
-    runs-on: ubuntu-latest
-    env:
-      # webpack build needs a lot of memory
-      NODE_OPTIONS: --max_old_space_size=4096
-      GITHUBUSER: ${{ secrets.GITHUBUSER }}
-      GITHUBTOKEN: ${{ secrets.GITHUBTOKEN }}
+    runs-on: ubuntu-20.04
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # We use a custom token to be able to write back to GitHub master branch without checking for permissions
+      # This token belongs to the CodeFreakBot user
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUBTOKEN }}
 
       - name: Publish release
         if: github.event_name == 'workflow_dispatch'
         run: |
-          git remote set-url origin https://$GITHUBTOKEN@github.com/${{ github.repository }}.git
-          git config --global user.email "$GITHUBUSER"
-          git config --global user.name "CI"
-          git checkout ${{ github.ref }}
+          git config --global user.email "${{ secrets.GITHUBUSER }}"
+          git config --global user.name "CodeFreakBot"
           ./gradlew release -x check -x bootJar -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ github.event.inputs.releaseVersion }}

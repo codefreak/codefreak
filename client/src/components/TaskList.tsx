@@ -1,3 +1,4 @@
+import { DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons'
 import { Button, Modal, Tooltip } from 'antd'
 import { CardProps } from 'antd/lib/card'
 import React from 'react'
@@ -76,7 +77,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
               onClick={confirmDelete}
               type="dashed"
               shape="circle"
-              icon="delete"
+              icon={<DeleteOutlined />}
             />
           </Tooltip>
         ) : null}
@@ -90,7 +91,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
           </CropContainer>
         ) : null}
         <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
-          <Button icon="folder-open" type="primary">
+          <Button icon={<FolderOpenOutlined />} type="primary">
             Details
           </Button>
         </EntityLink>

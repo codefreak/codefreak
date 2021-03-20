@@ -26,10 +26,12 @@ import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentService
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
+import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationService
+import org.codefreak.codefreak.service.evaluation.EvaluationStepService
 import org.codefreak.codefreak.service.evaluation.GradeDefinitionService
 import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
@@ -98,6 +100,8 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   val summary = entity.summary
   val feedback by lazy { entity.feedback.map { FeedbackDto(it) } }
   val status = EvaluationStepStatusDto(entity.status)
+  val queuedAt = entity.queuedAt
+  val finishedAt = entity.finishedAt
 
   /**
    * Added PointsOfEvaluationStep
@@ -210,6 +214,13 @@ class EvaluationQuery : BaseResolver(), Query {
     authorization.requireAuthorityIfNotCurrentUser(evaluation.answer.submission.user, Authority.ROLE_TEACHER)
     EvaluationDto(evaluation, this)
   }
+
+  @Secured(Authority.ROLE_STUDENT)
+  fun evaluationStep(stepId: UUID): EvaluationStepDto = context {
+    val evaluationStep = serviceAccess.getService(EvaluationStepService::class).getEvaluationStep(stepId)
+    authorization.requireAuthorityIfNotCurrentUser(evaluationStep.evaluation.answer.submission.user, Authority.ROLE_TEACHER)
+    EvaluationStepDto(evaluationStep, this)
+  }
 }
 
 @Component
@@ -263,7 +274,6 @@ class EvaluationMutation : BaseResolver(), Mutation {
     }
     val optionsMap = objectMapper.readValue(options, object : TypeReference<HashMap<String, Any>>() {})
     val definition = EvaluationStepDefinition(task, runner.getName(), task.evaluationStepDefinitions.size, runner.getDefaultTitle(), optionsMap)
-    definition.gradeDefinition = GradeDefinition(definition)
     evaluationService.validateRunnerOptions(definition)
     task.evaluationStepDefinitions.add(definition)
     evaluationService.saveEvaluationStepDefinition(definition)
@@ -351,23 +361,50 @@ class EvaluationMutation : BaseResolver(), Mutation {
 class EvaluationStatusUpdatedEventPublisher : SubscriptionEventPublisher<EvaluationStatusUpdatedEvent>()
 
 @Component
+class EvaluationStepStatusUpdatedEventPublisher : SubscriptionEventPublisher<EvaluationStepStatusUpdatedEvent>()
+
+@Component
 class EvaluationSubscription : BaseResolver(), Subscription {
 
   @Autowired
   private lateinit var evaluationStatusUpdatedEventPublisher: EvaluationStatusUpdatedEventPublisher
 
-  fun evaluationStatusUpdated(answerId: UUID, env: DataFetchingEnvironment): Flux<EvaluationStatusUpdatedEventDto> =
+  @Autowired
+  private lateinit var evaluationStepStatusUpdatedEventPublisher: EvaluationStepStatusUpdatedEventPublisher
+
+  fun evaluationStatusUpdated(answerId: UUID?, status: EvaluationStepStatusDto?, env: DataFetchingEnvironment): Flux<EvaluationStatusUpdatedEventDto> =
       context(env) {
-        val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
-        authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
+        val eventFilter = when {
+          answerId != null -> buildAnswerFilter(env, answerId)
+          else -> buildCurrentUserFilter(env)
+        }
         evaluationStatusUpdatedEventPublisher.eventStream
-            .filter { it.evaluation.answer.id == answerId }
+            .filter(eventFilter)
+            .filter(buildStatusFilter(status))
             .map { EvaluationStatusUpdatedEventDto(it, this) }
       }
 
-  fun evaluationFinished(env: DataFetchingEnvironment): Flux<EvaluationDto> = context(env) {
-    evaluationStatusUpdatedEventPublisher.eventStream
-        .filter { it.status >= EvaluationStepStatus.FINISHED && it.evaluation.answer.submission.user == authorization.currentUser }
-        .map { EvaluationDto(it.evaluation, this) }
+  fun evaluationStepStatusUpdated(stepId: UUID, env: DataFetchingEnvironment): Flux<EvaluationStepDto> = context(env) {
+    val evaluationStep = serviceAccess.getService(EvaluationStepService::class).getEvaluationStep(stepId)
+    authorization.requireAuthorityIfNotCurrentUser(evaluationStep.evaluation.answer.submission.user, Authority.ROLE_TEACHER)
+    evaluationStepStatusUpdatedEventPublisher.eventStream
+        .filter { it.evaluationStep.id == stepId }
+        .map { EvaluationStepDto(it.evaluationStep, this) }
+  }
+
+  private fun buildAnswerFilter(env: DataFetchingEnvironment, answerId: UUID): (event: EvaluationStatusUpdatedEvent) -> Boolean = context(env) {
+    val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
+    authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
+    return@context { it.evaluation.answer.id == answerId }
+  }
+
+  private fun buildCurrentUserFilter(env: DataFetchingEnvironment): (event: EvaluationStatusUpdatedEvent) -> Boolean = context(env) {
+    val currentUser = authorization.currentUser
+    return@context { it.evaluation.answer.submission.user == currentUser }
+  }
+
+  private fun buildStatusFilter(statusDto: EvaluationStepStatusDto?): (event: EvaluationStatusUpdatedEvent) -> Boolean {
+    val status = statusDto?.let { EvaluationStepStatus.valueOf(statusDto.name) }
+    return { status == null || it.status == status }
   }
 }

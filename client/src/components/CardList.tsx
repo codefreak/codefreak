@@ -1,4 +1,4 @@
-import { Icon } from 'antd'
+import { DragOutlined } from '@ant-design/icons'
 import Card, { CardProps } from 'antd/lib/card'
 import arrayMove from 'array-move'
 import React, { memo, ReactNode, useEffect, useState } from 'react'
@@ -18,7 +18,7 @@ interface CardListProps<T> {
 }
 
 const DragHandle = sortableHandle(() => (
-  <Icon type="drag" className="drag-handle" />
+  <DragOutlined className="drag-handle" />
 ))
 
 const SortableElement = sortableElement(({ value }: { value: ReactNode }) => (

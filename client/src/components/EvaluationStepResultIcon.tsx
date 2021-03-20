@@ -1,22 +1,28 @@
-import { Icon } from 'antd'
 import React from 'react'
 import { EvaluationStepResult } from '../generated/graphql'
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ExclamationCircleOutlined
+} from '@ant-design/icons'
 
 import './EvaluationStepResultIcon.less'
 
-const EvaluationStepResultIcon: React.FC<{
-  stepResult?: EvaluationStepResult | null
-}> = ({ stepResult }) => {
-  let iconType = 'question-circle'
-  if (stepResult === EvaluationStepResult.Success) {
-    iconType = 'check-circle'
-  } else if (stepResult === EvaluationStepResult.Errored) {
-    iconType = 'close-circle'
-  } else if (stepResult === EvaluationStepResult.Failed) {
-    iconType = 'exclamation-circle'
-  }
+const stepResultIconMap: Record<EvaluationStepResult, React.ElementType> = {
+  [EvaluationStepResult.Success]: CheckCircleOutlined,
+  [EvaluationStepResult.Failed]: ExclamationCircleOutlined,
+  [EvaluationStepResult.Errored]: CloseCircleOutlined
+}
 
-  return <Icon type={iconType} className="evaluation-step-result-icon" />
+interface EvaluationStepResultIconProps {
+  result: EvaluationStepResult
+}
+
+const EvaluationStepResultIcon: React.FC<EvaluationStepResultIconProps> = props => {
+  const { result } = props
+
+  const IconType = stepResultIconMap[result]
+  return <IconType className="evaluation-step-result-icon" />
 }
 
 export default EvaluationStepResultIcon

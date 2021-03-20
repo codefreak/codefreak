@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { ShareAltOutlined } from '@ant-design/icons'
 import { Popover, Button, Checkbox, Typography } from 'antd'
 import { extractTargetChecked } from '../services/util'
 import { HIDE_NAVIGATION_QUERY_PARAM } from '../hooks/useHideNavigation'
@@ -27,7 +28,7 @@ export const ShareAssignmentButton: React.FC = () => {
       trigger="click"
       placement="bottom"
     >
-      <Button icon="share-alt">Share</Button>
+      <Button icon={<ShareAltOutlined />}>Share</Button>
     </Popover>
   )
 }

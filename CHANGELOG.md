@@ -21,9 +21,16 @@
 * Admins can see the author of each assignment (#691)
 * Individual evaluation steps are now run in parallel to make evaluation faster (#710)
 * Make the IDE liveliness check work with URLs from other origin
+* Evaluation step status is shown in real time (#714)
 * If an evaluation step is marked inactive, export this too (#748)
+* The options of evaluation steps are exported regardless of whether they are the default options or not (#750)
+* When adding tasks to an assignment show whether the task pool is empty (#779)
+* Evaluation time is shown in real time and elapsed time after completion
+* Assignments can now be imported from the assignment list (#787)
+* When creating an assignment users can now directly set the title and tasks (#787)
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)
+* The database of the development server is now seeded with the task templates and not from examples in the main repository (#771)
 
 ### Removed

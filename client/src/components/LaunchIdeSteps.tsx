@@ -1,4 +1,4 @@
-import { Alert, Card, Icon, Steps } from 'antd'
+import { Alert, Card, Steps } from 'antd'
 import React, { useEffect, useState } from 'react'
 import {
   IdeType,
@@ -6,6 +6,12 @@ import {
   useStartIdeMutation
 } from '../generated/graphql'
 import { extractErrorMessage } from '../services/codefreak-api'
+import {
+  CloudOutlined,
+  ForwardOutlined,
+  LoadingOutlined,
+  RocketTwoTone
+} from '@ant-design/icons'
 
 const { Step } = Steps
 
@@ -49,9 +55,12 @@ const LaunchIdeSteps: React.FC<{
     })
   }, [startIde, checkIsIdeLive])
 
-  const icon = (iconType: string, step: number) => (
-    <Icon type={step === currentStep && !error ? 'loading' : iconType} />
-  )
+  const icon = (IconType: React.ElementType, step: number) => {
+    if (step === currentStep && !error) {
+      return <LoadingOutlined />
+    }
+    return <IconType />
+  }
 
   return (
     <Card style={{ width: '100%', maxWidth: 800 }}>
@@ -59,9 +68,9 @@ const LaunchIdeSteps: React.FC<{
         <Alert message={error} type="error" style={{ marginBottom: 16 }} />
       ) : null}
       <Steps current={currentStep} status={error ? 'error' : 'process'}>
-        <Step title="Launch Container" icon={icon('rocket', 0)} />
-        <Step title="Wait for IDE Startup" icon={icon('cloud', 1)} />
-        <Step title="Redirect" icon={icon('forward', 2)} />
+        <Step title="Launch Container" icon={icon(RocketTwoTone, 0)} />
+        <Step title="Wait for IDE Startup" icon={icon(CloudOutlined, 1)} />
+        <Step title="Redirect" icon={icon(ForwardOutlined, 2)} />
       </Steps>
     </Card>
   )

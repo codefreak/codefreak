@@ -14,6 +14,7 @@ import { useServerMoment, useServerNow } from '../hooks/useServerTimeOffset'
 import { momentDifferenceToRelTime, secondsToRelTime } from '../services/time'
 import TimeLimitTag from './time-limit/TimeLimitTag'
 import useMomentReached from '../hooks/useMomentReached'
+import { RocketOutlined } from '@ant-design/icons'
 
 interface CreateAnswerButtonProps
   extends Omit<ButtonProps, 'onClick' | 'loading'> {
@@ -55,7 +56,7 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = props => {
   }
 
   const buttonProps: ButtonProps = {
-    icon: 'rocket',
+    icon: <RocketOutlined />,
     type: 'primary',
     ...customButtonProps
   }
@@ -105,7 +106,6 @@ const CreateAnswerButton: React.FC<CreateAnswerButtonProps> = props => {
       return (
         <Alert
           type="warning"
-          iconType="warning"
           showIcon
           message={`You only have ${assignmentRelDeadline} left!`}
           description={

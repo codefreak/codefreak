@@ -92,6 +92,7 @@ class TaskTarService : BaseService() {
     task.protectedFiles = definition.protected
     task.ideEnabled = definition.ide?.enabled ?: true
     task.ideImage = definition.ide?.image
+    task.ideArguments = definition.ide?.cmd
 
     return task
   }
@@ -241,13 +242,24 @@ class TaskTarService : BaseService() {
       task.evaluationStepDefinitions
         .toSortedSet()
         .map {
+          val options =
+            if (it.options.isEmpty())
+              evaluationService.getDefaultOptions(it.runnerName)
+            else
+              it.options
+
         EvaluationDefinition(
             it.runnerName,
-            it.options,
+            options,
             it.title,
             if (it.active) null else false
         )
-      }
+      },
+      IdeDefinition(
+          enabled = task.ideEnabled,
+          image = task.ideImage,
+          cmd = task.ideArguments
+      )
   )
 
   private fun writeArchiveEntry(tar: TarArchiveOutputStream, entryName: String, content: ByteArray) {

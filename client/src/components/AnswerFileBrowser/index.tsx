@@ -1,4 +1,5 @@
-import { Col, Icon, Result, Row, Tabs } from 'antd'
+import { FileOutlined } from '@ant-design/icons'
+import { Col, Result, Row, Tabs } from 'antd'
 import { basename } from 'path'
 import React, { useEffect, useState } from 'react'
 import {
@@ -82,7 +83,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = props => {
   }
 
   const onTabEdit = (
-    path: string | React.MouseEvent<HTMLElement>,
+    path: string | React.MouseEvent<Element, MouseEvent> | React.KeyboardEvent,
     action: 'add' | 'remove'
   ) => {
     if (action === 'remove') {
@@ -94,7 +95,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = props => {
   }
 
   return (
-    <Row type="flex" className="answer-editor">
+    <Row className="answer-editor">
       <Col span={6} className="answer-editor-file-tree">
         <h4 className="answer-editor-file-title"> Files </h4>
         <AnswerFileTree
@@ -127,7 +128,7 @@ const AnswerFileBrowser: React.FC<AnswerFileBrowserProps> = props => {
             <Centered>
               <Result
                 title="Please select a file from the tree to view its content"
-                icon={<Icon type="file" twoToneColor="red" />}
+                icon={<FileOutlined twoToneColor="red" />}
               />
             </Centered>
           )}

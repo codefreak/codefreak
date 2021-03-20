@@ -1,6 +1,7 @@
 import { ApolloError } from '@apollo/client'
-import { Result, Spin } from 'antd'
+import { Result } from 'antd'
 import React from 'react'
+import LoadingIndicator from './LoadingIndicator'
 
 interface AsyncPlaceholderProps {
   result: {
@@ -11,11 +12,7 @@ interface AsyncPlaceholderProps {
 
 const AsyncPlaceholder: React.FC<AsyncPlaceholderProps> = props => {
   if (props.result.loading) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <Spin size="large" />
-      </div>
-    )
+    return <LoadingIndicator />
   }
   if (props.result.error) {
     return (

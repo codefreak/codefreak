@@ -1,11 +1,18 @@
 import {
+  EditOutlined,
+  InfoCircleFilled,
+  InfoCircleTwoTone,
+  PoweroffOutlined,
+  SaveOutlined,
+  SyncOutlined
+} from '@ant-design/icons'
+import {
   Alert,
   Button,
   Card,
   Checkbox,
   Col,
   Empty,
-  Icon,
   Input,
   List,
   Row,
@@ -115,7 +122,8 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
     hiddenFiles: task.hiddenFiles,
     protectedFiles: task.protectedFiles,
     ideEnabled: task.ideEnabled,
-    ideImage: task.ideImage
+    ideImage: task.ideImage,
+    ideArguments: task.ideArguments
   }
 
   const updater = makeUpdater(taskDetailsInput, input =>
@@ -138,9 +146,8 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
               This is what your students will see when they open the task. Check
               out the "edit" tabs that are only visible to you.
               <br />
-              <Icon type="info-circle" theme="twoTone" /> To try out what your
-              students see when they start working on this task, enable{' '}
-              <i>testing mode</i>.
+              <InfoCircleTwoTone /> To try out what your students see when they
+              start working on this task, enable <i>testing mode</i>.
             </>
           }
           style={{ marginBottom: 16 }}
@@ -165,7 +172,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
           extra={
             <Switch
               defaultChecked={task.ideEnabled}
-              unCheckedChildren={<Icon type="poweroff" />}
+              unCheckedChildren={<PoweroffOutlined />}
               onChange={updater('ideEnabled')}
             />
           }
@@ -173,24 +180,52 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             display: !task.ideEnabled ? 'none' : ''
           }}
         >
-          <p>
-            Optionally, you can specify a custom Docker image for the student
-            Online IDE. You will most likely <em>not</em> need this! Read more
-            about custom IDE images <HelpLink category="ide">here</HelpLink>.
-          </p>
-          <p>
-            Leave blank to use the default image <code>{defaultIdeImage}</code>.
-          </p>
-          <Input.Search
-            style={{
-              maxWidth: 400
-            }}
-            defaultValue={task.ideImage || ''}
-            placeholder="e.g. foo/bar:latest"
-            allowClear
-            enterButton={<Icon type="save" />}
-            onSearch={updater('ideImage')}
-          />
+          <Row gutter={16}>
+            <Col span={12}>
+              <h3>Image</h3>
+              <p>
+                Optionally, you can specify a custom Docker image for the
+                student Online IDE. You will most likely <em>not</em> need this!
+                Read more about custom IDE images{' '}
+                <HelpLink category="ide">here</HelpLink>.
+              </p>
+              <p>
+                Leave blank to use the default image{' '}
+                <code>{defaultIdeImage}</code>.
+              </p>
+              <Input.Search
+                style={{
+                  maxWidth: 400
+                }}
+                defaultValue={task.ideImage || ''}
+                placeholder="e.g. foo/bar:latest"
+                allowClear
+                enterButton={<SaveOutlined />}
+                onSearch={updater('ideImage')}
+              />
+            </Col>
+            <Col span={12}>
+              <h3>CMD / Arguments</h3>
+              <p>
+                You can customize the CMD on the container to alter either the
+                container CMD or pass additional arguments to the container.
+                Only use this if you know what you are doing.
+                <br />
+                <strong>Warning:</strong> These values are NOT parameters for{' '}
+                <code>docker run</code>!
+              </p>
+              <Input.Search
+                style={{
+                  maxWidth: 400
+                }}
+                defaultValue={task.ideArguments || ''}
+                placeholder="--option=value --verbose"
+                allowClear
+                enterButton={<SaveOutlined />}
+                onSearch={updater('ideArguments')}
+              />
+            </Col>
+          </Row>
         </Card>
         <Card title="Files" style={{ marginTop: 16 }}>
           {assignmentOpen ? (
@@ -229,7 +264,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             >
               <Button
                 type="primary"
-                icon="edit"
+                icon={<EditOutlined />}
                 disabled={assignmentOpen && !sureToEditFiles}
               >
                 Edit task files in IDE
@@ -241,7 +276,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                 invalidateTask={task.id}
                 disabled={assignmentOpen && !sureToEditFiles}
                 type="primary"
-                icon="sync"
+                icon={<SyncOutlined />}
               >
                 Evaluate all answers of this task
               </StartSubmissionEvaluationButton>
@@ -267,7 +302,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                         }
                         placement="bottom"
                       >
-                        <Icon type="info-circle" theme="filled" />
+                        <InfoCircleFilled />
                       </Tooltip>
                     </span>
                     <JsonSchemaEditButton
@@ -303,7 +338,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                         }
                         placement="bottom"
                       >
-                        <Icon type="info-circle" theme="filled" />
+                        <InfoCircleFilled />
                       </Tooltip>
                     </span>
                     <JsonSchemaEditButton

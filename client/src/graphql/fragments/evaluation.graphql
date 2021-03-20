@@ -1,0 +1,45 @@
+fragment evaluationStepBasics on EvaluationStep {
+  id
+  status
+  result
+  summary
+  queuedAt
+  finishedAt
+  definition {
+    position
+    runnerName
+    title
+    runner {
+      stoppable
+    }
+  }
+}
+
+fragment evaluationStepWithFeedback on EvaluationStep {
+  ...evaluationStepBasics
+  feedback {
+    id
+    summary
+    severity
+    group
+    longDescription
+    status
+    fileContext {
+      path
+      lineStart
+      lineStart
+      columnStart
+      columnEnd
+    }
+  }
+}
+
+fragment latestEvaluation on Evaluation {
+  id
+  createdAt
+  stepsResultSummary
+  stepsStatusSummary
+  steps {
+    ...evaluationStepBasics
+  }
+}

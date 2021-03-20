@@ -1,5 +1,4 @@
 import { MenuDataItem } from '@ant-design/pro-layout/lib/typings'
-import { Spin } from 'antd'
 import { useEffect, useState } from 'react'
 import {
   BrowserRouter as Router,
@@ -8,7 +7,6 @@ import {
   Switch
 } from 'react-router-dom'
 import './App.less'
-import Centered from './components/Centered'
 import DefaultLayout from './components/DefaultLayout'
 import ScrollToHash from './components/ScrollToHash'
 import {
@@ -32,6 +30,7 @@ import { messageService } from './services/message'
 import { displayName } from './services/user'
 import { noop } from './services/util'
 import { HideNavigationProvider } from './hooks/useHideNavigation'
+import LoadingIndicator from './components/LoadingIndicator'
 
 const App: React.FC<{ onUserChanged?: () => void }> = props => {
   const onUserChanged = props.onUserChanged || noop
@@ -63,11 +62,7 @@ const App: React.FC<{ onUserChanged?: () => void }> = props => {
   }, [logoutSucceeded, onUserChanged])
 
   if (loading || timeOffset === undefined) {
-    return (
-      <Centered>
-        <Spin size="large" />
-      </Centered>
-    )
+    return <LoadingIndicator />
   }
 
   if (authenticatedUser === undefined) {

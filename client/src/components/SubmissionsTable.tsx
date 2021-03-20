@@ -1,11 +1,17 @@
-import { Button, Col, Icon, Radio, Row, Table, Tooltip } from 'antd'
+import {
+  BarsOutlined,
+  LoadingOutlined,
+  QuestionCircleOutlined,
+  StopOutlined,
+  TableOutlined
+} from '@ant-design/icons'
+import { Button, Col, Radio, Row, Table, Tooltip } from 'antd'
 import { RadioGroupProps } from 'antd/es/radio'
 import React, { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   EvaluationStepResult,
-  GetAssignmentWithSubmissionsQueryResult,
-  EvaluationStepStatus
+  GetAssignmentWithSubmissionsQueryResult
 } from '../generated/graphql'
 import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { useFormatter } from '../hooks/useFormatter'
@@ -14,9 +20,10 @@ import { shorten } from '../services/short-id'
 import { matches } from '../services/strings'
 import ArchiveDownload from './ArchiveDownload'
 import EvaluationResultPopover from './EvaluationResultPopover'
-import EvaluationStepResultIcon from './EvaluationStepResultIcon'
 import './SubmissionsTable.less'
 import SearchBar from './SearchBar'
+import EvaluationStepIcon from './EvaluationStepIcon'
+import { isEvaluationInProgress } from '../services/evaluation'
 
 type Assignment = NonNullable<
   GetAssignmentWithSubmissionsQueryResult['data']
@@ -103,7 +110,7 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
           <Button
             type="default"
             href={`${assignment.submissionsDownloadUrl}.csv`}
-            icon="table"
+            icon={<TableOutlined />}
           >
             Download results as .csv
           </Button>
@@ -145,7 +152,7 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
     >
       <Column
         title="Last Name"
-        dataIndex="user.lastName"
+        dataIndex={['user', 'lastName']}
         width={200}
         fixed="left"
         defaultSortOrder="ascend"
@@ -153,14 +160,14 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
       />
       <Column
         title="First Name"
-        dataIndex="user.firstName"
+        dataIndex={['user', 'firstName']}
         width={200}
         fixed="left"
         sorter={alphabeticSorter(submission => submission.user.firstName)}
       />
       <Column
         title="Username"
-        dataIndex="user.username"
+        dataIndex={['user', 'username']}
         width={300}
         sorter={alphabeticSorter(submission => submission.user.username)}
       />
@@ -176,18 +183,14 @@ const AnswerEvaluationSummary: React.FC<{
 }> = ({ task, user, answer }) => {
   const { latestEvaluation, evaluationStatus, loading } = useAnswerEvaluation(
     answer.id,
-    answer.latestEvaluation
+    answer.latestEvaluation || undefined
   )
 
   // prevent flashing of old evaluation result by also showing loading indicator for fetching new results
-  if (
-    loading ||
-    evaluationStatus === EvaluationStepStatus.Queued ||
-    evaluationStatus === EvaluationStepStatus.Running
-  ) {
+  if (loading || isEvaluationInProgress(evaluationStatus)) {
     return (
       <Tooltip title="Evaluating answer…">
-        <Icon type="loading" />
+        <LoadingOutlined />
       </Tooltip>
     )
   }
@@ -209,7 +212,7 @@ const EvaluationStepOverview: React.FC<{
   const detailsLink = (
     <Link to={getEntityPath(task) + '/evaluation?user=' + shorten(user.id)}>
       <Button type="primary">
-        <Icon type="bars" /> Details
+        <BarsOutlined /> Details
       </Button>
     </Link>
   )
@@ -217,7 +220,7 @@ const EvaluationStepOverview: React.FC<{
   if (!evaluation) {
     return (
       <div className="evaluation-step-results">
-        <Icon type="question-circle" />
+        <QuestionCircleOutlined />
         <Tooltip title="Answer has not been evaluated, yet">
           {detailsLink}
         </Tooltip>
@@ -229,7 +232,11 @@ const EvaluationStepOverview: React.FC<{
     <>
       <div className="evaluation-step-results">
         {evaluation.steps.map(step => (
-          <EvaluationStepResultIcon key={step.id} stepResult={step.result} />
+          <EvaluationStepIcon
+            key={step.id}
+            result={step.result || undefined}
+            status={step.status}
+          />
         ))}
         <EvaluationResultPopover
           task={task}
@@ -245,7 +252,7 @@ const EvaluationStepOverview: React.FC<{
 
 // TODO: Multiple filters are not working. filterValues is always a single value
 const buildEvaluationFilter = (task: Task) => (
-  filterValue: string,
+  filterValue: string | number | boolean,
   submission: Submission
 ) => {
   const answer = getAnswerFromSubmission(submission, task)
@@ -284,7 +291,7 @@ const taskColumnRenderer = (
     if (!answer) {
       return (
         <Tooltip title="No answer submitted">
-          <Icon type="stop" className="no-answer" />
+          <StopOutlined className="no-answer" />
         </Tooltip>
       )
     }

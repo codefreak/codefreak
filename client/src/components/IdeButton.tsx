@@ -3,6 +3,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { Answer, Task } from '../services/codefreak-api'
 import { shorten } from '../services/short-id'
+import { CloudOutlined } from '@ant-design/icons'
 
 interface IdeButtonProps extends ButtonProps {
   answer: Pick<Answer, 'ideRunning'>
@@ -14,7 +15,7 @@ const IdeButton: React.FC<IdeButtonProps> = props => {
 
   return (
     <Link to={`/tasks/${shorten(task.id)}/answer/edit`}>
-      <Button icon="cloud" {...restProps}>
+      <Button icon={<CloudOutlined />} {...restProps}>
         Open in online IDE{answer.ideRunning ? ' (running)' : ''}
       </Button>
     </Link>

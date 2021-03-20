@@ -39,43 +39,14 @@ query GetDetailedEvaluaton($evaluationId: ID!) {
     }
     stepsResultSummary
     steps {
-      id
-      result
-      summary
-      definition {
-        position
-        runnerName
-        title
-      }
-      feedback {
-        id
-        summary
-        severity
-        group
-        longDescription
-        status
-        fileContext {
-          path
-          lineStart
-          lineStart
-          columnStart
-          columnEnd
-        }
-      }
-      pointsOfEvaluationStep {
-        id
-        mistakePoints
-        reachedPoints
-        calcCheck
-        edited
-        resultCheck
-        gradeDefinitionMax {
-          id
-          maxPoints
-          active
-        }
-      }
+      ...evaluationStepBasics
     }
+  }
+}
+
+query GetEvaluationStep($stepId: ID!) {
+  evaluationStep(stepId: $stepId) {
+    ...evaluationStepWithFeedback
   }
 }
 

@@ -1,4 +1,5 @@
-import { Dropdown, Icon, Menu } from 'antd'
+import { LogoutOutlined } from '@ant-design/icons'
+import { Dropdown, Menu } from 'antd'
 import React from 'react'
 import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
 import { displayName } from '../../services/user'
@@ -15,14 +16,18 @@ const Index: React.FC<RightHeaderProps> = ({ logout }) => {
   const userMenu = logout ? (
     <Menu selectedKeys={[]}>
       <Menu.Item key="logout" onClick={logout}>
-        <Icon type="logout" /> Logout
+        <LogoutOutlined /> Logout
       </Menu.Item>
     </Menu>
   ) : undefined
 
   return (
     <div style={{ float: 'right', paddingRight: 14 }}>
-      <Dropdown overlay={userMenu} disabled={!userMenu} trigger={['click']}>
+      <Dropdown
+        overlay={userMenu ?? <Menu />}
+        disabled={!userMenu}
+        trigger={['click']}
+      >
         <div style={{ padding: '0 10px' }}>
           <Avatar size="small" user={user} />
           {displayName(user)}

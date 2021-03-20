@@ -4,19 +4,23 @@ import {
   useImportTasksMutation,
   useUploadTasksMutation
 } from '../services/codefreak-api'
+import { UploadOutlined } from '@ant-design/icons'
 import { Alert, Button, Modal } from 'antd'
 import FileImport from './FileImport'
-import InlineError from './InlineError'
+import { useInlineErrorMessage } from '../hooks/useInlineErrorMessage'
+import { supportedArchiveExtensions } from '../services/file'
 
-interface UploadTasksButtonProps {
-  onUploadCompleted: (
+interface ImportTasksButtonProps {
+  onImportCompleted: (
     result: NonNullable<UploadTasksMutationResult['data']>['uploadTasks'] | null
   ) => void
 }
 
-const UploadTasksButton = (props: UploadTasksButtonProps) => {
+const ImportTasksButton = (props: ImportTasksButtonProps) => {
   const [modalVisible, setModalVisible] = useState(false)
-  const [inlineErrorMessage, setInlineErrorMessage] = useState('')
+  const [inlineError, setErrorMessage] = useInlineErrorMessage(
+    'Error while creating task(s)'
+  )
   const showModal = () => setModalVisible(true)
   const hideModal = () => setModalVisible(false)
 
@@ -35,9 +39,9 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
         if (data) {
           hideModal()
         }
-        props.onUploadCompleted(data)
+        props.onImportCompleted(data)
       })
-      .catch(reason => setInlineErrorMessage(reason.message))
+      .catch(reason => setErrorMessage(reason.message))
 
   const onImport = (url: string) =>
     importTasks({ variables: { url } })
@@ -46,21 +50,13 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
         if (data) {
           hideModal()
         }
-        props.onUploadCompleted(data)
+        props.onImportCompleted(data)
       })
-      .catch(reason => setInlineErrorMessage(reason.message))
-
-  const inlineError =
-    inlineErrorMessage.length > 0 ? (
-      <InlineError
-        title="Error while importing assignment"
-        message={inlineErrorMessage}
-      />
-    ) : null
+      .catch(reason => setErrorMessage(reason.message))
 
   return (
     <>
-      <Button icon="upload" type="default" onClick={showModal}>
+      <Button icon={<UploadOutlined />} type="default" onClick={showModal}>
         Import Tasks
       </Button>
       <Modal
@@ -84,10 +80,11 @@ const UploadTasksButton = (props: UploadTasksButtonProps) => {
           onUpload={onUpload}
           importing={importing}
           onImport={onImport}
+          acceptedTypes={supportedArchiveExtensions}
         />
       </Modal>
     </>
   )
 }
 
-export default UploadTasksButton
+export default ImportTasksButton

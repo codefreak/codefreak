@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: 1604658749623-2
+    author: hkasch (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: ide_arguments
+            type: varchar(255)
+            defaultValue: null
+        tableName: task

@@ -1,6 +1,13 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import { Button, Icon, Switch as AntSwitch, Tooltip } from 'antd'
-import Tag from 'antd/es/tag'
+import {
+  ArrowLeftOutlined,
+  CloudOutlined,
+  DashboardOutlined,
+  FileTextOutlined,
+  SolutionOutlined
+} from '@ant-design/icons'
+import { Button, Switch as AntSwitch, Tooltip } from 'antd'
+import { TagType } from 'antd/es/tag'
 import moment from 'moment'
 import { createContext, useCallback } from 'react'
 import {
@@ -53,9 +60,9 @@ export const DifferentUserContext = createContext<
   PublicUserFieldsFragment | undefined
 >(undefined)
 
-const tab = (title: string, icon: string) => (
+const tab = (title: string, icon: React.ReactNode) => (
   <>
-    <Icon type={icon} /> {title}
+    {icon} {title}
   </>
 )
 
@@ -167,23 +174,27 @@ const TaskPage: React.FC = () => {
     ? [
         {
           key: '/ide',
-          tab: tab('Online IDE', 'cloud'),
+          tab: tab('Online IDE', <CloudOutlined />),
           disabled: !answer
         }
       ]
     : []
 
   const tabs = [
-    { key: '/details', tab: tab('Task', 'file-text') },
+    { key: '/details', tab: tab('Task', <FileTextOutlined />) },
     ...testingModeSwitch,
-    { key: '/answer', tab: tab('Answer', 'solution'), disabled: !answer },
+    {
+      key: '/answer',
+      tab: tab('Answer', <SolutionOutlined />),
+      disabled: !answer
+    },
     ...ideTab,
     {
       key: '/evaluation',
       disabled: !answer,
       tab: (
         <>
-          {tab('Evaluation', 'dashboard')}
+          {tab('Evaluation', <DashboardOutlined />)}
           {answer ? (
             <EvaluationIndicator
               style={{ marginLeft: 8 }}
@@ -209,7 +220,7 @@ const TaskPage: React.FC = () => {
     const onClick = () =>
       history.push(getEntityPath(assignment) + '/submissions')
     buttons = (
-      <Button icon="arrow-left" size="large" onClick={onClick}>
+      <Button icon={<ArrowLeftOutlined />} size="large" onClick={onClick}>
         Back to submissions
       </Button>
     )
@@ -257,7 +268,7 @@ const TaskPage: React.FC = () => {
   const tags = [
     assignment ? <AssignmentStatusTag status={assignment.status} /> : undefined,
     renderTimeLimit()
-  ].filter((it): it is React.ReactElement<Tag> => it !== undefined)
+  ].filter((it): it is React.ReactElement<TagType> => it !== undefined)
 
   return (
     <DifferentUserContext.Provider value={differentUser}>

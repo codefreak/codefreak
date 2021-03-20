@@ -1,85 +1,65 @@
-import {
-  ApolloClient,
-  ApolloLink,
-  ApolloProvider,
-  InMemoryCache,
-  split
-} from '@apollo/client'
-import { onError } from '@apollo/client/link/error'
-import { WebSocketLink } from '@apollo/client/link/ws'
-import { getMainDefinition } from '@apollo/client/utilities'
-import { createUploadLink } from 'apollo-upload-client'
+import { ApolloProvider } from '@apollo/client'
 import ReactDOM from 'react-dom'
 import App from './App'
 import './index.css'
-import { extractErrorMessage } from './services/codefreak-api'
-import { messageService } from './services/message'
 import * as serviceWorker from './serviceWorker'
+import {
+  createApolloClient,
+  createApolloWsLink
+} from './services/codefreak-api'
+import React from 'react'
+import StandaloneErrorPage from './StandaloneErrorPage'
 
-const httpLink = createUploadLink({ uri: '/graphql', credentials: 'include' })
+/**
+ * Render the default Code FREAK frontend application
+ */
+const renderApp = () => {
+  const wsLink = createApolloWsLink()
+  const apolloClient = createApolloClient(wsLink)
 
-const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-
-const wsLink = new WebSocketLink({
-  uri: `${wsProtocol}//${window.location.host}/subscriptions`,
-  options: {
-    reconnect: true,
-    connectionParams: {
-      credentials: 'include'
-    }
+  // Based on https://github.com/apollographql/apollo-link/issues/197#issuecomment-363387875
+  // We need to re-connect the websocket so that the new session cookie is used for the handshake
+  const resetWebsocket = () => {
+    const websocket = (wsLink as any).subscriptionClient
+    websocket.close(true, true)
+    websocket.connect()
   }
-})
 
-// Based on https://github.com/apollographql/apollo-link/issues/197#issuecomment-363387875
-// We need to re-connect the websocket so that the new session cookie is used for the handshake
-const resetWebsocket = () => {
-  const websocket = (wsLink as any).subscriptionClient
-  websocket.close(true, true)
-  websocket.connect()
+  const onUserChanged = () => {
+    resetWebsocket()
+    apolloClient.clearStore()
+  }
+
+  return (
+    <ApolloProvider client={apolloClient}>
+      <App onUserChanged={onUserChanged} />
+    </ApolloProvider>
+  )
 }
 
-const apolloClient = new ApolloClient({
-  link: ApolloLink.from([
-    onError(error => {
-      if (!error.operation.getContext().disableGlobalErrorHandling) {
-        // If not authenticated or session expired, reload page to show login dialog
-        if ((error as any).networkError?.extensions?.errorCode === '401') {
-          window.location.reload()
-        }
-        messageService.error(extractErrorMessage(error))
-      }
-    }),
-    split(
-      ({ query }) => {
-        const definition = getMainDefinition(query)
-        return (
-          definition.kind === 'OperationDefinition' &&
-          definition.operation === 'subscription'
-        )
-      },
-      wsLink,
-      httpLink
-    )
-  ]),
-  cache: new InMemoryCache(),
-  defaultOptions: {
-    watchQuery: {
-      fetchPolicy: 'cache-and-network'
-    }
-  }
-})
-
-const onUserChanged = () => {
-  resetWebsocket()
-  apolloClient.clearStore()
+/**
+ * Renders a standalone error page based on server-side errors
+ * This will not create a connection to the backend
+ *
+ * @param error
+ */
+const renderErrorPage = (error: CodefreakError) => {
+  return <StandaloneErrorPage error={error} />
 }
 
-ReactDOM.render(
-  <ApolloProvider client={apolloClient}>
-    <App onUserChanged={onUserChanged} />
-  </ApolloProvider>,
-  document.getElementById('root')
-)
+/**
+ * Depending on if __CODEFREAK_ERROR is present or not this will render the
+ * error page or the regular application
+ */
+const renderConditionally = (): React.ReactElement => {
+  if (window.hasOwnProperty('__CODEFREAK_ERROR')) {
+    return renderErrorPage(window.__CODEFREAK_ERROR)
+  }
+
+  return renderApp()
+}
+
+ReactDOM.render(renderConditionally(), document.getElementById('root'))
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -1,3 +1,4 @@
+import { DownloadOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Menu } from 'antd'
 import React from 'react'
 
@@ -15,7 +16,7 @@ const ArchiveDownload: React.FC<{ url: string }> = props => {
   )
   return (
     <Dropdown overlay={menu}>
-      <Button icon="download">{children}</Button>
+      <Button icon={<DownloadOutlined />}>{children}</Button>
     </Dropdown>
   )
 }

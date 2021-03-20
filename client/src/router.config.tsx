@@ -3,7 +3,6 @@ import { AUTHORITIES } from './hooks/useHasAuthority'
 import AdminPage from './pages/AdminPage'
 import AssignmentListPage from './pages/assignment/AssignmentListPage'
 import AssignmentPage from './pages/assignment/AssignmentPage'
-import CreateAssignmentPage from './pages/assignment/CreateAssignmentPage'
 import {
   BasicHelpPage,
   DefinitionsHelpPage,
@@ -13,6 +12,12 @@ import {
 import CreateTaskPage from './pages/task/CreateTaskPage'
 import TaskPage from './pages/task/TaskPage'
 import TaskPoolPage from './pages/task/TaskPoolPage'
+import {
+  ContainerOutlined,
+  FileTextOutlined,
+  QuestionCircleOutlined,
+  SettingOutlined
+} from '@ant-design/icons'
 
 export const routerConfig: Route = {
   path: '/',
@@ -20,16 +25,10 @@ export const routerConfig: Route = {
     {
       path: '/assignments',
       name: 'Assignments',
-      icon: 'container',
+      icon: <ContainerOutlined />,
       hideChildrenInMenu: true,
       component: AssignmentListPage,
       children: [
-        {
-          path: '/assignments/create',
-          name: 'Create Assignment',
-          authority: AUTHORITIES.ROLE_TEACHER,
-          component: CreateAssignmentPage
-        },
         {
           path: '/assignments/:id',
           component: AssignmentPage
@@ -39,7 +38,7 @@ export const routerConfig: Route = {
     {
       path: '/tasks/pool',
       name: 'Task Pool',
-      icon: 'file-text',
+      icon: <FileTextOutlined />,
       component: TaskPoolPage,
       authority: AUTHORITIES.ROLE_TEACHER,
       hideChildrenInMenu: true,
@@ -58,7 +57,7 @@ export const routerConfig: Route = {
     },
     {
       name: 'Help',
-      icon: 'question-circle',
+      icon: <QuestionCircleOutlined />,
       path: '/help',
       hideChildrenInMenu: true,
       component: HelpPage,
@@ -86,7 +85,7 @@ export const routerConfig: Route = {
     {
       path: '/admin',
       name: 'Administration',
-      icon: 'setting',
+      icon: <SettingOutlined />,
       authority: AUTHORITIES.ROLE_ADMIN,
       component: AdminPage
     }

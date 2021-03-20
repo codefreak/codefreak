@@ -69,7 +69,7 @@ interface TaskTemplateCardProps {
   key: string
   title: string
   description: string
-  logo: JSX.Element
+  logo: React.ReactNode
   callToActionTitle: string
   onCallToAction: () => void
 }
