@@ -72,7 +72,10 @@ class CommandLineRunner : AbstractDockerRunner() {
   ): List<ExecResult> {
     val containerId = containerService.createContainer(image) {
       doNothingAndKeepAlive()
-      containerConfig { workingDir(projectPath) }
+      containerConfig {
+        workingDir(projectPath)
+        env(buildEnvVariables(answer))
+      }
       labels += getContainerLabelMap(answer)
     }
     val outputs = mutableListOf<ExecResult>()

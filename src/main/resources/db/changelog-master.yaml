@@ -59,3 +59,9 @@ databaseChangeLog:
 - include:
     file: changelogs/20210320154105-add-autograder-schema.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20210215184015-evaluation-settings-from-default.yaml
+    relativeToChangelogFile: true
+- include:
+    file: changelogs/20210306154303-add-update-timestamp-to-assignments.yaml
+    relativeToChangelogFile: true

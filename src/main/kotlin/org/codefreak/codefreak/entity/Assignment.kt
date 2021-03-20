@@ -10,6 +10,7 @@ import javax.persistence.OneToMany
 import javax.persistence.OrderBy
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
 
 @Entity
 @EntityListeners(SpringEntityListenerAdapter::class)
@@ -54,6 +55,9 @@ class Assignment(
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
+
+  @UpdateTimestamp
+  var updatedAt: Instant = Instant.now()
 
   @OneToMany(mappedBy = "assignment", cascade = [CascadeType.REMOVE])
   var submissions = mutableSetOf<Submission>()

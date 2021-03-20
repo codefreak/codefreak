@@ -17,7 +17,7 @@ import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.stereotype.Component
 
 @Component
-class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep> {
+class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
 
   @Autowired
   @Qualifier("asyncTaskExecutor")
@@ -31,7 +31,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep> {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun process(evaluationStep: EvaluationStep): EvaluationStep {
+  override fun process(evaluationStep: EvaluationStep): EvaluationStep? {
     val answer = evaluationStep.evaluation.answer
     log.debug("Start evaluation of answer {} ({} steps)", answer.id, answer.task.evaluationStepDefinitions.size)
 
@@ -39,7 +39,13 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep> {
     val runnerName = stepDefinition.runnerName
     try {
       val runner = evaluationService.getEvaluationRunner(runnerName)
-      val feedbackList = runEvaluation(runner, evaluationStep)
+      val feedbackList = try {
+        runEvaluation(runner, evaluationStep)
+      } catch (e: InterruptedException) {
+        // happens if the application shuts down. In this case we will stop any further processing.
+        // The evaluation will be re-run if the application restarts
+        return null
+      }
       evaluationStep.addAllFeedback(feedbackList)
       // only check for explicitly "failed" feedback so we ignore the "skipped" ones
       if (evaluationStep.feedback.any { feedback -> feedback.isFailed }) {

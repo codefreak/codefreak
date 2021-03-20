@@ -8,6 +8,7 @@ query GetAssignmentList {
       ...publicUserFields
     }
     createdAt
+    updatedAt
     deadline
     openFrom
     tasks {
@@ -23,6 +24,7 @@ query GetAssignment($id: ID!) {
     editable
     status
     createdAt
+    updatedAt
     deadline
     timeLimit
     openFrom

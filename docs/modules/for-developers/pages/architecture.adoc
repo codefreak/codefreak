@@ -7,11 +7,13 @@ WARNING: This page is out of date!
 While the documentation is still correct it misses the new React frontend.
 
 == High level overview
-Currently there are three major components of the system:
+Currently, there are five major components:
 
-1. The backend application based on Spring Boot
-2. Many Development Environments (IDE) for each user
+1. The backend application server based on Spring Boot
+2. Individual Online Development Environments (IDE) spawned for each user
 3. A Docker daemon controlled by the backend application
+4. (Users accessing the application via a React frontend application)
+5. Numerous evaluation containers to check students code in isolated environments
 
 image:for-developers:Code FREAK Overview.png[Code FREAK Overview, 600]
 
@@ -21,7 +23,7 @@ responsible for storing all kind of data including users, tasks and results. The
 Docker daemon to spin up new containers and pushing/pulling files from that containers. Currently there is no direct
 communication between the app and containers. All messages are send over the Docker daemon.
 
-It is not required but highly recommended to run the application using the official Docker image.
+It is not required but highly recommended running the application using our official Docker image.
 
 == IDE
 The Integrated Development Environments (IDE) are used by the users to work on the programming tasks. Because each IDE

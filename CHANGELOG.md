@@ -28,9 +28,19 @@
 * Evaluation time is shown in real time and elapsed time after completion
 * Assignments can now be imported from the assignment list (#787)
 * When creating an assignment users can now directly set the title and tasks (#787)
+* Reschedule non-finished evaluation steps on backend startup (#804)
+* Create project directory in IDE container before extracting files
+* Add task template for C++
+* Expose environment variables with information about the answer and user for commandline and junit runner
+* Add a button to the task page to get back to the assignment (#844)
+* Assignments show the dates they were created and last updated (#865)
+* Add IDE presets that will allow beta-testing of Breeze (#871)
+
 
 ### Changed
 * Time limit can be specified on assignments and not on individual tasks (#635)
 * The database of the development server is now seeded with the task templates and not from examples in the main repository (#771)
+* The timestamp of the last update is displayed in task pool and assignment list (#552)
+* The timestamp of the last update is shown in assignment details page (#556)
 
 ### Removed

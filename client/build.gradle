@@ -44,3 +44,12 @@ task bundle(type: NpmTask) {
   args = ['run', 'build']
   dependsOn generate
 }
+
+// set the version in package.json to the same version as the gradle.properties
+// do not use [rootProject|project].version as it might be outdated while releasing a new version
+task updateVersionFromGradle(type: NpmTask) {
+  def gradleProperties = new Properties()
+  file("../$GRADLE_PROPERTIES").withInputStream { gradleProperties.load(it) }
+
+  args = ['version', '--no-git-tag-version', gradleProperties.version.toString()]
+}

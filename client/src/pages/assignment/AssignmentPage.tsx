@@ -65,6 +65,8 @@ import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
 import TaskSelection from '../../components/TaskSelection'
 import ScoreboardPage from '../submission/ScoreboardPage'
+import ModificationTime from '../../components/ModificationTime'
+
 
 const { Step } = Steps
 
@@ -232,8 +234,11 @@ const AssignmentPage: React.FC = () => {
         content={
           <>
             <Descriptions className="assignment-dates" size="small" column={4}>
-              <Descriptions.Item label="Created">
-                {formatter.date(assignment.createdAt)}
+              <Descriptions.Item label="Updated">
+                <ModificationTime
+                  updated={new Date(assignment.updatedAt)}
+                  created={new Date(assignment.createdAt)}
+                />
               </Descriptions.Item>
               {renderDate(
                 'Open From',

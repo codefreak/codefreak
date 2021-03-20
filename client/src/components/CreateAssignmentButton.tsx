@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Button, Card, Input, Modal, Space } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { getEntityPath } from '../services/entity-path'

@@ -177,6 +177,7 @@ class EvaluationService : BaseService() {
     }
   }
 
+  @Transactional(readOnly = true)
   fun stopEvaluationStep(evaluationStep: EvaluationStep) {
     val runnerName = evaluationStep.definition.runnerName
     val answer = evaluationStep.evaluation.answer
