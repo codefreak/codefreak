@@ -55,7 +55,7 @@ import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskConfigurationPage from './TaskConfigurationPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
-import TaskInstructionsPage from "./TaskInstructionsPage";
+import TaskInstructionsPage from './TaskInstructionsPage'
 
 export const DifferentUserContext = createContext<
   PublicUserFieldsFragment | undefined

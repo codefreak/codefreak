@@ -1,14 +1,14 @@
-import {Alert, Card, Empty} from 'antd'
-import {InfoCircleTwoTone} from "@ant-design/icons";
-import ReactMarkdown from "react-markdown";
-import React from "react";
-import {useGetTaskDetailsQuery} from "../../generated/graphql";
-import useIdParam from "../../hooks/useIdParam";
-import AsyncPlaceholder from "../../components/AsyncContainer";
+import { Alert, Card, Empty } from 'antd'
+import { InfoCircleTwoTone } from '@ant-design/icons'
+import ReactMarkdown from 'react-markdown'
+import React from 'react'
+import { useGetTaskDetailsQuery } from '../../generated/graphql'
+import useIdParam from '../../hooks/useIdParam'
+import AsyncPlaceholder from '../../components/AsyncContainer'
 
 const TaskInstructionsPage: React.FC = () => {
   const result = useGetTaskDetailsQuery({
-    variables: { id: useIdParam()}
+    variables: { id: useIdParam() }
   })
 
   if (result.data === undefined) {
@@ -40,7 +40,7 @@ const TaskInstructionsPage: React.FC = () => {
         )}
       </Card>
     </>
-)
+  )
 }
 
 export default TaskInstructionsPage

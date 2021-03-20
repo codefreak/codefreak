@@ -9,11 +9,13 @@ import {
   Button,
   Card,
   Checkbox,
-  Col, Collapse,
+  Col,
+  Collapse,
   Empty,
   Input,
   List,
-  Row, Space,
+  Row,
+  Space,
   Tooltip
 } from 'antd'
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
@@ -72,7 +74,9 @@ const filePatternHelp = (
   />
 )
 
-const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({ editable }) => {
+const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
+  editable
+}) => {
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
   })
@@ -131,48 +135,48 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({ editable }) =>
       <Collapse defaultActiveKey={1}>
         <Panel header="Instructions" key={1}>
           {task.body || editable ? (
-
             <EditableMarkdown
               content={task.body}
               editable={editable}
               onSave={updater('body')}
             />
-
-
           ) : (
             <Empty description="This task has no extra instructions. Take a look at the provided files." />
           )}
         </Panel>
       </Collapse>
       <Collapse>
-        <Panel header="Files"
-            extra={
-              <>
-                <Link
-                  to={'/ide/task/' + shorten(task.id)}
-                  target={'task-ide-' + task.id}
+        <Panel
+          header="Files"
+          extra={
+            <>
+              <Link
+                to={'/ide/task/' + shorten(task.id)}
+                target={'task-ide-' + task.id}
+              >
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  disabled={assignmentOpen && !sureToEditFiles}
                 >
-                  <Button
-                    type="primary"
-                    icon={<EditOutlined />}
-                    disabled={assignmentOpen && !sureToEditFiles}
-                  >
-                    Edit task files in IDE
-                  </Button>
-                </Link>{' '}
-                {task.assignment?.id && (
-                  <StartSubmissionEvaluationButton
-                    assignmentId={task.assignment.id}
-                    invalidateTask={task.id}
-                    disabled={assignmentOpen && !sureToEditFiles}
-                    type="primary"
-                    icon={<SyncOutlined />}
-                  >
-                    Evaluate all answers of this task
-                  </StartSubmissionEvaluationButton>
-                )}
-              </>
-        } key="/edit">
+                  Edit task files in IDE
+                </Button>
+              </Link>{' '}
+              {task.assignment?.id && (
+                <StartSubmissionEvaluationButton
+                  assignmentId={task.assignment.id}
+                  invalidateTask={task.id}
+                  disabled={assignmentOpen && !sureToEditFiles}
+                  type="primary"
+                  icon={<SyncOutlined />}
+                >
+                  Evaluate all answers of this task
+                </StartSubmissionEvaluationButton>
+              )}
+            </>
+          }
+          key="/edit"
+        >
           {assignmentOpen ? (
             <Alert
               style={{ marginBottom: 16 }}
@@ -214,17 +218,17 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({ editable }) =>
                       alignItems: 'center'
                     }}
                   >
-                      <span>
-                        <b>Hidden files</b>{' '}
-                        <Tooltip
-                          title={
-                            'Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation.'
-                          }
-                          placement="bottom"
-                        >
-                          <InfoCircleFilled />
-                        </Tooltip>
-                      </span>
+                    <span>
+                      <b>Hidden files</b>{' '}
+                      <Tooltip
+                        title={
+                          'Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation.'
+                        }
+                        placement="bottom"
+                      >
+                        <InfoCircleFilled />
+                      </Tooltip>
+                    </span>
                     <JsonSchemaEditButton
                       title="Edit hidden files"
                       extraContent={filePatternHelp}
@@ -250,17 +254,17 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({ editable }) =>
                       alignItems: 'center'
                     }}
                   >
-                      <span>
-                        <b>Protected files</b>{' '}
-                        <Tooltip
-                          title={
-                            'Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.'
-                          }
-                          placement="bottom"
-                        >
-                          <InfoCircleFilled />
-                        </Tooltip>
-                      </span>
+                    <span>
+                      <b>Protected files</b>{' '}
+                      <Tooltip
+                        title={
+                          'Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.'
+                        }
+                        placement="bottom"
+                      >
+                        <InfoCircleFilled />
+                      </Tooltip>
+                    </span>
                     <JsonSchemaEditButton
                       title="Edit protected files"
                       extraContent={filePatternHelp}
@@ -276,16 +280,15 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({ editable }) =>
               />
             </Col>
           </Row>
-
         </Panel>
       </Collapse>
       <Collapse>
-        <Panel header={"Evaluation"} key="/edit-evaluation">
+        <Panel header={'Evaluation'} key="/edit-evaluation">
           <EditEvaluationPage taskId={task.id} />
         </Panel>
       </Collapse>
       <Collapse>
-        <Panel header={"Online IDE"} key={4}>
+        <Panel header={'Online IDE'} key={4}>
           <Row gutter={16}>
             <Col span={12}>
               <h3>Image</h3>
@@ -336,10 +339,8 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({ editable }) =>
             </Col>
           </Row>
         </Panel>
-
       </Collapse>
     </Space>
-
   )
 }
 
