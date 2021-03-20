@@ -1,4 +1,8 @@
-import { DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  FolderOpenOutlined,
+  SettingOutlined
+} from '@ant-design/icons'
 import { Button, Modal, Tooltip } from 'antd'
 import { CardProps } from 'antd/lib/card'
 import React from 'react'
@@ -64,17 +68,33 @@ const renderTask = (props: RenderProps) => (task: Task) => {
       <>
         <Authorized authority="ROLE_TEACHER">{updatedAtTag}</Authorized>
         {task.editable ? (
-          <Tooltip
-            title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
-            placement="left"
-          >
-            <Button
-              onClick={confirmDelete}
-              type="dashed"
-              shape="circle"
-              icon={<DeleteOutlined />}
-            />
-          </Tooltip>
+          <>
+            <Tooltip
+              title={
+                task.inPool
+                  ? 'Delete task from task pool'
+                  : 'Remove task from assignment'
+              }
+              placement="left"
+            >
+              <Button
+                onClick={confirmDelete}
+                type="dashed"
+                shape="circle"
+                icon={<DeleteOutlined />}
+              />
+            </Tooltip>
+            <EntityLink to={task} sub="/configuration">
+              <Tooltip title={'Configure task'} placement="left">
+                <Button
+                  type="dashed"
+                  shape="circle"
+                  style={{ marginLeft: 8 }}
+                  icon={<SettingOutlined />}
+                />
+              </Tooltip>
+            </EntityLink>
+          </>
         ) : null}
       </>
     ),
@@ -87,7 +107,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
         ) : null}
         <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
           <Button icon={<FolderOpenOutlined />} type="primary">
-            Details
+            Work on task
           </Button>
         </EntityLink>
       </>

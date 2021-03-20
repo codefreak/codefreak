@@ -35,6 +35,7 @@
 * Add a button to the task page to get back to the assignment (#844)
 * Assignments show the dates they were created and last updated (#865)
 * Add IDE presets that will allow beta-testing of Breeze (#871)
+* Add configuration Button to tasks in tasks and to assignments (#560)
 
 
 ### Changed

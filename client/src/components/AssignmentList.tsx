@@ -1,6 +1,7 @@
 import {
   DeleteOutlined,
   FolderOpenOutlined,
+  SettingOutlined,
   TableOutlined
 } from '@ant-design/icons'
 import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
@@ -128,6 +129,18 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
               />
             </Tooltip>
           ) : null}
+          <Authorized authority="ROLE_TEACHER">
+            <EntityLink to={assignment}>
+              <Tooltip title={'Configure assignment'} placement="left">
+                <Button
+                  type="dashed"
+                  shape="circle"
+                  style={{ marginLeft: 8 }}
+                  icon={<SettingOutlined />}
+                />
+              </Tooltip>
+            </EntityLink>
+          </Authorized>
         </>
       }
     >
@@ -138,7 +151,7 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
       </Descriptions>
       <EntityLink to={assignment}>
         <Button icon={<FolderOpenOutlined />} type="primary">
-          Details
+          Work on Assignment
         </Button>
       </EntityLink>
       <Authorized authority="ROLE_TEACHER">
