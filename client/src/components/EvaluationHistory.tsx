@@ -6,7 +6,7 @@ import {
   GetEvaluationHistoryQueryResult,
   useGetEvaluationHistoryQuery
 } from '../generated/graphql'
-import AsyncPlaceholder from './AsyncContainer'
+import AsyncPlaceholder from './AsyncPlaceholder'
 import './EvaluationHistory.less'
 import EvaluationResult from './EvaluationResult'
 import { EvaluationErrorIcon } from './Icons'

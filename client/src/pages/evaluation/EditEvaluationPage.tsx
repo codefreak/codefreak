@@ -20,7 +20,7 @@ import { JSONSchema6 } from 'json-schema'
 import YAML from 'json-to-pretty-yaml'
 import { useState } from 'react'
 import { deepEquals } from 'react-jsonschema-form/lib/utils'
-import AsyncPlaceholder from '../../components/AsyncContainer'
+import AsyncPlaceholder from '../../components/AsyncPlaceholder'
 import CardList from '../../components/CardList'
 import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
 import EditableTitle from '../../components/EditableTitle'
@@ -319,8 +319,8 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
           <>
             You can configure the automatic evaluation here. The configuration
             is only visible to teachers. To check the configuration, enable
-            "Testing Mode" on the top of the page and click the "Start Evaluation"
-            button on the top right.
+            "Testing Mode" on the top of the page and click the "Start
+            Evaluation" button on the top right.
             <br />
             The order of evaluation steps determines the order of the feedback
             displayed to students.

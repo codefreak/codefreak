@@ -6,7 +6,7 @@ import {
   FileType,
   useGetAnswerFileListQuery
 } from '../../services/codefreak-api'
-import AsyncPlaceholder from '../AsyncContainer'
+import AsyncPlaceholder from '../AsyncPlaceholder'
 import Centered from '../Centered'
 import CodeViewer from '../CodeViewer'
 import AnswerFileTree from './AnswerFileTree'

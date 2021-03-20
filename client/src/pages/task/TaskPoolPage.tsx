@@ -4,7 +4,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Row } from 'antd'
 import { useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
-import AsyncPlaceholder from '../../components/AsyncContainer'
+import AsyncPlaceholder from '../../components/AsyncPlaceholder'
 import EmptyListCallToAction from '../../components/EmptyListCallToAction'
 import TaskList from '../../components/TaskList'
 import {
