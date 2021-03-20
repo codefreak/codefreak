@@ -1,6 +1,7 @@
 import {
   EditOutlined,
-  InfoCircleFilled, PoweroffOutlined,
+  InfoCircleFilled,
+  PoweroffOutlined,
   SyncOutlined
 } from '@ant-design/icons'
 import {
@@ -13,14 +14,15 @@ import {
   Empty,
   List,
   Row,
-  Space, Switch,
+  Space,
+  Switch,
   Tooltip
 } from 'antd'
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { JSONSchema6 } from 'json-schema'
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncPlaceholder'
 import EditableMarkdown from '../../components/EditableMarkdown'
 import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
@@ -303,15 +305,17 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
         </Panel>
       </Collapse>
       <Collapse>
-        <Panel header={'Online IDE'} key={4}
-              extra={
-                 <Switch
-                   defaultChecked={task.ideEnabled}
-                   unCheckedChildren={<PoweroffOutlined />}
-                   onChange={updater('ideEnabled')}
-                 />
-               }>
-
+        <Panel
+          header={'Online IDE'}
+          key={4}
+          extra={
+            <Switch
+              defaultChecked={task.ideEnabled}
+              unCheckedChildren={<PoweroffOutlined />}
+              onChange={updater('ideEnabled')}
+            />
+          }
+        >
           <IdeSettingsForm
             defaultValue={{
               ideImage: taskDetailsInput.ideImage || undefined,
