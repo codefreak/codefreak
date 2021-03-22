@@ -9,7 +9,7 @@ import {
 } from '../../generated/graphql'
 import HelpTooltip from '../HelpTooltip'
 import { debounce } from 'ts-debounce'
-import {valueType} from "antd/es/statistic/utils";
+import { valueType } from 'antd/es/statistic/utils'
 
 const renderGradePoints = (
   title: string,
@@ -17,10 +17,9 @@ const renderGradePoints = (
   onChange: (value: number) => void,
   additionalProps: InputNumberProps = {}
 ) => {
-
-  const onChangeValid = (val: valueType| undefined) =>{
-    if(val!==undefined){
-      if (typeof val !== "string") {
+  const onChangeValid = (val: valueType | undefined) => {
+    if (val !== undefined) {
+      if (typeof val !== 'string') {
         onChange(val)
       }
     }
@@ -45,10 +44,9 @@ const renderGradeErrors = (
   onChange: (value: number) => void,
   additionalProps: InputNumberProps = {}
 ) => {
-
-  const onChangeValid = (val: valueType| undefined) =>{
-    if(val!==undefined){
-      if (typeof val !== "string") {
+  const onChangeValid = (val: valueType | undefined) => {
+    if (val !== undefined) {
+      if (typeof val !== 'string') {
         onChange(val)
       }
     }

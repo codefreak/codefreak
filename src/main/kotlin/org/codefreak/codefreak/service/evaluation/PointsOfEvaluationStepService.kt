@@ -87,7 +87,6 @@ class PointsOfEvaluationStepService : BaseService() {
     }
   }
 
-
   /**
    * starts calculation dependend of its associated EvaluationStepResult
    */
@@ -136,7 +135,6 @@ class PointsOfEvaluationStepService : BaseService() {
     // Save poe
     poeRepository.save(poe)
   }
-
 
   /**
    * If Result Errored

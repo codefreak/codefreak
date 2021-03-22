@@ -2,7 +2,8 @@ import { ApolloClient, ApolloProvider, useApolloClient } from '@apollo/client'
 import { Button, Card, Modal, Timeline } from 'antd'
 import React from 'react'
 import {
-  EvaluationStepResult, EvaluationStepStatus,
+  EvaluationStepResult,
+  EvaluationStepStatus,
   GetEvaluationHistoryQueryResult,
   useGetEvaluationHistoryQuery
 } from '../generated/graphql'
@@ -35,13 +36,16 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
           isEvaluationInProgress(evaluationStatus) ? 'Running...' : undefined
         }
       >
-        {evaluations.map(renderEvaluation(apolloClient,evaluationStatus!))}
+        {evaluations.map(renderEvaluation(apolloClient, evaluationStatus!))}
       </Timeline>
     </Card>
   )
 }
 
-const renderEvaluation = (apolloClient: ApolloClient<any>, evaluationStatus : EvaluationStepStatus) => (
+const renderEvaluation = (
+  apolloClient: ApolloClient<any>,
+  evaluationStatus: EvaluationStepStatus
+) => (
   evaluation: NonNullable<
     GetEvaluationHistoryQueryResult['data']
   >['answer']['evaluations'][0]
@@ -51,7 +55,10 @@ const renderEvaluation = (apolloClient: ApolloClient<any>, evaluationStatus : Ev
       icon: null,
       content: (
         <ApolloProvider client={apolloClient}>
-          <EvaluationResult evaluationId={evaluation.id} evaluationStepStatus={evaluationStatus} />
+          <EvaluationResult
+            evaluationId={evaluation.id}
+            evaluationStepStatus={evaluationStatus}
+          />
         </ApolloProvider>
       ),
       width: 800,

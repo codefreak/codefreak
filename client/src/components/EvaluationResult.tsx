@@ -1,10 +1,13 @@
 import React from 'react'
-import {EvaluationStepStatus, useGetDetailedEvaluatonQuery} from '../generated/graphql'
+import {
+  EvaluationStepStatus,
+  useGetDetailedEvaluatonQuery
+} from '../generated/graphql'
 import AsyncPlaceholder from './AsyncContainer'
 import './EvaluationResult.less'
 import EvaluationStepPanel from './EvaluationStepPanel'
-import useGetGrade from "../hooks/useGetGrade";
-import GradeView from "./autograder/GradeView";
+import useGetGrade from '../hooks/useGetGrade'
+import GradeView from './autograder/GradeView'
 
 const EvaluationResult: React.FC<{
   evaluationId: string

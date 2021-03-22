@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.service.evaluation
 
 import java.util.UUID
-import javax.annotation.PostConstruct
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepResult
@@ -112,8 +111,8 @@ class GradeService : BaseService() {
     var points = 0f
     var maxPoints = 0f
     for (poe in poeList) {
-      //Only pick for autograding if grader is activated.
-      if(poe.gradeDefinition.active){
+      // Only pick for autograding if grader is activated.
+      if (poe.gradeDefinition.active) {
         points += poe.reachedPoints
         maxPoints += poe.gradeDefinition.maxPoints
       }

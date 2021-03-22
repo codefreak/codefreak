@@ -45,7 +45,8 @@ import {
   UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
-  useUpdateAssignmentMutation, useUpdateAssignmentScoreboardMutation
+  useUpdateAssignmentMutation,
+  useUpdateAssignmentScoreboardMutation
 } from '../../generated/graphql'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
@@ -66,7 +67,6 @@ import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
 import TaskSelection from '../../components/TaskSelection'
 import ScoreboardPage from '../submission/ScoreboardPage'
 import ModificationTime from '../../components/ModificationTime'
-
 
 const { Step } = Steps
 

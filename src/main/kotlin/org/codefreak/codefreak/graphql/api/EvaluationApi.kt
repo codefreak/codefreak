@@ -18,7 +18,6 @@ import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
-import org.codefreak.codefreak.entity.GradeDefinition
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
@@ -101,7 +100,6 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   val status = EvaluationStepStatusDto(entity.status)
   val queuedAt = entity.queuedAt
   val finishedAt = entity.finishedAt
-
 }
 
 @GraphQLName("EvaluationRunner")
