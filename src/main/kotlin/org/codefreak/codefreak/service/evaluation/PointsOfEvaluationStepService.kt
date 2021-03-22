@@ -80,8 +80,8 @@ class PointsOfEvaluationStepService : BaseService() {
    * Get a save entity.
    */
   fun getEvaluationStepId(id: UUID): PointsOfEvaluationStep? {
-    return poeRepository.findByEvaluationStepId(id).let {
-      return if (it.isPresent) it.get()
+    poeRepository.findByEvaluationStepId(id).let {
+        return if (it.isPresent) it.get()
       else
         null
     }
@@ -89,14 +89,14 @@ class PointsOfEvaluationStepService : BaseService() {
 
 
   /**
-   * starts calculation in depend of its associated EvaluationStepResult
+   * starts calculation dependend of its associated EvaluationStepResult
    */
   fun calculate(es: EvaluationStep) {
     LOG.info("calculate es: ${es.id}")
     es.result?.let {
       when (it) {
         EvaluationStepResult.SUCCESS -> onSuccess(es)
-        EvaluationStepResult.FAILED -> onSuccess(es) // try it. Should be the same path if flaws were found
+        EvaluationStepResult.FAILED -> onSuccess(es) // Same path as success but differs the result.
         EvaluationStepResult.ERRORED -> onErrored(es)
       }
     }
@@ -120,7 +120,7 @@ class PointsOfEvaluationStepService : BaseService() {
     val failedFeedbacks = feedbackRepository.findByEvaluationStepAndStatusNot(es, Feedback.Status.SUCCESS)
     LOG.info("We gathered ${failedFeedbacks.size} Failed Feedbacks")
 
-    var mistakePoints = collectMistakes(failedFeedbacks, gradeDefinition)
+    val mistakePoints = collectMistakes(failedFeedbacks, gradeDefinition)
 
     LOG.info("we collected $mistakePoints mistakepoints")
 
@@ -137,12 +137,6 @@ class PointsOfEvaluationStepService : BaseService() {
     poeRepository.save(poe)
   }
 
-  /**
-   * if Result Failed badly
-   */
-  fun onFailed(es: EvaluationStep) {
-    // Nothing happens here. Teacher has to take a look.
-  }
 
   /**
    * If Result Errored
@@ -171,7 +165,7 @@ class PointsOfEvaluationStepService : BaseService() {
    *
    */
   fun recalculatePoints(gradeDefinition: GradeDefinition) {
-    var stepList = evaluationStepsRepository.findAllByGradeDefinition(gradeDefinition)
+    val stepList = evaluationStepsRepository.findAllByGradeDefinition(gradeDefinition)
     for (step in stepList) {
       calculate(step)
     }
@@ -217,7 +211,6 @@ class PointsOfEvaluationStepService : BaseService() {
     calcCheck?.let { poe.calcCheck = calcCheck }
     edited?.let { poe.edited = edited }
     resultCheck?.let { poe.resultCheck = resultCheck }
-    LOG.info("processing update : ${poe.evaluationStep}")
     val updatedPoE = save(changeEdited(poe))
     gradeService.createOrUpdateGradeFromPointsOfEvaluation(updatedPoE)
 
