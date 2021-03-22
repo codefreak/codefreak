@@ -1,21 +1,10 @@
-import { Card, Collapse, Empty, Icon, Result, Typography } from 'antd'
-import React, { useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import {
-  EvaluationStep,
-  EvaluationStepResult,
-  EvaluationStepStatus,
-  Feedback,
-  Feedback as FeedbackEntity,
-  FeedbackSeverity,
-  FeedbackStatus,
-  useGetDetailedEvaluatonQuery
-} from '../generated/graphql'
 import React from 'react'
-import { useGetDetailedEvaluatonQuery } from '../generated/graphql'
+import {EvaluationStepStatus, useGetDetailedEvaluatonQuery} from '../generated/graphql'
 import AsyncPlaceholder from './AsyncContainer'
 import './EvaluationResult.less'
 import EvaluationStepPanel from './EvaluationStepPanel'
+import useGetGrade from "../hooks/useGetGrade";
+import GradeView from "./autograder/GradeView";
 
 const EvaluationResult: React.FC<{
   evaluationId: string
