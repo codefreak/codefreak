@@ -45,8 +45,8 @@ import {
   UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
-  useUpdateAssignmentMutation
-} from '../../services/codefreak-api'
+  useUpdateAssignmentMutation, useUpdateAssignmentScoreboardMutation
+} from '../../generated/graphql'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import {
