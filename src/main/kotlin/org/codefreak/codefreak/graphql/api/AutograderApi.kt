@@ -87,8 +87,8 @@ class GradeDto(@GraphQLIgnore val entity: Grade?, ctx: ResolverContext) : BaseDt
 
   @GraphQLID
   val id = entity?.id
-  val gradePercentage = entity?.let { it.gradePercentage }
-  val calculated = entity?.let { it.calculated }
+  val gradePercentage = entity?.gradePercentage
+  val calculated = entity?.calculated
 }
 
 @GraphQLName("UserAlias")
@@ -232,7 +232,6 @@ class GradeDefinitionMutation : BaseResolver(), Mutation {
         criticalError = input.criticalError
       )
       LOG.info("GradeDefinition values of $gradeDefinition updated")
-      true
     } else
       LOG.error("failed to update GradeDefinition of id " + input.id)
       false
@@ -247,7 +246,6 @@ class GradeDefinitionMutation : BaseResolver(), Mutation {
       gradeDefinitionService.updateGradeDefinitionStatus(gradeDefinition,
         active = input.active)
       LOG.info("GradeDefinition status of $gradeDefinition updated")
-      true
     } else
       LOG.error("failed to update GradeDefinition of id " + input.id)
       false
@@ -298,16 +296,13 @@ class PointsOfEvaluationStepMutation : BaseResolver(), Mutation {
     val poeService = serviceAccess.getService(PointsOfEvaluationStepService::class)
     val poe = poeService.findById(input.id)
     if (poe.id == input.id) {
-      var updatedPoe = poeService.updatePointsOfEvaluationStep(poe,
+      poeService.updatePointsOfEvaluationStep(poe,
         reachedPoints = input.reachedPoints,
         mistakePoints = input.mistakePoints,
         calcCheck = input.calcCheck,
         edited = input.edited,
         resultCheck = input.resultCheck
       )
-      LOG.info("PointsOfEvaluationStep Updated ")
-      // Moved to PointsOfEvaluationService
-      // serviceAccess.getService(GradeService::class).createOrUpdateGradeFromPointsOfEvaluation(updatedPoe)
       true
     } else {
       LOG.error("failed to update PointsOfEvaluationStep of id ${input.id}")
