@@ -38,11 +38,6 @@ class GradeService : BaseService() {
   @Autowired
   private lateinit var evaluationRepository: EvaluationRepository
 
-  @PostConstruct
-  fun initialize() {
-    // function to integrate
-  }
-
   /**
    * Has a trackback function to look for an valid Evaluation of a Grade.
    * There might be no evaluation present on first evaluationstep finishes. So if its null, there will be nothing to return.
@@ -66,7 +61,6 @@ class GradeService : BaseService() {
    */
   fun createOrUpdateGradeFromEvaluation(eval: Evaluation): Boolean {
     return run {
-      LOG.info("start gradeCalc")
       startGradeCalculation(eval)
       true
     }
@@ -77,27 +71,14 @@ class GradeService : BaseService() {
    */
   fun startGradeCalculation(eval: Evaluation): Grade? {
     val stepList = stepRepository.findAllByEvaluation(eval)
-    // Since the grade calculation is uncoupled from the previous approach to perform it after PointsOfEvaluationStep
-    // points calculation, we need to check if there is a gradeCalculation wanted.
-    // Only continue, if there is any Autograder of an EvaluationStep.GradeDefinition activated.
-    var exit = false
-    for (s in stepList) {
-      s.gradeDefinition?.let { if (it.active) exit = true }
-    }
-    // If there is any evaluationStep with an GradeDefinition who has its active attribute on true
-    // We can proceed to GradeCalculation, otherwise we exit
-    if (exit)return null
 
-    LOG.info("findOrCreateGrade")
     val grade = findOrCreateGrade(eval)
 
-    LOG.info("validate")
     return if (validateEvaluationSteps(stepList)) {
       val poeList = mutableListOf<PointsOfEvaluationStep>()
-      LOG.info("Listsize: " + stepList.size)
       // Add grade to PointsOfEvaluationStep. Afterwards an existing grade just can collects its PointsOfEvaluationStep Child and recalculate the grade
       for (s in stepList) {
-        var poe = poeStepService.findByEvaluationStep(s)
+        val poe = poeStepService.findByEvaluationStep(s)
         // There might be Steps without a PoE due to deactivated Autograding for it
         if (poe != null) {
           poe.grade = grade
@@ -131,12 +112,13 @@ class GradeService : BaseService() {
     var points = 0f
     var maxPoints = 0f
     for (poe in poeList) {
-      points += poe.reachedPoints
-      maxPoints += poe.gradeDefinition.maxPoints
+      //Only pick for autograding if grader is activated.
+      if(poe.gradeDefinition.active){
+        points += poe.reachedPoints
+        maxPoints += poe.gradeDefinition.maxPoints
+      }
     }
-    LOG.info("points are $points and maxPoints are $maxPoints")
     grade.gradePercentage = (100 / maxPoints * points)
-    LOG.info("Grade is: ${grade.gradePercentage} of ${grade.evaluation.answer.submission.user}")
     grade.calculated = true
     return save(grade)
   }
@@ -162,7 +144,6 @@ class GradeService : BaseService() {
    * Trackback function. Is required to recalculate a grade if a pointsOfEvaluationStep has been modified by a teacher
    */
   private fun trackBackToEvaluation(poe: PointsOfEvaluationStep): Evaluation? {
-    LOG.info("Trackback: from ${poe.id} to ${poe.evaluationStep}")
     return evaluationRepository.findByEvaluationSteps(poe.evaluationStep).let {
       if (it.isPresent) {
         it.get()
@@ -185,8 +166,6 @@ class GradeService : BaseService() {
         it.get()
       }
     }
-
-//    return gradeRepository.findByEvaluation(evaluation).get()
   }
 
   fun findGrade(evaluation: Evaluation): Grade? {
