@@ -26,6 +26,7 @@ const EditNickname: React.FC<{
 
   const [updateUserAlias] = useUpdateUserAliasMutation({
     onCompleted: () => {
+      result.refetch()
       messageService.success('Nickname may have Updated')
     },
     onError: () => {
@@ -51,9 +52,9 @@ const EditNickname: React.FC<{
 
   const submit = () => {
     if (newAlias && newAlias.trim()) {
-      updateUserAlias({ variables: { input } }).then(r => result.refetch())
       props.onChange()
       hideModal()
+      return updateUserAlias({ variables: { input } })
     }
   }
   if (!props.editable) {
