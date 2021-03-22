@@ -1,5 +1,5 @@
 import './Points.less'
-import React, { useState } from 'react'
+import React, {useState} from 'react'
 import {
   PointsOfEvaluationStep,
   PointsOfEvaluationStepInput,
@@ -14,6 +14,7 @@ const PointsEdit: React.FC<{
   evaluationStepId: string
   fetchGrade: any
 }> = props => {
+
   const evaluationStepId = props.evaluationStepId
 
   const result = useGetPointsOfEvaluationStepByEvaluationStepIdQuery({
@@ -25,12 +26,9 @@ const PointsEdit: React.FC<{
   const onEnabledChange = (state: boolean) => {
     setChangeable(state)
   }
-  const [
-    updatePointsOfEvaluationStep
-  ] = useUpdatePointsOfEvaluationStepMutation({
+  const [updatePointsOfEvaluationStep] = useUpdatePointsOfEvaluationStepMutation({
     onCompleted: () => {
       result.refetch()
-      props.fetchGrade()
     }
   })
 
@@ -38,13 +36,9 @@ const PointsEdit: React.FC<{
   /**
    * Output
    */
-  // if (result.data !== null) {
-  //   return <Empty />
-  // }
-  if (result.data !== null) {
-    if (result.data !== undefined) {
+  if(result.data!==null){
+    if(result.data!==undefined){
       const data = result.data
-
 
       const input: PointsOfEvaluationStepInput = {
         calcCheck: data.pointsOfEvaluationStepByEvaluationStepId.calcCheck!!,
@@ -61,16 +55,13 @@ const PointsEdit: React.FC<{
         if (value !== undefined) {
           input.reachedPoints = value
           input.edited = true
-          debounce(
-            updatePointsOfEvaluationStep({ variables: { input } }).then,
-            500
+          debounce(updatePointsOfEvaluationStep({ variables: { input } }).then,
+            1000
           )
         }
       }
-      if (
-        data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax ===
-        null
-      ) {
+
+      if (data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax === null) {
         return <div />
       } else {
         if (
@@ -122,21 +113,14 @@ const renderEdit: React.FC<{
 }> = props => {
   const onChangeDefinitely = (val: number | undefined) => {
     if (val !== undefined) {
-      if (val > props.poe.gradeDefinitionMax!.maxPoints) {
-        props.onChange(props.poe.gradeDefinitionMax!.maxPoints)
-      } else {
-        props.onChange(val)
-      }
+        if (val > props.poe.gradeDefinitionMax!.maxPoints) {
+          props.onChange(props.poe.gradeDefinitionMax!.maxPoints)
+        } else {
+          props.onChange(val)
+        }
     }
-    // val !== undefined ? (val>props.poe.gradeDefinitionMax.pEvalMax ? props.onChange(props.poe.gradeDefinitionMax.pEvalMax) : props.onChange(val)) : undefined
   }
-  const parser = (val: string | undefined) => {
-    if (!val) {
-      return '0'
-    }
-    return val.replace(/[^\d]+/, '0')
-  }
-  const formatter = (val: string | number | undefined) => `${val}`
+
   if (props.poe.gradeDefinitionMax!.maxPoints === 0) return <></>
 
   const input = (
@@ -144,10 +128,9 @@ const renderEdit: React.FC<{
       title={'Points'}
       min={0}
       max={props.poe.gradeDefinitionMax!.maxPoints}
-      onChange={onChangeDefinitely}
+      onChange={debounce(onChangeDefinitely,1500)}
+      inputMode={"numeric"}
       value={props.poe.reachedPoints!!}
-      parser={parser}
-      formatter={formatter}
       disabled={!props.changeable}
     />
   )
