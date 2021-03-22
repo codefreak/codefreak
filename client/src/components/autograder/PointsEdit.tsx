@@ -128,7 +128,7 @@ const renderEdit: React.FC<{
       title={'Points'}
       min={0}
       max={props.poe.gradeDefinitionMax!.maxPoints}
-      onChange={debounce(onChangeDefinitely,1500)}
+      onChange={onChangeDefinitely}
       inputMode={"numeric"}
       value={props.poe.reachedPoints!!}
       disabled={!props.changeable}
