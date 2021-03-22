@@ -1,8 +1,9 @@
-import { Col, Icon, Row, Table, Tooltip } from 'antd'
-import { GetScoreboardByAssignmentIdQuery } from '../../generated/graphql'
+import { Col, Row, Table, Tooltip } from 'antd'
+import {GetScoreboardByAssignmentIdQuery, GradeScoreboard} from '../../generated/graphql'
 import '../SubmissionsTable.less'
 import EditNickname from './EditNickname'
 import React from 'react'
+import Icon from "@ant-design/icons";
 
 type AssignmentScoreboard = NonNullable<
   GetScoreboardByAssignmentIdQuery['scoreboardByAssignmentId']
@@ -17,9 +18,17 @@ const { Column } = Table
 const alphabeticSorter = (
   extractProperty: (x: SubmissionsScoreboard) => string | null | undefined
 ) => (a: SubmissionsScoreboard, b: SubmissionsScoreboard) => {
-  const valA = extractProperty(a) || ''
-  const valB = extractProperty(b) || ''
-  return valA.localeCompare(valB)
+  const valA = extractProperty(a) || 0
+  const valB = extractProperty(b) || 0
+  return typeof valA !== "number" ? valA?.localeCompare(valB as string) : valA
+}
+
+const numericSorter = (
+  extractProperty: (x: GradeScoreboard) => number
+) => (a: GradeScoreboard, b: GradeScoreboard) => {
+    const valA = extractProperty(a)
+    const valB = extractProperty(b)
+    return (valA>=valB) ? valA : valB
 }
 
 const ScoreboardTable: React.FC<{
@@ -43,6 +52,7 @@ const ScoreboardTable: React.FC<{
   // 200px = min width for each task column
   const scrollX = assignments.submissionsScoreboard.length * 100
 
+
   return (
     <Table
       dataSource={allSubmissions}
@@ -60,14 +70,13 @@ const ScoreboardTable: React.FC<{
     >
       <Column
         title="Nickname"
-        dataIndex="useralias.alias"
+        dataIndex={['useralias','alias']}
         width={200}
         fixed="left"
         defaultSortOrder="ascend"
         sorter={alphabeticSorter(submission => submission.useralias.alias)}
       />
-
-      {taskColumnRenderer(assignments.tasksScoreboard)}
+      {taskColumnRenderer(assignments.tasksScoreboard,assignments.submissionsScoreboard)}
     </Table>
   )
 }
@@ -80,7 +89,10 @@ const getAnswerFromSubmission = (
     candidate => candidate.taskScoreboard.id === taskScoreboard.id
   )
 
-const taskColumnRenderer = (tasks: TaskScoreboard[]) => {
+const taskColumnRenderer = (tasks: TaskScoreboard[], submission: SubmissionsScoreboard[]) => {
+
+
+
   const renderAnswer = (
     task: TaskScoreboard,
     submission: SubmissionsScoreboard
@@ -111,8 +123,9 @@ const taskColumnRenderer = (tasks: TaskScoreboard[]) => {
         key={`task-${task.id}`}
         title={task.title}
         align="center"
-        render={renderAnswer.bind(undefined, task)}
-        // sorter={alphabeticSorter(submission => submission.answersScoreboard)}
+        render={renderAnswer.bind(submission, task)}
+        sorter={numericSorter(x => x.gradePercentage)}
+        defaultSortOrder={"ascend"}
       />
     )
   })
