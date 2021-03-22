@@ -9,6 +9,7 @@ import {
 } from '../../generated/graphql'
 import HelpTooltip from '../HelpTooltip'
 import { debounce } from 'ts-debounce'
+import {valueType} from "antd/es/statistic/utils";
 
 const renderGradePoints = (
   title: string,
@@ -16,27 +17,22 @@ const renderGradePoints = (
   onChange: (value: number) => void,
   additionalProps: InputNumberProps = {}
 ) => {
-  const onChangeValid = (val: number | undefined) =>
-    val !== undefined ? onChange(val) : undefined
 
-  const parser = (val: string | undefined) => {
-    if (!val) {
-      return '0'
+  const onChangeValid = (val: valueType| undefined) =>{
+    if(val!==undefined){
+      if (typeof val !== "string") {
+        onChange(val)
+      }
     }
-
-    return val.replace(/[^\d]+/, '0')
   }
-  const formatter = (val: string | number | undefined) => `${val}`
 
   return (
     <InputNumber
       title={title}
       min={0}
       onChange={onChangeValid}
-      value={value}
-      parser={parser}
-      formatter={formatter}
       inputMode={'numeric'}
+      value={value}
       {...additionalProps}
     />
   )
@@ -49,18 +45,14 @@ const renderGradeErrors = (
   onChange: (value: number) => void,
   additionalProps: InputNumberProps = {}
 ) => {
-  const onChangeValid = (val: number | undefined) =>
-    val !== undefined ? onChange(val) : undefined
 
-  const parser = (val: string | undefined) => {
-    if (!val) {
-      return '0'
+  const onChangeValid = (val: valueType| undefined) =>{
+    if(val!==undefined){
+      if (typeof val !== "string") {
+        onChange(val)
+      }
     }
-    // (?:\d+(?:\.\d*)?|\.\d+) <- für Float
-    /// [^\d]+/ <- decimal
-    return val.replace(/[^\d]+/, '0')
   }
-  const formatter = (val: string | number | undefined) => `${val}`
 
   return (
     <InputNumber
@@ -68,9 +60,8 @@ const renderGradeErrors = (
       min={0}
       max={max}
       onChange={onChangeValid}
+      inputMode={'numeric'}
       value={value}
-      parser={parser}
-      formatter={formatter}
       {...additionalProps}
     />
   )
@@ -105,7 +96,7 @@ const GradeDefinitionInputField: React.FC<{
   )
 
   const [input, setGradeDefinitionInput] = useState<GradeDefinitionInput>()
-  // TODO updates two times, due to gradeDefinition Dependency her and useEffekt for memorizeCallback. Better approach required.
+  // TODO updates two times, due to gradeDefinition Dependency here and in useEffekt for memorizeCallback. Works but its not flawless.
   useEffect(() => {
     setGradeDefinitionInput({
       criticalError: gradeDefinition.criticalError,
