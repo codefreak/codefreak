@@ -17,7 +17,7 @@ class GradeDefinition(
 ) : BaseEntity() {
 
   @OneToMany(mappedBy = "gradeDefinition", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
-  var pointsOfEvaluationStep: MutableList<PointsOfEvaluationStep> = mutableListOf()
+  var pointsOfEvaluationStep = mutableSetOf<PointsOfEvaluationStep>()
 
   /**
    * boolean for UI-Slider. Will be set to true if Autograding is wanted for a task
@@ -47,5 +47,5 @@ class GradeDefinition(
    * A Grade definition is valid for many EvaluationSteps.
    */
   @OneToMany(mappedBy = "gradeDefinition", cascade = [CascadeType.ALL], orphanRemoval = true)
-  var evaluationStep: MutableList<EvaluationStep> = mutableListOf()
+  var evaluationStep = mutableSetOf<EvaluationStep>()
 }
