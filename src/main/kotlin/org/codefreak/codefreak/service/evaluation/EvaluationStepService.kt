@@ -37,7 +37,6 @@ class EvaluationStepService {
   @Autowired
   private lateinit var runnerService: EvaluationRunnerService
 
-
   fun getEvaluationStep(stepId: UUID): EvaluationStep {
     return stepRepository.findById(stepId).orElseThrow {
       EntityNotFoundException("EvaluationStep $stepId could not be found")
@@ -97,7 +96,7 @@ class EvaluationStepService {
    */
   fun configureEvaluationStepForAutoGrading(step: EvaluationStep): EvaluationStep {
     step.gradeDefinition = gradeDefinitionService.findByEvaluationStepDefinition(step.definition.id)
-    var updatedStep = stepRepository.save(step)
+    val updatedStep = stepRepository.save(step)
 
     // Check Consistency. Might throw errors due entity not persistent (lazy load)
     if (updatedStep.gradeDefinition == null) {
