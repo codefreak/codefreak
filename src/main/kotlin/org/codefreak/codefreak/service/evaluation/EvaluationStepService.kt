@@ -4,6 +4,7 @@ import java.util.UUID
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
+import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.repository.EvaluationStepRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
@@ -23,10 +24,24 @@ class EvaluationStepService {
   @Autowired
   private lateinit var stepRepository: EvaluationStepRepository
 
+  @Autowired
+  private lateinit var runnerService: EvaluationRunnerService
+
   fun getEvaluationStep(stepId: UUID): EvaluationStep {
     return stepRepository.findById(stepId).orElseThrow {
       EntityNotFoundException("EvaluationStep $stepId could not be found")
     }
+  }
+
+  /**
+   * Determine if an evaluation step has to be executed by a runner
+   */
+  fun stepNeedsExecution(step: EvaluationStep): Boolean {
+    if (!runnerService.isAutomated(step.definition.runnerName)) {
+      return false
+    }
+    // non-finished steps or errored steps can be executed again
+    return step.status != EvaluationStepStatus.FINISHED || step.result === EvaluationStepResult.ERRORED
   }
 
   @Transactional
@@ -48,9 +63,10 @@ class EvaluationStepService {
   }
 
   /**
-   * Get the existing evaluation step from the evaluation or create a new one
+   * Add a new evaluation step to the evaluation based on a given definition.
+   * If a step with the same definition already exists, it will be replaced.
    */
-  fun addPendingEvaluationStep(evaluation: Evaluation, stepDefinition: EvaluationStepDefinition): EvaluationStep {
+  fun addStepToEvaluation(evaluation: Evaluation, stepDefinition: EvaluationStepDefinition): EvaluationStep {
     // remove existing step with this definition from evaluation
     evaluation.evaluationSteps.removeIf { it.definition == stepDefinition }
     return EvaluationStep(stepDefinition, evaluation, EvaluationStepStatus.PENDING).also {

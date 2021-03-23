@@ -30,6 +30,7 @@ const EvaluationStatusTracker: React.FC<EvaluationStatusTrackerProps> = props =>
         setStep(2)
         break
       case EvaluationStepStatus.Finished:
+      case EvaluationStepStatus.Canceled:
         setStep(3)
         break
     }
