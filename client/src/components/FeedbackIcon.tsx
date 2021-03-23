@@ -11,7 +11,7 @@ interface FeedbackIconProps {
 const FeedbackIcon: React.FC<FeedbackIconProps> = props => {
   const { status, severity } = props
 
-  if (status === FeedbackStatus.Failed && severity) {
+  if (severity) {
     return <FeedbackSeverityIcon severity={severity} />
   }
   if (status) {

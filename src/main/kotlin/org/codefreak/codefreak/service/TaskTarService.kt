@@ -15,7 +15,7 @@ import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
-import org.codefreak.codefreak.service.evaluation.EvaluationService
+import org.codefreak.codefreak.service.evaluation.EvaluationRunnerService
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
 import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
@@ -38,7 +38,7 @@ class TaskTarService : BaseService() {
   private lateinit var taskService: TaskService
 
   @Autowired
-  private lateinit var evaluationService: EvaluationService
+  private lateinit var runnerService: EvaluationRunnerService
 
   @Autowired
   private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
@@ -105,11 +105,11 @@ class TaskTarService : BaseService() {
    */
   private fun getEvaluationStepDefinitions(taskDefinition: TaskDefinition, task: Task) = taskDefinition.evaluation
       .mapIndexed { index, it ->
-        val runner = evaluationService.getEvaluationRunner(it.step)
+        val runner = runnerService.getEvaluationRunner(it.step)
         val title = it.title ?: runner.getDefaultTitle()
         val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
         stepDefinition.active = it.active ?: true
-        evaluationService.validateRunnerOptions(stepDefinition)
+        runnerService.validateRunnerOptions(stepDefinition)
         stepDefinition
       }
       .toSortedSet()
@@ -117,7 +117,7 @@ class TaskTarService : BaseService() {
   private fun validateEvaluationSteps(task: Task) = task.evaluationStepDefinitions
       .groupBy { it.runnerName }
       .forEach { (runnerName, definitions) ->
-        if (definitions.size > 1 && evaluationService.getEvaluationRunner(runnerName).isBuiltIn()) {
+        if (definitions.size > 1 && runnerService.getEvaluationRunner(runnerName).isBuiltIn()) {
           throw IllegalArgumentException("Evaluation step '$runnerName' can only be added once!")
         }
       }
@@ -125,7 +125,7 @@ class TaskTarService : BaseService() {
   private fun addBuiltInEvaluationSteps(task: Task) {
     if (task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME } == null) {
       task.evaluationStepDefinitions.forEach { it.position++ }
-      val runner = evaluationService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
+      val runner = runnerService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
       task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
     }
   }
@@ -234,7 +234,7 @@ class TaskTarService : BaseService() {
         .map {
           val options =
             if (it.options.isEmpty())
-              evaluationService.getDefaultOptions(it.runnerName)
+              runnerService.getDefaultOptions(it.runnerName)
             else
               it.options
 
