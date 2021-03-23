@@ -8,7 +8,7 @@
     "@apollo/client": "3.3.12",
     "@codefreak/docs": "file:../docs",
     "@craco/craco": "6.1.1",
-    "@graphql-codegen/cli": "1.21.2",
+    "@graphql-codegen/cli": "1.21.3",
     "@graphql-codegen/typescript": "1.21.1",
     "@graphql-codegen/typescript-operations": "1.17.15",
     "@graphql-codegen/typescript-react-apollo": "1.17.7",
