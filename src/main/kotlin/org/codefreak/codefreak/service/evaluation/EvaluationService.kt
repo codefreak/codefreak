@@ -200,10 +200,6 @@ class EvaluationService : BaseService() {
     if (evaluation.evaluationSteps.any { stepService.stepNeedsExecution(it) }) {
       return false
     }
-    // allow to re-run if any of the steps errored
-    if (evaluation.stepsResultSummary === EvaluationStepResult.ERRORED) {
-      return false
-    }
     return true
   }
 
