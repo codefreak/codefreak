@@ -18,6 +18,7 @@ import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
+import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
@@ -29,6 +30,7 @@ import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
+import org.codefreak.codefreak.service.evaluation.EvaluationRunnerService
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.EvaluationStepService
 import org.codefreak.codefreak.service.evaluation.GradeDefinitionService
@@ -63,7 +65,7 @@ class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: Res
     objectMapper.writeValueAsString(definition.options)
   }
   val runner by lazy {
-    ctx.serviceAccess.getService(EvaluationService::class).getEvaluationRunner(runnerName).let { EvaluationRunnerDto(it) }
+    ctx.serviceAccess.getService(EvaluationRunnerService::class).getEvaluationRunner(runnerName).let { EvaluationRunnerDto(it) }
   }
   val timeout = definition.timeout
 }
@@ -192,7 +194,7 @@ class EvaluationQuery : BaseResolver(), Query {
 
   @Secured(Authority.ROLE_TEACHER)
   fun evaluationRunners() = context {
-    serviceAccess.getService(EvaluationService::class).getAllEvaluationRunners()
+    serviceAccess.getService(EvaluationRunnerService::class).getAllRunners()
         .map { EvaluationRunnerDto(it) }
         .toTypedArray()
   }
@@ -255,15 +257,16 @@ class EvaluationMutation : BaseResolver(), Mutation {
 
   fun createEvaluationStepDefinition(taskId: UUID, runnerName: String, options: String) = context {
     val evaluationService = serviceAccess.getService(EvaluationService::class)
+    val runnerService = serviceAccess.getService(EvaluationRunnerService::class)
     val taskService = serviceAccess.getService(TaskService::class)
     val task = taskService.findTask(taskId)
-    val runner = evaluationService.getEvaluationRunner(runnerName)
+    val runner = runnerService.getEvaluationRunner(runnerName)
     if (!task.isEditable(authorization)) {
       Authorization.deny()
     }
     val optionsMap = objectMapper.readValue(options, object : TypeReference<HashMap<String, Any>>() {})
     val definition = EvaluationStepDefinition(task, runner.getName(), task.evaluationStepDefinitions.size, runner.getDefaultTitle(), optionsMap)
-    evaluationService.validateRunnerOptions(definition)
+    runnerService.validateRunnerOptions(definition)
     task.evaluationStepDefinitions.add(definition)
     evaluationService.saveEvaluationStepDefinition(definition)
     taskService.saveTask(task)
@@ -288,11 +291,12 @@ class EvaluationMutation : BaseResolver(), Mutation {
 
   fun deleteEvaluationStepDefinition(id: UUID) = context {
     val evaluationService = serviceAccess.getService(EvaluationService::class)
+    val runnerService = serviceAccess.getService(EvaluationRunnerService::class)
     val definition = evaluationService.findEvaluationStepDefinition(id)
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
-    require(!evaluationService.getEvaluationRunner(definition.runnerName).isBuiltIn()) { "Built-in evaluation steps cannot be deleted" }
+    require(!runnerService.getEvaluationRunner(definition.runnerName).isBuiltIn()) { "Built-in evaluation steps cannot be deleted" }
     check(definition.task.answers.none { evaluationService.isEvaluationScheduled(it.id) }) { "Cannot delete evaluation step while waiting for evaluation" }
     try {
       evaluationService.deleteEvaluationStepDefinition(definition)
@@ -326,7 +330,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     val user = authorization.currentUser
     val evaluationService = serviceAccess.getService(EvaluationService::class)
     val digestByteArray = Base64Utils.decodeFromString(digest)
-    val feedback = evaluationService.createCommentFeedback(user, comment).apply {
+    val feedback = createBasicCommentFeedback(user, comment).apply {
       if (path != null) {
         fileContext = Feedback.FileContext(path).apply {
           lineStart = line
@@ -334,15 +338,28 @@ class EvaluationMutation : BaseResolver(), Mutation {
       }
       this.severity = when {
         severity != null -> Feedback.Severity.valueOf(severity.name)
-        else -> null
+        else -> Feedback.Severity.INFO
       }
-      this.status = when {
-        severity != null -> Feedback.Status.FAILED
-        else -> null
+      // because only the severity can be set by the teacher atm, we interpret everything else than null/"info" as "failed"
+      this.status = when (this.severity) {
+          null, Feedback.Severity.INFO -> Feedback.Status.SUCCESS
+          else -> Feedback.Status.FAILED
       }
     }
     evaluationService.addCommentFeedback(answer, digestByteArray, feedback)
     true
+  }
+
+  private fun createBasicCommentFeedback(author: User, comment: String): Feedback {
+    // use the first 10 words of the first line or max. 100 chars as summary
+    var summary = comment.trim().replace("((?:[^ \\n]+ ?){0,10})".toRegex(), "$1").trim()
+    if (summary.length > 100) {
+      summary = summary.substring(0..100) + "..."
+    }
+    return Feedback(summary).apply {
+      longDescription = comment
+      this.author = author
+    }
   }
 }
 

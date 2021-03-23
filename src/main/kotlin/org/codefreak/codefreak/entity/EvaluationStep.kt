@@ -61,4 +61,16 @@ class EvaluationStep(
   }
 
   fun addAllFeedback(feedbackList: List<Feedback>) = feedbackList.forEach(this::addFeedback)
+
+  /**
+   * Reset a step for re-evaluation
+   */
+  fun reset() {
+    status = EvaluationStepStatus.PENDING
+    result = null
+    queuedAt = null
+    finishedAt = null
+    summary = null
+    feedback.removeAll(feedback)
+  }
 }

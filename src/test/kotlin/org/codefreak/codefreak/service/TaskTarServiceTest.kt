@@ -11,7 +11,7 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.service.evaluation.EvaluationRunner
-import org.codefreak.codefreak.service.evaluation.EvaluationService
+import org.codefreak.codefreak.service.evaluation.EvaluationRunnerService
 import org.codefreak.codefreak.service.file.FileService
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -33,7 +33,7 @@ class TaskTarServiceTest {
   private lateinit var mockTaskService: TaskService
 
   @Mock
-  private lateinit var mockEvaluationService: EvaluationService
+  private lateinit var mockRunnerService: EvaluationRunnerService
 
   @Mock
   private lateinit var mockEvaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
@@ -49,7 +49,7 @@ class TaskTarServiceTest {
     MockitoAnnotations.openMocks(this)
     `when`(mockTaskService.saveTask(any())).thenAnswer { it.arguments[0] }
 
-    `when`(mockEvaluationService.getEvaluationRunner(any())).thenAnswer {
+    `when`(mockRunnerService.getEvaluationRunner(any())).thenAnswer {
       object : EvaluationRunner {
         override fun getName(): String { return it.arguments[0] as String }
         override fun run(answer: Answer, options: Map<String, Any>) = listOf<Feedback>()

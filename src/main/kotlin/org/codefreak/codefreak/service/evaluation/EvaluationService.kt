@@ -1,21 +1,16 @@
 package org.codefreak.codefreak.service.evaluation
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.networknt.schema.JsonSchemaFactory
-import com.networknt.schema.SpecVersion
 import java.time.Instant
 import java.util.UUID
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
-import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.Task
-import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.repository.TaskRepository
@@ -23,6 +18,7 @@ import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
+import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionDeadlineReachedEvent
 import org.codefreak.codefreak.service.SubmissionService
@@ -65,10 +61,10 @@ class EvaluationService : BaseService() {
   private lateinit var evaluationQueue: EvaluationQueue
 
   @Autowired
-  private lateinit var runners: List<EvaluationRunner>
+  private lateinit var eventPublisher: ApplicationEventPublisher
 
   @Autowired
-  private lateinit var eventPublisher: ApplicationEventPublisher
+  private lateinit var runnerService: EvaluationRunnerService
 
   @Autowired
   private lateinit var gradeService: GradeService
@@ -76,13 +72,7 @@ class EvaluationService : BaseService() {
   @Autowired
   private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
 
-  private val runnersByName by lazy { runners.map { it.getName() to it }.toMap() }
-
   private val log = LoggerFactory.getLogger(this::class.java)
-
-  companion object {
-    private val objectMapper = ObjectMapper()
-  }
 
   @Transactional
   fun startAssignmentEvaluation(assignmentId: UUID): List<Evaluation> {
@@ -104,20 +94,17 @@ class EvaluationService : BaseService() {
     ideService.saveAnswerFiles(answer, forceSaveFiles)
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
     check(!isEvaluationScheduled(answer.id)) { "Evaluation is already scheduled." }
-    val evaluation = createPendingEvaluation(answer)
-    evaluationQueue.insert(evaluation)
-    return evaluation
-  }
-
-  private fun createPendingEvaluation(answer: Answer): Evaluation {
     val digest = fileService.getCollectionMd5Digest(answer.id)
-    val evaluation = getOrCreateValidEvaluationByDigest(answer, digest)
-    answer.task.evaluationStepDefinitions.filter { it.active }.forEach {
-      stepService.addPendingEvaluationStep(evaluation, it)
-    }
-    return saveEvaluation(evaluation).also {
-      eventPublisher.publishEvent(EvaluationStatusUpdatedEvent(evaluation, evaluation.stepStatusSummary))
-    }
+    val evaluation = getOrCreateEvaluationByDigest(answer, digest)
+
+    // schedule all non-finished steps for automated evaluation
+    evaluation.evaluationSteps
+        .filter { stepService.stepNeedsExecution(it) }
+        .forEach {
+          it.reset()
+          evaluationQueue.insert(it)
+        }
+    return evaluation
   }
 
   fun getLatestEvaluation(answerId: UUID) = evaluationRepository.findFirstByAnswerIdOrderByCreatedAtDesc(answerId)
@@ -134,10 +121,10 @@ class EvaluationService : BaseService() {
     return getLatestEvaluation(answerId).map { it.stepStatusSummary }.orNull()
   }
 
-  fun getOrCreateValidEvaluationByDigest(answer: Answer, digest: ByteArray): Evaluation {
+  fun getOrCreateEvaluationByDigest(answer: Answer, digest: ByteArray): Evaluation {
     return evaluationRepository.findFirstByAnswerIdAndFilesDigestOrderByCreatedAtDesc(answer.id, digest)
-        .map { if (it.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) createEvaluation(answer) else it }
-        .orElseGet { createEvaluation(answer) }
+        .map { if (it.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) createEvaluation(answer, digest) else it }
+        .orElseGet { createEvaluation(answer, digest) }
   }
 
   @Transactional
@@ -153,56 +140,51 @@ class EvaluationService : BaseService() {
     assignment.tasks.forEach(this::invalidateEvaluations)
   }
 
-  fun createEvaluation(answer: Answer): Evaluation {
-    return saveEvaluation(
-        Evaluation(
-            answer,
-            fileService.getCollectionMd5Digest(answer.id),
-            answer.task.evaluationSettingsChangedAt
-        )
+  /**
+   * Create a fresh evaluation for the given answer + digest combination.
+   * All steps are in a pending state
+   */
+  @Transactional
+  fun createEvaluation(answer: Answer, filesDigest: ByteArray): Evaluation {
+    val evaluation = Evaluation(
+        answer,
+        filesDigest,
+        answer.task.evaluationSettingsChangedAt
     )
+    // add all steps as "pending" to the evaluation
+    answer.task.evaluationStepDefinitions
+        .filter { it.active }
+        .forEach { stepService.addStepToEvaluation(evaluation, it) }
+    return saveEvaluation(evaluation).also {
+      eventPublisher.publishEvent(EvaluationStatusUpdatedEvent(it, it.stepStatusSummary))
+    }
   }
 
   fun saveEvaluation(evaluation: Evaluation) = evaluationRepository.save(evaluation)
 
-  fun createCommentFeedback(author: User, comment: String): Feedback {
-    // use the first 10 words of the first line or max. 100 chars as summary
-    var summary = comment.trim().replace("((?:[^ \\n]+ ?){0,10})".toRegex(), "$1").trim()
-    if (summary.length > 100) {
-      summary = summary.substring(0..100) + "..."
-    }
-    return Feedback(summary).apply {
-      longDescription = comment
-      this.author = author
-    }
-  }
-
-  @Transactional(readOnly = true)
-  fun stopEvaluationStep(evaluationStep: EvaluationStep) {
-    val runnerName = evaluationStep.definition.runnerName
-    val answer = evaluationStep.evaluation.answer
-    val runner = getEvaluationRunner(runnerName)
-    if (runner is StoppableEvaluationRunner) {
-      runner.stop(answer)
-    } else {
-      log.warn("Cannot stop evaluation of runner ${runner.getName()}")
-    }
-  }
-
+  @Transactional
   fun addCommentFeedback(answer: Answer, digest: ByteArray, feedback: Feedback): Feedback {
     // find out if evaluation has a comment step definition
     val stepDefinition = answer.task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME }
         ?: throw IllegalArgumentException("Task has no 'comments' evaluation step")
-    val evaluation = getOrCreateValidEvaluationByDigest(answer, digest)
-
-    // either take existing comments step on evaluation or create a new one
+    val evaluation = getOrCreateEvaluationByDigest(answer, digest)
     val evaluationStep = evaluation.evaluationSteps.find { it.definition == stepDefinition }
-        ?: EvaluationStep(stepDefinition, evaluation, EvaluationStepStatus.FINISHED).also {
-          evaluation.addStep(it)
-        }
-
+        ?: throw RuntimeException("Evaluation does not contain a 'comments' step")
     evaluationStep.addFeedback(feedback)
+
+    // mark this evaluation step as "finished" which means "teacher evaluated this answer manually"
+    evaluationStep.status = EvaluationStepStatus.FINISHED
+    evaluationStep.finishedAt = Instant.now()
+    // if there is any failed feedback the overall step result is "failed"
+    evaluationStep.result = when {
+      evaluationStep.feedback.any { it.isFailed } -> EvaluationStepResult.FAILED
+      else -> EvaluationStepResult.SUCCESS
+    }
     saveEvaluation(evaluation)
+
+    // there is no real definition of "done" for comments, so we trigger a FINISHED event
+    // each time a new comment is added to this answer
+    eventPublisher.publishEvent(EvaluationStepStatusUpdatedEvent(evaluationStep, EvaluationStepStatus.FINISHED))
     return feedback
   }
 
@@ -217,26 +199,12 @@ class EvaluationService : BaseService() {
     if (!evaluation.filesDigest.contentEquals(fileService.getCollectionMd5Digest(answer.id))) {
       return false
     }
-    // check if all evaluation steps have been run
-    if (answer.task.evaluationStepDefinitions.size != evaluation.evaluationSteps.size) {
-      return false
-    }
-    // allow to re-run if any of the steps errored
-    if (evaluation.stepsResultSummary === EvaluationStepResult.ERRORED) {
+    // check if any step needs execution
+    if (evaluation.evaluationSteps.any { stepService.stepNeedsExecution(it) }) {
       return false
     }
     return true
   }
-
-  fun getEvaluationRunner(name: String): EvaluationRunner = runnersByName[name]
-      ?: throw IllegalArgumentException("Evaluation runner '$name' not found")
-
-  fun getAllEvaluationRunners() = runners
-
-  /**
-   * Returns the default options for the given evaluation runner
-   */
-  fun getDefaultOptions(runnerName: String) = getEvaluationRunner(runnerName).getDefaultOptions()
 
   fun getEvaluation(evaluationId: UUID): Evaluation {
     return evaluationRepository.findById(evaluationId).orElseThrow { EntityNotFoundException("Evaluation not found") }
@@ -289,13 +257,6 @@ class EvaluationService : BaseService() {
     evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
   }
 
-  fun validateRunnerOptions(definition: EvaluationStepDefinition) {
-    val runner = getEvaluationRunner(definition.runnerName)
-    val schema = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V6).getSchema(runner.getOptionsSchema())
-    val errors = schema.validate(objectMapper.valueToTree(definition.options))
-    require(errors.isEmpty()) { "Runner options for ${definition.runnerName} are invalid: \n" + errors.joinToString("\n") { it.message } }
-  }
-
   @Transactional
   fun updateEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition, title: String?, active: Boolean?, timeout: Long?, options: Map<String, Any>?): EvaluationStepDefinition {
     title?.let {
@@ -308,7 +269,7 @@ class EvaluationService : BaseService() {
       evaluationStepDefinition.options = it
     }
     evaluationStepDefinition.timeout = timeout
-    validateRunnerOptions(evaluationStepDefinition)
+    runnerService.validateRunnerOptions(evaluationStepDefinition)
     saveEvaluationStepDefinition(evaluationStepDefinition)
     taskService.invalidateLatestEvaluations(evaluationStepDefinition.task)
 

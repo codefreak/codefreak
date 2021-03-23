@@ -141,7 +141,11 @@ export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => 
   }
 
   if (!body) {
-    body = <Empty />
+    body = (
+      <div style={{ padding: '20px 0' }}>
+        <Empty description="This step has not been executed, yet." />
+      </div>
+    )
   }
 
   return (

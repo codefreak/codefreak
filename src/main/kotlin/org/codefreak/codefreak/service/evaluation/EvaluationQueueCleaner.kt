@@ -30,7 +30,7 @@ class EvaluationQueueCleaner {
   private lateinit var evaluationQueue: EvaluationQueue
 
   @Autowired
-  private lateinit var evaluationService: EvaluationService
+  private lateinit var runnerService: EvaluationRunnerService
 
   @Autowired
   private lateinit var evaluationStepService: EvaluationStepService
@@ -55,7 +55,7 @@ class EvaluationQueueCleaner {
           // if the step still exist in our database stop the existing evaluation runner and reschedule the single step
           try {
             val evaluationStep = evaluationStepService.getEvaluationStep(stepId)
-            evaluationService.stopEvaluationStep(evaluationStep)
+            runnerService.stopAnswerEvaluation(evaluationStep.definition.runnerName, evaluationStep.evaluation.answer)
             evaluationQueue.insert(evaluationStep)
             log.info("Rescheduled evaluation step $stepId")
           } catch (e: EntityNotFoundException) {
