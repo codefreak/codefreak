@@ -9,7 +9,6 @@ import {
 } from '../../generated/graphql'
 import AsyncPlaceholder from '../AsyncContainer'
 import { messageService } from '../../services/message'
-import './EditNickname.less'
 
 const EditNickname: React.FC<{
   editable: boolean
