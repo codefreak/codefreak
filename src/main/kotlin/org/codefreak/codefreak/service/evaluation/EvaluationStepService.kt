@@ -69,7 +69,13 @@ class EvaluationStepService {
   fun addStepToEvaluation(evaluation: Evaluation, stepDefinition: EvaluationStepDefinition): EvaluationStep {
     // remove existing step with this definition from evaluation
     evaluation.evaluationSteps.removeIf { it.definition == stepDefinition }
-    return EvaluationStep(stepDefinition, evaluation, EvaluationStepStatus.PENDING).also {
+    // mark all manual steps as finished without a result
+    // otherwise the overall evaluation status would be stuck at "pending"
+    val initialStatus = when {
+      !runnerService.isAutomated(stepDefinition.runnerName) -> EvaluationStepStatus.FINISHED
+      else -> EvaluationStepStatus.PENDING
+    }
+    return EvaluationStep(stepDefinition, evaluation, initialStatus).also {
       evaluation.addStep(it)
     }
   }

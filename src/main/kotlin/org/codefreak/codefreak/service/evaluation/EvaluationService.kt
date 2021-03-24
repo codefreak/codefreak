@@ -169,8 +169,7 @@ class EvaluationService : BaseService() {
         ?: throw RuntimeException("Evaluation does not contain a 'comments' step")
     evaluationStep.addFeedback(feedback)
 
-    // mark this evaluation step as "finished" which means "teacher evaluated this answer manually"
-    evaluationStep.status = EvaluationStepStatus.FINISHED
+    // Update the timestamp to indicate when the last comment was made
     evaluationStep.finishedAt = Instant.now()
     // if there is any failed feedback the overall step result is "failed"
     evaluationStep.result = when {
