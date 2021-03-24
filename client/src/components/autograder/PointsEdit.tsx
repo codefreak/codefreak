@@ -9,10 +9,11 @@ import {
 import useHasAuthority from '../../hooks/useHasAuthority'
 import { Empty, InputNumber, Switch } from 'antd'
 import { debounce } from 'ts-debounce'
+import {FetchGrade} from "../../hooks/useGetGrade";
 
 const PointsEdit: React.FC<{
   evaluationStepId: string
-  fetchGrade: any
+  fetchGrade: FetchGrade
 }> = props => {
   const evaluationStepId = props.evaluationStepId
 

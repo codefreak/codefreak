@@ -36,7 +36,7 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
           isEvaluationInProgress(evaluationStatus) ? 'Running...' : undefined
         }
       >
-        {evaluations.map(renderEvaluation(apolloClient, evaluationStatus!))}
+        {evaluations.map(renderEvaluation(apolloClient, evaluationStatus))}
       </Timeline>
     </Card>
   )
@@ -44,7 +44,7 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
 
 const renderEvaluation = (
   apolloClient: ApolloClient<any>,
-  evaluationStatus: EvaluationStepStatus
+  evaluationStatus: EvaluationStepStatus | undefined
 ) => (
   evaluation: NonNullable<
     GetEvaluationHistoryQueryResult['data']
@@ -57,7 +57,7 @@ const renderEvaluation = (
         <ApolloProvider client={apolloClient}>
           <EvaluationResult
             evaluationId={evaluation.id}
-            evaluationStepStatus={evaluationStatus}
+            evaluationStatus={evaluationStatus}
           />
         </ApolloProvider>
       ),

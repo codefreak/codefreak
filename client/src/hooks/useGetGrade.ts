@@ -5,13 +5,20 @@ import {
 } from '../generated/graphql'
 import { useCallback, useEffect, useState } from 'react'
 
+export interface FetchGrade{
+  ():void
+}
+
 const useGetGrade = (
   evaluationId: string,
-  evaluationStepStatus?: EvaluationStepStatus
-): { grade: Grade | undefined; fetchGrade: any } => {
+  evaluationStatus?: EvaluationStepStatus
+): { grade: Grade | undefined; fetchGrade: FetchGrade } => {
   const result = useGetGradeQuery({
     variables: { evaluationId }
   })
+
+
+
 
   const [grade, setGrade] = useState<Grade | undefined>(undefined)
 
@@ -27,13 +34,19 @@ const useGetGrade = (
 
   useEffect(() => {
     memorizeCallback()
-  }, [evaluationStepStatus, memorizeCallback])
+  }, [evaluationStatus, memorizeCallback])
 
-  function fetchGrade() {
-    return result.refetch()
+  let fetchGrade : FetchGrade
+  fetchGrade=function ():void {
+    result.refetch()
   }
+
+  // function fetchGrade() {
+  //   return result.refetch()
+  // }
 
   return { grade, fetchGrade }
 }
 
 export default useGetGrade
+

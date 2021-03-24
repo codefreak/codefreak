@@ -11,10 +11,11 @@ import GradeView from './autograder/GradeView'
 
 const EvaluationResult: React.FC<{
   evaluationId: string
-  evaluationStepStatus?: EvaluationStepStatus
-}> = ({ evaluationId, evaluationStepStatus }) => {
+  evaluationStatus?: EvaluationStepStatus
+}> = ({ evaluationId, evaluationStatus }) => {
+
   const result = useGetDetailedEvaluatonQuery({ variables: { evaluationId } })
-  const gradeData = useGetGrade(evaluationId, evaluationStepStatus)
+  const gradeData = useGetGrade(evaluationId, evaluationStatus)
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -23,7 +24,7 @@ const EvaluationResult: React.FC<{
   const { evaluation } = result.data
 
   // On Init
-  let gradeView
+  let gradeView = null
   if (gradeData.grade !== undefined) {
     if (gradeData.grade !== null) {
       gradeView = (

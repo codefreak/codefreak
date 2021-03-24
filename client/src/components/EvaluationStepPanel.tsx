@@ -20,6 +20,7 @@ import Countdown from './Countdown'
 import moment from 'moment'
 import { momentDifferenceToRelTime } from '../services/time'
 import PointsEdit from './autograder/PointsEdit'
+import {FetchGrade} from "../hooks/useGetGrade";
 
 function timer(queuedAt?: string, finishedAt?: string) {
   if (queuedAt && !finishedAt) {
@@ -43,7 +44,7 @@ function timer(queuedAt?: string, finishedAt?: string) {
 interface EvaluationStepPanelProps {
   answerId: string
   stepBasics: EvaluationStepBasicsFragment
-  fetchGrade: any
+  fetchGrade: FetchGrade
 }
 
 export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => {
