@@ -77,6 +77,7 @@ class EvaluationStepService {
     }
     // If the count is at least one, we can assume that only the Comment EvaluationStep is on Pending.
     // If all other steps are finished, calc a grade for the given evaluation
+    // evaluation.stepStatusSummary == EvaluationStepStatus.FINISHED
     if (count <= 1) {
       gradeService.createOrUpdateGradeFromEvaluation(evaluation)
     }
