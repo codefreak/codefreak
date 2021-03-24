@@ -1,39 +1,56 @@
-import { Col, Row, Table, Tooltip } from 'antd'
+import {Col, Row, Table, Tooltip} from 'antd'
 import {
-  GetScoreboardByAssignmentIdQuery,
-  GradeScoreboard
+  GetScoreboardByAssignmentIdQuery
 } from '../../generated/graphql'
 import '../SubmissionsTable.less'
 import EditNickname from './EditNickname'
 import React from 'react'
-import Icon from '@ant-design/icons'
+import Icon from "@ant-design/icons";
+
+
 
 type AssignmentScoreboard = NonNullable<
   GetScoreboardByAssignmentIdQuery['scoreboardByAssignmentId']
 >
-
 type SubmissionsScoreboard = AssignmentScoreboard['submissionsScoreboard'][number]
 type AnswersScoreboard = SubmissionsScoreboard['answersScoreboard'][number]
-type TaskScoreboard = AssignmentScoreboard['tasksScoreboard'][number]
+type TaskScoreboard = AnswersScoreboard['taskScoreboard']
 
 const { Column } = Table
+
+const defaultSort = (a: number, b: number) => {
+  if (a < b) return -1;
+  if (b < a) return 1;
+  return 0;
+}
+export const Sorter = {
+  DEFAULT: defaultSort,
+};
+
+const getAnswerFromSubmission = (
+  submission: SubmissionsScoreboard,
+  taskScoreboard: TaskScoreboard
+): AnswersScoreboard | undefined =>
+  submission.answersScoreboard.find(
+    candidate => candidate.taskScoreboard.id === taskScoreboard.id
+  )
+
 
 const alphabeticSorter = (
   extractProperty: (x: SubmissionsScoreboard) => string | null | undefined
 ) => (a: SubmissionsScoreboard, b: SubmissionsScoreboard) => {
-  const valA = extractProperty(a) || 0
-  const valB = extractProperty(b) || 0
-  return typeof valA !== 'number' ? valA?.localeCompare(valB as string) : valA
+  const valA = extractProperty(a) || ''
+  const valB = extractProperty(b) || ''
+  return valA.localeCompare(valB)
 }
 
-const numericSorter = (extractProperty: (x: GradeScoreboard) => number) => (
-  a: GradeScoreboard,
-  b: GradeScoreboard
-) => {
-  const valA = extractProperty(a)
-  const valB = extractProperty(b)
-  return valA >= valB ? valA : valB
+const numericSorter=(a: SubmissionsScoreboard, b: SubmissionsScoreboard, task:TaskScoreboard) => {
+  const valA = getAnswerFromSubmission(a,task)?.gradeScoreboard?.gradePercentage || 0
+  const valB = getAnswerFromSubmission(b,task)?.gradeScoreboard?.gradePercentage || 0
+  return Sorter.DEFAULT(valA,valB)
 }
+
+
 
 const ScoreboardTable: React.FC<{
   scoreboardByAssignmentId: AssignmentScoreboard
@@ -76,7 +93,7 @@ const ScoreboardTable: React.FC<{
         dataIndex={['useralias', 'alias']}
         width={200}
         fixed="left"
-        defaultSortOrder="ascend"
+        sortDirections={["ascend","descend","ascend"]}
         sorter={alphabeticSorter(submission => submission.useralias.alias)}
       />
       {taskColumnRenderer(assignments.tasksScoreboard)}
@@ -84,23 +101,20 @@ const ScoreboardTable: React.FC<{
   )
 }
 
-const getAnswerFromSubmission = (
-  submission: SubmissionsScoreboard,
-  taskScoreboard: TaskScoreboard
-): AnswersScoreboard | undefined =>
-  submission.answersScoreboard.find(
-    candidate => candidate.taskScoreboard.id === taskScoreboard.id
-  )
+
 
 const taskColumnRenderer = (tasks: TaskScoreboard[]) => {
+
+
   const renderAnswer = (
     task: TaskScoreboard,
     submission: SubmissionsScoreboard
-  ) => {
+  )=> {
     // There should always be a grade defined
     if (getAnswerFromSubmission(submission, task) !== undefined) {
-      const grade = getAnswerFromSubmission(submission, task)!!.gradeScoreboard
-      if (grade === null || !grade?.calculated) {
+      const answer = getAnswerFromSubmission(submission, task)
+      // answer.
+      if (answer?.gradeScoreboard === null || !answer?.gradeScoreboard?.calculated) {
         return (
           <Tooltip title="No Grade Calculated">
             <Icon type="stop" className="no-answer" />
@@ -109,10 +123,12 @@ const taskColumnRenderer = (tasks: TaskScoreboard[]) => {
       } else {
         return (
           <div>
-            {(Math.round(grade.gradePercentage * 100) / 100).toFixed(2)}%
+            {(Math.round(answer.gradeScoreboard.gradePercentage * 100) / 100).toFixed(2)}%
           </div>
         )
       }
+    }else{
+      return null
     }
   }
 
@@ -123,9 +139,9 @@ const taskColumnRenderer = (tasks: TaskScoreboard[]) => {
         key={`task-${task.id}`}
         title={task.title}
         align="center"
-        render={renderAnswer.bind(undefined, task)}
-        sorter={numericSorter(x => x.gradePercentage)}
-        defaultSortOrder={'ascend'}
+        render={renderAnswer.bind((submission: any) => submission,task)}
+        sortDirections={["ascend","descend","ascend"]}
+        sorter={(a:SubmissionsScoreboard,b:SubmissionsScoreboard)=>numericSorter(a,b,task)}
       />
     )
   })
