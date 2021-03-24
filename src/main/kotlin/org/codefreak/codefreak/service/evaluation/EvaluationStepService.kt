@@ -67,17 +67,17 @@ class EvaluationStepService {
     val originalEvaluationStatus = evaluation.stepStatusSummary
     step.status = status
     val newEvaluationStatus = evaluation.stepStatusSummary
-    //The regular Evaluation keeps the Comment EvaluationStep on Pending until the teacher writes a comment.
-    //So we need every Step finished except one, because the Comment Step is fixed and cant be removed.
-    var count=0
-    for(evalStep in evaluation.evaluationSteps){
-      if(evalStep.status != EvaluationStepStatus.FINISHED){
+    // The regular Evaluation keeps the Comment EvaluationStep on Pending until the teacher writes a comment.
+    // So we need every Step finished except one, because the Comment Step is fixed and cant be removed.
+    var count = 0
+    for (evalStep in evaluation.evaluationSteps) {
+      if (evalStep.status != EvaluationStepStatus.FINISHED) {
         count++
       }
     }
-    //If the count is at least one, we can assume that only the Comment EvaluationStep is on Pending.
+    // If the count is at least one, we can assume that only the Comment EvaluationStep is on Pending.
     // If all other steps are finished, calc a grade for the given evaluation
-    if (count<=1) {
+    if (count <= 1) {
       gradeService.createOrUpdateGradeFromEvaluation(evaluation)
     }
     eventPublisher.publishEvent(EvaluationStepStatusUpdatedEvent(step, status))

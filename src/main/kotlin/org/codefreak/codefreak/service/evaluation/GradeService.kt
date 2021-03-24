@@ -13,7 +13,6 @@ import org.codefreak.codefreak.service.BaseService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.stream.Collectors
 
 @Service
 class GradeService : BaseService() {
@@ -102,10 +101,10 @@ class GradeService : BaseService() {
    */
   private fun validateEvaluationSteps(steps: MutableList<EvaluationStep>): Boolean {
     val updatedSteps = mutableListOf<EvaluationStep>()
-    for(s in steps){
-      if(s.result!=null)updatedSteps.add(s)
+    for (s in steps) {
+      if (s.result != null)updatedSteps.add(s)
     }
-    if(steps.size<=(updatedSteps.size+1)){
+    if (steps.size <= (updatedSteps.size + 1)) {
       for (s in updatedSteps) {
         if (s.result == null) { return false }
         s.result?.let { if (it == EvaluationStepResult.ERRORED) return false }
