@@ -164,8 +164,10 @@ class PointsOfEvaluationStepService : BaseService() {
    */
   fun recalculatePoints(gradeDefinition: GradeDefinition) {
     val stepList = evaluationStepsRepository.findAllByGradeDefinition(gradeDefinition)
-    for (step in stepList) {
-      calculate(step)
+    if(gradeDefinition.active){
+      for (step in stepList) {
+        calculate(step)
+      }
     }
   }
 
