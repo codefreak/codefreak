@@ -12,6 +12,6 @@ const GradeView: React.FC<{
         {(Math.round(grade.gradePercentage * 100) / 100).toFixed(2)}% Grade
       </div>)
   }
-  return <></>
+  return null
 }
 export default GradeView
