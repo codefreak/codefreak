@@ -18,11 +18,12 @@ const renderGradePoints = (
   additionalProps: InputNumberProps = {}
 ) => {
   const onChangeValid = (val: valueType | undefined) => {
-    if (val !== undefined) {
-      if (typeof val !== 'string') {
+    // if (val !== undefined) {
+    //   if (typeof val !== 'string') {
+      if (typeof val === 'number') {
         onChange(val)
       }
-    }
+    // }
   }
 
   return (
@@ -45,11 +46,12 @@ const renderGradeErrors = (
   additionalProps: InputNumberProps = {}
 ) => {
   const onChangeValid = (val: valueType | undefined) => {
-    if (val !== undefined) {
-      if (typeof val !== 'string') {
-        onChange(val)
-      }
+    // if (val !== undefined) {
+    //   if (typeof val !== 'string') {
+    if (typeof val === 'number') {
+      onChange(val)
     }
+    // }
   }
 
   return (
@@ -105,6 +107,8 @@ const GradeDefinitionInputField: React.FC<{
     })
   }, [gradeDefinition])
 
+  //The update Mutation fetches the gradeDefinition, which triggers the useEffect again due to its dependency.
+  //The useEffekt memorizes its callback to prevent an infinite update circle.
   const memoizedCallback = useCallback(() => {
     if (globalField !== null) {
       if (input !== undefined)
