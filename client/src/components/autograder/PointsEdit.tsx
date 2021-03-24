@@ -38,19 +38,18 @@ const PointsEdit: React.FC<{
   /**
    * Output
    */
-  if (result.data !== null) {
-    if (result.data !== undefined) {
-      const data = result.data
+  if (result.data !== null && result.data !== undefined) {
+      const data = result.data.pointsOfEvaluationStepByEvaluationStepId
 
       const input: PointsOfEvaluationStepInput = {
-        calcCheck: data.pointsOfEvaluationStepByEvaluationStepId.calcCheck!!,
-        mistakePoints: data.pointsOfEvaluationStepByEvaluationStepId
+        calcCheck: data.calcCheck!!,
+        mistakePoints: data
           .mistakePoints!!,
-        edited: data.pointsOfEvaluationStepByEvaluationStepId.edited!!,
-        id: data.pointsOfEvaluationStepByEvaluationStepId.id!!,
-        reachedPoints: data.pointsOfEvaluationStepByEvaluationStepId
+        edited: data.edited!!,
+        id: data.id!!,
+        reachedPoints: data
           .reachedPoints!!,
-        resultCheck: data.pointsOfEvaluationStepByEvaluationStepId.resultCheck!!
+        resultCheck: data.resultCheck!!
       }
 
       if (result.error) return <div>Error!</div>
@@ -60,20 +59,20 @@ const PointsEdit: React.FC<{
           input.reachedPoints = value
           input.edited = true
           debounce(
-            updatePointsOfEvaluationStep({ variables: { input } }).then,
+            updatePointsOfEvaluationStep({variables: {input}}).then,
             1000
           )
         }
       }
 
       if (
-        data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax ===
+        data.gradeDefinitionMax ===
         null
       ) {
         return <div />
       } else {
         if (
-          !data.pointsOfEvaluationStepByEvaluationStepId.gradeDefinitionMax!
+          !data.gradeDefinitionMax!
             .active
         )
           return <div />
@@ -81,22 +80,19 @@ const PointsEdit: React.FC<{
 
       if (auth) {
         return renderEdit({
-          poe: data.pointsOfEvaluationStepByEvaluationStepId,
+          poe: data,
           onChange: onPoEStepChange,
           onSwitch: onEnabledChange,
           changeable
         })
       } else {
         return renderView({
-          reachedPoints: data.pointsOfEvaluationStepByEvaluationStepId!
+          reachedPoints: data!
             .reachedPoints!!,
-          maxPoints: data.pointsOfEvaluationStepByEvaluationStepId
+          maxPoints: data
             .gradeDefinitionMax!.maxPoints
         })
       }
-    } else {
-      return <Empty />
-    }
   } else {
     return <Empty />
   }
