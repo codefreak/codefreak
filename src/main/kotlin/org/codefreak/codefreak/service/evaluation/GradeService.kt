@@ -13,6 +13,7 @@ import org.codefreak.codefreak.service.BaseService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.stream.Collectors
 
 @Service
 class GradeService : BaseService() {
@@ -74,6 +75,7 @@ class GradeService : BaseService() {
     val grade = findOrCreateGrade(eval)
 
     return if (validateEvaluationSteps(stepList)) {
+
       val poeList = mutableListOf<PointsOfEvaluationStep>()
       // Add grade to PointsOfEvaluationStep. Afterwards an existing grade just can collects its PointsOfEvaluationStep Child and recalculate the grade
       for (s in stepList) {
@@ -94,13 +96,23 @@ class GradeService : BaseService() {
    * Validates all EvaluationSteps. If there are Errors this function returns false
    * Decider if a grade will be calculated.
    *
+   * The validation will pass if there is just one EvaluationStep.Result Null.
+   * This is currently the case because the Comment EvaluationStep.Result is NULL straight after a student has run an evaluation.
+   *
    */
   private fun validateEvaluationSteps(steps: MutableList<EvaluationStep>): Boolean {
-    for (s in steps) {
-      if (s.result == null) { return false }
-      s.result?.let { if (it == EvaluationStepResult.ERRORED) return false }
+    val updatedSteps = mutableListOf<EvaluationStep>()
+    for(s in steps){
+      if(s.result!=null)updatedSteps.add(s)
     }
-    return true
+    if(steps.size<=(updatedSteps.size+1)){
+      for (s in updatedSteps) {
+        if (s.result == null) { return false }
+        s.result?.let { if (it == EvaluationStepResult.ERRORED) return false }
+      }
+      return true
+    }
+    return false
   }
 
   /**
