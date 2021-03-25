@@ -138,10 +138,11 @@ class EvaluationService : BaseService() {
 
   /**
    * Create a fresh evaluation for the given answer + digest combination.
-   * All steps are in a pending state
+   * All steps are in a pending state.
+   * Force creation in a new transaction so the evaluation is persisted correctly in the DB when this
+   * function returns.
    */
-  @Transactional
-  fun createEvaluation(answer: Answer, filesDigest: ByteArray): Evaluation {
+  fun createEvaluation(answer: Answer, filesDigest: ByteArray): Evaluation = withNewTransaction {
     val evaluation = Evaluation(
         answer,
         filesDigest,
@@ -151,7 +152,7 @@ class EvaluationService : BaseService() {
     answer.task.evaluationStepDefinitions
         .filter { it.active }
         .forEach { stepService.addStepToEvaluation(evaluation, it) }
-    return saveEvaluation(evaluation).also {
+    saveEvaluation(evaluation).also {
       eventPublisher.publishEvent(EvaluationStatusUpdatedEvent(it, it.stepStatusSummary))
     }
   }
