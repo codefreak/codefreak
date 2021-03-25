@@ -52,16 +52,13 @@ codefreak:
     adapter: jpa
   docker:
     # All of the docker settings below will fall back to a system-depended default value if unset
-    host: "http://127.0.0.1:2375"
+    host: ~
     certPath: ~
     caCertPath: ~
     clientKeyPath: ~
     clientCertPath: ~
     # Define how (and if) images will be pulled on application startup
     pull-policy: always
-  reverse-proxy:
-    type: traefik
-    url: "http://localhost:8081"
   ide:
     image: "cfreak/ide:1"
     # Interval for checking for idle containers in ms. Default 30 seconds.
@@ -81,4 +78,3 @@ management:
   health:
     defaults:
       enabled: false
-
