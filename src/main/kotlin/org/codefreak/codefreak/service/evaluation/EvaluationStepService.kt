@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service.evaluation
 
+import java.time.Instant
 import java.util.UUID
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStep
@@ -51,6 +52,13 @@ class EvaluationStepService {
 
   @Transactional
   fun updateEvaluationStepStatus(step: EvaluationStep, status: EvaluationStepStatus) {
+    // We do not check if the step is already in the given status on purpose.
+    // This allows updating the finishedAt timestamp (used for comments).
+    when (status) {
+      EvaluationStepStatus.QUEUED -> step.queuedAt = Instant.now()
+      EvaluationStepStatus.FINISHED -> step.finishedAt = Instant.now()
+      else -> Unit // all other status do not have a timestamp atm
+    }
     val evaluation = step.evaluation
     val originalEvaluationStatus = evaluation.stepStatusSummary
     step.status = status

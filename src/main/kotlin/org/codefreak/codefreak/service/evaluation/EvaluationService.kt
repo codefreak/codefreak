@@ -18,7 +18,6 @@ import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
-import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionDeadlineReachedEvent
 import org.codefreak.codefreak.service.SubmissionService
@@ -169,8 +168,6 @@ class EvaluationService : BaseService() {
         ?: throw RuntimeException("Evaluation does not contain a 'comments' step")
     evaluationStep.addFeedback(feedback)
 
-    // Update the timestamp to indicate when the last comment was made
-    evaluationStep.finishedAt = Instant.now()
     // if there is any failed feedback the overall step result is "failed"
     evaluationStep.result = when {
       evaluationStep.feedback.any { it.isFailed } -> EvaluationStepResult.FAILED
@@ -180,7 +177,7 @@ class EvaluationService : BaseService() {
 
     // there is no real definition of "done" for comments, so we trigger a FINISHED event
     // each time a new comment is added to this answer
-    eventPublisher.publishEvent(EvaluationStepStatusUpdatedEvent(evaluationStep, EvaluationStepStatus.FINISHED))
+    stepService.updateEvaluationStepStatus(evaluationStep, EvaluationStepStatus.FINISHED)
     return feedback
   }
 
