@@ -28,3 +28,4 @@
 src/main/resources/application-dev.*
 src/main/resources/git.properties
 .asscache
+.vagrant
