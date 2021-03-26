@@ -35,6 +35,7 @@
 * Add a button to the task page to get back to the assignment (#844)
 * Assignments show the dates they were created and last updated (#865)
 * Add IDE presets that will allow beta-testing of Breeze (#871)
+* Add configuration Button to tasks in tasks and to assignments (#560)
 
 
 ### Changed
@@ -42,5 +43,6 @@
 * The database of the development server is now seeded with the task templates and not from examples in the main repository (#771)
 * The timestamp of the last update is displayed in task pool and assignment list (#552)
 * The timestamp of the last update is shown in assignment details page (#556)
+* Usability: Removed second level menu (Detail, Edit Details, Edit Configuration) from task configuration page, renamed task configuration page (#534)
 
 ### Removed

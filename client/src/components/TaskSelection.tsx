@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useGetTaskPoolForAddingQuery } from '../services/codefreak-api'
 import { Alert, Checkbox, Col, Empty, Row } from 'antd'
-import AsyncPlaceholder from './AsyncContainer'
+import AsyncPlaceholder from './AsyncPlaceholder'
 import {
   filterTasks,
   TaskSortMethodNames,

@@ -3,6 +3,7 @@ import {
   CloudOutlined,
   DashboardOutlined,
   FileTextOutlined,
+  SettingOutlined,
   SolutionOutlined
 } from '@ant-design/icons'
 import { Switch as AntSwitch, Tooltip } from 'antd'
@@ -19,7 +20,7 @@ import {
 import AnswerBlocker from '../../components/AnswerBlocker'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
-import AsyncPlaceholder from '../../components/AsyncContainer'
+import AsyncPlaceholder from '../../components/AsyncPlaceholder'
 import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
@@ -52,8 +53,9 @@ import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
 import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
-import TaskDetailsPage from './TaskDetailsPage'
+import TaskConfigurationPage from './TaskConfigurationPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
+import TaskInstructionsPage from './TaskInstructionsPage'
 
 export const DifferentUserContext = createContext<
   PublicUserFieldsFragment | undefined
@@ -147,6 +149,10 @@ const TaskPage: React.FC = () => {
     editable && !differentUser
       ? [
           {
+            key: '/configuration',
+            tab: tab('Configuration', <SettingOutlined />)
+          },
+          {
             key: 'testing-mode',
             tab: (
               <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
@@ -180,8 +186,8 @@ const TaskPage: React.FC = () => {
     : []
 
   const tabs = [
-    { key: '/details', tab: tab('Task', <FileTextOutlined />) },
     ...testingModeSwitch,
+    { key: '/instructions', tab: tab('Instructions', <FileTextOutlined />) },
     {
       key: '/answer',
       tab: tab('Answer', <SolutionOutlined />),
@@ -302,10 +308,13 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path}>
-          <Redirect to={`${url}/details`} />
+          <Redirect to={`${url}/instructions`} />
         </Route>
-        <Route path={`${path}/details`}>
-          <TaskDetailsPage editable={editable} />
+        <Route path={`${path}/configuration`}>
+          <TaskConfigurationPage editable={editable} />
+        </Route>
+        <Route path={`${path}/instructions`}>
+          <TaskInstructionsPage />
         </Route>
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
