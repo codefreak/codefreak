@@ -51,7 +51,7 @@
     "react-mde": "11.0.6",
     "react-router-dom": "5.2.0",
     "react-scripts": "4.0.3",
-    "react-sortable-hoc": "1.11.0",
+    "react-sortable-hoc": "2.0.0",
     "react-syntax-highlighter": "12.2.1",
     "short-uuid": "4.1.0",
     "subscriptions-transport-ws": "0.9.18",
