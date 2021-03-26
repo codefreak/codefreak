@@ -24,7 +24,10 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
   private lateinit var taskExecutor: AsyncTaskExecutor
 
   @Autowired
-  private lateinit var evaluationService: EvaluationService
+  private lateinit var evaluationStepService: EvaluationStepService
+
+  @Autowired
+  private lateinit var runnerService: EvaluationRunnerService
 
   @Value("#{@config.evaluation.defaultTimeout}")
   private var defaultTimeout: Long = 0L
@@ -38,7 +41,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     val stepDefinition = evaluationStep.definition
     val runnerName = stepDefinition.runnerName
     try {
-      val runner = evaluationService.getEvaluationRunner(runnerName)
+      val runner = runnerService.getEvaluationRunner(runnerName)
       val feedbackList = try {
         runEvaluation(runner, evaluationStep)
       } catch (e: InterruptedException) {
@@ -89,7 +92,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
       }
     } catch (e: TimeoutException) {
       log.info("Timeout for evaluation step $runnerName of answer ${answer.id} occurred after ${timeout}sec")
-      evaluationService.stopEvaluationStep(step)
+      runnerService.stopAnswerEvaluation(runnerName, answer)
       throw EvaluationStepException("Evaluation timed out after $timeout seconds",
           result = EvaluationStepResult.ERRORED,
           status = EvaluationStepStatus.CANCELED
