@@ -1,6 +1,6 @@
 import React from 'react'
 import { useGetDetailedEvaluatonQuery } from '../generated/graphql'
-import AsyncPlaceholder from './AsyncContainer'
+import AsyncPlaceholder from './AsyncPlaceholder'
 import './EvaluationResult.less'
 import EvaluationStepPanel from './EvaluationStepPanel'
 

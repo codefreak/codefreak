@@ -42,5 +42,6 @@
 * The database of the development server is now seeded with the task templates and not from examples in the main repository (#771)
 * The timestamp of the last update is displayed in task pool and assignment list (#552)
 * The timestamp of the last update is shown in assignment details page (#556)
+* Usability: Removed second level menu (Detail, Edit Details, Edit Configuration) from task configuration page, renamed task configuration page (#534)
 
 ### Removed

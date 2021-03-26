@@ -1,4 +1,4 @@
-import AsyncPlaceholder from '../../components/AsyncContainer'
+import AsyncPlaceholder from '../../components/AsyncPlaceholder'
 import SubmissionsTable from '../../components/SubmissionsTable'
 import { useGetAssignmentWithSubmissionsQuery } from '../../generated/graphql'
 import useIdParam from '../../hooks/useIdParam'

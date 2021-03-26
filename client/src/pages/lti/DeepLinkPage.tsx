@@ -1,7 +1,7 @@
 import { LinkOutlined } from '@ant-design/icons'
 import { Button, Checkbox, List, Typography } from 'antd'
 import { createRef, useEffect, useState } from 'react'
-import AsyncPlaceholder from '../../components/AsyncContainer'
+import AsyncPlaceholder from '../../components/AsyncPlaceholder'
 import {
   Assignment,
   useCreateLtiDeepLinkResponseMutation,

@@ -2,7 +2,7 @@ import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Col, Modal, Row } from 'antd'
 import { useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import AsyncPlaceholder from '../../components/AsyncContainer'
+import AsyncPlaceholder from '../../components/AsyncPlaceholder'
 import Authorized from '../../components/Authorized'
 import {
   UploadAssignmentMutationResult,
