@@ -20,9 +20,11 @@
     "jsx": "react-jsx",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "types": ["cypress"]
   },
   "include": [
-    "src"
+    "src",
+    "cypress"
   ]
 }

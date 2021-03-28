@@ -78,7 +78,8 @@
     "fix:prettier": "prettier --write \"src/**/*\"",
     "lint": "npm-run-all lint:**",
     "fix": "npm-run-all fix:**",
-    "generate": "graphql-codegen --config codegen.yml"
+    "generate": "graphql-codegen --config codegen.yml",
+    "cypress:open": "cypress open"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -94,5 +95,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "cypress": "^6.8.0"
   }
 }
