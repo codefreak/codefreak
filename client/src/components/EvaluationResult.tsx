@@ -25,14 +25,13 @@ const EvaluationResult: React.FC<{
 
   // On Init
   let gradeView = null
-  if (gradeData.grade !== undefined) {
-    if (gradeData.grade !== null) {
+  if (gradeData.grade !== null && gradeData.grade !== undefined) {
       gradeView = (
         <p className="grade-view-container">
           <GradeView grade={gradeData.grade} />
         </p>
       )
-    }
+
   }
 
   return (
