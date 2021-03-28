@@ -37,18 +37,6 @@ class GradeDefinitionService : BaseService() {
 
   fun save(gradeDefinition: GradeDefinition): GradeDefinition = gradeDefinitionRepository.save(gradeDefinition)
 
-  /**
-   * check if task already has a GradeDefinition and create a default one. Then return the fresh one OR an already existing one
-   * Currently not in use. So uncommented
-   */
-//  @Transactional
-//  fun getOrCreateValidGradeDefinitionByEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition) : GradeDefinition {
-//    return gradeDefinitionRepository.findByEvaluationStepDefinition(evaluationStepDefinition)
-//      .map { if(it.evaluationStepDefinition != evaluationStepDefinition) {
-//        createGradeDefinition(evaluationStepDefinition).apply { log.info("GradeDefinition with task_id $evaluationStepDefinition created and saved.") }
-//      }else{ it.apply { log.info("GradeDefinition with task_id $evaluationStepDefinition already existed. Loaded and returned.") }}}
-//      .orElseGet{ createGradeDefinition(evaluationStepDefinition).apply { log.info("GradeDefinition with task_id $evaluationStepDefinition created and saved.") }}
-//  }
 
   /**
    * Creates and saves a GradeDefinition
