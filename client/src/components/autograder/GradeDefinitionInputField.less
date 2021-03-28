@@ -1,15 +1,8 @@
 .grade-definition-input {
-  //display: inline-block;
-  //display: inline-grid;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 3em 3em 3em 3em;
   gap: 5px 5px;
-  //grid-template-areas:
-  //  "maxPoints maxPointsInput"
-  //  "minorError minorErrorInput"
-  //  "majorError MajorErrorInput"
-  //  "criticalError criticalErrorInput";
   grid-template-areas:
     'maxPointsInput maxPoints'
     'minorErrorInput minorError'
@@ -37,7 +30,6 @@
 
 .grade-definition-unlock {
   display: inline-block;
-  //display: flex;
 
   .ant-switch {
     margin-right: 5px;
