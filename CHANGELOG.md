@@ -54,3 +54,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * The database of the development server is now seeded with the task templates and not from examples in the main repository ([#771](https://github.com/codefreak/codefreak/pull/771))
 * The timestamp of the last update is displayed in task pool and assignment list ([#552](https://github.com/codefreak/codefreak/pull/552))
 * The timestamp of the last update is shown in assignment details page ([#556](https://github.com/codefreak/codefreak/pull/556))
+* Don't show a "Default configuration" label on evaluation step configurations if there is no configuration ([#917](https://github.com/codefreak/codefreak/pull/917))
