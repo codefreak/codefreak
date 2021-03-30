@@ -21,10 +21,14 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["cypress"]
+    "types": ["jest"]
   },
   "include": [
-    "src",
-    "cypress"
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  // Only compile production files
+  "exclude": [
+    "src/**/*.test.ts"
   ]
 }
