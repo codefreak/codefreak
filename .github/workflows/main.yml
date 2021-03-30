@@ -52,6 +52,7 @@ jobs:
           install: false
           start: npm start
           wait-on: 'http://localhost:3000, http://localhost:8080'
+          wait-on-timeout: 180
           command: npm run cypress:run
           headless: true
 
