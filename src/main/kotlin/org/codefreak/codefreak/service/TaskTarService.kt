@@ -132,7 +132,10 @@ class TaskTarService : BaseService() {
 
   private fun copyTaskFilesFromTar(taskId: UUID, tarContent: ByteArray) {
     fileService.writeCollectionTar(taskId).use { fileCollection ->
-      TarUtil.copyEntries(tarContent.inputStream(), fileCollection, filter = { !TarUtil.isCodefreakDefinition(it) })
+      TarUtil.copyEntries(
+          TarArchiveInputStream(tarContent.inputStream()),
+          TarUtil.PosixTarArchiveOutputStream(fileCollection)
+      ) { !TarUtil.isCodefreakDefinition(it) }
     }
   }
 

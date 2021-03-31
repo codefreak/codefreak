@@ -249,11 +249,10 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `moveFile throws when target directory path already exists`() {
+  fun `moveFile throws when source directory is moved to itself`() {
     createDirectory(directoryPath)
-    createDirectory("new")
-
-    moveFile(directoryPath, "new")
+    createDirectory("$directoryPath/inner")
+    moveFile(directoryPath, "$directoryPath/inner")
   }
 
   @Test
@@ -289,19 +288,19 @@ class JpaFileServiceTest {
     assertTrue(equals(getFileContents("new/$filePath").readBytes(), innerFile2Contents))
   }
 
-  private fun createFile(path: String) = fileService.createFile(collectionId, path)
+  private fun createFile(path: String) = fileService.createFiles(collectionId, setOf(path))
 
-  private fun createDirectory(path: String) = fileService.createDirectory(collectionId, path)
+  private fun createDirectory(path: String) = fileService.createDirectories(collectionId, setOf(path))
 
-  private fun deleteFile(path: String) = fileService.deleteFile(collectionId, path)
+  private fun deleteFile(path: String) = fileService.deleteFiles(collectionId, setOf(path))
 
   private fun containsFile(path: String): Boolean = fileService.containsFile(collectionId, path)
 
   private fun containsDirectory(path: String): Boolean = fileService.containsDirectory(collectionId, path)
 
-  private fun filePutContents(path: String) = fileService.filePutContents(collectionId, path)
+  private fun filePutContents(path: String) = fileService.writeFile(collectionId, path)
 
-  private fun getFileContents(path: String): InputStream = fileService.getFileContents(collectionId, path)
+  private fun getFileContents(path: String): InputStream = fileService.readFile(collectionId, path)
 
-  private fun moveFile(from: String, to: String) = fileService.moveFile(collectionId, from, to)
+  private fun moveFile(from: String, to: String) = fileService.moveFile(collectionId, setOf(from), to)
 }

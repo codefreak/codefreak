@@ -144,17 +144,16 @@ object TarUtil {
   fun normalizeEntryName(name: String) = name.trim().replace(stripPrefixPattern, "").trim()
 
   fun copyEntries(
-    from: InputStream,
-    to: OutputStream,
-    filter: (TarArchiveEntry) -> Boolean = { true },
-    prefix: String? = null
-  ) = copyEntries(TarArchiveInputStream(from), PosixTarArchiveOutputStream(to), filter, prefix)
+    from: TarArchiveInputStream,
+    to: TarArchiveOutputStream,
+    filter: (TarArchiveEntry) -> Boolean = { true }
+  ) = copyEntries(from, to, filter, null)
 
   fun copyEntries(
     from: TarArchiveInputStream,
     to: TarArchiveOutputStream,
     filter: (TarArchiveEntry) -> Boolean = { true },
-    prefix: String? = null
+    prefix: String?
   ) {
     generateSequence { from.nextTarEntry }
         .filter(filter)
