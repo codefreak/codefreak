@@ -134,7 +134,9 @@ The following sample users are pre-configured for development.
 
 == Running tests
 
-To run the tests you need a working Docker connection.
+=== Unit tests
+
+To run the unit tests you need a working Docker connection.
 It is also possible to use the Vagrant machine for Testing:
 
 [source,shell]
@@ -143,6 +145,19 @@ It is also possible to use the Vagrant machine for Testing:
 $ ./gradlew test          # for testing with local Docker daemon
 $ ./gradlew vagrantTest   # for testing with Vagrant Docker daemon
 -----
+
+=== End-to-end tests
+
+End-to-end tests run with cypress. Cypress will be installed with npm automatically, but if your running on Linux you might need to install some additional libraries. Please refer to https://docs.cypress.io/guides/getting-started/installing-cypress#Linux[the official cypress documentation] on how to install these dependencies.
+
+The End-to-end tests found in the `client/cypress` directory can be run from the `client` directory with the following commands:
+
+[source,shell]
+[source]
+----
+$ npm run cypress:open  # opens the cypress gui where e2e tests can be run (with graphical output)
+$ npm run cypress:run   # runs all e2e tests headless
+----
 
 == Fix linting issues
 
