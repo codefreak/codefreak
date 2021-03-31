@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Added
+* Started with end-to-end testing ([#916](https://github.com/codefreak/codefreak/pull/916))
 
 ### Changed
 
