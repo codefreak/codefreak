@@ -1,7 +1,6 @@
 const CracoAntDesignPlugin = require('craco-antd')
 const CracoSvgReactLoaderPlugin = require('./craco/craco-svg-loader-plugin')
 const CracoDefinePlugin = require('./craco/craco-define-plugin')
-const CracoYamlPlugin = require('./craco/craco-yaml-plugin')
 const GitRevisionPlugin = require('git-revision-webpack-plugin')
 
 /**
@@ -20,7 +19,6 @@ const createBuildDefinitions = () => {
 module.exports = {
   plugins: [
     { plugin: CracoAntDesignPlugin },
-    { plugin: CracoYamlPlugin },
     {
       plugin: CracoSvgReactLoaderPlugin,
       options: {

@@ -13,7 +13,7 @@ import CardList from './CardList'
 import CropContainer from './CropContainer'
 import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
-import ModificationTime from './ModificationTime'
+import RelativeDateTime from './RelativeDateTime'
 import Authorized from './Authorized'
 
 const { confirm } = Modal
@@ -38,13 +38,15 @@ const renderTask = (props: RenderProps) => (task: Task) => {
       }
     })
 
+  const createdAtTag = (
+    <span style={{ marginRight: '1em' }}>
+      Created: <RelativeDateTime date={new Date(task.createdAt)} />
+    </span>
+  )
+
   const updatedAtTag = (
     <span style={{ marginRight: '1em' }}>
-      Last Updated:{' '}
-      <ModificationTime
-        updated={new Date(task.updatedAt)}
-        created={new Date(task.createdAt)}
-      />
+      Updated: <RelativeDateTime date={new Date(task.updatedAt)} />
     </span>
   )
 
@@ -62,7 +64,10 @@ const renderTask = (props: RenderProps) => (task: Task) => {
     ),
     extra: (
       <>
-        <Authorized authority="ROLE_TEACHER">{updatedAtTag}</Authorized>
+        <Authorized authority="ROLE_TEACHER">
+          {createdAtTag}
+          {updatedAtTag}
+        </Authorized>
         {task.editable ? (
           <Tooltip
             title={task.inPool ? 'Delete from pool' : 'Remove from assignment'}
