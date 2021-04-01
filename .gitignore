@@ -29,5 +29,3 @@ src/main/resources/application-dev.*
 src/main/resources/git.properties
 .asscache
 .vagrant
-src/main/resources/application.yml
-*.yml

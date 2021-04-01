@@ -314,7 +314,6 @@ const taskColumnRenderer = (
         key={`task-${task.id}`}
         title={task.title}
         align="center"
-        sorter={alphabeticSorter(submission => getAnswerFromSubmission(submission, task)?.updatedAt)}
         filters={[
           { text: 'Successful', value: 'successful' },
           { text: 'Failed', value: 'failed' },
