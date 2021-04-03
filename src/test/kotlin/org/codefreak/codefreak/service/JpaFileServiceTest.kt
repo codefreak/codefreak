@@ -32,24 +32,24 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `createFile creates an empty file`() {
+  fun `creates an empty file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
     assertTrue(fileService.containsFile(collectionId, "file.txt"))
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `createFile throws when the path already exists`() {
+  fun `creating a file throws when the path already exists`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.createFiles(collectionId, setOf("file.txt")) // Throws because file already exists
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `createFile throws on empty path name`() {
+  fun `creating a file throws on empty path name`() {
     fileService.createFiles(collectionId, setOf(""))
   }
 
   @Test
-  fun `createFile keeps other files intact`() {
+  fun `creating a file keeps other files intact`() {
     fileService.createFiles(collectionId, setOf("other.txt"))
     fileService.createDirectories(collectionId, setOf("aDirectory"))
     fileService.createFiles(collectionId, setOf("file.txt"))
@@ -60,24 +60,24 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `createDirectory creates an empty directory`() {
+  fun `creates an empty directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `createDirectory throws when the path already exists`() {
+  fun `creating a directory throws when the path already exists`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.createDirectories(collectionId, setOf("some/path")) // Throws because directory already exists
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `createDirectory throws on empty path name`() {
+  fun `creating a directory throws on empty path name`() {
     fileService.createFiles(collectionId, setOf(""))
   }
 
   @Test
-  fun `createDirectory keeps other files intact`() {
+  fun `creating a directory keeps other files intact`() {
     fileService.createFiles(collectionId, setOf("other.txt"))
     fileService.createDirectories(collectionId, setOf("aDirectory"))
     fileService.createDirectories(collectionId, setOf("some/path"))
@@ -88,7 +88,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `deleteFile deletes existing file`() {
+  fun `deletes an existing file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
 
     fileService.deleteFiles(collectionId, setOf("file.txt"))
@@ -97,12 +97,12 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `deleteFile throws when path does not exist`() {
+  fun `deleting a file throws when path does not exist`() {
     fileService.deleteFiles(collectionId, setOf("file.txt"))
   }
 
   @Test
-  fun `deleteFile keeps other files and directories intact when deleting a file`() {
+  fun `keeps other files and directories intact when deleting a file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.createFiles(collectionId, setOf("DO_NOT_DELETE.txt"))
     fileService.createDirectories(collectionId, setOf("some/path"))
@@ -115,7 +115,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `deleteFile deletes existing directory`() {
+  fun `deletes existing directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
 
     fileService.deleteFiles(collectionId, setOf("some/path"))
@@ -124,7 +124,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `deleteFile keeps other files and directories intact when deleting a directory`() {
+  fun `keeps other files and directories intact when deleting a directory`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.createDirectories(collectionId, setOf("DO_NOT_DELETE"))
     fileService.createDirectories(collectionId, setOf("some/path"))
@@ -137,7 +137,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `deleteFile deletes directory content recursively`() {
+  fun `deletes directory content recursively`() {
     val directoryToDelete = "some/path"
     val fileToRecursivelyDelete = "some/path/file.txt"
     val directoryToRecursivelyDelete = "some/path/some/path"
@@ -157,7 +157,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `filePutContents puts the file contents correctly`() {
+  fun `writes file contents correctly`() {
     val contents = byteArrayOf(42)
     fileService.createFiles(collectionId, setOf("file.txt"))
 
@@ -184,7 +184,7 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `filePutContents throws for directories`() {
+  fun `writing file contents throws for directories`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
 
     fileService.writeFile(collectionId, "some/path").use {
@@ -193,14 +193,14 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `filePutContents throws if path does not exist`() {
+  fun `writing file contents throws if path does not exist`() {
     fileService.writeFile(collectionId, "file.txt").use {
       it.write(byteArrayOf(42))
     }
   }
 
   @Test
-  fun `moveFile moves existing file`() {
+  fun `moves existing file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
 
     fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
@@ -210,12 +210,12 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `moveFile throws when source path does not exist`() {
+  fun `moving a file throws when source path does not exist`() {
     fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `moveFile throws when target file path already exists`() {
+  fun `moving a file throws when target file path already exists`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.createFiles(collectionId, setOf("new.txt"))
 
@@ -223,7 +223,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `moveFile does not change file contents`() {
+  fun `moving a file does not change file contents`() {
     val contents = byteArrayOf(42)
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.writeFile(collectionId, "file.txt").use {
@@ -236,7 +236,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `moveFile moves existing directory`() {
+  fun `moves existing directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
 
     fileService.moveFile(collectionId, setOf("some/path"), "new")
@@ -246,7 +246,7 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `moveFile throws when source directory is moved to itself`() {
+  fun `moving a directory throws when source directory is moved to itself`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.createDirectories(collectionId, setOf("some/path/inner"))
 
@@ -254,7 +254,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `moveFile moves inner hierarchy correctly`() {
+  fun `moving a directory moves inner hierarchy correctly`() {
     val innerDirectory = "some/path/inner"
     val innerFile1 = "some/path/inner/file.txt"
     val innerFile1Contents = byteArrayOf(42)
