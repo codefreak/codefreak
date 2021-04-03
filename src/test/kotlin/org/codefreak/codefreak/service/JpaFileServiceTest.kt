@@ -1,7 +1,6 @@
 package org.codefreak.codefreak.service
 
 import com.nhaarman.mockitokotlin2.any
-import java.io.InputStream
 import java.util.Optional
 import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
@@ -18,8 +17,6 @@ import org.mockito.MockitoAnnotations
 
 class JpaFileServiceTest {
   private val collectionId = UUID(0, 0)
-  private val filePath = "file.txt"
-  private val directoryPath = "some/path"
 
   @Mock
   lateinit var fileCollectionRepository: FileCollectionRepository
@@ -28,7 +25,7 @@ class JpaFileServiceTest {
 
   @Before
   fun init() {
-    MockitoAnnotations.initMocks(this)
+    MockitoAnnotations.openMocks(this)
 
     val fileCollection = FileCollection(collectionId)
     `when`(fileCollectionRepository.findById(any())).thenReturn(Optional.of(fileCollection))
@@ -36,140 +33,140 @@ class JpaFileServiceTest {
 
   @Test
   fun `createFile creates an empty file`() {
-    createFile(filePath)
-    assertTrue(containsFile(filePath))
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createFile throws when the path already exists`() {
-    createFile(filePath)
-    createFile(filePath) // Throws because file already exists
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    fileService.createFiles(collectionId, setOf("file.txt")) // Throws because file already exists
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createFile throws on empty path name`() {
-    createFile("")
+    fileService.createFiles(collectionId, setOf(""))
   }
 
   @Test
   fun `createFile keeps other files intact`() {
-    createFile("other.txt")
-    createDirectory("aDirectory")
-    createFile(filePath)
+    fileService.createFiles(collectionId, setOf("other.txt"))
+    fileService.createDirectories(collectionId, setOf("aDirectory"))
+    fileService.createFiles(collectionId, setOf("file.txt"))
 
-    assertTrue(containsFile(filePath))
-    assertTrue(containsFile("other.txt"))
-    assertTrue(containsDirectory("aDirectory"))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "other.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
   }
 
   @Test
   fun `createDirectory creates an empty directory`() {
-    createDirectory(directoryPath)
-    assertTrue(containsDirectory(directoryPath))
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createDirectory throws when the path already exists`() {
-    createDirectory(directoryPath)
-    createDirectory(directoryPath) // Throws because directory already exists
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.createDirectories(collectionId, setOf("some/path")) // Throws because directory already exists
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `createDirectory throws on empty path name`() {
-    createFile("")
+    fileService.createFiles(collectionId, setOf(""))
   }
 
   @Test
   fun `createDirectory keeps other files intact`() {
-    createFile("other.txt")
-    createDirectory("aDirectory")
-    createDirectory(directoryPath)
+    fileService.createFiles(collectionId, setOf("other.txt"))
+    fileService.createDirectories(collectionId, setOf("aDirectory"))
+    fileService.createDirectories(collectionId, setOf("some/path"))
 
-    assertTrue(containsFile("other.txt"))
-    assertTrue(containsDirectory("aDirectory"))
-    assertTrue(containsDirectory(directoryPath))
+    assertTrue(fileService.containsFile(collectionId, "other.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
   fun `deleteFile deletes existing file`() {
-    createFile(filePath)
+    fileService.createFiles(collectionId, setOf("file.txt"))
 
-    deleteFile(filePath)
+    fileService.deleteFiles(collectionId, setOf("file.txt"))
 
-    assertFalse(containsFile(filePath))
+    assertFalse(fileService.containsFile(collectionId, "file.txt"))
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `deleteFile throws when path does not exist`() {
-    deleteFile(filePath)
+    fileService.deleteFiles(collectionId, setOf("file.txt"))
   }
 
   @Test
   fun `deleteFile keeps other files and directories intact when deleting a file`() {
-    createFile(filePath)
-    createFile("DO_NOT_DELETE.txt")
-    createDirectory(directoryPath)
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    fileService.createFiles(collectionId, setOf("DO_NOT_DELETE.txt"))
+    fileService.createDirectories(collectionId, setOf("some/path"))
 
-    deleteFile(filePath)
+    fileService.deleteFiles(collectionId, setOf("file.txt"))
 
-    assertFalse(containsFile(filePath))
-    assertTrue(containsFile("DO_NOT_DELETE.txt"))
-    assertTrue(containsDirectory(directoryPath))
+    assertFalse(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "DO_NOT_DELETE.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
   fun `deleteFile deletes existing directory`() {
-    createDirectory(directoryPath)
+    fileService.createDirectories(collectionId, setOf("some/path"))
 
-    deleteFile(directoryPath)
+    fileService.deleteFiles(collectionId, setOf("some/path"))
 
-    assertFalse(containsDirectory(directoryPath))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
   fun `deleteFile keeps other files and directories intact when deleting a directory`() {
-    createFile(filePath)
-    createDirectory("DO_NOT_DELETE")
-    createDirectory(directoryPath)
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    fileService.createDirectories(collectionId, setOf("DO_NOT_DELETE"))
+    fileService.createDirectories(collectionId, setOf("some/path"))
 
-    deleteFile(directoryPath)
+    fileService.deleteFiles(collectionId, setOf("some/path"))
 
-    assertTrue(containsFile(filePath))
-    assertTrue(containsDirectory("DO_NOT_DELETE"))
-    assertFalse(containsDirectory(directoryPath))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "DO_NOT_DELETE"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
   fun `deleteFile deletes directory content recursively`() {
-    val directoryToDelete = directoryPath
-    val fileToRecursivelyDelete = "$directoryPath/$filePath"
-    val directoryToRecursivelyDelete = "$directoryPath/$directoryPath"
-    val fileToBeUnaffected = filePath
+    val directoryToDelete = "some/path"
+    val fileToRecursivelyDelete = "some/path/file.txt"
+    val directoryToRecursivelyDelete = "some/path/some/path"
+    val fileToBeUnaffected = "file.txt"
 
-    createDirectory(directoryToDelete)
-    createFile(fileToRecursivelyDelete)
-    createDirectory(directoryToRecursivelyDelete)
-    createFile(fileToBeUnaffected)
+    fileService.createDirectories(collectionId, setOf(directoryToDelete))
+    fileService.createFiles(collectionId, setOf(fileToRecursivelyDelete))
+    fileService.createDirectories(collectionId, setOf(directoryToRecursivelyDelete))
+    fileService.createFiles(collectionId, setOf(fileToBeUnaffected))
 
-    deleteFile(directoryToDelete)
+    fileService.deleteFiles(collectionId, setOf(directoryToDelete))
 
-    assertFalse(containsDirectory(directoryToDelete))
-    assertFalse(containsFile(fileToRecursivelyDelete))
-    assertFalse(containsDirectory(directoryToRecursivelyDelete))
-    assertTrue(containsFile(fileToBeUnaffected))
+    assertFalse(fileService.containsDirectory(collectionId, directoryToDelete))
+    assertFalse(fileService.containsFile(collectionId, fileToRecursivelyDelete))
+    assertFalse(fileService.containsDirectory(collectionId, directoryToRecursivelyDelete))
+    assertTrue(fileService.containsFile(collectionId, fileToBeUnaffected))
   }
 
   @Test
   fun `filePutContents puts the file contents correctly`() {
     val contents = byteArrayOf(42)
-    createFile(filePath)
+    fileService.createFiles(collectionId, setOf("file.txt"))
 
-    filePutContents(filePath).use {
+    fileService.writeFile(collectionId, "file.txt").use {
       it.write(contents)
     }
 
-    assertTrue(containsFile(filePath))
-    assertTrue(equals(getFileContents(filePath).readBytes(), contents))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), contents))
   }
 
   private fun equals(a: ByteArray, b: ByteArray): Boolean {
@@ -188,119 +185,104 @@ class JpaFileServiceTest {
 
   @Test(expected = IllegalArgumentException::class)
   fun `filePutContents throws for directories`() {
-    createDirectory(directoryPath)
+    fileService.createDirectories(collectionId, setOf("some/path"))
 
-    filePutContents(directoryPath).use {
+    fileService.writeFile(collectionId, "some/path").use {
       it.write(byteArrayOf(42))
     }
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `filePutContents throws if path does not exist`() {
-    filePutContents(filePath).use {
+    fileService.writeFile(collectionId, "file.txt").use {
       it.write(byteArrayOf(42))
     }
   }
 
   @Test
   fun `moveFile moves existing file`() {
-    createFile(filePath)
+    fileService.createFiles(collectionId, setOf("file.txt"))
 
-    moveFile(filePath, "new.txt")
+    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
 
-    assertFalse(containsFile(filePath))
-    assertTrue(containsFile("new.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "new.txt"))
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `moveFile throws when source path does not exist`() {
-    moveFile(filePath, "new.txt")
+    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `moveFile throws when target file path already exists`() {
-    createFile(filePath)
-    createFile("new.txt")
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    fileService.createFiles(collectionId, setOf("new.txt"))
 
-    moveFile(filePath, "new.txt")
+    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
   }
 
   @Test
   fun `moveFile does not change file contents`() {
     val contents = byteArrayOf(42)
-    createFile(filePath)
-    filePutContents(filePath).use {
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    fileService.writeFile(collectionId, "file.txt").use {
       it.write(contents)
     }
 
-    moveFile(filePath, "new.txt")
+    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
 
-    assertTrue(equals(contents, getFileContents("new.txt").readBytes()))
+    assertTrue(equals(contents, fileService.readFile(collectionId, "new.txt").readBytes()))
   }
 
   @Test
   fun `moveFile moves existing directory`() {
-    createDirectory(directoryPath)
+    fileService.createDirectories(collectionId, setOf("some/path"))
 
-    moveFile(directoryPath, "new")
+    fileService.moveFile(collectionId, setOf("some/path"), "new")
 
-    assertFalse(containsDirectory(directoryPath))
-    assertTrue(containsDirectory("new"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "new"))
   }
 
   @Test(expected = IllegalArgumentException::class)
   fun `moveFile throws when source directory is moved to itself`() {
-    createDirectory(directoryPath)
-    createDirectory("$directoryPath/inner")
-    moveFile(directoryPath, "$directoryPath/inner")
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.createDirectories(collectionId, setOf("some/path/inner"))
+
+    fileService.moveFile(collectionId, setOf("some/path"), "some/path/inner")
   }
 
   @Test
   fun `moveFile moves inner hierarchy correctly`() {
-    val innerDirectory = "$directoryPath/inner"
-    val innerFile1 = "$innerDirectory/$filePath"
+    val innerDirectory = "some/path/inner"
+    val innerFile1 = "some/path/inner/file.txt"
     val innerFile1Contents = byteArrayOf(42)
-    val innerFile2 = "$directoryPath/$filePath"
+    val innerFile2 = "some/path/file.txt"
     val innerFile2Contents = byteArrayOf(17)
 
-    createDirectory(directoryPath)
-    createDirectory(innerDirectory)
-    createFile(innerFile1)
-    filePutContents(innerFile1).use {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.createDirectories(collectionId, setOf(innerDirectory))
+    fileService.createFiles(collectionId, setOf(innerFile1))
+    fileService.writeFile(collectionId, innerFile1).use {
       it.write(innerFile1Contents)
     }
-    createFile(innerFile2)
-    filePutContents(innerFile2).use {
+    fileService.createFiles(collectionId, setOf(innerFile2))
+    fileService.writeFile(collectionId, innerFile2).use {
       it.write(innerFile2Contents)
     }
 
-    moveFile(directoryPath, "new")
+    fileService.moveFile(collectionId, setOf("some/path"), "new")
 
-    assertFalse(containsDirectory(directoryPath))
-    assertFalse(containsDirectory(innerDirectory))
-    assertFalse(containsFile(innerFile1))
-    assertFalse(containsFile(innerFile2))
-    assertTrue(containsDirectory("new"))
-    assertTrue(containsDirectory("new/inner"))
-    assertTrue(containsFile("new/inner/$filePath"))
-    assertTrue(equals(getFileContents("new/inner/$filePath").readBytes(), innerFile1Contents))
-    assertTrue(containsFile("new/$filePath"))
-    assertTrue(equals(getFileContents("new/$filePath").readBytes(), innerFile2Contents))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, innerDirectory))
+    assertFalse(fileService.containsFile(collectionId, innerFile1))
+    assertFalse(fileService.containsFile(collectionId, innerFile2))
+    assertTrue(fileService.containsDirectory(collectionId, "new"))
+    assertTrue(fileService.containsDirectory(collectionId, "new/inner"))
+    assertTrue(fileService.containsFile(collectionId, "new/inner/file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "new/inner/file.txt").readBytes(), innerFile1Contents))
+    assertTrue(fileService.containsFile(collectionId, "new/file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "new/file.txt").readBytes(), innerFile2Contents))
   }
-
-  private fun createFile(path: String) = fileService.createFiles(collectionId, setOf(path))
-
-  private fun createDirectory(path: String) = fileService.createDirectories(collectionId, setOf(path))
-
-  private fun deleteFile(path: String) = fileService.deleteFiles(collectionId, setOf(path))
-
-  private fun containsFile(path: String): Boolean = fileService.containsFile(collectionId, path)
-
-  private fun containsDirectory(path: String): Boolean = fileService.containsDirectory(collectionId, path)
-
-  private fun filePutContents(path: String) = fileService.writeFile(collectionId, path)
-
-  private fun getFileContents(path: String): InputStream = fileService.readFile(collectionId, path)
-
-  private fun moveFile(from: String, to: String) = fileService.moveFile(collectionId, setOf(from), to)
 }
