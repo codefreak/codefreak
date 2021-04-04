@@ -13,12 +13,15 @@ import EvaluationResult from './EvaluationResult'
 import { EvaluationErrorIcon } from './Icons'
 import useEvaluationStatus from '../hooks/useEvaluationStatus'
 import { isEvaluationInProgress } from '../services/evaluation'
+import useHasAuthority from '../hooks/useHasAuthority'
 
 const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
   const result = useGetEvaluationHistoryQuery({ variables: { answerId } })
   const apolloClient = useApolloClient()
 
   const evaluationStatus = useEvaluationStatus(answerId)
+
+  const auth = useHasAuthority('ROLE_TEACHER')
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -36,7 +39,9 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
           isEvaluationInProgress(evaluationStatus) ? 'Running...' : undefined
         }
       >
-        {evaluations.map(renderEvaluation(apolloClient, evaluationStatus))}
+        {evaluations.map(
+          renderEvaluation(apolloClient, evaluationStatus, auth)
+        )}
       </Timeline>
     </Card>
   )
@@ -44,7 +49,8 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
 
 const renderEvaluation = (
   apolloClient: ApolloClient<any>,
-  evaluationStatus: EvaluationStepStatus | undefined
+  evaluationStatus: EvaluationStepStatus | undefined,
+  teacherAuthority: boolean
 ) => (
   evaluation: NonNullable<
     GetEvaluationHistoryQueryResult['data']
@@ -58,6 +64,7 @@ const renderEvaluation = (
           <EvaluationResult
             evaluationId={evaluation.id}
             evaluationStatus={evaluationStatus}
+            teacherAuthority={teacherAuthority}
           />
         </ApolloProvider>
       ),

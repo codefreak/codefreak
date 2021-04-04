@@ -6,16 +6,16 @@ import {
 import AsyncPlaceholder from './AsyncContainer'
 import './EvaluationResult.less'
 import EvaluationStepPanel from './EvaluationStepPanel'
-import useGetGrade from '../hooks/useGetGrade'
+import useGrade from '../hooks/useGrade'
 import GradeView from './autograder/GradeView'
 
 const EvaluationResult: React.FC<{
   evaluationId: string
   evaluationStatus?: EvaluationStepStatus
-}> = ({ evaluationId, evaluationStatus }) => {
-
+  teacherAuthority?: boolean
+}> = ({ evaluationId, evaluationStatus, teacherAuthority }) => {
   const result = useGetDetailedEvaluatonQuery({ variables: { evaluationId } })
-  const gradeData = useGetGrade(evaluationId, evaluationStatus)
+  const gradeData = useGrade(evaluationId, evaluationStatus)
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -26,12 +26,11 @@ const EvaluationResult: React.FC<{
   // On Init
   let gradeView = null
   if (gradeData.grade !== null && gradeData.grade !== undefined) {
-      gradeView = (
-        <p className="grade-view-container">
-          <GradeView grade={gradeData.grade} />
-        </p>
-      )
-
+    gradeView = (
+      <p className="grade-view-container">
+        <GradeView grade={gradeData.grade} />
+      </p>
+    )
   }
 
   return (
@@ -43,6 +42,7 @@ const EvaluationResult: React.FC<{
           stepBasics={step}
           key={step.id}
           fetchGrade={gradeData.fetchGrade}
+          teacherAuthority={!!teacherAuthority}
         />
       ))}
     </>

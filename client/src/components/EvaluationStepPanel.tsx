@@ -20,7 +20,6 @@ import Countdown from './Countdown'
 import moment from 'moment'
 import { momentDifferenceToRelTime } from '../services/time'
 import PointsEdit from './autograder/PointsEdit'
-import {FetchGrade} from "../hooks/useGetGrade";
 
 function timer(queuedAt?: string, finishedAt?: string) {
   if (queuedAt && !finishedAt) {
@@ -44,7 +43,8 @@ function timer(queuedAt?: string, finishedAt?: string) {
 interface EvaluationStepPanelProps {
   answerId: string
   stepBasics: EvaluationStepBasicsFragment
-  fetchGrade: FetchGrade
+  fetchGrade: () => void
+  teacherAuthority: boolean
 }
 
 export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => {
@@ -87,6 +87,13 @@ export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => 
     />
   )
 
+  const pointsEdit = (
+    <PointsEdit
+      evaluationStepId={step.id}
+      fetchGrade={props.fetchGrade}
+      teacherAuthority={props.teacherAuthority}
+    />
+  )
   let body
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
@@ -96,20 +103,13 @@ export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => 
             icon={<SmileTwoTone />}
             title="All checks passed – good job!"
           />
-          <PointsEdit
-            evaluationStepId={step.id}
-            fetchGrade={props.fetchGrade}
-          />
+          {pointsEdit}
         </div>
       )
     } else if (step.summary) {
       body = (
         <div>
-          <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>{' '}
-          <PointsEdit
-            evaluationStepId={step.id}
-            fetchGrade={props.fetchGrade}
-          />
+          <SyntaxHighlighter>{step.summary}</SyntaxHighlighter> {pointsEdit}
         </div>
       )
     }
@@ -126,8 +126,7 @@ export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => 
 
     body = (
       <div>
-        <Collapse>{renderedFeedbackList}</Collapse>{' '}
-        <PointsEdit evaluationStepId={step.id} fetchGrade={props.fetchGrade} />
+        <Collapse>{renderedFeedbackList}</Collapse> {pointsEdit}
       </div>
     )
   }
