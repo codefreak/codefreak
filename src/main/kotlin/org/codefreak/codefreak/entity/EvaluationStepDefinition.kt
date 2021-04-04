@@ -25,8 +25,8 @@ class EvaluationStepDefinition(
   var active: Boolean = true
 
   @OneToOne(cascade = [CascadeType.ALL])
-  @JoinColumn(name = "gradeDefinition", referencedColumnName = "id")
-  var gradeDefinition: GradeDefinition? = null
+  @JoinColumn(name = "gradingDefinition", referencedColumnName = "id")
+  var gradingDefinition: GradingDefinition? = null
 
   /**
    * Timeout of this task in seconds
