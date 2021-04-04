@@ -102,10 +102,18 @@ class JpaFileServiceTest {
     assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
-  fun `creating a directory throws when the path already exists`() {
+  @Test
+  fun `creates multiple directories`() {
+    fileService.createDirectories(collectionId, setOf("some/path", "some/other/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/other/path"))
+  }
+
+  @Test
+  fun `creating a ignores silently when the directory already exists`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    fileService.createDirectories(collectionId, setOf("some/path")) // Throws because directory already exists
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -122,6 +130,18 @@ class JpaFileServiceTest {
     assertTrue(fileService.containsFile(collectionId, "other.txt"))
     assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
     assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+  }
+
+  @Test
+  fun `creating multiple directories keeps other files intact`() {
+    fileService.createFiles(collectionId, setOf("other.txt"))
+    fileService.createDirectories(collectionId, setOf("aDirectory"))
+    fileService.createDirectories(collectionId, setOf("some/path", "some/other/path"))
+
+    assertTrue(fileService.containsFile(collectionId, "other.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/other/path"))
   }
 
   @Test
