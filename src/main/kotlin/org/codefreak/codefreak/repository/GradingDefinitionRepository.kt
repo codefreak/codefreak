@@ -8,7 +8,9 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface EvaluationStepRepository : CrudRepository<EvaluationStep, UUID> {
-  fun findAllByGradingDefinition(gradingDefinition: GradingDefinition): MutableList<EvaluationStep>
-  fun findByPointsId(pointsOfEvaluationStepId: UUID): Optional<EvaluationStep>
+interface GradingDefinitionRepository : CrudRepository<GradingDefinition, UUID> {
+
+  fun findByEvaluationStepDefinitionId(id: UUID): Optional<GradingDefinition>
+//  fun findByPointsOfEvaluationStepId(id: UUID): Optional<GradeDefinition>
+  fun findByEvaluationStep(step: EvaluationStep): Optional<GradingDefinition>
 }

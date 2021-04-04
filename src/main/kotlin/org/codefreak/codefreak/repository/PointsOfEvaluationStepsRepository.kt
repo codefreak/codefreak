@@ -7,10 +7,6 @@ import org.codefreak.codefreak.entity.PointsOfEvaluationStep
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
-/**
- * Repository of PointsOfEvaluation. Associated generic functions added
- *
- */
 @Repository
 interface PointsOfEvaluationStepsRepository : CrudRepository<PointsOfEvaluationStep, UUID> {
   fun findByEvaluationStep(evaluationStep: EvaluationStep): Optional<PointsOfEvaluationStep>

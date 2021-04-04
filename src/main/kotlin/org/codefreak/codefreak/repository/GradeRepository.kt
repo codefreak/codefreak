@@ -7,9 +7,6 @@ import org.codefreak.codefreak.entity.Grade
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
-/**
- * Repository of Grade. Associated generic functions added
- */
 @Repository
 interface GradeRepository : CrudRepository<Grade, UUID> {
   fun findByEvaluation(evaluation: Evaluation): Optional<Grade>
