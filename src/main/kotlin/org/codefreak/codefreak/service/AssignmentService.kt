@@ -45,8 +45,6 @@ class AssignmentService : BaseService() {
   fun findAssignment(id: UUID): Assignment = assignmentRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Assignment not found") }
 
-  fun findAssignmentById(id: UUID): Assignment = assignmentRepository.findById(id).get()
-
   @Transactional
   fun findAllAssignments(): Iterable<Assignment> = assignmentRepository.findAll()
 
