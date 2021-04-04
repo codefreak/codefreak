@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableAsync
 @EnableAspectJAutoProxy
 @EnableBatchProcessing
-class CodeFreakApplication : CommandLineRunner{
+class CodeFreakApplication : CommandLineRunner {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
