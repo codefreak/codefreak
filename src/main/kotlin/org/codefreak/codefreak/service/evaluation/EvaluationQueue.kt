@@ -83,10 +83,10 @@ class EvaluationQueue : StepExecutionListener {
           else -> EvaluationStepStatus.FINISHED
         }
         evaluationStep.finishedAt = Instant.now()
-        // retrieve a fresh instance of the current EvaluationStep. Start Autograding.
-        // This function needs a call right before updateEvaluationStepStatus, because afterwards there
-        // might be a GradeCalculation
-        evaluationStepService.startAutograding(evaluationStepService.getEvaluationStep(it))
+        //If a gradeDefinition is present, start autograding.
+        evaluationStep.definition.gradingDefinition?.let {
+          evaluationStepService.startAutograding(evaluationStep)
+        }
         evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
       }
     }
