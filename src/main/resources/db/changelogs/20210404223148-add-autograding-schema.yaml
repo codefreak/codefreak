@@ -1,6 +1,6 @@
 databaseChangeLog:
 - changeSet:
-    id: 1616251413796-2
+    id: 1617568391322-1
     author: timsc (generated)
     changes:
     - createTable:
@@ -13,15 +13,8 @@ databaseChangeLog:
             name: id
             type: UUID
         - column:
-            constraints:
-              nullable: false
-            name: calculated
-            type: BOOLEAN
-        - column:
-            constraints:
-              nullable: false
             name: grade_percentage
-            type: FLOAT
+            type: FLOAT4
         - column:
             name: answer_id
             type: UUID
@@ -30,7 +23,7 @@ databaseChangeLog:
             type: UUID
         tableName: grade
 - changeSet:
-    id: 1616251413796-3
+    id: 1617568391322-2
     author: timsc (generated)
     changes:
     - createTable:
@@ -39,7 +32,7 @@ databaseChangeLog:
             constraints:
               nullable: false
               primaryKey: true
-              primaryKeyName: grade_definitionPK
+              primaryKeyName: grading_definitionPK
             name: id
             type: UUID
         - column:
@@ -50,26 +43,26 @@ databaseChangeLog:
         - column:
             constraints:
               nullable: false
-            name: critical_error
-            type: FLOAT
+            name: critical_mistake_penalty
+            type: FLOAT4
         - column:
             constraints:
               nullable: false
-            name: major_error
-            type: FLOAT
+            name: major_mistake_penalty
+            type: FLOAT4
         - column:
             constraints:
               nullable: false
             name: max_points
-            type: FLOAT
+            type: FLOAT4
         - column:
             constraints:
               nullable: false
-            name: minor_error
-            type: FLOAT
-        tableName: grade_definition
+            name: minor_mistake_penalty
+            type: FLOAT4
+        tableName: grading_definition
 - changeSet:
-    id: 1616251413796-4
+    id: 1617568391322-3
     author: timsc (generated)
     changes:
     - createTable:
@@ -84,7 +77,7 @@ databaseChangeLog:
         - column:
             constraints:
               nullable: false
-            name: calc_check
+            name: calculation_check
             type: BOOLEAN
         - column:
             constraints:
@@ -94,67 +87,37 @@ databaseChangeLog:
         - column:
             constraints:
               nullable: false
+            name: evaluation_step_result_check
+            type: BOOLEAN
+        - column:
+            constraints:
+              nullable: false
             name: mistake_points
-            type: FLOAT
+            type: FLOAT4
         - column:
             constraints:
               nullable: false
             name: reached_points
-            type: FLOAT
-        - column:
-            constraints:
-              nullable: false
-            name: result_check
-            type: BOOLEAN
+            type: FLOAT4
         - column:
             name: evaluation_step
             type: UUID
         - column:
             name: grade_id
             type: UUID
-        - column:
-            name: grade_definition_id
-            type: UUID
         tableName: points_of_evaluation_step
 - changeSet:
-    id: 1616251413796-5
+    id: 1617568391322-4
     author: timsc (generated)
     changes:
-    - createTable:
+    - addColumn:
         columns:
-        - column:
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: user_aliasPK
-            name: id
-            type: UUID
         - column:
             name: alias
-            type: VARCHAR(255)
-        tableName: user_alias
+            type: varchar(255)
+        tableName: user
 - changeSet:
-    id: 1616251413796-6
-    author: timsc (generated)
-    changes:
-    - addColumn:
-        columns:
-        - column:
-            name: grade_definition
-            type: uuid
-        tableName: evaluation_step_definition
-- changeSet:
-    id: 1616251413796-7
-    author: timsc (generated)
-    changes:
-    - addColumn:
-        columns:
-        - column:
-            name: grade_definition_id
-            type: uuid
-        tableName: evaluation_step
-- changeSet:
-    id: 1616251413796-8
+    id: 1617568391322-5
     author: timsc (generated)
     changes:
     - addColumn:
@@ -162,73 +125,31 @@ databaseChangeLog:
         - column:
             constraints:
               nullable: false
-            name: scoreboard
+            name: enable_scoreboard
             type: boolean
         tableName: assignment
 - changeSet:
-    id: 1616251413796-9
+    id: 1617568391322-6
     author: timsc (generated)
     changes:
     - addColumn:
         columns:
         - column:
-            name: user_alias
+            name: grading_definition
             type: uuid
-        tableName: user
+        tableName: evaluation_step_definition
 - changeSet:
-    id: 1616251413796-10
+    id: 1617568391322-7
     author: timsc (generated)
     changes:
-    - addForeignKeyConstraint:
-        baseColumnNames: grade_definition_id
-        baseTableName: evaluation_step
-        constraintName: FK1fhw2yapxh7gcpjffq7khwyy4
-        deferrable: false
-        initiallyDeferred: false
-        referencedColumnNames: id
-        referencedTableName: grade_definition
-        validate: true
+    - addColumn:
+        columns:
+        - column:
+            name: grading_definition_id
+            type: uuid
+        tableName: evaluation_step
 - changeSet:
-    id: 1616251413796-11
-    author: timsc (generated)
-    changes:
-    - addForeignKeyConstraint:
-        baseColumnNames: grade_definition
-        baseTableName: evaluation_step_definition
-        constraintName: FK5nbvkttgdeitra32dedyur2yl
-        deferrable: false
-        initiallyDeferred: false
-        referencedColumnNames: id
-        referencedTableName: grade_definition
-        validate: true
-- changeSet:
-    id: 1616251413796-12
-    author: timsc (generated)
-    changes:
-    - addForeignKeyConstraint:
-        baseColumnNames: grade_definition_id
-        baseTableName: points_of_evaluation_step
-        constraintName: FK88t0ej81b68dxhyxv3hyhmnr8
-        deferrable: false
-        initiallyDeferred: false
-        referencedColumnNames: id
-        referencedTableName: grade_definition
-        validate: true
-- changeSet:
-    id: 1616251413796-13
-    author: timsc (generated)
-    changes:
-    - addForeignKeyConstraint:
-        baseColumnNames: user_alias
-        baseTableName: user
-        constraintName: FKbb5dkdfvrp9ivi0uxq4kg67jr
-        deferrable: false
-        initiallyDeferred: false
-        referencedColumnNames: id
-        referencedTableName: user_alias
-        validate: true
-- changeSet:
-    id: 1616251413796-14
+    id: 1617568391322-8
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -241,7 +162,7 @@ databaseChangeLog:
         referencedTableName: evaluation_step
         validate: true
 - changeSet:
-    id: 1616251413796-15
+    id: 1617568391322-9
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -254,7 +175,7 @@ databaseChangeLog:
         referencedTableName: answer
         validate: true
 - changeSet:
-    id: 1616251413796-16
+    id: 1617568391322-10
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -267,7 +188,7 @@ databaseChangeLog:
         referencedTableName: grade
         validate: true
 - changeSet:
-    id: 1616251413796-17
+    id: 1617568391322-11
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -280,11 +201,29 @@ databaseChangeLog:
         referencedTableName: evaluation
         validate: true
 - changeSet:
-    id: 1616251413796-1
+    id: 1617568391322-12
     author: timsc (generated)
     changes:
-    - dropDefaultValue:
-        columnDataType: varchar(255)
-        columnName: status
-        tableName: evaluation_step
+    - addForeignKeyConstraint:
+        baseColumnNames: grading_definition_id
+        baseTableName: evaluation_step
+        constraintName: FKr1llarfhcy8dj1ca1jqph38eq
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: grading_definition
+        validate: true
+- changeSet:
+    id: 1617568391322-13
+    author: timsc (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: grading_definition
+        baseTableName: evaluation_step_definition
+        constraintName: FKskf0mfyjtfod14dd0pw4rlo49
+        deferrable: false
+        initiallyDeferred: false
+        referencedColumnNames: id
+        referencedTableName: grading_definition
+        validate: true
 
