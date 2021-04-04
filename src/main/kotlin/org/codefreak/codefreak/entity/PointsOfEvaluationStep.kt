@@ -6,65 +6,50 @@ import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 
 /**
- * Hat die Beziehung zu einer Task. Außerdem zu PointsOfEvaluation.
- * ein Assignment besteht aus mehreren Tasks. So trägt die Task evaluationstep Definitionen.
+ * This Entity required a relation to a evaluationStep and a gradeDefinition.
+ * Its purpose is to be part of a Grade and distribute points.
  *
  */
 @Entity
 class PointsOfEvaluationStep(
 
   /**
-   * The Evaluation of which this PointsOfEvaluation belongs to
+   * The Evaluation which this PointsOfEvaluation belongs to
    */
   @OneToOne
   @JoinColumn(name = "evaluationStep", referencedColumnName = "id")
   var evaluationStep: EvaluationStep,
 
-  /**
-   * Gradedefinition reference to calculate and in particular update points of evaluation
-   * Especially if values might have changed.
-   */
-  @ManyToOne
-  var gradeDefinition: GradeDefinition,
-
-  /**
-   *
-   */
   @ManyToOne
   var grade: Grade? = null
 
 ) : BaseEntity() {
 
   /**
-   * A Boolean value which purpose is to make a teacher set points manually and prevent further autograding from updating the bOfT value
-   *
+   * A Boolean value in purpose of which is to make a teacher set points manually and prevent further Autograding from updating the mistakePoints value
    */
   var edited: Boolean = false
 
   /**
-   * somekind of lever if there was any calculation done. There might not run an evaluation and therefor no errors appear.
-   * Switch to true if run for the first time. If it stays false on grade Calculation it will set bOfT to the maximum of
-   * points this evaluationstep will give. It also will provide a sign for the teacher that something went wrong.
-   */
-  var calcCheck: Boolean = false
-
-  /**
-   * A Check if a EvaluationStepResult is fine or not. This is important to check if an error was caused by us or the student
-   * In any case the Result might not be succeded the teacher has to take action.
-   * It also provides as check if a grade will be calculated in the first place.
+   * A Boolean value which switches on true if a calculation was done on this entity.
    *
-   * a change of this boolean value has to trigger a possivle grade-calculation. A Gradecalculation will take place if all related Evaluationsteps succeded.
    */
-  var resultCheck: Boolean = false
+  var calculationCheck: Boolean = false
 
   /**
-   * sum of all mistakes refered to all flawed feedbacks
+   * Checks if there is a valid result. A not valid result would be if the EvaluationStepStatus Errored.
+   * This attribut is required to give the teacher the possibility of setting points manually if the student sends in a broken submission.
+   */
+  var evaluationStepResultCheck: Boolean = false
+
+  /**
+   * sum of all mistakes obtained from All Feedback which status is FAILED and severity is not INFO provided by the evaluationStep
+   *
    */
   var mistakePoints: Float = 0f
 
   /**
    * Points reached in this Evaluation.
    */
-
   var reachedPoints: Float = 0f
 }
