@@ -1,152 +1,195 @@
 import './Points.less'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
+  GetPointsOfEvaluationStepByEvaluationStepIdDocument,
+  GradingDefinition,
   PointsOfEvaluationStep,
   PointsOfEvaluationStepInput,
   useGetPointsOfEvaluationStepByEvaluationStepIdQuery,
   useUpdatePointsOfEvaluationStepMutation
 } from '../../generated/graphql'
-import useHasAuthority from '../../hooks/useHasAuthority'
 import { Empty, InputNumber, Switch } from 'antd'
 import { debounce } from 'ts-debounce'
-import {FetchGrade} from "../../hooks/useGetGrade";
+import { messageService } from '../../services/message'
 
 const PointsEdit: React.FC<{
   evaluationStepId: string
-  fetchGrade: FetchGrade
+  fetchGrade: () => void
+  teacherAuthority?: boolean
 }> = props => {
   const evaluationStepId = props.evaluationStepId
+  const auth = props.teacherAuthority
 
   const result = useGetPointsOfEvaluationStepByEvaluationStepIdQuery({
     variables: { evaluationStepId }
   })
+  const data = result.data?.pointsOfEvaluationStepByEvaluationStepId
 
-  const [changeable, setChangeable] = useState<boolean>(false)
+  const [updateState, setUpdateState] = useState<boolean>(false)
 
-  const onEnabledChange = (state: boolean) => {
-    setChangeable(state)
-  }
-  const [
-    updatePointsOfEvaluationStep
-  ] = useUpdatePointsOfEvaluationStepMutation({
+  const [updateMutation] = useUpdatePointsOfEvaluationStepMutation({
     onCompleted: () => {
-      result.refetch()
-    }
+      messageService.success('Points updated')
+      props.fetchGrade()
+    },
+    refetchQueries: [
+      {
+        query: GetPointsOfEvaluationStepByEvaluationStepIdDocument,
+        variables: { evaluationStepId }
+      }
+    ]
   })
 
-  const auth = useHasAuthority('ROLE_TEACHER')
-  /**
-   * Output
-   */
-  if (result.data !== null && result.data !== undefined) {
-      const data = result.data.pointsOfEvaluationStepByEvaluationStepId
+  const [updatePoints, setUpdatePoints] = useState<boolean>(true)
 
-      const input: PointsOfEvaluationStepInput = {
-        calcCheck: data.calcCheck!!,
-        mistakePoints: data
-          .mistakePoints!!,
-        edited: data.edited!!,
-        id: data.id!!,
-        reachedPoints: data
-          .reachedPoints!!,
-        resultCheck: data.resultCheck!!
-      }
+  const [points, setPoints] = useState<PointsOfEvaluationStep>({
+    reachedPoints: 0,
+    mistakePoints: 0,
+    edited: false,
+    calculationCheck: false,
+    evaluationStepResultCheck: false,
+    id: '0',
+    gradingDefinition: null
+  })
 
-      if (result.error) return <div>Error!</div>
-
-      const onPoEStepChange = (value: number) => {
-        if (value !== undefined) {
-          input.reachedPoints = value
-          input.edited = true
-          debounce(
-            updatePointsOfEvaluationStep({variables: {input}}).then,
-            1000
-          )
-        }
-      }
-
-      if (
-        data.gradeDefinitionMax ===
-        null
-      ) {
-        return <div />
-      } else {
-        if (
-          !data.gradeDefinitionMax!
-            .active
-        )
-          return <div />
-      }
-
-      if (auth) {
-        return renderEdit({
-          poe: data,
-          onChange: onPoEStepChange,
-          onSwitch: onEnabledChange,
-          changeable
+  useEffect(() => {
+    if (data !== undefined) {
+      if (updatePoints) {
+        setPoints({
+          id: data.id,
+          edited: data.edited,
+          mistakePoints: data.mistakePoints,
+          reachedPoints: data.reachedPoints,
+          evaluationStepResultCheck: data.evaluationStepResultCheck,
+          calculationCheck: data.calculationCheck,
+          gradingDefinition: data.gradingDefinition as GradingDefinition
         })
-      } else {
-        return renderView({
-          reachedPoints: data!
-            .reachedPoints!!,
-          maxPoints: data
-            .gradeDefinitionMax!.maxPoints
-        })
+        setUpdatePoints(false)
       }
+    }
+  }, [data, updatePoints, setPoints, setUpdatePoints])
+
+  const [pointsInput, setPointsInput] = useState<
+    PointsOfEvaluationStepInput | undefined
+  >(undefined)
+
+  useEffect(() => {
+    if (points !== undefined) {
+      setPointsInput({
+        id: points.id!!,
+        edited: points.edited!!,
+        mistakePoints: points.mistakePoints!!,
+        reachedPoints: points.reachedPoints!!,
+        evaluationStepResultCheck: points.evaluationStepResultCheck!!,
+        calculationCheck: points.calculationCheck!!
+      })
+    }
+  }, [points])
+
+  const debounceMutation = useMemo(
+    () =>
+      debounce((input: PointsOfEvaluationStepInput) => {
+        updateMutation({ variables: { input } }).then()
+      }, 500),
+    [updateMutation]
+  )
+
+  useEffect(() => {
+    if (updateState) {
+      if (pointsInput !== undefined) {
+        debounceMutation(pointsInput).then()
+      }
+    }
+  }, [debounceMutation, pointsInput, updateState])
+
+  const [editable, setEditable] = useState<boolean>(false)
+
+  const onEnabledChange = (state: boolean) => {
+    setEditable(state)
+  }
+  const createOnValueChange = (field: keyof PointsOfEvaluationStepInput) => (
+    value: number
+  ) => {
+    const valueOfKey = { ...points, [field]: value }
+    if (field !== null && pointsInput !== null) {
+      setUpdateState(true)
+      setPointsInput(valueOfKey as PointsOfEvaluationStepInput)
+      setPoints(valueOfKey)
+    }
+  }
+
+  if (points !== undefined && points.gradingDefinition !== undefined) {
+    if (result.error) return <div>{result.error.message}</div>
+
+    if (points.gradingDefinition === null) {
+      return <Empty />
+    } else if (!points.gradingDefinition!.active) {
+      return <Empty />
+    }
+    if (auth) {
+      return renderEdit(
+        points.gradingDefinition,
+        points,
+        createOnValueChange('reachedPoints'),
+        onEnabledChange,
+        editable
+      )
+    } else {
+      return renderView(
+        points.reachedPoints!,
+        points.gradingDefinition!.maxPoints
+      )
+    }
   } else {
     return <Empty />
   }
 }
 
-const renderView: React.FC<{
-  reachedPoints: number
-  maxPoints: number | undefined
-}> = props => {
+const renderView = (reachedPoints: number, maxPoints: number | undefined) => {
   return (
     <div className="points-view">
-      {props.reachedPoints}/{props.maxPoints} Points
+      {reachedPoints}/{maxPoints} Points
     </div>
   )
 }
 
-const renderEdit: React.FC<{
-  poe: PointsOfEvaluationStep
-  onChange: (value: number) => void
-  onSwitch: (changeable: boolean) => void
-  changeable: boolean
-}> = props => {
+const renderEdit = (
+  gradeDefinition: Pick<GradingDefinition, 'active' | 'maxPoints'>,
+  pointsOfEvaluationStep: Pick<PointsOfEvaluationStep, 'reachedPoints'>,
+  onChange: (value: number) => void,
+  onSwitch: (changeable: boolean) => void,
+  editable: boolean
+) => {
   const onChangeDefinitely = (val: number | undefined) => {
-    if (val !== undefined) {
-      if (val > props.poe.gradeDefinitionMax!.maxPoints) {
-        props.onChange(props.poe.gradeDefinitionMax!.maxPoints)
+    if (typeof val === 'number') {
+      if (val > gradeDefinition.maxPoints) {
+        onChange(gradeDefinition.maxPoints)
       } else {
-        props.onChange(val)
+        onChange(val)
       }
     }
   }
 
-  if (props.poe.gradeDefinitionMax!.maxPoints === 0) return <></>
+  if (gradeDefinition.maxPoints === 0) return <></>
 
   const input = (
     <InputNumber
       title={'Points'}
       min={0}
-      max={props.poe.gradeDefinitionMax!.maxPoints}
+      max={gradeDefinition.maxPoints}
       onChange={onChangeDefinitely}
       inputMode={'numeric'}
-      value={props.poe.reachedPoints!!}
-      disabled={!props.changeable}
+      value={pointsOfEvaluationStep.reachedPoints!!}
+      disabled={!editable}
     />
   )
 
-  const lever = (
-    <Switch defaultChecked={props.changeable} onChange={props.onSwitch} />
-  )
+  const lever = <Switch defaultChecked={editable} onChange={onSwitch} />
 
   return (
     <div className="points-edit">
       {lever}
-      {input} / {props.poe.gradeDefinitionMax!.maxPoints}
+      {input} / {gradeDefinition.maxPoints}
     </div>
   )
 }
