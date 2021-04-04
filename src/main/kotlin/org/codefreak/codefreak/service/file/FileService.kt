@@ -90,7 +90,7 @@ interface FileService {
   /**
    * Write to file specified by path. Will create the file if it does not exist and truncate existing content.
    * The output stream must be closed properly after writing!
-   * Throws an IllegalArgumentException if path does not exist or is a directory.
+   * Throws an IllegalArgumentException if path is a directory.
    */
   @Throws(IllegalArgumentException::class)
   fun writeFile(collectionId: UUID, path: String): OutputStream

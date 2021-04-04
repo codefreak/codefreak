@@ -400,10 +400,39 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `writing file contents throws if path does not exist`() {
+  fun `writing file contents throws when path is a directory`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.writeFile(collectionId, "some/path").use {
+      it.write(byteArrayOf(42))
+    }
+  }
+
+  @Test
+  fun `writing file contents when path does not exist creates the file and writes the content`() {
     fileService.writeFile(collectionId, "file.txt").use {
       it.write(byteArrayOf(42))
     }
+
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf(42)))
+  }
+
+  @Test
+  fun `writing file contents overrides existing file contents`() {
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    val oldContent = byteArrayOf(42)
+    val newContent = byteArrayOf(17)
+
+    fileService.writeFile(collectionId, "file.txt").use {
+      it.write(oldContent)
+    }
+
+    fileService.writeFile(collectionId, "file.txt").use {
+      it.write(newContent)
+    }
+
+    assertFalse(equals(fileService.readFile(collectionId, "file.txt").readBytes(), oldContent))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), newContent))
   }
 
   @Test
