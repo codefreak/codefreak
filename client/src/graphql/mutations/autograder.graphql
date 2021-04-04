@@ -1,12 +1,6 @@
-#mutation UpdateGradingDefinitionValues($input: GradingDefinitionInput!) {
-#  updateGradingDefinitionValues(input: $input)
-#}
-#
-#mutation UpdateGradingDefinitionStatus(
-#  $input: GradingDefinitionActiveInput!
-#) {
-#  updateGradingDefinitionStatus(input: $input)
-#}
+mutation UpdateGradingDefinitionValues($input: GradingDefinitionInput!){
+  updateGradingDefinitionValues(input: $input)
+}
 
 mutation UpdatePointsOfEvaluationStep($input: PointsOfEvaluationStepInput!) {
   updatePointsOfEvaluationStep(input: $input)
