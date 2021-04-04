@@ -34,10 +34,10 @@ class EvaluationStep(
   var feedback = mutableSetOf<Feedback>()
 
   @OneToOne(mappedBy = "evaluationStep", cascade = [CascadeType.ALL])
-  var pointsOfEvaluationStep: PointsOfEvaluationStep? = null
+  var points: PointsOfEvaluationStep? = null
 
   @ManyToOne
-  var gradeDefinition: GradeDefinition? = null
+  var gradingDefinition: GradingDefinition? = null
 
   @Enumerated(EnumType.STRING)
   var result: EvaluationStepResult? = null
