@@ -28,13 +28,13 @@ import {
   EvaluationRunner,
   EvaluationStepDefinitionInput,
   GetEvaluationStepDefinitionsQueryResult,
-  GradeDefinitionActiveInput,
+  GetGradingDefinitionDocument,
   useCreateEvaluationStepDefinitionMutation,
   useDeleteEvaluationStepDefinitionMutation,
   useGetEvaluationStepDefinitionsQuery,
   useSetEvaluationStepDefinitionPositonMutation,
   useUpdateEvaluationStepDefinitionMutation,
-  useUpdateGradeDefinitionStatusMutation
+  useUpdateGradingDefinitionMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import { makeUpdater } from '../../services/util'
@@ -48,7 +48,7 @@ import {
 } from '../../services/time'
 import HelpTooltip from '../../components/HelpTooltip'
 import { debounce } from 'ts-debounce'
-import GradeDefinitionInputField from '../../components/autograder/GradeDefinitionInputField'
+import GradingDefinitionInputField from '../../components/autograder/GradingDefinitionInputField'
 
 type EvaluationStepDefinition = NonNullable<
   GetEvaluationStepDefinitionsQueryResult['data']
@@ -82,16 +82,8 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       messageService.success('Step updated')
     }
   })
-  const [
-    UpdateGradeDefinitionActiveMutation
-  ] = useUpdateGradeDefinitionStatusMutation({
-    onCompleted: () => {
-      result.refetch()
-    }
-  })
-  const fetchForUpdate = () => {
-    return result.refetch() as any
-  }
+
+  const [updateGradingDefinitionMutation] = useUpdateGradingDefinitionMutation()
 
   const [createStep] = useCreateEvaluationStepDefinitionMutation()
 
@@ -176,16 +168,30 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       return updateTimeout(timeout)
     }
 
-    const gradeDefinitionActiveInput: GradeDefinitionActiveInput = {
-      id: definition.gradeDefinition.id,
-      active: definition.gradeDefinition.active
-    }
+    const gradingDefinition = definition.gradingDefinition.id
+
+    const gradingDefinitionUpdater = makeUpdater(
+      definition.gradingDefinition,
+      variables =>
+        updateGradingDefinitionMutation({
+          variables,
+          refetchQueries: [
+            {
+              query: GetGradingDefinitionDocument,
+              variables: { gradingDefinition }
+            }
+          ]
+        }).finally(() => {
+          if (!definition.gradingDefinition.active) {
+            messageService.success('GradingDefinition On')
+          } else {
+            messageService.success('GradingDefinition Off')
+          }
+        })
+    )
 
     const onGradeActiveChange = (state: boolean) => {
-      gradeDefinitionActiveInput.active = state
-      return UpdateGradeDefinitionActiveMutation({
-        variables: { gradeDefinitionActiveInput }
-      })
+      gradingDefinitionUpdater('active')(state)
     }
 
     const cardProps: CardProps = {
@@ -278,22 +284,16 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
               <p>
                 <div>Automatic Grading</div>
                 <Switch
-                  defaultChecked={gradeDefinitionActiveInput.active}
+                  defaultChecked={definition.gradingDefinition.active}
                   onChange={onGradeActiveChange}
                   disabled={assignmentOpen && !sureToEdit}
                 />
               </p>
-              {definition.gradeDefinition.active ? (
+              {definition.gradingDefinition.active ? (
                 <p>
-                  <GradeDefinitionInputField
-                    gradeDefinition={definition.gradeDefinition}
-                    fetchForUpdate={fetchForUpdate}
+                  <GradingDefinitionInputField
+                    gradingDefinition={definition.gradingDefinition}
                     disable={assignmentOpen && !sureToEdit}
-                    // placeholder={
-                    //   gradeDefinitionInput
-                    //     ? defaultGradeDefinitionComponent()
-                    //     : undefined
-                    // }
                   />
                 </p>
               ) : null}
