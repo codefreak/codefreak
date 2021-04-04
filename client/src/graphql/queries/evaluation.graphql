@@ -65,13 +65,8 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       options
       active
       timeout
-      gradeDefinition {
-        id
-        active
-        maxPoints
-        minorError
-        majorError
-        criticalError
+      gradingDefinition {
+        ...gradingDefinition
       }
     }
   }
