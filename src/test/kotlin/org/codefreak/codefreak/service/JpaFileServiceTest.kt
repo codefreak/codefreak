@@ -38,6 +38,14 @@ class JpaFileServiceTest {
     assertTrue(fileService.containsFile(collectionId, "file.txt"))
   }
 
+  @Test
+  fun `creates multiple files`() {
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt", "file3.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file2.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file3.txt"))
+  }
+
   @Test(expected = IllegalArgumentException::class)
   fun `creating a file throws when the path already exists`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
@@ -45,8 +53,24 @@ class JpaFileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
+  fun `creating a file two times at once throws`() {
+    fileService.createFiles(collectionId, setOf("file.txt", "file.txt"))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
   fun `creating a file throws on empty path name`() {
     fileService.createFiles(collectionId, setOf(""))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `creating a file throws when path is a directory`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.createFiles(collectionId, setOf("some/path"))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `creating a file throws when the parent directory does not exist`() {
+    fileService.createFiles(collectionId, setOf("parent/file.txt"))
   }
 
   @Test
@@ -56,6 +80,18 @@ class JpaFileServiceTest {
     fileService.createFiles(collectionId, setOf("file.txt"))
 
     assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "other.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
+  }
+
+  @Test
+  fun `creating multiple files keeps other files intact`() {
+    fileService.createFiles(collectionId, setOf("other.txt"))
+    fileService.createDirectories(collectionId, setOf("aDirectory"))
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
+
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file2.txt"))
     assertTrue(fileService.containsFile(collectionId, "other.txt"))
     assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
   }
