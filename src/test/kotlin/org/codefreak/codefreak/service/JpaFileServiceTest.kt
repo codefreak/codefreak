@@ -363,9 +363,36 @@ class JpaFileServiceTest {
     assertTrue(fileService.containsFile(collectionId, "new.txt"))
   }
 
+  @Test
+  fun `moves existing files`() {
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
+    fileService.createDirectories(collectionId, setOf("some/path"))
+
+    fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "some/path")
+
+    assertFalse(fileService.containsFile(collectionId, "file1.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file2.txt"))
+    assertTrue(fileService.containsFile(collectionId, "some/path/file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "some/path/file2.txt"))
+  }
+
   @Test(expected = IllegalArgumentException::class)
   fun `moving a file throws when source path does not exist`() {
     fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+  }
+
+  @Test
+  fun `moving files does not move any files when a file in the source path does not exist`() {
+    fileService.createFiles(collectionId, setOf("file1.txt"))
+    fileService.createDirectories(collectionId, setOf("new"))
+
+    try {
+      fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
+      fail() // An IllegalArgumentException should be thrown
+    } catch (e: IllegalArgumentException) {}
+
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
+    assertFalse(fileService.containsFile(collectionId, "new/file1.txt"))
   }
 
   @Test(expected = IllegalArgumentException::class)
@@ -374,6 +401,37 @@ class JpaFileServiceTest {
     fileService.createFiles(collectionId, setOf("new.txt"))
 
     fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `moving multiple files throws when target file path does not exist`() {
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
+
+    fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
+  }
+
+  @Test
+  fun `moving files does not move any files when a file in the target path already exists`() {
+    val newFile2Contents = byteArrayOf(42)
+
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
+    fileService.createDirectories(collectionId, setOf("new"))
+    fileService.createFiles(collectionId, setOf("new/file2.txt"))
+
+    fileService.writeFile(collectionId, "new/file2.txt").use {
+      it.write(newFile2Contents)
+    }
+
+    try {
+      fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
+      fail() // An IllegalArgumentException should be thrown
+    } catch (e: IllegalArgumentException) {}
+
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file2.txt"))
+    assertFalse(fileService.containsFile(collectionId, "new/file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "new/file2.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "new/file2.txt").readBytes(), newFile2Contents))
   }
 
   @Test
@@ -397,6 +455,18 @@ class JpaFileServiceTest {
 
     assertFalse(fileService.containsDirectory(collectionId, "some/path"))
     assertTrue(fileService.containsDirectory(collectionId, "new"))
+  }
+
+  @Test
+  fun `moves existing directories`() {
+    fileService.createDirectories(collectionId, setOf("some/path", "some/other", "new"))
+
+    fileService.moveFile(collectionId, setOf("some/path", "some/other"), "new")
+
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/other"))
+    assertTrue(fileService.containsDirectory(collectionId, "new/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "new/other"))
   }
 
   @Test(expected = IllegalArgumentException::class)
