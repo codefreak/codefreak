@@ -293,7 +293,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `writes file contents correctly`() {
+  fun `writes and reads file contents correctly`() {
     val contents = byteArrayOf(42)
     fileService.createFiles(collectionId, setOf("file.txt"))
 
@@ -333,6 +333,24 @@ class JpaFileServiceTest {
     fileService.writeFile(collectionId, "file.txt").use {
       it.write(byteArrayOf(42))
     }
+  }
+
+  @Test
+  fun `reads an existing empty file`() {
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf()))
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `reading file contents throws for directories`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+
+    fileService.readFile(collectionId, "some/path")
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `reading file contents throws if path does not exist`() {
+    fileService.readFile(collectionId, "file.txt")
   }
 
   @Test
