@@ -1,55 +1,32 @@
-query GetGradeDefinition($gradeDefinition: ID!) {
-  gradeDefinition(id: $gradeDefinition) {
-    id
-    active
-    maxPoints
-    minorError
-    majorError
-    criticalError
+query GetGradingDefinition($gradingDefinition: ID!) {
+  gradingDefinition(id: $gradingDefinition) {
+    ...gradingDefinition
   }
 }
 
 query GetPointsOfEvaluation($pointsOfEvaluation: ID!) {
   pointsOfEvaluation(id: $pointsOfEvaluation) {
-    id
-    mistakePoints
-    reachedPoints
-    calcCheck
-    edited
-    resultCheck
+    ...pointsOfEvaluationStep
   }
 }
 
-fragment pointsOfEvaluationStep on PointsOfEvaluationStep {
-  id
-  mistakePoints
-  reachedPoints
-  calcCheck
-  edited
-  resultCheck
-}
-
 query GetPointsOfEvaluationStepByEvaluationStepId($evaluationStepId: ID!) {
-  pointsOfEvaluationStepByEvaluationStepId(id: $evaluationStepId) {
-    id
-    mistakePoints
-    reachedPoints
-    calcCheck
-    edited
-    resultCheck
-    gradeDefinitionMax {
+  pointsOfEvaluationStepByEvaluationStepId(
+    evaluationStepId: $evaluationStepId
+  ) {
+    ...pointsOfEvaluationStep
+    gradingDefinition {
       id
-      maxPoints
       active
+      maxPoints
     }
   }
 }
 
-query GetGrade($evaluationId: ID!) {
-  grade(id: $evaluationId) {
+query GetGradeForEvaluation($evaluationId: ID!) {
+  gradeForEvaluation(evaluationId: $evaluationId) {
     id
     gradePercentage
-    calculated
   }
 }
 
@@ -59,8 +36,7 @@ query GetScoreboardByAssignmentId($id: ID!) {
     title
     submissionsScoreboard {
       id
-      #skip user in tree. We dont need him
-      useralias {
+      userAlias {
         id
         alias
       }
@@ -73,7 +49,6 @@ query GetScoreboardByAssignmentId($id: ID!) {
         gradeScoreboard {
           id
           gradePercentage
-          calculated
         }
       }
     }

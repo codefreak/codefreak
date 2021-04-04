@@ -1,12 +1,12 @@
-mutation UpdateGradeDefinitionValues($input: GradeDefinitionInput!) {
-  updateGradeDefinitionValues(input: $input)
-}
-
-mutation UpdateGradeDefinitionStatus(
-  $gradeDefinitionActiveInput: GradeDefinitionActiveInput!
-) {
-  updateGradeDefinitionStatus(input: $gradeDefinitionActiveInput)
-}
+#mutation UpdateGradingDefinitionValues($input: GradingDefinitionInput!) {
+#  updateGradingDefinitionValues(input: $input)
+#}
+#
+#mutation UpdateGradingDefinitionStatus(
+#  $input: GradingDefinitionActiveInput!
+#) {
+#  updateGradingDefinitionStatus(input: $input)
+#}
 
 mutation UpdatePointsOfEvaluationStep($input: PointsOfEvaluationStepInput!) {
   updatePointsOfEvaluationStep(input: $input)
@@ -14,4 +14,22 @@ mutation UpdatePointsOfEvaluationStep($input: PointsOfEvaluationStepInput!) {
 
 mutation UpdateUserAlias($input: UserAliasInput!) {
   updateUserAlias(input: $input)
+}
+
+mutation UpdateGradingDefinition(
+  $id: ID!
+  $active: Boolean
+  $maxPoints: Float
+  $minorMistakePenalty: Float
+  $majorMistakePenalty: Float
+  $criticalMistakePenalty: Float
+) {
+  updateGradingDefinition(
+    id: $id
+    active: $active
+    maxPoints: $maxPoints
+    minorMistakePenalty: $minorMistakePenalty
+    majorMistakePenalty: $majorMistakePenalty
+    criticalMistakePenalty: $criticalMistakePenalty
+  )
 }
