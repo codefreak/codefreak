@@ -5,6 +5,7 @@ import java.util.Optional
 import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
+import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.service.file.JpaFileService
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -21,7 +22,7 @@ class JpaFileServiceTest {
   @Mock
   lateinit var fileCollectionRepository: FileCollectionRepository
   @InjectMocks
-  val fileService = JpaFileService()
+  val fileService: FileService = JpaFileService()
 
   @Before
   fun init() {
@@ -85,6 +86,40 @@ class JpaFileServiceTest {
     assertTrue(fileService.containsFile(collectionId, "other.txt"))
     assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
     assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+  }
+
+  @Test
+  fun `finds an existing file`() {
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+  }
+
+  @Test
+  fun `does not find not-existing files`() {
+    assertFalse(fileService.containsFile(collectionId, "file.txt"))
+  }
+
+  @Test
+  fun `does not find file if the path is a directory`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    assertFalse(fileService.containsFile(collectionId, "some/path"))
+  }
+
+  @Test
+  fun `finds an existing directory`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+  }
+
+  @Test
+  fun `does not find not-existing directories`() {
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+  }
+
+  @Test
+  fun `does not find directory if the path is a file`() {
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    assertFalse(fileService.containsDirectory(collectionId, "file.txt"))
   }
 
   @Test
