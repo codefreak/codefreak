@@ -1,22 +1,14 @@
 import { Route } from '@ant-design/pro-layout/lib/typings'
 import { AUTHORITIES } from './hooks/useHasAuthority'
-import AdminPage from './pages/AdminPage'
 import AssignmentListPage from './pages/assignment/AssignmentListPage'
 import AssignmentPage from './pages/assignment/AssignmentPage'
-import {
-  BasicHelpPage,
-  DefinitionsHelpPage,
-  HelpPage,
-  IdeHelpPage
-} from './pages/help'
 import CreateTaskPage from './pages/task/CreateTaskPage'
 import TaskPage from './pages/task/TaskPage'
 import TaskPoolPage from './pages/task/TaskPoolPage'
 import {
   ContainerOutlined,
   FileTextOutlined,
-  QuestionCircleOutlined,
-  SettingOutlined
+  QuestionCircleOutlined
 } from '@ant-design/icons'
 
 export const routerConfig: Route = {
@@ -56,38 +48,12 @@ export const routerConfig: Route = {
       component: TaskPage
     },
     {
-      name: 'Help',
+      key: 'docs',
+      name: 'Documentation',
       icon: <QuestionCircleOutlined />,
-      path: '/help',
-      hideChildrenInMenu: true,
-      component: HelpPage,
-      children: [
-        {
-          path: '/help/basics',
-          name: 'Basics',
-          component: BasicHelpPage,
-          authority: AUTHORITIES.ROLE_TEACHER
-        },
-        {
-          path: '/help/definitions',
-          name: 'Definition Files',
-          component: DefinitionsHelpPage,
-          authority: AUTHORITIES.ROLE_TEACHER
-        },
-        {
-          path: '/help/ide',
-          name: 'Online IDE',
-          component: IdeHelpPage,
-          authority: AUTHORITIES.ROLE_TEACHER
-        }
-      ]
-    },
-    {
-      path: '/admin',
-      name: 'Administration',
-      icon: <SettingOutlined />,
-      authority: AUTHORITIES.ROLE_ADMIN,
-      component: AdminPage
+      isUrl: true,
+      target: '_blank',
+      path: process.env.CODEFREAK_DOCS_BASE_URL
     }
   ]
 }

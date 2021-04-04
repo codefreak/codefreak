@@ -16,6 +16,7 @@ import './DefaultLayout.less'
 import Logo from './Logo'
 import RightHeader from './RightHeader'
 import { useHideNavigation } from '../hooks/useHideNavigation'
+import SidebarMenuItem from './SidebarMenuItem'
 
 export const appName = 'Code FREAK'
 
@@ -87,12 +88,18 @@ const menuItemRender = (
   menuItemProps: MenuDataItem,
   defaultDom: React.ReactNode
 ) => {
-  if (menuItemProps.isUrl || menuItemProps.children || !menuItemProps.path) {
+  const { path, icon, name, isUrl, target } = menuItemProps
+
+  if (!path) {
     return defaultDom
   }
+
   return (
     <Authorized authority={menuItemProps.authority as Authority}>
-      <Link to={menuItemProps.path}>{defaultDom}</Link>
+      <SidebarMenuItem path={path} isUrl={isUrl} target={target}>
+        {icon}
+        <span>{name}</span>
+      </SidebarMenuItem>
     </Authorized>
   )
 }

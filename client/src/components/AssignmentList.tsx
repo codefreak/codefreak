@@ -7,7 +7,6 @@ import { Button, Card, Descriptions, Modal, Tooltip } from 'antd'
 import AssignmentStatusTag from './AssignmentStatusTag'
 import EntityLink from './EntityLink'
 import Authorized from './Authorized'
-import React from 'react'
 import {
   AssignmentStatus,
   GetAssignmentListQueryResult
@@ -15,6 +14,7 @@ import {
 import { compare } from '../services/util'
 import { matches } from '../services/strings'
 import { displayName } from '../services/user'
+import ModificationTime from './ModificationTime'
 
 const { confirm } = Modal
 
@@ -95,6 +95,16 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
     </span>
   )
 
+  const updatedAtTag = (
+    <span style={{ marginRight: '1em' }}>
+      Last Updated:{' '}
+      <ModificationTime
+        updated={new Date(assignment.updatedAt)}
+        created={new Date(assignment.createdAt)}
+      />
+    </span>
+  )
+
   return (
     <Card
       title={
@@ -106,7 +116,8 @@ const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {
       style={{ marginBottom: 16 }}
       extra={
         <>
-          <Authorized authority={'ROLE_ADMIN'}>{authorTag}</Authorized>
+          <Authorized authority="ROLE_ADMIN">{authorTag}</Authorized>
+          <Authorized authority="ROLE_TEACHER">{updatedAtTag}</Authorized>
           {assignment.deletable ? (
             <Tooltip title={'Delete assignment'} placement="left">
               <Button

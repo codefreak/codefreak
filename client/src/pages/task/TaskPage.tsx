@@ -1,12 +1,11 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import {
-  ArrowLeftOutlined,
   CloudOutlined,
   DashboardOutlined,
   FileTextOutlined,
   SolutionOutlined
 } from '@ant-design/icons'
-import { Button, Switch as AntSwitch, Tooltip } from 'antd'
+import { Switch as AntSwitch, Tooltip } from 'antd'
 import { TagType } from 'antd/es/tag'
 import moment from 'moment'
 import { createContext, useCallback } from 'react'
@@ -45,7 +44,7 @@ import {
   useGetTaskQuery,
   useUpdateTaskMutation
 } from '../../services/codefreak-api'
-import { getEntityPath } from '../../services/entity-path'
+import { BASE_PATHS, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
@@ -216,14 +215,8 @@ const TaskPage: React.FC = () => {
 
   let buttons
   if (differentUser && assignment) {
-    // Show "back to submissions" button for teachers
-    const onClick = () =>
-      history.push(getEntityPath(assignment) + '/submissions')
-    buttons = (
-      <Button icon={<ArrowLeftOutlined />} size="large" onClick={onClick}>
-        Back to submissions
-      </Button>
-    )
+    // no buttons in the teacher's submission view
+    buttons = null
   } else if (answer) {
     // regular buttons to work on task for students
     buttons = (
@@ -270,6 +263,20 @@ const TaskPage: React.FC = () => {
     renderTimeLimit()
   ].filter((it): it is React.ReactElement<TagType> => it !== undefined)
 
+  const goToAssignment = () => {
+    let previousPath
+
+    if (assignment && differentUser) {
+      previousPath = getEntityPath(assignment) + '/submissions'
+    } else if (assignment) {
+      previousPath = getEntityPath(assignment)
+    } else {
+      previousPath = BASE_PATHS.Task + '/pool'
+    }
+
+    history.push(previousPath)
+  }
+
   return (
     <DifferentUserContext.Provider value={differentUser}>
       <SetTitle>{task.title}</SetTitle>
@@ -291,6 +298,7 @@ const TaskPage: React.FC = () => {
             {teacherControls} {buttons}
           </>
         }
+        onBack={goToAssignment}
       />
       <Switch>
         <Route exact path={path}>

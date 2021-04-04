@@ -13,7 +13,6 @@ import {
   EvaluationStepResult,
   GetAssignmentWithSubmissionsQueryResult
 } from '../generated/graphql'
-import useAnswerEvaluation from '../hooks/useAnswerEvaluation'
 import { useFormatter } from '../hooks/useFormatter'
 import { getEntityPath } from '../services/entity-path'
 import { shorten } from '../services/short-id'
@@ -24,6 +23,7 @@ import './SubmissionsTable.less'
 import SearchBar from './SearchBar'
 import EvaluationStepIcon from './EvaluationStepIcon'
 import { isEvaluationInProgress } from '../services/evaluation'
+import useEvaluationStatusUpdates from '../hooks/useEvaluationStatusUpdates'
 
 type Assignment = NonNullable<
   GetAssignmentWithSubmissionsQueryResult['data']
@@ -181,13 +181,12 @@ const AnswerEvaluationSummary: React.FC<{
   user: Submission['user']
   answer: Answer
 }> = ({ task, user, answer }) => {
-  const { latestEvaluation, evaluationStatus, loading } = useAnswerEvaluation(
-    answer.id,
-    answer.latestEvaluation || undefined
-  )
+  // keep track of server-side evaluation status updates for this answer
+  const liveEvaluation = useEvaluationStatusUpdates(answer.id)
+  const latestEvaluation = liveEvaluation || answer.latestEvaluation
+  const evaluationStatus = latestEvaluation?.stepsStatusSummary
 
-  // prevent flashing of old evaluation result by also showing loading indicator for fetching new results
-  if (loading || isEvaluationInProgress(evaluationStatus)) {
+  if (isEvaluationInProgress(evaluationStatus)) {
     return (
       <Tooltip title="Evaluating answer…">
         <LoadingOutlined />

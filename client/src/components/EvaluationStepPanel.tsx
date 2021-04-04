@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   EvaluationStepBasicsFragment,
   EvaluationStepResult,
-  EvaluationStepStatus,
   Feedback,
   FeedbackSeverity,
-  FeedbackStatus,
-  useEvaluationStepStatusUpdatedSubscription,
-  useGetEvaluationStepQuery
+  FeedbackStatus
 } from '../generated/graphql'
 import { SmileTwoTone } from '@ant-design/icons'
 import { Card, Collapse, Empty, Result, Skeleton, Tag } from 'antd'
@@ -18,6 +15,7 @@ import renderFeedbackPanel from './FeedbackPanel'
 import EvaluationStepIcon from './EvaluationStepIcon'
 import { isEvaluationInProgress } from '../services/evaluation'
 import EvaluationProcessingIcon from './EvaluationProcessingIcon'
+import useLiveEvaluationStep from '../hooks/useLiveEvaluationStep'
 import Countdown from './Countdown'
 import moment from 'moment'
 import { momentDifferenceToRelTime } from '../services/time'
@@ -41,43 +39,19 @@ function timer(queuedAt?: string, finishedAt?: string) {
   }
 }
 
-export const EvaluationStepPanel: React.FC<{
+interface EvaluationStepPanelProps {
   answerId: string
   stepBasics: EvaluationStepBasicsFragment
-}> = props => {
+}
+
+export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => {
   const { answerId, stepBasics } = props
-  const { id: stepId } = stepBasics
-
-  const [stepStatus, setStepStatus] = useState<EvaluationStepStatus>(
-    stepBasics.status
-  )
-  const [stepResult, setStepResult] = useState<
-    EvaluationStepResult | undefined
-  >(stepBasics.result || undefined)
   const [sortValue, setSortValue] = useState('FILE')
-  const result = useGetEvaluationStepQuery({ variables: { stepId } })
-  const { refetch } = result
-  const { data: liveData } = useEvaluationStepStatusUpdatedSubscription({
-    variables: { stepId }
-  })
+  const stepDetailsQuery = useLiveEvaluationStep(stepBasics.id)
 
-  useEffect(() => {
-    const updatedStep = liveData?.evaluationStepStatusUpdated
-    if (updatedStep?.status) {
-      setStepStatus(updatedStep?.status)
-    }
-    if (updatedStep?.result) {
-      setStepResult(updatedStep.result)
-    }
-  }, [liveData, setStepStatus, setStepResult])
-
-  useEffect(() => {
-    const updatedStep = liveData?.evaluationStepStatusUpdated
-    if (updatedStep?.status === EvaluationStepStatus.Finished) {
-      refetch()
-    }
-  }, [refetch, liveData])
-
+  const stepDetails = stepDetailsQuery.data?.evaluationStep
+  const stepStatus = stepDetails?.status || stepBasics.status
+  const stepResult = stepDetails?.result || stepBasics.result || undefined
   const title = (
     <>
       <EvaluationStepIcon status={stepStatus} result={stepResult} />{' '}
@@ -90,14 +64,14 @@ export const EvaluationStepPanel: React.FC<{
     </>
   )
 
-  if (result.loading || !result.data) {
+  if (stepDetailsQuery.loading || !stepDetailsQuery.data) {
     return (
       <Card title={title} className="evaluation-result-panel">
         <Skeleton />
       </Card>
     )
   }
-  const { evaluationStep: step } = result.data
+  const { evaluationStep: step } = stepDetailsQuery.data
 
   const feedbackList = step.feedback
   const handleSortChange = (value: string) => setSortValue(value)
@@ -143,7 +117,11 @@ export const EvaluationStepPanel: React.FC<{
   }
 
   if (!body) {
-    body = <Empty />
+    body = (
+      <div style={{ padding: '20px 0' }}>
+        <Empty description="This step has not been executed, yet." />
+      </div>
+    )
   }
 
   return (

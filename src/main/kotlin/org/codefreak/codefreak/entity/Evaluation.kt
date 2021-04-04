@@ -6,6 +6,7 @@ import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.Transient
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.Type
 
@@ -20,6 +21,7 @@ class Evaluation(
   @Type(type = "image")
   var filesDigest: ByteArray,
 
+  @ColumnDefault("1970-01-01 00:00:00")
   var evaluationSettingsFrom: Instant
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL], orphanRemoval = true)

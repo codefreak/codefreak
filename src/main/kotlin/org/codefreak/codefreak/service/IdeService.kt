@@ -257,12 +257,12 @@ class IdeService : BaseService() {
   protected fun copyFilesToIde(containerId: String, fileCollectionId: UUID) {
     // extract possible existing files of the current submission into project dir
     if (fileService.collectionExists(fileCollectionId)) {
-      // remove existing files before writing new ones
+      // remove existing files before writing new ones and create the project directory (if it does not exist)
       // use sh to make globbing work
       // two globs: one for regular files and one for hidden files/dirs except . and ..
       containerService.exec(
           containerId,
-          arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]*")
+          arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]* && mkdir -p $PROJECT_PATH")
       )
 
       fileService.readCollectionTar(fileCollectionId).use {

@@ -79,7 +79,7 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
       "Sample Assignment",
       teacher,
       openFrom = Instant.now(),
-      deadline = Instant.now().plusSeconds(60),
+      deadline = null,
       active = true
     )
     assignmentService.saveAssignment(assignmentWithAllTasks)

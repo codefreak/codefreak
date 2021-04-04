@@ -17,29 +17,38 @@ import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.stereotype.Component
 
 @Component
-class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep> {
+class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
 
   @Autowired
   @Qualifier("asyncTaskExecutor")
   private lateinit var taskExecutor: AsyncTaskExecutor
 
   @Autowired
-  private lateinit var evaluationService: EvaluationService
+  private lateinit var evaluationStepService: EvaluationStepService
+
+  @Autowired
+  private lateinit var runnerService: EvaluationRunnerService
 
   @Value("#{@config.evaluation.defaultTimeout}")
   private var defaultTimeout: Long = 0L
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun process(evaluationStep: EvaluationStep): EvaluationStep {
+  override fun process(evaluationStep: EvaluationStep): EvaluationStep? {
     val answer = evaluationStep.evaluation.answer
     log.debug("Start evaluation of answer {} ({} steps)", answer.id, answer.task.evaluationStepDefinitions.size)
 
     val stepDefinition = evaluationStep.definition
     val runnerName = stepDefinition.runnerName
     try {
-      val runner = evaluationService.getEvaluationRunner(runnerName)
-      val feedbackList = runEvaluation(runner, evaluationStep)
+      val runner = runnerService.getEvaluationRunner(runnerName)
+      val feedbackList = try {
+        runEvaluation(runner, evaluationStep)
+      } catch (e: InterruptedException) {
+        // happens if the application shuts down. In this case we will stop any further processing.
+        // The evaluation will be re-run if the application restarts
+        return null
+      }
       evaluationStep.addAllFeedback(feedbackList)
       // only check for explicitly "failed" feedback so we ignore the "skipped" ones
       if (evaluationStep.feedback.any { feedback -> feedback.isFailed }) {
@@ -83,7 +92,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep> {
       }
     } catch (e: TimeoutException) {
       log.info("Timeout for evaluation step $runnerName of answer ${answer.id} occurred after ${timeout}sec")
-      evaluationService.stopEvaluationStep(step)
+      runnerService.stopAnswerEvaluation(runnerName, answer)
       throw EvaluationStepException("Evaluation timed out after $timeout seconds",
           result = EvaluationStepResult.ERRORED,
           status = EvaluationStepStatus.CANCELED

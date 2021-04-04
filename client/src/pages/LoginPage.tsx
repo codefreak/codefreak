@@ -1,34 +1,40 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input } from 'antd'
-import { useEffect } from 'react'
+import { useState } from 'react'
 import Centered from '../components/Centered'
 import Logo from '../components/Logo'
 import { AuthenticatedUser } from '../hooks/useAuthenticatedUser'
 import { useLoginMutation } from '../services/codefreak-api'
-import { FormProps } from 'antd/es/form'
 
 interface Credentials {
   username: string
   password: string
 }
 
-interface LoginProps extends FormProps<Credentials> {
-  onSuccessfulLogin: (user: AuthenticatedUser) => void
+interface LoginProps {
+  loggingOut: boolean
+  onSuccessfulLogin: (user: AuthenticatedUser) => Promise<void>
 }
 
 const LoginPage: React.FC<LoginProps> = props => {
-  const { onSuccessfulLogin } = props
+  const { onSuccessfulLogin, loggingOut } = props
+  const [loading, setLoading] = useState<boolean>(false)
+  const [login] = useLoginMutation({
+    errorPolicy: 'ignore' // prevents unhandled rejection errors
+  })
 
-  const [login, { data, loading }] = useLoginMutation()
-
-  useEffect(() => {
-    if (data) {
-      onSuccessfulLogin(data.login.user)
+  const handleSubmit = async (values: Credentials) => {
+    setLoading(true)
+    // errors during login are shown by our global error handling
+    try {
+      const { data } = await login({ variables: values })
+      if (data?.login) {
+        await onSuccessfulLogin(data.login.user)
+      }
+    } finally {
+      // get out of loading mode even if something goes wrong
+      setLoading(false)
     }
-  }, [onSuccessfulLogin, data])
-
-  const handleSubmit: FormProps['onFinish'] = async values => {
-    await login({ variables: values })
   }
 
   return (
@@ -62,6 +68,7 @@ const LoginPage: React.FC<LoginProps> = props => {
               autoComplete="username"
               autoFocus
               placeholder="Username / Mail Address"
+              disabled={loggingOut}
             />
           </Form.Item>
           <Form.Item
@@ -78,6 +85,7 @@ const LoginPage: React.FC<LoginProps> = props => {
               autoComplete="password"
               type="password"
               placeholder="Password"
+              disabled={loggingOut}
             />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0 }}>
@@ -85,9 +93,10 @@ const LoginPage: React.FC<LoginProps> = props => {
               type="primary"
               htmlType="submit"
               style={{ width: '100%' }}
-              loading={loading}
+              loading={loading || loggingOut}
+              disabled={loggingOut}
             >
-              Sign in
+              {loggingOut ? 'Logging out…' : 'Sign in'}
             </Button>
           </Form.Item>
         </Form>

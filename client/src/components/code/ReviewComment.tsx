@@ -6,18 +6,27 @@ import { FeedbackSeverity } from '../../generated/graphql'
 import useAuthenticatedUser from '../../hooks/useAuthenticatedUser'
 import Avatar from '../user/Avatar'
 import { FormProps } from 'antd/es/form'
+import FeedbackSeverityIcon from '../FeedbackSeverityIcon'
+
+// these are ordered by increasing severity
+const FeedbackSeverityOptions: Record<FeedbackSeverity, string> = {
+  [FeedbackSeverity.Info]: 'Info',
+  [FeedbackSeverity.Minor]: 'Minor',
+  [FeedbackSeverity.Major]: 'Major',
+  [FeedbackSeverity.Critical]: 'Critical'
+}
 
 const renderSeveritySelect = () => {
   return (
     <Select
       style={{ width: '250px' }}
       placeholder="Select a severity"
-      allowClear
+      defaultValue={FeedbackSeverity.Info}
     >
-      {Object.entries(FeedbackSeverity).map(([value, key]) => {
+      {Object.entries(FeedbackSeverityOptions).map(([key, value]) => {
         return (
           <Select.Option key={key} value={key}>
-            {value}
+            <FeedbackSeverityIcon severity={key as FeedbackSeverity} /> {value}
           </Select.Option>
         )
       })}
@@ -97,7 +106,7 @@ const ReviewCommentForm: React.FC<ReviewCommentFormProps> = props => {
             </Form.Item>
             <Row>
               <Col span={12}>
-                <Form.Item hasFeedback name="severity">
+                <Form.Item hasFeedback name="severity" label="Severity">
                   {renderSeveritySelect()}
                 </Form.Item>
               </Col>
