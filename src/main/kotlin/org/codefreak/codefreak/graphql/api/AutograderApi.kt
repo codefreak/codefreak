@@ -10,56 +10,38 @@ import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Grade
-import org.codefreak.codefreak.entity.GradeDefinition
+import org.codefreak.codefreak.entity.GradingDefinition
 import org.codefreak.codefreak.entity.PointsOfEvaluationStep
 import org.codefreak.codefreak.entity.Submission
 import org.codefreak.codefreak.entity.Task
-import org.codefreak.codefreak.entity.UserAlias
+import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
+import org.codefreak.codefreak.service.AliasNameGenerator
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentService
 import org.codefreak.codefreak.service.SubmissionService
-import org.codefreak.codefreak.service.UserAliasService
+import org.codefreak.codefreak.service.UserService
 import org.codefreak.codefreak.service.evaluation.EvaluationService
-import org.codefreak.codefreak.service.evaluation.GradeDefinitionService
 import org.codefreak.codefreak.service.evaluation.GradeService
+import org.codefreak.codefreak.service.evaluation.GradingDefinitionService
 import org.codefreak.codefreak.service.evaluation.PointsOfEvaluationStepService
-import org.slf4j.LoggerFactory
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 
-/**
- * GradeDefinition for query
- */
-@GraphQLName("GradeDefinition")
-class GradeDefinitionDto(@GraphQLIgnore val entity: GradeDefinition, ctx: ResolverContext) : BaseDto(ctx) {
+@GraphQLName("GradingDefinition")
+class GradingDefinitionDto(@GraphQLIgnore val entity: GradingDefinition, ctx: ResolverContext) : BaseDto(ctx) {
 
   @GraphQLID
   val id = entity.id
   val active = entity.active
   val maxPoints = entity.maxPoints
-  val minorError = entity.minorError
-  val majorError = entity.majorError
-  val criticalError = entity.criticalError
+  val minorMistakePenalty = entity.minorMistakePenalty
+  val majorMistakePenalty = entity.majorMistakePenalty
+  val criticalMistakePenalty = entity.criticalMistakePenalty
 }
 
-/**
- * GradeDefinitionMaxDto for query. Main purpose
- */
-@GraphQLName("GradeDefinitionMax")
-class GradeDefinitionMaxDto(@GraphQLIgnore val entity: GradeDefinition, ctx: ResolverContext) : BaseDto(ctx) {
-
-  @GraphQLID
-  val id = entity.id
-  val maxPoints = entity.maxPoints
-  val active = entity.active
-}
-
-/**
- * PointsOfEvaluation Dto for query
- */
 @GraphQLName("PointsOfEvaluationStep")
 class PointsOfEvaluationStepDto(@GraphQLIgnore val entity: PointsOfEvaluationStep?, ctx: ResolverContext) : BaseDto(ctx) {
 
@@ -67,36 +49,34 @@ class PointsOfEvaluationStepDto(@GraphQLIgnore val entity: PointsOfEvaluationSte
   val id = entity?.id
   val mistakePoints = entity?.mistakePoints
   val reachedPoints = entity?.reachedPoints
-  val calcCheck = entity?.calcCheck
+  val calculationCheck = entity?.calculationCheck
   val edited = entity?.edited
-  val resultCheck = entity?.resultCheck
-  val gradeDefinitionMax by lazy {
+  val evaluationStepResultCheck = entity?.evaluationStepResultCheck
+  val gradingDefinition by lazy {
     entity?.id?.let {
-      ctx.serviceAccess.getService(GradeDefinitionService::class).findByPointsOfEvaluationStepId(
+      ctx.serviceAccess.getService(GradingDefinitionService::class).findByPointsOfEvaluationStepId(
         it
       )
-    }?.let { GradeDefinitionMaxDto(it, ctx) }
+    }?.let { GradingDefinitionDto(it, ctx) }
   }
 }
 
-/**
- * Grade Dto for query
- */
 @GraphQLName("Grade")
 class GradeDto(@GraphQLIgnore val entity: Grade?, ctx: ResolverContext) : BaseDto(ctx) {
 
   @GraphQLID
   val id = entity?.id
   val gradePercentage = entity?.gradePercentage
-  val calculated = entity?.calculated
 }
 
 @GraphQLName("UserAlias")
-class UserAliasDto(@GraphQLIgnore val entity: UserAlias, ctx: ResolverContext) : BaseDto(ctx) {
+class UserAliasDto(@GraphQLIgnore val entity: User, ctx: ResolverContext) : BaseDto(ctx) {
 
   @GraphQLID
   val id = entity.id
-  val alias = entity.alias
+  val alias by lazy {
+    if (entity.alias != null) { entity.alias } else { ctx.serviceAccess.getService(AliasNameGenerator::class).generateAndSetAlias(entity).alias }
+  }
 }
 
 /**
@@ -118,8 +98,7 @@ class AssignmentScoreboardDto(@GraphQLIgnore val entity: Assignment, ctx: Resolv
 class SubmissionsScoreboardDto(@GraphQLIgnore val entity: Submission, ctx: ResolverContext) : BaseDto(ctx) {
   @GraphQLID
   val id = entity.id
-  // User is skipped in this Step. Not required on scoreboard UserAlias should be persistent
-  val useralias by lazy { UserAliasDto(entity.user.userAlias!!, ctx) }
+  val userAlias by lazy { UserAliasDto(entity.user, ctx) }
   val answersScoreboard by lazy { serviceAccess.getService(AnswerService::class).findAllBySubmissionId(id).map { AnswersScoreboardDto(it, ctx) } }
 }
 
@@ -139,7 +118,6 @@ class GradeScoreboardDto(@GraphQLIgnore val entity: Grade, ctx: ResolverContext)
   @GraphQLID
   val id = entity.id
   val gradePercentage = entity.gradePercentage
-  val calculated = entity.calculated
 }
 @GraphQLName("TaskScoreboard")
 class TaskScoreboardDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(ctx) {
@@ -148,239 +126,155 @@ class TaskScoreboardDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) :
   val title = entity.title
 }
 
-/**
- * Dto to receive input for Gradedefinitions
- */
-@GraphQLName("GradeDefinitionInput")
-class GradeDefinitionInputDto(var id: UUID, var maxPoints: Float, var minorError: Float, var majorError: Float, var criticalError: Float) {
-  constructor() : this(UUID.randomUUID(), 0f, 0f, 0f, 0f)
+@GraphQLName("GradingDefinitionInput")
+class GradingDefinitionInputDto(var id: UUID,var active: Boolean?, var maxPoints: Float, var minorMistakePenalty: Float, var majorMistakePenalty: Float, var criticalMistakePenalty: Float) {
+  constructor() : this(UUID.randomUUID(),false, 0f, 0f, 0f, 0f)
 }
 
-@GraphQLName("GradeDefinitionActiveInput")
-class GradeDefinitionActiveInputDto(var id: UUID, var active: Boolean) {
+@GraphQLName("GradingDefinitionActiveInput")
+class GradingDefinitionActiveInputDto(var id: UUID, var active: Boolean) {
   constructor() : this(UUID.randomUUID(), false)
 }
 
-/**
- * Dto to receive input for PointsOfEvaluationSteps
- */
 @GraphQLName("PointsOfEvaluationStepInput")
-class PointsOfEvaluationStepInputDto(var id: UUID, var reachedPoints: Float, var mistakePoints: Float, var calcCheck: Boolean, var edited: Boolean, var resultCheck: Boolean) {
+class PointsOfEvaluationStepInputDto(var id: UUID, var reachedPoints: Float, var mistakePoints: Float, var calculationCheck: Boolean, var edited: Boolean, var evaluationStepResultCheck: Boolean) {
   constructor() : this(UUID.randomUUID(), 0f, 0f, false, false, false)
 }
 
-/**
- * Dto to receive input for UserAlias
- * Required to update the name
- */
 @GraphQLName("UserAliasInput")
 class UserAliasInputDto(var id: UUID, var alias: String) {
   constructor() : this(UUID.randomUUID(), "Empty")
 }
 
 @Component
-class GradeDefinitionQuery : BaseResolver(), Query {
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(this::class.simpleName)
+class GradingDefinitionQuery : BaseResolver(), Query {
 
-  /**
-   *  Gets a GradeDefinition by its Id
-   */
+
   @Secured(Authority.ROLE_TEACHER)
-  fun gradeDefinition(id: UUID): GradeDefinitionDto = context {
-    val gradeDefinitionService = serviceAccess.getService(GradeDefinitionService::class)
-    LOG.info("generate GradeDefinitionDTO for Query")
-    GradeDefinitionDto(gradeDefinitionService.findGradeDefinition(id), this)
+  fun gradingDefinition(id: UUID): GradingDefinitionDto = context {
+    val gradingDefinitionService = serviceAccess.getService(GradingDefinitionService::class)
+    GradingDefinitionDto(gradingDefinitionService.findGradingDefinition(id), this)
   }
 
-  /**
-   * Gets Gradedefinition by EvaluationStepDefinitionId
-   */
   @Secured(Authority.ROLE_TEACHER)
-  fun gradeDefinitionByEvaluationStepDefinition(id: UUID): GradeDefinitionDto = context {
-    val gradeDefinitionService = serviceAccess.getService(GradeDefinitionService::class)
-    LOG.info("generate GradeDefinitionDTO for Query")
-    GradeDefinitionDto(gradeDefinitionService.findGradeDefinitionByEvaluationStepDefinitionId(id), this)
+  fun gradingDefinitionByEvaluationStepDefinition(evaluationStepDefinitionId: UUID): GradingDefinitionDto = context {
+    val gradingDefinitionService = serviceAccess.getService(GradingDefinitionService::class)
+    GradingDefinitionDto(gradingDefinitionService.findGradingDefinitionByEvaluationStepDefinitionId(evaluationStepDefinitionId), this)
   }
 }
 
 @Component
-class GradeDefinitionMutation : BaseResolver(), Mutation {
+class GradingDefinitionMutation : BaseResolver(), Mutation {
 
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(GradeDefinitionMutation::class.simpleName)
-
-  /**
-   * Updates a Gradedefinition from its InputDto. This function fires a recalculation from all related grades.
-   * May take some time. Thread candidate?
-   */
   @Secured(Authority.ROLE_TEACHER)
-  fun updateGradeDefinitionValues(input: GradeDefinitionInputDto): Boolean = context {
-    val gradeDefinitionService = serviceAccess.getService(GradeDefinitionService::class)
-    val gradeDefinition = gradeDefinitionService.findGradeDefinition(input.id)
-
-    if (input.id == gradeDefinition.id) {
-      gradeDefinitionService.updateGradeDefinitionValues(
-        gradeDefinition,
-        maxPoints = input.maxPoints,
-        minorError = input.minorError,
-        majorError = input.majorError,
-        criticalError = input.criticalError
-      )
-      LOG.info("GradeDefinition values of $gradeDefinition updated")
-    } else
-      LOG.error("failed to update GradeDefinition of id " + input.id)
-      false
+  fun updateGradingDefinition(id: UUID, active: Boolean?, maxPoints: Float?, minorMistakePenalty: Float?, majorMistakePenalty: Float?, criticalMistakePenalty: Float?): Boolean = context {
+    val gradingDefinitionService = serviceAccess.getService(GradingDefinitionService::class)
+    val gradingDefinition = gradingDefinitionService.findGradingDefinition(id)
+    gradingDefinitionService.updateGradingDefinition(
+      gradingDefinition,
+      active, maxPoints, minorMistakePenalty, majorMistakePenalty, criticalMistakePenalty
+    )
+    true
   }
 
   @Secured(Authority.ROLE_TEACHER)
-  fun updateGradeDefinitionStatus(input: GradeDefinitionActiveInputDto): Boolean = context {
-    val gradeDefinitionService = serviceAccess.getService(GradeDefinitionService::class)
-    val gradeDefinition = gradeDefinitionService.findGradeDefinition(input.id)
-
-    if (input.id == gradeDefinition.id) {
-      gradeDefinitionService.updateGradeDefinitionStatus(gradeDefinition,
-        active = input.active)
-      LOG.info("GradeDefinition status of $gradeDefinition updated")
-    } else
-      LOG.error("failed to update GradeDefinition of id " + input.id)
-      false
+  fun updateGradingDefinitionValues(input: GradingDefinitionInputDto): Boolean = context {
+    val gradingDefinitionService = serviceAccess.getService(GradingDefinitionService::class)
+    val gradingDefinition = gradingDefinitionService.findGradingDefinition(input.id)
+    gradingDefinitionService.updateGradingDefinition(
+      gradingDefinition,
+      active=input.active,
+      maxPoints= input.maxPoints,
+      minorMistakePenalty = input.minorMistakePenalty,
+      majorMistakePenalty = input.majorMistakePenalty,
+      criticalMistakePenalty = input.criticalMistakePenalty
+    )
+    true
   }
 }
 
 @Component
 class PointsOfEvaluationStepQuery : BaseResolver(), Query {
 
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(this::class.simpleName)
-
-  /**
-   * Gets PointsOfEvaluationStep by its Id.
-   */
+  @Secured(Authority.ROLE_STUDENT)
   fun pointsOfEvaluation(id: UUID): PointsOfEvaluationStepDto = context {
     val pointsOfEvaluationStepService = serviceAccess.getService(PointsOfEvaluationStepService::class)
-    LOG.info("generate PointsOfEvaluationStepDto for Query")
-    val poe = pointsOfEvaluationStepService.getEvaluationStepId(id)!!
+    val poe = pointsOfEvaluationStepService.findEvaluationStepById(id)
     PointsOfEvaluationStepDto(poe, this)
   }
 
-  /**
-   * Gets PointsOfEvaluationStep by its EvaluationStepId
-   */
   @Secured(Authority.ROLE_STUDENT)
-  fun pointsOfEvaluationStepByEvaluationStepId(id: UUID): PointsOfEvaluationStepDto = context {
+  fun pointsOfEvaluationStepByEvaluationStepId(evaluationStepId: UUID): PointsOfEvaluationStepDto = context {
     val pointsOfEvaluationStepService = serviceAccess.getService(PointsOfEvaluationStepService::class)
-    PointsOfEvaluationStepDto(pointsOfEvaluationStepService.getEvaluationStepId(id), this)
+    PointsOfEvaluationStepDto(pointsOfEvaluationStepService.findEvaluationStepById(evaluationStepId), this)
   }
 }
 
 @Component
 class PointsOfEvaluationStepMutation : BaseResolver(), Mutation {
 
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(this::class.simpleName)
-
-  /**
-   * Updates PointsOfEvaluationStep by its InputDto
-   */
   @Secured(Authority.ROLE_TEACHER)
   fun updatePointsOfEvaluationStep(input: PointsOfEvaluationStepInputDto): Boolean = context {
     val poeService = serviceAccess.getService(PointsOfEvaluationStepService::class)
     val poe = poeService.findById(input.id)
-    if (poe.id == input.id) {
       poeService.updatePointsOfEvaluationStep(poe,
         reachedPoints = input.reachedPoints,
         mistakePoints = input.mistakePoints,
-        calcCheck = input.calcCheck,
+        calculationCheck = input.calculationCheck,
         edited = input.edited,
-        resultCheck = input.resultCheck
+        evaluationStepResultCheck = input.evaluationStepResultCheck
       )
       true
-    } else {
-      LOG.error("failed to update PointsOfEvaluationStep of id ${input.id}")
-      false
-    }
   }
 }
 
 @Component
 class GradeQuery : BaseResolver(), Query {
 
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(this::class.simpleName)
-
-  /**
-   * Gets a Grade from an Evaluation Id.
-   */
-  fun grade(id: UUID): GradeDto = context {
+  @Secured(Authority.ROLE_STUDENT)
+  fun gradeForEvaluation(evaluationId: UUID): GradeDto? = context {
     val evaluationService = serviceAccess.getService(EvaluationService::class)
-    val evaluation = evaluationService.getEvaluation(id)
-    val gradeService = serviceAccess.getService(GradeService::class)
-    GradeDto(gradeService.findGrade(evaluation), this)
+    val evaluation = evaluationService.getEvaluation(evaluationId)
+    evaluation.grade?.let {
+      GradeDto(it, this)
+    }
   }
 }
 
 @Component
 class UserAliasQuery : BaseResolver(), Query {
 
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(this::class.simpleName)
-
+  @Secured(Authority.ROLE_STUDENT)
   fun userAliasByUserId(id: UUID): UserAliasDto = context {
-    val userAliasService = serviceAccess.getService(UserAliasService::class)
-    UserAliasDto(userAliasService.getByUserId(id), this)
+    val userService = serviceAccess.getService(UserService::class)
+    UserAliasDto(userService.getById(id), this)
   }
 }
 
 @Component
 class UserAliasMutation : BaseResolver(), Mutation {
 
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(this::class.simpleName)
-
+  @Secured(Authority.ROLE_STUDENT)
   fun updateUserAlias(input: UserAliasInputDto): Boolean = context {
-    val service = serviceAccess.getService(UserAliasService::class)
+    val service = serviceAccess.getService(UserService::class)
     val userAlias = service.getById(input.id)
-    if (input.id == userAlias.id) {
+    if (authorization.isCurrentUser(userAlias)) {
       if (!service.existsByAlias(input.alias)) {
         userAlias.alias = input.alias
         service.save(userAlias)
-        true
-      } else {
-        false
       }
-    } else {
-      false
     }
+    true
   }
 }
 
 @Component
 class ScoreboardQuery : BaseResolver(), Query {
 
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(this::class.simpleName)
-
+  @Secured(Authority.ROLE_STUDENT)
   fun scoreboardByAssignmentId(id: UUID): AssignmentScoreboardDto = context {
     val assignmentService = serviceAccess.getService(AssignmentService::class)
-    val assignment = assignmentService.findAssignmentById(id)
-
+    val assignment = assignmentService.findAssignment(id)
     AssignmentScoreboardDto(assignment, this)
   }
 }
