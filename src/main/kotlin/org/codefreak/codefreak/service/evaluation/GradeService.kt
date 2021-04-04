@@ -6,86 +6,40 @@ import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.Grade
 import org.codefreak.codefreak.entity.PointsOfEvaluationStep
-import org.codefreak.codefreak.repository.EvaluationRepository
-import org.codefreak.codefreak.repository.EvaluationStepRepository
 import org.codefreak.codefreak.repository.GradeRepository
 import org.codefreak.codefreak.service.BaseService
-import org.slf4j.LoggerFactory
+import org.codefreak.codefreak.util.orNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 class GradeService : BaseService() {
 
-  /**
-   * Logging
-   */
-  val LOG = LoggerFactory.getLogger(this::class.simpleName)
-
-  /**
-   * Instance of GradeRepository for DB access
-   */
   @Autowired
   private lateinit var gradeRepository: GradeRepository
 
   @Autowired
   private lateinit var poeStepService: PointsOfEvaluationStepService
 
-  @Autowired
-  private lateinit var stepRepository: EvaluationStepRepository
-
-  @Autowired
-  private lateinit var evaluationRepository: EvaluationRepository
-
   /**
-   * Has a trackback function to look for an valid Evaluation of a Grade.
-   * There might be no evaluation present on first evaluationstep finishes. So if its null, there will be nothing to return.
-   * Adjust GraphQL Query and handle null objects on Frontend.
-   *
+   * function to initialize a GradeCalculation. It updates a Grade or creates one from scratch.
    */
-  fun createOrUpdateGradeFromPointsOfEvaluation(poe: PointsOfEvaluationStep): Boolean {
-    val eval = trackBackToEvaluation(poe)
-    return if (eval != null) {
-      createOrUpdateGradeFromEvaluation(eval)
-      true
-    } else {
-      false
-    }
-  }
-
-  /**
-   * Without trackback function if Evaluation is known
-   * Will also be called from trackback containing function
-   * run means if eval!=null. said simply comparison
-   */
-  fun createOrUpdateGradeFromEvaluation(eval: Evaluation): Boolean {
-    return run {
-      startGradeCalculation(eval)
-      true
-    }
-  }
-
-  /**
-   * function to start a GradeCalculation
-   */
-  fun startGradeCalculation(eval: Evaluation): Grade? {
-    val stepList = stepRepository.findAllByEvaluation(eval)
-
-    val grade = findOrCreateGrade(eval)
+  fun gradeCalculation(evaluation: Evaluation): Grade? {
+    val stepList = evaluation.evaluationSteps
 
     return if (validateEvaluationSteps(stepList)) {
-
+      val grade = findOrCreateGrade(evaluation)
       val poeList = mutableListOf<PointsOfEvaluationStep>()
       // Add grade to PointsOfEvaluationStep. Afterwards an existing grade just can collects its PointsOfEvaluationStep Child and recalculate the grade
       for (s in stepList) {
-        val poe = poeStepService.findByEvaluationStep(s)
-        // There might be Steps without a PoE due to deactivated Autograding for it
+        val poe = poeStepService.findOrCreateByEvaluationStepId(s.id)
+        // There might be Steps without a PointsOfEvaluationStep Entity due to deactivated autograding
         if (poe != null) {
           poe.grade = grade
           poeList.add(poeStepService.save(poe))
         }
       }
-      calcGrade(grade, poeList)
+      calculateGrade(grade, poeList)
     } else {
       null
     }
@@ -99,8 +53,9 @@ class GradeService : BaseService() {
    * This is currently the case because the Comment EvaluationStep.Result is NULL straight after a student has run an evaluation.
    *
    */
-  private fun validateEvaluationSteps(steps: MutableList<EvaluationStep>): Boolean {
+  private fun validateEvaluationSteps(steps: MutableSet<EvaluationStep>): Boolean {
     val updatedSteps = mutableListOf<EvaluationStep>()
+
     for (s in steps) {
       if (s.result != null)updatedSteps.add(s)
     }
@@ -118,50 +73,30 @@ class GradeService : BaseService() {
    * Calculates a grade based on the points archived in a PointsOfEvaluationStep List
    * Sets grade.calculated on true at last so it will be considered for a grade.
    */
-  private fun calcGrade(grade: Grade, poeList: MutableList<PointsOfEvaluationStep>): Grade {
+  private fun calculateGrade(grade: Grade, poeList: MutableList<PointsOfEvaluationStep>): Grade {
     var points = 0f
     var maxPoints = 0f
     for (poe in poeList) {
       // Only pick for autograding if grader is activated.
-      if (poe.gradeDefinition.active) {
-        points += poe.reachedPoints
-        maxPoints += poe.gradeDefinition.maxPoints
-      }
+        poe.evaluationStep.definition.gradingDefinition?.let { it ->
+          if (it.active) {
+            points += poe.reachedPoints
+            maxPoints += it.maxPoints
+          }
+        }
     }
     grade.gradePercentage = (100 / maxPoints * points)
-    grade.calculated = true
     return save(grade)
   }
 
   /**
    * Returns the best answer if one exists.
    */
-  fun getBestGradeOfAnswer(answer: UUID): Grade? {
-    return gradeRepository.findFirstByAnswerIdOrderByGradePercentageDesc(answer).let {
-      if (it.isPresent)
-        it.get()
-      else
-        null
-      }
+  fun getBestGradeOfAnswer(answerId: UUID): Grade? {
+    return gradeRepository.findFirstByAnswerIdOrderByGradePercentageDesc(answerId).orNull()
   }
 
-  /**
-   * Saves a Grade
-   */
   fun save(grade: Grade) = gradeRepository.save(grade)
-
-  /**
-   * Trackback function. Is required to recalculate a grade if a pointsOfEvaluationStep has been modified by a teacher
-   */
-  private fun trackBackToEvaluation(poe: PointsOfEvaluationStep): Evaluation? {
-    return evaluationRepository.findByEvaluationSteps(poe.evaluationStep).let {
-      if (it.isPresent) {
-        it.get()
-      } else {
-        null
-      }
-    }
-  }
 
   /**
    * If a Grade is present pick it and return it. Otherwise create a new Grade for this evaluation / answer
@@ -175,15 +110,6 @@ class GradeService : BaseService() {
       } else {
         it.get()
       }
-    }
-  }
-
-  fun findGrade(evaluation: Evaluation): Grade? {
-    return gradeRepository.findByEvaluation(evaluation).let {
-      if (it.isPresent)
-        it.get()
-      else
-        null
     }
   }
 }
