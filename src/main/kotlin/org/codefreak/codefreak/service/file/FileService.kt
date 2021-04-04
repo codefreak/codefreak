@@ -45,7 +45,7 @@ interface FileService {
 
   /**
    * Create directories places specified by path.
-   * This will create all parent directories in case the do not exist.
+   * This will create all parent directories in case they do not exist.
    * Ignores silently if a directory already exists.
    */
   fun createDirectories(collectionId: UUID, paths: Set<String>)
