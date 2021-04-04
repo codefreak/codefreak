@@ -8,6 +8,8 @@ import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.service.file.JpaFileService
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
@@ -31,6 +33,68 @@ class JpaFileServiceTest {
 
     val fileCollection = FileCollection(collectionId)
     `when`(fileCollectionRepository.findById(any())).thenReturn(Optional.of(fileCollection))
+  }
+
+  @Test
+  fun `lists all existing files and directories`() {
+    fileService.createDirectories(collectionId, setOf("some/path", "some/other/path"))
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt", "some/file3.txt", "some/path/file4.txt", "some/other/path/file5.txt"))
+
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other/path" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/file1.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/file2.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/file3.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path/file4.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other/path/file5.txt" })
+  }
+
+  @Test
+  fun `lists no files or directories that do not exist`() {
+    assertNull(fileService.walkFileTree(collectionId).find { it.path == "/file.txt" })
+    assertNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path" })
+    assertNull(fileService.listFiles(collectionId, "/").find { it.path == "/file.txt" })
+    assertNull(fileService.listFiles(collectionId, "/some").find { it.path == "/path" })
+  }
+
+  @Test
+  fun `lists all files and directories in a path`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
+
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/some" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file1.txt" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file2.txt" })
+  }
+
+  @Test
+  fun `listing all files and directories in a path lists no other files and directories at a deeper level`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt", "some/file3.txt"))
+
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/some" })
+    assertNull(fileService.listFiles(collectionId, "/").find { it.path == "/some/path" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file1.txt" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file2.txt" })
+    assertNull(fileService.listFiles(collectionId, "/").find { it.path == "/some/file3.txt" })
+  }
+
+  @Test
+  fun `listing all files and directories in a path lists no other files and directories at a higher level`() {
+    fileService.createDirectories(collectionId, setOf("some/path", "other"))
+    fileService.createFiles(collectionId, setOf("file1.txt", "some/file2.txt"))
+
+    assertNull(fileService.listFiles(collectionId, "/some").find { it.path == "/other" })
+    assertNull(fileService.listFiles(collectionId, "/some").find { it.path == "/file1.txt" })
+    assertNotNull(fileService.listFiles(collectionId, "/some").find { it.path == "/some/path" })
+    assertNotNull(fileService.listFiles(collectionId, "/some").find { it.path == "/some/file2.txt" })
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun `listing all files and directories in a path throws when the path does not exist`() {
+    fileService.listFiles(collectionId, "/some/path")
   }
 
   @Test
@@ -100,6 +164,13 @@ class JpaFileServiceTest {
   @Test
   fun `creates an empty directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+  }
+
+  @Test
+  fun `creates a directory creates parent directories`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some"))
     assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
