@@ -18,7 +18,6 @@ import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
-import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionDeadlineReachedEvent
 import org.codefreak.codefreak.service.SubmissionService
@@ -142,10 +141,11 @@ class EvaluationService : BaseService() {
 
   /**
    * Create a fresh evaluation for the given answer + digest combination.
-   * All steps are in a pending state
+   * All steps are in a pending state.
+   * Force creation in a new transaction so the evaluation is persisted correctly in the DB when this
+   * function returns.
    */
-  @Transactional
-  fun createEvaluation(answer: Answer, filesDigest: ByteArray): Evaluation {
+  fun createEvaluation(answer: Answer, filesDigest: ByteArray): Evaluation = withNewTransaction {
     val evaluation = Evaluation(
         answer,
         filesDigest,
@@ -155,7 +155,7 @@ class EvaluationService : BaseService() {
     answer.task.evaluationStepDefinitions
         .filter { it.active }
         .forEach { stepService.addStepToEvaluation(evaluation, it) }
-    return saveEvaluation(evaluation).also {
+    saveEvaluation(evaluation).also {
       eventPublisher.publishEvent(EvaluationStatusUpdatedEvent(it, it.stepStatusSummary))
     }
   }
@@ -172,9 +172,6 @@ class EvaluationService : BaseService() {
         ?: throw RuntimeException("Evaluation does not contain a 'comments' step")
     evaluationStep.addFeedback(feedback)
 
-    // mark this evaluation step as "finished" which means "teacher evaluated this answer manually"
-    evaluationStep.status = EvaluationStepStatus.FINISHED
-    evaluationStep.finishedAt = Instant.now()
     // if there is any failed feedback the overall step result is "failed"
     evaluationStep.result = when {
       evaluationStep.feedback.any { it.isFailed } -> EvaluationStepResult.FAILED
@@ -184,7 +181,7 @@ class EvaluationService : BaseService() {
 
     // there is no real definition of "done" for comments, so we trigger a FINISHED event
     // each time a new comment is added to this answer
-    eventPublisher.publishEvent(EvaluationStepStatusUpdatedEvent(evaluationStep, EvaluationStepStatus.FINISHED))
+    stepService.updateEvaluationStepStatus(evaluationStep, EvaluationStepStatus.FINISHED)
     return feedback
   }
 

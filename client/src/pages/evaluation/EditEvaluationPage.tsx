@@ -328,13 +328,11 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
               </Descriptions.Item>
             ) : null}
           </Descriptions>
-          {definition.options === '{}' ? (
-            <i>Default configuration</i>
-          ) : (
+          {definition.options !== '{}' ? (
             <SyntaxHighlighter language="yaml" noLineNumbers>
               {YAML.stringify(JSON.parse(definition.options))}
             </SyntaxHighlighter>
-          )}
+          ) : null}
         </>
       )
     }

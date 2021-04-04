@@ -57,7 +57,6 @@ class EvaluationQueue : StepExecutionListener {
     log.debug("Queuing evaluation step ${step.definition.runnerName} of answer ${step.evaluation.answer.id}")
     val params = buildJobParameters(step)
     jobLauncher.run(job, params)
-    step.queuedAt = Instant.now()
     // Warning: the step entity is detached because of Propagation.NOT_SUPPORTED (citation needed)
     // by passing only the id this will cause a re-fetch from the database
     evaluationStepService.updateEvaluationStepStatus(step.id, EvaluationStepStatus.QUEUED)
@@ -82,7 +81,6 @@ class EvaluationQueue : StepExecutionListener {
           evaluationStep.status >= EvaluationStepStatus.FINISHED -> evaluationStep.status
           else -> EvaluationStepStatus.FINISHED
         }
-        evaluationStep.finishedAt = Instant.now()
         //If a gradeDefinition is present, start autograding.
         evaluationStep.definition.gradingDefinition?.let {
           evaluationStepService.startAutograding(evaluationStep)
