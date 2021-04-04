@@ -111,7 +111,7 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `creating a ignores silently when the directory already exists`() {
+  fun `creating a directory ignores silently when the directory already exists`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.createDirectories(collectionId, setOf("some/path"))
     assertTrue(fileService.containsDirectory(collectionId, "some/path"))
