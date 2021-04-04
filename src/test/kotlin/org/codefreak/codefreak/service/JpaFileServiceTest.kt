@@ -9,6 +9,7 @@ import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.service.file.JpaFileService
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.mockito.InjectMocks
@@ -187,9 +188,31 @@ class JpaFileServiceTest {
     assertFalse(fileService.containsFile(collectionId, "file.txt"))
   }
 
+  @Test
+  fun `deletes multiple existing files`() {
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
+
+    fileService.deleteFiles(collectionId, setOf("file1.txt", "file2.txt"))
+
+    assertFalse(fileService.containsFile(collectionId, "file1.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file2.txt"))
+  }
+
   @Test(expected = IllegalArgumentException::class)
   fun `deleting a file throws when path does not exist`() {
     fileService.deleteFiles(collectionId, setOf("file.txt"))
+  }
+
+  @Test
+  fun `deleting multiple files does not delete any file when one of the files does not exist`() {
+    fileService.createFiles(collectionId, setOf("file1.txt"))
+
+    try {
+      fileService.deleteFiles(collectionId, setOf("file1.txt", "file2.txt"))
+      fail() // An IllegalArgumentException should be thrown
+    } catch (e: IllegalArgumentException) {}
+
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
   }
 
   @Test
@@ -212,6 +235,28 @@ class JpaFileServiceTest {
     fileService.deleteFiles(collectionId, setOf("some/path"))
 
     assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+  }
+
+  @Test
+  fun `deletes multiple existing directories`() {
+    fileService.createDirectories(collectionId, setOf("some/path", "some/other/path"))
+
+    fileService.deleteFiles(collectionId, setOf("some/path", "some/other/path"))
+
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/other/path"))
+  }
+
+  @Test
+  fun `deletes existing files and directories`() {
+    fileService.createDirectories(collectionId, setOf("some/path", "some/other/path", "file1.txt", "file2.txt"))
+
+    fileService.deleteFiles(collectionId, setOf("some/path", "some/other/path", "file1.txt", "file2.txt"))
+
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/other/path"))
+    assertFalse(fileService.containsFile(collectionId, "file1.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file2.txt"))
   }
 
   @Test
