@@ -39,14 +39,12 @@ import { useServerMoment } from '../../hooks/useServerTimeOffset'
 import useSubPath from '../../hooks/useSubPath'
 import {
   Assignment,
-  AssignmentScoreboardInput,
   AssignmentStatus,
   GetTaskListDocument,
   UpdateAssignmentMutationVariables,
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
-  useUpdateAssignmentMutation,
-  useUpdateAssignmentScoreboardMutation
+  useUpdateAssignmentMutation
 } from '../../generated/graphql'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
@@ -93,13 +91,6 @@ const AssignmentPage: React.FC = () => {
     }
   })
 
-  const [updateScoreboardMutation] = useUpdateAssignmentScoreboardMutation({
-    onCompleted: () => {
-      result.refetch()
-      messageService.success('Scoreboard status updated')
-    }
-  })
-
   useAssignmentStatusChange(
     assignmentId,
     useCallback(() => {
@@ -115,7 +106,7 @@ const AssignmentPage: React.FC = () => {
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
-  if (result.data.assignment.scoreboard) {
+  if (result.data.assignment.enableScoreboard) {
     tabs.push({ key: '/scoreboard', tab: 'Scoreboard' })
   }
 
@@ -128,24 +119,19 @@ const AssignmentPage: React.FC = () => {
     active: assignment.active,
     deadline: assignment.deadline,
     openFrom: assignment.openFrom,
-    timeLimit: assignment.timeLimit
-  }
-
-  const assignmentScoreboardInput: AssignmentScoreboardInput = {
-    id: assignment.id,
-    scoreboard: assignment.scoreboard
-  }
-
-  const onScoreboardChange = (value: boolean) => {
-    if (value !== undefined) {
-      assignmentScoreboardInput.scoreboard = value
-      updateScoreboardMutation({ variables: { assignmentScoreboardInput } })
-    }
+    timeLimit: assignment.timeLimit,
+    enableScoreboard: assignment.enableScoreboard
   }
 
   const updater = makeUpdater(assignmentInput, variables =>
     updateMutation({ variables })
   )
+
+  const onScoreboardChange = (value: boolean) => {
+    if (value !== undefined) {
+      updater('enableScoreboard')(value)
+    }
+  }
 
   const renderDate = (
     label: string,
@@ -256,7 +242,11 @@ const AssignmentPage: React.FC = () => {
               {assignment.editable ? (
                 <Descriptions.Item label="Scoreboard">
                   <AntSwitch
-                    defaultChecked={assignment.scoreboard}
+                    defaultChecked={
+                      assignment.enableScoreboard
+                        ? assignment.enableScoreboard
+                        : false
+                    }
                     onChange={onScoreboardChange}
                   />
                 </Descriptions.Item>
@@ -276,7 +266,7 @@ const AssignmentPage: React.FC = () => {
       <Switch>
         <Route exact path={path} component={TaskListPage} />
         <Route path={`${path}/submissions`} component={SubmissionListPage} />
-        {result.data.assignment.scoreboard ? (
+        {(assignment.enableScoreboard ? assignment.enableScoreboard : null) ? (
           <Route path={`${path}/scoreboard`} component={ScoreboardPage} />
         ) : null}
         <Route component={NotFoundPage} />
