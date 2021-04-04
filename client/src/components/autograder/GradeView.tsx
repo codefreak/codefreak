@@ -6,11 +6,16 @@ const GradeView: React.FC<{
   grade: Grade
 }> = props => {
   const grade = props.grade
-  if (grade.calculated && grade.gradePercentage) {
+  if (
+    grade !== null &&
+    grade.gradePercentage !== undefined &&
+    grade.gradePercentage !== null
+  ) {
     return (
       <div className="grade-view">
         {(Math.round(grade.gradePercentage * 100) / 100).toFixed(2)}% Grade
-      </div>)
+      </div>
+    )
   }
   return null
 }
