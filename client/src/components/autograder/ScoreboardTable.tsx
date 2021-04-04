@@ -14,15 +14,6 @@ type TaskScoreboard = AnswersScoreboard['taskScoreboard']
 
 const { Column } = Table
 
-const defaultSort = (a: number, b: number) => {
-  if (a < b) return -1
-  if (b < a) return 1
-  return 0
-}
-export const Sorter = {
-  DEFAULT: defaultSort
-}
-
 const getAnswerFromSubmission = (
   submission: SubmissionsScoreboard,
   taskScoreboard: TaskScoreboard
@@ -48,12 +39,11 @@ const numericSorter = (
     getAnswerFromSubmission(a, task)?.gradeScoreboard?.gradePercentage || 0
   const valB =
     getAnswerFromSubmission(b, task)?.gradeScoreboard?.gradePercentage || 0
-  return Sorter.DEFAULT(valA, valB)
+  return valA - valB
 }
 
 const ScoreboardTable: React.FC<{
   scoreboardByAssignmentId: AssignmentScoreboard
-  fetchScoreboard: any
 }> = props => {
   const assignments = props.scoreboardByAssignmentId
   const allSubmissions = assignments.submissionsScoreboard
@@ -62,7 +52,7 @@ const ScoreboardTable: React.FC<{
     return (
       <Row gutter={16}>
         <Col span={6}>
-          <EditNickname editable onChange={props.fetchScoreboard} />
+          <EditNickname editable />
         </Col>
       </Row>
     )
@@ -89,11 +79,11 @@ const ScoreboardTable: React.FC<{
     >
       <Column
         title="Nickname"
-        dataIndex={['useralias', 'alias']}
+        dataIndex={['userAlias', 'alias']}
         width={200}
         fixed="left"
         sortDirections={['ascend', 'descend', 'ascend']}
-        sorter={alphabeticSorter(submission => submission.useralias.alias)}
+        sorter={alphabeticSorter(submission => submission.userAlias.alias)}
       />
       {taskColumnRenderer(assignments.tasksScoreboard)}
     </Table>
@@ -102,16 +92,20 @@ const ScoreboardTable: React.FC<{
 
 const taskColumnRenderer = (tasks: TaskScoreboard[]) => {
   const renderAnswer = (
-    task: TaskScoreboard,
-    submission: SubmissionsScoreboard
+    taskScoreboard: TaskScoreboard,
+    submissionScoreboard: SubmissionsScoreboard
   ) => {
-    // There should always be a grade defined
-    if (getAnswerFromSubmission(submission, task) !== undefined) {
-      const answer = getAnswerFromSubmission(submission, task)
-      // answer.
+    if (
+      getAnswerFromSubmission(submissionScoreboard, taskScoreboard) !==
+      undefined
+    ) {
+      const answer = getAnswerFromSubmission(
+        submissionScoreboard,
+        taskScoreboard
+      )
       if (
         answer?.gradeScoreboard === null ||
-        !answer?.gradeScoreboard?.calculated
+        !answer?.gradeScoreboard?.gradePercentage
       ) {
         return (
           <Tooltip title="No Grade Calculated">
@@ -144,7 +138,7 @@ const taskColumnRenderer = (tasks: TaskScoreboard[]) => {
         key={`task-${task.id}`}
         title={task.title}
         align="center"
-        render={renderAnswer.bind((submission: any) => submission, task)}
+        render={renderAnswer.bind(undefined, task)}
         sortDirections={['ascend', 'descend', 'ascend']}
         sorter={jumpRender}
       />
