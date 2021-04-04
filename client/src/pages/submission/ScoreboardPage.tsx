@@ -6,10 +6,9 @@ import React from 'react'
 
 const Scoreboard: React.FC = () => {
   const assignmentId = useIdParam()
-  const result = ScoreboardByAssignmentHook(assignmentId)
-  const fetchScoreboard = () => {
-    return result.refetch() as any
-  }
+  const result = useGetScoreboardByAssignmentIdQuery({
+    variables: { id: assignmentId }
+  })
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -18,17 +17,8 @@ const Scoreboard: React.FC = () => {
   return (
     <ScoreboardTable
       scoreboardByAssignmentId={result.data.scoreboardByAssignmentId}
-      fetchScoreboard={fetchScoreboard}
     />
   )
-}
-
-const ScoreboardByAssignmentHook = (assignmentId: string) => {
-  const result = useGetScoreboardByAssignmentIdQuery({
-    variables: { id: assignmentId }
-  })
-
-  return result
 }
 
 export default Scoreboard
