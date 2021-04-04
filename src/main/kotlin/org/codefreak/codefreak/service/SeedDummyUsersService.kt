@@ -123,7 +123,7 @@ class SeedDummyUsersService : ApplicationListener<ContextRefreshedEvent> {
 
     val users = userRepository.saveAll(allUsers)
     users.forEach {
-      aliasNameGenerator.applyAliasName(it)
+      aliasNameGenerator.generateAndSetAlias(it)
     }
   }
 }

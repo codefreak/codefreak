@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service
 
+import java.util.UUID
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,4 +32,10 @@ class UserService : BaseService() {
   fun getUser(username: String): User = userRepository.findByUsernameCanonical(username.toLowerCase()).orElseThrow {
     EntityNotFoundException("User cannot be found")
   }
+
+  fun getById(id: UUID): User = userRepository.findById(id).get()
+
+  fun save(user: User) = userRepository.save(user)
+
+  fun existsByAlias(alias: String) = userRepository.existsByAlias(alias)
 }
