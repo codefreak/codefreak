@@ -108,7 +108,7 @@ class AssignmentQuery : BaseResolver(), Query {
   fun assignment(id: UUID): AssignmentDto = context {
     val assignment = serviceAccess.getService(AssignmentService::class).findAssignment(id)
     if (assignment.status == AssignmentStatus.INACTIVE) {
-      authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_ADMIN)
+      authorization.requireAuthorityIfNotCurrentUser(assignment.owner, Authority.ROLE_TEACHER)
     }
     AssignmentDto(assignment, this)
   }
