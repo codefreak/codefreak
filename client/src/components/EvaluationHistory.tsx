@@ -21,7 +21,7 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
 
   const evaluationStatus = useEvaluationStatus(answerId)
 
-  const auth = useHasAuthority('ROLE_TEACHER')
+  const authority = useHasAuthority('ROLE_TEACHER')
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -40,7 +40,7 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
         }
       >
         {evaluations.map(
-          renderEvaluation(apolloClient, evaluationStatus, auth)
+          renderEvaluation(apolloClient, evaluationStatus, authority)
         )}
       </Timeline>
     </Card>
@@ -62,8 +62,8 @@ const renderEvaluation = (
       content: (
         <ApolloProvider client={apolloClient}>
           <EvaluationResult
-            evaluationId={evaluation.id}
             evaluationStatus={evaluationStatus}
+            evaluationId={evaluation.id}
             teacherAuthority={teacherAuthority}
           />
         </ApolloProvider>

@@ -14,7 +14,11 @@ export interface LatestEvaluationProps {
 
 const LatestEvaluation: React.FC<LatestEvaluationProps> = props => {
   const { answerId, showTrigger } = props
-  const { latestEvaluation, loading } = useLiveAnswerEvaluation(answerId)
+  const {
+    latestEvaluation,
+    evaluationStatus,
+    loading
+  } = useLiveAnswerEvaluation(answerId)
 
   const teacherAuthority = useHasAuthority('ROLE_TEACHER')
 
@@ -45,6 +49,7 @@ const LatestEvaluation: React.FC<LatestEvaluationProps> = props => {
   return (
     <EvaluationResult
       evaluationId={latestEvaluation.id}
+      evaluationStatus={evaluationStatus}
       teacherAuthority={teacherAuthority}
     />
   )

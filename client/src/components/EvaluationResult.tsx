@@ -11,7 +11,7 @@ import GradeView from './autograder/GradeView'
 
 const EvaluationResult: React.FC<{
   evaluationId: string
-  evaluationStatus?: EvaluationStepStatus
+  evaluationStatus?: EvaluationStepStatus | undefined
   teacherAuthority?: boolean
 }> = ({ evaluationId, evaluationStatus, teacherAuthority }) => {
   const result = useGetDetailedEvaluatonQuery({ variables: { evaluationId } })
