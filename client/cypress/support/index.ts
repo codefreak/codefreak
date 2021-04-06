@@ -15,7 +15,7 @@
 
 // Import commands.ts using ES2015 syntax:
 import './commands'
-import failOnConsoleError from "cypress-fail-on-console-error";
+import failOnConsoleError from 'cypress-fail-on-console-error'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
