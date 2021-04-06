@@ -4,46 +4,47 @@ import {
   useGetGradeForEvaluationQuery
 } from '../generated/graphql'
 import { useCallback, useEffect, useState } from 'react'
-import { messageService } from '../services/message'
 
 const useGrade = (
   evaluationId: string,
   evaluationStatus?: EvaluationStepStatus
 ): { grade: Grade | undefined; fetchGrade(): void } => {
   // Query to get a Grade
-  const result = useGetGradeForEvaluationQuery({
+  const { data, refetch } = useGetGradeForEvaluationQuery({
     variables: { evaluationId }
   })
 
-  const [update, setUpdate] = useState<boolean>(true)
+  const [evaluationStatusState, setEvaluationStatusState] = useState<
+    EvaluationStepStatus | undefined
+  >(evaluationStatus)
+  useEffect(() => {
+    if (evaluationStatus !== undefined) {
+      setEvaluationStatusState(evaluationStatus)
+    }
+  }, [evaluationStatus])
 
   // state Hook to manage a grade
   const [grade, setGrade] = useState<Grade | undefined>(undefined)
 
   const callback = useCallback(() => {
-    if (evaluationStatus === EvaluationStepStatus.Finished) {
-      messageService.success('Grade Calculated')
-    }
-    result.refetch()
-  }, [result, evaluationStatus])
-
-  // Set a Grade in a state Hook if one exists.
-  useEffect(() => {
-    if (result.data !== null && result.data !== undefined) {
-      if (update) {
-        setGrade(result.data?.gradeForEvaluation!!)
-        setUpdate(false)
+    if (evaluationStatusState === EvaluationStepStatus.Finished && refetch!==undefined) {
+      refetch().finally()
+      if (data !== null && data?.gradeForEvaluation !== null) {
+        setGrade(data?.gradeForEvaluation)
       }
     }
-  }, [result, update, grade])
+  }, [evaluationStatusState, data, refetch])
+
+  // Use callback function to prevent infinite-loop
+  useEffect(() => {
+    callback()
+  }, [callback])
 
   // this exported function will update a grade if the related points are changed.
   const fetchGrade = (): void => {
-    callback()
-    // Async Sleep timer. Wait 500ms before updating the grade over useEffect.
-    new Promise(resolve => setTimeout(resolve, 500)).finally(() =>
-      setUpdate(true)
-    )
+    if(refetch!==undefined){
+      refetch().finally()
+    }
   }
 
   return { grade, fetchGrade }
