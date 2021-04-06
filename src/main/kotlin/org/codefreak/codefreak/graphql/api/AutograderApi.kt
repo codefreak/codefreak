@@ -114,10 +114,10 @@ class AnswersScoreboardDto(@GraphQLIgnore val entity: Answer, ctx: ResolverConte
 }
 
 @GraphQLName("GradeScoreboard")
-class GradeScoreboardDto(@GraphQLIgnore val entity: Grade, ctx: ResolverContext) : BaseDto(ctx) {
+class GradeScoreboardDto(@GraphQLIgnore val entity: Grade?, ctx: ResolverContext) : BaseDto(ctx) {
   @GraphQLID
-  val id = entity.id
-  val gradePercentage = entity.gradePercentage
+  val id = entity?.id
+  val gradePercentage = entity?.gradePercentage
 }
 @GraphQLName("TaskScoreboard")
 class TaskScoreboardDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(ctx) {
@@ -127,13 +127,8 @@ class TaskScoreboardDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) :
 }
 
 @GraphQLName("GradingDefinitionInput")
-class GradingDefinitionInputDto(var id: UUID,var active: Boolean?, var maxPoints: Float, var minorMistakePenalty: Float, var majorMistakePenalty: Float, var criticalMistakePenalty: Float) {
-  constructor() : this(UUID.randomUUID(),false, 0f, 0f, 0f, 0f)
-}
-
-@GraphQLName("GradingDefinitionActiveInput")
-class GradingDefinitionActiveInputDto(var id: UUID, var active: Boolean) {
-  constructor() : this(UUID.randomUUID(), false)
+class GradingDefinitionInputDto(var id: UUID, var active: Boolean?, var maxPoints: Float, var minorMistakePenalty: Float, var majorMistakePenalty: Float, var criticalMistakePenalty: Float) {
+  constructor() : this(UUID.randomUUID(), false, 0f, 0f, 0f, 0f)
 }
 
 @GraphQLName("PointsOfEvaluationStepInput")
@@ -148,7 +143,6 @@ class UserAliasInputDto(var id: UUID, var alias: String) {
 
 @Component
 class GradingDefinitionQuery : BaseResolver(), Query {
-
 
   @Secured(Authority.ROLE_TEACHER)
   fun gradingDefinition(id: UUID): GradingDefinitionDto = context {
@@ -183,8 +177,8 @@ class GradingDefinitionMutation : BaseResolver(), Mutation {
     val gradingDefinition = gradingDefinitionService.findGradingDefinition(input.id)
     gradingDefinitionService.updateGradingDefinition(
       gradingDefinition,
-      active=input.active,
-      maxPoints= input.maxPoints,
+      active = input.active,
+      maxPoints = input.maxPoints,
       minorMistakePenalty = input.minorMistakePenalty,
       majorMistakePenalty = input.majorMistakePenalty,
       criticalMistakePenalty = input.criticalMistakePenalty
