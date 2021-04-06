@@ -48,7 +48,7 @@ class Assignment(
     else -> AssignmentStatus.CLOSED
   }
 
-  var enableScoreboard: Boolean = false
+  var enableScoreboard: Boolean? = false
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()
