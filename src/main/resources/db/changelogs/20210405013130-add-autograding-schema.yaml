@@ -14,7 +14,7 @@ databaseChangeLog:
             type: UUID
         - column:
             name: grade_percentage
-            type: FLOAT4
+            type: FLOAT
         - column:
             name: answer_id
             type: UUID
@@ -44,22 +44,22 @@ databaseChangeLog:
             constraints:
               nullable: false
             name: critical_mistake_penalty
-            type: FLOAT4
+            type: FLOAT
         - column:
             constraints:
               nullable: false
             name: major_mistake_penalty
-            type: FLOAT4
+            type: FLOAT
         - column:
             constraints:
               nullable: false
             name: max_points
-            type: FLOAT4
+            type: FLOAT
         - column:
             constraints:
               nullable: false
             name: minor_mistake_penalty
-            type: FLOAT4
+            type: FLOAT
         tableName: grading_definition
 - changeSet:
     id: 1617579169715-3
@@ -93,12 +93,12 @@ databaseChangeLog:
             constraints:
               nullable: false
             name: mistake_points
-            type: FLOAT4
+            type: FLOAT
         - column:
             constraints:
               nullable: false
             name: reached_points
-            type: FLOAT4
+            type: FLOAT
         - column:
             name: evaluation_step
             type: UUID
