@@ -103,20 +103,19 @@ const taskColumnRenderer = (tasks: TaskScoreboard[]) => {
         submissionScoreboard,
         taskScoreboard
       )
-      if (
-        answer?.gradeScoreboard === null ||
-        !answer?.gradeScoreboard?.gradePercentage
-      ) {
+
+
+      if (answer?.gradeScoreboard === null) {
         return (
           <Tooltip title="No Grade Calculated">
             <Icon type="stop" className="no-answer" />
           </Tooltip>
         )
-      } else {
+      } else if (answer?.gradeScoreboard?.gradePercentage !== null && answer?.gradeScoreboard?.gradePercentage !== undefined){
         return (
           <div>
             {(
-              Math.round(answer.gradeScoreboard.gradePercentage * 100) / 100
+              Math.round(answer?.gradeScoreboard?.gradePercentage * 100) / 100
             ).toFixed(2)}
             %
           </div>
