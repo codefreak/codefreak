@@ -36,36 +36,21 @@ class PointsOfEvaluationStepService : BaseService() {
   @Autowired
   private lateinit var gradeService: GradeService
 
-
   /**
    * Check if a EvaluationStep already has a PointsOfEvaluation
    * If it misses create one if a GradingDefinition is provided and return it.
-   * Otherwise return null or an EntityNotFoundException if even the EvaluationStep can not be found.
    */
-  fun findOrCreateByEvaluationStepId(evaluationStepId: UUID): PointsOfEvaluationStep? {
-    evaluationStepsRepository.findById(evaluationStepId).let { optional ->
-        if (optional.isPresent) {
-          poeRepository.findByEvaluationStep(optional.get()).let { optional2 ->
-            return if (optional2.isPresent) {
-              optional2.get()
-            } else {
-              // If a PointsOfEvaluationStep exists, it will be returned. Otherwise it will be created.
-              // If the creation failed due to a non-existent gradeDefinition it will return null
-              var evaluationStep = optional.get()
-              evaluationStep.points = evaluationStep.definition.gradingDefinition?.let { PointsOfEvaluationStep(evaluationStep) }
-              if (evaluationStep.points != null) {
-                evaluationStep = evaluationStepsRepository.save(evaluationStep)
-                evaluationStep.points
-              } else {
-                null
-              }
-            }
-          }
-        } else {
-          EntityNotFoundException("evaluationStepId $evaluationStepId has no valid entry in EvaluationStep")
-        }
+  fun findOrCreateByEvaluationStep(evaluationStep: EvaluationStep): PointsOfEvaluationStep {
+    poeRepository.findByEvaluationStep(evaluationStep).let { optional ->
+      // If a PointsOfEvaluationStep exists, it will be returned. Otherwise it will be created.
+      // If the creation failed due to a non-existent gradeDefinition it will return null
+      return if (optional.isPresent) {
+        optional.get()
+      } else {
+        val points = PointsOfEvaluationStep(evaluationStep)
+        poeRepository.save(points)
       }
-    return null
+    }
   }
 
   fun findEvaluationStepById(evaluationStepId: UUID): PointsOfEvaluationStep? {
@@ -94,14 +79,17 @@ class PointsOfEvaluationStepService : BaseService() {
    */
   private fun onEvaluationStepResultSuccess(evaluationStep: EvaluationStep) {
     // Load or Create pointsOfEvaluationStep
-    val poe = findOrCreateByEvaluationStepId(evaluationStep.id) ?: return
+    val poe = findOrCreateByEvaluationStep(evaluationStep)
 
     // return if the edited attribute is true. This means a teacher manually changed the points.
     if (poe.edited) {
       return
     }
     poe.evaluationStep.gradingDefinition?.let {
+      // flag set to true because at this stage the EvaluationStep didnt fail in the process
+      // This is necessary to let the teacher handle this evaluationStep before a grade will be calculated.
       poe.evaluationStepResultCheck = true
+      // Pick all Feedbacks who are not successful and collect mistakes
       val failedFeedbacks = feedbackRepository.findByEvaluationStepAndStatusNot(evaluationStep, Feedback.Status.SUCCESS)
       val mistakePoints = collectMistakes(failedFeedbacks, it)
       poe.mistakePoints = mistakePoints
@@ -110,6 +98,7 @@ class PointsOfEvaluationStepService : BaseService() {
       } else {
         poe.reachedPoints = it.maxPoints - mistakePoints
       }
+      // caculation successful and save.
       poe.calculationCheck = true
       poeRepository.save(poe)
     }
@@ -137,14 +126,19 @@ class PointsOfEvaluationStepService : BaseService() {
    * If a GradeDefinition receives an Upgrade, all related evaluationSteps will update their respective
    * PointsOfEvaluationStep and recalculate the related grade
    */
-  fun recalculatePoints(gradingDefinition: GradingDefinition) {
+  fun recalculatePoints(gradingDefinition: GradingDefinition) : Boolean{
     if (gradingDefinition.active) {
       val stepList = evaluationStepsRepository.findAllByGradingDefinition(gradingDefinition)
-      for (step in stepList) {
-        calculate(step, gradingDefinition)
+       if(stepList.size>0){
+        for (step in stepList) {
+          calculate(step, gradingDefinition)
+        }
+        return true
       }
     }
+    return false
   }
+
 
   fun findById(id: UUID): PointsOfEvaluationStep {
     return poeRepository.findById(id).orElseThrow {
@@ -159,8 +153,7 @@ class PointsOfEvaluationStepService : BaseService() {
   }
 
   /**
-   * Updatefunction. Checks what is transmitted and updated values
-   * Save when done
+   * Checks what is transmitted and updated values Save and recalculate the related grade
    */
   fun updatePointsOfEvaluationStep(poe: PointsOfEvaluationStep, reachedPoints: Float?, mistakePoints: Float?, calculationCheck: Boolean?, edited: Boolean?, evaluationStepResultCheck: Boolean?): PointsOfEvaluationStep {
     reachedPoints?.let { poe.reachedPoints = reachedPoints }
@@ -176,8 +169,8 @@ class PointsOfEvaluationStepService : BaseService() {
 
   /**
    * Only Autograding will set calcCheck to true. Autograding fails if the evaluationStep has errored / failed
-   * A teacher can turn this state around by manually looking at the grade and adjusting the points which should be zero
-   * This will turn the attribute poe.edited to true and keep its attribute calcCheck false.
+   * A teacher can turn this state around by manually looking at the grade and adjusting the points which is zero
+   * This will turn the attribute poe.edited to true.
    *
    */
   fun changeEdited(poe: PointsOfEvaluationStep): PointsOfEvaluationStep {
