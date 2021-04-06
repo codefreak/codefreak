@@ -77,21 +77,8 @@ class EvaluationStepService {
     val newEvaluationStatus = evaluation.stepStatusSummary
 
     step.definition.gradingDefinition?.let {
-      // The regular Evaluation keeps the Comment EvaluationStep on Pending until the teacher writes a comment.
-      // So we need every Step finished except one, because the Comment Step is fixed and cant be removed.
-      var count = 0
-      for (evalStep in evaluation.evaluationSteps) {
-        if (evalStep.status != EvaluationStepStatus.FINISHED) {
-          count++
-        }
-      }
-      LOG.info("Count is: $count")
-      // If the count is at least one, we can assume that only the Comment EvaluationStep is on Pending.
-      // If all other steps are finished, calc a grade for the given evaluation
-      // evaluation.stepStatusSummary == EvaluationStepStatus.FINISHED
-      if (count <= 1) {
-        gradeService.gradeCalculation(evaluation)
-//      gradeService.createOrUpdateGradeFromEvaluation(evaluation)
+      if (evaluation.stepStatusSummary == EvaluationStepStatus.FINISHED && it.active) {
+          gradeService.gradeCalculation(evaluation)
       }
     }
 
@@ -123,10 +110,9 @@ class EvaluationStepService {
   fun saveEvaluationStep(step: EvaluationStep) = stepRepository.save(step)
 
   /**
-   * Starts an possible autograding process. If requirements are met a grade will be calculated.
+   * Starts a autograding process. If requirements are met  points will be calculated.
    */
   fun startAutograding(evaluationStep: EvaluationStep) {
-//    val updatedStep = configureEvaluationStepForAutoGrading(evaluationStep)
     // Only Autograde if a GradeDefinition is present. Otherwise this EvaluationStep is not eligible for Autograding
     evaluationStep.definition.gradingDefinition?.let {
       // Check if this step is ready to get calculated.
