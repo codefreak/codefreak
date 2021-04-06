@@ -7,6 +7,7 @@ import org.codefreak.codefreak.repository.EvaluationStepRepository
 import org.codefreak.codefreak.repository.GradingDefinitionRepository
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,6 +26,12 @@ class GradingDefinitionService : BaseService() {
 
   @Autowired
   private lateinit var pointsOfEvaluationStepService: PointsOfEvaluationStepService
+
+  @Autowired
+  private lateinit var gradeService : GradeService
+
+  @Autowired
+  private lateinit var evaluationStepsRepository : EvaluationStepRepository
 
   fun save(gradingDefinition: GradingDefinition): GradingDefinition = gradingDefinitionRepository.save(gradingDefinition)
 
@@ -54,11 +61,16 @@ class GradingDefinitionService : BaseService() {
     minorMistakePenalty?.let { gradingDefinition.minorMistakePenalty = minorMistakePenalty }
     majorMistakePenalty?.let { gradingDefinition.majorMistakePenalty = majorMistakePenalty }
     criticalMistakePenalty?.let { gradingDefinition.criticalMistakePenalty = criticalMistakePenalty }
-    val def = save(gradingDefinition)
-    pointsOfEvaluationStepService.recalculatePoints(gradingDefinition)
-    return def
+    val updatedGradingDefinition = save(gradingDefinition)
+    //Set on active and recalculate points and afterwards the related grades
+    if(updatedGradingDefinition.active && pointsOfEvaluationStepService.recalculatePoints(updatedGradingDefinition)){
+      val stepsList = evaluationStepsRepository.findAllByGradingDefinition(updatedGradingDefinition)
+      stepsList.forEach{
+        gradeService.gradeCalculation(it.evaluation)
+      }
+    }
+    return updatedGradingDefinition
   }
-
 
   @Transactional
   fun findByPointsOfEvaluationStepId(pointsOfEvaluationStepId: UUID): GradingDefinition {
