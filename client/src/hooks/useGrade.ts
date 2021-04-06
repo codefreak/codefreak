@@ -27,7 +27,10 @@ const useGrade = (
   const [grade, setGrade] = useState<Grade | undefined>(undefined)
 
   const callback = useCallback(() => {
-    if (evaluationStatusState === EvaluationStepStatus.Finished && refetch!==undefined) {
+    if (
+      evaluationStatusState === EvaluationStepStatus.Finished &&
+      refetch !== undefined
+    ) {
       refetch().finally()
       if (data !== null && data?.gradeForEvaluation !== null) {
         setGrade(data?.gradeForEvaluation)
@@ -42,7 +45,7 @@ const useGrade = (
 
   // this exported function will update a grade if the related points are changed.
   const fetchGrade = (): void => {
-    if(refetch!==undefined){
+    if (refetch !== undefined) {
       refetch().finally()
     }
   }

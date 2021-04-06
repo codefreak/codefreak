@@ -9,13 +9,11 @@ import org.codefreak.codefreak.entity.PointsOfEvaluationStep
 import org.codefreak.codefreak.repository.GradeRepository
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.util.orNull
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 class GradeService : BaseService() {
-
 
   @Autowired
   private lateinit var gradeRepository: GradeRepository
@@ -29,7 +27,6 @@ class GradeService : BaseService() {
   fun gradeCalculation(evaluation: Evaluation): Grade? {
     val stepList = evaluation.evaluationSteps
 
-
     return if (validateEvaluationSteps(stepList)) {
       val grade = findOrCreateGrade(evaluation)
       val poeList = mutableListOf<PointsOfEvaluationStep>()
@@ -39,7 +36,6 @@ class GradeService : BaseService() {
         // There might be Steps without a PointsOfEvaluationStep Entity due to deactivated autograding
         poe.grade = grade
         poeList.add(poeStepService.save(poe))
-
       }
       calculateGrade(grade, poeList)
     } else {
@@ -52,9 +48,9 @@ class GradeService : BaseService() {
    * activate / deactivate the GradingDefinition will add / remove points
    * If there are no Points left, no Grade will be calculated.
    */
-  fun gradeStatusCheck(evaluation: Evaluation) : Boolean{
-    for(step in evaluation.evaluationSteps){
-      if(step.points!=null)return false
+  fun gradeStatusCheck(evaluation: Evaluation): Boolean {
+    for (step in evaluation.evaluationSteps) {
+      if (step.points != null)return false
     }
     return true
   }
@@ -70,18 +66,17 @@ class GradeService : BaseService() {
   private fun validateEvaluationSteps(steps: MutableSet<EvaluationStep>): Boolean {
     val updatedSteps = mutableListOf<EvaluationStep>()
 
-    //exclude comments evaluationStep from validation. It currently has result=null after an Evaluation
+    // exclude comments evaluationStep from validation. It currently has result=null after an Evaluation
     //
     for (s in steps) {
-      if (s.definition.runnerName != "comments"){updatedSteps.add(s)}
+      if (s.definition.runnerName != "comments") { updatedSteps.add(s) }
     }
-    //Run validation of all other
+    // Run validation of all other
     for (s in updatedSteps) {
       if (s.result == null) { return false }
       s.result.let { if (it == EvaluationStepResult.ERRORED) return false }
     }
     return true
-
   }
 
   /**

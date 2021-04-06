@@ -126,19 +126,18 @@ class PointsOfEvaluationStepService : BaseService() {
    * If a GradeDefinition receives an Upgrade, all related evaluationSteps will update their respective
    * PointsOfEvaluationStep and recalculate the related grade
    */
-  fun recalculatePoints(gradingDefinition: GradingDefinition) : Boolean{
+  fun recalculatePoints(gradingDefinition: GradingDefinition): Boolean {
     if (gradingDefinition.active) {
       val stepList = evaluationStepsRepository.findAllByGradingDefinition(gradingDefinition)
-       if(stepList.size>0){
-        for (step in stepList) {
-          calculate(step, gradingDefinition)
-        }
+        if (stepList.size> 0) {
+          for (step in stepList) {
+            calculate(step, gradingDefinition)
+          }
         return true
       }
     }
     return false
   }
-
 
   fun findById(id: UUID): PointsOfEvaluationStep {
     return poeRepository.findById(id).orElseThrow {
