@@ -1,4 +1,4 @@
-mutation UpdateGradingDefinitionValues($input: GradingDefinitionInput!){
+mutation UpdateGradingDefinitionValues($input: GradingDefinitionInput!) {
   updateGradingDefinitionValues(input: $input)
 }
 

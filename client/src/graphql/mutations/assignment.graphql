@@ -37,7 +37,7 @@ mutation UpdateAssignment(
   $deadline: DateTime
   $openFrom: DateTime
   $timeLimit: Long
-  $enableScoreboard: Boolean!
+  $enableScoreboard: Boolean
 ) {
   updateAssignment(
     id: $id
