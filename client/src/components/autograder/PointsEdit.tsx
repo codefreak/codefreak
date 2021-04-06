@@ -8,7 +8,7 @@ import {
   useGetPointsOfEvaluationStepByEvaluationStepIdQuery,
   useUpdatePointsOfEvaluationStepMutation
 } from '../../generated/graphql'
-import { Empty, InputNumber, Switch } from 'antd'
+import { InputNumber, Switch } from 'antd'
 import { debounce } from 'ts-debounce'
 import { messageService } from '../../services/message'
 
@@ -122,9 +122,9 @@ const PointsEdit: React.FC<{
     if (result.error) return <div>{result.error.message}</div>
 
     if (points.gradingDefinition === null) {
-      return <Empty />
+      return null
     } else if (!points.gradingDefinition!.active) {
-      return <Empty />
+      return null
     }
     if (auth) {
       return renderEdit(
@@ -141,7 +141,7 @@ const PointsEdit: React.FC<{
       )
     }
   } else {
-    return <Empty />
+    return null
   }
 }
 
