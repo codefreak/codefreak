@@ -13,7 +13,7 @@ abstract class BaseService {
   protected lateinit var entityManager: EntityManager
 
   @Autowired
-  private lateinit var transactionManager: PlatformTransactionManager
+  protected open lateinit var transactionManager: PlatformTransactionManager
 
   protected fun <T> withNewTransaction(block: TransactionCallback<T>): T {
     val transactionTemplate = TransactionTemplate(transactionManager)
