@@ -1,6 +1,5 @@
 package org.codefreak.codefreak.service.evaluation
 
-import java.time.Instant
 import java.util.Date
 import org.codefreak.codefreak.config.EvaluationConfiguration
 import org.codefreak.codefreak.entity.Evaluation
@@ -81,7 +80,7 @@ class EvaluationQueue : StepExecutionListener {
           evaluationStep.status >= EvaluationStepStatus.FINISHED -> evaluationStep.status
           else -> EvaluationStepStatus.FINISHED
         }
-        //If a gradeDefinition is present, start autograding.
+        // If a gradeDefinition is present, start autograding.
         evaluationStep.definition.gradingDefinition?.let {
           evaluationStepService.startAutograding(evaluationStep)
         }
