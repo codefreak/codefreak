@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 
+## [6.0.1](https://github.com/codefreak/codefreak/releases/tag/6.0.1) - 2020-04-06
+
+### Changed
+* Allow teachers to access inactive assignments of other teachers
+* Fix a bug that prevents from creating assignments
+
+
 ## [6.0.0](https://github.com/codefreak/codefreak/releases/tag/6.0.0) - 2020-03-26
 
 ### Added
