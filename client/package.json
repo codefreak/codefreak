@@ -99,6 +99,7 @@
     ]
   },
   "devDependencies": {
-    "cypress": "^6.8.0"
+    "cypress": "^6.8.0",
+    "cypress-fail-on-console-error": "^2.0.6"
   }
 }
