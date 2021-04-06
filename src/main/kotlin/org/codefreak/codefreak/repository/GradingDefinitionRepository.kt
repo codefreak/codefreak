@@ -9,8 +9,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface GradingDefinitionRepository : CrudRepository<GradingDefinition, UUID> {
-
   fun findByEvaluationStepDefinitionId(id: UUID): Optional<GradingDefinition>
-//  fun findByPointsOfEvaluationStepId(id: UUID): Optional<GradeDefinition>
-  fun findByEvaluationStep(step: EvaluationStep): Optional<GradingDefinition>
 }
