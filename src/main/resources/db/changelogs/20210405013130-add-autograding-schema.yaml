@@ -1,6 +1,6 @@
 databaseChangeLog:
 - changeSet:
-    id: 1617568391322-1
+    id: 1617579169715-1
     author: timsc (generated)
     changes:
     - createTable:
@@ -23,7 +23,7 @@ databaseChangeLog:
             type: UUID
         tableName: grade
 - changeSet:
-    id: 1617568391322-2
+    id: 1617579169715-2
     author: timsc (generated)
     changes:
     - createTable:
@@ -62,7 +62,7 @@ databaseChangeLog:
             type: FLOAT4
         tableName: grading_definition
 - changeSet:
-    id: 1617568391322-3
+    id: 1617579169715-3
     author: timsc (generated)
     changes:
     - createTable:
@@ -107,7 +107,7 @@ databaseChangeLog:
             type: UUID
         tableName: points_of_evaluation_step
 - changeSet:
-    id: 1617568391322-4
+    id: 1617579169715-4
     author: timsc (generated)
     changes:
     - addColumn:
@@ -117,19 +117,17 @@ databaseChangeLog:
             type: varchar(255)
         tableName: user
 - changeSet:
-    id: 1617568391322-5
+    id: 1617579169715-5
     author: timsc (generated)
     changes:
     - addColumn:
         columns:
         - column:
-            constraints:
-              nullable: false
             name: enable_scoreboard
             type: boolean
         tableName: assignment
 - changeSet:
-    id: 1617568391322-6
+    id: 1617579169715-6
     author: timsc (generated)
     changes:
     - addColumn:
@@ -139,7 +137,7 @@ databaseChangeLog:
             type: uuid
         tableName: evaluation_step_definition
 - changeSet:
-    id: 1617568391322-7
+    id: 1617579169715-7
     author: timsc (generated)
     changes:
     - addColumn:
@@ -149,7 +147,7 @@ databaseChangeLog:
             type: uuid
         tableName: evaluation_step
 - changeSet:
-    id: 1617568391322-8
+    id: 1617579169715-8
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -162,7 +160,7 @@ databaseChangeLog:
         referencedTableName: evaluation_step
         validate: true
 - changeSet:
-    id: 1617568391322-9
+    id: 1617579169715-9
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -175,7 +173,7 @@ databaseChangeLog:
         referencedTableName: answer
         validate: true
 - changeSet:
-    id: 1617568391322-10
+    id: 1617579169715-10
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -188,7 +186,7 @@ databaseChangeLog:
         referencedTableName: grade
         validate: true
 - changeSet:
-    id: 1617568391322-11
+    id: 1617579169715-11
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -201,7 +199,7 @@ databaseChangeLog:
         referencedTableName: evaluation
         validate: true
 - changeSet:
-    id: 1617568391322-12
+    id: 1617579169715-12
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:
@@ -214,7 +212,7 @@ databaseChangeLog:
         referencedTableName: grading_definition
         validate: true
 - changeSet:
-    id: 1617568391322-13
+    id: 1617579169715-13
     author: timsc (generated)
     changes:
     - addForeignKeyConstraint:

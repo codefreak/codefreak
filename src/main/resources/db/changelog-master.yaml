@@ -63,5 +63,5 @@ databaseChangeLog:
     file: changelogs/20210306154303-add-update-timestamp-to-assignments.yaml
     relativeToChangelogFile: true
 - include:
-    file: changelogs/20210404223148-add-autograding-schema.yaml
+    file: changelogs/20210405013130-add-autograding-schema.yaml
     relativeToChangelogFile: true
