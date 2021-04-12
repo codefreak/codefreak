@@ -3,6 +3,7 @@ declare global {
     interface Chainable<Subject> {
       login(username: string, password: string): void
       visitIndex(): Chainable<Window>
+      visitAssignmentsListPage(): Chainable<Window>
     }
   }
 }
@@ -16,6 +17,8 @@ Cypress.Commands.add('login', (username, password) => {
 })
 
 Cypress.Commands.add('visitIndex', () => cy.visit('/'))
+
+Cypress.Commands.add('visitAssignmentsListPage', () => cy.visit('/assignments'))
 
 // Convert this into a module instead of a script
 export {}
