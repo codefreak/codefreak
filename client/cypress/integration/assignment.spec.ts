@@ -17,6 +17,13 @@ describe('Assignment', () => {
     cy.get('.ant-modal-footer').contains('Create Assignment').click()
 
     cy.contains('Assignment created').should('exist')
+
+    cy.url().then(url => {
+      const assignmentUrl = Cypress.config().baseUrl + '/assignments'
+      const assignmentId = url.replace(assignmentUrl, '')
+      expect(assignmentId).not.to.be.equal('/')
+      expect(assignmentId).not.to.be.equal('')
+    })
   })
 })
 
