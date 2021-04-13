@@ -52,11 +52,8 @@ class JpaFileServiceTest {
   }
 
   @Test
-  fun `lists no files or directories that do not exist`() {
-    assertNull(fileService.walkFileTree(collectionId).find { it.path == "/file.txt" })
-    assertNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path" })
-    assertNull(fileService.listFiles(collectionId, "/").find { it.path == "/file.txt" })
-    assertNull(fileService.listFiles(collectionId, "/some").find { it.path == "/path" })
+  fun `root dir does always exist with no files`() {
+    assertTrue(fileService.listFiles(collectionId, "/").count() == 0)
   }
 
   @Test
@@ -115,11 +112,6 @@ class JpaFileServiceTest {
   fun `creating a file throws when the path already exists`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.createFiles(collectionId, setOf("file.txt")) // Throws because file already exists
-  }
-
-  @Test(expected = IllegalArgumentException::class)
-  fun `creating a file two times at once throws`() {
-    fileService.createFiles(collectionId, setOf("file.txt", "file.txt"))
   }
 
   @Test(expected = IllegalArgumentException::class)

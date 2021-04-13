@@ -4,10 +4,12 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.archivers.tar.TarConstants
 import org.apache.commons.compress.utils.IOUtils
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
@@ -64,6 +66,7 @@ class JpaFileService : FileService {
   }
 
   override fun listFiles(collectionId: UUID, path: String): Sequence<FileMetaData> {
+    requireDirectoryDoesExist(collectionId, path)
     val parentPath = Paths.get("/" + TarUtil.normalizeFileName(path))
     return walkFileTree(collectionId).filter {
       Paths.get(it.path).parent == parentPath
@@ -87,6 +90,8 @@ class JpaFileService : FileService {
     val normalizedPaths = paths.map { path ->
       TarUtil.normalizeFileName(path).also {
         requireValidPath(it)
+        val parentDir = TarUtil.normalizeDirectoryName(getParentDir(path))
+        requireDirectoryDoesExist(collectionId, parentDir)
         require(!containsPath(collectionId, it))
       }
     }
@@ -103,8 +108,8 @@ class JpaFileService : FileService {
   private fun requireFileDoesExist(collectionId: UUID, path: String) =
       require(containsFile(collectionId, path)) { "File `$path` does not exist" }
 
-  private fun requireFileDoesNotExist(collectionId: UUID, path: String) =
-      require(!containsFile(collectionId, path)) { "File `$path` already exists" }
+  private fun requireDirectoryDoesExist(collectionId: UUID, path: String) =
+      require(containsDirectory(collectionId, path)) { "Directory `$path` does not exist" }
 
   private fun requireDirectoryDoesNotExist(collectionId: UUID, path: String) =
       require(!containsDirectory(collectionId, path)) { "Directory `$path` already exists" }
@@ -114,7 +119,7 @@ class JpaFileService : FileService {
   }
 
   override fun containsDirectory(collectionId: UUID, path: String): Boolean {
-    return containsPath(collectionId, path) { it.isDirectory }
+    return TarUtil.isRoot(path) || containsPath(collectionId, path) { it.isDirectory }
   }
 
   private fun containsPath(
@@ -140,11 +145,35 @@ class JpaFileService : FileService {
 
   private fun getTarOutputStream(collectionId: UUID) = TarUtil.PosixTarArchiveOutputStream(writeCollectionTar(collectionId))
 
+  /**
+   * Return a set of ALL parent directories for a given path
+   * This will not include path itself and not the root path /
+   */
+  private fun getParentDirs(path: String): Set<String> {
+    val parents: MutableSet<String> = mutableSetOf()
+    var currentParent: Path? = Paths.get("/$path").parent
+    while (currentParent != null && currentParent.toString() != "/" && !parents.contains(currentParent.toString())) {
+      parents.add(currentParent.toString())
+      currentParent = currentParent.parent
+    }
+    return parents
+  }
+
+  private fun getParentDir(path: String): String {
+    return Paths.get("/" + TarUtil.normalizeFileName(path)).parent?.toString() ?: "/"
+  }
+
   override fun createDirectories(collectionId: UUID, paths: Set<String>) {
-    val normalizedPaths = paths.map { path ->
+    val allDirs = paths.flatMap { path ->
+      mutableSetOf<String>().also {
+        it.addAll(getParentDirs(path))
+        it.add(path)
+      }
+    }
+    val normalizedPaths = allDirs.map { path ->
       TarUtil.normalizeFileName(path).also {
         requireValidPath(it)
-        require(!containsPath(collectionId, it))
+        require(!containsFile(collectionId, it))
       }
     }
 
@@ -177,19 +206,19 @@ class JpaFileService : FileService {
     val normalizedPath = TarUtil.normalizeFileName(path)
 
     requireValidPath(normalizedPath)
-    requireFileDoesExist(collectionId, normalizedPath)
+    requireDirectoryDoesNotExist(collectionId, normalizedPath)
 
     return object : ByteArrayOutputStream() {
       override fun close() {
-        val contents = toByteArray()
-        val entryToPut = findEntry(collectionId, normalizedPath)!!
-        entryToPut.size = contents.size.toLong()
-
         getTarOutputStream(collectionId).use { output ->
           getTarInputStream(collectionId).use { input ->
             TarUtil.copyEntries(input, output) { entry -> entry.name != normalizedPath }
           }
 
+          val contents = toByteArray()
+          val entryToPut = TarArchiveEntry(normalizedPath, TarConstants.LF_NORMAL, false)
+          entryToPut.mode = TarArchiveEntry.DEFAULT_FILE_MODE
+          entryToPut.size = contents.size.toLong()
           output.putArchiveEntry(entryToPut)
           IOUtils.copy(contents.inputStream(), output)
           output.closeArchiveEntry()

@@ -90,7 +90,7 @@ object TarUtil {
     return out.toByteArray()
   }
 
-  private fun isRoot(path: String) = normalizeEntryName(path).isBlank()
+  fun isRoot(path: String) = normalizeEntryName(path).isBlank()
   fun isRoot(entry: TarArchiveEntry) = isRoot(entry.name)
 
   private fun createTarRootDirectory(outputStream: TarArchiveOutputStream) {
