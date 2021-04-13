@@ -39,6 +39,7 @@ interface FileService {
   /**
    * Create empty files in places specified by path.
    * Throws an IllegalArgumentException if the parent directory does not exist or existing path is a directory.
+   * Ignores silently if a file already exists (similar to Linux' "touch")
    */
   @Throws(IllegalArgumentException::class)
   fun createFiles(collectionId: UUID, paths: Set<String>)
@@ -46,7 +47,7 @@ interface FileService {
   /**
    * Create directories places specified by path.
    * This will create all parent directories in case they do not exist.
-   * Ignores silently if a directory already exists.
+   * Ignores silently if a directory already exists (similar to Linux' "mkdir -p")
    */
   fun createDirectories(collectionId: UUID, paths: Set<String>)
 
