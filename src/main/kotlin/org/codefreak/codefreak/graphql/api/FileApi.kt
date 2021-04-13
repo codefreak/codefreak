@@ -117,21 +117,26 @@ class FileMutation : BaseResolver(), Mutation {
     true
   }
 
-  fun uploadFile(fileContext: FileContext, path: String, contents: ApplicationPart): Boolean = context {
+  fun uploadFiles(fileContext: FileContext, dir: String, files: Array<ApplicationPart>): Boolean = context {
     authorize(fileContext)
-    serviceAccess.getService(FileService::class).writeFile(fileContext.id, path).use {
-      IOUtils.copy(contents.inputStream, it)
+    val fileService = serviceAccess.getService(FileService::class)
+    files.forEach { file ->
+      val filename = file.submittedFileName ?: "upload-${Instant.now()}-${file.name}"
+      val filePath = "$dir/$filename"
+      fileService.writeFile(fileContext.id, filePath).use {
+        IOUtils.copy(file.inputStream, it)
+      }
     }
     true
   }
 
-  fun moveFile(fileContext: FileContext, sources: List<String>, target: String): Boolean = context {
+  fun moveFiles(fileContext: FileContext, sources: List<String>, target: String): Boolean = context {
     authorize(fileContext)
     serviceAccess.getService(FileService::class).moveFile(fileContext.id, sources.toSet(), target)
     true
   }
 
-  fun deleteFile(fileContext: FileContext, paths: List<String>): Boolean = context {
+  fun deleteFiles(fileContext: FileContext, paths: List<String>): Boolean = context {
     authorize(fileContext)
     serviceAccess.getService(FileService::class).deleteFiles(fileContext.id, paths.toSet())
     true

@@ -175,6 +175,9 @@ class JpaFileService : FileService {
         requireValidPath(it)
         require(!containsFile(collectionId, it))
       }
+    }.filter {
+      // only create directories that are not already existing
+      !containsDirectory(collectionId, it)
     }
 
     getTarOutputStream(collectionId).use { output ->
