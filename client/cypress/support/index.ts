@@ -13,11 +13,12 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.ts using ES2015 syntax:
 import './commands'
-import failOnConsoleError from 'cypress-fail-on-console-error'
+import failOnConsoleError, {consoleType} from 'cypress-fail-on-console-error'
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
-
-failOnConsoleError()
+failOnConsoleError({
+  includeConsoleTypes: [
+    consoleType.ERROR,
+    consoleType.WARN,
+  ],
+})
