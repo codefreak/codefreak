@@ -47,7 +47,7 @@ jobs:
         with:
           working-directory: client
           install: false
-          start: docker run -d -p8080:8080 --name=cfreak-cypress cfreak/codefreak
+          start: docker run -d -e CODEFREAK_REVERSE_PROXY_URL="http://$(docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}')" -v /var/run/docker.sock:/var/run/docker.sock -p8080:8080 --name=cfreak-cypress cfreak/codefreak
           config-file: cypress/cypress-ci.json
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 180
