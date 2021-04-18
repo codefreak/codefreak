@@ -9,7 +9,9 @@ describe('Login', () => {
   it('works with valid credentials', () => {
     cy.visitIndex()
 
-    cy.login(username, validPassword)
+    cy.get('#login_username').type(username)
+    cy.get('#login_password').type(validPassword)
+    cy.contains('Sign in').click()
 
     cy.url().should('include', '/assignments')
 
@@ -21,7 +23,9 @@ describe('Login', () => {
   it('does not work with invalid credentials', () => {
     cy.visitIndex()
 
-    cy.login(username, invalidPassword)
+    cy.get('#login_username').type(username)
+    cy.get('#login_password').type(invalidPassword)
+    cy.contains('Sign in').click()
 
     cy.url().should('not.include', '/assignments')
 

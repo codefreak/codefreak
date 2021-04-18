@@ -14,11 +14,8 @@
 // ***********************************************************
 
 import './commands'
-import failOnConsoleError, {consoleType} from 'cypress-fail-on-console-error'
+import failOnConsoleError, { consoleType } from 'cypress-fail-on-console-error'
 
 failOnConsoleError({
-  includeConsoleTypes: [
-    consoleType.ERROR,
-    consoleType.WARN,
-  ],
+  includeConsoleTypes: [consoleType.ERROR, consoleType.WARN]
 })

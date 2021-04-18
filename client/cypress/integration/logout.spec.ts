@@ -1,8 +1,8 @@
 describe('Logout', () => {
   it('logs the user out', () => {
-    cy.visitIndex()
+    cy.loginTeacher()
 
-    cy.login('teacher', '123')
+    cy.visitIndex()
 
     cy.contains('Kim Teacher').click()
 

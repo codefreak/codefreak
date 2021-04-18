@@ -1,8 +1,8 @@
 describe('Task', () => {
   it('creates an empty task', () => {
-    cy.visitTaskPoolPage()
+    cy.loginTeacher()
 
-    cy.login('teacher', '123')
+    cy.visitTaskPoolPage()
 
     cy.contains('Create Task').click()
 

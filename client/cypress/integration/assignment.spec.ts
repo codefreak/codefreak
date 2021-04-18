@@ -1,8 +1,8 @@
 describe('Assignment', () => {
   it('creates an empty assignment', () => {
-    cy.visitAssignmentsListPage()
+    cy.loginTeacher()
 
-    cy.login('teacher', '123')
+    cy.visitAssignmentsListPage()
 
     cy.contains('Create Assignment').click()
 
