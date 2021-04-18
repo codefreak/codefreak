@@ -21,7 +21,7 @@
     "@types/node": "12.20.7",
     "@types/react": "17.0.3",
     "@types/react-dom": "17.0.3",
-    "@types/react-helmet": "6.1.0",
+    "@types/react-helmet": "6.1.1",
     "@types/react-jsonschema-form": "1.7.4",
     "@types/react-router-dom": "5.1.7",
     "@types/react-syntax-highlighter": "11.0.5",
