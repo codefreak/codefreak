@@ -19,3 +19,13 @@ import failOnConsoleError, { consoleType } from 'cypress-fail-on-console-error'
 failOnConsoleError({
   includeConsoleTypes: [consoleType.ERROR, consoleType.WARN]
 })
+
+// Prevents Cypress failing on the ci because of a ResizeObserver-loop-limit-error
+// https://stackoverflow.com/a/63519375
+const resizeObserverLoopErrorRegex = /^[^(ResizeObserver loop limit exceeded)]/
+Cypress.on('uncaught:exception', error => {
+  /* returning false here prevents Cypress from failing the test */
+  if (resizeObserverLoopErrorRegex.test(error.message)) {
+    return false
+  }
+})
