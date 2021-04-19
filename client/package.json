@@ -33,7 +33,7 @@
     "bootstrap-less": "3.3.8",
     "copy-to-clipboard": "3.3.1",
     "craco-antd": "1.19.0",
-    "devicon": "2.10.1",
+    "devicon": "2.11.0",
     "filesize": "6.1.0",
     "git-revision-webpack-plugin": "3.0.6",
     "graphql": "15.5.0",
