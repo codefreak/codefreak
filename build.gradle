@@ -4,7 +4,7 @@ plugins {
   id 'org.jetbrains.kotlin.plugin.spring' version '1.4.32'
   id "org.jetbrains.kotlin.kapt" version "1.4.32"
   id 'org.springframework.boot' version '2.4.4'
-  id 'com.diffplug.spotless' version '5.12.1'
+  id 'com.diffplug.spotless' version '5.12.2'
   id 'com.bertramlabs.asset-pipeline' version '3.0.10'
   id 'jacoco'
   id "com.gorylenko.gradle-git-properties" version "2.2.4"
