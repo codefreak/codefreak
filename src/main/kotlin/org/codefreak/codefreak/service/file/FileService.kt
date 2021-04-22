@@ -82,6 +82,7 @@ interface FileService {
    *   - Target must not be one of the descendants of source (moving something to itself)
    *   - Basename of each source must not be existent in target
    *   - Moving directories preserves the directory structure
+   *   - Ignore silently if a file is moved to itself (e.g. /some/file.txt is moved to /some/)
    *
    * If one of the conditions above does not match an IllegalArgumentException is thrown.
    */

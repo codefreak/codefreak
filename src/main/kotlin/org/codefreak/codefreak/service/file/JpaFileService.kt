@@ -304,6 +304,10 @@ class JpaFileService : FileService {
         )
       }
     } else {
+      if (sources.size == 1 && TarUtil.normalizeFileName(target) == TarUtil.normalizeFileName(sources.first())) {
+        // Renaming a single item to itself. Our job is done here.
+        return
+      }
       // move things to a directory
       if (!targetEntry.isDirectory) {
         throw IllegalArgumentException("Cannot move to $target: Is not directory")
@@ -330,7 +334,7 @@ class JpaFileService : FileService {
 
       // make sure we will not override something in the new directory
       replaceMap.forEach { (oldName, newName) ->
-        require(!containsPath(collectionId, newName)) {
+        require(oldName == newName || !containsPath(collectionId, newName)) {
           "Cannot move ${oldName.withoutTrailingSlash()} to $target: ${newName.withoutTrailingSlash()} already exists"
         }
       }
