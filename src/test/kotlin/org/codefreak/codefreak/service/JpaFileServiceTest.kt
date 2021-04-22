@@ -619,9 +619,15 @@ class JpaFileServiceTest {
 
   @Test
   fun `ignore if file is moved to its own directory`() {
-    fileService.createDirectories(collectionId, setOf("some"))
-    fileService.createFiles(collectionId, setOf("some/file.txt"))
-    fileService.moveFile(collectionId, setOf("some/file.txt"), "some")
-    assertTrue(fileService.containsFile(collectionId, "some/file.txt"))
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    fileService.createFiles(collectionId, setOf("file2.txt"))
+    fileService.moveFile(collectionId, setOf("file.txt", "file2.txt"), "/")
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file2.txt"))
+
+    fileService.createDirectories(collectionId, setOf("subdir"))
+    fileService.createFiles(collectionId, setOf("subdir/file.txt"))
+    fileService.moveFile(collectionId, setOf("subdir/file.txt"), "subdir")
+    assertTrue(fileService.containsFile(collectionId, "subdir/file.txt"))
   }
 }
