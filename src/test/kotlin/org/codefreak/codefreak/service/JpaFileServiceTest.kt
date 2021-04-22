@@ -601,4 +601,11 @@ class JpaFileServiceTest {
     assertTrue(fileService.containsFile(collectionId, "new/file.txt"))
     assertTrue(equals(fileService.readFile(collectionId, "new/file.txt").readBytes(), innerFile2Contents))
   }
+
+  @Test
+  fun `moving from child to parent directory`() {
+    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.moveFile(collectionId, setOf("some/path"), "/")
+    assertTrue(fileService.containsDirectory(collectionId, "path"))
+  }
 }

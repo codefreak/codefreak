@@ -133,6 +133,10 @@ class JpaFileService : FileService {
     path: String,
     restriction: (TarArchiveEntry) -> Boolean = { true }
   ): TarArchiveEntry? {
+    // create a fake root entry as it might not be present in some archives
+    if (TarUtil.isRoot(path)) {
+      return TarArchiveEntry("./")
+    }
     val normalizedFileName = TarUtil.normalizeFileName(path)
     getTarInputStream(collectionId).use { archive ->
       return archive.entrySequence().firstOrNull {
