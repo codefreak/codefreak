@@ -128,7 +128,12 @@ class AppConfiguration {
     var adapter = FileAdapter.JPA
 
     enum class FileAdapter {
-      JPA
+      JPA,
+      FILE_SYSTEM
+    }
+
+    class FileSystem {
+      var collectionStoragePath = "/var/lib/codefreak"
     }
   }
 
