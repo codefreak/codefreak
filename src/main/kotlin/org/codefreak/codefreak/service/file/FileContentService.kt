@@ -23,11 +23,13 @@ class FileContentService : BaseService() {
     SYMLINK
   }
 
-  class VirtualFile(
+  data class VirtualFile(
     val path: String,
     val lastModifiedDate: Instant,
     val type: VirtualFileType,
-    val content: ByteArray?
+    val content: ByteArray?,
+    val size: Long,
+    val mode: Int
   )
 
   fun getFile(fileCollectionId: UUID, path: String): VirtualFile {
@@ -61,7 +63,9 @@ class FileContentService : BaseService() {
           entry.isLink || entry.isSymbolicLink -> VirtualFileType.SYMLINK
           entry.isDirectory -> VirtualFileType.DIRECTORY
           else -> VirtualFileType.FILE
-        }
+        },
+        size = entry.size,
+        mode = entry.mode
     )
   }
 }
