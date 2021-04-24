@@ -1,11 +1,10 @@
-package org.codefreak.codefreak.service
+package org.codefreak.codefreak.service.file
 
 import com.nhaarman.mockitokotlin2.any
 import java.util.Optional
 import java.util.UUID
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
-import org.codefreak.codefreak.service.file.FileService
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

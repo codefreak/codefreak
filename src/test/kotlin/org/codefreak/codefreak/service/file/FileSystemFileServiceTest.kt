@@ -1,9 +1,7 @@
-package org.codefreak.codefreak.service
+package org.codefreak.codefreak.service.file
 
 import java.util.UUID
 import org.codefreak.codefreak.repository.FileCollectionRepository
-import org.codefreak.codefreak.service.file.FileService
-import org.codefreak.codefreak.service.file.FileSystemFileService
 import org.mockito.InjectMocks
 import org.mockito.Mock
 
