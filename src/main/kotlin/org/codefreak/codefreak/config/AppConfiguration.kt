@@ -126,6 +126,7 @@ class AppConfiguration {
 
   class Files {
     var adapter = FileAdapter.JPA
+    val fileSystem = FileSystem()
 
     enum class FileAdapter {
       JPA,
@@ -133,7 +134,7 @@ class AppConfiguration {
     }
 
     class FileSystem {
-      var collectionStoragePath = "/var/lib/codefreak"
+      lateinit var collectionStoragePath: String
     }
   }
 

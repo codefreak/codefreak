@@ -49,7 +49,9 @@ server:
 codefreak:
   instanceId: default
   files:
-    adapter: jpa
+    adapter: file_system
+    fileSystem:
+      collectionStoragePath: "/var/lib/codefreak"
   docker:
     # All of the docker settings below will fall back to a system-depended default value if unset
     host: ~
