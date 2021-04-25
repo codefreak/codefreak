@@ -1,15 +1,15 @@
 package org.codefreak.codefreak.service.file
 
 import com.nhaarman.mockitokotlin2.any
-import org.codefreak.codefreak.entity.FileCollection
+import java.util.Optional
 import java.util.UUID
+import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.junit.Before
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 class JpaFileServiceTest : FileServiceTest() {
   override var collectionId = UUID(0, 0)

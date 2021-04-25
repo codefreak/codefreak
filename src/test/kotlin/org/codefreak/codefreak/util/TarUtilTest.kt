@@ -9,7 +9,6 @@ import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.notNullValue
-import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockPart
@@ -59,28 +58,6 @@ internal class TarUtilTest {
     TarArchiveInputStream(out.toByteArray().inputStream()).use {
       val result = generateSequence { it.nextTarEntry }.filter { it.name == "main.c" }.firstOrNull()
       assertThat(result, notNullValue())
-    }
-  }
-
-  @Test
-  fun `entry name is normalized correctly`() {
-    mapOf(
-        " " to "",
-        "foo" to "foo",
-        "foo " to "foo",
-        "foo/bar" to "foo/bar",
-        ".foo" to ".foo",
-        ".foo.bar" to ".foo.bar",
-        ".foo/bar" to ".foo/bar",
-        ".foo/.bar" to ".foo/.bar",
-        "./" to "",
-        "." to "",
-        "../" to "",
-        "../." to "",
-        "../.." to "",
-        ".././foo" to "foo"
-    ).forEach {
-      assertEquals(it.value, TarUtil.normalizeEntryName(it.key))
     }
   }
 }

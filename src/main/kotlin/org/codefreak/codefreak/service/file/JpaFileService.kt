@@ -14,6 +14,7 @@ import org.apache.commons.compress.utils.IOUtils
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
+import org.codefreak.codefreak.util.FileUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.codefreak.codefreak.util.withoutTrailingSlash
@@ -194,7 +195,7 @@ class JpaFileService : FileService {
 
   override fun deleteFiles(collectionId: UUID, paths: Set<String>) {
     val normalizedPaths = paths.map { path ->
-      requireValidPath(TarUtil.normalizeEntryName(path))
+      requireValidPath(FileUtil.normalizeName(path))
       val fileExists = containsFile(collectionId, TarUtil.normalizeFileName(path))
       val directoryExists = containsDirectory(collectionId, TarUtil.normalizeDirectoryName(path))
       require(fileExists || directoryExists) { "`$path` does not exist" }

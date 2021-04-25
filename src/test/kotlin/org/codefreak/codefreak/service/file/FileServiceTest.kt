@@ -1,8 +1,8 @@
 package org.codefreak.codefreak.service.file
 
+import java.util.UUID
 import org.junit.Assert
 import org.junit.Test
-import java.util.UUID
 
 abstract class FileServiceTest {
   abstract var collectionId: UUID

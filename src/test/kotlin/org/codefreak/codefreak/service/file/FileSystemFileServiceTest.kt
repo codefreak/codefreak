@@ -2,14 +2,14 @@ package org.codefreak.codefreak.service.file
 
 import com.google.common.jimfs.Configuration
 import com.google.common.jimfs.Jimfs
+import java.nio.file.Paths
+import java.util.UUID
 import org.codefreak.codefreak.config.AppConfiguration
 import org.junit.After
 import org.junit.Before
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.MockedStatic
 import org.mockito.Mockito
-import java.nio.file.Paths
-import java.util.UUID
 
 class FileSystemFileServiceTest : FileServiceTest() {
   override var collectionId: UUID = UUID(0, 0)
