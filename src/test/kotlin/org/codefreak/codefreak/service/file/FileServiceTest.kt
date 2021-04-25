@@ -17,7 +17,7 @@ interface FileServiceTest {
   var fileCollectionRepository: FileCollectionRepository
 
   @Before
-  fun init() {
+  open fun init() {
     MockitoAnnotations.openMocks(this)
 
     val fileCollection = FileCollection(collectionId)

@@ -111,6 +111,9 @@ dependencies {
   liquibaseRuntime 'org.yaml:snakeyaml:1.28'
   liquibaseRuntime sourceSets.main.runtimeClasspath
   liquibaseRuntime sourceSets.main.output
+
+  // Virtual file system for unit tests
+  implementation 'com.google.jimfs:jimfs:1.2'
 }
 
 compileKotlin {
