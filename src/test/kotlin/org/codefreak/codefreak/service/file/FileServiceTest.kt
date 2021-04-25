@@ -1,28 +1,12 @@
 package org.codefreak.codefreak.service.file
 
-import com.nhaarman.mockitokotlin2.any
-import java.util.Optional
-import java.util.UUID
-import org.codefreak.codefreak.entity.FileCollection
-import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.junit.Assert
-import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
-import org.mockito.MockitoAnnotations
+import java.util.UUID
 
-interface FileServiceTest {
-  var collectionId: UUID
-  var fileService: FileService
-  var fileCollectionRepository: FileCollectionRepository
-
-  @Before
-  open fun init() {
-    MockitoAnnotations.openMocks(this)
-
-    val fileCollection = FileCollection(collectionId)
-    Mockito.`when`(fileCollectionRepository.findById(any())).thenReturn(Optional.of(fileCollection))
-  }
+abstract class FileServiceTest {
+  abstract var collectionId: UUID
+  abstract var fileService: FileService
 
   @Test
   fun `lists all existing files and directories`() {
