@@ -83,8 +83,8 @@
     "lint:tsc": "tsc",
     "lint:eslint": "eslint \"src/**/*.{ts,tsx,js,jsx}\"",
     "fix:eslint": "eslint --fix \"src/**/*.{ts,tsx,js,jsx}\"",
-    "lint:prettier": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\"",
-    "fix:prettier": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\"",
+    "lint:prettier": "prettier --check \"src/**/*\"",
+    "fix:prettier": "prettier --write \"src/**/*\"",
     "lint": "npm-run-all lint:**",
     "fix": "npm-run-all fix:**",
     "generate": "graphql-codegen --config codegen.yml"
