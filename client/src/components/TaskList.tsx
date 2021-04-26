@@ -25,7 +25,7 @@ type Task = TaskListItemFragment & {
 }
 
 interface RenderProps {
-  delete: (taskId: string) => Promise<void>
+  delete: (taskId: string) => Promise<unknown>
 }
 
 const renderTask = (props: RenderProps) => (task: Task) => {

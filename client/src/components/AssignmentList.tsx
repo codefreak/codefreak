@@ -57,7 +57,7 @@ interface AssignmentListProps {
   list: Assignment[]
   sortMethod?: string
   filterCriteria?: string
-  onDelete: (assignmentId: string) => Promise<void>
+  onDelete: (assignmentId: string) => Promise<unknown>
 }
 
 const AssignmentList = (props: AssignmentListProps) => {
@@ -75,7 +75,7 @@ const AssignmentList = (props: AssignmentListProps) => {
 }
 
 interface RenderProps {
-  delete: (assignmentId: string) => Promise<void>
+  delete: (assignmentId: string) => Promise<unknown>
 }
 
 const renderAssignment = (props: RenderProps) => (assignment: Assignment) => {

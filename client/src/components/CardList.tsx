@@ -20,7 +20,7 @@ interface CardListProps<T> {
   items: T[]
   renderItem: (value: T) => CardProps
   sortable?: boolean
-  handlePositionChange?: (item: T, newPosition: number) => Promise<void>
+  handlePositionChange?: (item: T, newPosition: number) => Promise<unknown>
 }
 
 const DragHandle = sortableHandle(() => (
