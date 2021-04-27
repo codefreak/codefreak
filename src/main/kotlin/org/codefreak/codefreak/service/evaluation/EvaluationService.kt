@@ -66,6 +66,9 @@ class EvaluationService : BaseService() {
   private lateinit var runnerService: EvaluationRunnerService
 
   @Autowired
+  private lateinit var gradeService: GradeService
+
+  @Autowired
   private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
 
   private val log = LoggerFactory.getLogger(this::class.java)

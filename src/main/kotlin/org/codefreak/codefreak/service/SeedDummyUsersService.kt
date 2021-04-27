@@ -24,6 +24,9 @@ class SeedDummyUsersService : ApplicationListener<ContextRefreshedEvent> {
   @Autowired
   lateinit var userRepository: UserRepository
 
+  @Autowired
+  private lateinit var aliasNameGenerator: AliasNameGenerator
+
   private val log = LoggerFactory.getLogger(this::class.java)
 
   companion object {
@@ -47,7 +50,66 @@ class SeedDummyUsersService : ApplicationListener<ContextRefreshedEvent> {
       lastName = "Student"
       password = DEV_USER_PASSWORD_HASH
     }
-    val allUsers = listOf(admin, teacher, student)
+
+    /**
+     * Added couple more users for testing
+     */
+    val student2 = User("student2").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Karl"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student3 = User("student3").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Max"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student4 = User("student4").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Anna"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student5 = User("student5").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Eve"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student6 = User("student6").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Klaus"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student7 = User("student7").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Hannes"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student8 = User("student8").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Richard"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student9 = User("student9").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Lena"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+    val student10 = User("student10").apply {
+      roles = mutableSetOf(Role.STUDENT)
+      firstName = "Emily"
+      lastName = "Student"
+      password = DEV_USER_PASSWORD_HASH
+    }
+
+    val allUsers = listOf(admin, teacher, student, student2, student3, student4, student5, student6, student7, student8, student9, student10)
   }
 
   override fun onApplicationEvent(event: ContextRefreshedEvent) {
@@ -58,6 +120,10 @@ class SeedDummyUsersService : ApplicationListener<ContextRefreshedEvent> {
         "Adding some dummy users to database with password '$DEV_USER_PASSWORD': " +
             allUsers.joinToString { it.username }
     )
-    userRepository.saveAll(allUsers)
+
+    val users = userRepository.saveAll(allUsers)
+    users.forEach {
+      aliasNameGenerator.generateAndSetAlias(it)
+    }
   }
 }

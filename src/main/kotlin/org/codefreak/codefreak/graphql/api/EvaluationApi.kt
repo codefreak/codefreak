@@ -33,6 +33,7 @@ import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationRunnerService
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.EvaluationStepService
+import org.codefreak.codefreak.service.evaluation.GradingDefinitionService
 import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
 import org.codefreak.codefreak.service.evaluation.isBuiltIn
 import org.codefreak.codefreak.util.exhaustive
@@ -54,6 +55,7 @@ class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: Res
   val active = definition.active
   val position = definition.position
   val title = definition.title
+  val gradingDefinition by lazy { GradingDefinitionDto(ctx.serviceAccess.getService(GradingDefinitionService::class).findByEvaluationStepDefinition(definition.id), ctx) }
   val options: String by lazy {
     ctx.authorization.requireAuthorityIfNotCurrentUser(definition.task.owner, Authority.ROLE_ADMIN)
     objectMapper.writeValueAsString(definition.options)

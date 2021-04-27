@@ -37,6 +37,7 @@ mutation UpdateAssignment(
   $deadline: DateTime
   $openFrom: DateTime
   $timeLimit: Long
+  $enableScoreboard: Boolean
 ) {
   updateAssignment(
     id: $id
@@ -45,5 +46,6 @@ mutation UpdateAssignment(
     deadline: $deadline
     openFrom: $openFrom
     timeLimit: $timeLimit
+    enableScoreboard: $enableScoreboard
   )
 }

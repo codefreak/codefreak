@@ -32,8 +32,16 @@ class Answer(
     }
   }
 
-  @OneToMany(mappedBy = "answer", cascade = [CascadeType.REMOVE])
+  @OneToMany(mappedBy = "answer", cascade = [CascadeType.ALL])
   var evaluations = mutableSetOf<Evaluation>()
+
+  /**
+   * All grades related to their respective evaluations are mapped.
+   * This makes it easier to get the best grade of an answer for the scoreboard
+   * Otherwise too much cascading
+   */
+  @OneToMany(mappedBy = "answer", cascade = [CascadeType.ALL])
+  var grades = mutableSetOf<Grade>()
 
   @CreationTimestamp
   var createdAt: Instant = Instant.now()

@@ -14,4 +14,5 @@ interface AnswerRepository : CrudRepository<Answer, UUID> {
   fun findIdsForTaskIds(@Param("taskIds") taskIds: Iterable<UUID>, @Param("userId") userId: UUID): Collection<Pair<UUID, UUID>>
 
   fun findByTaskIdAndSubmissionUserId(taskId: UUID, userId: UUID): Optional<Answer>
+  fun findAllBySubmissionId(id: UUID): MutableList<Answer>
 }

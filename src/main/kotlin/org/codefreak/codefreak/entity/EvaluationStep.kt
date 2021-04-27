@@ -10,6 +10,7 @@ import javax.persistence.FetchType
 import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.Type
 
@@ -31,6 +32,12 @@ class EvaluationStep(
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluationStep", fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
   var feedback = mutableSetOf<Feedback>()
+
+  @OneToOne(mappedBy = "evaluationStep", cascade = [CascadeType.ALL])
+  var points: PointsOfEvaluationStep? = null
+
+  @ManyToOne
+  var gradingDefinition: GradingDefinition? = null
 
   @Enumerated(EnumType.STRING)
   var result: EvaluationStepResult? = null

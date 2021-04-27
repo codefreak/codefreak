@@ -28,11 +28,13 @@ import {
   EvaluationRunner,
   EvaluationStepDefinitionInput,
   GetEvaluationStepDefinitionsQueryResult,
+  GetGradingDefinitionDocument,
   useCreateEvaluationStepDefinitionMutation,
   useDeleteEvaluationStepDefinitionMutation,
   useGetEvaluationStepDefinitionsQuery,
   useSetEvaluationStepDefinitionPositonMutation,
-  useUpdateEvaluationStepDefinitionMutation
+  useUpdateEvaluationStepDefinitionMutation,
+  useUpdateGradingDefinitionMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import { makeUpdater } from '../../services/util'
@@ -46,6 +48,7 @@ import {
 } from '../../services/time'
 import HelpTooltip from '../../components/HelpTooltip'
 import { debounce } from 'ts-debounce'
+import GradingDefinitionInputField from '../../components/autograder/GradingDefinitionInputField'
 
 type EvaluationStepDefinition = NonNullable<
   GetEvaluationStepDefinitionsQueryResult['data']
@@ -79,6 +82,8 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       messageService.success('Step updated')
     }
   })
+
+  const [updateGradingDefinitionMutation] = useUpdateGradingDefinitionMutation()
 
   const [createStep] = useCreateEvaluationStepDefinitionMutation()
 
@@ -162,6 +167,33 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         : undefined
       return updateTimeout(timeout)
     }
+
+    const gradingDefinition = definition.gradingDefinition.id
+
+    const gradingDefinitionUpdater = makeUpdater(
+      definition.gradingDefinition,
+      variables =>
+        updateGradingDefinitionMutation({
+          variables,
+          refetchQueries: [
+            {
+              query: GetGradingDefinitionDocument,
+              variables: { gradingDefinition }
+            }
+          ]
+        }).finally(() => {
+          if (!definition.gradingDefinition.active) {
+            messageService.success('GradingDefinition On')
+          } else {
+            messageService.success('GradingDefinition Off')
+          }
+        })
+    )
+
+    const onGradeActiveChange = (state: boolean) => {
+      gradingDefinitionUpdater('active')(state)
+    }
+
     const cardProps: CardProps = {
       title: (
         <EditableTitle
@@ -247,6 +279,26 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 disabled={assignmentOpen && !sureToEdit}
               />
             </Descriptions.Item>
+
+            <Descriptions.Item>
+              <p>
+                <div>Automatic Grading</div>
+                <Switch
+                  defaultChecked={definition.gradingDefinition.active}
+                  onChange={onGradeActiveChange}
+                  disabled={assignmentOpen && !sureToEdit}
+                />
+              </p>
+              {definition.gradingDefinition.active ? (
+                <p>
+                  <GradingDefinitionInputField
+                    gradingDefinition={definition.gradingDefinition}
+                    disable={assignmentOpen && !sureToEdit}
+                  />
+                </p>
+              ) : null}
+            </Descriptions.Item>
+
             {runner.stoppable ? (
               <Descriptions.Item
                 label={

@@ -24,6 +24,7 @@ query GetLatestEvaluation($answerId: ID!) {
   answer(id: $answerId) {
     id
     latestEvaluation {
+      id
       ...latestEvaluation
     }
   }
@@ -64,6 +65,9 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
       options
       active
       timeout
+      gradingDefinition {
+        ...gradingDefinition
+      }
     }
   }
   evaluationRunners {

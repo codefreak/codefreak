@@ -39,4 +39,6 @@ class User(private val username: String) : BaseEntity(), UserDetails, Credential
   override fun eraseCredentials() {
     password = null
   }
+
+  var alias: String? = null
 }

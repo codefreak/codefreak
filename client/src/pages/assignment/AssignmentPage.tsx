@@ -13,7 +13,8 @@ import {
   Menu,
   Modal,
   Steps,
-  TimePicker
+  TimePicker,
+  Switch as AntSwitch
 } from 'antd'
 import { DropdownButtonProps } from 'antd/es/dropdown/dropdown-button'
 import moment, { Moment, unitOfTime } from 'moment'
@@ -44,7 +45,7 @@ import {
   useAddTasksToAssignmentMutation,
   useGetAssignmentQuery,
   useUpdateAssignmentMutation
-} from '../../services/codefreak-api'
+} from '../../generated/graphql'
 import { getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import {
@@ -62,6 +63,7 @@ import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import { ShareAssignmentButton } from '../../components/ShareAssignmentButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
 import TaskSelection from '../../components/TaskSelection'
+import ScoreboardPage from '../submission/ScoreboardPage'
 import ModificationTime from '../../components/ModificationTime'
 
 const { Step } = Steps
@@ -104,6 +106,9 @@ const AssignmentPage: React.FC = () => {
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
+  if (result.data.assignment.enableScoreboard) {
+    tabs.push({ key: '/scoreboard', tab: 'Scoreboard' })
+  }
 
   const { assignment } = result.data
   const { submission } = assignment
@@ -114,12 +119,19 @@ const AssignmentPage: React.FC = () => {
     active: assignment.active,
     deadline: assignment.deadline,
     openFrom: assignment.openFrom,
-    timeLimit: assignment.timeLimit
+    timeLimit: assignment.timeLimit,
+    enableScoreboard: assignment.enableScoreboard
   }
 
   const updater = makeUpdater(assignmentInput, variables =>
     updateMutation({ variables })
   )
+
+  const onScoreboardChange = (value: boolean) => {
+    if (value !== undefined) {
+      updater('enableScoreboard')(value)
+    }
+  }
 
   const renderDate = (
     label: string,
@@ -227,6 +239,18 @@ const AssignmentPage: React.FC = () => {
                   ? secondsToRelTime(assignment.timeLimit)
                   : 'none'}
               </Descriptions.Item>
+              {assignment.editable ? (
+                <Descriptions.Item label="Scoreboard">
+                  <AntSwitch
+                    defaultChecked={
+                      assignment.enableScoreboard
+                        ? assignment.enableScoreboard
+                        : false
+                    }
+                    onChange={onScoreboardChange}
+                  />
+                </Descriptions.Item>
+              ) : null}
             </Descriptions>
             <Authorized condition={assignment.editable}>
               <StatusSteps
@@ -242,6 +266,9 @@ const AssignmentPage: React.FC = () => {
       <Switch>
         <Route exact path={path} component={TaskListPage} />
         <Route path={`${path}/submissions`} component={SubmissionListPage} />
+        {(assignment.enableScoreboard ? assignment.enableScoreboard : null) ? (
+          <Route path={`${path}/scoreboard`} component={ScoreboardPage} />
+        ) : null}
         <Route component={NotFoundPage} />
       </Switch>
     </>

@@ -24,6 +24,10 @@ class TestUserDetailsService(private val userService: UserService) : UserDetails
     "admin" -> SeedDummyUsersService.admin
     "teacher" -> SeedDummyUsersService.teacher
     "student" -> SeedDummyUsersService.student
+    "student2" -> SeedDummyUsersService.student2
+    "student3" -> SeedDummyUsersService.student3
+    "student4" -> SeedDummyUsersService.student4
+    "student5" -> SeedDummyUsersService.student5
     else -> throw UsernameNotFoundException("User $username cannot be found")
   }
 }

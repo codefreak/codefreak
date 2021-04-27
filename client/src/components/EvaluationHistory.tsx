@@ -3,6 +3,7 @@ import { Button, Card, Modal, Timeline } from 'antd'
 import React from 'react'
 import {
   EvaluationStepResult,
+  EvaluationStepStatus,
   GetEvaluationHistoryQueryResult,
   useGetEvaluationHistoryQuery
 } from '../generated/graphql'
@@ -12,12 +13,15 @@ import EvaluationResult from './EvaluationResult'
 import { EvaluationErrorIcon } from './Icons'
 import useEvaluationStatus from '../hooks/useEvaluationStatus'
 import { isEvaluationInProgress } from '../services/evaluation'
+import useHasAuthority from '../hooks/useHasAuthority'
 
 const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
   const result = useGetEvaluationHistoryQuery({ variables: { answerId } })
   const apolloClient = useApolloClient()
 
   const evaluationStatus = useEvaluationStatus(answerId)
+
+  const authority = useHasAuthority('ROLE_TEACHER')
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -35,13 +39,19 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
           isEvaluationInProgress(evaluationStatus) ? 'Running...' : undefined
         }
       >
-        {evaluations.map(renderEvaluation(apolloClient))}
+        {evaluations.map(
+          renderEvaluation(apolloClient, evaluationStatus, authority)
+        )}
       </Timeline>
     </Card>
   )
 }
 
-const renderEvaluation = (apolloClient: ApolloClient<any>) => (
+const renderEvaluation = (
+  apolloClient: ApolloClient<any>,
+  evaluationStatus: EvaluationStepStatus | undefined,
+  teacherAuthority: boolean
+) => (
   evaluation: NonNullable<
     GetEvaluationHistoryQueryResult['data']
   >['answer']['evaluations'][0]
@@ -51,7 +61,11 @@ const renderEvaluation = (apolloClient: ApolloClient<any>) => (
       icon: null,
       content: (
         <ApolloProvider client={apolloClient}>
-          <EvaluationResult evaluationId={evaluation.id} />
+          <EvaluationResult
+            evaluationStatus={evaluationStatus}
+            evaluationId={evaluation.id}
+            teacherAuthority={teacherAuthority}
+          />
         </ApolloProvider>
       ),
       width: 800,

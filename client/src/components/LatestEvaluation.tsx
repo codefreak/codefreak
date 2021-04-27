@@ -5,6 +5,7 @@ import EvaluationResult from './EvaluationResult'
 import StartEvaluationButton from './StartEvaluationButton'
 import LoadingIndicator from './LoadingIndicator'
 import { RocketTwoTone } from '@ant-design/icons'
+import useHasAuthority from '../hooks/useHasAuthority'
 
 export interface LatestEvaluationProps {
   answerId: string
@@ -13,7 +14,13 @@ export interface LatestEvaluationProps {
 
 const LatestEvaluation: React.FC<LatestEvaluationProps> = props => {
   const { answerId, showTrigger } = props
-  const { latestEvaluation, loading } = useLiveAnswerEvaluation(answerId)
+  const {
+    latestEvaluation,
+    evaluationStatus,
+    loading
+  } = useLiveAnswerEvaluation(answerId)
+
+  const teacherAuthority = useHasAuthority('ROLE_TEACHER')
 
   if (loading) {
     return <LoadingIndicator />
@@ -39,7 +46,13 @@ const LatestEvaluation: React.FC<LatestEvaluationProps> = props => {
     }
   }
 
-  return <EvaluationResult evaluationId={latestEvaluation.id} />
+  return (
+    <EvaluationResult
+      evaluationId={latestEvaluation.id}
+      evaluationStatus={evaluationStatus}
+      teacherAuthority={teacherAuthority}
+    />
+  )
 }
 
 export default LatestEvaluation

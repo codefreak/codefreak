@@ -1,0 +1,67 @@
+query GetGradingDefinition($gradingDefinition: ID!) {
+  gradingDefinition(id: $gradingDefinition) {
+    ...gradingDefinition
+  }
+}
+
+query GetPointsOfEvaluation($pointsOfEvaluation: ID!) {
+  pointsOfEvaluation(id: $pointsOfEvaluation) {
+    ...pointsOfEvaluationStep
+  }
+}
+
+query GetPointsOfEvaluationStepByEvaluationStepId($evaluationStepId: ID!) {
+  pointsOfEvaluationStepByEvaluationStepId(
+    evaluationStepId: $evaluationStepId
+  ) {
+    ...pointsOfEvaluationStep
+    gradingDefinition {
+      id
+      active
+      maxPoints
+    }
+  }
+}
+
+query GetGradeForEvaluation($evaluationId: ID!) {
+  gradeForEvaluation(evaluationId: $evaluationId) {
+    id
+    gradePercentage
+  }
+}
+
+query GetScoreboardByAssignmentId($id: ID!) {
+  scoreboardByAssignmentId(id: $id) {
+    id
+    title
+    submissionsScoreboard {
+      id
+      userAlias {
+        id
+        alias
+      }
+      answersScoreboard {
+        id
+        taskScoreboard {
+          id
+          title
+        }
+        gradeScoreboard {
+          id
+          gradePercentage
+        }
+      }
+    }
+    tasksScoreboard {
+      id
+      title
+    }
+  }
+}
+
+query GetUserAliasByUserId($userId: ID!) {
+  userAliasByUserId(id: $userId) {
+    id
+    alias
+  }
+}

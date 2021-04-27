@@ -5,6 +5,7 @@ import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.Transient
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.annotations.CreationTimestamp
@@ -26,6 +27,9 @@ class Evaluation(
 ) : BaseEntity() {
   @OneToMany(mappedBy = "evaluation", cascade = [CascadeType.ALL], orphanRemoval = true)
   var evaluationSteps = mutableSetOf<EvaluationStep>()
+
+  @OneToOne(mappedBy = "evaluation")
+  var grade: Grade? = null
 
   /**
    * Represents the worst result from all steps

@@ -80,6 +80,10 @@ class EvaluationQueue : StepExecutionListener {
           evaluationStep.status >= EvaluationStepStatus.FINISHED -> evaluationStep.status
           else -> EvaluationStepStatus.FINISHED
         }
+        // If a gradeDefinition is present, start autograding.
+        evaluationStep.definition.gradingDefinition?.let {
+          evaluationStepService.startAutograding(evaluationStep)
+        }
         evaluationStepService.updateEvaluationStepStatus(evaluationStep, status)
       }
     }

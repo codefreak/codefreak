@@ -19,6 +19,7 @@ import useLiveEvaluationStep from '../hooks/useLiveEvaluationStep'
 import Countdown from './Countdown'
 import moment from 'moment'
 import { momentDifferenceToRelTime } from '../services/time'
+import PointsEdit from './autograder/PointsEdit'
 
 function timer(queuedAt?: string, finishedAt?: string) {
   if (queuedAt && !finishedAt) {
@@ -42,6 +43,8 @@ function timer(queuedAt?: string, finishedAt?: string) {
 interface EvaluationStepPanelProps {
   answerId: string
   stepBasics: EvaluationStepBasicsFragment
+  fetchGrade: () => void
+  teacherAuthority: boolean
 }
 
 export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => {
@@ -84,14 +87,31 @@ export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => 
     />
   )
 
+  const pointsEdit = (
+    <PointsEdit
+      evaluationStepId={step.id}
+      fetchGrade={props.fetchGrade}
+      teacherAuthority={props.teacherAuthority}
+    />
+  )
   let body
   if (!step.feedback || step.feedback.length === 0) {
     if (step.result === EvaluationStepResult.Success) {
       body = (
-        <Result icon={<SmileTwoTone />} title="All checks passed – good job!" />
+        <div>
+          <Result
+            icon={<SmileTwoTone />}
+            title="All checks passed – good job!"
+          />
+          {pointsEdit}
+        </div>
       )
     } else if (step.summary) {
-      body = <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>
+      body = (
+        <div>
+          <SyntaxHighlighter>{step.summary}</SyntaxHighlighter> {pointsEdit}
+        </div>
+      )
     }
   } else {
     const renderFeedback = (feedback: Feedback) =>
@@ -104,7 +124,11 @@ export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => 
       .sort(FeedbackSortMethods[sortValue])
       .map(renderFeedback)
 
-    body = <Collapse>{renderedFeedbackList}</Collapse>
+    body = (
+      <div>
+        <Collapse>{renderedFeedbackList}</Collapse> {pointsEdit}
+      </div>
+    )
   }
 
   if (!body && isEvaluationInProgress(stepStatus)) {

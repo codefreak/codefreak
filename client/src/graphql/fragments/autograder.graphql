@@ -1,0 +1,17 @@
+fragment pointsOfEvaluationStep on PointsOfEvaluationStep {
+  id
+  mistakePoints
+  reachedPoints
+  calculationCheck
+  edited
+  evaluationStepResultCheck
+}
+
+fragment gradingDefinition on GradingDefinition {
+  id
+  active
+  maxPoints
+  minorMistakePenalty
+  majorMistakePenalty
+  criticalMistakePenalty
+}

@@ -1,0 +1,38 @@
+.grading-definition-input {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 3em 3em 3em 3em;
+  gap: 5px 5px;
+  grid-template-areas:
+    'max-Points-input max-Points'
+    'minor-mistake-penalty-input minor-mistake-penalty'
+    'Major-mistake-penalty-input major-mistake-penalty'
+    'critical-mistake-penalty-input critical-mistake-penalty';
+
+  .ant-switch {
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+
+  .ant-input-number {
+    width: 80px;
+    border-radius: 0;
+
+    .ant-input-number-handler-wrap {
+      opacity: 1;
+    }
+  }
+  .grading-definition-input-edit {
+    display: inline-block;
+    justify-content: space-between;
+  }
+}
+
+.grading-definition-unlock {
+  display: inline-block;
+
+  .ant-switch {
+    margin-right: 5px;
+    margin-top: 5px;
+  }
+}

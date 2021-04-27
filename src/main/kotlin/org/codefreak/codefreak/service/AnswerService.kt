@@ -103,6 +103,10 @@ class AnswerService : BaseService() {
     return ByteArrayInputStream(out.toByteArray())
   }
 
+  fun findAllBySubmissionId(id: UUID): List<Answer> {
+    return answerRepository.findAllBySubmissionId(id)
+  }
+
   private fun Task.isHidden(entry: TarArchiveEntry): Boolean {
     val path = TarUtil.normalizeEntryName(entry.name)
     val matcher = AntPathMatcher()
