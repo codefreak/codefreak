@@ -37,7 +37,7 @@ WARNING: Currently, you cannot use Docker Desktop on Windows because of a proble
 1. Obtain the source code of Code FREAK from GitHub: `git clone https://github.com/codefreak/codefreak.git`
 2. Generate the GraphQL schema: `./gradlew client:generate` (this will also install all backend and frontend dependencies)
 3. Start the backend with `./gradlew bootRun`. The task may stop at 88% but if you see a log line like "Code FREAK instance id: default" the backend is running! You can check this if you point your browser to `http://localhost:8080` and see a 404 error page.
-4. Start the frontend inside the `client` directory with `npm start` (initial compilation make take some time)
+4. Start the frontend inside the `client` directory with `npm start` (initial compilation may take some time)
 
 The frontend should open automatically.
 If it does not please open `http://localhost:3000` in you browser.
