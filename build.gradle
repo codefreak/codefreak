@@ -10,7 +10,7 @@ plugins {
   id "com.gorylenko.gradle-git-properties" version "2.3.1"
   id 'net.researchgate.release' version '2.8.1'
   id 'org.liquibase.gradle' version '2.0.4'
-  id 'com.google.cloud.tools.jib' version '2.8.0'
+  id 'com.google.cloud.tools.jib' version '3.0.0'
 }
 
 apply plugin: 'io.spring.dependency-management'
