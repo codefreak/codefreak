@@ -114,6 +114,7 @@ dependencies {
 
 compileKotlin {
   kotlinOptions {
+    allWarningsAsErrors = true
     freeCompilerArgs = ['-Xjsr305=strict']
     jvmTarget = '1.8'
   }
@@ -121,6 +122,7 @@ compileKotlin {
 
 compileTestKotlin {
   kotlinOptions {
+    allWarningsAsErrors = true
     freeCompilerArgs = ['-Xjsr305=strict']
     jvmTarget = '1.8'
   }
