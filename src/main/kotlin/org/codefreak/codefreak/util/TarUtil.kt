@@ -248,10 +248,22 @@ object TarUtil {
     DIRECTORY(TarConstants.LF_DIR, TarArchiveEntry.DEFAULT_DIR_MODE)
   }
 
-  private fun createEntryInTar(name: String, outputStream: TarArchiveOutputStream, type: EntryType) {
+  private fun createEntryInTar(name: String, outputStream: TarArchiveOutputStream, type: EntryType, content: InputStream? = null) {
+    val contentBytes = content?.readBytes()
+
     TarArchiveEntry(name, type.linkFlag, false).also {
       it.mode = type.mode
+
+      contentBytes?.let { bytes ->
+        it.size = bytes.size.toLong()
+      }
+
       outputStream.putArchiveEntry(it)
+
+      contentBytes?.let { bytes ->
+        outputStream.write(bytes)
+      }
+
       outputStream.closeArchiveEntry()
     }
   }
@@ -270,4 +282,8 @@ object TarUtil {
   fun normalizeDirectoryName(name: String) = FileUtil.normalizeName(name).withTrailingSlash()
 
   fun TarArchiveInputStream.entrySequence() = generateSequence { nextTarEntry }
+
+  fun writeFileWithContent(name: String, content: InputStream, outputStream: TarArchiveOutputStream) {
+    createEntryInTar(name, outputStream, EntryType.FILE, content)
+  }
 }

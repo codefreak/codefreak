@@ -28,7 +28,11 @@ class FileSystemFileServiceTest : FileServiceTest() {
 
     Mockito.`when`(fileSystemConfig.collectionStoragePath).thenReturn("/var/lib/codefreak")
 
-    val fileSystem = Jimfs.newFileSystem(Configuration.unix())
+    val jimfsConfiguration = Configuration.unix().toBuilder()
+      .setAttributeViews("basic", "owner", "posix", "unix")
+      .build()
+    val fileSystem = Jimfs.newFileSystem(jimfsConfiguration)
+
     pathsMock = Mockito.mockStatic(Paths::class.java)
     Mockito.`when`(Paths.get(anyString(), anyString())).thenAnswer {
       fileSystem.getPath(it.arguments[0] as String, it.arguments[1] as String)
@@ -39,6 +43,9 @@ class FileSystemFileServiceTest : FileServiceTest() {
 
   @After
   fun tearDown() {
+    // Cleanup created files
+    fileService.deleteCollection(collectionId)
+    // Cleanup filesystem mock
     pathsMock.close()
   }
 }
