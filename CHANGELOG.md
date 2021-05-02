@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Added
+* Documentation of GraphQL interface for developers ([#889](https://github.com/codefreak/codefreak/pull/889))
 
 ### Changed
 

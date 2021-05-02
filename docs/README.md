@@ -8,3 +8,5 @@ The documentation is built using [Antora](https://antora.org) in a
 [dedicated repository](https://github.com/codefreak/docs.codefreak.org).
 
 We use [Asciidoc](http://asciidoc.org/) for writing documentation.
+
+The documentation source files are best edited using JetBrain's IntelliJ IDE with AsciiDoc plugin enabled. The plugin provides a preview for the antora results.
