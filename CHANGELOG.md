@@ -6,11 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 ### Added
-* Add support for CodeClimate `location.positions` format
 
 ### Changed
 
 ### Removed
+
+
+## [6.0.2](https://github.com/codefreak/codefreak/releases/tag/6.0.2) - 2020-05-04
+
+### Added
+* Add support for CodeClimate `location.positions` format
 
 
 ## [6.0.1](https://github.com/codefreak/codefreak/releases/tag/6.0.1) - 2020-04-06
