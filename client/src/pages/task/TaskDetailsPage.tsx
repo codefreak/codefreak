@@ -21,7 +21,6 @@ import {
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { JSONSchema6 } from 'json-schema'
 import { useState } from 'react'
-import ReactMarkdown from 'react-markdown'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
@@ -42,6 +41,7 @@ import EditEvaluationPage from '../evaluation/EditEvaluationPage'
 import IdeSettingsForm, {
   IdeSettingsModel
 } from '../../components/IdeSettingsForm'
+import Markdown from '../../components/Markdown'
 
 const { TabPane } = Tabs
 
@@ -108,7 +108,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const details = (
     <Card title="Instructions">
       {task.body ? (
-        <ReactMarkdown source={task.body} />
+        <Markdown>{task.body}</Markdown>
       ) : (
         <Empty description="This task has no extra instructions. Take a look at the provided files." />
       )}
@@ -273,9 +273,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                     <span>
                       <b>Hidden files</b>{' '}
                       <Tooltip
-                        title={
-                          'Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation.'
-                        }
+                        title="Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation."
                         placement="bottom"
                       >
                         <InfoCircleFilled />
@@ -309,9 +307,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                     <span>
                       <b>Protected files</b>{' '}
                       <Tooltip
-                        title={
-                          'Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.'
-                        }
+                        title="Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation."
                         placement="bottom"
                       >
                         <InfoCircleFilled />

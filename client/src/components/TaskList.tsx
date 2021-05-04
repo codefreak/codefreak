@@ -2,7 +2,6 @@ import { DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons'
 import { Button, Modal, Tooltip } from 'antd'
 import { CardProps } from 'antd/lib/card'
 import React from 'react'
-import ReactMarkdown from 'react-markdown'
 import {
   TaskListItemFragment,
   useDeleteTaskMutation,
@@ -15,15 +14,18 @@ import EntityLink from './EntityLink'
 import EvaluationIndicator from './EvaluationIndicator'
 import ModificationTime from './ModificationTime'
 import Authorized from './Authorized'
+import Markdown from './Markdown'
 
 const { confirm } = Modal
 
 type Task = TaskListItemFragment & {
-  answer?: any
+  answer?: {
+    id: string
+  } | null
 }
 
 interface RenderProps {
-  delete: (taskId: string) => Promise<any>
+  delete: (taskId: string) => Promise<unknown>
 }
 
 const renderTask = (props: RenderProps) => (task: Task) => {
@@ -82,7 +84,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
       <>
         {task.body ? (
           <CropContainer maxHeight={100}>
-            <ReactMarkdown source={task.body} />
+            <Markdown>{task.body}</Markdown>
           </CropContainer>
         ) : null}
         <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>

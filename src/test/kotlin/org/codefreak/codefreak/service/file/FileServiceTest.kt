@@ -421,10 +421,10 @@ abstract class FileServiceTest {
   }
 
   @Test
-  fun `moves existing file`() {
+  fun `rename existing file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
 
-    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    fileService.renameFile(collectionId, "file.txt", "new.txt")
 
     Assert.assertFalse(fileService.containsFile(collectionId, "file.txt"))
     Assert.assertTrue(fileService.containsFile(collectionId, "new.txt"))
@@ -504,23 +504,23 @@ abstract class FileServiceTest {
   }
 
   @Test
-  fun `moving a file does not change file contents`() {
+  fun `renaming a file does not change file contents`() {
     val contents = byteArrayOf(42)
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.writeFile(collectionId, "file.txt").use {
       it.write(contents)
     }
 
-    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    fileService.renameFile(collectionId, "file.txt", "new.txt")
 
     Assert.assertTrue(equals(contents, fileService.readFile(collectionId, "new.txt").readBytes()))
   }
 
   @Test
-  fun `moves existing directory`() {
+  fun `rename existing directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
 
-    fileService.moveFile(collectionId, setOf("some/path"), "new")
+    fileService.renameFile(collectionId, "some/path", "new")
 
     Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
     Assert.assertTrue(fileService.containsDirectory(collectionId, "new"))
@@ -547,34 +547,30 @@ abstract class FileServiceTest {
   }
 
   @Test
-  fun `moving a directory moves inner hierarchy correctly`() {
-    val innerDirectory = "some/path/inner"
-    val innerFile1 = "some/path/inner/file.txt"
-    val innerFile1Contents = byteArrayOf(42)
-    val innerFile2 = "some/path/file.txt"
+  fun `renaming a directory moves inner hierarchy correctly`() {
     val innerFile2Contents = byteArrayOf(17)
 
     fileService.createDirectories(collectionId, setOf("some/path"))
-    fileService.createDirectories(collectionId, setOf(innerDirectory))
-    fileService.createFiles(collectionId, setOf(innerFile1))
-    fileService.writeFile(collectionId, innerFile1).use {
-      it.write(innerFile1Contents)
+    fileService.createDirectories(collectionId, setOf("some/path/inner"))
+    fileService.createFiles(collectionId, setOf("some/path/inner/file.txt"))
+    fileService.writeFile(collectionId, "some/path/inner/file.txt").use {
+      it.write(byteArrayOf(42))
     }
-    fileService.createFiles(collectionId, setOf(innerFile2))
-    fileService.writeFile(collectionId, innerFile2).use {
+    fileService.createFiles(collectionId, setOf("some/path/file.txt"))
+    fileService.writeFile(collectionId, "some/path/file.txt").use {
       it.write(innerFile2Contents)
     }
 
-    fileService.moveFile(collectionId, setOf("some/path"), "new")
+    fileService.renameFile(collectionId, "some/path", "new")
 
     Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
-    Assert.assertFalse(fileService.containsDirectory(collectionId, innerDirectory))
-    Assert.assertFalse(fileService.containsFile(collectionId, innerFile1))
-    Assert.assertFalse(fileService.containsFile(collectionId, innerFile2))
+    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path/inner"))
+    Assert.assertFalse(fileService.containsFile(collectionId, "some/path/inner/file.txt"))
+    Assert.assertFalse(fileService.containsFile(collectionId, "some/path/file.txt"))
     Assert.assertTrue(fileService.containsDirectory(collectionId, "new"))
     Assert.assertTrue(fileService.containsDirectory(collectionId, "new/inner"))
     Assert.assertTrue(fileService.containsFile(collectionId, "new/inner/file.txt"))
-    Assert.assertTrue(equals(fileService.readFile(collectionId, "new/inner/file.txt").readBytes(), innerFile1Contents))
+    Assert.assertTrue(equals(fileService.readFile(collectionId, "new/inner/file.txt").readBytes(), byteArrayOf(42)))
     Assert.assertTrue(fileService.containsFile(collectionId, "new/file.txt"))
     Assert.assertTrue(equals(fileService.readFile(collectionId, "new/file.txt").readBytes(), innerFile2Contents))
   }
@@ -590,7 +586,7 @@ abstract class FileServiceTest {
   fun `ignore if renaming file to itself`() {
     fileService.createDirectories(collectionId, setOf("some"))
     fileService.createFiles(collectionId, setOf("some/file.txt"))
-    fileService.moveFile(collectionId, setOf("some/file.txt"), "some/file.txt")
+    fileService.renameFile(collectionId, "some/file.txt", "some/file.txt")
     Assert.assertTrue(fileService.containsFile(collectionId, "some/file.txt"))
   }
 

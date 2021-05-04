@@ -1,19 +1,19 @@
 import { EditOutlined } from '@ant-design/icons'
 import { Button, Empty } from 'antd'
 import React, { useState } from 'react'
-import ReactMarkdown from 'react-markdown'
+import Markdown from './Markdown'
 import ReactMde from 'react-mde'
 import { GenerateMarkdownPreview } from 'react-mde/lib/definitions/types'
 import 'react-mde/lib/styles/css/react-mde-all.css'
 import './EditableMarkdown.less'
 
-const generateMarkdownProview: GenerateMarkdownPreview = markdown =>
-  Promise.resolve(<ReactMarkdown source={markdown} />)
+const generateMarkdownPreview: GenerateMarkdownPreview = markdown =>
+  Promise.resolve(<Markdown>{markdown}</Markdown>)
 
 const EditableMarkdown: React.FC<{
   content?: string | null
   editable: boolean
-  onSave: (newContent: string | undefined) => Promise<any>
+  onSave: (newContent: string | undefined) => Promise<unknown>
 }> = ({ content, editable, onSave }) => {
   const [editing, setEditing] = useState(false)
   const [newContent, setNewContent] = useState<string>()
@@ -40,7 +40,7 @@ const EditableMarkdown: React.FC<{
           onChange={setNewContent}
           selectedTab={selectedTab}
           onTabChange={setSelectedTab}
-          generateMarkdownPreview={generateMarkdownProview}
+          generateMarkdownPreview={generateMarkdownPreview}
         />
         <div style={{ marginTop: 8 }}>
           <Button style={{ marginRight: 8 }} onClick={cancel}>
@@ -60,7 +60,7 @@ const EditableMarkdown: React.FC<{
       >
         <EditOutlined className="edit-icon" />
         {content || !editable ? (
-          <ReactMarkdown source={content || ''} />
+          <Markdown>{content || ''}</Markdown>
         ) : (
           <Empty description={null} />
         )}
