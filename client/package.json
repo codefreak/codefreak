@@ -81,7 +81,7 @@
     "eject": "react-scripts eject",
     "assemble": "tsc",
     "lint:cypress": "tsc --project cypress/tsconfig.json",
-    "lint:tsc": "tsc --project tsconfig.lint.json",
+    "lint:tsc": "tsc",
     "lint:eslint": "eslint \"src/**/*.{ts,tsx,js,jsx}\"",
     "fix:eslint": "eslint --fix \"src/**/*.{ts,tsx,js,jsx}\"",
     "lint:prettier": "prettier --check \"{src,cypress}/**/*\"",
