@@ -22,7 +22,7 @@ class FileUtilTest {
       "../.." to "",
       ".././foo" to "foo"
     ).forEach {
-      Assert.assertEquals(it.value, FileUtil.normalizeName(it.key))
+      Assert.assertEquals(it.value, FileUtil.sanitizeName(it.key))
     }
   }
 }

@@ -5,15 +5,11 @@ import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
 
 object FileUtil {
-  private val stripPrefixPattern = """^(?:\.*/)*(?:\.+$)?""".toRegex()
 
   /**
-   * Remove leading dots and slashes from given path
+   * Remove leading dots and slashes from given path and normalizes patterns like `foo/../bar`.
    */
-  fun normalizeName(name: String) = name.trim().trim('/').replace(stripPrefixPattern, "").trim()
-
-  // TODO sanitize name
-  fun sanitizeName(name: String, basePath: String = "/") = Paths.get(basePath).resolve(name).normalize()
+  fun sanitizeName(name: String, basePath: String = "/") = Paths.get(basePath, name).normalize().toString().trim().trim('/')
 
   fun getFilePermissionsMode(permissions: Set<PosixFilePermission>): Int {
     return permissions.sumOf(FileUtil::getFilePermissionsMode)

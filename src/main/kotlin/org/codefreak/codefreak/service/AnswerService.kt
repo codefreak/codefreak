@@ -105,7 +105,7 @@ class AnswerService : BaseService() {
   }
 
   private fun Task.isHidden(entry: TarArchiveEntry): Boolean {
-    val path = FileUtil.normalizeName(entry.name)
+    val path = FileUtil.sanitizeName(entry.name)
     val matcher = AntPathMatcher()
     hiddenFiles.plus("codefreak.yml").forEach {
       if (matcher.match(it, path)) return true
@@ -114,7 +114,7 @@ class AnswerService : BaseService() {
   }
 
   private fun Task.isProtected(entry: TarArchiveEntry): Boolean {
-    val path = FileUtil.normalizeName(entry.name)
+    val path = FileUtil.sanitizeName(entry.name)
     val matcher = AntPathMatcher()
     protectedFiles.forEach {
       if (matcher.match(it, path)) return true

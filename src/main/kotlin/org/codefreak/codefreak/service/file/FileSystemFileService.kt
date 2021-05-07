@@ -67,6 +67,9 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
         TarArchiveInputStream(ByteArrayInputStream(toByteArray())).use { input ->
           input.entrySequence().forEach {
+            val name = it.name
+            require(isValidPath(collectionId, Paths.get(it.name, ""))) { "`$name` is not a valid path" }
+
             if (it.isFile) {
               if (it.size == 0L) {
                 val fileName = TarUtil.normalizeFileName(it.name)
@@ -87,6 +90,20 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     }
   }
 
+  private fun isValidPath(collectionId: UUID, path: Path): Boolean {
+    val collectionPath = getCollectionPath(collectionId)
+    val unsanitizedPath = if (path.startsWith(collectionPath)) {
+      path
+    } else {
+      Paths.get(collectionPath.toString(), path.toString())
+    }
+
+    val sanitizedPathName = FileUtil.sanitizeName(unsanitizedPath.toString())
+    // Sanitizing the path name removes the leading slash, which we still need
+    val sanitizedPath = Paths.get("/", sanitizedPathName)
+    return isDescendant(sanitizedPath, collectionPath)
+  }
+
   override fun collectionExists(collectionId: UUID): Boolean {
     val collectionPath = getCollectionPath(collectionId)
     return Files.exists(collectionPath)
@@ -104,7 +121,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val collectionPath = getCollectionPath(collectionId)
 
     return Files.walk(collectionPath)
-      .filter { it != collectionPath }
+      .filter { it != collectionPath && isValidPath(collectionId, it) }
       .map { filePathToFileMetaData(it, collectionPath) }
       .asSequence()
   }
@@ -130,17 +147,18 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     require(Files.exists(fileTreeBasePath)) { "`$path` does not exist" }
 
     return Files.walk(fileTreeBasePath, 1)
-      .filter { it != collectionPath }
+      .filter { it != collectionPath && isValidPath(collectionId, it) }
       .map { filePathToFileMetaData(it, collectionPath) }
       .asSequence()
   }
 
   override fun createFiles(collectionId: UUID, paths: Set<String>) {
-    val collectionPath = getCollectionPath(collectionId).toString()
+    val collectionPath = getCollectionPath(collectionId)
     paths.forEach {
-      val normalizedPathName = FileUtil.normalizeName(it)
-      require(normalizedPathName.isNotBlank()) { "`$it` is not a valid path" }
-      val filePath = Paths.get(collectionPath, normalizedPathName)
+      require(isValidPath(collectionId, Paths.get(it, ""))) { "`$it` is not a valid path" }
+      val sanitizedPathName = FileUtil.sanitizeName(it)
+      val filePath = Paths.get(collectionPath.toString(), sanitizedPathName)
+      require(sanitizedPathName.isNotBlank() && isValidPath(collectionId, filePath)) { "`$it` is not a valid path" }
       createFile(filePath)
     }
   }
@@ -160,9 +178,10 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   override fun createDirectories(collectionId: UUID, paths: Set<String>) {
     val collectionPath = getCollectionPath(collectionId).toString()
     paths.forEach {
-      val normalizedPathName = FileUtil.normalizeName(it)
-      require(normalizedPathName.isNotBlank() || TarUtil.isRoot(normalizedPathName)) { "`$it` is not a valid path" }
-      val directoryPath = Paths.get(collectionPath, normalizedPathName)
+      require(isValidPath(collectionId, Paths.get(it, ""))) { "`$it` is not a valid path" }
+      val sanitizedPathName = FileUtil.sanitizeName(it)
+      require(sanitizedPathName.isNotBlank() || TarUtil.isRoot(sanitizedPathName)) { "`$it` is not a valid path" }
+      val directoryPath = Paths.get(collectionPath, sanitizedPathName)
       createDirectory(directoryPath)
     }
   }
@@ -179,25 +198,25 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
   override fun containsFile(collectionId: UUID, path: String): Boolean {
     val collectionPath = getCollectionPath(collectionId).toString()
-    val normalizedPath = FileUtil.normalizeName(path)
+    val normalizedPath = FileUtil.sanitizeName(path)
     val filePath = Paths.get(collectionPath, normalizedPath)
-    return Files.exists(filePath) && Files.isRegularFile(filePath)
+    return Files.exists(filePath) && Files.isRegularFile(filePath) && isValidPath(collectionId, filePath)
   }
 
   override fun containsDirectory(collectionId: UUID, path: String): Boolean {
     val collectionPath = getCollectionPath(collectionId).toString()
-    val normalizedPath = FileUtil.normalizeName(path)
-    val filePath = Paths.get(collectionPath, normalizedPath)
-    return Files.exists(filePath) && Files.isDirectory(filePath)
+    val normalizedPath = FileUtil.sanitizeName(path)
+    val directoryPath = Paths.get(collectionPath, normalizedPath)
+    return Files.exists(directoryPath) && Files.isDirectory(directoryPath) && isValidPath(collectionId, directoryPath)
   }
 
   override fun deleteFiles(collectionId: UUID, paths: Set<String>) {
     val collectionPath = getCollectionPath(collectionId).toString()
 
     val normalizedPaths = paths.map {
-      val normalizedPathName = FileUtil.normalizeName(it)
-      require(normalizedPathName.isNotBlank()) { "`$it` is not a valid path" }
-      val filePath = Paths.get(collectionPath, normalizedPathName)
+      val sanitizedPathName = FileUtil.sanitizeName(it)
+      require(sanitizedPathName.isNotBlank() && isValidPath(collectionId, Paths.get(sanitizedPathName, ""))) { "`$it` is not a valid path" }
+      val filePath = Paths.get(collectionPath, sanitizedPathName)
       require(Files.exists(filePath)) { "`$filePath` does not exist" }
       filePath
     }
@@ -239,7 +258,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val sourcePath = Paths.get(collectionPath.toString(), source)
     val targetPath = Paths.get(collectionPath.toString(), target)
 
-    require(Files.exists(sourcePath)) { "The source path `$source` does not exist" }
+    require(Files.exists(sourcePath) && isValidPath(collectionId, sourcePath)) { "The source path `$source` does not exist" }
 
     if (arePathsEqual(sourcePath, targetPath)) {
       // Moving file to itself, ignore
@@ -247,6 +266,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     }
 
     require(!Files.exists(targetPath)) { "The target path `$target` already exists" }
+    require(isValidPath(collectionId, targetPath)) { "The target path `$target` is not a valid path" }
 
     when {
       Files.isRegularFile(sourcePath) -> moveSingleFile(sourcePath, targetPath)
@@ -264,7 +284,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val sourcePaths = mutableListOf<Path>()
     sources.forEach {
       val sourcePath = Paths.get(collectionPath.toString(), it)
-      require(Files.exists(sourcePath)) { "The source path `$it` does not exist" }
+      require(Files.exists(sourcePath) && isValidPath(collectionId, sourcePath)) { "The source path `$it` does not exist" }
 
       val targetPath2 = Paths.get(targetPath.toString(), it)
       if (!arePathsEqual(sourcePath, targetPath) && !arePathsEqual(sourcePath, targetPath2) || Files.isDirectory(sourcePath)) {
@@ -280,6 +300,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
       Files.isDirectory(targetPath) ||
           (sourcePaths.size == 1 && arePathsEqual(sourcePaths.first(), targetPath))
     ) { "`$target` is not a directory" }
+    require(isValidPath(collectionId, targetPath)) { "The target path `$target` is not a valid path" }
 
     sourcePaths.forEach {
       require(!isDescendant(targetPath, it)) { "The target `$target` is a descendant of the source `$it`" }
@@ -314,7 +335,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   }
 
   private fun isDescendant(path: Path, of: Path): Boolean {
-    return path.toString().contains(of.toString())
+    return path.toString().startsWith(of.toString())
   }
 
   private fun isBasenamePresent(source: Path, target: Path): Boolean {
@@ -378,6 +399,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val filePath = Paths.get(collectionPath.toString(), path)
 
     require(!Files.isDirectory(filePath)) { "`$path` is a directory" }
+    require(isValidPath(collectionId, filePath)) { "`$path` is not a valid path" }
 
     return Files.newOutputStream(filePath)
   }
@@ -387,6 +409,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val filePath = Paths.get(collectionPath.toString(), path)
 
     require(Files.isRegularFile(filePath)) { "`$path` does not exist or is a directory" }
+    require(isValidPath(collectionId, filePath)) { "`$path` is not a valid path" }
 
     return Files.newInputStream(filePath)
   }
