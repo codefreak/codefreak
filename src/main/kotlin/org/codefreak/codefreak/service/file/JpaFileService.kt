@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
@@ -91,7 +90,7 @@ class JpaFileService : FileService {
     val normalizedPaths = paths.map { path ->
       TarUtil.normalizeFileName(path).also {
         requireValidPath(it)
-        val parentDir = TarUtil.normalizeDirectoryName(getParentDir(path))
+        val parentDir = TarUtil.normalizeDirectoryName(FileUtil.getParentDir(path))
         requireDirectoryDoesExist(collectionId, parentDir)
         require(!containsPath(collectionId, it))
       }
@@ -150,28 +149,10 @@ class JpaFileService : FileService {
 
   private fun getTarOutputStream(collectionId: UUID) = TarUtil.PosixTarArchiveOutputStream(writeCollectionTar(collectionId))
 
-  /**
-   * Return a set of ALL parent directories for a given path
-   * This will not include path itself and not the root path /
-   */
-  private fun getParentDirs(path: String): Set<String> {
-    val parents: MutableSet<String> = mutableSetOf()
-    var currentParent: Path? = Paths.get("/$path").parent
-    while (currentParent != null && currentParent.toString() != "/" && !parents.contains(currentParent.toString())) {
-      parents.add(currentParent.toString())
-      currentParent = currentParent.parent
-    }
-    return parents
-  }
-
-  private fun getParentDir(path: String): String {
-    return Paths.get("/" + TarUtil.normalizeFileName(path)).parent?.toString() ?: "/"
-  }
-
   override fun createDirectories(collectionId: UUID, paths: Set<String>) {
     val allDirs = paths.flatMap { path ->
       mutableSetOf<String>().also {
-        it.addAll(getParentDirs(path))
+        it.addAll(FileUtil.getParentDirs(path))
         it.add(path)
       }
     }

@@ -1,8 +1,7 @@
 package org.codefreak.codefreak.service.file
 
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
-import org.apache.commons.io.IOUtils
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -14,6 +13,10 @@ import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.UUID
+import kotlin.streams.asSequence
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
+import org.apache.commons.io.IOUtils
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.util.FileUtil
 import org.codefreak.codefreak.util.TarUtil
@@ -21,8 +24,6 @@ import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 
 @Service
 @ConditionalOnProperty(name = ["codefreak.files.adapter"], havingValue = "FILE_SYSTEM")
@@ -68,7 +69,10 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
           input.entrySequence().forEach {
             if (it.isFile) {
               if (it.size == 0L) {
-                createFiles(collectionId, setOf(it.name))
+                val fileName = TarUtil.normalizeFileName(it.name)
+                // create parent directories first because they might only implicitly exist in the tar through this file name
+                createDirectories(collectionId, setOf(FileUtil.getParentDir(fileName)))
+                createFiles(collectionId, setOf(fileName))
               } else {
                 writeFile(collectionId, it.name).use { outputStream ->
                   IOUtils.copy(input, outputStream)
@@ -98,25 +102,15 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
   override fun walkFileTree(collectionId: UUID): Sequence<FileMetaData> {
     val collectionPath = getCollectionPath(collectionId)
-    val fileTree = mutableListOf<FileMetaData>()
 
-    Files.walkFileTree(collectionPath, object : SimpleFileVisitor<Path>() {
-      override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-        file?.let { fileTree.add(filePathToFileMetaData(it, collectionPath)) }
-        return FileVisitResult.CONTINUE
-      }
-
-      override fun postVisitDirectory(dir: Path?, exc: IOException?): FileVisitResult {
-        dir?.let { fileTree.add(filePathToFileMetaData(it, collectionPath)) }
-        return FileVisitResult.CONTINUE
-      }
-    })
-
-    return fileTree.asSequence()
+    return Files.walk(collectionPath)
+      .filter { it != collectionPath }
+      .map { filePathToFileMetaData(it, collectionPath) }
+      .asSequence()
   }
 
   private fun filePathToFileMetaData(path: Path, basePath: Path): FileMetaData {
-    val relativizedPath = basePath.relativize(path)
+    val relativizedPath = basePath.relativize(path).normalize()
     return FileMetaData(
       path = "/$relativizedPath",
       lastModifiedDate = Files.getLastModifiedTime(path).toInstant(),
@@ -135,29 +129,10 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
     require(Files.exists(fileTreeBasePath)) { "`$path` does not exist" }
 
-    val fileTree = mutableListOf<FileMetaData>()
-
-    Files.walkFileTree(fileTreeBasePath, object : SimpleFileVisitor<Path>() {
-      override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-        file?.let {
-          if (it.parent == fileTreeBasePath) {
-            fileTree.add(filePathToFileMetaData(it, collectionPath))
-          }
-        }
-        return FileVisitResult.CONTINUE
-      }
-
-      override fun postVisitDirectory(dir: Path?, exc: IOException?): FileVisitResult {
-        dir?.let {
-          if (it.parent == fileTreeBasePath) {
-            fileTree.add(filePathToFileMetaData(it, collectionPath))
-          }
-        }
-        return FileVisitResult.CONTINUE
-      }
-    })
-
-    return fileTree.asSequence()
+    return Files.walk(fileTreeBasePath, 1)
+      .filter { it != collectionPath }
+      .map { filePathToFileMetaData(it, collectionPath) }
+      .asSequence()
   }
 
   override fun createFiles(collectionId: UUID, paths: Set<String>) {
@@ -259,6 +234,10 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     })
   }
 
+  override fun renameFile(collectionId: UUID, source: String, target: String) {
+    TODO("Not yet implemented")
+  }
+
   override fun moveFile(collectionId: UUID, sources: Set<String>, target: String) {
     require(sources.isNotEmpty()) { "No sources given" }
 
@@ -292,8 +271,8 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     }
 
     require(
-      Files.isDirectory(targetPath)
-          || (sourcePaths.size == 1 && arePathsEqual(sourcePaths.first(), targetPath))
+      Files.isDirectory(targetPath) ||
+          (sourcePaths.size == 1 && arePathsEqual(sourcePaths.first(), targetPath))
     ) { "`$target` is not a directory" }
 
     sourcePaths.forEach {
@@ -344,9 +323,9 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   }
 
   private fun arePathsEqual(path1: Path, path2: Path): Boolean {
-    return path1.toString() == path2.toString()
-        || path1.parent.toString() == path2.toString()
-        || path1.toString() == path2.parent.toString()
+    return path1.toString() == path2.toString() ||
+        path1.parent.toString() == path2.toString() ||
+        path1.toString() == path2.parent.toString()
   }
 
   private fun moveDirectoryRecursively(source: Path, target: Path) {
