@@ -235,7 +235,24 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   }
 
   override fun renameFile(collectionId: UUID, source: String, target: String) {
-    TODO("Not yet implemented")
+    val collectionPath = getCollectionPath(collectionId)
+    val sourcePath = Paths.get(collectionPath.toString(), source)
+    val targetPath = Paths.get(collectionPath.toString(), target)
+
+    require(Files.exists(sourcePath)) { "The source path `$source` does not exist" }
+
+    if (arePathsEqual(sourcePath, targetPath)) {
+      // Moving file to itself, ignore
+      return
+    }
+
+    require(!Files.exists(targetPath)) { "The target path `$target` already exists" }
+
+    when {
+      Files.isRegularFile(sourcePath) -> moveSingleFile(sourcePath, targetPath)
+      Files.isDirectory(sourcePath) -> moveDirectoryRecursively(sourcePath, targetPath)
+      else -> throw IllegalStateException("`$sourcePath` does not exist though it should at this point")
+    }
   }
 
   override fun moveFile(collectionId: UUID, sources: Set<String>, target: String) {
@@ -256,17 +273,6 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     }
 
     if (sourcePaths.isEmpty()) {
-      return
-    }
-
-    if (!Files.exists(targetPath)) {
-      require(sourcePaths.size == 1) { "`$target` is not a directory" }
-      val sourcePath = sourcePaths.first()
-      when {
-        Files.isRegularFile(sourcePath) -> moveSingleFile(sourcePath, targetPath)
-        Files.isDirectory(sourcePath) -> moveDirectoryRecursively(sourcePath, targetPath)
-        else -> throw IllegalStateException("`$sourcePath` does not exist though it should at this point")
-      }
       return
     }
 
