@@ -104,4 +104,47 @@ class FileSystemFileServiceTest : FileServiceTest() {
       Assert.fail()
     } catch (e: IllegalArgumentException) {}
   }
+
+  @Test
+  fun `cannot create blacklisted files and directories`() {
+    try {
+      fileService.createFiles(collectionId, setOf(".git"))
+      Assert.fail()
+    } catch (e: IllegalArgumentException) {}
+
+    try {
+      fileService.createFiles(collectionId, setOf(".git/foo"))
+      Assert.fail()
+    } catch (e: IllegalArgumentException) {}
+
+    try {
+      fileService.createFiles(collectionId, setOf(".gitignore"))
+      Assert.fail()
+    } catch (e: IllegalArgumentException) {}
+
+    try {
+      fileService.createFiles(collectionId, setOf(".gitattributes"))
+      Assert.fail()
+    } catch (e: IllegalArgumentException) {}
+
+    try {
+      fileService.createDirectories(collectionId, setOf(".git"))
+      Assert.fail()
+    } catch (e: IllegalArgumentException) {}
+
+    try {
+      fileService.createDirectories(collectionId, setOf(".git/foo"))
+      Assert.fail()
+    } catch (e: IllegalArgumentException) {}
+
+    try {
+      fileService.createDirectories(collectionId, setOf(".gitignore"))
+      Assert.fail()
+    } catch (e: IllegalArgumentException) {}
+
+    try {
+      fileService.createDirectories(collectionId, setOf(".gitattributes"))
+      Assert.fail()
+    } catch (e: IllegalArgumentException) {}
+  }
 }

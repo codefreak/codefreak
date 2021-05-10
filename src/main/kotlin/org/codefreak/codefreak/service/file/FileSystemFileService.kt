@@ -29,6 +29,14 @@ import org.springframework.stereotype.Service
 @ConditionalOnProperty(name = ["codefreak.files.adapter"], havingValue = "FILE_SYSTEM")
 class FileSystemFileService(@Autowired val config: AppConfiguration) : FileService {
 
+  companion object {
+    val blacklistedPaths = setOf(
+      ".git",
+      ".gitignore",
+      ".gitattributes"
+    )
+  }
+
   override fun readCollectionTar(collectionId: UUID): InputStream {
     val output = ByteArrayOutputStream()
     val tarOutput = TarArchiveOutputStream(output)
@@ -101,6 +109,14 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val sanitizedPathName = FileUtil.sanitizeName(unsanitizedPath.toString())
     // Sanitizing the path name removes the leading slash, which we still need
     val sanitizedPath = Paths.get("/", sanitizedPathName)
+
+    blacklistedPaths.forEach {
+      val blacklistedPath = Paths.get(collectionPath.toString(), it)
+      if (sanitizedPath.startsWith(blacklistedPath)) {
+        return false
+      }
+    }
+
     return isDescendant(sanitizedPath, collectionPath)
   }
 
