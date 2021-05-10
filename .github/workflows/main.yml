@@ -40,7 +40,10 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Test
-        run: ./gradlew check jibDockerBuild -x bootJar
+        run: |
+          sudo mkdir /var/lib/codefreak
+          sudo chown -R $USER /var/lib/codefreak
+          ./gradlew check jibDockerBuild -x bootJar
 
       - name: Prepare cache
         run: |
