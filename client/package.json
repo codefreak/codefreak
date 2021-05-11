@@ -38,6 +38,8 @@
     "bootstrap-less": "3.3.8",
     "copy-to-clipboard": "3.3.1",
     "craco-antd": "1.19.0",
+    "cypress": "6.9.1",
+    "cypress-fail-on-console-error": "2.1.0",
     "devicon": "2.11.0",
     "eslint": "7.25.0",
     "eslint-config-prettier": "8.3.0",
@@ -106,9 +108,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "cypress": "6.9.1",
-    "cypress-fail-on-console-error": "2.1.0"
   }
 }
