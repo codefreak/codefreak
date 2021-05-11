@@ -152,3 +152,19 @@ codefreak:
   evaluation:
     max-concurrent-executions: 12
 ----
+
+== File Storage
+All files for e.g. tasks or submissions can be stored either in the database or (by default) on directly on the native file system. The file storage can be configured as follows:
+
+WARNING: When choosing the file system, please make sure that the application has read+write access to the configured storage path!
+
+.application.yml
+[source,yaml]
+----
+codefreak:
+  files:
+    adapter: file_system # or jpa
+    # needed when using the file system:
+    fileSystem:
+      collectionStoragePath: "/var/lib/codefreak"
+----
