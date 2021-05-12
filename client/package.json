@@ -21,7 +21,7 @@
     "@types/jest": "26.0.23",
     "@types/loadable__component": "5.13.3",
     "@types/node": "12.20.12",
-    "@types/react": "17.0.4",
+    "@types/react": "17.0.5",
     "@types/react-dom": "17.0.3",
     "@types/react-helmet": "6.1.1",
     "@types/react-jsonschema-form": "1.7.4",
