@@ -14,7 +14,7 @@
     "@graphql-codegen/typescript": "1.22.0",
     "@graphql-codegen/typescript-operations": "1.17.16",
     "@graphql-codegen/typescript-react-apollo": "1.17.7",
-    "@loadable/component": "5.14.1",
+    "@loadable/component": "5.15.0",
     "@types/apollo-upload-client": "14.1.0",
     "@types/filesize": "5.0.0",
     "@types/highlight.js": "9.12.4",
