@@ -10,6 +10,7 @@
   "prCreation": "not-pending",
   "dependencyDashboard": true,
   "labels": ["dependencies"],
+  "lockFileMaintenance": { "enabled": true },
   "packageRules": [
     {
       "paths": ["+(client/package.json)"],
