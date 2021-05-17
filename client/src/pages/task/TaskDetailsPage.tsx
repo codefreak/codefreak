@@ -29,6 +29,7 @@ import StartSubmissionEvaluationButton from '../../components/StartSubmissionEva
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
 import {
+  FileContextType,
   GetTaskDetailsDocument,
   TaskDetailsInput,
   useGetTaskDetailsQuery,
@@ -41,6 +42,7 @@ import EditEvaluationPage from '../evaluation/EditEvaluationPage'
 import IdeSettingsForm, {
   IdeSettingsModel
 } from '../../components/IdeSettingsForm'
+import FileBrowser from '../../components/FileBrowser'
 import Markdown from '../../components/Markdown'
 
 const { TabPane } = Tabs
@@ -233,7 +235,8 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
               showIcon
             />
           ) : null}
-          <p>
+          <FileBrowser type={FileContextType.Task} id={task.id} />
+          <p style={{ marginTop: '1em' }}>
             <Link
               to={'/ide/task/' + shorten(task.id)}
               target={'task-ide-' + task.id}

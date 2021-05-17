@@ -1,4 +1,4 @@
-import { Moment } from 'moment'
+import moment, { Moment } from 'moment'
 import { zeroPad } from 'react-countdown'
 
 export interface TimeComponents {
@@ -55,4 +55,23 @@ export const componentsToSeconds = (components: TimeComponents): number => {
 
 export function momentToIsoCb<T>(fn: (date?: string) => T) {
   return (m: Moment | null) => fn(m?.toISOString())
+}
+
+/**
+ * Build a function that can be used in Array.sort and similar methods.
+ * Uses a property from T that must be a valid input for moment.
+ * Example:
+ *
+ *   interface Obj { timestamp: number }
+ *   const b: Obj[] = []
+ *   b.sort(buildDateSorter<Obj>('timestamp'))
+ */
+export const buildDateSorter = <T>(
+  property: keyof T
+): ((a: T, b: T) => number) => {
+  return (a, b) => {
+    const valA = a[property]
+    const valB = b[property]
+    return moment(valA).diff(valB)
+  }
 }
