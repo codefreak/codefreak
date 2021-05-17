@@ -6,9 +6,8 @@ export type AuthenticatedUser = Pick<
   'id' | 'username' | 'authorities' | 'firstName' | 'lastName'
 >
 
-export const AuthenticatedUserContext = createContext<
-  AuthenticatedUser | undefined
->(undefined)
+export const AuthenticatedUserContext =
+  createContext<AuthenticatedUser | undefined>(undefined)
 
 const useAuthenticatedUser = () => {
   const authenticatedUser = useContext(AuthenticatedUserContext)

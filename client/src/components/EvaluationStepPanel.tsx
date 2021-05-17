@@ -44,97 +44,101 @@ interface EvaluationStepPanelProps {
   stepBasics: EvaluationStepBasicsFragment
 }
 
-export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> = props => {
-  const { answerId, stepBasics } = props
-  const [sortValue, setSortValue] = useState('FILE')
-  const stepDetailsQuery = useLiveEvaluationStep(stepBasics.id)
+export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> =
+  props => {
+    const { answerId, stepBasics } = props
+    const [sortValue, setSortValue] = useState('FILE')
+    const stepDetailsQuery = useLiveEvaluationStep(stepBasics.id)
 
-  const stepDetails = stepDetailsQuery.data?.evaluationStep
-  const stepStatus = stepDetails?.status || stepBasics.status
-  const stepResult = stepDetails?.result || stepBasics.result || undefined
-  const title = (
-    <>
-      <EvaluationStepIcon status={stepStatus} result={stepResult} />{' '}
-      {stepBasics.definition.title + ' '}
-      {stepBasics.definition.runner.stoppable &&
-        timer(
-          stepBasics.queuedAt || undefined,
-          stepBasics.finishedAt || undefined
-        )}
-    </>
-  )
+    const stepDetails = stepDetailsQuery.data?.evaluationStep
+    const stepStatus = stepDetails?.status || stepBasics.status
+    const stepResult = stepDetails?.result || stepBasics.result || undefined
+    const title = (
+      <>
+        <EvaluationStepIcon status={stepStatus} result={stepResult} />{' '}
+        {stepBasics.definition.title + ' '}
+        {stepBasics.definition.runner.stoppable &&
+          timer(
+            stepBasics.queuedAt || undefined,
+            stepBasics.finishedAt || undefined
+          )}
+      </>
+    )
 
-  if (stepDetailsQuery.loading || !stepDetailsQuery.data) {
+    if (stepDetailsQuery.loading || !stepDetailsQuery.data) {
+      return (
+        <Card title={title} className="evaluation-result-panel">
+          <Skeleton />
+        </Card>
+      )
+    }
+    const { evaluationStep: step } = stepDetailsQuery.data
+
+    const feedbackList = step.feedback
+    const handleSortChange = (value: string) => setSortValue(value)
+    const FeedbackSortOptions: string[] = Object.keys(FeedbackSortMethods)
+    const sorter = (
+      <SortSelect
+        defaultValue={sortValue}
+        values={FeedbackSortOptions}
+        onSortChange={handleSortChange}
+      />
+    )
+
+    let body
+    if (!step.feedback || step.feedback.length === 0) {
+      if (step.result === EvaluationStepResult.Success) {
+        body = (
+          <Result
+            icon={<SmileTwoTone />}
+            title="All checks passed – good job!"
+          />
+        )
+      } else if (step.summary) {
+        body = <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>
+      }
+    } else {
+      const renderFeedback = (feedback: Feedback) =>
+        renderFeedbackPanel({
+          feedback,
+          answerId
+        })
+      const renderedFeedbackList = feedbackList
+        .slice()
+        .sort(FeedbackSortMethods[sortValue])
+        .map(renderFeedback)
+
+      body = <Collapse>{renderedFeedbackList}</Collapse>
+    }
+
+    if (!body && isEvaluationInProgress(stepStatus)) {
+      body = (
+        <Result
+          icon={<EvaluationProcessingIcon />}
+          title={`"${stepBasics.definition.title}" is in progress…`}
+        />
+      )
+    }
+
+    if (!body) {
+      body = (
+        <div style={{ padding: '20px 0' }}>
+          <Empty description="This step has not been executed, yet." />
+        </div>
+      )
+    }
+
     return (
-      <Card title={title} className="evaluation-result-panel">
-        <Skeleton />
+      <Card
+        title={title}
+        key={step.id}
+        extra={sorter}
+        className="evaluation-result-panel"
+      >
+        {body}
       </Card>
     )
   }
-  const { evaluationStep: step } = stepDetailsQuery.data
-
-  const feedbackList = step.feedback
-  const handleSortChange = (value: string) => setSortValue(value)
-  const FeedbackSortOptions: string[] = Object.keys(FeedbackSortMethods)
-  const sorter = (
-    <SortSelect
-      defaultValue={sortValue}
-      values={FeedbackSortOptions}
-      onSortChange={handleSortChange}
-    />
-  )
-
-  let body
-  if (!step.feedback || step.feedback.length === 0) {
-    if (step.result === EvaluationStepResult.Success) {
-      body = (
-        <Result icon={<SmileTwoTone />} title="All checks passed – good job!" />
-      )
-    } else if (step.summary) {
-      body = <SyntaxHighlighter>{step.summary}</SyntaxHighlighter>
-    }
-  } else {
-    const renderFeedback = (feedback: Feedback) =>
-      renderFeedbackPanel({
-        feedback,
-        answerId
-      })
-    const renderedFeedbackList = feedbackList
-      .slice()
-      .sort(FeedbackSortMethods[sortValue])
-      .map(renderFeedback)
-
-    body = <Collapse>{renderedFeedbackList}</Collapse>
-  }
-
-  if (!body && isEvaluationInProgress(stepStatus)) {
-    body = (
-      <Result
-        icon={<EvaluationProcessingIcon />}
-        title={`"${stepBasics.definition.title}" is in progress…`}
-      />
-    )
-  }
-
-  if (!body) {
-    body = (
-      <div style={{ padding: '20px 0' }}>
-        <Empty description="This step has not been executed, yet." />
-      </div>
-    )
-  }
-
-  return (
-    <Card
-      title={title}
-      key={step.id}
-      extra={sorter}
-      className="evaluation-result-panel"
-    >
-      {body}
-    </Card>
-  )
-}
 
 const severityOrder: Record<FeedbackSeverity, number> = {
   INFO: 3,

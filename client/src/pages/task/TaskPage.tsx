@@ -55,9 +55,8 @@ import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 
-export const DifferentUserContext = createContext<
-  PublicUserFieldsFragment | undefined
->(undefined)
+export const DifferentUserContext =
+  createContext<PublicUserFieldsFragment | undefined>(undefined)
 
 const tab = (title: string, icon: React.ReactNode) => (
   <>

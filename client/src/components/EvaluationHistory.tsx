@@ -41,36 +41,39 @@ const EvaluationHistory: React.FC<{ answerId: string }> = ({ answerId }) => {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-const renderEvaluation = (apolloClient: ApolloClient<object>) => (
-  evaluation: NonNullable<
-    GetEvaluationHistoryQueryResult['data']
-  >['answer']['evaluations'][0]
-) => {
-  const showDetails = () =>
-    Modal.info({
-      icon: null,
-      content: (
-        <ApolloProvider client={apolloClient}>
-          <EvaluationResult evaluationId={evaluation.id} />
-        </ApolloProvider>
-      ),
-      width: 800,
-      maskClosable: true
-    })
+const renderEvaluation =
+  (
+    apolloClient: ApolloClient<object> // eslint-disable-line @typescript-eslint/ban-types
+  ) =>
+  (
+    evaluation: NonNullable<
+      GetEvaluationHistoryQueryResult['data']
+    >['answer']['evaluations'][0]
+  ) => {
+    const showDetails = () =>
+      Modal.info({
+        icon: null,
+        content: (
+          <ApolloProvider client={apolloClient}>
+            <EvaluationResult evaluationId={evaluation.id} />
+          </ApolloProvider>
+        ),
+        width: 800,
+        maskClosable: true
+      })
 
-  return (
-    <Timeline.Item
-      key={evaluation.id}
-      {...getDot(evaluation.stepsResultSummary)}
-    >
-      {new Date(evaluation.createdAt).toLocaleString()}{' '}
-      <Button size="small" onClick={showDetails}>
-        Details
-      </Button>
-    </Timeline.Item>
-  )
-}
+    return (
+      <Timeline.Item
+        key={evaluation.id}
+        {...getDot(evaluation.stepsResultSummary)}
+      >
+        {new Date(evaluation.createdAt).toLocaleString()}{' '}
+        <Button size="small" onClick={showDetails}>
+          Details
+        </Button>
+      </Timeline.Item>
+    )
+  }
 
 const getDot = (result: EvaluationStepResult) => {
   switch (result) {

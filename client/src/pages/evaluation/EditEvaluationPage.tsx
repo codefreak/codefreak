@@ -69,9 +69,8 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       result.refetch()
     }
   })
-  const [
-    setEvaluationStepDefinitionPosition
-  ] = useSetEvaluationStepDefinitionPositonMutation()
+  const [setEvaluationStepDefinitionPosition] =
+    useSetEvaluationStepDefinitionPositonMutation()
 
   const [updateMutation] = useUpdateEvaluationStepDefinitionMutation({
     onCompleted: () => {
@@ -343,40 +342,40 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   )
 }
 
-const renderAddStepButton = (
-  onCreate: (runnerName: string, options: string) => Promise<unknown>
-) => (
-  runner: Pick<EvaluationRunner, 'name' | 'defaultTitle' | 'optionsSchema'>
-) => {
-  const { optionsSchema, hasProperties } = parseSchema(runner.optionsSchema)
-  const buttonProps: ButtonProps = {
-    type: 'dashed',
-    icon: <PlusOutlined />,
-    children: runner.defaultTitle,
-    style: { margin: '0 4px' }
-  }
-  const createStepWithoutOptions = () => createStep({})
-  const createStep = (options: unknown) =>
-    onCreate(runner.name, JSON.stringify(options))
-  if (!hasProperties) {
+const renderAddStepButton =
+  (onCreate: (runnerName: string, options: string) => Promise<unknown>) =>
+  (
+    runner: Pick<EvaluationRunner, 'name' | 'defaultTitle' | 'optionsSchema'>
+  ) => {
+    const { optionsSchema, hasProperties } = parseSchema(runner.optionsSchema)
+    const buttonProps: ButtonProps = {
+      type: 'dashed',
+      icon: <PlusOutlined />,
+      children: runner.defaultTitle,
+      style: { margin: '0 4px' }
+    }
+    const createStepWithoutOptions = () => createStep({})
+    const createStep = (options: unknown) =>
+      onCreate(runner.name, JSON.stringify(options))
+    if (!hasProperties) {
+      return (
+        <Button
+          key={runner.name}
+          {...buttonProps}
+          onClick={createStepWithoutOptions}
+        />
+      )
+    }
     return (
-      <Button
+      <JsonSchemaEditButton
         key={runner.name}
-        {...buttonProps}
-        onClick={createStepWithoutOptions}
+        title={`Configure ${runner.name} step`}
+        value={{}}
+        schema={optionsSchema}
+        onSubmit={createStep}
+        buttonProps={buttonProps}
       />
     )
   }
-  return (
-    <JsonSchemaEditButton
-      key={runner.name}
-      title={`Configure ${runner.name} step`}
-      value={{}}
-      schema={optionsSchema}
-      onSubmit={createStep}
-      buttonProps={buttonProps}
-    />
-  )
-}
 
 export default EditEvaluationPage

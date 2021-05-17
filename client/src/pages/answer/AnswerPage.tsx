@@ -124,15 +124,11 @@ interface UploadAnswerProps {
 const UploadAnswer: React.FC<UploadAnswerProps> = props => {
   const { id } = props.answer
   const { deadline } = props.answer.submission
-  const [
-    uploadSource,
-    { loading: uploading, data: uploadSuccess }
-  ] = useUploadAnswerSourceMutation()
+  const [uploadSource, { loading: uploading, data: uploadSuccess }] =
+    useUploadAnswerSourceMutation()
 
-  const [
-    importSource,
-    { loading: importing, data: importSucess }
-  ] = useImportAnswerSourceMutation()
+  const [importSource, { loading: importing, data: importSucess }] =
+    useImportAnswerSourceMutation()
 
   const onUpload = (files: File[]) =>
     uploadSource({ variables: { files, id } }).then(() => {

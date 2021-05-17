@@ -17,9 +17,8 @@ const EditableMarkdown: React.FC<{
 }> = ({ content, editable, onSave }) => {
   const [editing, setEditing] = useState(false)
   const [newContent, setNewContent] = useState<string>()
-  const [selectedTab, setSelectedTab] = React.useState<'write' | 'preview'>(
-    'write'
-  )
+  const [selectedTab, setSelectedTab] =
+    React.useState<'write' | 'preview'>('write')
   const [saving, setSaving] = useState(false)
   const edit = () => {
     setNewContent(content || undefined)

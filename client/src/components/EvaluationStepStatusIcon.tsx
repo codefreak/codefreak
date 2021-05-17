@@ -20,17 +20,18 @@ interface EvaluationStepStatusIconProps {
   status: EvaluationStepStatus
 }
 
-const EvaluationStepStatusIcon: React.FC<EvaluationStepStatusIconProps> = props => {
-  const { status } = props
+const EvaluationStepStatusIcon: React.FC<EvaluationStepStatusIconProps> =
+  props => {
+    const { status } = props
 
-  const className = `evaluation-step-status-icon evaluation-step-status-icon-${status.toLowerCase()}`
+    const className = `evaluation-step-status-icon evaluation-step-status-icon-${status.toLowerCase()}`
 
-  if (isEvaluationInProgress(status)) {
-    return <EvaluationProcessingIcon className={className} />
+    if (isEvaluationInProgress(status)) {
+      return <EvaluationProcessingIcon className={className} />
+    }
+
+    const IconType = stepStatusIconMap[status]
+    return <IconType className={className} />
   }
-
-  const IconType = stepStatusIconMap[status]
-  return <IconType className={className} />
-}
 
 export default EvaluationStepStatusIcon

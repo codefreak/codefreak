@@ -6,15 +6,16 @@ export function makeUpdater<T, R>(
   currentValue: T,
   callback: (newValue: T) => Promise<R>
 ): Updater<T, R> {
-  return <P extends keyof T>(propName: P) => (propValue: T[P]) => {
-    const newValue = { ...currentValue }
-    if (propValue === undefined) {
-      delete newValue[propName]
-    } else {
-      newValue[propName] = propValue
+  return <P extends keyof T>(propName: P) =>
+    (propValue: T[P]) => {
+      const newValue = { ...currentValue }
+      if (propValue === undefined) {
+        delete newValue[propName]
+      } else {
+        newValue[propName] = propValue
+      }
+      return callback(newValue)
     }
-    return callback(newValue)
-  }
 }
 
 export type Updater<T, R = unknown> = <P extends keyof T>(

@@ -9,42 +9,35 @@ interface StartSubmissionEvaluationButtonProps extends ButtonProps {
   invalidateTask?: string
 }
 
-const StartSubmissionEvaluationButton: React.FC<StartSubmissionEvaluationButtonProps> = ({
-  assignmentId,
-  invalidateAll,
-  invalidateTask,
-  ...buttonProps
-}) => {
-  const [
-    startAssignmentEvaluation,
-    assignmentEvaluationResult
-  ] = useStartAssignmentEvaluationMutation()
+const StartSubmissionEvaluationButton: React.FC<StartSubmissionEvaluationButtonProps> =
+  ({ assignmentId, invalidateAll, invalidateTask, ...buttonProps }) => {
+    const [startAssignmentEvaluation, assignmentEvaluationResult] =
+      useStartAssignmentEvaluationMutation()
 
-  const evaluateAll = () =>
-    startAssignmentEvaluation({
-      variables: { assignmentId, invalidateTask, invalidateAll }
-    })
+    const evaluateAll = () =>
+      startAssignmentEvaluation({
+        variables: { assignmentId, invalidateTask, invalidateAll }
+      })
 
-  useEffect(() => {
-    if (assignmentEvaluationResult.data) {
-      const {
-        startAssignmentEvaluation: queuedEvaluations
-      } = assignmentEvaluationResult.data
-      if (queuedEvaluations.length) {
-        message.success(`Queued ${queuedEvaluations.length} evaluation(s)`)
-      } else {
-        message.info(`No new evaluations queued`)
+    useEffect(() => {
+      if (assignmentEvaluationResult.data) {
+        const { startAssignmentEvaluation: queuedEvaluations } =
+          assignmentEvaluationResult.data
+        if (queuedEvaluations.length) {
+          message.success(`Queued ${queuedEvaluations.length} evaluation(s)`)
+        } else {
+          message.info(`No new evaluations queued`)
+        }
       }
-    }
-  }, [assignmentEvaluationResult])
+    }, [assignmentEvaluationResult])
 
-  return (
-    <Button
-      {...buttonProps}
-      loading={assignmentEvaluationResult.loading}
-      onClick={evaluateAll}
-    />
-  )
-}
+    return (
+      <Button
+        {...buttonProps}
+        loading={assignmentEvaluationResult.loading}
+        onClick={evaluateAll}
+      />
+    )
+  }
 
 export default StartSubmissionEvaluationButton
