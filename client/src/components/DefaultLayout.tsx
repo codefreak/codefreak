@@ -51,9 +51,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
   useLocation() // somehow this is needed for 'active navigation item' to work correctly 🤔
 
   useSubscribeToGlobalEvents()
-  const [sidebarCollapsed, setSidebarCollapsed] = useSidebarCollapsedState(
-    false
-  )
+  const [sidebarCollapsed, setSidebarCollapsed] =
+    useSidebarCollapsedState(false)
   const hideNavigation = useHideNavigation()
   const { data: motd } = useSystemConfig('motd')
 

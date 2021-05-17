@@ -12,9 +12,8 @@ interface EvaluationIndicatorProps {
 
 const EvaluationIndicator: React.FC<EvaluationIndicatorProps> = props => {
   const { answerId, style } = props
-  const { latestEvaluation, evaluationStatus } = useLiveAnswerEvaluation(
-    answerId
-  )
+  const { latestEvaluation, evaluationStatus } =
+    useLiveAnswerEvaluation(answerId)
 
   if (isEvaluationInProgress(evaluationStatus)) {
     return <Badge style={style} status="processing" />

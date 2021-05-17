@@ -17,71 +17,70 @@ interface FeedbackPanelProps {
  *
  * @param props
  */
-const renderFeedbackPanel: (
-  props: FeedbackPanelProps
-) => React.ReactElement = props => {
-  const { answerId, feedback } = props
+const renderFeedbackPanel: (props: FeedbackPanelProps) => React.ReactElement =
+  props => {
+    const { answerId, feedback } = props
 
-  const title = (
-    <>
-      <FeedbackIcon
-        status={feedback.status || undefined}
-        severity={feedback.severity || undefined}
-      />
-      <Markdown
-        allowedElements={[
-          'inlineCode',
-          'text',
-          'strong',
-          'delete',
-          'emphasis',
-          'link'
-        ]}
-        unwrapDisallowed
-      >
-        {feedback.summary}
-      </Markdown>
-    </>
-  )
-  let body = null
-  if (feedback.fileContext) {
-    const { lineStart, lineEnd } = feedback.fileContext
-    body = (
-      <CodeViewerCard
-        answerId={answerId}
-        path={feedback.fileContext.path}
-        lineStart={lineStart || undefined}
-        lineEnd={lineEnd || undefined}
-      />
-    )
-  }
-
-  if (feedback.longDescription) {
-    body = (
+    const title = (
       <>
-        {body}
-        <Markdown className="feedback-long-description">
-          {feedback.longDescription}
+        <FeedbackIcon
+          status={feedback.status || undefined}
+          severity={feedback.severity || undefined}
+        />
+        <Markdown
+          allowedElements={[
+            'inlineCode',
+            'text',
+            'strong',
+            'delete',
+            'emphasis',
+            'link'
+          ]}
+          unwrapDisallowed
+        >
+          {feedback.summary}
         </Markdown>
       </>
     )
-  }
+    let body = null
+    if (feedback.fileContext) {
+      const { lineStart, lineEnd } = feedback.fileContext
+      body = (
+        <CodeViewerCard
+          answerId={answerId}
+          path={feedback.fileContext.path}
+          lineStart={lineStart || undefined}
+          lineEnd={lineEnd || undefined}
+        />
+      )
+    }
 
-  return (
-    <Collapse.Panel
-      disabled={!body}
-      showArrow={!!body}
-      header={title}
-      extra={
-        feedback.fileContext ? (
-          <FileContextTag context={feedback.fileContext} />
-        ) : null
-      }
-      key={feedback.id}
-    >
-      {body}
-    </Collapse.Panel>
-  )
-}
+    if (feedback.longDescription) {
+      body = (
+        <>
+          {body}
+          <Markdown className="feedback-long-description">
+            {feedback.longDescription}
+          </Markdown>
+        </>
+      )
+    }
+
+    return (
+      <Collapse.Panel
+        disabled={!body}
+        showArrow={!!body}
+        header={title}
+        extra={
+          feedback.fileContext ? (
+            <FileContextTag context={feedback.fileContext} />
+          ) : null
+        }
+        key={feedback.id}
+      >
+        {body}
+      </Collapse.Panel>
+    )
+  }
 
 export default renderFeedbackPanel

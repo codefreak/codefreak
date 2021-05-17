@@ -42,10 +42,8 @@ interface AppProps {
 
 const App: React.FC<AppProps> = props => {
   const onUserChanged = props.onUserChanged || noop
-  const [
-    authenticatedUser,
-    setAuthenticatedUser
-  ] = useState<AuthenticatedUser>()
+  const [authenticatedUser, setAuthenticatedUser] =
+    useState<AuthenticatedUser>()
   const timeOffset = useCalculatedServerTimeOffset()
   const [loggingOut, setLoggingOut] = useState<boolean>(false)
   const { data: authResult, loading } = useGetAuthenticatedUserQuery({

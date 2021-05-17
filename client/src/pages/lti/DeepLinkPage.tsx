@@ -15,10 +15,8 @@ import { HIDE_NAVIGATION_QUERY_PARAM } from '../../hooks/useHideNavigation'
 const DeepLinkPage: React.FC = () => {
   const result = useGetAssignmentListQuery()
   const jwtId = useQueryParam('jwt')
-  const [
-    createLtiDeepLinkResponse,
-    { data: deepLinkData }
-  ] = useCreateLtiDeepLinkResponseMutation()
+  const [createLtiDeepLinkResponse, { data: deepLinkData }] =
+    useCreateLtiDeepLinkResponseMutation()
   const formRef = createRef<HTMLFormElement>()
   const [hideNavigation, setHideNavigation] = useState(true)
 

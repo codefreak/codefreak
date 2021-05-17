@@ -21,9 +21,8 @@ export interface ReviewEditorProps {
 
 const ReviewEditor: React.FC<ReviewEditorProps> = props => {
   const { children } = props
-  const [currentLineNumber, setCurrentLineNumber] = useState<
-    number | undefined
-  >()
+  const [currentLineNumber, setCurrentLineNumber] =
+    useState<number | undefined>()
   const [createComment, { loading }] = useCreateCommentFeedbackMutation()
 
   const highlighterProps = {
