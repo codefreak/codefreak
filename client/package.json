@@ -67,7 +67,7 @@
     "react-scripts": "4.0.3",
     "react-sortable-hoc": "2.0.0",
     "react-syntax-highlighter": "12.2.1",
-    "short-uuid": "4.1.0",
+    "short-uuid": "4.2.0",
     "subscriptions-transport-ws": "0.9.18",
     "svg-react-loader": "0.4.6",
     "ts-debounce": "3.0.0",
