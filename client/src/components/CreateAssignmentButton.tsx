@@ -20,12 +20,10 @@ type Assignment = NonNullable<
 
 const CreateAssignmentButton = () => {
   const history = useHistory()
-  const [
-    createEmptyAssignment,
-    { loading: creating }
-  ] = useCreateAssignmentMutation({
-    context: { disableGlobalErrorHandling: true }
-  })
+  const [createEmptyAssignment, { loading: creating }] =
+    useCreateAssignmentMutation({
+      context: { disableGlobalErrorHandling: true }
+    })
   const [updateAssignment, { loading: updating }] = useUpdateAssignmentMutation(
     {
       context: { disableGlobalErrorHandling: true }

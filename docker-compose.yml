@@ -14,7 +14,7 @@ services:
   frontend:
     depends_on:
       - backend
-    image: node:13-alpine
+    image: node:16-alpine
     ports:
       - "3000:3000"
     working_dir: /app/client

@@ -7,9 +7,8 @@ import {
   TimeSyncQueryVariables
 } from '../generated/graphql'
 
-const ServerTimeOffsetContext = React.createContext<number | undefined>(
-  undefined
-)
+const ServerTimeOffsetContext =
+  React.createContext<number | undefined>(undefined)
 export const ServerTimeOffsetProvider = ServerTimeOffsetContext.Provider
 
 /**

@@ -15,7 +15,7 @@ Because Code FREAK makes heavy use of containers some basic Docker knowledge can
 Before you start developing, please install the following tools/software on your computer:
 
 * Java JDK 8 or later (we recommend https://adoptopenjdk.net/[OpenJDK])
-* NodeJS 14 or later (https://nodejs.org/en/)
+* NodeJS 16 or later (https://nodejs.org/en/) with NPM v7
 * Docker (Linux) or Docker Desktop (Windows, MacOS) (https://docs.docker.com/get-docker/)
 
 == Directory Structure

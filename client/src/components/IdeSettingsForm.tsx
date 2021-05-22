@@ -48,16 +48,18 @@ const IdeSettingsForm: React.FC<IdeSettingsFormProps> = props => {
   const { data: defaultIdeImage } = useSystemConfig('defaultIdeImage')
   const [values, setValues] = useState<IdeSettingsModel>(defaultValue)
 
-  const setValue = <K extends keyof IdeSettingsModel>(
-    field: K
-  ): ChangeEventHandler<HTMLInputElement> => e => {
-    const newValues = {
-      ...values,
-      [field]: e.target.value
+  const setValue =
+    <K extends keyof IdeSettingsModel>(
+      field: K
+    ): ChangeEventHandler<HTMLInputElement> =>
+    e => {
+      const newValues = {
+        ...values,
+        [field]: e.target.value
+      }
+      setValues(newValues)
+      onChange?.(newValues)
     }
-    setValues(newValues)
-    onChange?.(newValues)
-  }
 
   const onPresetApply = (formValues: { preset: string }) => {
     const [groupKey, presetKey] = formValues.preset.split('.')

@@ -35,13 +35,13 @@ type User = Submission['user']
 
 const { Column } = Table
 
-const alphabeticSorter = (
-  extractProperty: (x: Submission) => string | null | undefined
-) => (a: Submission, b: Submission) => {
-  const valA = extractProperty(a) || ''
-  const valB = extractProperty(b) || ''
-  return valA.localeCompare(valB)
-}
+const alphabeticSorter =
+  (extractProperty: (x: Submission) => string | null | undefined) =>
+  (a: Submission, b: Submission) => {
+    const valA = extractProperty(a) || ''
+    const valB = extractProperty(b) || ''
+    return valA.localeCompare(valB)
+  }
 
 const SEARCHABLE_USER_COLUMNS: (keyof User)[] = [
   'username',
@@ -67,9 +67,8 @@ const SubmissionsTable: React.FC<{ assignment: Assignment }> = ({
   const { dateTime } = useFormatter()
   const allSubmissions = assignment.submissions
   const [searchCriteria, setSearchCriteria] = useState<string>()
-  const [columnDisplay, setColumnDisplay] = useState<ColumnDisplay>(
-    'eval-results'
-  )
+  const [columnDisplay, setColumnDisplay] =
+    useState<ColumnDisplay>('eval-results')
 
   const submissions = searchCriteria?.trim().length
     ? searchSubmissions(allSubmissions, searchCriteria.trim())
@@ -250,28 +249,27 @@ const EvaluationStepOverview: React.FC<{
 }
 
 // TODO: Multiple filters are not working. filterValues is always a single value
-const buildEvaluationFilter = (task: Task) => (
-  filterValue: string | number | boolean,
-  submission: Submission
-) => {
-  const answer = getAnswerFromSubmission(submission, task)
-  const latestEvaluation = answer ? answer.latestEvaluation : null
-  switch (filterValue) {
-    case 'successful':
-      return (
-        !!latestEvaluation &&
-        latestEvaluation.stepsResultSummary === EvaluationStepResult.Success
-      )
-    case 'failed':
-      return (
-        !!latestEvaluation &&
-        latestEvaluation.stepsResultSummary === EvaluationStepResult.Failed
-      )
-    case 'no-answer':
-    default:
-      return !answer || !latestEvaluation
+const buildEvaluationFilter =
+  (task: Task) =>
+  (filterValue: string | number | boolean, submission: Submission) => {
+    const answer = getAnswerFromSubmission(submission, task)
+    const latestEvaluation = answer ? answer.latestEvaluation : null
+    switch (filterValue) {
+      case 'successful':
+        return (
+          !!latestEvaluation &&
+          latestEvaluation.stepsResultSummary === EvaluationStepResult.Success
+        )
+      case 'failed':
+        return (
+          !!latestEvaluation &&
+          latestEvaluation.stepsResultSummary === EvaluationStepResult.Failed
+        )
+      case 'no-answer':
+      default:
+        return !answer || !latestEvaluation
+    }
   }
-}
 
 const getAnswerFromSubmission = (
   submission: Submission,
