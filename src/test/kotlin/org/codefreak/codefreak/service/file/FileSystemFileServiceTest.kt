@@ -70,39 +70,25 @@ class FileSystemFileServiceTest : FileServiceTest() {
   }
 
   @Test
-  fun `cannot create files outside of the collection`() {
-    try {
-      fileService.createFiles(collectionId, setOf("/../foo.txt"))
-      Assert.fail()
-    } catch (e: IllegalArgumentException) {}
+  fun `files trying to escape the collection path are still created inside the collection`() {
+    fileService.createFiles(collectionId, setOf("/../foo.txt", "foo/../../bar.txt"))
 
-    try {
-      fileService.createFiles(collectionId, setOf("foo/../../bar.txt"))
-      Assert.fail()
-    } catch (e: IllegalArgumentException) {}
+    Assert.assertTrue(fileService.containsFile(collectionId, "/foo.txt"))
+    Assert.assertTrue(fileService.containsFile(collectionId, "/bar.txt"))
 
-    try {
+    Assert.assertThrows(IllegalArgumentException::class.java) {
+      // /etc does not exist
       fileService.createFiles(collectionId, setOf("foo/../../../../../etc/passwd"))
-      Assert.fail()
-    } catch (e: IllegalArgumentException) {}
+    }
   }
 
   @Test
-  fun `cannot create directories outside of the collection`() {
-    try {
-      fileService.createDirectories(collectionId, setOf("/../foo"))
-      Assert.fail()
-    } catch (e: IllegalArgumentException) {}
+  fun `directories trying to escape the collection path are still created inside the collection`() {
+    fileService.createDirectories(collectionId, setOf("/../foo", "foo/../../bar", "foo/../../../../../etc/passwd"))
 
-    try {
-      fileService.createDirectories(collectionId, setOf("foo/../../bar"))
-      Assert.fail()
-    } catch (e: IllegalArgumentException) {}
-
-    try {
-      fileService.createDirectories(collectionId, setOf("foo/../../../../../etc/passwd"))
-      Assert.fail()
-    } catch (e: IllegalArgumentException) {}
+    Assert.assertTrue(fileService.containsDirectory(collectionId, "/foo"))
+    Assert.assertTrue(fileService.containsDirectory(collectionId, "/bar"))
+    Assert.assertTrue(fileService.containsDirectory(collectionId, "/etc/passwd"))
   }
 
   @Test
