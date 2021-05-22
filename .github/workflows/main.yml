@@ -57,14 +57,6 @@ jobs:
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 180
           headless: true
-          record: true
-          group: merge
-          tag: ${{ github.event_name }}
-        env:
-          CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMIT_INFO_MESSAGE: ${{ github.event.pull_request.title }}
 
       - name: Prepare cache
         run: |
