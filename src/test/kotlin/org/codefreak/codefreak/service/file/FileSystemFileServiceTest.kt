@@ -1,22 +1,16 @@
 package org.codefreak.codefreak.service.file
 
-import com.google.common.jimfs.Configuration
-import com.google.common.jimfs.Jimfs
-import java.nio.file.Paths
 import java.util.UUID
 import org.codefreak.codefreak.config.AppConfiguration
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.MockedStatic
 import org.mockito.Mockito
 
 class FileSystemFileServiceTest : FileServiceTest() {
   override var collectionId: UUID = UUID(0, 0)
   override lateinit var fileService: FileService
-  lateinit var pathsMock: MockedStatic<Paths>
 
   @Before
   fun init() {
@@ -28,17 +22,7 @@ class FileSystemFileServiceTest : FileServiceTest() {
     val fileSystemConfig = Mockito.mock(AppConfiguration.Files.FileSystem::class.java)
     Mockito.`when`(files.fileSystem).thenReturn(fileSystemConfig)
 
-    Mockito.`when`(fileSystemConfig.collectionStoragePath).thenReturn("/var/lib/codefreak")
-
-    val jimfsConfiguration = Configuration.unix().toBuilder()
-      .setAttributeViews("basic", "owner", "posix", "unix")
-      .build()
-    val fileSystem = Jimfs.newFileSystem(jimfsConfiguration)
-
-    pathsMock = Mockito.mockStatic(Paths::class.java)
-    Mockito.`when`(Paths.get(anyString(), anyString())).thenAnswer {
-      fileSystem.getPath(it.arguments[0] as String, it.arguments[1] as String)
-    }
+    Mockito.`when`(fileSystemConfig.collectionStoragePath).thenReturn("/tmp/codefreak-test")
 
     fileService = FileSystemFileService(config)
   }
@@ -47,8 +31,6 @@ class FileSystemFileServiceTest : FileServiceTest() {
   fun tearDown() {
     // Cleanup created files
     fileService.deleteCollection(collectionId)
-    // Cleanup filesystem mock
-    pathsMock.close()
   }
 
   @Test

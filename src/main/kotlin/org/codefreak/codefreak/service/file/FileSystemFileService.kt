@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.LinkOption
@@ -18,6 +17,7 @@ import kotlin.io.path.isSymbolicLink
 import kotlin.streams.asSequence
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
+import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.apache.commons.io.file.PathUtils
 import org.codefreak.codefreak.config.AppConfiguration
@@ -53,8 +53,9 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     Files.walkFileTree(collectionPath, object : SimpleFileVisitor<Path>() {
       override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes?): FileVisitResult {
         dir?.let {
-          val path = collectionPath.relativize(dir).normalize()
-          val normalizedPath = TarUtil.normalizeDirectoryName(path.toString())
+          val sanitizedPath = Paths.get("/", FileUtil.sanitizeName(it.toString()))
+          val path = collectionPath.relativize(sanitizedPath).normalize().toString()
+          val normalizedPath = TarUtil.normalizeDirectoryName(path).replace("$collectionId/", "")
           TarUtil.mkdir(normalizedPath, tarOutput)
         }
         return FileVisitResult.CONTINUE
@@ -62,8 +63,9 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
       override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
         file?.let {
-          val path = collectionPath.relativize(file).normalize()
-          val normalizedPath = TarUtil.normalizeFileName(path.toString())
+          val sanitizedPath = Paths.get("/", FileUtil.sanitizeName(it.toString()))
+          val path = collectionPath.relativize(sanitizedPath).normalize().toString()
+          val normalizedPath = TarUtil.normalizeFileName(path).replace("$collectionId/", "")
           TarUtil.writeFileWithContent(normalizedPath, Files.newInputStream(it), tarOutput)
         }
         return FileVisitResult.CONTINUE
@@ -78,32 +80,41 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   override fun writeCollectionTar(collectionId: UUID): OutputStream {
     return object : ByteArrayOutputStream() {
       override fun close() {
-        // Overwrite the existing collection with the tar contents
-        deleteCollection(collectionId)
+        val collectionPath = createCollectionPath(collectionId)
+        val tempCollectionPath = Paths.get(FileUtils.getTempDirectory().path, "codefreak", collectionId.toString())
+        // Create the temp directory first so it still can be "moved" if the archive is empty
+        Files.createDirectories(tempCollectionPath)
 
+        // Extract the archive to a temporary location first so the current collection files are not lost if an error occurs whilst extraction
         TarArchiveInputStream(ByteArrayInputStream(toByteArray())).use { input ->
           input.entrySequence().forEach {
-            val collectionPath = createCollectionPath(collectionId).toString()
             val sanitizedName = FileUtil.sanitizeName(it.name)
-            val path = Paths.get(collectionPath, sanitizedName)
+            val path = Paths.get(collectionPath.toString(), sanitizedName)
+            val tempPath = Paths.get(tempCollectionPath.toString(), sanitizedName)
+
             require(!isBlacklistedPath(collectionId, path)) { "`${it.name}` is not a valid path" }
 
             if (it.isFile) {
-              // create parent directories first because they might only implicitly exist in the tar through this file name
-              createDirectories(collectionId, setOf(FileUtil.getParentDir(sanitizedName)))
+              // Create parent directories first because they might only implicitly exist in the tar through this file name
+              Files.createDirectories(tempPath.parent)
 
               if (it.size == 0L) {
-                createFiles(collectionId, setOf(sanitizedName))
+                createFile(tempPath)
               } else {
-                writeFile(collectionId, sanitizedName).use { outputStream ->
+                writeFile(tempPath).use { outputStream ->
                   IOUtils.copy(input, outputStream)
                 }
               }
             } else if (it.isDirectory) {
-              createDirectories(collectionId, setOf(sanitizedName))
+              createDirectory(tempPath)
             }
           }
         }
+
+        // Overwrite the existing collection with the tar contents
+        deleteCollection(collectionId)
+        FileUtils.moveToDirectory(tempCollectionPath.toFile(), collectionPath.parent.toFile(), true)
+        FileUtils.deleteDirectory(tempCollectionPath.toFile())
       }
     }
   }
@@ -232,35 +243,8 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     }
 
     sanitizedPaths.forEach {
-      deleteFile(it)
+      FileUtils.forceDelete(it.toFile())
     }
-  }
-
-  private fun deleteFile(path: Path) {
-    require(Files.exists(path)) { "`$path` does not exist" }
-
-    try {
-      Files.delete(path)
-    } catch (e: DirectoryNotEmptyException) {
-      deleteDirectoryRecursively(path)
-    }
-  }
-
-  private fun deleteDirectoryRecursively(path: Path) {
-    require(Files.exists(path)) { "`$path` does not exist" }
-
-    Files.walkFileTree(path, object : SimpleFileVisitor<Path>() {
-      override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-        file?.let { Files.delete(it) }
-        return FileVisitResult.CONTINUE
-      }
-
-      override fun postVisitDirectory(dir: Path?, exc: IOException?): FileVisitResult {
-        exc?.let { throw it }
-        dir?.let { Files.delete(it) }
-        return FileVisitResult.CONTINUE
-      }
-    })
   }
 
   override fun renameFile(collectionId: UUID, source: String, target: String) {
@@ -279,9 +263,12 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     require(!Files.exists(targetPath)) { "The target path `$target` already exists" }
     require(!isBlacklistedPath(collectionId, targetPath)) { "The target path `$target` is not a valid path" }
 
+    val sourceFile = sourcePath.toFile()
+    val targetFile = targetPath.toFile()
+
     when {
-      Files.isRegularFile(sourcePath) -> moveSingleFile(sourcePath, targetPath)
-      Files.isDirectory(sourcePath) -> moveDirectoryRecursively(sourcePath, targetPath)
+      Files.isRegularFile(sourcePath) -> FileUtils.moveFile(sourceFile, targetFile)
+      Files.isDirectory(sourcePath) -> FileUtils.moveDirectory(sourceFile, targetFile)
       else -> throw IllegalStateException("`$sourcePath` does not exist though it should at this point")
     }
   }
@@ -294,11 +281,12 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
     val sourcePaths = mutableListOf<Path>()
     sources.forEach {
-      val sourcePath = Paths.get(collectionPath, it)
+      val sanitizedPath = FileUtil.sanitizeName(it)
+      val sourcePath = Paths.get(collectionPath, sanitizedPath)
       require(Files.exists(sourcePath)) { "The source path `$it` does not exist" }
       require(!isBlacklistedPath(collectionId, sourcePath)) { "The source path `$it` is not a valid path" }
 
-      val mappedTargetPath = Paths.get(targetPath.toString(), it)
+      val mappedTargetPath = Paths.get(targetPath.toString(), sanitizedPath)
       val shouldMovePath = !arePathsEqual(sourcePath, targetPath) && !arePathsEqual(sourcePath, mappedTargetPath) || Files.isDirectory(sourcePath)
 
       if (shouldMovePath) {
@@ -320,30 +308,8 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     }
 
     sourcePaths.forEach {
-      when {
-        Files.isRegularFile(it) -> moveSingleFile(it, targetPath)
-        Files.isDirectory(it) -> moveDirectoryRecursively(it, targetPath)
-        else -> throw IllegalStateException("`$it` does not exist though it should at this point")
-      }
+      FileUtils.moveToDirectory(it.toFile(), targetPath.toFile(), false)
     }
-  }
-
-  private fun moveSingleFile(source: Path, target: Path) {
-    require(Files.isRegularFile(source)) { "`$source` is not a file" }
-
-    if (Files.exists(target)) {
-      require(
-        Files.isDirectory(target) || arePathsEqual(source, target)
-      ) { "The target path `$target` already exists" }
-    }
-
-    var targetPath = target
-
-    if (Files.isDirectory(target)) {
-      targetPath = Paths.get(target.toString(), source.fileName.toString())
-    }
-
-    Files.move(source, targetPath)
   }
 
   private fun isDescendant(path: Path, of: Path): Boolean {
@@ -367,53 +333,20 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
         path1.toString() == path2.parent.toString()
   }
 
-  private fun moveDirectoryRecursively(source: Path, target: Path) {
-    require(Files.isDirectory(source)) { "`$source` is not a directory" }
-
-    source.let {
-      val targetPath = Paths.get(target.toString(), it.fileName.toString())
-      Files.createDirectories(targetPath)
-    }
-
-    Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
-      override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-        dir?.let {
-          // Create the directory in the target so its files can be copied there
-          val sourceDir = source.relativize(it).normalize()
-          val targetDir = Paths.get(target.toString(), sourceDir.toString())
-          Files.createDirectories(targetDir)
-        }
-        return FileVisitResult.CONTINUE
-      }
-
-      override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
-        file?.let {
-          // Move the file to the new location
-          val sourcePath = source.relativize(it).normalize()
-          val targetPath = Paths.get(target.toString(), sourcePath.toString())
-          moveSingleFile(it, targetPath)
-        }
-        return FileVisitResult.CONTINUE
-      }
-
-      override fun postVisitDirectory(dir: Path?, exc: IOException?): FileVisitResult {
-        dir?.let {
-          // Delete directory after moving all its contents
-          Files.delete(it)
-        }
-        return FileVisitResult.CONTINUE
-      }
-    })
-  }
-
   override fun writeFile(collectionId: UUID, path: String): OutputStream {
     val collectionPath = createCollectionPath(collectionId).toString()
     val filePath = Paths.get(collectionPath, FileUtil.sanitizeName(path))
 
-    require(!Files.isDirectory(filePath)) { "`$path` is a directory" }
     require(!isBlacklistedPath(collectionId, filePath)) { "`$path` is not a valid path" }
 
-    return Files.newOutputStream(filePath)
+    return writeFile(filePath)
+  }
+
+  private fun writeFile(path: Path): OutputStream {
+    require(!Files.isDirectory(path)) { "`$path` is a directory" }
+
+    // The default behaviour is StandardOpenOption::CREATE, StandardOpenOption::TRUNCATE_EXISTING and StandardOpenOption::WRITE
+    return Files.newOutputStream(path)
   }
 
   override fun readFile(collectionId: UUID, path: String): InputStream {

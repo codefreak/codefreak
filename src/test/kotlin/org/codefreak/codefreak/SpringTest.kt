@@ -1,8 +1,5 @@
 package org.codefreak.codefreak
 
-import com.google.common.jimfs.Configuration
-import com.google.common.jimfs.Jimfs
-import java.nio.file.Paths
 import java.time.Instant
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
@@ -14,12 +11,7 @@ import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.SubmissionRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.repository.UserRepository
-import org.junit.AfterClass
-import org.junit.BeforeClass
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.MockedStatic
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -49,29 +41,6 @@ abstract class SpringTest {
 
   @Autowired
   private lateinit var answerRepository: AnswerRepository
-
-  companion object {
-    private lateinit var pathsMock: MockedStatic<Paths>
-
-    @BeforeClass
-    fun setUp() {
-      val jimfsConfiguration = Configuration.unix().toBuilder()
-        .setAttributeViews("basic", "owner", "posix", "unix")
-        .build()
-      val fileSystem = Jimfs.newFileSystem(jimfsConfiguration)
-
-      pathsMock = Mockito.mockStatic(Paths::class.java)
-      Mockito.`when`(Paths.get(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenAnswer {
-        fileSystem.getPath(it.arguments[0] as String, it.arguments[1] as String)
-      }
-    }
-
-    @AfterClass
-    fun tearDown() {
-      // Cleanup filesystem mock cfat auth lti ide
-      pathsMock.close()
-    }
-  }
 
   protected fun seedDatabase() {
     user = User("demo")
