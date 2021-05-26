@@ -5,7 +5,7 @@
   "dependencies": {
     "@ant-design/icons": "4.6.2",
     "@ant-design/pro-layout": "5.0.19",
-    "@apollo/client": "3.3.16",
+    "@apollo/client": "3.3.19",
     "@codefreak/docs": "file:../docs",
     "@codefreak/eslint-config": "0.1.3",
     "@codefreak/prettier-config": "0.1.2",
