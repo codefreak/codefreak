@@ -97,9 +97,10 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
             if (it.isFile) {
               // Create parent directories first because they might only implicitly exist in the tar through this file name
               Files.createDirectories(tempPath.parent)
+              require(!Files.isDirectory(tempPath)) { "`${it.name}` is a directory" }
 
               if (it.size == 0L) {
-                createFile(tempPath)
+                createFile(collectionId, tempPath)
               } else {
                 writeFile(tempPath).use { outputStream ->
                   IOUtils.copy(input, outputStream)
@@ -185,17 +186,18 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     paths.forEach {
       val path = Paths.get(collectionPath, FileUtil.sanitizeName(it))
       require(!isBlacklistedPath(collectionId, path)) { "`$it` is not a valid path" }
-      createFile(path)
+      require(!Files.isDirectory(path)) { "`$it` is a directory" }
+      createFile(collectionId, path)
     }
   }
 
-  private fun createFile(path: Path) {
-    require(!Files.isDirectory(path)) { "`$path` is a directory" }
-
+  private fun createFile(collectionId: UUID, path: Path) {
     try {
       Files.createFile(path)
     } catch (e: IOException) {
-      throw IllegalArgumentException("A parent directory of $path does not exist")
+      val collectionPath = getCollectionPath(collectionId)
+      val pathToPrint = path.toString().replace("$collectionPath/", "")
+      throw IllegalArgumentException("A parent directory of $pathToPrint does not exist")
     } catch (e: FileAlreadyExistsException) {
       // Ignore silently
     }
@@ -279,7 +281,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val collectionPath = createCollectionPath(collectionId).toString()
     val targetPath = Paths.get(collectionPath, target)
 
-    val sourcePaths = mutableListOf<Path>()
+    val sourcePaths = mutableMapOf<String, Path>()
     sources.forEach {
       val sanitizedPath = FileUtil.sanitizeName(it)
       val sourcePath = Paths.get(collectionPath, sanitizedPath)
@@ -290,7 +292,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
       val shouldMovePath = !arePathsEqual(sourcePath, targetPath) && !arePathsEqual(sourcePath, mappedTargetPath) || Files.isDirectory(sourcePath)
 
       if (shouldMovePath) {
-        sourcePaths.add(sourcePath)
+        sourcePaths[it] = sourcePath
       }
     }
 
@@ -302,13 +304,13 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     require(Files.isDirectory(targetPath)) { "`$target` is not a directory" }
     require(!isBlacklistedPath(collectionId, targetPath)) { "The target path `$target` is not a valid path" }
 
-    sourcePaths.forEach {
-      require(!isDescendant(targetPath, it)) { "The target `$target` is a descendant of the source `$it`" }
-      require(!isBasenamePresent(it, targetPath)) { "`$it` or a child of it already exists in `$targetPath`" }
+    sourcePaths.forEach { (originalPath, sourcePath) ->
+      require(!isDescendant(targetPath, sourcePath)) { "The target `$target` is a descendant of the source `$originalPath`" }
+      require(!isBasenamePresent(sourcePath, targetPath)) { "`$originalPath` or a child of it already exists in `$targetPath`" }
     }
 
-    sourcePaths.forEach {
-      FileUtils.moveToDirectory(it.toFile(), targetPath.toFile(), false)
+    sourcePaths.forEach { (_, sourcePath) ->
+      FileUtils.moveToDirectory(sourcePath.toFile(), targetPath.toFile(), false)
     }
   }
 
@@ -338,13 +340,12 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val filePath = Paths.get(collectionPath, FileUtil.sanitizeName(path))
 
     require(!isBlacklistedPath(collectionId, filePath)) { "`$path` is not a valid path" }
+    require(!Files.isDirectory(filePath)) { "`$path` is a directory" }
 
     return writeFile(filePath)
   }
 
   private fun writeFile(path: Path): OutputStream {
-    require(!Files.isDirectory(path)) { "`$path` is a directory" }
-
     // The default behaviour is StandardOpenOption::CREATE, StandardOpenOption::TRUNCATE_EXISTING and StandardOpenOption::WRITE
     return Files.newOutputStream(path)
   }
