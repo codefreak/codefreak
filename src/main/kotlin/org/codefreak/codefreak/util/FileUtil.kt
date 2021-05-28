@@ -9,7 +9,7 @@ object FileUtil {
   /**
    * Remove leading dots and slashes from given path and normalizes patterns like `foo/../bar`.
    */
-  fun sanitizeName(name: String, basePath: String = "/") = Paths.get(basePath, name).normalize().toString().trim().trim('/')
+  fun sanitizeName(name: String) = Paths.get("/", name).normalize().toString().trim().trim('/')
 
   fun getFilePermissionsMode(permissions: Set<PosixFilePermission>): Int {
     return permissions.sumOf(FileUtil::getFilePermissionsMode)
@@ -17,12 +17,12 @@ object FileUtil {
 
   fun getFilePermissionsMode(permission: PosixFilePermission): Int {
     return when (permission) {
-      PosixFilePermission.OWNER_READ -> 100
-      PosixFilePermission.OWNER_WRITE -> 200
-      PosixFilePermission.OWNER_EXECUTE -> 400
-      PosixFilePermission.GROUP_READ -> 10
-      PosixFilePermission.GROUP_WRITE -> 20
-      PosixFilePermission.GROUP_EXECUTE -> 40
+      PosixFilePermission.OWNER_READ -> 64
+      PosixFilePermission.OWNER_WRITE -> 128
+      PosixFilePermission.OWNER_EXECUTE -> 256
+      PosixFilePermission.GROUP_READ -> 8
+      PosixFilePermission.GROUP_WRITE -> 16
+      PosixFilePermission.GROUP_EXECUTE -> 32
       PosixFilePermission.OTHERS_READ -> 1
       PosixFilePermission.OTHERS_WRITE -> 2
       PosixFilePermission.OTHERS_EXECUTE -> 4
