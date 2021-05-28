@@ -49,7 +49,7 @@ server:
 codefreak:
   instanceId: default
   files:
-    adapter: file_system
+    adapter: jpa
     fileSystem:
       # The path where all file collections will be stored in sub-directories
       # Please make sure that the user running the server has read+write permissions on this directory
