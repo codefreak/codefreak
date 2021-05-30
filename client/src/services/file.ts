@@ -1,8 +1,5 @@
-/**
- * Check value for non-printable characters
- *
- * @param value
- */
+import { dirname, resolve } from 'path'
+
 export const isBinaryContent = (value: string) => {
   // eslint-disable-next-line no-control-regex
   return /[\x00-\x08\x0E-\x1F]/.test(value)
@@ -99,3 +96,18 @@ export const supportedArchiveExtensions = [
   '.txz',
   '.jar'
 ]
+const abspath = (path: string) => resolve('/', path)
+const isSamePath = (a: string, b: string) => abspath(a) === abspath(b)
+
+/**
+ * List all directory names of path and all parents
+ *
+ * @param path
+ */
+export const dirnames = (path: string): string[] => {
+  const dirs: string[] = []
+  while (!isSamePath(dirname(path), path)) {
+    dirs.push((path = dirname(path)))
+  }
+  return dirs
+}

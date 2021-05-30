@@ -1,13 +1,12 @@
 import {
+  DownCircleOutlined,
   ExclamationCircleTwoTone,
-  UpCircleOutlined,
-  DownCircleOutlined
+  UpCircleOutlined
 } from '@ant-design/icons'
 import { Alert, Button, Card, Col, Modal, Row } from 'antd'
 import moment from 'moment'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import AnswerBlocker from '../../components/AnswerBlocker'
-import AnswerFileBrowser from '../../components/AnswerFileBrowser'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
@@ -15,6 +14,7 @@ import useMomentReached from '../../hooks/useMomentReached'
 import { useServerNow } from '../../hooks/useServerTimeOffset'
 import {
   Answer,
+  FileContextType,
   Submission,
   useGetAnswerQuery,
   useImportAnswerSourceMutation,
@@ -24,6 +24,7 @@ import {
 import { messageService } from '../../services/message'
 import { displayName } from '../../services/user'
 import { DifferentUserContext } from '../task/TaskPage'
+import FileBrowser from '../../components/FileBrowser'
 
 type AnswerWithSubmissionDeadline = Pick<Answer, 'id'> & {
   submission: Pick<Submission, 'deadline'>
@@ -31,7 +32,7 @@ type AnswerWithSubmissionDeadline = Pick<Answer, 'id'> & {
 
 interface DangerZoneProps {
   answer: AnswerWithSubmissionDeadline
-  onReset?: () => void
+  onReset: () => void
 }
 
 const DangerZone: React.FC<DangerZoneProps> = props => {
@@ -69,9 +70,7 @@ const DangerZone: React.FC<DangerZoneProps> = props => {
       onOk: () =>
         resetAnswer().then(() => {
           messageService.success('Answer has been reset to initial files!')
-          if (props.onReset) {
-            props.onReset()
-          }
+          props.onReset()
         })
     })
   }
@@ -118,32 +117,25 @@ const DangerZone: React.FC<DangerZoneProps> = props => {
 
 interface UploadAnswerProps {
   answer: AnswerWithSubmissionDeadline
-  onUpload?: () => void
+  onUpload: () => unknown
 }
 
 const UploadAnswer: React.FC<UploadAnswerProps> = props => {
   const { id } = props.answer
   const { deadline } = props.answer.submission
-  const [uploadSource, { loading: uploading, data: uploadSuccess }] =
-    useUploadAnswerSourceMutation()
-
-  const [importSource, { loading: importing, data: importSucess }] =
-    useImportAnswerSourceMutation()
+  const [uploadSource, { loading: uploading }] = useUploadAnswerSourceMutation()
+  const [importSource, { loading: importing }] = useImportAnswerSourceMutation()
 
   const onUpload = (files: File[]) =>
     uploadSource({ variables: { files, id } }).then(() => {
-      if (props.onUpload) {
-        props.onUpload()
-      }
+      messageService.success('Source code uploaded successfully')
+      props.onUpload()
     })
-
-  const onImport = (url: string) => importSource({ variables: { url, id } })
-
-  useEffect(() => {
-    if (uploadSuccess || importSucess) {
-      messageService.success('Source code submitted successfully')
-    }
-  }, [uploadSuccess, importSucess])
+  const onImport = (url: string) =>
+    importSource({ variables: { url, id } }).then(() => {
+      messageService.success('Source code imported successfully')
+      props.onUpload()
+    })
 
   return (
     <Card title="Upload Source Code" style={{ marginBottom: '16px' }}>
@@ -164,9 +156,15 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
     variables: { id: props.answerId }
   })
   const differentUser = useContext(DifferentUserContext)
-  const [reloadFiles, setReloadFiles] = useState<() => void>(() => {
-    return () => undefined
-  })
+
+  // This fake "revision" is a dirty hack to force a full reload of the file-browser
+  // after files have been modified externally via upload/import or reset button.
+  // We cannot invalidate Apollo caches for all paths of the file-browser easily
+  // (see useFileCollection Hook) and we do not have a real collection revision
+  // on the backend, yet.
+  const [answerRevision, setAnswerRevision] = useState(0)
+  const incrementAnswerRevision = () =>
+    setAnswerRevision(revision => revision + 1)
 
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
@@ -177,10 +175,6 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
   const filesTitle = differentUser
     ? `Files uploaded by ${displayName(differentUser)}`
     : 'Your current submission'
-
-  // if we want to store a function in state we have to wrap it in another callback
-  // otherwise React will execute the function
-  const onFileTreeReady = (reload: () => void) => setReloadFiles(() => reload)
 
   return (
     <>
@@ -200,16 +194,16 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
             style={{ marginBottom: 16 }}
           />
         )}
-        <AnswerFileBrowser
-          answerId={answer.id}
-          review={!!differentUser}
-          onReady={onFileTreeReady}
+        <FileBrowser
+          key={`answer-rev-${answerRevision}`}
+          id={answer.id}
+          type={FileContextType.Answer}
         />
       </Card>
       {!differentUser && (
         <>
-          <UploadAnswer answer={answer} onUpload={reloadFiles} />
-          <DangerZone answer={answer} onReset={reloadFiles} />
+          <UploadAnswer answer={answer} onUpload={incrementAnswerRevision} />
+          <DangerZone answer={answer} onReset={incrementAnswerRevision} />
         </>
       )}
     </>
