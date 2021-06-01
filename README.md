@@ -3,7 +3,7 @@
 </p>
 <h1 align="center">Code FREAK</h1>
 
-![CI](https://github.com/codefreak/codefreak/workflows/CI/badge.svg)
+[![CI](https://github.com/codefreak/codefreak/actions/workflows/main.yml/badge.svg)](https://github.com/codefreak/codefreak/actions/workflows/main.yml)
 [![Docker Image Version](https://img.shields.io/docker/v/cfreak/codefreak?sort=semver)](https://hub.docker.com/r/cfreak/codefreak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Join Discord Server](https://img.shields.io/discord/748856997105107025?color=7289da&label=discord&logo=discord&logoColor=ffffff)](https://discord.gg/HYDQEDt)

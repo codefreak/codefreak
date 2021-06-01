@@ -1,12 +1,12 @@
 import { DownloadOutlined, InboxOutlined } from '@ant-design/icons'
 import { Button, Col, Form, Input, Row, Spin, Upload } from 'antd'
 import { RcFile } from 'antd/lib/upload/interface'
-import filesize from 'filesize'
 import React, { useCallback, useState } from 'react'
 import useSystemConfig from '../hooks/useSystemConfig'
 import { messageService } from '../services/message'
 import Centered from './Centered'
 import { findFilesWithInvalidExtension } from '../services/file'
+import { useFormatter } from '../hooks/useFormatter'
 
 const { Dragger } = Upload
 
@@ -21,6 +21,7 @@ interface FileImportProps {
 const FileImport: React.FC<FileImportProps> = props => {
   const { uploading, onUpload, importing, onImport } = props
   const [url, setUrl] = useState('')
+  const { bytes: formatBytes } = useFormatter()
   const { data: maxFileSize } = useSystemConfig('maxFileUploadSize')
 
   const beforeUpload = useCallback(
@@ -43,7 +44,7 @@ const FileImport: React.FC<FileImportProps> = props => {
 
         if (maxFileSize && file.size > maxFileSize) {
           messageService.error(
-            `Selected file is too large. Maximum allowed size is ${filesize(
+            `Selected file is too large. Maximum allowed size is ${formatBytes(
               maxFileSize
             )}.`
           )
@@ -53,7 +54,7 @@ const FileImport: React.FC<FileImportProps> = props => {
       }
       return false
     },
-    [onUpload, maxFileSize, props.acceptedTypes]
+    [onUpload, maxFileSize, formatBytes, props.acceptedTypes]
   )
 
   const onUrlChange = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -81,7 +82,7 @@ const FileImport: React.FC<FileImportProps> = props => {
             structure create a .zip, .tar or .tar.gz archive.
           </p>
           <p className="ant-upload-hint">
-            Max. file size: {maxFileSize ? filesize(maxFileSize) : '…'}
+            Max. file size: {maxFileSize ? formatBytes(maxFileSize) : '…'}
           </p>
         </Dragger>
       </Col>
