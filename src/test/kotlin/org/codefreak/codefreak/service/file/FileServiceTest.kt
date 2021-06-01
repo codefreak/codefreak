@@ -479,31 +479,6 @@ abstract class FileServiceTest {
   }
 
   @Test
-  fun `moving files does not move any files when a file in the target path already exists`() {
-    val newFile2Contents = byteArrayOf(42)
-
-    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
-    fileService.createDirectories(collectionId, setOf("new"))
-    fileService.createFiles(collectionId, setOf("new/file2.txt"))
-
-    fileService.writeFile(collectionId, "new/file2.txt").use {
-      it.write(newFile2Contents)
-    }
-
-    try {
-      fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
-      Assert.fail() // An IllegalArgumentException should be thrown
-    } catch (e: IllegalArgumentException) {
-    }
-
-    Assert.assertTrue(fileService.containsFile(collectionId, "file1.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "file2.txt"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "new/file1.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "new/file2.txt"))
-    Assert.assertTrue(equals(fileService.readFile(collectionId, "new/file2.txt").readBytes(), newFile2Contents))
-  }
-
-  @Test
   fun `renaming a file does not change file contents`() {
     val contents = byteArrayOf(42)
     fileService.createFiles(collectionId, setOf("file.txt"))
