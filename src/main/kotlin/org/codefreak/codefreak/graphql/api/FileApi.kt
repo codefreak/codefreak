@@ -94,7 +94,7 @@ class FileQuery : BaseResolver(), Query {
   }
 
   fun listFiles(fileContext: FileContext, path: String = "/"): List<FileDto> = context {
-    authorize(fileContext)
+    authorize(fileContext, FileActionType.VIEW)
     val fileService = serviceAccess.getService(FileService::class)
     val digest = fileService.getCollectionMd5Digest(fileContext.id)
     fileService.listFiles(fileContext.id, path).map {
@@ -106,19 +106,19 @@ class FileQuery : BaseResolver(), Query {
 @Component
 class FileMutation : BaseResolver(), Mutation {
   fun createFile(fileContext: FileContext, path: String): Boolean = context {
-    authorize(fileContext)
+    authorize(fileContext, FileActionType.EDIT)
     serviceAccess.getService(FileService::class).createFiles(fileContext.id, setOf(path))
     true
   }
 
   fun createDirectory(fileContext: FileContext, path: String): Boolean = context {
-    authorize(fileContext)
+    authorize(fileContext, FileActionType.EDIT)
     serviceAccess.getService(FileService::class).createDirectories(fileContext.id, setOf(path))
     true
   }
 
   fun uploadFiles(fileContext: FileContext, dir: String, files: Array<ApplicationPart>): Boolean = context {
-    authorize(fileContext)
+    authorize(fileContext, FileActionType.EDIT)
     val fileService = serviceAccess.getService(FileService::class)
     files.forEach { file ->
       val filename = file.submittedFileName ?: "upload-${Instant.now()}-${file.name}"
@@ -131,29 +131,40 @@ class FileMutation : BaseResolver(), Mutation {
   }
 
   fun moveFiles(fileContext: FileContext, sources: List<String>, target: String): Boolean = context {
-    authorize(fileContext)
+    authorize(fileContext, FileActionType.EDIT)
     serviceAccess.getService(FileService::class).moveFile(fileContext.id, sources.toSet(), target)
     true
   }
 
   fun renameFile(fileContext: FileContext, source: String, target: String): Boolean = context {
-    authorize(fileContext)
+    authorize(fileContext, FileActionType.EDIT)
     serviceAccess.getService(FileService::class).renameFile(fileContext.id, source, target)
     true
   }
 
   fun deleteFiles(fileContext: FileContext, paths: List<String>): Boolean = context {
-    authorize(fileContext)
+    authorize(fileContext, FileActionType.EDIT)
     serviceAccess.getService(FileService::class).deleteFiles(fileContext.id, paths.toSet())
     true
   }
 }
 
-private fun BaseResolver.authorize(fileContext: FileContext) = context {
+enum class FileActionType {
+  VIEW,
+  EDIT
+}
+
+private fun BaseResolver.authorize(fileContext: FileContext, fileAction: FileActionType) = context {
   when (fileContext.type) {
     FileContextType.ANSWER -> {
       val answer = serviceAccess.getService(AnswerService::class).findAnswer(fileContext.id)
-      authorization.requireAuthorityIfNotCurrentUser(answer.task.owner, Authority.ROLE_ADMIN)
+      authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_ADMIN)
+
+      if (fileAction == FileActionType.EDIT) {
+        require(answer.isEditable) { "The answer is not editable anymore" }
+      }
+
+      return@context
     }
     FileContextType.TASK -> {
       val task = serviceAccess.getService(TaskService::class).findTask(fileContext.id)
