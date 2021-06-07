@@ -9,7 +9,7 @@ object FileUtil {
   /**
    * Remove leading dots and slashes from given path and normalizes patterns like `foo/../bar`.
    */
-  fun sanitizeName(name: String) = Paths.get("/", name).normalize().toString().trim().trim('/')
+  fun sanitizeName(vararg name: String) = Paths.get("/", *name).normalize().toString().trim().trim('/')
 
   fun getFilePermissionsMode(permissions: Set<PosixFilePermission>): Int {
     return permissions.sumOf(FileUtil::getFilePermissionsMode)
