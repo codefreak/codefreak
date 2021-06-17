@@ -107,7 +107,7 @@ dependencies {
 
   liquibaseRuntime 'org.liquibase.ext:liquibase-hibernate5:4.3.5'
   liquibaseRuntime 'com.h2database:h2:1.4.200'
-  liquibaseRuntime 'org.yaml:snakeyaml:1.28'
+  liquibaseRuntime 'org.yaml:snakeyaml:1.29'
   liquibaseRuntime sourceSets.main.runtimeClasspath
   liquibaseRuntime sourceSets.main.output
 }
