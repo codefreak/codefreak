@@ -34,6 +34,10 @@ import org.springframework.stereotype.Service
 class FileSystemFileService(@Autowired val config: AppConfiguration) : FileService {
 
   companion object {
+    /**
+     * This is a list names that should never be written to (directories and files).
+     * They should never appear at any position in paths.
+     */
     val blacklistedPaths = setOf(
       ".git",
       ".gitignore",
@@ -126,7 +130,9 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     }
   }
 
-  private fun isBlacklistedPath(path: Path) = blacklistedPaths.any { path.toString().contains(it) }
+  private fun isBlacklistedPath(path: Path) = blacklistedPaths.any {
+    path.toString().split("/").contains(it)
+  }
 
   override fun collectionExists(collectionId: UUID): Boolean {
     val collectionPath = getCollectionPath(collectionId)
@@ -216,18 +222,17 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
   override fun containsFile(collectionId: UUID, path: String): Boolean {
     val filePath = getCollectionFilePath(collectionId, path)
-    return Files.exists(filePath) && Files.isRegularFile(filePath, LinkOption.NOFOLLOW_LINKS) && !isBlacklistedPath(filePath)
+    return Files.exists(filePath) && Files.isRegularFile(filePath, LinkOption.NOFOLLOW_LINKS)
   }
 
   override fun containsDirectory(collectionId: UUID, path: String): Boolean {
     val directoryPath = getCollectionFilePath(collectionId, path)
-    return Files.exists(directoryPath) && Files.isDirectory(directoryPath, LinkOption.NOFOLLOW_LINKS) && !isBlacklistedPath(directoryPath)
+    return Files.exists(directoryPath) && Files.isDirectory(directoryPath, LinkOption.NOFOLLOW_LINKS)
   }
 
   override fun deleteFiles(collectionId: UUID, paths: Set<String>) {
     val sanitizedPaths = paths.map {
       val path = getCollectionFilePath(collectionId, it)
-      require(!isBlacklistedPath(path)) { "`$it` is not a valid path" }
       require(Files.exists(path)) { "`$it` does not exist" }
       path
     }
@@ -268,7 +273,6 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     val sourcePaths: Map<String, Path> = sources.mapNotNull {
       val sourcePath = getCollectionFilePath(collectionId, it)
 
-      require(!isBlacklistedPath(sourcePath)) { "The source path `$it` is not a valid path" }
       require(Files.exists(sourcePath)) { "The source path `$it` does not exist" }
 
       val mappedTargetPath = getCollectionFilePath(collectionId, targetPath.toString(), it)
@@ -323,7 +327,6 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   override fun readFile(collectionId: UUID, path: String): InputStream {
     val filePath = getCollectionFilePath(collectionId, path)
 
-    require(!isBlacklistedPath(filePath)) { "`$path` is not a valid path" }
     require(Files.isRegularFile(filePath)) { "`$path` does not exist or is a directory" }
 
     return Files.newInputStream(filePath)
