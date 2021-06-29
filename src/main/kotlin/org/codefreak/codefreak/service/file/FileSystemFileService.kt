@@ -85,7 +85,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   override fun writeCollectionTar(collectionId: UUID): OutputStream {
     return object : ByteArrayOutputStream() {
       override fun close() {
-        val tempCollectionPath = Paths.get(FileUtils.getTempDirectory().path, "codefreak", collectionId.toString())
+        val tempCollectionPath = Files.createTempDirectory("codefreak-extract-$collectionId")
 
         try {
           // Create the temp directory first so it still can be "moved" if the archive is empty
@@ -116,10 +116,9 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
             }
           }
 
-          // Overwrite the existing collection with the tar contents
-          val collectionPath = createCollectionPath(collectionId)
           deleteCollection(collectionId)
-          FileUtils.moveToDirectory(tempCollectionPath.toFile(), collectionPath.parent.toFile(), true)
+          // Overwrite the existing collection with the tar contents
+          FileUtils.moveDirectory(tempCollectionPath.toFile(), getCollectionPath(collectionId).toFile())
         } finally {
           FileUtils.deleteDirectory(tempCollectionPath.toFile())
         }
