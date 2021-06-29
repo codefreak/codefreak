@@ -10,7 +10,7 @@ import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.service.evaluation.EvaluationStepException
-import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.FileUtil
 import org.codefreak.codefreak.util.withTrailingSlash
 import org.openmbee.junit.model.JUnitTestCase
 import org.openmbee.junit.model.JUnitTestSuite
@@ -37,13 +37,13 @@ class JUnitRunner : CommandLineRunner() {
 
   override fun run(answer: Answer, options: Map<String, Any>): List<Feedback> {
     val resultsPath = options.get("results-path", String::class) ?: "build/test-results/test"
-    val resultsPattern = TarUtil.normalizeEntryName(resultsPath.withTrailingSlash() + "TEST-.+\\.xml").toRegex()
+    val resultsPattern = FileUtil.sanitizeName(resultsPath.withTrailingSlash() + "TEST-.+\\.xml").toRegex()
     val defaultOptions = getDefaultOptions()
     val feedback = mutableListOf<Feedback>()
     super.executeCommands(answer, defaultOptions + options) { files ->
       val tar = TarArchiveInputStream(files)
       generateSequence { tar.nextTarEntry }.forEach {
-        if (it.isFile && TarUtil.normalizeEntryName(it.name).matches(resultsPattern)) {
+        if (it.isFile && FileUtil.sanitizeName(it.name).matches(resultsPattern)) {
           val out = ByteArrayOutputStream()
           StreamUtils.copy(tar, out)
           feedback.addAll(

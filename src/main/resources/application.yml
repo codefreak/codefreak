@@ -50,6 +50,10 @@ codefreak:
   instanceId: default
   files:
     adapter: jpa
+    fileSystem:
+      # The path where all file collections will be stored in sub-directories
+      # Please make sure that the user running the server has read+write permissions on this directory
+      collectionStoragePath: "/var/lib/codefreak"
   docker:
     # All of the docker settings below will fall back to a system-depended default value if unset
     host: ~

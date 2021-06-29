@@ -126,9 +126,15 @@ class AppConfiguration {
 
   class Files {
     var adapter = FileAdapter.JPA
+    val fileSystem = FileSystem()
 
     enum class FileAdapter {
-      JPA
+      JPA,
+      FILE_SYSTEM
+    }
+
+    class FileSystem {
+      lateinit var collectionStoragePath: String
     }
   }
 

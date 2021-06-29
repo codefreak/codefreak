@@ -17,6 +17,7 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.FileUtil
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.afterClose
@@ -104,7 +105,7 @@ class AnswerService : BaseService() {
   }
 
   private fun Task.isHidden(entry: TarArchiveEntry): Boolean {
-    val path = TarUtil.normalizeEntryName(entry.name)
+    val path = FileUtil.sanitizeName(entry.name)
     val matcher = AntPathMatcher()
     hiddenFiles.plus("codefreak.yml").forEach {
       if (matcher.match(it, path)) return true
@@ -113,7 +114,7 @@ class AnswerService : BaseService() {
   }
 
   private fun Task.isProtected(entry: TarArchiveEntry): Boolean {
-    val path = TarUtil.normalizeEntryName(entry.name)
+    val path = FileUtil.sanitizeName(entry.name)
     val matcher = AntPathMatcher()
     protectedFiles.forEach {
       if (matcher.match(it, path)) return true
