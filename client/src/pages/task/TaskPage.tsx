@@ -24,7 +24,6 @@ import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
-import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
@@ -34,9 +33,9 @@ import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
 import useSubPath from '../../hooks/useSubPath'
 import {
+  FileContextType,
   GetTaskListDocument,
   GetTaskPoolDocument,
-  IdeType,
   PublicUserFieldsFragment,
   TaskInput,
   useCreateAnswerMutation,
@@ -54,6 +53,7 @@ import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
+import WorkspacePage from '../../components/WorkspacePage'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
@@ -322,7 +322,7 @@ const TaskPage: React.FC = () => {
                   submission?.deadline ? moment(submission.deadline) : undefined
                 }
               >
-                <IdeIframe type={IdeType.Answer} id={answer.id} />
+                <WorkspacePage type={FileContextType.Answer} id={answer.id} />
               </AnswerBlocker>
             </div>
           ) : (

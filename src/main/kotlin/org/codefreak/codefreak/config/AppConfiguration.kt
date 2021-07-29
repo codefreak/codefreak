@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.config
 
+import java.net.URL
 import java.time.ZoneId
 import java.util.Locale
 import javax.validation.constraints.NotBlank
@@ -30,6 +31,7 @@ class AppConfiguration {
   val lti = Lti()
   val evaluation = Evaluation()
   val gitImport = GitImport()
+  val workspaces = Workspaces()
 
   enum class ReverseProxyType {
     TRAEFIK, PUBLISH
@@ -90,6 +92,23 @@ class AppConfiguration {
     var dockerDaemonAllowlist = arrayListOf(
         "cfreak/breeze"
     )
+  }
+
+  class Workspaces {
+    /**
+     * Kubernetes namespace where new workspaces will be created in
+     */
+    var namespace = "default"
+
+    /**
+     * Base URL where workspaces will be reachable
+     */
+    var baseUrl: URL = URL("http://localhost/")
+
+    /**
+     * Full image name that will be used for the workspace companion
+     */
+    var companionImage = "ghcr.io/henningcash/codefreak-cloud-companion:latest"
   }
 
   class Docker {

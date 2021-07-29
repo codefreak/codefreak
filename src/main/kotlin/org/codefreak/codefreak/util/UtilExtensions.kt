@@ -11,6 +11,7 @@ import org.slf4j.Logger
 import org.springframework.batch.core.JobParameters
 
 fun String.withoutTrailingSlash(): String = trimEnd('/')
+fun String.withoutLeadingSlash(): String = trimStart('/')
 fun String.withTrailingSlash(): String = if (endsWith("/")) this else "$this/"
 
 fun OutputStream.afterClose(callback: () -> Any?) = object : ProxyOutputStream(this) {

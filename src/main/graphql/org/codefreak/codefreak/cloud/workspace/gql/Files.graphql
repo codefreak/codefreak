@@ -1,0 +1,8 @@
+query ListFiles($path: String!) {
+  listFiles(path: $path) {
+    path
+    ... on File {
+      size
+    }
+  }
+}
