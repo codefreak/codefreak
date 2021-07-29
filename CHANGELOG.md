@@ -9,8 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Add support for CodeClimate `location.positions` format
 
 ### Changed
+* ❗️ Migrated file-collections from the database to the filesystem and set it as the default file storage ([#1118](https://github.com/codefreak/codefreak/pull/1118))
 
 ### Removed
+* ❗️ Removed `file_collection` table from database ([#1118](https://github.com/codefreak/codefreak/pull/1118))
 
 
 ## [6.0.0](https://github.com/codefreak/codefreak/releases/tag/6.0.0) - 2020-03-26
