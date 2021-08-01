@@ -53,7 +53,7 @@ dependencies {
   implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21'
   implementation 'com.spotify:docker-client:8.16.0'
   implementation 'org.apache.commons:commons-compress:1.21'
-  implementation 'org.apache.commons:commons-csv:1.8'
+  implementation 'org.apache.commons:commons-csv:1.9.0'
   implementation 'commons-io:commons-io:2.11.0'
   implementation 'io.sentry:sentry-logback:4.3.0'
   implementation 'com.github.hsingh:java-shortuuid:2a4d72f'
