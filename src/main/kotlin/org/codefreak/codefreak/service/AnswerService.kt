@@ -60,6 +60,10 @@ class AnswerService : BaseService() {
   fun deleteAnswer(answerId: UUID) {
     ideService.removeAnswerIdeContainers(answerId)
     answerRepository.deleteById(answerId)
+
+    if (fileService.collectionExists(answerId)) {
+      fileService.deleteCollection(answerId)
+    }
   }
 
   @Transactional
