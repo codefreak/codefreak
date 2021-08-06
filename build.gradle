@@ -198,6 +198,9 @@ jib {
       SENTRY_ENVIRONMENT: "prod",
       SENTRY_RELEASE: project.version.toString()
     ]
+    volumes = [
+      "/var/lib/codefreak"
+    ]
   }
 }
 tasks.jibDockerBuild.dependsOn deployFrontend
