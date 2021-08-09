@@ -4,7 +4,7 @@ import com.fkorotkov.kubernetes.metadata
 import io.fabric8.kubernetes.api.model.ConfigMap
 import org.codefreak.codefreak.cloud.WorkspaceConfiguration
 
-class CompanionScriptMap(wsConfig: WorkspaceConfiguration): ConfigMap() {
+class CompanionScriptMap(wsConfig: WorkspaceConfiguration) : ConfigMap() {
   init {
     metadata {
       name = wsConfig.companionScriptMapName

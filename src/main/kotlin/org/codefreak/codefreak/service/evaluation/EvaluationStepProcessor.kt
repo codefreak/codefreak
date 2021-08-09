@@ -1,38 +1,44 @@
 package org.codefreak.codefreak.service.evaluation
 
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.codefreak.codefreak.cloud.WorkspaceClient
+import org.codefreak.codefreak.cloud.WorkspaceClientFactory
+import org.codefreak.codefreak.cloud.WorkspaceService
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepResult
-import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
+import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.stereotype.Component
+import reactor.kotlin.adapter.rxjava.toFlowable
+import java.time.Duration
+import java.time.Instant
 
 @Component
 class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
 
   @Autowired
-  @Qualifier("asyncTaskExecutor")
-  private lateinit var taskExecutor: AsyncTaskExecutor
+  private lateinit var fileService: FileService
 
   @Autowired
-  private lateinit var evaluationStepService: EvaluationStepService
+  private lateinit var workspaceClientFactory: WorkspaceClientFactory
 
   @Autowired
-  private lateinit var runnerService: EvaluationRunnerService
+  private lateinit var workspaceService: WorkspaceService
 
   @Value("#{@config.evaluation.defaultTimeout}")
   private var defaultTimeout: Long = 0L
 
   private val log = LoggerFactory.getLogger(this::class.java)
+
+  @Autowired
+  private lateinit var junitXmlFormatParser: JunitXmlFormatParser
 
   override fun process(evaluationStep: EvaluationStep): EvaluationStep? {
     val answer = evaluationStep.evaluation.answer
@@ -40,10 +46,24 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
 
     val stepDefinition = evaluationStep.definition
     val runnerName = stepDefinition.runnerName
+    val workspaceConfig = workspaceService.createWorkspaceConfigForCollection(evaluationStep.id).also {
+      it.addScript(
+          "run-evaluation", """
+        #!/bin/env bash
+        apt-get update
+        apt-get install -y unzip
+        curl -o /tmp/gradle-7.1.1-bin.zip -L "https://services.gradle.org/distributions/gradle-7.1.1-bin.zip"
+        unzip -d /opt/gradle /tmp/gradle-7.1.1-bin.zip
+        /opt/gradle/gradle-7.1.1/bin/gradle testClasses
+        /opt/gradle/gradle-7.1.1/bin/gradle test
+      """.trimIndent()
+      )
+    }
     try {
-      val runner = runnerService.getEvaluationRunner(runnerName)
+      val workspace = workspaceService.createWorkspace(workspaceConfig)
+      val workspaceClient = workspaceClientFactory.createClient(workspace)
       val feedbackList = try {
-        runEvaluation(runner, evaluationStep)
+        runEvaluation(workspaceClient, evaluationStep)
       } catch (e: InterruptedException) {
         // happens if the application shuts down. In this case we will stop any further processing.
         // The evaluation will be re-run if the application restarts
@@ -56,7 +76,6 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
       } else {
         evaluationStep.result = EvaluationStepResult.SUCCESS
       }
-      evaluationStep.summary = runner.summarize(feedbackList)
     } catch (e: EvaluationStepException) {
       evaluationStep.result = e.result
       evaluationStep.summary = e.message
@@ -67,6 +86,8 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
       log.error("Evaluation step $runnerName of answer ${answer.id} failed unexpectedly:", e)
       evaluationStep.result = EvaluationStepResult.ERRORED
       evaluationStep.summary = e.message ?: "Unknown error"
+    } finally {
+      workspaceService.deleteWorkspace(workspaceConfig)
     }
 
     log.debug(
@@ -75,31 +96,53 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     return evaluationStep
   }
 
-  private fun runEvaluation(runner: EvaluationRunner, step: EvaluationStep): List<Feedback> {
-    val answer = step.evaluation.answer
-    val timeout = step.definition.timeout ?: defaultTimeout
-    val runnerName = runner.getName()
-    try {
-      val task = taskExecutor.submit(Callable {
-        runner.run(answer, step.definition.options)
-      })
-      return if (timeout > 0) {
-        log.debug("Running evaluation step $runnerName of answer ${answer.id}  with a time limit of $timeout seconds")
-        task.get(timeout, TimeUnit.SECONDS)
-      } else {
-        log.info("Running evaluation step $runnerName of answer ${answer.id} without time limit!")
-        task.get()
+  private fun runEvaluation(workspaceClient: WorkspaceClient, evaluationStep: EvaluationStep): List<Feedback> {
+    return runBlocking {
+      println("waiting for workspace to come live")
+      val start = Instant.now().epochSecond
+      while (true) {
+        if (workspaceClient.isWorkspaceLive()) {
+          val duration = Instant.now().epochSecond - start
+          println("Workspace is live after ${duration}sec!")
+          break
+        } else {
+          delay(250)
+        }
       }
-    } catch (e: TimeoutException) {
-      log.info("Timeout for evaluation step $runnerName of answer ${answer.id} occurred after ${timeout}sec")
-      runnerService.stopAnswerEvaluation(runnerName, answer)
-      throw EvaluationStepException("Evaluation timed out after $timeout seconds",
-          result = EvaluationStepResult.ERRORED,
-          status = EvaluationStepStatus.CANCELED
-      )
-    } catch (e: ExecutionException) {
-      // unwrap exceptions from EvaluationRunner#run() to catch them properly
-      throw e.cause ?: e
+
+      fileService.readCollectionTar(evaluationStep.evaluation.answer.id).use { collectionStream ->
+        workspaceClient.deployFiles(collectionStream)
+      }
+      log.debug("Starting evaluation process of step ${evaluationStep.id}")
+      val processId = workspaceClient.startProcess(listOf("/bin/bash", "/scripts/run-evaluation"))
+      val processOutput = StringBuilder()
+      val outputStream = workspaceClient.getProcessOutput(processId).subscribe {
+        println(it)
+        processOutput.append(it)
+      }
+      log.debug("Waiting for evaluation process of step ${evaluationStep.id} to finish...")
+      val exitCode = workspaceClient.waitForProcess(processId)
+      log.debug("Process of evaluation ${evaluationStep.id} exited with $exitCode")
+      outputStream.dispose()
+      val feedback = workspaceClient.downloadFiles(filter = "build/test-results/test/*.xml") { archive ->
+        archive.entrySequence()
+            .filter { it.isFile }
+            .flatMap {
+          log.debug("Parsing file ${it.name} from evaluation step ${evaluationStep.id}")
+          junitXmlFormatParser.parse(archive.decodeToString())
+        }.toList()
+      }
+      if (feedback.isEmpty() && exitCode > 0) {
+        throw EvaluationStepException(
+            processOutput.toString(),
+            EvaluationStepResult.ERRORED
+        )
+      }
+      feedback
     }
+  }
+
+  fun TarArchiveInputStream.decodeToString(): String {
+    return readBytes().decodeToString()
   }
 }

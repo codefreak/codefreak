@@ -20,7 +20,8 @@ class CompanionIngress(private val wsConfig: WorkspaceConfiguration) : Ingress()
       name = wsConfig.companionIngressName
       labels = wsConfig.getLabelsForComponent("companion")
       annotations = mapOf(
-          "nginx.ingress.kubernetes.io/rewrite-target" to "/$2"
+          "nginx.ingress.kubernetes.io/rewrite-target" to "/$2",
+          "nginx.ingress.kubernetes.io/proxy-body-size" to "10m"
       )
     }
     spec {

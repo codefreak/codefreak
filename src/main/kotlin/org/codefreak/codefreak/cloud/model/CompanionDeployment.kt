@@ -15,8 +15,10 @@ import com.fkorotkov.kubernetes.newVolume
 import com.fkorotkov.kubernetes.newVolumeMount
 import com.fkorotkov.kubernetes.persistentVolumeClaim
 import com.fkorotkov.kubernetes.readinessProbe
+import com.fkorotkov.kubernetes.resources
 import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
+import io.fabric8.kubernetes.api.model.Quantity
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import org.codefreak.codefreak.cloud.WorkspaceConfiguration
 
@@ -44,6 +46,17 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
               containerPort = 8080
               protocol = "TCP"
             })
+            resources {
+              requests = mapOf(
+                  "memory" to Quantity.parse("256Mi")
+              )
+              limits = mapOf(
+                  "cpu" to Quantity.parse("2"),
+                  //"memory" to Quantity.parse("512Mi")
+              )
+            }
+            // disable environment variables with service links
+            enableServiceLinks = false
             volumeMounts = listOf(
                 newVolumeMount {
                   name = "workspace-data"
@@ -60,17 +73,17 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
                 path = "/actuator/health/liveness"
                 port = IntOrString("http")
               }
-              failureThreshold = 3
-              initialDelaySeconds = 3
-              periodSeconds = 5
+              failureThreshold = 10
+              initialDelaySeconds = 1
+              periodSeconds = 1
             }
             readinessProbe {
               httpGet {
                 path = "/actuator/health/readiness"
                 port = IntOrString("http")
               }
-              failureThreshold = 3
-              initialDelaySeconds = 3
+              failureThreshold = 20
+              initialDelaySeconds = 1
               periodSeconds = 1
             }
           })

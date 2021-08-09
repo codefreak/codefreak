@@ -49,3 +49,5 @@ val <T> T.exhaustive: T
 
 val JobParameters.evaluationStepId: UUID?
   get() = getString(EvaluationConfiguration.PARAM_EVALUATION_STEP_ID)?.let { id -> UUID.fromString(id) }
+
+fun String.wrapInMarkdownCodeBlock() = if (isNotBlank()) "```\n$this\n```" else ""

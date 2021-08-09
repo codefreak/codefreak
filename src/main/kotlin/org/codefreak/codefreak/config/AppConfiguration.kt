@@ -108,7 +108,7 @@ class AppConfiguration {
     /**
      * Full image name that will be used for the workspace companion
      */
-    var companionImage = "ghcr.io/henningcash/codefreak-cloud-companion:latest"
+    var companionImage = "ghcr.io/codefreak/codefreak-cloud-companion:latest"
   }
 
   class Docker {
