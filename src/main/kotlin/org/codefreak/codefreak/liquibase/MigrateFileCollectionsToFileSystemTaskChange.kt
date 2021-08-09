@@ -104,6 +104,8 @@ class MigrateFileCollectionsToFileSystemTaskChange : CustomTaskChange {
     val entryPath = collectionPathName.resolve(entry.name)
 
     if (entry.isFile) {
+      Files.createDirectories(entryPath.parent)
+
       if (entry.size > 0L) {
         Files.newOutputStream(entryPath).use { outputStream ->
           IOUtils.copy(inputStream, outputStream)
