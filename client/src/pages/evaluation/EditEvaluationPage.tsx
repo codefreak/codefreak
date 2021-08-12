@@ -3,30 +3,12 @@ import {
   PlusOutlined,
   SettingOutlined
 } from '@ant-design/icons'
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Descriptions,
-  Modal,
-  Switch,
-  Tag,
-  Tooltip
-} from 'antd'
-import { ButtonProps } from 'antd/lib/button'
+import { Alert, Button, Checkbox, Modal, Tooltip } from 'antd'
 import { CardProps } from 'antd/lib/card'
-import { CheckboxChangeEvent } from 'antd/lib/checkbox'
-import { JSONSchema6 } from 'json-schema'
-import YAML from 'json-to-pretty-yaml'
 import { useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import CardList from '../../components/CardList'
-import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
-import EditableTitle from '../../components/EditableTitle'
-import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import {
-  EvaluationRunner,
-  EvaluationStepDefinitionInput,
   GetEvaluationStepDefinitionsQueryResult,
   useCreateEvaluationStepDefinitionMutation,
   useDeleteEvaluationStepDefinitionMutation,
@@ -35,34 +17,16 @@ import {
   useUpdateEvaluationStepDefinitionMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
-import { makeUpdater } from '../../services/util'
-import TimeIntervalInput from '../../components/TimeIntervalInput'
-import useSystemConfig from '../../hooks/useSystemConfig'
-import {
-  componentsToSeconds,
-  secondsToComponents,
-  secondsToRelTime,
-  TimeComponents
-} from '../../services/time'
-import HelpTooltip from '../../components/HelpTooltip'
-import { debounce } from 'ts-debounce'
+import { CheckboxChangeEvent } from 'antd/es/checkbox'
+import EditEvaluationStepDefinitionModal from '../../components/EditEvaluationStepDefinitionModal'
+import SyntaxHighlighter from '../../components/code/SyntaxHighlighter'
 
 type EvaluationStepDefinition = NonNullable<
   GetEvaluationStepDefinitionsQueryResult['data']
 >['task']['evaluationStepDefinitions'][0]
 
-const parseSchema = (schema: string) => {
-  const optionsSchema: JSONSchema6 = JSON.parse(schema)
-  const hasProperties =
-    optionsSchema.properties && Object.keys(optionsSchema.properties).length > 0
-  return { optionsSchema, hasProperties }
-}
-
 const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const result = useGetEvaluationStepDefinitionsQuery({ variables: { taskId } })
-  const { data: defaultEvaluationTimeout } = useSystemConfig(
-    'defaultEvaluationTimeout'
-  )
   const [deleteStep] = useDeleteEvaluationStepDefinitionMutation({
     onCompleted: () => {
       messageService.success('Evaluation step deleted')
@@ -80,21 +44,20 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   })
 
   const [createStep] = useCreateEvaluationStepDefinitionMutation()
-
   const [sureToEdit, setSureToEdit] = useState(false)
   const onSureToEditChange = (e: CheckboxChangeEvent) =>
     setSureToEdit(e.target.checked)
-
+  const [editing, setEditing] = useState<string | undefined>()
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
 
   const {
-    task: { evaluationStepDefinitions, assignment },
-    evaluationRunners
+    task: { evaluationStepDefinitions, assignment }
   } = result.data
 
   const assignmentOpen = assignment?.status === 'OPEN'
+  const settingsEditable = sureToEdit || !assignmentOpen
 
   const handlePositionChange = (
     definition: EvaluationStepDefinition,
@@ -107,24 +70,6 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const renderEvaluationStepDefinition = (
     definition: EvaluationStepDefinition
   ) => {
-    const definitionInput: EvaluationStepDefinitionInput = {
-      id: definition.id,
-      active: definition.active,
-      title: definition.title,
-      options: definition.options
-    }
-
-    const runner = evaluationRunners.find(r => r.name === definition.runnerName)
-
-    if (!runner) {
-      return <>Unknown Runner '{definition.runnerName}'</>
-    }
-    const { optionsSchema, hasProperties } = parseSchema(runner.optionsSchema)
-
-    const updater = makeUpdater(definitionInput, input =>
-      updateMutation({ variables: { input } })
-    )
-
     const confirmDelete = () =>
       Modal.confirm({
         title: 'Are you sure?',
@@ -147,155 +92,72 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         }
       })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateOptions = (newOptions: any) =>
-      updater('options')(JSON.stringify(newOptions))
-    const updateTimeout = debounce(updater('timeout'), 500)
-
-    const configureButtonProps: ButtonProps = {
-      type: 'primary',
-      shape: 'circle',
-      icon: <SettingOutlined />
-    }
-
-    const onTimeIntervalChange = (timeoutComps?: TimeComponents) => {
-      const timeout = timeoutComps
-        ? componentsToSeconds(timeoutComps)
-        : undefined
-      return updateTimeout(timeout)
-    }
     const cardProps: CardProps = {
-      title: (
-        <EditableTitle
-          editable
-          title={definition.title}
-          onChange={updater('title')}
-        />
-      ),
+      title: definition.title,
       extra: (
         <>
-          {runner.builtIn ? null : (
-            <Tooltip title="Delete evaluation step" placement="left">
-              <Button
-                style={{ marginRight: 8 }}
-                onClick={confirmDelete}
-                type="dashed"
-                shape="circle"
-                icon={<DeleteOutlined />}
-              />
-            </Tooltip>
-          )}
-          {hasProperties ? (
-            <JsonSchemaEditButton
-              title={`Configure ${definition.runnerName} step`}
-              value={JSON.parse(definition.options)}
-              schema={optionsSchema}
-              onSubmit={updateOptions}
-              buttonProps={{
-                ...configureButtonProps,
-                disabled: assignmentOpen && !sureToEdit
-              }}
+          <Tooltip title="Delete evaluation step">
+            <Button
+              style={{ marginRight: 8 }}
+              onClick={confirmDelete}
+              type="dashed"
+              shape="circle"
+              danger
+              icon={<DeleteOutlined />}
             />
-          ) : (
-            <Tooltip
-              placement="left"
-              title="This runner does not have any configuration options"
-            >
-              <Button disabled {...configureButtonProps} />
-            </Tooltip>
-          )}
+          </Tooltip>
+          <Tooltip title="Edit evaluation step">
+            <Button
+              disabled={!settingsEditable}
+              onClick={() => setEditing(definition.id)}
+              style={{ marginRight: 8 }}
+              shape="circle"
+              icon={<SettingOutlined />}
+            />
+          </Tooltip>
         </>
       ),
       children: (
         <>
-          <Descriptions layout="horizontal" style={{ marginBottom: -8 }}>
-            <Descriptions.Item label="Runner">
-              {definition.runnerName}{' '}
-              {runner.builtIn ? (
-                <Tooltip
-                  placement="right"
-                  title="Built-in evaluation steps cannot be deleted. You can still hide them from students by deactivating."
-                >
-                  <Tag>built-in</Tag>
-                </Tooltip>
-              ) : null}{' '}
-              {runner.documentationUrl ? (
-                <>
-                  (
-                  <a
-                    href={runner.documentationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Documentation
-                  </a>
-                  )
-                </>
-              ) : null}
-            </Descriptions.Item>
-            <Descriptions.Item
-              label={
-                <HelpTooltip
-                  placement="right"
-                  title="If disabled, this evaluation step will not be run in future evaluation. Feedback for this step is hidden from students in existing evaluations."
-                >
-                  Active
-                </HelpTooltip>
+          <EditEvaluationStepDefinitionModal
+            visible={editing === definition.id}
+            initialValues={definition}
+            onSave={async updatedDefinition => {
+              // merge updated values and original values but leave out
+              // key, __typename and position
+              const { key, __typename, position, ...fullDefinition } = {
+                ...definition,
+                ...updatedDefinition
               }
-            >
-              <Switch
-                checked={definition.active}
-                onChange={updater('active')}
-                disabled={assignmentOpen && !sureToEdit}
-              />
-            </Descriptions.Item>
-            {runner.stoppable ? (
-              <Descriptions.Item
-                label={
-                  <HelpTooltip
-                    title={`There is always a default time limit of ${secondsToRelTime(
-                      defaultEvaluationTimeout || 0
-                    )}. You can modify this timeout here.`}
-                  >
-                    Custom Time Limit
-                  </HelpTooltip>
-                }
-              >
-                <TimeIntervalInput
-                  nullable
-                  onChange={onTimeIntervalChange}
-                  defaultValue={
-                    definition.timeout
-                      ? secondsToComponents(definition.timeout)
-                      : undefined
-                  }
-                  placeholder={
-                    defaultEvaluationTimeout
-                      ? secondsToComponents(defaultEvaluationTimeout)
-                      : undefined
-                  }
-                />
-              </Descriptions.Item>
-            ) : null}
-          </Descriptions>
-          {definition.options !== '{}' ? (
-            <SyntaxHighlighter language="yaml" noLineNumbers>
-              {YAML.stringify(JSON.parse(definition.options))}
-            </SyntaxHighlighter>
-          ) : null}
+              await updateMutation({ variables: { input: fullDefinition } })
+              setEditing(undefined)
+            }}
+            onCancel={() => setEditing(undefined)}
+          />
+          {definition.reportPath && definition.reportFormat && (
+            <p>
+              Files found at <code>{definition.reportPath}</code> will be parsed
+              with {definition.reportFormat}.
+            </p>
+          )}
+          <SyntaxHighlighter language="bash">
+            {definition.script}
+          </SyntaxHighlighter>
         </>
       )
     }
     return cardProps
   }
 
-  const addableRunners = evaluationRunners.filter(r => !r.builtIn)
-
-  const onCreate = (runnerName: string, options: string) =>
-    createStep({ variables: { taskId, runnerName, options } }).then(() => {
-      messageService.success('Evaluation step added')
-      result.refetch()
-    })
+  const onCreate = async () => {
+    await createStep({ variables: { taskId } })
+    messageService.success('Evaluation step added')
+    const newSteps = (await result.refetch()).data.task
+      .evaluationStepDefinitions
+    if (newSteps.length) {
+      setEditing(newSteps[newSteps.length - 1].id)
+    }
+  }
 
   return (
     <>
@@ -331,51 +193,17 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       <CardList
         sortable
         items={evaluationStepDefinitions}
+        itemKey={step => step.id}
         renderItem={renderEvaluationStepDefinition}
         handlePositionChange={handlePositionChange}
       />
       <div style={{ marginTop: 16, textAlign: 'center' }}>
-        <h3>Add Evaluation Step</h3>
-        {addableRunners.map(renderAddStepButton(onCreate))}
+        <Button onClick={onCreate} type="dashed" icon={<PlusOutlined />}>
+          Add evaluation step
+        </Button>
       </div>
     </>
   )
 }
-
-const renderAddStepButton =
-  (onCreate: (runnerName: string, options: string) => Promise<unknown>) =>
-  (
-    runner: Pick<EvaluationRunner, 'name' | 'defaultTitle' | 'optionsSchema'>
-  ) => {
-    const { optionsSchema, hasProperties } = parseSchema(runner.optionsSchema)
-    const buttonProps: ButtonProps = {
-      type: 'dashed',
-      icon: <PlusOutlined />,
-      children: runner.defaultTitle,
-      style: { margin: '0 4px' }
-    }
-    const createStepWithoutOptions = () => createStep({})
-    const createStep = (options: unknown) =>
-      onCreate(runner.name, JSON.stringify(options))
-    if (!hasProperties) {
-      return (
-        <Button
-          key={runner.name}
-          {...buttonProps}
-          onClick={createStepWithoutOptions}
-        />
-      )
-    }
-    return (
-      <JsonSchemaEditButton
-        key={runner.name}
-        title={`Configure ${runner.name} step`}
-        value={{}}
-        schema={optionsSchema}
-        onSubmit={createStep}
-        buttonProps={buttonProps}
-      />
-    )
-  }
 
 export default EditEvaluationPage

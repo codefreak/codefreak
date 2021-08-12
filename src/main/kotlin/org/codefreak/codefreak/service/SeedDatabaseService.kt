@@ -11,6 +11,7 @@ import org.codefreak.codefreak.util.TaskTemplate
 import org.codefreak.codefreak.util.TaskTemplateUtil
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Profile
 import org.springframework.context.event.ContextRefreshedEvent
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service
 @Service
 @Profile(Env.DEV)
 @Order(Ordered.LOWEST_PRECEDENCE)
+@ConditionalOnProperty("codefreak.seed-database", havingValue = "true", matchIfMissing = true)
 class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
 
   @Autowired

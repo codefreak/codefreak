@@ -11,13 +11,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
 import org.codefreak.codefreak.entity.Assignment
-import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
-import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
-import org.codefreak.codefreak.service.evaluation.EvaluationRunnerService
-import org.codefreak.codefreak.service.evaluation.isBuiltIn
-import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.getCodefreakDefinition
@@ -38,12 +33,6 @@ class TaskTarService : BaseService() {
   private lateinit var taskService: TaskService
 
   @Autowired
-  private lateinit var runnerService: EvaluationRunnerService
-
-  @Autowired
-  private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
-
-  @Autowired
   private lateinit var fileService: FileService
 
   /**
@@ -58,76 +47,10 @@ class TaskTarService : BaseService() {
   @Transactional
   fun createFromTar(tarContent: ByteArray, owner: User, assignment: Assignment? = null, position: Long = 0L): Task {
     val definition = yamlMapper.getCodefreakDefinition<TaskDefinition>(tarContent.inputStream())
-
-    var task = createTaskFromDefinition(definition, owner, assignment, position)
-
+    var task = definition.toEntity(assignment, owner, position)
     task = taskService.saveTask(task)
-
-    addEvaluationStepsFromDefinition(definition, task)
-    validateEvaluationSteps(task)
-    addBuiltInEvaluationSteps(task)
-
-    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
-
-    task = taskService.saveTask(task)
-
     copyTaskFilesFromTar(task.id, tarContent)
-
     return task
-  }
-
-  /**
-   * Creates a new task from a given TaskDefinition without the evaluation steps and the file contents.
-   */
-  private fun createTaskFromDefinition(
-    definition: TaskDefinition,
-    owner: User,
-    assignment: Assignment? = null,
-    position: Long = 0L
-  ): Task {
-    val task = Task(assignment, owner, position, definition.title, definition.description, 100)
-
-    task.hiddenFiles = definition.hidden
-    task.protectedFiles = definition.protected
-    task.ideEnabled = definition.ide?.enabled ?: true
-    task.ideImage = definition.ide?.image
-    task.ideArguments = definition.ide?.cmd
-
-    return task
-  }
-
-  private fun addEvaluationStepsFromDefinition(definition: TaskDefinition, task: Task) {
-    task.evaluationStepDefinitions = getEvaluationStepDefinitions(definition, task)
-  }
-
-  /**
-   * Returns a set of evaluation step definitions for a task defined in a given TaskDefinition.
-   */
-  private fun getEvaluationStepDefinitions(taskDefinition: TaskDefinition, task: Task) = taskDefinition.evaluation
-      .mapIndexed { index, it ->
-        val runner = runnerService.getEvaluationRunner(it.step)
-        val title = it.title ?: runner.getDefaultTitle()
-        val stepDefinition = EvaluationStepDefinition(task, runner.getName(), index, title, it.options)
-        stepDefinition.active = it.active ?: true
-        runnerService.validateRunnerOptions(stepDefinition)
-        stepDefinition
-      }
-      .toSortedSet()
-
-  private fun validateEvaluationSteps(task: Task) = task.evaluationStepDefinitions
-      .groupBy { it.runnerName }
-      .forEach { (runnerName, definitions) ->
-        if (definitions.size > 1 && runnerService.getEvaluationRunner(runnerName).isBuiltIn()) {
-          throw IllegalArgumentException("Evaluation step '$runnerName' can only be added once!")
-        }
-      }
-
-  private fun addBuiltInEvaluationSteps(task: Task) {
-    if (task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME } == null) {
-      task.evaluationStepDefinitions.forEach { it.position++ }
-      val runner = runnerService.getEvaluationRunner(CommentRunner.RUNNER_NAME)
-      task.evaluationStepDefinitions.add(EvaluationStepDefinition(task, runner.getName(), 0, runner.getDefaultTitle()))
-    }
   }
 
   private fun copyTaskFilesFromTar(taskId: UUID, tarContent: ByteArray) {
@@ -223,37 +146,9 @@ class TaskTarService : BaseService() {
   }
 
   private fun writeTaskDefinition(task: Task, tar: TarArchiveOutputStream) {
-    val definition = createTaskDefinition(task).let { yamlMapper.writeValueAsBytes(it) }
+    val definition = task.toYamlDefinition().let { yamlMapper.writeValueAsBytes(it) }
     writeArchiveEntry(tar, TarUtil.CODEFREAK_DEFINITION_YML, definition)
   }
-
-  private fun createTaskDefinition(task: Task) = TaskDefinition(
-      task.title,
-      task.body,
-      task.hiddenFiles,
-      task.protectedFiles,
-      task.evaluationStepDefinitions
-        .toSortedSet()
-        .map {
-          val options =
-            if (it.options.isEmpty())
-              runnerService.getDefaultOptions(it.runnerName)
-            else
-              it.options
-
-        EvaluationDefinition(
-            it.runnerName,
-            options,
-            it.title,
-            if (it.active) null else false
-        )
-      },
-      IdeDefinition(
-          enabled = task.ideEnabled,
-          image = task.ideImage,
-          cmd = task.ideArguments
-      )
-  )
 
   private fun writeArchiveEntry(tar: TarArchiveOutputStream, entryName: String, content: ByteArray) {
     val entry = TarArchiveEntry(entryName).also { it.size = content.size.toLong() }

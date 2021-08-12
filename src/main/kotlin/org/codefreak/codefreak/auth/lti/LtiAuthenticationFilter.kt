@@ -286,7 +286,7 @@ class LtiAuthenticationFilter : OIDCAuthenticationFilter() {
 
         return authenticationManager.authenticate(token)
       } catch (e: ParseException) {
-        throw AuthenticationServiceException("Couldn't parse id_token: ", e)
+        throw AuthenticationServiceException("Couldn't parseStdout id_token: ", e)
       }
     }
   }

@@ -23,13 +23,9 @@ fun OutputStream.afterClose(callback: () -> Any?) = object : ProxyOutputStream(t
   }
 }
 
-fun InputStream.afterClose(callback: () -> Any?) = object : ProxyInputStream(this) {
+fun InputStream.preventClose() = object : ProxyInputStream(this) {
   override fun close() {
-    try {
-      super.close()
-    } finally {
-      callback()
-    }
+    // nope
   }
 }
 
@@ -48,3 +44,5 @@ val <T> T.exhaustive: T
 
 val JobParameters.evaluationStepId: UUID?
   get() = getString(EvaluationConfiguration.PARAM_EVALUATION_STEP_ID)?.let { id -> UUID.fromString(id) }
+
+fun String.wrapInMarkdownCodeBlock() = if (isNotBlank()) "```\n$this\n```" else ""

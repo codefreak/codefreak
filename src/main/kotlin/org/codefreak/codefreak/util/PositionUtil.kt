@@ -3,6 +3,12 @@ package org.codefreak.codefreak.util
 import java.lang.IllegalArgumentException
 
 object PositionUtil {
+  fun <K, V : Comparable<V>> move(items: Map<K, V>, associatedBy: (V) -> K, oldPosition: Long, newPosition: Long, getPosition: V.() -> Long, setPosition: V.(Long) -> Unit): Map<K, V> {
+    val values = items.values
+    move(values, oldPosition, newPosition, getPosition, setPosition)
+    return values.sorted().associateBy(associatedBy)
+  }
+
   fun <T> move(items: Collection<T>, oldPosition: Long, newPosition: Long, getPosition: T.() -> Long, setPosition: T.(Long) -> Unit) {
     if (oldPosition == newPosition) {
       return

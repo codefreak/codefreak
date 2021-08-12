@@ -5,7 +5,6 @@ import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
 import com.expediagroup.graphql.spring.operations.Subscription
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetchingEnvironment
 import java.util.UUID
@@ -26,15 +25,14 @@ import org.codefreak.codefreak.graphql.SubscriptionEventPublisher
 import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.AssignmentService
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
+import org.codefreak.codefreak.service.EvaluationStepDefinitionService
 import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
-import org.codefreak.codefreak.service.evaluation.EvaluationRunner
-import org.codefreak.codefreak.service.evaluation.EvaluationRunnerService
+import org.codefreak.codefreak.service.evaluation.EvaluationReportFormatParser
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.EvaluationStepService
-import org.codefreak.codefreak.service.evaluation.StoppableEvaluationRunner
-import org.codefreak.codefreak.service.evaluation.isBuiltIn
+import org.codefreak.codefreak.service.evaluation.FormatParserRegistry
 import org.codefreak.codefreak.util.exhaustive
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
@@ -45,29 +43,36 @@ import reactor.core.publisher.Flux
 
 @GraphQLName("EvaluationStepDefinition")
 class EvaluationStepDefinitionDto(definition: EvaluationStepDefinition, ctx: ResolverContext) {
-  companion object {
-    private val objectMapper = ObjectMapper()
-  }
-
   val id = definition.id
-  val runnerName = definition.runnerName
+  val key = definition.key
   val active = definition.active
   val position = definition.position
   val title = definition.title
-  val options: String by lazy {
-    ctx.authorization.requireAuthorityIfNotCurrentUser(definition.task.owner, Authority.ROLE_ADMIN)
-    objectMapper.writeValueAsString(definition.options)
-  }
-  val runner by lazy {
-    ctx.serviceAccess.getService(EvaluationRunnerService::class).getEvaluationRunner(runnerName).let { EvaluationRunnerDto(it) }
-  }
   val timeout = definition.timeout
+  val script by lazy {
+    ctx.authorization.requireAuthorityIfNotCurrentUser(definition.task.owner, Authority.ROLE_ADMIN)
+    definition.script
+  }
+  val reportFormat by lazy {
+    ctx.authorization.requireAuthorityIfNotCurrentUser(definition.task.owner, Authority.ROLE_ADMIN)
+    definition.report.format
+  }
+  val reportPath by lazy {
+    ctx.authorization.requireAuthorityIfNotCurrentUser(definition.task.owner, Authority.ROLE_ADMIN)
+    definition.report.path
+  }
 }
 
 @GraphQLName("EvaluationStepDefinitionInput")
-class EvaluationStepDefinitionInputDto(var id: UUID, var title: String, var active: Boolean, var timeout: Long?, var options: String) {
-  constructor() : this(UUID.randomUUID(), "", true, null, "")
-}
+class EvaluationStepDefinitionInputDto(
+  var id: UUID,
+  var title: String,
+  var active: Boolean,
+  var timeout: Long?,
+  var script: String,
+  var reportFormat: String,
+  var reportPath: String
+)
 
 @GraphQLName("Evaluation")
 class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
@@ -96,16 +101,6 @@ class EvaluationStepDto(entity: EvaluationStep, ctx: ResolverContext) {
   val status = EvaluationStepStatusDto(entity.status)
   val queuedAt = entity.queuedAt
   val finishedAt = entity.finishedAt
-}
-
-@GraphQLName("EvaluationRunner")
-class EvaluationRunnerDto(runner: EvaluationRunner) {
-  val name = runner.getName()
-  val builtIn = runner.isBuiltIn()
-  val defaultTitle = runner.getDefaultTitle()
-  val optionsSchema = runner.getOptionsSchema()
-  val documentationUrl = runner.getDocumentationUrl()
-  val stoppable = runner is StoppableEvaluationRunner
 }
 
 @GraphQLName("EvaluationStepResult")
@@ -183,14 +178,17 @@ class EvaluationStatusUpdatedEventDto(event: EvaluationStatusUpdatedEvent, ctx: 
   val status = EvaluationStepStatusDto(event.status)
 }
 
+@GraphQLName("EvaluationReportFormat")
+class EvaluationReportFormatDto(parser: EvaluationReportFormatParser) {
+  val key = parser.id
+  val title = parser.title
+}
+
 @Component
 class EvaluationQuery : BaseResolver(), Query {
-
   @Secured(Authority.ROLE_TEACHER)
-  fun evaluationRunners() = context {
-    serviceAccess.getService(EvaluationRunnerService::class).getAllRunners()
-        .map { EvaluationRunnerDto(it) }
-        .toTypedArray()
+  fun evaluationReportFormats(): List<EvaluationReportFormatDto> = context {
+    serviceAccess.getService(FormatParserRegistry::class).allParsers.map { EvaluationReportFormatDto(it) }
   }
 
   @Secured(Authority.ROLE_STUDENT)
@@ -249,51 +247,49 @@ class EvaluationMutation : BaseResolver(), Mutation {
     }
   }
 
-  fun createEvaluationStepDefinition(taskId: UUID, runnerName: String, options: String) = context {
-    val evaluationService = serviceAccess.getService(EvaluationService::class)
-    val runnerService = serviceAccess.getService(EvaluationRunnerService::class)
+  fun createEvaluationStepDefinition(taskId: UUID) = context {
     val taskService = serviceAccess.getService(TaskService::class)
     val task = taskService.findTask(taskId)
-    val runner = runnerService.getEvaluationRunner(runnerName)
     if (!task.isEditable(authorization)) {
       Authorization.deny()
     }
-    val optionsMap = objectMapper.readValue(options, object : TypeReference<HashMap<String, Any>>() {})
-    val definition = EvaluationStepDefinition(task, runner.getName(), task.evaluationStepDefinitions.size, runner.getDefaultTitle(), optionsMap)
-    runnerService.validateRunnerOptions(definition)
-    task.evaluationStepDefinitions.add(definition)
-    evaluationService.saveEvaluationStepDefinition(definition)
+    val definitionService = serviceAccess.getService(EvaluationStepDefinitionService::class)
+    task.addEvaluationStepDefinition(
+        definitionService.createNewStepDefinition(task)
+    )
     taskService.saveTask(task)
     taskService.invalidateLatestEvaluations(task)
     true
   }
 
   fun updateEvaluationStepDefinition(input: EvaluationStepDefinitionInputDto): Boolean = context {
-    val evaluationService = serviceAccess.getService(EvaluationService::class)
-    val definition = evaluationService.findEvaluationStepDefinition(input.id)
+    val definitionService = serviceAccess.getService(EvaluationStepDefinitionService::class)
+    val definition = definitionService.findEvaluationStepDefinition(input.id)
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
-    val options = objectMapper.readValue(input.options, object : TypeReference<HashMap<String, Any>>() {})
-    evaluationService.updateEvaluationStepDefinition(definition,
-        title = input.title,
-        active = input.active,
-        timeout = input.timeout,
-        options = options)
+    definition.title = input.title
+    definition.script = input.script
+    definition.active = input.active
+    definition.timeout = input.timeout
+    definition.report.path = input.reportPath
+    definition.report.format = input.reportFormat
+    definitionService.updateEvaluationStepDefinition(definition)
     true
   }
 
   fun deleteEvaluationStepDefinition(id: UUID) = context {
-    val evaluationService = serviceAccess.getService(EvaluationService::class)
-    val runnerService = serviceAccess.getService(EvaluationRunnerService::class)
-    val definition = evaluationService.findEvaluationStepDefinition(id)
+    val definitionService = serviceAccess.getService(EvaluationStepDefinitionService::class)
+    val definition = definitionService.findEvaluationStepDefinition(id)
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
-    require(!runnerService.getEvaluationRunner(definition.runnerName).isBuiltIn()) { "Built-in evaluation steps cannot be deleted" }
+    val evaluationService = serviceAccess.getService(EvaluationService::class)
     check(definition.task.answers.none { evaluationService.isEvaluationScheduled(it.id) }) { "Cannot delete evaluation step while waiting for evaluation" }
     try {
-      evaluationService.deleteEvaluationStepDefinition(definition)
+      val task = definition.task
+      task.deleteEvaluationStepDefinition(definition)
+      serviceAccess.getService(TaskService::class).saveTask(task)
     } catch (e: DataIntegrityViolationException) {
       throw IllegalStateException("Evaluation steps cannot be deleted once used to generate feedback. You can deactivate it for future evaluation.")
     }
@@ -302,11 +298,12 @@ class EvaluationMutation : BaseResolver(), Mutation {
   }
 
   fun setEvaluationStepDefinitionPosition(id: UUID, position: Long): Boolean = context {
-    val definition = serviceAccess.getService(EvaluationService::class).findEvaluationStepDefinition(id)
+    val definitionService = serviceAccess.getService(EvaluationStepDefinitionService::class)
+    val definition = definitionService.findEvaluationStepDefinition(id)
     if (!definition.task.isEditable(authorization)) {
       Authorization.deny()
     }
-    serviceAccess.getService(EvaluationService::class).setEvaluationStepDefinitionPosition(definition, position)
+    definitionService.setEvaluationStepDefinitionPosition(definition, position)
     // we do not need to invalidate evaluations here because order does not matter
     true
   }

@@ -1,7 +1,11 @@
 import { InputNumber, Switch } from 'antd'
 import { InputNumberProps } from 'antd/es/input-number'
 import React, { useState } from 'react'
-import { TimeComponents } from '../services/time'
+import {
+  componentsToSeconds,
+  secondsToComponents,
+  TimeComponents
+} from '../services/time'
 import './TimeIntervalInput.less'
 
 const renderTimeIntervalInput = (
@@ -34,23 +38,23 @@ const renderTimeIntervalInput = (
 }
 
 export interface TimeIntervalInputProps {
-  defaultValue?: TimeComponents
+  value?: TimeComponents
   placeholder?: TimeComponents
   onChange?: (newComponents: TimeComponents | undefined) => void
   nullable?: boolean
 }
 
 const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
-  defaultValue,
+  value,
   placeholder,
   onChange,
   nullable
 }) => {
   const [components, setComponents] = useState<TimeComponents>(
-    defaultValue || { hours: 0, minutes: 0, seconds: 0 }
+    value || { hours: 0, minutes: 0, seconds: 0 }
   )
   const [enabled, setEnabled] = useState<boolean>(
-    !nullable || defaultValue !== undefined
+    !nullable || value !== undefined
   )
 
   const createOnValueChange =
@@ -98,5 +102,30 @@ const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
     </div>
   )
 }
+
+export interface TimeIntervalSecInputProps
+  extends Omit<TimeIntervalInputProps, 'value' | 'onChange'> {
+  value?: number
+  onChange?: (newValue: number | undefined) => unknown
+}
+
+export const TimeIntervalSecInput: React.FC<TimeIntervalSecInputProps> =
+  props => {
+    const { value, onChange, ...otherProps } = props
+    const onRealChange: TimeIntervalInputProps['onChange'] = components => {
+      onChange?.(!!components ? componentsToSeconds(components) : undefined)
+    }
+    return (
+      <TimeIntervalInput
+        {...otherProps}
+        value={
+          value !== undefined && value !== null
+            ? secondsToComponents(value)
+            : undefined
+        }
+        onChange={onRealChange}
+      />
+    )
+  }
 
 export default TimeIntervalInput

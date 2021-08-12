@@ -25,9 +25,6 @@ class EvaluationStepService {
   @Autowired
   private lateinit var stepRepository: EvaluationStepRepository
 
-  @Autowired
-  private lateinit var runnerService: EvaluationRunnerService
-
   fun getEvaluationStep(stepId: UUID): EvaluationStep {
     return stepRepository.findById(stepId).orElseThrow {
       EntityNotFoundException("EvaluationStep $stepId could not be found")
@@ -38,9 +35,6 @@ class EvaluationStepService {
    * Determine if an evaluation step has to be executed by a runner
    */
   fun stepNeedsExecution(step: EvaluationStep): Boolean {
-    if (!runnerService.isAutomated(step.definition.runnerName)) {
-      return false
-    }
     // non-finished steps or errored steps can be executed again
     return step.status != EvaluationStepStatus.FINISHED || step.result === EvaluationStepResult.ERRORED
   }
@@ -77,13 +71,7 @@ class EvaluationStepService {
   fun addStepToEvaluation(evaluation: Evaluation, stepDefinition: EvaluationStepDefinition): EvaluationStep {
     // remove existing step with this definition from evaluation
     evaluation.evaluationSteps.removeIf { it.definition == stepDefinition }
-    // mark all manual steps as finished without a result
-    // otherwise the overall evaluation status would be stuck at "pending"
-    val initialStatus = when {
-      !runnerService.isAutomated(stepDefinition.runnerName) -> EvaluationStepStatus.FINISHED
-      else -> EvaluationStepStatus.PENDING
-    }
-    return EvaluationStep(stepDefinition, evaluation, initialStatus).also {
+    return EvaluationStep(stepDefinition, evaluation, EvaluationStepStatus.PENDING).also {
       evaluation.addStep(it)
     }
   }

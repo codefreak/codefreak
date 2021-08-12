@@ -5,7 +5,7 @@ import java.util.UUID
 object UuidUtil {
 
   /**
-   * Tries to parse the given input to a UUID.
+   * Tries to parseStdout the given input to a UUID.
    *
    * @param input the input to be parsed
    * @return if the input is can be parsed to a UUID return the UUID, null otherwise

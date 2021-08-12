@@ -89,51 +89,6 @@ evaluation:
 ----
 
 
-=== [[cli-environment-variables]] Environment Variables
-During evaluation of the answer the following environment variables are available
-
-
-|===
-|Variable Name |Example Value |Explanation
-
-|`CI`
-|`true`
-|The value is always "true". Indicates running in a CI environment.
-
-|`CODEFREAK_ANSWER_ID`
-|`3a7b9bb9-4efe-4435-9df3-89b1bf7c01ab`
-|UUID of the answer currently processing
-
-|`CODEFREAK_ASSIGNMENT_ID`
-|`d420f578-fb0c-4974-afbe-42ec5856ab3b`
-|UUID of the assignment currently processing. The variable might be empty if running in task-pool testing mode.
-
-|`CODEFREAK_SUBMISSION_ID`
-|`3a24a325-bb5a-4de8-bbe7-cd99ca02fa19`
-|UUID of the submission currently processing
-
-|`CODEFREAK_TASK_ID`
-|`6d476ae7-9d45-4153-9157-a046192c40dd`
-|UUID of the task currently processing
-
-|`CODEFREAK_USER_ID`
-|`aefa1307-f247-4440-b1b1-ccc37f6563b9`
-|UUID of the user the answer belongs to
-
-|`CODEFREAK_USER_FIRST_NAME`
-|Jane
-|First name of the user the answer belongs to
-
-|`CODEFREAK_USER_LAST_NAME`
-|Doe
-|Last name of the user this answer belongs to
-
-|`CODEFREAK_USER_USERNAME`
-|jane.doe@student.example.org
-|Username/mail address of the user this answer belongs to
-|===
-
-
 == [[comments]] Comments (`comments`)
 The comments runner is a placeholder currently. Comments are always possible and *don't* have to be enabled in configuration.
 

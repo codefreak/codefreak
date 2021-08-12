@@ -1,0 +1,91 @@
+= Evaluation
+
+Code FREAK allows running automated evaluation on answers.
+An answer can be evaluation by a single or multiple evaluation step.
+Evaluation steps are independent of each other and are run in parallel to speed up the overall evaluation.
+
+Each evaluation step can check things like:
+
+* Checking code for functional correctness (Unit Tests)
+* Analyzing code for common bugs (Static Code Analysis)
+* Checking code for proper formatting (Linting)
+* etc.
+
+The actual content of the evaluation step (script) is up to the teacher.
+This allows using your favorite programming language and tools to check code.
+There are only a few things you need:
+
+* A command-line utility, which will test the code (e.g. junit, pytest, pylint, checkstyle, ...)
+* The tool has to generate a report readable by Code FREAK. Please check out the list of xref:for-teachers:evaluation.adoc#report-parsers[supported report parsers].
+
+=== [[evaluation-scripts]] Evaluation Scripts
+An evaluation script is a (Linux) Bash script that will be executed in an isolated environment to analyze the answer/code a student submitted.
+The simplest evaluation script could check for the pure existence of a file a student created, for example:
+
+[source,bash]
+----
+FILE=file.txt
+if test -f "$FILE"; then
+  echo "$FILE exists, good job!"
+  exit 0
+else
+  echo "$FILE does not exist!"
+  exit 1
+fi
+----
+
+=== [[report-parsers]] Report Parsers
+
+==== [[report-parsers-default]] Default Parser (`default`)
+The default parser does not expect any report but will read the output and exit-code of your script.
+If your test-script exits with a code of `0` the result is interpreted as successful.
+All other exit-codes indicate that something went wrong.
+The output of your evaluation script will be shown to the student.
+
+==== [[report-parsers-junit-xml]] jUnit XML Parser (`junit-xml`)
+
+
+=== [[cli-environment-variables]] Environment Variables
+During evaluation of the answer the following environment variables are available
+
+
+|===
+|Variable Name |Example Value |Explanation
+
+|`CI`
+|`true`
+|The value is always "true". Indicates running in a CI environment.
+
+|`CODEFREAK_ANSWER_ID`
+|`3a7b9bb9-4efe-4435-9df3-89b1bf7c01ab`
+|UUID of the answer currently processing
+
+|`CODEFREAK_ASSIGNMENT_ID`
+|`d420f578-fb0c-4974-afbe-42ec5856ab3b`
+|UUID of the assignment currently processing. The variable might be empty if running in task-pool testing mode.
+
+|`CODEFREAK_SUBMISSION_ID`
+|`3a24a325-bb5a-4de8-bbe7-cd99ca02fa19`
+|UUID of the submission currently processing
+
+|`CODEFREAK_TASK_ID`
+|`6d476ae7-9d45-4153-9157-a046192c40dd`
+|UUID of the task currently processing
+
+|`CODEFREAK_USER_ID`
+|`aefa1307-f247-4440-b1b1-ccc37f6563b9`
+|UUID of the user the answer belongs to
+
+|`CODEFREAK_USER_FIRST_NAME`
+|Jane
+|First name of the user the answer belongs to
+
+|`CODEFREAK_USER_LAST_NAME`
+|Doe
+|Last name of the user this answer belongs to
+
+|`CODEFREAK_USER_USERNAME`
+|jane.doe@student.example.org
+|Username/mail address of the user this answer belongs to
+|===
+

@@ -57,11 +57,10 @@ export const EvaluationStepPanel: React.FC<EvaluationStepPanelProps> =
       <>
         <EvaluationStepIcon status={stepStatus} result={stepResult} />{' '}
         {stepBasics.definition.title + ' '}
-        {stepBasics.definition.runner.stoppable &&
-          timer(
-            stepBasics.queuedAt || undefined,
-            stepBasics.finishedAt || undefined
-          )}
+        {timer(
+          stepBasics.queuedAt || undefined,
+          stepBasics.finishedAt || undefined
+        )}
       </>
     )
 
