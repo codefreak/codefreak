@@ -48,6 +48,7 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
             })
             resources {
               requests = mapOf(
+                  "cpu" to Quantity.parse("0.5"),
                   "memory" to Quantity.parse("256Mi")
               )
               limits = mapOf(
