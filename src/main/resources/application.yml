@@ -20,6 +20,8 @@ spring:
       max-request-size: 5MB
   liquibase:
     change-log: classpath:db/changelog-master.yaml
+    parameters:
+      collectionStoragePath: ${codefreak.files.fileSystem.collectionStoragePath}
 
 logging:
   level:
@@ -49,7 +51,7 @@ server:
 codefreak:
   instanceId: default
   files:
-    adapter: jpa
+    adapter: file_system
     fileSystem:
       # The path where all file collections will be stored in sub-directories
       # Please make sure that the user running the server has read+write permissions on this directory

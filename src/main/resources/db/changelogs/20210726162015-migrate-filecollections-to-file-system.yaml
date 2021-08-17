@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1627309215-1
+      author: hannes
+      changes:
+        - customChange:
+            "class": "org.codefreak.codefreak.liquibase.MigrateFileCollectionsToFileSystemTaskChange"
+            "collectionStoragePath": ${collectionStoragePath}
+        - dropTable:
+            tableName: file_collection
