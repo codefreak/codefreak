@@ -80,7 +80,7 @@ class DockerEvaluationBackend : EvaluationBackend {
       return containerService.archiveContainer(containerId, "${runConfig.projectPath.withTrailingSlash()}.") { archiveStream ->
         TarArchiveInputStream(archiveStream).use { tarStream ->
           tarStream.entrySequence()
-              .filter { matcher.match(pattern, it.name) }
+              .filter { matcher.match(TarUtil.normalizeFileName(pattern), TarUtil.normalizeFileName(it.name)) }
               .map {
                 // we are working with the underlying http stream which should not be closed outside this method
                 consumer(it.name, tarStream.preventClose())
