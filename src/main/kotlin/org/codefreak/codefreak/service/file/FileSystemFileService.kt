@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.file.FileAlreadyExistsException
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.LinkOption
@@ -102,12 +103,10 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
               if (!isBlacklistedPath(tempPath)) {
                 if (it.isFile) {
-                  // Create parent directories first because they might only implicitly exist in the tar through this file name
-                  Files.createDirectories(tempPath.parent)
                   require(!Files.isDirectory(tempPath)) { "`${it.name}` is a directory" }
 
                   if (it.size == 0L) {
-                    createFile(collectionId, tempPath)
+                    createFile(tempPath)
                   } else {
                     writeFile(tempPath).use { outputStream ->
                       IOUtils.copy(input, outputStream)
@@ -187,16 +186,14 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
       val path = getCollectionFilePath(collectionId, it)
       require(!isBlacklistedPath(path)) { "`$it` is not a valid path" }
       require(!Files.isDirectory(path)) { "`$it` is a directory" }
-      createFile(collectionId, path)
+      createFile(path)
     }
   }
 
-  private fun createFile(collectionId: UUID, path: Path) {
+  private fun createFile(path: Path) {
     try {
+      Files.createDirectories(path.parent)
       Files.createFile(path)
-    } catch (e: IOException) {
-      val pathToPrint = getFileRelativePath(collectionId, path)
-      throw IllegalArgumentException("A parent directory of $pathToPrint does not exist")
     } catch (e: FileAlreadyExistsException) {
       // Ignore silently
     }
@@ -320,6 +317,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   }
 
   private fun writeFile(path: Path): OutputStream {
+    Files.createDirectories(path.parent)
     // The default behaviour is StandardOpenOption::CREATE, StandardOpenOption::TRUNCATE_EXISTING and StandardOpenOption::WRITE
     return Files.newOutputStream(path)
   }

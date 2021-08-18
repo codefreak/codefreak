@@ -37,8 +37,8 @@ interface FileService {
   fun listFiles(collectionId: UUID, path: String): Sequence<FileMetaData>
 
   /**
-   * Create empty files in places specified by path.
-   * Throws an IllegalArgumentException if the parent directory does not exist or existing path is a directory.
+   * Create empty files and their parent directories in places specified by path.
+   * Throws an IllegalArgumentException if the existing path is a directory.
    * Ignores silently if a file already exists (similar to Linux' "touch")
    */
   @Throws(IllegalArgumentException::class)
@@ -97,7 +97,7 @@ interface FileService {
   fun moveFile(collectionId: UUID, sources: Set<String>, target: String)
 
   /**
-   * Write to file specified by path. Will create the file if it does not exist and truncate existing content.
+   * Write to file specified by path. Will create the file and its parent directories if it does not exist and truncate existing content.
    * The output stream must be closed properly after writing!
    * Throws an IllegalArgumentException if path is a directory.
    */

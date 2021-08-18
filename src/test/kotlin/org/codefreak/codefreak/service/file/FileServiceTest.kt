@@ -83,12 +83,6 @@ abstract class FileServiceTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `creating a file throws when the path already exists`() {
-    fileService.createFiles(collectionId, setOf("file.txt"))
-    fileService.createFiles(collectionId, setOf("file.txt")) // Throws because file already exists
-  }
-
-  @Test(expected = IllegalArgumentException::class)
   fun `creating a file throws on empty path name`() {
     fileService.createFiles(collectionId, setOf(""))
   }
@@ -99,9 +93,10 @@ abstract class FileServiceTest {
     fileService.createFiles(collectionId, setOf("some/path"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
-  fun `creating a file throws when the parent directory does not exist`() {
+  @Test
+  fun `creating a file doesn't throw when the parent directory does not exist`() {
     fileService.createFiles(collectionId, setOf("parent/file.txt"))
+    Assert.assertTrue(fileService.containsFile(collectionId, "parent/file.txt"))
   }
 
   @Test
