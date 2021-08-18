@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service.file
 
+import java.nio.file.Files
 import java.util.UUID
 import org.codefreak.codefreak.config.AppConfiguration
 import org.junit.After
@@ -22,7 +23,9 @@ class FileSystemFileServiceTest : FileServiceTest() {
     val fileSystemConfig = Mockito.mock(AppConfiguration.Files.FileSystem::class.java)
     Mockito.`when`(files.fileSystem).thenReturn(fileSystemConfig)
 
-    Mockito.`when`(fileSystemConfig.collectionStoragePath).thenReturn("/tmp/codefreak-test")
+    val tmpCollectionStoragePath = Files.createTempDirectory("codefreak-test")
+    Files.createDirectories(tmpCollectionStoragePath)
+    Mockito.`when`(fileSystemConfig.collectionStoragePath).thenReturn(tmpCollectionStoragePath.toString())
 
     fileService = FileSystemFileService(config)
   }

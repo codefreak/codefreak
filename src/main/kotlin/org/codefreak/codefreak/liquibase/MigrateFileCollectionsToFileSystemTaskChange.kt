@@ -1,6 +1,7 @@
 package org.codefreak.codefreak.liquibase
 
 import java.io.ByteArrayInputStream
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -49,7 +50,11 @@ class MigrateFileCollectionsToFileSystemTaskChange : CustomTaskChange {
     val errors = ValidationErrors()
 
     if (!Files.isDirectory(fileSystemPath)) {
-      errors.addError("`$fileSystemPath` does not exist or is not a directory")
+      try {
+        Files.createDirectories(fileSystemPath)
+      } catch (e: IOException) {
+        errors.addError("cannot create `$fileSystemPath`")
+      }
     } else if (!Files.isWritable(fileSystemPath)) {
       errors.addError("`$fileSystemPath` is not writable")
     }

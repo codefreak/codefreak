@@ -47,12 +47,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Run unit tests
-        run: |
-          sudo mkdir /var/lib/codefreak
-          sudo chown -R $USER /var/lib/codefreak
-          sudo mkdir /tmp/codefreak-test
-          sudo chown -R $USER /tmp/codefreak-test
-          ./gradlew check jibDockerBuild -x bootJar
+        run: ./gradlew check jibDockerBuild -x bootJar
 
       - name: Run end-to-end tests
         uses: cypress-io/github-action@v2

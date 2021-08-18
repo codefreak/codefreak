@@ -48,6 +48,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   init {
     val basePath = config.files.fileSystem.collectionStoragePath
     require(basePath.isNotBlank()) { "A collection storage path must be configured!" }
+    Files.createDirectories(Paths.get(basePath))
   }
 
   override fun readCollectionTar(collectionId: UUID): InputStream {
