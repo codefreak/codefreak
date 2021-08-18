@@ -145,11 +145,6 @@ class EvaluationService : BaseService() {
 
   fun saveEvaluation(evaluation: Evaluation) = evaluationRepository.save(evaluation)
 
-  @Transactional
-  fun addCommentFeedback(answer: Answer, digest: ByteArray, feedback: Feedback): Feedback {
-    TODO("Not refactored, yet")
-  }
-
   fun isEvaluationUpToDate(answer: Answer): Boolean {
     // check if any evaluation has been run at all
     val evaluation = getLatestEvaluation(answer.id).orNull() ?: return false

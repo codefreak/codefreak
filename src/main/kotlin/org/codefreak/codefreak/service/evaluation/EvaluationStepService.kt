@@ -47,7 +47,7 @@ class EvaluationStepService {
   @Transactional
   fun updateEvaluationStepStatus(step: EvaluationStep, status: EvaluationStepStatus) {
     // We do not check if the step is already in the given status on purpose.
-    // This allows updating the finishedAt timestamp (used for comments).
+    // This allows updating the finishedAt timestamp.
     when (status) {
       EvaluationStepStatus.QUEUED -> step.queuedAt = Instant.now()
       EvaluationStepStatus.FINISHED -> step.finishedAt = Instant.now()

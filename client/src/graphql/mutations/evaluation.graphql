@@ -21,24 +21,6 @@ mutation StartAssignmentEvaluation(
   }
 }
 
-mutation CreateCommentFeedback(
-  $answerId: ID!
-  $digest: String!
-  $comment: String!
-  $path: String
-  $severity: FeedbackSeverity
-  $line: Int
-) {
-  addCommentFeedback(
-    answerId: $answerId
-    digest: $digest
-    comment: $comment
-    path: $path
-    severity: $severity
-    line: $line
-  )
-}
-
 mutation DeleteEvaluationStepDefinition($id: ID!) {
   deleteEvaluationStepDefinition(id: $id)
 }

@@ -307,51 +307,6 @@ class EvaluationMutation : BaseResolver(), Mutation {
     // we do not need to invalidate evaluations here because order does not matter
     true
   }
-
-  @Secured(Authority.ROLE_TEACHER)
-  fun addCommentFeedback(
-    answerId: UUID,
-    digest: String,
-    comment: String,
-    severity: SeverityDto?,
-    path: String?,
-    line: Int?
-  ): Boolean = context {
-    val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
-    val user = authorization.currentUser
-    val evaluationService = serviceAccess.getService(EvaluationService::class)
-    val digestByteArray = Base64Utils.decodeFromString(digest)
-    val feedback = createBasicCommentFeedback(user, comment).apply {
-      if (path != null) {
-        fileContext = Feedback.FileContext(path).apply {
-          lineStart = line
-        }
-      }
-      this.severity = when {
-        severity != null -> Feedback.Severity.valueOf(severity.name)
-        else -> Feedback.Severity.INFO
-      }
-      // because only the severity can be set by the teacher atm, we interpret everything else than null/"info" as "failed"
-      this.status = when (this.severity) {
-          null, Feedback.Severity.INFO -> Feedback.Status.SUCCESS
-          else -> Feedback.Status.FAILED
-      }
-    }
-    evaluationService.addCommentFeedback(answer, digestByteArray, feedback)
-    true
-  }
-
-  private fun createBasicCommentFeedback(author: User, comment: String): Feedback {
-    // use the first 10 words of the first line or max. 100 chars as summary
-    var summary = comment.trim().replace("((?:[^ \\n]+ ?){0,10})".toRegex(), "$1").trim()
-    if (summary.length > 100) {
-      summary = summary.substring(0..100) + "..."
-    }
-    return Feedback(summary).apply {
-      longDescription = comment
-      this.author = author
-    }
-  }
 }
 
 @Component
