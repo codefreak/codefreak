@@ -183,9 +183,6 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
       return script
     }
     // Otherwise, create a proper bash script based on the given input
-    return """
-    #!/usr/bin/env bash
-    ${script.trimIndent()}
-    """.trimIndent()
+    return "#!/usr/bin/env bash\n$script"
   }
 }
