@@ -17,7 +17,6 @@ import org.codefreak.codefreak.entity.EvaluationStepDefinition
 import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
-import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.graphql.BaseDto
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.graphql.ResolverContext
@@ -38,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
-import org.springframework.util.Base64Utils
 import reactor.core.publisher.Flux
 
 @GraphQLName("EvaluationStepDefinition")

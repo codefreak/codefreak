@@ -7,7 +7,6 @@ import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
 import org.codefreak.codefreak.entity.EvaluationStepStatus
-import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.EvaluationRepository
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent

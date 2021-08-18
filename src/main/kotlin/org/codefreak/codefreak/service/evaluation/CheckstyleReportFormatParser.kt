@@ -94,10 +94,6 @@ class CheckstyleReportFormatParser(
     }
   }
 
-  override fun summarize(feedbackList: List<Feedback>): String {
-    return feedbackList.groupBy { it.severity }.entries.joinToString { (k, v) -> "${v.size}x $k" }
-  }
-
   data class CheckstyleXmlRoot(
     @JacksonXmlElementWrapper(useWrapping = false)
     @JsonProperty("file")
