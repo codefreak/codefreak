@@ -4,7 +4,12 @@ on: [push, pull_request, release]
 
 jobs:
   main:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-2019]
+
     env:
       # webpack build needs a lot of memory
       NODE_OPTIONS: --max_old_space_size=4096
