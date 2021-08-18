@@ -1,6 +1,8 @@
 package org.codefreak.codefreak.config
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder
@@ -35,4 +37,13 @@ class SerializationConfiguration {
       setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }
   }
+
+  @Bean("xmlObjectMapper")
+  fun xmlObjectMapper(
+    builder: Jackson2ObjectMapperBuilder
+  ) = builder.createXmlMapper(true)
+      .build<ObjectMapper>()
+      .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+      .registerKotlinModule()
 }

@@ -5,8 +5,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.junit.Test
 
-class JunitXmlFormatParserTest {
-  private val JUNIT_XML = """
+const val JUNIT_XML = """
 <?xml version="1.0" encoding="utf-8"?>
 <testsuites>
         <testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.016" timestamp="2021-08-06T12:34:02.621108" hostname="arch-desktop">
@@ -21,8 +20,9 @@ main_test.py:8: AssertionError</failure>
                 <testcase classname="main_test" name="test_always_true" time="0.000" />
         </testsuite>
 </testsuites>
-  """.trimIndent()
+"""
 
+class JunitXmlFormatParserTest {
   @Test
   fun parse() {
     val parser = JunitXmlFormatParser()
