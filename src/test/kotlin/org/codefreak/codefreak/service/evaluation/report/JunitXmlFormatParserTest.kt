@@ -1,11 +1,15 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import org.codefreak.codefreak.entity.Feedback
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.junit.Test
 
-const val JUNIT_XML = """
+class JunitXmlFormatParserTest {
+  @Test
+  fun parse() {
+    val parser = JunitXmlFormatParser()
+    val feedback = parser.parse("""
 <?xml version="1.0" encoding="utf-8"?>
 <testsuites>
         <testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.016" timestamp="2021-08-06T12:34:02.621108" hostname="arch-desktop">
@@ -20,13 +24,7 @@ main_test.py:8: AssertionError</failure>
                 <testcase classname="main_test" name="test_always_true" time="0.000" />
         </testsuite>
 </testsuites>
-"""
-
-class JunitXmlFormatParserTest {
-  @Test
-  fun parse() {
-    val parser = JunitXmlFormatParser()
-    val feedback = parser.parse(0, "", JUNIT_XML)
+""".trimIndent())
     assertThat(feedback, Matchers.hasSize(2))
     val first = feedback.first()
     assertThat(first.status, Matchers.equalTo(Feedback.Status.FAILED))

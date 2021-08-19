@@ -1,4 +1,4 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import org.codefreak.codefreak.entity.Feedback
 import org.hamcrest.MatcherAssert
@@ -11,7 +11,7 @@ class VisualStudioReportFormatParserTest {
 
     @Test
     fun `parse valid strings`() {
-      val feedback = parser.parse(0, "", """
+      val feedback = parser.parse("""
         # Taken from MS examples
         C:\sourcefile.cpp(134) : error C2143: syntax error : missing ';' before '}'
         LINK : fatal error LNK1104: cannot open file 'somelib.lib'

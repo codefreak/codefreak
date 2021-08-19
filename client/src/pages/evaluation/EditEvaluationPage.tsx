@@ -137,7 +137,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
           {definition.reportPath && definition.reportFormat && (
             <p>
               Files found at <code>{definition.reportPath}</code> will be parsed
-              with {definition.reportFormat}.
+              with <code>{definition.reportFormat}</code>.
             </p>
           )}
           <SyntaxHighlighter language="bash">

@@ -32,7 +32,7 @@ class DockerEvaluationBackend : EvaluationBackend {
     val containerId = containerService.createContainer(runConfig.image) {
       doNothingAndKeepAlive()
       containerConfig {
-        workingDir(runConfig.projectPath)
+        workingDir(runConfig.workingDirectory)
         env(runConfig.environment.entries.map { (k, v) -> "$k=$v" })
       }
       labels = labels + getEvalContainerListMap(id)
@@ -40,7 +40,7 @@ class DockerEvaluationBackend : EvaluationBackend {
     return containerService.useContainer(containerId) {
       // copy over project files that will be evaluated
       runConfig.useFiles {
-        containerService.copyToContainer(it, containerId, runConfig.projectPath)
+        containerService.copyToContainer(it, containerId, runConfig.workingDirectory)
       }
       // copy all scripts
       containerService.copyToContainer(
@@ -77,7 +77,7 @@ class DockerEvaluationBackend : EvaluationBackend {
       // we can only specify a path when getting an archive from the docker container.
       // Thus, we have to fetch all files and filter the files while iterating the archive.
       val matcher = AntPathMatcher()
-      return containerService.archiveContainer(containerId, "${runConfig.projectPath.withTrailingSlash()}.") { archiveStream ->
+      return containerService.archiveContainer(containerId, "${runConfig.workingDirectory.withTrailingSlash()}.") { archiveStream ->
         TarArchiveInputStream(archiveStream).use { tarStream ->
           tarStream.entrySequence()
               .filter { matcher.match(TarUtil.normalizeFileName(pattern), TarUtil.normalizeFileName(it.name)) }

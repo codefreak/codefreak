@@ -1,4 +1,4 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -14,7 +14,7 @@ class PylintJsonReportFormatParser(
   override val id = "pylint-json"
   override val title = "Pylint JSON"
 
-  override fun parse(exitCode: Int, stdout: String, fileContent: InputStream): List<Feedback> {
+  override fun parse(fileContent: InputStream): List<Feedback> {
     return jsonObjectMapper.readValue(fileContent, Array<PylintViolation>::class.java).map(::pylintViolationToFeedback)
   }
 

@@ -16,8 +16,8 @@ interface EvaluationBackend {
     val id: UUID,
     val script: String,
     val environment: Map<String, String>,
-    val image: String = "replco/polygott",
-    val projectPath: String = "/home/runner/project",
+    val image: String,
+    val workingDirectory: String,
     val filesSupplier: () -> InputStream
   ) {
     fun <T> useFiles(consumer: (input: InputStream) -> T): T = filesSupplier().use(consumer)

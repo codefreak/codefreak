@@ -9,7 +9,7 @@ import org.codefreak.codefreak.entity.User
  * This file contains all YAML data structures that are used for importing and exporting tasks/assignments.
  */
 data class TaskDefinition(
-  val title: String,
+  val title: String = "",
   val description: String? = null,
   val hidden: List<String> = emptyList(),
   val protected: List<String> = emptyList(),
@@ -40,9 +40,9 @@ data class TaskDefinition(
 }
 
 data class EvaluationDefinition(
-  val title: String,
-  val active: Boolean? = null,
   val script: String,
+  val title: String = "Unnamed Evaluation Step",
+  val active: Boolean? = null,
   val timeout: Long? = null,
   val report: EvaluationReportDefinition
 ) {

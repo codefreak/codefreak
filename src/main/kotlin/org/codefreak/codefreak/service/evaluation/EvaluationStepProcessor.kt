@@ -4,11 +4,16 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.service.AnswerService
+import org.codefreak.codefreak.service.evaluation.report.EvaluationReportFormatParser
+import org.codefreak.codefreak.service.evaluation.report.EvaluationReportParsingException
+import org.codefreak.codefreak.service.evaluation.report.FormatParserRegistry
+import org.codefreak.codefreak.util.withTrailingSlash
 import org.slf4j.LoggerFactory
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,6 +38,9 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
   @Autowired
   private lateinit var answerService: AnswerService
 
+  @Autowired
+  private lateinit var appConfig: AppConfiguration
+
   @Value("#{@config.evaluation.defaultTimeout}")
   private var defaultTimeout: Long = 0L
 
@@ -52,6 +60,14 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
         // The evaluation will be re-run if the application restarts
         return null
       }
+
+      // This is a simple fix to make the absolute paths contained in the feedback relative
+      feedbackList.forEach { feedback ->
+        feedback.fileContext?.let {
+          it.path = it.path.removePrefix(appConfig.evaluation.imageWorkdir.withTrailingSlash())
+        }
+      }
+
       evaluationStep.addAllFeedback(feedbackList)
       // only check for explicitly "failed" feedback so we ignore the "skipped" ones
       if (evaluationStep.feedback.any { it.isFailed }) {
@@ -115,7 +131,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
       // we could introduce a more explicit flag or value for this like ":stdout"
       if (definition.report.path.isBlank()) {
         log.debug("No report file matching pattern given. Trying to extract feedback from stdout")
-        reportFormatParser.parse(evaluationResult.exitCode, evaluationResult.output, evaluationResult.output)
+        reportFormatParser.parse(evaluationResult.output)
       } else {
         log.debug("Trying to generate feedback from files matching ${definition.report.path}")
         parseFeedbackFromEvaluationFiles(reportFormatParser, evaluationResult, definition.report.path)
@@ -129,7 +145,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     val feedbackFromFiles = evaluationResult.consumeFiles(filePattern) { fileName, fileContent ->
       log.debug("Parsing file $fileName with ${reportFormatParser.id}")
       try {
-        Pair(fileName, reportFormatParser.parse(evaluationResult.exitCode, evaluationResult.output, fileContent))
+        Pair(fileName, reportFormatParser.parse(fileContent))
       } catch (parsingException: EvaluationReportParsingException) {
         throw EvaluationStepException(
             "Failed to parseStdout report file $fileName with ${reportFormatParser.id}: ${parsingException.message}",
@@ -141,18 +157,41 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
 
     // handle cases where no file was found
     if (feedbackFromFiles.isEmpty()) {
-      val exitCode = evaluationResult.exitCode
-      val output = evaluationResult.output
-      return reportFormatParser.handleNoFilesFound(exitCode, output, filePattern)
+      return handleNoFilesFound(evaluationResult)
     }
 
     return feedbackFromFiles.values.flatten()
+  }
+
+  /**
+   * This method will be called in case no matching files to parse have been found.
+   * This could either be good or bad: E.g. in case no jUnit test reports have been found when using Java
+   * this means compilation failed. In this cases the stdout gives more information about what went wrong.
+   */
+  fun handleNoFilesFound(evaluationResult: EvaluationResult): List<Feedback> {
+    val exitCode = evaluationResult.exitCode
+    val output = evaluationResult.output
+    if (exitCode > 0) {
+      throw EvaluationStepException(
+          "Process exited with $exitCode:\n$output",
+          EvaluationStepResult.FAILED,
+          EvaluationStepStatus.FINISHED
+      )
+    } else {
+      throw EvaluationStepException(
+          "Process exited with $exitCode:\n$output",
+          EvaluationStepResult.SUCCESS,
+          EvaluationStepStatus.FINISHED
+      )
+    }
   }
 
   private fun buildEvaluationRunConfig(step: EvaluationStep): EvaluationBackend.EvaluationRunConfig {
     val stepDefinition = step.definition
     return EvaluationBackend.EvaluationRunConfig(
         id = step.id,
+        image = appConfig.evaluation.defaultImage,
+        workingDirectory = appConfig.evaluation.imageWorkdir,
         script = createEvaluationScript(stepDefinition.script),
         environment = buildEnvVariables(step),
         filesSupplier = { answerService.copyFilesForEvaluation(step.evaluation.answer) }

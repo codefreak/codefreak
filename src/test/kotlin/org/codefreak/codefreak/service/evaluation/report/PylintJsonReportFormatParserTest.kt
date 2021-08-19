@@ -1,4 +1,4 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
@@ -14,7 +14,7 @@ class PylintJsonReportFormatParserTest {
 
     @Test
     fun parse() {
-      val feedback = parser.parse(0, "", """
+      val feedback = parser.parse("""
         [
             {
                 "type": "convention",

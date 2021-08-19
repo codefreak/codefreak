@@ -28,10 +28,10 @@ import org.codefreak.codefreak.service.EvaluationStepDefinitionService
 import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
-import org.codefreak.codefreak.service.evaluation.EvaluationReportFormatParser
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.EvaluationStepService
-import org.codefreak.codefreak.service.evaluation.FormatParserRegistry
+import org.codefreak.codefreak.service.evaluation.report.EvaluationReportFormatParser
+import org.codefreak.codefreak.service.evaluation.report.FormatParserRegistry
 import org.codefreak.codefreak.util.exhaustive
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException

@@ -1,4 +1,4 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import java.io.InputStream
 import org.codefreak.codefreak.entity.Feedback
@@ -16,12 +16,10 @@ class DefaultReportFormatParser : EvaluationReportFormatParser {
   override val id = "default"
   override val title = "Display Output"
 
-  override fun parse(exitCode: Int, stdout: String, fileContent: InputStream): List<Feedback> {
-    val outputString = StreamUtils.copyToString(fileContent, Charsets.UTF_8).ifBlank { stdout }
-    val summary = "Process exited with $exitCode (${if (exitCode > 0) "failed" else "success"})!"
-    val feedback = Feedback(summary).also {
+  override fun parse(fileContent: InputStream): List<Feedback> {
+    val outputString = StreamUtils.copyToString(fileContent, Charsets.UTF_8)
+    val feedback = Feedback("Console Output").also {
       it.longDescription = outputString.trim().wrapInMarkdownCodeBlock()
-      it.status = if (exitCode > 0) Feedback.Status.FAILED else Feedback.Status.SUCCESS
     }
     return listOf(feedback)
   }

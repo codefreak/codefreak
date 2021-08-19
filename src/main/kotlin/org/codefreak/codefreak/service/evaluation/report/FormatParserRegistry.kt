@@ -1,4 +1,4 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component

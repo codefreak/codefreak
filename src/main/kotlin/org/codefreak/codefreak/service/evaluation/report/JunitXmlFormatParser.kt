@@ -1,4 +1,4 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import java.io.InputStream
 import javax.xml.bind.JAXBContext
@@ -23,11 +23,7 @@ class JunitXmlFormatParser : EvaluationReportFormatParser {
 
   private val unmarshaller = JAXBContext.newInstance(JUnitTestSuites::class.java, JUnitTestSuite::class.java).createUnmarshaller()
 
-  /**
-   * Try to parse the incoming report as XML.
-   * We do not care about the exit code
-   */
-  override fun parse(exitCode: Int, stdout: String, fileContent: InputStream): List<Feedback> = testSuiteToFeedback(fileContent)
+  override fun parse(fileContent: InputStream): List<Feedback> = testSuiteToFeedback(fileContent)
 
   override fun summarize(feedbackList: List<Feedback>): String {
     val numSuccess = feedbackList.count { feedback -> !feedback.isFailed }

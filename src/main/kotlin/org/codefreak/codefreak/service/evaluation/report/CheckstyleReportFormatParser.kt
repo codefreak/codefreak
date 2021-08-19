@@ -1,4 +1,4 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -41,7 +41,7 @@ class CheckstyleReportFormatParser(
   )
   private val defaultSeverity = Feedback.Severity.MINOR
 
-  override fun parse(exitCode: Int, stdout: String, fileContent: InputStream): List<Feedback> {
+  override fun parse(fileContent: InputStream): List<Feedback> {
     return when (val checkstyleRoot = xmlMapper.readValue(fileContent, CheckstyleXmlRoot::class.java)) {
       is CheckstyleXmlRoot -> checkstyleRootToFeedback(checkstyleRoot)
       else -> throw EvaluationReportParsingException("Expected a root element of <checkstyle> but received $checkstyleRoot instead")
@@ -96,22 +96,22 @@ class CheckstyleReportFormatParser(
 
   data class CheckstyleXmlRoot(
     @JacksonXmlElementWrapper(useWrapping = false)
-    @JsonProperty("file")
-    val files: List<CheckstyleFile>?,
+  @JsonProperty("file")
+  val files: List<CheckstyleFile>?,
     @JacksonXmlElementWrapper(useWrapping = false)
-    @JsonProperty("error")
-    val errors: List<CheckstyleError>?,
+  @JsonProperty("error")
+  val errors: List<CheckstyleError>?,
     @JacksonXmlCData
-    val exception: String?
+  val exception: String?
   )
 
   data class CheckstyleFile(
     val name: String?,
     @JacksonXmlElementWrapper(useWrapping = false)
-    @JsonProperty("error")
-    val errors: List<CheckstyleError>?,
+  @JsonProperty("error")
+  val errors: List<CheckstyleError>?,
     @JacksonXmlElementWrapper(useWrapping = false)
-    val exception: String?
+  val exception: String?
   )
 
   data class CheckstyleError(

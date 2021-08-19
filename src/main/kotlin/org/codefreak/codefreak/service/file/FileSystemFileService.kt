@@ -16,7 +16,6 @@ import java.util.UUID
 import kotlin.io.path.isSymbolicLink
 import kotlin.streams.asSequence
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.io.FileExistsException
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
@@ -52,7 +51,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
   override fun readCollectionTar(collectionId: UUID): InputStream {
     val output = ByteArrayOutputStream()
-    val tarOutput = TarArchiveOutputStream(output)
+    val tarOutput = TarUtil.PosixTarArchiveOutputStream(output)
     val collectionPath = createCollectionPath(collectionId)
 
     Files.walkFileTree(collectionPath, object : SimpleFileVisitor<Path>() {

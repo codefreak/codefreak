@@ -1,4 +1,4 @@
-package org.codefreak.codefreak.service.evaluation
+package org.codefreak.codefreak.service.evaluation.report
 
 import java.io.InputStream
 import org.codefreak.codefreak.entity.Feedback
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class VisualStudioReportFormatParser : EvaluationReportFormatParser {
-  override val id = "visual-studio"
+  override val id = "visualstudio"
   override val title = "Visual Studio"
 
   /**
@@ -50,7 +50,7 @@ class VisualStudioReportFormatParser : EvaluationReportFormatParser {
    */
   private val vscodeMessageRegex = Regex("^(?:(?<filename>[^)]+)\\((?<line>\\d+)(?:,(?<column>\\d+))?\\)|(?<toolname>[^:]+))\\s*:\\s*(.*? )?(?<severity>error|warning)\\s+(?<code>[^:]+):\\s*(?<message>.+?)(?: \\[[^\\[]+\\])?\$")
 
-  override fun parse(exitCode: Int, stdout: String, fileContent: InputStream): List<Feedback> {
+  override fun parse(fileContent: InputStream): List<Feedback> {
     return fileContent.bufferedReader().lineSequence().mapNotNull {
       vscodeMessageRegex.matchEntire(it)
     }.mapNotNull {
