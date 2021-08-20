@@ -1,12 +1,15 @@
 package org.codefreak.codefreak.service.evaluation
 
 import com.spotify.docker.client.DockerClient
+import com.spotify.docker.client.exceptions.ContainerNotFoundException
+import com.spotify.docker.client.exceptions.DockerException
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.ExecResult
 import org.codefreak.codefreak.util.TarUtil
@@ -23,13 +26,18 @@ import org.springframework.util.StreamUtils
 class DockerEvaluationBackend : EvaluationBackend {
 
   @Autowired
+  private lateinit var appConfiguration: AppConfiguration
+
+  @Autowired
   private lateinit var containerService: ContainerService
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun <T> runEvaluation(runConfig: EvaluationBackend.EvaluationRunConfig, processResult: EvaluationResultProcessor<T>): T {
+  override fun <T> runEvaluation(runConfig: EvaluationRunConfig, processResult: EvaluationResultProcessor<T>): T {
     val id = runConfig.id
-    val containerId = containerService.createContainer(runConfig.image) {
+    val containerId = containerService.createContainer(runConfig.imageName) {
+      // the unique name will make the evaluation fail if it is already running
+      name = buildContainerName(id)
       doNothingAndKeepAlive()
       containerConfig {
         workingDir(runConfig.workingDirectory)
@@ -39,7 +47,7 @@ class DockerEvaluationBackend : EvaluationBackend {
     }
     return containerService.useContainer(containerId) {
       // copy over project files that will be evaluated
-      runConfig.useFiles {
+      runConfig.files.use {
         containerService.copyToContainer(it, containerId, runConfig.workingDirectory)
       }
       // copy all scripts
@@ -51,33 +59,43 @@ class DockerEvaluationBackend : EvaluationBackend {
           ), containerId, "/"
       )
       val result = containerService.exec(containerId, arrayOf("/scripts/run-evaluation"))
+      // TODO: At this point we should check if the evaluation has been interrupted from outside.
+      // This could be done checking the exit code of the process. 128 + SIGNAL represents the exit code in bash when
+      // execution has been interrupted. But this might also be the case if the container has been killed by the
+      // system's watch dog.
       processResult(createEvaluationResult(containerId, result, runConfig))
     }
   }
 
+  private fun buildContainerName(id: UUID): String = "cf-${appConfiguration.instanceId}-eval-$id"
+
   override fun interruptEvaluation(id: UUID) {
-    val containerId = containerService.listContainers(*getEvalContainerListParams(id)).firstOrNull()?.id()
-    if (containerId == null) {
-      // container has already exited
+    val containerName = buildContainerName(id)
+    try {
+      containerService.removeContainer(containerName, force = true, removeVolumes = true)
+      log.debug("Removed evaluation container $containerName forcibly.")
+    } catch (e: ContainerNotFoundException) {
       log.debug("Cannot find any evaluation container for evaluation step $id")
-      return
+    } catch (e: DockerException) {
+      log.warn("Cannot remove evaluation container $containerName!", e)
     }
-    log.debug("Removing container $containerId running step $id")
-    containerService.removeContainer(containerId, force = true, removeVolumes = true)
   }
 
   /**
    * Create an evaluation result based on the exec result that gives access to the files inside the container using
    * the container service.
    */
-  private fun createEvaluationResult(containerId: String, execResult: ExecResult, runConfig: EvaluationBackend.EvaluationRunConfig) = object : EvaluationResult {
+  private fun createEvaluationResult(containerId: String, execResult: ExecResult, runConfig: EvaluationRunConfig) = object : EvaluationResult {
     override val exitCode: Int = execResult.exitCode.toInt()
     override val output: String = execResult.output
     override fun <T> consumeFiles(pattern: String, consumer: (fileName: String, fileContent: InputStream) -> T): List<T> {
       // we can only specify a path when getting an archive from the docker container.
       // Thus, we have to fetch all files and filter the files while iterating the archive.
       val matcher = AntPathMatcher()
-      return containerService.archiveContainer(containerId, "${runConfig.workingDirectory.withTrailingSlash()}.") { archiveStream ->
+      return containerService.archiveContainer(
+          containerId,
+          "${runConfig.workingDirectory.withTrailingSlash()}."
+      ) { archiveStream ->
         TarArchiveInputStream(archiveStream).use { tarStream ->
           tarStream.entrySequence()
               .filter { matcher.match(TarUtil.normalizeFileName(pattern), TarUtil.normalizeFileName(it.name)) }

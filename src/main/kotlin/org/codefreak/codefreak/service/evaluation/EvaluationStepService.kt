@@ -48,10 +48,12 @@ class EvaluationStepService {
   fun updateEvaluationStepStatus(step: EvaluationStep, status: EvaluationStepStatus) {
     // We do not check if the step is already in the given status on purpose.
     // This allows updating the finishedAt timestamp.
-    when (status) {
-      EvaluationStepStatus.QUEUED -> step.queuedAt = Instant.now()
-      EvaluationStepStatus.FINISHED -> step.finishedAt = Instant.now()
-      else -> Unit // all other status do not have a timestamp atm
+    when {
+      status == EvaluationStepStatus.QUEUED -> {
+        step.queuedAt = Instant.now()
+        step.finishedAt = null
+      }
+      status >= EvaluationStepStatus.FINISHED -> step.finishedAt = Instant.now()
     }
     val evaluation = step.evaluation
     val originalEvaluationStatus = evaluation.stepStatusSummary

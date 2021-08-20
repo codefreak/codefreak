@@ -9,7 +9,7 @@ class ShortUuidConverter : Converter<String, UUID> {
 
   override fun convert(source: String): UUID? {
     // ShortUuidBuilder will also eat regular UUIDs and converts them to very different UUIDs
-    // let's try to parseStdout the string as normal UUID first
+    // let's try to parse the string as normal UUID first
     try {
       return UUID.fromString(source)
     } catch (e: Exception) {

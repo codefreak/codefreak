@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.service.evaluation
 
+import java.io.InputStream
+import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
@@ -186,11 +188,11 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     }
   }
 
-  private fun buildEvaluationRunConfig(step: EvaluationStep): EvaluationBackend.EvaluationRunConfig {
+  private fun buildEvaluationRunConfig(step: EvaluationStep): DefaultEvaluationRunConfig {
     val stepDefinition = step.definition
-    return EvaluationBackend.EvaluationRunConfig(
+    return DefaultEvaluationRunConfig(
         id = step.id,
-        image = appConfig.evaluation.defaultImage,
+        imageName = appConfig.evaluation.defaultImage,
         workingDirectory = appConfig.evaluation.imageWorkdir,
         script = createEvaluationScript(stepDefinition.script),
         environment = buildEnvVariables(step),
@@ -216,12 +218,31 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
   }
 
   private fun createEvaluationScript(script: String): String {
-    // if the script already contains a shebang line return it as-is.
+    // If the script already contains a shebang line return it as-is.
     // The script might not be written in bash but another language
     if (script.startsWith("#!")) {
       return script
     }
     // Otherwise, create a proper bash script based on the given input
     return "#!/usr/bin/env bash\n$script"
+  }
+
+  /**
+   * Evaluation run config which invokes a supplied function to read files.
+   */
+  class DefaultEvaluationRunConfig(
+    override val id: UUID,
+    override val script: String,
+    override val environment: Map<String, String>,
+    override val imageName: String,
+    override val workingDirectory: String,
+    private val filesSupplier: () -> InputStream
+  ) : EvaluationRunConfig {
+    /**
+     * Invoke the supplier function lazy to generate the input stream.
+     * This will be called every time when files will be accessed!
+     */
+    override val files
+      get() = filesSupplier()
   }
 }

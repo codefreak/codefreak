@@ -29,7 +29,7 @@ class FileSystemFileServiceTest : FileServiceTest() {
 
   @After
   fun tearDown() {
-    // Cleanup created file
+    // Cleanup created files
     fileService.deleteCollection(collectionId)
   }
 

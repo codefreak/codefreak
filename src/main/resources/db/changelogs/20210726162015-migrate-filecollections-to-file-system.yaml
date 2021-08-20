@@ -5,6 +5,6 @@ databaseChangeLog:
       changes:
         - customChange:
             "class": "org.codefreak.codefreak.liquibase.MigrateFileCollectionsToFileSystemTaskChange"
-            "collectionStoragePath": /tmp
+            "collectionStoragePath": ${collectionStoragePath}
         - dropTable:
             tableName: file_collection

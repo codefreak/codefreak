@@ -47,7 +47,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
   const [sureToEdit, setSureToEdit] = useState(false)
   const onSureToEditChange = (e: CheckboxChangeEvent) =>
     setSureToEdit(e.target.checked)
-  const [editing, setEditing] = useState<string | undefined>()
+  const [editingStepId, setEditingStepId] = useState<string | undefined>()
   if (result.data === undefined) {
     return <AsyncPlaceholder result={result} />
   }
@@ -109,7 +109,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
           <Tooltip title="Edit evaluation step">
             <Button
               disabled={!settingsEditable}
-              onClick={() => setEditing(definition.id)}
+              onClick={() => setEditingStepId(definition.id)}
               style={{ marginRight: 8 }}
               shape="circle"
               icon={<SettingOutlined />}
@@ -120,7 +120,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
       children: (
         <>
           <EditEvaluationStepDefinitionModal
-            visible={editing === definition.id}
+            visible={editingStepId === definition.id}
             initialValues={definition}
             onSave={async updatedDefinition => {
               // merge updated values and original values but leave out
@@ -130,9 +130,9 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
                 ...updatedDefinition
               }
               await updateMutation({ variables: { input: fullDefinition } })
-              setEditing(undefined)
+              setEditingStepId(undefined)
             }}
-            onCancel={() => setEditing(undefined)}
+            onCancel={() => setEditingStepId(undefined)}
           />
           {definition.reportPath && definition.reportFormat && (
             <p>
@@ -149,13 +149,13 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
     return cardProps
   }
 
-  const onCreate = async () => {
+  const onCreateStep = async () => {
     await createStep({ variables: { taskId } })
     messageService.success('Evaluation step added')
     const newSteps = (await result.refetch()).data.task
       .evaluationStepDefinitions
     if (newSteps.length) {
-      setEditing(newSteps[newSteps.length - 1].id)
+      setEditingStepId(newSteps[newSteps.length - 1].id)
     }
   }
 
@@ -198,7 +198,7 @@ const EditEvaluationPage: React.FC<{ taskId: string }> = ({ taskId }) => {
         handlePositionChange={handlePositionChange}
       />
       <div style={{ marginTop: 16, textAlign: 'center' }}>
-        <Button onClick={onCreate} type="dashed" icon={<PlusOutlined />}>
+        <Button onClick={onCreateStep} type="dashed" icon={<PlusOutlined />}>
           Add evaluation step
         </Button>
       </div>

@@ -319,7 +319,6 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   }
 
   private fun writeFile(path: Path): OutputStream {
-    Files.createDirectories(path.parent)
     // The default behaviour is StandardOpenOption::CREATE, StandardOpenOption::TRUNCATE_EXISTING and StandardOpenOption::WRITE
     return Files.newOutputStream(path)
   }
