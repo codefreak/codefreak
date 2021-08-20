@@ -10,7 +10,6 @@ import java.io.FileWriter
 import kotlin.system.exitProcess
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
-import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -39,6 +38,5 @@ class SchemaPrinter : CommandLineRunner {
 
 fun main(args: Array<String>) {
   SpringApplicationBuilder(SchemaPrinter::class.java)
-      .web(WebApplicationType.NONE)
       .run(*args)
 }
