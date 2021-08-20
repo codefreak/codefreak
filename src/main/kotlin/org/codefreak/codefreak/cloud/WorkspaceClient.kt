@@ -4,6 +4,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.ws.DefaultWebSocketEngine
 import com.apollographql.apollo3.network.ws.GraphQLWsProtocol
 import com.apollographql.apollo3.network.ws.WebSocketNetworkTransport
+import java.io.InputStream
 import kotlinx.coroutines.flow.first
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -19,10 +20,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.cloud.workspace.StartProcessMutation
 import org.codefreak.codefreak.cloud.workspace.WaitForProcessSubscription
 import reactor.core.publisher.Flux
-import java.io.InputStream
 
 class WorkspaceClient(
-    private val reference: RemoteWorkspaceReference
+  private val reference: RemoteWorkspaceReference
 ) {
   private val requestFactory = OkHttpClient.Builder()
       // .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))

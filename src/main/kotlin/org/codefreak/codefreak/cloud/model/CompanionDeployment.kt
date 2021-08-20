@@ -52,8 +52,8 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
                   "memory" to Quantity.parse("256Mi")
               )
               limits = mapOf(
-                  "cpu" to Quantity.parse("2"),
-                  //"memory" to Quantity.parse("512Mi")
+                  "cpu" to Quantity.parse("2")
+                  // "memory" to Quantity.parse("512Mi")
               )
             }
             // disable environment variables with service links

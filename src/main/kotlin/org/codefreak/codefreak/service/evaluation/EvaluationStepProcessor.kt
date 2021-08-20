@@ -1,5 +1,6 @@
 package org.codefreak.codefreak.service.evaluation
 
+import java.time.Instant
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -16,9 +17,6 @@ import org.springframework.batch.item.ItemProcessor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import reactor.kotlin.adapter.rxjava.toFlowable
-import java.time.Duration
-import java.time.Instant
 
 @Component
 class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {

@@ -1,6 +1,4 @@
-mutation StartWorkspace(
-  $context: FileContextInput!
-) {
+mutation StartWorkspace($context: FileContextInput!) {
   startWorkspace(fileContext: $context) {
     baseUrl
   }
