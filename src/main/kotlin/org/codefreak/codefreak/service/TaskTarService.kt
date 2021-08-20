@@ -16,6 +16,7 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.getCodefreakDefinition
+import org.codefreak.templates.TaskTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
@@ -60,6 +61,20 @@ class TaskTarService : BaseService() {
           TarUtil.PosixTarArchiveOutputStream(fileCollection)
       ) { !TarUtil.isCodefreakDefinition(it) }
     }
+  }
+
+  fun createFromTemplateName(templateName: String, owner: User): Task {
+    val template = try {
+      TaskTemplate.valueOf(templateName.uppercase())
+    } catch (e: IllegalArgumentException) {
+      throw EntityNotFoundException("Template $templateName does not exist!")
+    }
+    return createFromTemplate(template, owner)
+  }
+
+  fun createFromTemplate(template: TaskTemplate, owner: User): Task {
+    val templateContent = template.archiveStream.use { it.readBytes() }
+    return createFromTar(templateContent, owner)
   }
 
   /**

@@ -86,3 +86,11 @@ query GetTaskDetails($id: ID!, $teacher: Boolean = false) {
     }
   }
 }
+
+query GetAvailableTaskTemplates {
+  taskTemplates {
+    name
+    title
+    description
+  }
+}
