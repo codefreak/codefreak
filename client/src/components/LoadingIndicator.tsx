@@ -2,10 +2,14 @@ import { Spin } from 'antd'
 import React from 'react'
 import Centered from './Centered'
 
-const LoadingIndicator: React.FC = () => {
+type LoadingIndicatorProps = {
+  message?: string
+}
+
+const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ message }) => {
   return (
     <Centered>
-      <Spin size="large" />
+      <Spin size="large" tip={message} />
     </Centered>
   )
 }
