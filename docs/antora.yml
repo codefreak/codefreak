@@ -1,6 +1,6 @@
 name: codefreak
 title: Code FREAK
-version: master
+version: v6
 nav:
   - modules/ROOT/nav.adoc
   - modules/for-admins/nav.adoc
