@@ -12,7 +12,7 @@ import org.openmbee.junit.model.JUnitTestSuite
 import org.springframework.stereotype.Component
 
 /**
- * Parses jUnit XML format. There is no official standard for this format.
+ * Parses JUnit XML format. There is no official standard for this format.
  * Check this SO post for some gathered information:
  * https://stackoverflow.com/questions/4922867/what-is-the-junit-xml-format-specification-that-hudson-supports
  */
