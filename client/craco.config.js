@@ -33,7 +33,7 @@ module.exports = {
         definitions: [
           createBuildDefinitions,
           {
-            'process.env.CODEFREAK_DOCS_BASE_URL': JSON.stringify('https://docs.codefreak.org/codefreak/')
+            'process.env.CODEFREAK_DOCS_BASE_URL': JSON.stringify('https://docs.codefreak.org/codefreak/v6/')
           }
         ]
       }
