@@ -57,7 +57,7 @@ You should verify that this works as expected on you local computer before conti
 pytest main_test.py
 ----
 
-This should give some output about a **failing** test. It is important that your tests are failing. Otherwise you could not expect your students to fix the faulty source code.
+This should give some output about a **failing** test. It is important that your tests are failing. Otherwise, you could not expect your students to fix the faulty source code.
 
 .Failing `pytest` output
 [source]
@@ -82,6 +82,35 @@ main_test.py:4: AssertionError
 FAILED main_test.py::test_function - assert 0 == 5
 ===================== 1 failed in 0.04s ======================
 ----
+
+== Checking Code Quality
+There are many tools available for doing Static Code Analysis.
+Static Code Analysers can check code for possible bugs, proper formatting and many more cool things.
+They are also often called "linters".
+In contrast to Unit Testing you do not have to write individual tests as most static analysers ship with many built-in tests.
+A popular linting tool for Python is https://www.pylint.org/["Pylint"] which will test if the code is formatted according to https://www.python.org/dev/peps/pep-0008/[PEP8], and it will also find possible errors.
+
+Pylint can be installed using `pip install pylint` and invoked using `pylint [name-of-the-file.py]`, e.g. `pylint main.py`.
+If Pylint produces no output it meant your code is fine.
+Otherwise, it will show a list of issues:
+
+.Example Pylint output
+[source,text]
+----
+************* Module main
+main.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+main.py:1:0: C0103: Argument name "a" doesn't conform to snake_case naming style (invalid-name)
+main.py:1:0: C0103: Argument name "b" doesn't conform to snake_case naming style (invalid-name)
+main.py:1:0: C0116: Missing function or method docstring (missing-function-docstring)
+main.py:1:8: W0613: Unused argument 'a' (unused-argument)
+main.py:1:16: W0613: Unused argument 'b' (unused-argument)
+
+--------------------------------------------------------------------
+Your code has been rated at -5.00/10 (previous run: -5.00/10, +0.00)
+----
+
+If you call pylint with `--output-format=json` it will print the issues in a format that can be read by Code FREAK.
+This will be important when we prepare the xref:for-teachers:assignments.adoc#task-codefreak-yml[configuration for Code FREAK].
 
 == Creating the basic directory layout
 You should already have a `main.py` file and a `main_test.py` file. Transform your directory layout to match the following.
@@ -138,49 +167,44 @@ description: |
   `main.py` file, that returns the sum of parameter `a` and `b`.
 
    Find some useful help in the [official reference](https://docs.python.org/3.7/reference/index.html).
-hidden: <2>
-  - main_test.py
-evaluation:
-  - step: codeclimate <3>
-  - step: junit <4>
-    options:
-      image: "python:3.7" <5>
-      project-path: /code <6>
-      results-path: . <7>
-      commands:
-        - pip install pytest <8>
-        - pytest --junitxml=TEST-report.xml main_test.py <9>
+hidden:
+  - "**/*_test.py" <2>
+evaluation: <3>
+  unit-tests: <4>
+    title: Unit Tests
+    script: |-
+      pip3 install pytest
+      pytest --junitxml=test-results.xml main_test.py
+    report:
+      format: junit-xml
+      path: test-results.xml
+  code-quality: <5>
+    title: Code Quality
+    script: |-
+      pip3 install pylint
+      pylint --ignore-patterns='.*?_test.py' --output-format=json -ry *.py > pylint-report.json
+    report:
+      format: pylint-json
+      path: pylint-report.json
 ----
 
 <1> The first two lines will add a title and some description to our task. The weird `description` syntax is a https://yaml-multiline.info/[multi line string in YAML]. The description allows basic Markdown syntax.
 <2> In the `hidden` property we define a list of directories and/or files that will be hidden from our students. Each instruction is a glob pattern. The `codefreak.yml` file is ALWAYS hidden for students.
-<3> The first evaluation step is <<definitions.adoc#codeclimate,Code Climate>>. If you don't add any more options it will perform a basic static code analysis.
-<4> The second evaluation step is the actual unit testing. See <<definitions.adoc#junit,the definition docs>> for a full reference of available options.
-<5> We use the official https://hub.docker.com/_/python[Python 3.7] Docker image for running the tests. This makes Code FREAK so flexible and allows you to use the Docker Image of your favorite programming language.
-<6> The `project-path` is the working directory inside your container. All commands will be executed relative to this path. This can be any directory.
-<7> The `results-path` is a path that will contain the jUnit XML files. Code FREAK will look for `.xml` files starting with `TEST-*`. The path is relative to the `project-path`!
-<8> Because the Docker container does not ship with `pytest` we have to install it first.
-<9> This is our actual `pytest` command that runs the test in our `main_test.py` file and generates a `TEST-report.xml` file for Code FREAK.
-
-You can already run the tests locally to check if they behave as expected by invoking the test command `pytest --junitxml=TEST-report.xml main_test.py`.
-
-== (optionally) Add VSCode configuration files
-Students can use Code FREAK to program in their browsers. The programming environment is currently based on VSCode. We recommend that you add debugging configuration for VSCode, so your students can execute their source code in the browser.
-Please follow the https://code.visualstudio.com/docs/editor/debugging[official documentation] on how to creating debugging/run configurations in VSCode.
-
-The result should be a `.vscode` directory with a `launch.json` file. Add this directory to you `task-1` directory.
+<3> Under `evaluation:` you can list one or multiple evaluation-steps. Each evaluation step has a unique key which will identify the job internally. In this case we define the steps `unit-tests` and `code-quality`.
+<4> The `unit-tests` step will invoke pytest and write a JUnit-compatible XML file to `test-results.xml`. This file will be picked up by the report parser xref:for-teachers:evaluation.adoc#report-parsers-junit-xml[`junit-xml`].
+<5> Our second evaluation step `code-quality` will simply invoke `pylint` and create machine-readable JSON output. Because pylint does not have a special parameter to write the report to a file we have to use https://www.gnu.org/software/bash/manual/html_node/Redirections.html[bash output redirection] to write the output to a dedicated file. The asterisk means we will check all `.py` files, except those suffixed with `_test.py`.
 
 [[testing-locally]]
 == Testing locally with Docker
 Before you upload your assignment to Code FREAK you should try to run the tests locally with Docker. After https://docs.docker.com/install/[installing Docker] you can use the following command-template to test execution locally:
 
-[source]
+[source,bash]
 ----
 docker run -it --rm \
-       -w <project-path> \
-       -v $PWD:<project-path> \
-       <image> \
-       sh -c '<command #1> && <command #2> && <command #3> && ...'
+       -v $PWD:/home/coder/project \
+       --entrypoint "" \
+       cfreak/ide:1 \
+       sh -c 'pip3 install pytest && python -m pytest --junitxml=test-results.xml main_test.py'
 ----
 
 The `<variables>` should be replaced by the corresponding values from your task's `codefreak.yml`.
