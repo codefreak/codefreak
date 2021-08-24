@@ -201,26 +201,13 @@ Before you upload your assignment to Code FREAK you should try to run the tests 
 [source,bash]
 ----
 docker run -it --rm \
-       -v $PWD:/home/coder/project \
+       -v ${PWD}:/home/coder/project \
        --entrypoint "" \
        cfreak/ide:1 \
        sh -c 'pip3 install pytest && python -m pytest --junitxml=test-results.xml main_test.py'
 ----
 
-The `<variables>` should be replaced by the corresponding values from your task's `codefreak.yml`.
-
 TIP: If you are on **Windows** replace the `$PWD` variable with the absolute path to your `task-1` directory. On Mac OS and Linux the `$PWD` variable will be replaced accordingly.
-
-This is an example for our `task-1`. Execute the following command in the `task-1` directory:
-
-[source]
-----
-docker run -it --rm \
-       -w /code \
-       -v $PWD:/code \
-       python:3.7 \
-       sh -c 'pip install pytest && pytest --junitxml=TEST-report.xml main_test.py'
-----
 
 == Creating and uploading an assignment
 If your assignment is ready to be uploaded to Code FREAK you have to create a `zip` or `tar` archive. The archive name itself does not have to follow any naming scheme.
