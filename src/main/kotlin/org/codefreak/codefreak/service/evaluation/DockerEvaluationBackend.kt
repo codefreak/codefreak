@@ -33,7 +33,7 @@ class DockerEvaluationBackend : EvaluationBackend {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun <T> runEvaluation(runConfig: EvaluationRunConfig, processResult: EvaluationResultProcessor<T>): T {
+  override fun <T> runEvaluation(runConfig: EvaluationRunConfig, resultProcessor: EvaluationResultProcessor<T>): T {
     val id = runConfig.id
     val containerId = containerService.createContainer(runConfig.imageName) {
       // the unique name will make the evaluation fail if it is already running
@@ -63,7 +63,7 @@ class DockerEvaluationBackend : EvaluationBackend {
       // This could be done checking the exit code of the process. 128 + SIGNAL represents the exit code in bash when
       // execution has been interrupted. But this might also be the case if the container has been killed by the
       // system's watch dog.
-      processResult(createEvaluationResult(containerId, result, runConfig))
+      resultProcessor(createEvaluationResult(containerId, result, runConfig))
     }
   }
 

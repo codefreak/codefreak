@@ -21,7 +21,7 @@ const EvaluationStepDefinitionForm = (props: {
 }) => {
   const evaluationReportFormats =
     useGetSupportedEvaluationReportFormatsQuery()?.data
-      ?.evaluationReportFormats || []
+      ?.evaluationReportFormats ?? []
 
   useEffect(() => {
     // update form values if initial values change
@@ -97,7 +97,7 @@ const EditEvaluationStepDefinitionModal: React.FC<EditEvaluationStepDefinitionMo
             // validation failed
           }
         }}
-        onCancel={() => onCancel()}
+        onCancel={onCancel}
       >
         <EvaluationStepDefinitionForm
           initialValues={initialValues}

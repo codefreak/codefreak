@@ -13,7 +13,7 @@ interface EvaluationBackend {
   /**
    * Run the evaluation based on the supplied config and invoke the result processor after the evaluation has been run.
    */
-  fun <T> runEvaluation(runConfig: EvaluationRunConfig, processResult: EvaluationResultProcessor<T>): T
+  fun <T> runEvaluation(runConfig: EvaluationRunConfig, resultProcessor: EvaluationResultProcessor<T>): T
 
   /**
    * Terminate a running evaluation with the given ID. It should be ignored if the evaluation is not running (anymore).

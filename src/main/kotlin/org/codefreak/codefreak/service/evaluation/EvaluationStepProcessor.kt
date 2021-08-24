@@ -129,7 +129,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     val config = buildEvaluationRunConfig(step)
     // file stream should be closed by evaluation backend as soon as files have been copied over
     return evaluationBackend.runEvaluation(config) { evaluationResult ->
-      // a blank pattern indicates we should parseStdout the process output instead of any files
+      // a blank pattern indicates we should parse the process output instead of any files
       // we could introduce a more explicit flag or value for this like ":stdout"
       if (definition.report.path.isBlank()) {
         log.debug("No report file matching pattern given. Trying to extract feedback from stdout")
@@ -150,7 +150,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
         Pair(fileName, reportFormatParser.parse(fileContent))
       } catch (parsingException: EvaluationReportParsingException) {
         throw EvaluationStepException(
-            "Failed to parseStdout report file $fileName with ${reportFormatParser.id}: ${parsingException.message}",
+            "Failed to parse report file $fileName with ${reportFormatParser.id}: ${parsingException.message}",
             EvaluationStepResult.ERRORED,
             cause = parsingException
         )

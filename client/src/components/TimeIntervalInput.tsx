@@ -51,7 +51,7 @@ const TimeIntervalInput: React.FC<TimeIntervalInputProps> = ({
   nullable
 }) => {
   const [components, setComponents] = useState<TimeComponents>(
-    value || { hours: 0, minutes: 0, seconds: 0 }
+    value ?? { hours: 0, minutes: 0, seconds: 0 }
   )
   const [enabled, setEnabled] = useState<boolean>(
     !nullable || value !== undefined

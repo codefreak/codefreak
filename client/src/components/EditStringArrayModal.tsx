@@ -52,13 +52,7 @@ const EditStringArrayModal: React.FC<EditStringArrayModalProps> = props => {
             </Popconfirm>
           </Col>
           <Col span="12">
-            <Button
-              onClick={() => {
-                onCancel?.()
-              }}
-            >
-              Cancel
-            </Button>
+            <Button onClick={onCancel}>Cancel</Button>
             <Button
               type="primary"
               onClick={async () => {
@@ -81,7 +75,7 @@ const EditStringArrayModal: React.FC<EditStringArrayModalProps> = props => {
         form={form}
         name="evaluation-step-definition"
         initialValues={{
-          entries: initialValues || []
+          entries: initialValues ?? []
         }}
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 18 }}
@@ -129,7 +123,7 @@ const EditStringArrayModal: React.FC<EditStringArrayModalProps> = props => {
               <Form.Item {...formItemLayoutWithOutLabel}>
                 <Button
                   type="dashed"
-                  onClick={() => add()}
+                  onClick={add}
                   style={{ width: '90%' }}
                   icon={<PlusOutlined />}
                 >
