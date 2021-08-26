@@ -57,11 +57,6 @@ class FileSystemFileServiceTest : FileServiceTest() {
 
     Assert.assertTrue(fileService.containsFile(collectionId, "/foo.txt"))
     Assert.assertTrue(fileService.containsFile(collectionId, "/bar.txt"))
-
-    Assert.assertThrows(IllegalArgumentException::class.java) {
-      // /etc does not exist
-      fileService.createFiles(collectionId, setOf("foo/../../../../../etc/passwd"))
-    }
   }
 
   @Test
