@@ -36,7 +36,7 @@ if __name__ == "__main__":
 == Writing tests
 Which form of testing you choose for your tasks heavily depends on the tasks requirements. If students have to work on algorithms you should use some form of unit or functional testing. If they create a simple I/O application you can use a library that tests input and output.
 
-In this example we will use https://pytest.org[pytest], a testing framework for Python. It is important that your testing framework supports jUnit XML output so Code FREAK is able to parse the results.
+In this example we will use https://pytest.org[pytest], a testing framework for Python. It is important that your testing framework supports JUnit XML output so Code FREAK is able to parse the results.
 
 Alongside the `main.py` file we will create a `main_test.py` file that will contain some assertions to verify the `add` function.
 

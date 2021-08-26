@@ -167,7 +167,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
 
   /**
    * This method will be called in case no matching files to parse have been found.
-   * This could either be good or bad: E.g. in case no jUnit test reports have been found when using Java
+   * This could either be good or bad: E.g. in case no JUnit test reports have been found when using Java
    * this means compilation failed. In this cases the stdout gives more information about what went wrong.
    */
   fun handleNoFilesFound(evaluationResult: EvaluationResult): List<Feedback> {

@@ -84,7 +84,7 @@ The name in braces after the parser name is the key/id of the parser which can b
 The default report parser does not do any actual parsing but creates a single feedback entry which contains the output of the report file (or console).
 This can be useful if you are creating a new task and just finished your evaluation script to view the output of your script.
 
-==== [[report-parsers-junit-xml]] jUnit XML Parser (`junit-xml`)
+==== [[report-parsers-junit-xml]] JUnit XML Parser (`junit-xml`)
 Because each testcase can only be successful or failing the rules how we convert them to Feedback are quite simple:
 
 * Each `<testcase>` will result in a single Feedback entry.
@@ -95,7 +95,7 @@ Because each testcase can only be successful or failing the rules how we convert
 
 The body of the feedback will either be taken from the `message` attribute if present or the body of the `<failure|error>` tag.
 
-.Example jUnit XML report
+.Example JUnit XML report
 [source,xml]
 ----
 <testsuites>
