@@ -43,9 +43,7 @@ const EditStringArrayModal: React.FC<EditStringArrayModalProps> = props => {
           <Col span="12" style={{ textAlign: 'left' }}>
             <Popconfirm
               title="Really undo changes?"
-              onConfirm={() => {
-                form.resetFields()
-              }}
+              onConfirm={() => form.resetFields()}
               placement="left"
             >
               <Button danger>Reset</Button>
