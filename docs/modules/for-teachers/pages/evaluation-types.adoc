@@ -1,3 +1,3 @@
-= Types of Evaluation _Evaluation Runners_)
+= Types of Evaluation (_Evaluation Runners_)
 
-WARNING: Since Code FREAK v7 we have replaced "Evaluation Runners" with a more flexible script-based approach. Please head over the xref:for-teachers:evaluation.adoc[Evaluation page] to get more information.
+WARNING: In Code FREAK v7 we have replaced "Evaluation Runners" with a more flexible script-based approach. Please head over the xref:for-teachers:evaluation.adoc[Evaluation] page to get more information.

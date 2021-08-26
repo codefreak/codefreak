@@ -76,11 +76,15 @@ Luckily, many tools share common reporting formats.
 To parse all different formats into Code FREAK's internal Feedback model we use something called "report parsers". Each parser tries to read one or multiple report files generated during evaluation and convert it into a list of Feedback.
 Below is a list of currently supported report parsers.
 
-=== [[report-parsers-default]] Default Parser (`default`)
+=== [[supported-report-parsers]] Supported Report Parsers
+The list below contains a list of all supported report parsers and how they interpret files/output.
+The name in braces after the parser name is the key/id of the parser which can be used in the evaluation step definition: _Name of the Parser_ (`key`)
+
+==== [[report-parsers-default]] Default Parser (`default`)
 The default report parser does not do any actual parsing but creates a single feedback entry which contains the output of the report file (or console).
 This can be useful if you are creating a new task and just finished your evaluation script to view the output of your script.
 
-=== [[report-parsers-junit-xml]] jUnit XML Parser (`junit-xml`)
+==== [[report-parsers-junit-xml]] jUnit XML Parser (`junit-xml`)
 Because each testcase can only be successful or failing the rules how we convert them to Feedback are quite simple:
 
 * Each `<testcase>` will result in a single Feedback entry.
@@ -109,7 +113,7 @@ main_test.py:8: AssertionError</failure>
 </testsuites>
 ----
 
-=== [[report-parsers-checkstyle-xml]] Checkstyle XML Parser (`checkstyle-xml`)
+==== [[report-parsers-checkstyle-xml]] Checkstyle XML Parser (`checkstyle-xml`)
 
 * Each `<error>` entry will result in a single Feedback entry.
 * The `message` attribute will be taken as feedback summary
@@ -137,7 +141,7 @@ main_test.py:8: AssertionError</failure>
 </checkstyle>
 ----
 
-=== [[report-parsers-pylint-json]] Pylint JSON Parser (`pylint-json`)
+==== [[report-parsers-pylint-json]] Pylint JSON Parser (`pylint-json`)
 
 * Each array-object will result in a single Feedback entry.
 * The summary will be read from the `message` attribute
@@ -172,7 +176,7 @@ main_test.py:8: AssertionError</failure>
 ]
 ----
 
-=== [[report-parsers-visualstudio]] Visual Studio Parser (`visualstudio`)
+==== [[report-parsers-visualstudio]] Visual Studio Parser (`visualstudio`)
 
 * Each line will result in a single Feedback entity (if it matches the expected pattern; all other lines will be ignored silently)
 * If the type is "warning" the severity will be "minor", otherwise "major"

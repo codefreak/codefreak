@@ -74,8 +74,8 @@ A task is defined by a directory (or packaged archive) containing source code fi
 |Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation.
 
 |evaluation
-|[<<evaluation,Evaluation Step Object>>]
-|List of automatic evaluation steps.
+|Map[string, <<evaluation,Evaluation Step Object>>]
+|Map of key to an evaluation step object. They key acts as unique identifier for the evaluation step within this task.
 |===
 
 TIP: File patterns use the Ant pattern syntax. For more information refer to the https://ant.apache.org/manual/dirtasks.html#patterns"[official documentation].
@@ -92,131 +92,43 @@ protected:
   - build.gradle
   - settings.gradle
 evaluation:
-  - step: codeclimate
-  - step: junit
+  my-step:
+    title: My first check
+    script: |
+      echo "Hello World"
+    report:
+      format: default
 ----
 
 [[evaluation]]
 == Evaluation
 
-Automatic evaluation consists one or more steps. Each step is implemented by a so-called runner.
-Runners take the student submissions and execute e.g. static code analysis. They then collect the results to give feedback to the student and support the teacher's grading. The same runner can be used in multiple steps (usually with different configuration). An evaluation step is defined as follows.
+Automatic evaluation consists one or more steps
+Each step consists of a script that evaluates the code and a report parser, that will parse the result into a list of feedback.
+An evaluation step is defined as follows.
 
 .Evaluation Step Object
 |===
 |Field Name |Type |Description
 
-|step
+|script
 |`string`
-|**REQUIRED.** The name of the runner. See below for supported ones.
+|**REQUIRED.** A (bash) script that will be executed for evaluation.
 
 |title
 |`string`
-|An optional human readable name for the evaluation step. Summarize briefly for your students what this evaluation step checks (e.g. "Test functions.py", "Class XYZ Tests", "Code Style", ...). The default title depends on the runner.
+|An optional human readable name for the evaluation step. Summarize briefly for your students what this evaluation step checks (e.g. "Test functions.py", "Class XYZ Tests", "Code Style", ...).
 
 |timeout
 |`integer`
 |An optional custom timeout in seconds after which the evaluation step will be canceled and marked as failed. There is a system-wide default timeout of 5min.
 
-|options
-|Map[`string`, ?]
-|Runner-specific configuration. See below for details.
-|===
-
-[[commandline]]
-=== Command Line Runner
-Name: `commandline`
-
-This is the most basic runner. It executes arbitrary commands and uses the output as feedback. The evaluation result is based on exit codes of the commands.
-
-[cols="1,1,3"]
-.Command Line Runner Options
-|===
-|Key |Type |Description
-
-|image
+|report.format
 |`string`
-|**REQUIRED.** The name of the Docker image in which the commands are run.
+|**REQUIRED.** The id/key of one evaluation report parser that will try to parse the result into a list of feedback. See xref:for-teachers:evaluation.adoc#report-parsers[Report Parsers] for a list of currently supported parsers.
 
-|project-path
+|report.path
 |`string`
-|**REQUIRED.** Absolute path of where the student submission is placed.
+|A path or matching-pattern for a file that will be read by the report parser. If a blank path is specified the console output will be passed to the report parser.
 
-|commands
-|[`string`]
-|List of commands that executed. Working directory is the `project-path`.
-
-|stop-on-fail
-|`boolean`
-|Whether to stop when the first command fails or always execute all commands. Default is `true`.
 |===
-
-.Example
-[source,yaml]
-----
-evaluation:
-  - step: commandline
-    options:
-      image: gradle
-      project-path: /home/gradle/project
-      commands:
-        - pwd
-        - gradle test
-        - ls build/test-results/test
-----
-
-[[codeclimate]]
-=== Code Climate Runner
-Name: `codeclimate`
-
-This runner performs static code analysis via https://github.com/codeclimate/codeclimate[Code Climate^]. It is configured by including a `.codeclimate.yml` in the task files. See https://docs.codeclimate.com/docs/advanced-configuration[official documentation^] for details.
-
-.Example
-[source,yaml]
-----
-evaluation:
-  - step: codeclimate
-----
-
-.Example .codeclimate.yml
-[source,yaml]
-----
-plugins:
-  sonar-java:
-    enabled: true
-----
-
-[[junit]]
-=== JUnit Runner
-Name: `junit`
-
-This runner executes unit tests in Java projects via https://junit.org[JUnit^]. It is pre-configured to work with standard https://gradle.org/[Gradle^] projects.
-
-[cols="1,1,3"]
-.JUnit Runner Options
-|===
-|Key |Type |Description
-
-|image
-|`string`
-|Inherited from <<commandline,Command Line Runner>>. Default is `gradle`.
-
-|project-path
-|`string`
-|Inherited from <<commandline,Command Line Runner>>. Default is `/home/gradle/project`.
-
-|commands
-|[`string`]
-|Inherited from <<commandline,Command Line Runner>>. Default is `["gradle testClasses", "gradle test"]`.
-
-|stop-on-fail
-|`boolean`
-|Inherited from <<commandline,Command Line Runner>>. Default is `true`.
-|===
-
-.Example
-[source,yaml]
-----
-evaluation:
-  - step: junit
-----
