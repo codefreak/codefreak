@@ -224,7 +224,9 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
       return script
     }
     // Otherwise, create a proper bash script based on the given input
-    return "#!/usr/bin/env bash\n$script"
+    // set -e            makes the script stop on a failing command
+    // set -o pipefail   makes the script stop on failing pipes
+    return "#!/usr/bin/env bash\n\nset -eo pipefail\n$script"
   }
 
   /**
