@@ -10,6 +10,7 @@ import com.spotify.docker.client.exceptions.ContainerNotFoundException
 import com.spotify.docker.client.exceptions.ImageNotFoundException
 import com.spotify.docker.client.messages.Container
 import com.spotify.docker.client.messages.ContainerInfo
+import java.io.FilterInputStream
 import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.locks.ReentrantLock
@@ -122,15 +123,20 @@ class ContainerService : BaseService() {
     return docker.listContainers(withLabel(LABEL_INSTANCE_ID, config.instanceId), *listContainerParams)
   }
 
-  fun archiveContainer(containerId: String, path: String, process: (InputStream) -> Unit) {
-    try {
-      docker.archiveContainer(containerId, path).use(process)
-    } catch (e: ProcessingException) {
-      // okay until this is fixed https://github.com/eclipse-ee4j/jersey/issues/3486
-      if (e.message != LocalizationMessages.MESSAGE_CONTENT_INPUT_STREAM_CLOSE_FAILED()) {
-        throw e
+  fun <T> archiveContainer(containerId: String, path: String, process: (InputStream) -> T): T {
+    val wrappedStream = object : FilterInputStream(docker.archiveContainer(containerId, path)) {
+      override fun close() {
+        try {
+          super.close()
+        } catch (e: ProcessingException) {
+          // okay until this is fixed https://github.com/eclipse-ee4j/jersey/issues/3486
+          if (e.message != LocalizationMessages.MESSAGE_CONTENT_INPUT_STREAM_CLOSE_FAILED()) {
+            throw e
+          }
+        }
       }
     }
+    return wrappedStream.use(process)
   }
 
   fun createContainer(

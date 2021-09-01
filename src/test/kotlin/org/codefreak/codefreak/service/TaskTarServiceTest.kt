@@ -1,21 +1,20 @@
 package org.codefreak.codefreak.service
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import org.codefreak.codefreak.entity.Answer
+import kotlin.random.Random
 import org.codefreak.codefreak.entity.EvaluationStepDefinition
-import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
-import org.codefreak.codefreak.service.evaluation.EvaluationRunner
-import org.codefreak.codefreak.service.evaluation.EvaluationRunnerService
 import org.codefreak.codefreak.service.file.FileService
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.jupiter.api.fail
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -33,9 +32,6 @@ class TaskTarServiceTest {
   private lateinit var mockTaskService: TaskService
 
   @Mock
-  private lateinit var mockRunnerService: EvaluationRunnerService
-
-  @Mock
   private lateinit var mockEvaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
 
   @Mock
@@ -47,14 +43,8 @@ class TaskTarServiceTest {
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
+    yamlMapper.registerKotlinModule()
     `when`(mockTaskService.saveTask(any())).thenAnswer { it.arguments[0] }
-
-    `when`(mockRunnerService.getEvaluationRunner(any())).thenAnswer {
-      object : EvaluationRunner {
-        override fun getName(): String { return it.arguments[0] as String }
-        override fun run(answer: Answer, options: Map<String, Any>) = listOf<Feedback>()
-      }
-    }
 
     `when`(mockEvaluationStepDefinitionRepository.save(any())).thenAnswer { it.arguments[0] }
     // circumvent impossible type inference with "Nothing" in Kotlin 1.4.30
@@ -67,66 +57,73 @@ class TaskTarServiceTest {
 
   @Test
   fun `EvaluationStepDefinitions keep positions on import`() {
-    task.evaluationStepDefinitions = createUnorderedEvaluationStepDefinitionSet(task).toMutableSet()
+    task.evaluationStepDefinitions = createUnorderedEvaluationStepDefinitions(task)
 
     val importedTask = exportAndReimportTask(task, user)
 
-    task.evaluationStepDefinitions.forEach {
-      val importedDefinition = findDefinition(it.title, importedTask.evaluationStepDefinitions)
+    task.evaluationStepDefinitions.values.forEach {
+      val importedDefinition = importedTask.evaluationStepDefinitions[it.key]
+          ?: fail("EvaluationStep does not exist after re-import")
       assertEquals(
-        "Step ${it.title} has an incorrect position",
-        it.position,
-        importedDefinition.position
+          "Step ${it.title} has an incorrect position",
+          it.position,
+          importedDefinition.position
       )
     }
   }
 
-  private fun createUnorderedEvaluationStepDefinitionSet(task: Task) = setOf(
-    EvaluationStepDefinition(task, "comments", 0, "Comments"),
-    EvaluationStepDefinition(task, "codeclimate", 1, "Code Quality 1"),
-    EvaluationStepDefinition(task, "junit", 5, "Unit tests 1"),
-    EvaluationStepDefinition(task, "codeclimate", 2, "Code Quality 2"),
-    EvaluationStepDefinition(task, "junit", 6, "Unit tests 2"),
-    EvaluationStepDefinition(task, "codeclimate", 3, "Code Quality 3"),
-    EvaluationStepDefinition(task, "junit", 7, "Unit tests 3"),
-    EvaluationStepDefinition(task, "junit", 8, "Unit tests 4"),
-    EvaluationStepDefinition(task, "codeclimate", 4, "Code Quality 4")
-  )
+  @Test
+  fun `EvaluationStepDefinitions keep (in-)active status`() {
+    task.evaluationStepDefinitions = createEvaluationStepDefinitionsWithInactiveSteps(task)
+
+    val importedTask = exportAndReimportTask(task, user)
+
+    task.evaluationStepDefinitions.values.forEach {
+      val importedDefinition = importedTask.evaluationStepDefinitions[it.key]
+          ?: fail("EvaluationStep does not exist after re-import")
+      assertEquals(
+          "Step ${it.title} has an incorrect active state",
+          it.active,
+          importedDefinition.active
+      )
+    }
+  }
+
+  private fun createEvaluationStepDefinitionsWithInactiveSteps(task: Task): MutableMap<String, EvaluationStepDefinition> {
+    val definitions = createUnorderedEvaluationStepDefinitions(task)
+
+    definitions.values.first().active = false
+    definitions.values.last().active = false
+
+    return definitions
+  }
+
+  private fun createStepDefinition(task: Task, position: Int): EvaluationStepDefinition {
+    return EvaluationStepDefinition(
+        "step-${position + 1}",
+        task,
+        position,
+        "Step ${position + 1}",
+        "echo 'Step $position'",
+        EvaluationStepDefinition.EvaluationStepReportDefinition(
+            "junit-xml",
+            "report.xml"
+        )
+    )
+  }
+
+  /**
+   * Create a random list of integers
+   */
+  private fun createUnorderedEvaluationStepDefinitions(task: Task) = (0..8).shuffled(Random(1337)).map { position ->
+    createStepDefinition(
+        task,
+        position
+    )
+  }.associateBy { it.key }.toMutableMap()
 
   private fun exportAndReimportTask(task: Task, user: User): Task {
     val exportedTar = taskTarService.getExportTar(task)
     return taskTarService.createFromTar(exportedTar, user)
-  }
-
-  private fun findDefinition(title: String, definitions: Set<EvaluationStepDefinition>): EvaluationStepDefinition =
-    definitions.find { it.title == title } ?: throw IllegalStateException("Definition $title does not exist")
-
-  @Test
-  fun `EvaluationStepDefinitions keep (in-)active status`() {
-    task.evaluationStepDefinitions = createEvaluationStepDefinitionSetWithInactiveSteps(task).toMutableSet()
-
-    val importedTask = exportAndReimportTask(task, user)
-
-    task.evaluationStepDefinitions.forEach {
-      val importedDefinition = findDefinition(it.title, importedTask.evaluationStepDefinitions)
-      assertEquals(
-        "Step ${it.title} has an incorrect active state",
-        it.active,
-        importedDefinition.active
-      )
-    }
-  }
-
-  private fun createEvaluationStepDefinitionSetWithInactiveSteps(task: Task): Set<EvaluationStepDefinition> {
-    val definitions = setOf(
-      EvaluationStepDefinition(task, "comments", 0, "Comments"),
-      EvaluationStepDefinition(task, "codeclimate", 1, "Code Quality 1"),
-      EvaluationStepDefinition(task, "junit", 2, "Unit tests 1")
-    )
-
-    definitions.first().active = false
-    definitions.last().active = false
-
-    return definitions
   }
 }

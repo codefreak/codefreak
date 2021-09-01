@@ -161,12 +161,9 @@ class AppConfiguration {
     var maxConcurrentExecutions = Runtime.getRuntime().availableProcessors()
     var maxQueueSize = 1000
     var defaultTimeout = 5L * 60L
-
-    val codeclimate = Codeclimate()
-
-    class Codeclimate {
-      var image = "cfreak/codeclimate"
-    }
+    // Use IDE image also for evaluation until cloud workspaces have been implemented
+    var defaultImage = "cfreak/ide:1"
+    var imageWorkdir = "/home/runner/project"
   }
 
   class GitImport {

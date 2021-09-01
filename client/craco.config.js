@@ -34,10 +34,7 @@ module.exports = {
     { plugin: CracoAntDesignPlugin },
     { plugin: CracoYamlPlugin },
     {
-      plugin: CracoSvgReactLoaderPlugin,
-      options: {
-        exclude: /bootstrap-less\/fonts/ // prevent svg fonts from being processed
-      }
+      plugin: CracoSvgReactLoaderPlugin
     },
     {
       plugin: CracoDefinePlugin,

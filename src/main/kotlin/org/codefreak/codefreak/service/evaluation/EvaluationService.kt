@@ -6,14 +6,9 @@ import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Evaluation
-import org.codefreak.codefreak.entity.EvaluationStepDefinition
-import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
-import org.codefreak.codefreak.entity.Feedback
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.EvaluationRepository
-import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
-import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException
@@ -21,10 +16,7 @@ import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionDeadlineReachedEvent
 import org.codefreak.codefreak.service.SubmissionService
-import org.codefreak.codefreak.service.TaskService
-import org.codefreak.codefreak.service.evaluation.runner.CommentRunner
 import org.codefreak.codefreak.service.file.FileService
-import org.codefreak.codefreak.util.PositionUtil
 import org.codefreak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,12 +40,6 @@ class EvaluationService : BaseService() {
   private lateinit var fileService: FileService
 
   @Autowired
-  private lateinit var taskRepository: TaskRepository
-
-  @Autowired
-  private lateinit var taskService: TaskService
-
-  @Autowired
   private lateinit var stepService: EvaluationStepService
 
   @Autowired
@@ -61,12 +47,6 @@ class EvaluationService : BaseService() {
 
   @Autowired
   private lateinit var eventPublisher: ApplicationEventPublisher
-
-  @Autowired
-  private lateinit var runnerService: EvaluationRunnerService
-
-  @Autowired
-  private lateinit var evaluationStepDefinitionRepository: EvaluationStepDefinitionRepository
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -119,7 +99,12 @@ class EvaluationService : BaseService() {
 
   fun getOrCreateEvaluationByDigest(answer: Answer, digest: ByteArray): Evaluation {
     return evaluationRepository.findFirstByAnswerIdAndFilesDigestOrderByCreatedAtDesc(answer.id, digest)
-        .map { if (it.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) createEvaluation(answer, digest) else it }
+        .map {
+          if (it.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) createEvaluation(
+              answer,
+              digest
+          ) else it
+        }
         .orElseGet { createEvaluation(answer, digest) }
   }
 
@@ -149,7 +134,7 @@ class EvaluationService : BaseService() {
         answer.task.evaluationSettingsChangedAt
     )
     // add all steps as "pending" to the evaluation
-    answer.task.evaluationStepDefinitions
+    answer.task.evaluationStepDefinitions.values
         .filter { it.active }
         .forEach { stepService.addStepToEvaluation(evaluation, it) }
     saveEvaluation(evaluation).also {
@@ -158,29 +143,6 @@ class EvaluationService : BaseService() {
   }
 
   fun saveEvaluation(evaluation: Evaluation) = evaluationRepository.save(evaluation)
-
-  @Transactional
-  fun addCommentFeedback(answer: Answer, digest: ByteArray, feedback: Feedback): Feedback {
-    // find out if evaluation has a comment step definition
-    val stepDefinition = answer.task.evaluationStepDefinitions.find { it.runnerName == CommentRunner.RUNNER_NAME }
-        ?: throw IllegalArgumentException("Task has no 'comments' evaluation step")
-    val evaluation = getOrCreateEvaluationByDigest(answer, digest)
-    val evaluationStep = evaluation.evaluationSteps.find { it.definition == stepDefinition }
-        ?: throw RuntimeException("Evaluation does not contain a 'comments' step")
-    evaluationStep.addFeedback(feedback)
-
-    // if there is any failed feedback the overall step result is "failed"
-    evaluationStep.result = when {
-      evaluationStep.feedback.any { it.isFailed } -> EvaluationStepResult.FAILED
-      else -> EvaluationStepResult.SUCCESS
-    }
-    saveEvaluation(evaluation)
-
-    // there is no real definition of "done" for comments, so we trigger a FINISHED event
-    // each time a new comment is added to this answer
-    stepService.updateEvaluationStepStatus(evaluationStep, EvaluationStepStatus.FINISHED)
-    return feedback
-  }
 
   fun isEvaluationUpToDate(answer: Answer): Boolean {
     // check if any evaluation has been run at all
@@ -225,48 +187,5 @@ class EvaluationService : BaseService() {
     }
     log.info("Automatically trigger evaluation for answers of ${event.assignmentId}")
     startAssignmentEvaluation(event.assignmentId)
-  }
-
-  fun findEvaluationStepDefinition(id: UUID): EvaluationStepDefinition = evaluationStepDefinitionRepository.findById(id)
-      .orElseThrow { EntityNotFoundException("Evaluation step definition not found") }
-
-  fun saveEvaluationStepDefinition(definition: EvaluationStepDefinition) = evaluationStepDefinitionRepository.save(definition)
-
-  @Transactional
-  fun setEvaluationStepDefinitionPosition(evaluationStepDefinition: EvaluationStepDefinition, newPosition: Long) {
-    val task = evaluationStepDefinition.task
-
-    PositionUtil.move(task.evaluationStepDefinitions, evaluationStepDefinition.position.toLong(), newPosition, { position.toLong() }, { position = it.toInt() })
-
-    evaluationStepDefinitionRepository.saveAll(task.evaluationStepDefinitions)
-    taskRepository.save(task)
-  }
-
-  @Transactional
-  fun deleteEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition) {
-    evaluationStepDefinition.task.run {
-      evaluationStepDefinitions.filter { it.position > evaluationStepDefinition.position }.forEach { it.position-- }
-      evaluationStepDefinitionRepository.saveAll(evaluationStepDefinitions)
-    }
-    evaluationStepDefinitionRepository.delete(evaluationStepDefinition)
-  }
-
-  @Transactional
-  fun updateEvaluationStepDefinition(evaluationStepDefinition: EvaluationStepDefinition, title: String?, active: Boolean?, timeout: Long?, options: Map<String, Any>?): EvaluationStepDefinition {
-    title?.let {
-      evaluationStepDefinition.title = it
-    }
-    active?.let {
-      evaluationStepDefinition.active = it
-    }
-    options?.let {
-      evaluationStepDefinition.options = it
-    }
-    evaluationStepDefinition.timeout = timeout
-    runnerService.validateRunnerOptions(evaluationStepDefinition)
-    saveEvaluationStepDefinition(evaluationStepDefinition)
-    taskService.invalidateLatestEvaluations(evaluationStepDefinition.task)
-
-    return evaluationStepDefinition
   }
 }

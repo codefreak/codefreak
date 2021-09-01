@@ -1,23 +1,30 @@
 package org.codefreak.codefreak.entity
 
-import javax.persistence.Column
+import javax.persistence.Embeddable
+import javax.persistence.Embedded
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
-import org.hibernate.annotations.ColumnDefault
+import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 import org.hibernate.annotations.Type
 
 @Entity
+@Table(
+    uniqueConstraints = [
+      // prevent duplicate keys on tasks
+      UniqueConstraint(columnNames = ["key", "task_id"])
+    ]
+)
 class EvaluationStepDefinition(
+  var key: String,
   @ManyToOne(optional = false)
   var task: Task,
-  var runnerName: String,
   var position: Int,
   var title: String,
-
-  @Type(type = "json")
-  @Column(length = 1024)
-  @ColumnDefault("'{}'")
-  var options: Map<String, Any> = mapOf()
+  @Type(type = "text")
+  var script: String,
+  @Embedded
+  var report: EvaluationStepReportDefinition
 ) : BaseEntity(), Comparable<EvaluationStepDefinition> {
   var active: Boolean = true
 
@@ -29,10 +36,16 @@ class EvaluationStepDefinition(
 
   override fun equals(other: Any?): Boolean {
     if (other is EvaluationStepDefinition) {
-      return other.id == id && other.runnerName == runnerName
+      return other.id == id && other.key == key
     }
     return super.equals(other)
   }
 
   override fun compareTo(other: EvaluationStepDefinition) = position - other.position
+
+  @Embeddable
+  class EvaluationStepReportDefinition(
+    var format: String,
+    var path: String
+  )
 }
