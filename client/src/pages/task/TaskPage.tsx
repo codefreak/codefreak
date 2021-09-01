@@ -53,7 +53,7 @@ import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
-import WorkspacePage from '../../components/WorkspacePage'
+import WorkspacePage from '../../components/workspace/WorkspacePage'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
