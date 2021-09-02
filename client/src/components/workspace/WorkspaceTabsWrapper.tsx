@@ -2,12 +2,13 @@ import { Tabs } from 'antd'
 import { extractRelativeFilePath, readFilePath } from '../../services/workspace'
 import useWorkspace from '../../hooks/useWorkspace'
 import EditorTabPanel from './EditorTabPanel'
-
-export const FIXED_FILE_NAME = 'main.py'
+import EmptyTabPanel from './EmptyTabPanel'
+import InstructionsTabPanel from './InstructionsTabPanel'
 
 export enum WorkspaceTabType {
   EDITOR,
-  EMPTY
+  EMPTY,
+  INSTRUCTIONS
 }
 
 const getTabTitle = (
@@ -28,31 +29,73 @@ const getTabTitle = (
       } else {
         throw new Error('tab is set to type EDITOR but no filePath was given')
       }
+    case WorkspaceTabType.INSTRUCTIONS:
+      return 'Instructions'
     default:
       return ''
   }
 }
 
-type WorkspaceTabsWrapperProps = {
-  baseUrl: string
+type WorkspaceTab = {
+  type: WorkspaceTabType
+  path?: string
 }
 
-const WorkspaceTabsWrapper = ({ baseUrl }: WorkspaceTabsWrapperProps) => {
+const renderTab =
+  (baseUrl: string, loading: boolean) =>
+  (tab: WorkspaceTab, index = 0) => {
+    const title = getTabTitle(
+      tab.type,
+      readFilePath(baseUrl, tab.path ?? ''),
+      loading
+    )
+
+    let content
+
+    switch (tab.type) {
+      case WorkspaceTabType.EDITOR:
+        content = <EditorTabPanel baseUrl={baseUrl} file={tab.path ?? ''} />
+        break
+      case WorkspaceTabType.INSTRUCTIONS:
+        content = <InstructionsTabPanel loading={loading} baseUrl={baseUrl} />
+        break
+      case WorkspaceTabType.EMPTY:
+      default:
+        content = <EmptyTabPanel loading={loading} />
+        break
+    }
+
+    return (
+      <Tabs.TabPane
+        tab={title}
+        key={`tab-${title}-${index}`}
+        style={{ height: '100%' }}
+      >
+        {content}
+      </Tabs.TabPane>
+    )
+  }
+
+type WorkspaceTabsWrapperProps = {
+  baseUrl: string
+  tabs: WorkspaceTab[]
+}
+
+const WorkspaceTabsWrapper = ({ baseUrl, tabs }: WorkspaceTabsWrapperProps) => {
   const { isWorkspaceAvailable } = useWorkspace(baseUrl)
 
-  const filePath = readFilePath(baseUrl, FIXED_FILE_NAME)
-  const title = getTabTitle(
-    WorkspaceTabType.EDITOR,
-    filePath,
-    !isWorkspaceAvailable
-  )
+  const renderTabImpl = renderTab(baseUrl, !isWorkspaceAvailable)
+
+  const renderedTabs =
+    tabs.length > 0
+      ? tabs.map(renderTabImpl)
+      : renderTabImpl({ type: WorkspaceTabType.EMPTY })
 
   return (
     <div className="workspace-tabs-wrapper">
       <Tabs hideAdd type="card" className="workspace-tabs">
-        <Tabs.TabPane tab={title} key={title} />
+        {renderedTabs}
       </Tabs>
-      <EditorTabPanel baseUrl={baseUrl} />
     </div>
   )
 }

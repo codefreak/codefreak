@@ -6,13 +6,13 @@ import { extractRelativeFilePath, readFilePath } from '../../services/workspace'
 import { debounce } from 'ts-debounce'
 import { editor } from 'monaco-editor'
 import { messageService } from '../../services/message'
-import { FIXED_FILE_NAME } from './WorkspaceTabsWrapper'
 
 type EditorTabPanelProps = {
   baseUrl: string
+  file: string
 }
 
-const EditorTabPanel = ({ baseUrl }: EditorTabPanelProps) => {
+const EditorTabPanel = ({ baseUrl, file }: EditorTabPanelProps) => {
   const { isWorkspaceAvailable, getFile, saveFile } = useWorkspace(baseUrl)
   const [isLoadingFile, setLoadingFile] = useState(false)
   const [fileContents, setFileContents] =
@@ -21,15 +21,15 @@ const EditorTabPanel = ({ baseUrl }: EditorTabPanelProps) => {
   useEffect(() => {
     // get initial file
     if (isWorkspaceAvailable && !isLoadingFile && fileContents === undefined) {
-      getFile(FIXED_FILE_NAME, true).then(value => {
+      getFile(file, true).then(value => {
         setFileContents(value)
         setLoadingFile(false)
       })
       setLoadingFile(true)
     }
-  }, [isWorkspaceAvailable, getFile, isLoadingFile, fileContents])
+  }, [isWorkspaceAvailable, getFile, isLoadingFile, fileContents, file])
 
-  const filePath = readFilePath(baseUrl, FIXED_FILE_NAME)
+  const filePath = readFilePath(baseUrl, file)
 
   const handleChange = debounce((contents?: string) => {
     // autosave

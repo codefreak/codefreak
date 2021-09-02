@@ -1,6 +1,16 @@
+.workspace-page {
+  height: 100%;
+}
+
 .workspace-tabs {
+  height: 100%;
+
   .ant-tabs-nav {
     margin-bottom: 0;
+  }
+
+  .ant-tabs-content, .ant-tabs-content-holder {
+    height: 100%;
   }
 }
 
@@ -12,10 +22,17 @@
 }
 
 .workspace-tab-panel {
+  height: 100%;
   display: flex;
   flex-grow: 1;
+  flex-direction: column;
   flex-basis: 0;
   border: #f0f0f0 1px solid;
+  background: white;
+
+  .with-padding {
+    padding: 16px;
+  }
 }
 
 .workspace-tab-panel-placeholder {
