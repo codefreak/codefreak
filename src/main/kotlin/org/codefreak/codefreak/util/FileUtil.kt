@@ -1,15 +1,20 @@
 package org.codefreak.codefreak.util
 
+import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
+import org.apache.commons.io.FilenameUtils
 
 object FileUtil {
 
   /**
    * Remove leading dots and slashes from given path and normalizes patterns like `foo/../bar`.
    */
-  fun sanitizeName(vararg name: String) = Paths.get("/", *name).normalize().toString().trim().trim('/')
+  fun sanitizeName(vararg name: String): String {
+    val concated = name.joinToString(File.separator).trim(File.separatorChar)
+    return FilenameUtils.normalize(concated)
+  }
 
   fun getFilePermissionsMode(permissions: Set<PosixFilePermission>): Int {
     return permissions.sumOf(FileUtil::getFilePermissionsMode)
