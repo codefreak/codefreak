@@ -1,14 +1,11 @@
-import ReactDOM from 'react-dom'
+import { render } from '@testing-library/react'
 import App from './App'
 import { MockedProvider } from '@apollo/client/testing'
 
 it('renders without crashing', () => {
-  const div = document.createElement('div')
-  ReactDOM.render(
+  render(
     <MockedProvider>
       <App />
-    </MockedProvider>,
-    div
+    </MockedProvider>
   )
-  ReactDOM.unmountComponentAtNode(div)
 })
