@@ -103,6 +103,11 @@
   "eslintConfig": {
     "extends": "react-app"
   },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!antd)/"
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",
