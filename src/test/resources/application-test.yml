@@ -1,4 +1,6 @@
 codefreak:
+  scheduling:
+    enable: false
   instanceId: test
   ide:
     idle-check-rate: 1000
