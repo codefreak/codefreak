@@ -81,7 +81,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
   private fun getFileRelativePath(collectionId: UUID, path: Path): Path {
     val collectionPath = getCollectionPath(collectionId)
-    val sanitizedPath = Paths.get("/", FileUtil.sanitizeName(path.toString()))
+    val sanitizedPath = Paths.get("/", FileUtil.sanitizePath(path.toString()))
     val relativePath = collectionPath.relativize(sanitizedPath).normalize().toString()
     // `Path::relativize` returns the path prefixed with the parent, which we don't want here
     return Paths.get("/", relativePath.replace("$collectionId/", ""))
@@ -99,7 +99,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
           // Extract the archive to a temporary location first so the current collection files are not lost if an error occurs whilst extraction
           TarArchiveInputStream(ByteArrayInputStream(toByteArray())).use { input ->
             input.entrySequence().forEach {
-              val tempPath = Paths.get(tempCollectionPath.toString(), FileUtil.sanitizeName(it.name))
+              val tempPath = Paths.get(tempCollectionPath.toString(), FileUtil.sanitizePath(it.name))
 
               if (!isBlacklistedPath(tempPath)) {
                 if (it.isFile) {
@@ -339,7 +339,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
    */
   private fun getCollectionFilePath(collectionId: UUID, vararg path: String): Path {
     // join collection path and the relative file path to an absolute path
-    return createCollectionPath(collectionId).resolve(FileUtil.sanitizeName(*path))
+    return createCollectionPath(collectionId).resolve(FileUtil.sanitizePath(*path))
   }
 
   /**

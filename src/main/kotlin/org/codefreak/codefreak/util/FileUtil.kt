@@ -9,11 +9,21 @@ import org.apache.commons.io.FilenameUtils
 object FileUtil {
 
   /**
-   * Remove leading dots and slashes from given path and normalizes patterns like `foo/../bar`.
+   * Remove leading dots and slashes from given path and normalizes patterns like `foo/../bar` to `bar`.
+   * The returned value has no leading or trailing path separator.
+   * Expected results are very similar to FilenameUtils.normalize, except the "no parent directory left" case:
+   * ../a will return a
+   * /a/../../b/c will return b/c
    */
-  fun sanitizeName(vararg name: String): String {
-    val concated = name.joinToString(File.separator).trim(File.separatorChar)
-    return FilenameUtils.normalize(concated)
+  fun sanitizePath(vararg name: String): String {
+    var concated = name.joinToString(File.separator)
+    // FilenameUtils.normalize returns null in case it has no parent directory left to work with
+    // so "/../foo" will return null. We trick this by prepending fake directories to the original path
+    // until we get a valid path from FilenameUtils.normalize.
+    while (FilenameUtils.normalize(concated) === null) {
+      concated = "a" + File.separatorChar + concated
+    }
+    return FilenameUtils.normalizeNoEndSeparator(concated).trimStart(File.separatorChar)
   }
 
   fun getFilePermissionsMode(permissions: Set<PosixFilePermission>): Int {
