@@ -19,11 +19,18 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
+import org.junit.jupiter.api.condition.DisabledOnOs
+import org.junit.jupiter.api.condition.OS
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ClassPathResource
 
+/**
+ * The Docker library has some issues on Windows so we skip
+ * these tests on this platform.
+ */
+@DisabledOnOs(OS.WINDOWS)
 internal class IdeServiceTest : SpringTest() {
 
   @MockBean
