@@ -21,6 +21,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.io.FileExistsException
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
 import org.apache.commons.io.file.PathUtils
 import org.codefreak.codefreak.config.AppConfiguration
@@ -139,7 +140,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   }
 
   private fun isBlacklistedPath(path: Path) = blacklistedPaths.any {
-    path.toString().split("/").contains(it)
+    path.toString().split(path.fileSystem.separator).contains(it)
   }
 
   override fun collectionExists(collectionId: UUID): Boolean {
@@ -160,14 +161,14 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
     return Files.walk(collectionPath)
       .filter { it != collectionPath && !isBlacklistedPath(it) && !it.isSymbolicLink() }
-      .map { filePathToFileMetaData(it, collectionPath) }
+      .map { filePathToFileMetaData(collectionId, it) }
       .asSequence()
   }
 
-  private fun filePathToFileMetaData(path: Path, basePath: Path): FileMetaData {
-    val relativizedPath = basePath.relativize(path).normalize()
+  private fun filePathToFileMetaData(collectionId: UUID, path: Path): FileMetaData {
+    val relativePath = getFileRelativePath(collectionId, path)
     return FileMetaData(
-      path = "/$relativizedPath",
+      path = "/${FilenameUtils.normalize(relativePath, true)}",
       lastModifiedDate = Files.getLastModifiedTime(path).toInstant(),
       type = when {
         Files.isDirectory(path) -> FileType.DIRECTORY
@@ -179,14 +180,11 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   }
 
   override fun listFiles(collectionId: UUID, path: String): Sequence<FileMetaData> {
-    val collectionPath = createCollectionPath(collectionId)
     val fileTreeBasePath = getCollectionFilePath(collectionId, path)
-
     require(Files.isDirectory(fileTreeBasePath)) { "`$path` does not exist" }
-
     return Files.walk(fileTreeBasePath, 1)
       .filter { it != fileTreeBasePath && !isBlacklistedPath(it) && !it.isSymbolicLink() }
-      .map { filePathToFileMetaData(it, collectionPath) }
+      .map { filePathToFileMetaData(collectionId, it) }
       .asSequence()
   }
 
