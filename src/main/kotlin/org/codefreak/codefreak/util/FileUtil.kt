@@ -65,7 +65,7 @@ object FileUtil {
       parents.add(currentParent)
       currentParent = getParentDir(currentParent)
     }
-    return parents
+    return parents.map(FilenameUtils::separatorsToSystem)
   }
 
   /**
@@ -73,8 +73,8 @@ object FileUtil {
    */
   fun getParentDir(path: String): String {
     return FilenameUtils.getFullPathNoEndSeparator(path)
-      .ifBlank { "/" }
-      .apply(FilenameUtils::separatorsToSystem)
+      .ifBlank { File.separator }
+      .run(FilenameUtils::separatorsToSystem)
   }
 
   /**

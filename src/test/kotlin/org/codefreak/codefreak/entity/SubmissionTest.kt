@@ -4,14 +4,14 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.junit.jupiter.MockitoExtension
 
-@RunWith(MockitoJUnitRunner::class)
+@ExtendWith(MockitoExtension::class)
 class SubmissionTest {
   @Mock
   lateinit var user: User
@@ -22,7 +22,7 @@ class SubmissionTest {
   @InjectMocks
   lateinit var submission: Submission
 
-  @Before
+  @BeforeEach
   fun init() {
     whenever(assignment.deadline).thenReturn(null)
     whenever(assignment.timeLimit).thenReturn(null)

@@ -76,12 +76,15 @@ dependencies {
   runtimeOnly 'org.springframework.boot:spring-boot-devtools'
   runtimeOnly 'org.postgresql:postgresql'
   runtimeOnly 'org.hsqldb:hsqldb'
-  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation('org.springframework.boot:spring-boot-starter-test') {
+    exclude group: 'org.junit.vintage'
+    exclude group: 'junit', module: 'junit'
+  }
   testImplementation 'org.springframework.batch:spring-batch-test'
   testImplementation 'org.springframework.security:spring-security-test'
   testImplementation 'org.hamcrest:hamcrest:2.2'
   testImplementation 'com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0'
-  testImplementation 'com.tngtech.archunit:archunit-junit4:0.20.1'
+  testImplementation 'com.tngtech.archunit:archunit-junit5:0.21.0'
 
   // workaround for https://github.com/spotify/docker-client/issues/1030
   implementation 'org.glassfish.jersey.inject:jersey-hk2:2.34'
@@ -157,6 +160,7 @@ springBoot {
 }
 
 test {
+  useJUnitPlatform()
   testLogging {
     events "failed"
     exceptionFormat "full"

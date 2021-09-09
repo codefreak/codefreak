@@ -2,7 +2,8 @@ package org.codefreak.codefreak.service.file
 
 import java.util.UUID
 import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 abstract class FileServiceTest {
   abstract var collectionId: UUID
@@ -11,8 +12,10 @@ abstract class FileServiceTest {
   @Test
   fun `lists all existing files and directories`() {
     fileService.createDirectories(collectionId, setOf("some/path", "some/other/path"))
-    fileService.createFiles(collectionId,
-      setOf("file1.txt", "file2.txt", "some/file3.txt", "some/path/file4.txt", "some/other/path/file5.txt"))
+    fileService.createFiles(
+      collectionId,
+      setOf("file1.txt", "file2.txt", "some/file3.txt", "some/path/file4.txt", "some/other/path/file5.txt")
+    )
 
     Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some" })
     Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path" })
@@ -63,9 +66,11 @@ abstract class FileServiceTest {
     Assert.assertNotNull(fileService.listFiles(collectionId, "/some").find { it.path == "/some/file2.txt" })
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `listing all files and directories in a path throws when the path does not exist`() {
-    fileService.listFiles(collectionId, "/some/path")
+    assertThrows<IllegalArgumentException> {
+      fileService.listFiles(collectionId, "/some/path")
+    }
   }
 
   @Test
@@ -82,26 +87,34 @@ abstract class FileServiceTest {
     Assert.assertTrue(fileService.containsFile(collectionId, "file3.txt"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `creating a file throws when the path already exists`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
-    fileService.createFiles(collectionId, setOf("file.txt")) // Throws because file already exists
+    assertThrows<IllegalArgumentException> {
+      fileService.createFiles(collectionId, setOf("file.txt")) // Throws because file already exists
+    }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `creating a file throws on empty path name`() {
-    fileService.createFiles(collectionId, setOf(""))
+    assertThrows<IllegalArgumentException> {
+      fileService.createFiles(collectionId, setOf(""))
+    }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `creating a file throws when path is a directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    fileService.createFiles(collectionId, setOf("some/path"))
+    assertThrows<IllegalArgumentException> {
+      fileService.createFiles(collectionId, setOf("some/path"))
+    }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `creating a file throws when the parent directory does not exist`() {
-    fileService.createFiles(collectionId, setOf("parent/file.txt"))
+    assertThrows<IllegalArgumentException> {
+      fileService.createFiles(collectionId, setOf("parent/file.txt"))
+    }
   }
 
   @Test
@@ -154,9 +167,11 @@ abstract class FileServiceTest {
     Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `creating a directory throws on empty path name`() {
-    fileService.createFiles(collectionId, setOf(""))
+    assertThrows<IllegalArgumentException> {
+      fileService.createFiles(collectionId, setOf(""))
+    }
   }
 
   @Test
@@ -235,9 +250,11 @@ abstract class FileServiceTest {
     Assert.assertFalse(fileService.containsFile(collectionId, "file2.txt"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `deleting a file throws when path does not exist`() {
-    fileService.deleteFiles(collectionId, setOf("file.txt"))
+    assertThrows<IllegalArgumentException> {
+      fileService.deleteFiles(collectionId, setOf("file.txt"))
+    }
   }
 
   @Test
@@ -357,20 +374,23 @@ abstract class FileServiceTest {
     return true
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `writing file contents throws for directories`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-
-    fileService.writeFile(collectionId, "some/path").use {
-      it.write(byteArrayOf(42))
+    assertThrows<IllegalArgumentException> {
+      fileService.writeFile(collectionId, "some/path").use {
+        it.write(byteArrayOf(42))
+      }
     }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `writing file contents throws when path is a directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    fileService.writeFile(collectionId, "some/path").use {
-      it.write(byteArrayOf(42))
+    assertThrows<IllegalArgumentException> {
+      fileService.writeFile(collectionId, "some/path").use {
+        it.write(byteArrayOf(42))
+      }
     }
   }
 
@@ -408,16 +428,20 @@ abstract class FileServiceTest {
     Assert.assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf()))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `reading file contents throws for directories`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
 
-    fileService.readFile(collectionId, "some/path")
+    assertThrows<IllegalArgumentException> {
+      fileService.readFile(collectionId, "some/path")
+    }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `reading file contents throws if path does not exist`() {
-    fileService.readFile(collectionId, "file.txt")
+    assertThrows<IllegalArgumentException> {
+      fileService.readFile(collectionId, "file.txt")
+    }
   }
 
   @Test
@@ -443,9 +467,11 @@ abstract class FileServiceTest {
     Assert.assertTrue(fileService.containsFile(collectionId, "some/path/file2.txt"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `moving a file throws when source path does not exist`() {
-    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    assertThrows<IllegalArgumentException> {
+      fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    }
   }
 
   @Test
@@ -463,19 +489,22 @@ abstract class FileServiceTest {
     Assert.assertFalse(fileService.containsFile(collectionId, "new/file1.txt"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `moving a file throws when target file path already exists`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.createFiles(collectionId, setOf("new.txt"))
-
-    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    assertThrows<IllegalArgumentException> {
+      fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `moving multiple files throws when target file path does not exist`() {
     fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
 
-    fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
+    assertThrows<IllegalArgumentException> {
+      fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
+    }
   }
 
   @Test
@@ -513,12 +542,13 @@ abstract class FileServiceTest {
     Assert.assertTrue(fileService.containsDirectory(collectionId, "new/other"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `moving a directory throws when source directory is moved to itself`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.createDirectories(collectionId, setOf("some/path/inner"))
-
-    fileService.moveFile(collectionId, setOf("some/path"), "some/path/inner")
+    assertThrows<IllegalArgumentException> {
+      fileService.moveFile(collectionId, setOf("some/path"), "some/path/inner")
+    }
   }
 
   @Test

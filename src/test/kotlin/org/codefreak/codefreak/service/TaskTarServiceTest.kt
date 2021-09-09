@@ -14,8 +14,8 @@ import org.codefreak.codefreak.service.evaluation.EvaluationRunner
 import org.codefreak.codefreak.service.evaluation.EvaluationRunnerService
 import org.codefreak.codefreak.service.file.FileService
 import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
@@ -44,7 +44,7 @@ class TaskTarServiceTest {
   @Spy
   internal lateinit var yamlMapper: YAMLMapper
 
-  @Before
+  @BeforeEach
   fun setUp() {
     MockitoAnnotations.openMocks(this)
     `when`(mockTaskService.saveTask(any())).thenAnswer { it.arguments[0] }

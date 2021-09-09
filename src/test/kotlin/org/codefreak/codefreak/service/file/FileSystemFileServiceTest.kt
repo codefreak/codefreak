@@ -3,17 +3,17 @@ package org.codefreak.codefreak.service.file
 import java.nio.file.Files
 import java.util.UUID
 import org.codefreak.codefreak.config.AppConfiguration
-import org.junit.After
 import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 
 class FileSystemFileServiceTest : FileServiceTest() {
   override var collectionId: UUID = UUID(0, 0)
   override lateinit var fileService: FileService
 
-  @Before
+  @BeforeEach
   fun init() {
     val config = Mockito.mock(AppConfiguration::class.java)
 
@@ -30,7 +30,7 @@ class FileSystemFileServiceTest : FileServiceTest() {
     fileService = FileSystemFileService(config)
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     // Cleanup created files
     fileService.deleteCollection(collectionId)

@@ -6,7 +6,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.empty
 import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class FileUtilTest {
   @Test

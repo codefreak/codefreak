@@ -14,14 +14,15 @@ import org.codefreak.codefreak.repository.SubmissionRepository
 import org.codefreak.codefreak.service.file.FileService
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.junit.jupiter.MockitoExtension
 
-@RunWith(MockitoJUnitRunner::class)
+@ExtendWith(MockitoExtension::class)
 class AssignmentAndSubmissionServiceTest {
   private val assignment = Assignment("Assignment 1", User("user"), null)
   private val user = User("user")
@@ -36,16 +37,22 @@ class AssignmentAndSubmissionServiceTest {
 
   @Mock
   lateinit var assignmentRepository: AssignmentRepository
+
   @Mock
   lateinit var submissionRepository: SubmissionRepository
+
   @Mock
   lateinit var answerRepository: AnswerRepository
+
   @Mock
   lateinit var answerService: AnswerService
+
   @Mock
   lateinit var fileService: FileService
+
   @InjectMocks
   val assignmentService = AssignmentService()
+
   @InjectMocks
   val submissionService = SubmissionService()
 
@@ -55,10 +62,12 @@ class AssignmentAndSubmissionServiceTest {
     assertThat(assignmentService.findAssignment(UUID(0, 0)), equalTo(assignment))
   }
 
-  @Test(expected = EntityNotFoundException::class)
+  @Test
   fun `findAssignment throws for no results`() {
     `when`(assignmentRepository.findById(any())).thenReturn(Optional.empty())
-    assignmentService.findAssignment(UUID(0, 0))
+    assertThrows<EntityNotFoundException> {
+      assignmentService.findAssignment(UUID(0, 0))
+    }
   }
 
   @Test
@@ -67,9 +76,11 @@ class AssignmentAndSubmissionServiceTest {
     assertThat(submissionService.findSubmission(UUID(0, 0)), equalTo(submission))
   }
 
-  @Test(expected = EntityNotFoundException::class)
+  @Test
   fun `findSubmission throws for no results`() {
     `when`(submissionRepository.findById(any())).thenReturn(Optional.empty())
-    submissionService.findSubmission(UUID(0, 0))
+    assertThrows<EntityNotFoundException> {
+      submissionService.findSubmission(UUID(0, 0))
+    }
   }
 }
