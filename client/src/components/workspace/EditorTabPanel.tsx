@@ -1,42 +1,39 @@
 import Editor, { Monaco } from '@monaco-editor/react'
 import TabPanel, { LoadingTabPanelPlaceholder } from './TabPanel'
-import useWorkspace from '../../hooks/useWorkspace'
-import { useEffect, useState } from 'react'
+import useWorkspace from '../../hooks/workspace/useWorkspace'
 import { extractRelativeFilePath, readFilePath } from '../../services/workspace'
 import { debounce } from 'ts-debounce'
 import { editor } from 'monaco-editor'
 import { messageService } from '../../services/message'
+import useGetWorkspaceFileQuery from '../../hooks/workspace/useGetWorkspaceFileQuery'
+import useSaveWorkspaceFileMutation from '../../hooks/workspace/useSaveWorkspaceFileMutation'
+import { useEffect, useState } from 'react'
 
 type EditorTabPanelProps = {
-  baseUrl: string
   file: string
 }
 
-const EditorTabPanel = ({ baseUrl, file }: EditorTabPanelProps) => {
-  const { isWorkspaceAvailable, getFile, saveFile } = useWorkspace(baseUrl)
-  const [isLoadingFile, setLoadingFile] = useState(false)
+const EditorTabPanel = ({ file }: EditorTabPanelProps) => {
+  const { isAvailable, baseUrl } = useWorkspace()
+  const { data, isLoading } = useGetWorkspaceFileQuery(file)
+  const { mutate: saveFile } = useSaveWorkspaceFileMutation()
+
   const [fileContents, setFileContents] =
     useState<string | undefined>(undefined)
 
   useEffect(() => {
-    // get initial file
-    if (isWorkspaceAvailable && !isLoadingFile && fileContents === undefined) {
-      getFile(file, true).then(value => {
-        setFileContents(value)
-        setLoadingFile(false)
-      })
-      setLoadingFile(true)
+    if (data && fileContents === undefined) {
+      setFileContents(data)
     }
-  }, [isWorkspaceAvailable, getFile, isLoadingFile, fileContents, file])
+  }, [data, fileContents])
 
   const filePath = readFilePath(baseUrl, file)
 
-  const handleChange = debounce((contents?: string) => {
+  const handleChange = debounce(async (contents?: string) => {
     // autosave
-    if (contents) {
+    if (contents !== undefined) {
       const path = extractRelativeFilePath(filePath)
-      saveFile(path, contents)
-      setFileContents(contents)
+      saveFile({ path, contents })
     }
   }, 250)
 
@@ -55,14 +52,14 @@ const EditorTabPanel = ({ baseUrl, file }: EditorTabPanelProps) => {
         if (model) {
           const path = extractRelativeFilePath(model.uri.path)
           const contents = model.getValue()
-          await saveFile(path, contents)
+          saveFile({ path, contents })
           messageService.success(`${path} saved`)
         }
       }
     })
   }
 
-  const loading = !isWorkspaceAvailable || isLoadingFile
+  const loading = !isAvailable || isLoading
 
   return (
     <TabPanel loading={loading}>

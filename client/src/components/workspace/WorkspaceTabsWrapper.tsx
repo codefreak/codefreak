@@ -1,6 +1,6 @@
 import { Tabs } from 'antd'
 import { extractRelativeFilePath, readFilePath } from '../../services/workspace'
-import useWorkspace from '../../hooks/useWorkspace'
+import useWorkspace from '../../hooks/workspace/useWorkspace'
 import EditorTabPanel from './EditorTabPanel'
 import EmptyTabPanel from './EmptyTabPanel'
 import InstructionsTabPanel from './InstructionsTabPanel'
@@ -54,10 +54,10 @@ const renderTab =
 
     switch (tab.type) {
       case WorkspaceTabType.EDITOR:
-        content = <EditorTabPanel baseUrl={baseUrl} file={tab.path ?? ''} />
+        content = <EditorTabPanel file={tab.path ?? ''} />
         break
       case WorkspaceTabType.INSTRUCTIONS:
-        content = <InstructionsTabPanel loading={loading} baseUrl={baseUrl} />
+        content = <InstructionsTabPanel loading={loading} />
         break
       case WorkspaceTabType.EMPTY:
       default:
@@ -77,14 +77,13 @@ const renderTab =
   }
 
 type WorkspaceTabsWrapperProps = {
-  baseUrl: string
   tabs: WorkspaceTab[]
 }
 
-const WorkspaceTabsWrapper = ({ baseUrl, tabs }: WorkspaceTabsWrapperProps) => {
-  const { isWorkspaceAvailable } = useWorkspace(baseUrl)
+const WorkspaceTabsWrapper = ({ tabs }: WorkspaceTabsWrapperProps) => {
+  const { isAvailable, baseUrl } = useWorkspace()
 
-  const renderTabImpl = renderTab(baseUrl, !isWorkspaceAvailable)
+  const renderTabImpl = renderTab(baseUrl, !isAvailable)
 
   const renderedTabs =
     tabs.length > 0

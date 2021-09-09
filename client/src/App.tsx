@@ -31,6 +31,7 @@ import { displayName } from './services/user'
 import { noop } from './services/util'
 import { HideNavigationProvider } from './hooks/useHideNavigation'
 import LoadingIndicator from './components/LoadingIndicator'
+import { QueryClient, QueryClientProvider } from 'react-query'
 
 interface AppProps {
   /**
@@ -90,31 +91,35 @@ const App: React.FC<AppProps> = props => {
   const routes: MenuDataItem[] = []
   flattenRoutes(routerConfig.routes || [], routes)
 
+  const queryClient = new QueryClient()
+
   return (
-    <ServerTimeOffsetProvider value={timeOffset}>
-      <AuthenticatedUserContext.Provider value={authenticatedUser}>
-        <Router>
-          <ScrollToHash />
-          <Switch>
-            <Route exact path="/">
-              <Redirect to="/assignments" />
-            </Route>
-            <Route path="/ide/:type/:id" component={IdePage} />
-            <Route path="/lti" component={LtiPage} />
-            <Route>
-              <HideNavigationProvider>
-                <DefaultLayout logout={logout}>
-                  <Switch>
-                    {routes.map(renderRoute)}
-                    <Route component={NotFoundPage} />
-                  </Switch>
-                </DefaultLayout>
-              </HideNavigationProvider>
-            </Route>
-          </Switch>
-        </Router>
-      </AuthenticatedUserContext.Provider>
-    </ServerTimeOffsetProvider>
+    <QueryClientProvider client={queryClient}>
+      <ServerTimeOffsetProvider value={timeOffset}>
+        <AuthenticatedUserContext.Provider value={authenticatedUser}>
+          <Router>
+            <ScrollToHash />
+            <Switch>
+              <Route exact path="/">
+                <Redirect to="/assignments" />
+              </Route>
+              <Route path="/ide/:type/:id" component={IdePage} />
+              <Route path="/lti" component={LtiPage} />
+              <Route>
+                <HideNavigationProvider>
+                  <DefaultLayout logout={logout}>
+                    <Switch>
+                      {routes.map(renderRoute)}
+                      <Route component={NotFoundPage} />
+                    </Switch>
+                  </DefaultLayout>
+                </HideNavigationProvider>
+              </Route>
+            </Switch>
+          </Router>
+        </AuthenticatedUserContext.Provider>
+      </ServerTimeOffsetProvider>
+    </QueryClientProvider>
   )
 }
 

@@ -2,7 +2,7 @@ import React from 'react'
 import { Card } from 'antd'
 
 export const LoadingTabPanelPlaceholder = () => (
-  <Card loading className="workspace-tab-panel" />
+  <Card loading className="workspace-tab-panel-placeholder" />
 )
 
 export interface TabPanelProps {

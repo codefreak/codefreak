@@ -1,14 +1,11 @@
-import { render } from '@testing-library/react'
+import { render } from '../../services/testing'
 import WorkspacePage from './WorkspacePage'
 import { FileContextType } from '../../services/codefreak-api'
-import { MockedProvider } from '@apollo/client/testing'
 
 describe('<WorkspacePage />', () => {
   it('renders <WorkspaceTabsWrapper /> two times', () => {
     const { container } = render(
-      <MockedProvider>
-        <WorkspacePage id="" type={FileContextType.Task} />
-      </MockedProvider>
+      <WorkspacePage id="" type={FileContextType.Answer} />
     )
 
     expect(

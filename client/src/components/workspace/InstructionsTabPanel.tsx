@@ -1,31 +1,17 @@
 import TabPanel from './TabPanel'
-import useWorkspace from '../../hooks/useWorkspace'
-import { useEffect, useState } from 'react'
 import { renderTaskInstructionsText } from '../../pages/task/TaskDetailsPage'
+import useGetWorkspaceFileQuery from '../../hooks/workspace/useGetWorkspaceFileQuery'
 
 type InstructionsTabPanelProps = {
   loading: boolean
-  baseUrl: string
 }
 
-const InstructionsTabPanel = ({
-  loading,
-  baseUrl
-}: InstructionsTabPanelProps) => {
-  // TODO reload automatically
-  const { getFile } = useWorkspace(baseUrl)
-  const [readme, setReadme] = useState<string | undefined>(undefined)
-
-  useEffect(() => {
-    if (!readme) {
-      getFile('/README.md')
-        .then(value => setReadme(value))
-        .catch(error => console.error(error))
-    }
-  }, [getFile, readme])
+const InstructionsTabPanel = ({ loading }: InstructionsTabPanelProps) => {
+  const { data: readme, isLoading: isLoadingFile } =
+    useGetWorkspaceFileQuery('/README.md')
 
   return (
-    <TabPanel withPadding loading={loading}>
+    <TabPanel withPadding loading={loading || isLoadingFile}>
       {renderTaskInstructionsText(readme)}
     </TabPanel>
   )

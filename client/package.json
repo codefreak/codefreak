@@ -71,6 +71,7 @@
     "react-jsonschema-form": "1.8.1",
     "react-markdown": "6.0.3",
     "react-mde": "11.5.0",
+    "react-query": "^3.23.0",
     "react-router-dom": "5.2.0",
     "react-scripts": "4.0.3",
     "react-sortable-hoc": "2.0.0",

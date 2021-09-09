@@ -1,11 +1,12 @@
 import {
   FileContextType,
   useStartWorkspaceMutation
-} from '../../generated/graphql'
+} from '../../services/codefreak-api'
 import './WorkspacePage.less'
 import WorkspaceTabsWrapper, { WorkspaceTabType } from './WorkspaceTabsWrapper'
 import { useEffect, useState } from 'react'
 import { Col, Row } from 'antd'
+import { WorkspaceContext } from '../../hooks/workspace/useWorkspace'
 
 export interface WorkspacePageProps {
   id: string
@@ -36,25 +37,23 @@ const WorkspacePage = ({ id, type }: WorkspacePageProps) => {
   }, [data, baseUrl])
 
   return (
-    <Row gutter={16} className="workspace-page">
-      <Col span={12}>
-        <WorkspaceTabsWrapper
-          baseUrl={baseUrl}
-          tabs={[
-            { type: WorkspaceTabType.EDITOR, path: 'main.py' },
-            { type: WorkspaceTabType.EDITOR, path: 'main.java' },
-            { type: WorkspaceTabType.EDITOR, path: 'test.js' },
-            { type: WorkspaceTabType.EDITOR, path: 'README.md' }
-          ]}
-        />
-      </Col>
-      <Col span={12}>
-        <WorkspaceTabsWrapper
-          baseUrl={baseUrl}
-          tabs={[{ type: WorkspaceTabType.INSTRUCTIONS }]}
-        />
-      </Col>
-    </Row>
+    <WorkspaceContext.Provider value={{ baseUrl }}>
+      <Row gutter={16} className="workspace-page">
+        <Col span={12}>
+          <WorkspaceTabsWrapper
+            tabs={[
+              { type: WorkspaceTabType.EDITOR, path: 'main.py' },
+              { type: WorkspaceTabType.EDITOR, path: 'README.md' }
+            ]}
+          />
+        </Col>
+        <Col span={12}>
+          <WorkspaceTabsWrapper
+            tabs={[{ type: WorkspaceTabType.INSTRUCTIONS }]}
+          />
+        </Col>
+      </Row>
+    </WorkspaceContext.Provider>
   )
 }
 
