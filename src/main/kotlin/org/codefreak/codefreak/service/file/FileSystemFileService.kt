@@ -2,6 +2,7 @@ package org.codefreak.codefreak.service.file
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -13,6 +14,7 @@ import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.UUID
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.isSymbolicLink
 import kotlin.streams.asSequence
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -59,7 +61,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     Files.walkFileTree(collectionPath, object : SimpleFileVisitor<Path>() {
       override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes?): FileVisitResult {
         dir?.let {
-          val path = getFileRelativePath(collectionId, it).toString()
+          val path = getFileRelativePath(collectionId, it)
           TarUtil.mkdir(path, tarOutput)
         }
         return FileVisitResult.CONTINUE
@@ -67,7 +69,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
       override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
         file?.let {
-          val path = getFileRelativePath(collectionId, it).toString()
+          val path = getFileRelativePath(collectionId, it)
           TarUtil.writeFileWithContent(path, Files.newInputStream(it), tarOutput)
         }
         return FileVisitResult.CONTINUE
@@ -79,12 +81,17 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     return ByteArrayInputStream(output.toByteArray())
   }
 
-  private fun getFileRelativePath(collectionId: UUID, path: Path): Path {
-    val collectionPath = getCollectionPath(collectionId)
-    val sanitizedPath = Paths.get("/", FileUtil.sanitizePath(path.toString()))
-    val relativePath = collectionPath.relativize(sanitizedPath).normalize().toString()
-    // `Path::relativize` returns the path prefixed with the parent, which we don't want here
-    return Paths.get("/", relativePath.replace("$collectionId/", ""))
+  /**
+   * Return the relative path of a file inside the specified collection.
+   * The returned path has no leading file separator.
+   */
+  private fun getFileRelativePath(collectionId: UUID, path: Path): String {
+    val fullPath = path.absolutePathString()
+    val collectionPath = getCollectionPath(collectionId).absolutePathString()
+    if (!fullPath.startsWith(collectionPath)) {
+      throw IllegalArgumentException("$fullPath is not a file of collection $collectionId")
+    }
+    return fullPath.removePrefix(collectionPath).trimStart(File.separatorChar)
   }
 
   override fun writeCollectionTar(collectionId: UUID): OutputStream {
@@ -167,7 +174,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
         else -> FileType.FILE
       },
       size = Files.size(path),
-      mode = FileUtil.getFilePermissionsMode(Files.getPosixFilePermissions(path))
+      mode = FileUtil.getFileMode(path)
     )
   }
 
@@ -277,7 +284,10 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
       require(Files.exists(sourcePath)) { "The source path `$it` does not exist" }
 
       val mappedTargetPath = getCollectionFilePath(collectionId, targetPath.toString(), it)
-      val shouldMovePath = !arePathsEqual(sourcePath, targetPath) && !arePathsEqual(sourcePath, mappedTargetPath) || Files.isDirectory(sourcePath)
+      val shouldMovePath =
+        !arePathsEqual(sourcePath, targetPath) && !arePathsEqual(sourcePath, mappedTargetPath) || Files.isDirectory(
+          sourcePath
+        )
 
       if (shouldMovePath) {
         Pair(it, sourcePath)

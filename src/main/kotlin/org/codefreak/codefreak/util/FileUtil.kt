@@ -1,6 +1,7 @@
 package org.codefreak.codefreak.util
 
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
@@ -26,11 +27,18 @@ object FileUtil {
     return FilenameUtils.normalizeNoEndSeparator(concated).trimStart(File.separatorChar)
   }
 
-  fun getFilePermissionsMode(permissions: Set<PosixFilePermission>): Int {
-    return permissions.sumOf(FileUtil::getFilePermissionsMode)
+  /**
+   * Return the UNIX file permissions of a file.
+   * In case we are not on a *NIX system this will return 0.
+   */
+  fun getFileMode(path: Path): Int {
+    if (!path.fileSystem.supportedFileAttributeViews().contains("posix")) {
+      return 0
+    }
+    return Files.getPosixFilePermissions(path).sumOf(FileUtil::getFilePermissionsMode)
   }
 
-  fun getFilePermissionsMode(permission: PosixFilePermission): Int {
+  private fun getFilePermissionsMode(permission: PosixFilePermission): Int {
     return when (permission) {
       PosixFilePermission.OWNER_READ -> 64
       PosixFilePermission.OWNER_WRITE -> 128
