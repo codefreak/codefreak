@@ -3,7 +3,6 @@ package org.codefreak.codefreak.util
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
 import org.apache.commons.io.FilenameUtils
 import org.springframework.util.AntPathMatcher
@@ -19,15 +18,15 @@ object FileUtil {
    * ../a will return a
    * /a/../../b/c will return b/c
    */
-  fun sanitizePath(vararg name: String, unixSeparator: Boolean = false): String {
+  fun sanitizePath(vararg name: String): String {
     var concated = name.joinToString(File.separator)
     // FilenameUtils.normalize returns null in case it has no parent directory left to work with
     // so "/../foo" will return null. We trick this by prepending fake directories to the original path
     // until we get a valid path from FilenameUtils.normalize.
-    while (FilenameUtils.normalize(concated, unixSeparator) === null) {
+    while (FilenameUtils.normalize(concated) === null) {
       concated = "a" + File.separatorChar + concated
     }
-    return FilenameUtils.normalizeNoEndSeparator(concated, unixSeparator).trimStart(File.separatorChar)
+    return FilenameUtils.normalizeNoEndSeparator(concated).trimStart(File.separatorChar)
   }
 
   /**
@@ -57,14 +56,14 @@ object FileUtil {
 
   /**
    * Return a set of ALL parent directories for a given path
-   * This will not include path itself and not the root path /
+   * This will not include path itself and not the root path
    */
-  fun getParentDirs(path: String): Set<String> {
+  fun getParentDirs(path: String): Collection<String> {
     val parents: MutableSet<String> = mutableSetOf()
-    var currentParent: Path? = Paths.get("/$path").parent
-    while (currentParent != null && currentParent.toString() != "/" && !parents.contains(currentParent.toString())) {
-      parents.add(currentParent.toString())
-      currentParent = currentParent.parent
+    var currentParent = getParentDir(path)
+    while (currentParent != FilenameUtils.getPrefix(currentParent) && !parents.contains(currentParent)) {
+      parents.add(currentParent)
+      currentParent = getParentDir(currentParent)
     }
     return parents
   }
@@ -73,10 +72,14 @@ object FileUtil {
    * Returns the parent directory for a given path or `/` if there is no parent directory.
    */
   fun getParentDir(path: String): String {
-    return Paths.get("/" + TarUtil.normalizeFileName(path)).parent?.toString() ?: "/"
+    return FilenameUtils.getFullPathNoEndSeparator(path).ifBlank { File.separator }
   }
 
+  /**
+   * Check if a path matches the given Ant pattern.
+   * This ignores the directory separator.
+   */
   fun matches(pattern: String, path: String): Boolean {
-    return matcher.match(pattern, sanitizePath(path, unixSeparator = true))
+    return matcher.match(pattern, FilenameUtils.separatorsToUnix(sanitizePath(path)))
   }
 }

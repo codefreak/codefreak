@@ -23,6 +23,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.compressors.CompressorException
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 import org.apache.commons.compress.utils.IOUtils
+import org.apache.commons.io.FilenameUtils
 import org.springframework.util.StreamUtils
 
 object TarUtil {
@@ -278,8 +279,10 @@ object TarUtil {
     createEntryInTar(name, outputStream, EntryType.FILE)
   }
 
-  fun normalizeFileName(name: String) = FileUtil.sanitizePath(name, unixSeparator = true).withoutTrailingSlash()
-  fun normalizeDirectoryName(name: String) = FileUtil.sanitizePath(name, unixSeparator = true).withTrailingSlash()
+  fun normalizeFileName(name: String) = FilenameUtils.separatorsToUnix(FileUtil.sanitizePath(name)).withoutTrailingSlash().trimStart('/')
+  fun normalizeDirectoryName(name: String) = FilenameUtils.separatorsToUnix(FileUtil.sanitizePath(name)).withTrailingSlash().trimStart('/')
+  fun getParentDir(name: String) = FilenameUtils.separatorsToUnix(FileUtil.getParentDir(name)).trimStart('/')
+  fun getParentDirs(name: String) = FileUtil.getParentDirs(name).map { FilenameUtils.separatorsToUnix(it).trimStart('/') }
 
   fun TarArchiveInputStream.entrySequence() = generateSequence { nextTarEntry }
 

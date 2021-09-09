@@ -4,16 +4,15 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.nio.file.Paths
 import java.util.UUID
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarConstants
 import org.apache.commons.compress.utils.IOUtils
+import org.apache.commons.io.FilenameUtils
 import org.codefreak.codefreak.entity.FileCollection
 import org.codefreak.codefreak.repository.FileCollectionRepository
 import org.codefreak.codefreak.service.EntityNotFoundException
-import org.codefreak.codefreak.util.FileUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.codefreak.codefreak.util.withoutTrailingSlash
@@ -67,9 +66,9 @@ class JpaFileService : FileService {
 
   override fun listFiles(collectionId: UUID, path: String): Sequence<FileMetaData> {
     requireDirectoryDoesExist(collectionId, path)
-    val parentPath = Paths.get("/" + TarUtil.normalizeFileName(path))
+    val parentPath = TarUtil.normalizeFileName(path)
     return walkFileTree(collectionId).filter {
-      Paths.get(it.path).parent == parentPath
+      TarUtil.getParentDir(it.path) == parentPath
     }
   }
 
@@ -90,7 +89,7 @@ class JpaFileService : FileService {
     val normalizedPaths = paths.map { path ->
       TarUtil.normalizeFileName(path).also {
         requireValidPath(it)
-        val parentDir = TarUtil.normalizeDirectoryName(FileUtil.getParentDir(path))
+        val parentDir = TarUtil.normalizeDirectoryName(TarUtil.getParentDir(path))
         requireDirectoryDoesExist(collectionId, parentDir)
         require(!containsPath(collectionId, it))
       }
@@ -152,7 +151,7 @@ class JpaFileService : FileService {
   override fun createDirectories(collectionId: UUID, paths: Set<String>) {
     val allDirs = paths.flatMap { path ->
       mutableSetOf<String>().also {
-        it.addAll(FileUtil.getParentDirs(path))
+        it.addAll(TarUtil.getParentDirs(path))
         it.add(path)
       }
     }
@@ -176,7 +175,7 @@ class JpaFileService : FileService {
 
   override fun deleteFiles(collectionId: UUID, paths: Set<String>) {
     val normalizedPaths = paths.map { path ->
-      requireValidPath(FileUtil.sanitizePath(path, unixSeparator = true))
+      requireValidPath(TarUtil.normalizeFileName(path))
       val fileExists = containsFile(collectionId, TarUtil.normalizeFileName(path))
       val directoryExists = containsDirectory(collectionId, TarUtil.normalizeDirectoryName(path))
       require(fileExists || directoryExists) { "`$path` does not exist" }
@@ -291,7 +290,8 @@ class JpaFileService : FileService {
     // prefix is now something like /hello/world/
     val targetPrefix = TarUtil.normalizeDirectoryName(target)
     val replaceMap: Map<String, String> = normalizedSources.flatMap { normalizedSource ->
-      val sourceBasename = Paths.get("/$normalizedSource").fileName.toString()
+      // .getName() returns an empty string if path ends with a slash!
+      val sourceBasename = FilenameUtils.getName(TarUtil.normalizeFileName(normalizedSource))
       if (normalizedSource.endsWith("/")) {
         if (targetPrefix.startsWith(normalizedSource)) {
           throw IllegalArgumentException("Cannot move '$normalizedSource' to a subdirectory of itself '$targetPrefix'")
