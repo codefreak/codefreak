@@ -176,7 +176,7 @@ class JpaFileService : FileService {
 
   override fun deleteFiles(collectionId: UUID, paths: Set<String>) {
     val normalizedPaths = paths.map { path ->
-      requireValidPath(FileUtil.sanitizePath(path))
+      requireValidPath(FileUtil.sanitizePath(path, unixSeparator = true))
       val fileExists = containsFile(collectionId, TarUtil.normalizeFileName(path))
       val directoryExists = containsDirectory(collectionId, TarUtil.normalizeDirectoryName(path))
       require(fileExists || directoryExists) { "`$path` does not exist" }

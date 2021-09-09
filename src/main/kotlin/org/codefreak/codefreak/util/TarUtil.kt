@@ -45,7 +45,7 @@ object TarUtil {
   }
 
   private fun addFileToTar(tar: TarArchiveOutputStream, file: File, name: String) {
-    val entry = TarArchiveEntry(file, FileUtil.sanitizePath(name))
+    val entry = TarArchiveEntry(file, normalizeFileName(name))
     // add the executable bit for user. Default mode is 0644
     // 0644 + 0100 = 0744
     if (file.isFile && file.canExecute()) {
@@ -71,7 +71,7 @@ object TarUtil {
     val tar = TarArchiveInputStream(`in`)
     val zip = ZipArchiveOutputStream(out)
     generateSequence { tar.nextTarEntry }.forEach { tarEntry ->
-      val zipEntry = ZipArchiveEntry(FileUtil.sanitizePath(tarEntry.name))
+      val zipEntry = ZipArchiveEntry(normalizeFileName(tarEntry.name))
       if (tarEntry.isFile) {
         zipEntry.size = tarEntry.size
         zip.putArchiveEntry(zipEntry)
@@ -90,7 +90,7 @@ object TarUtil {
     return out.toByteArray()
   }
 
-  fun isRoot(path: String) = FileUtil.sanitizePath(path).isBlank()
+  fun isRoot(path: String) = normalizeFileName(path).isBlank()
   fun isRoot(entry: TarArchiveEntry) = isRoot(entry.name)
 
   private fun createTarRootDirectory(outputStream: TarArchiveOutputStream) {
@@ -122,7 +122,7 @@ object TarUtil {
         // remove all dirs/files that are candidates for root b/c we created a root dir already
         .filter { !isRoot(it.name) }
         .forEach { archiveEntry ->
-          val tarEntry = TarArchiveEntry(FileUtil.sanitizePath(archiveEntry.name))
+          val tarEntry = TarArchiveEntry(normalizeFileName(archiveEntry.name))
           if (archiveEntry.isDirectory) {
             tar.putArchiveEntry(tarEntry)
           } else {
@@ -152,7 +152,7 @@ object TarUtil {
         .filter(filter)
         .forEach {
           if (prefix != null) {
-            it.name = "${FileUtil.sanitizePath(prefix).withTrailingSlash()}${FileUtil.sanitizePath(it.name)}"
+            it.name = "${normalizeFileName(prefix).withTrailingSlash()}${normalizeFileName(it.name)}"
           }
           copyEntry(from, to, it)
         }
@@ -174,7 +174,7 @@ object TarUtil {
     TarArchiveInputStream(`in`).let { tar ->
       generateSequence { tar.nextTarEntry }.forEach {
         possiblePaths.forEach { path ->
-          if (it.isFile && FileUtil.sanitizePath(it.name) == FileUtil.sanitizePath(path)) {
+          if (it.isFile && normalizeFileName(it.name) == normalizeFileName(path)) {
             return consumer(it, tar)
           }
         }
@@ -196,17 +196,17 @@ object TarUtil {
   }
 
   fun isCodefreakDefinition(entry: TarArchiveEntry): Boolean {
-    val normalizedName = FileUtil.sanitizePath(entry.name)
+    val normalizedName = normalizeFileName(entry.name)
     return normalizedName == CODEFREAK_DEFINITION_YML || normalizedName == CODEFREAK_DEFINITION_YAML
   }
 
   fun extractSubdirectory(`in`: InputStream, out: OutputStream, path: String) {
-    val prefix = FileUtil.sanitizePath(path).withTrailingSlash()
+    val prefix = normalizeFileName(path).withTrailingSlash()
     val extracted = PosixTarArchiveOutputStream(out)
     TarArchiveInputStream(`in`).let { tar ->
       generateSequence { tar.nextTarEntry }.forEach {
-        if (FileUtil.sanitizePath(it.name).startsWith(prefix)) {
-          it.name = FileUtil.sanitizePath(it.name).drop(prefix.length)
+        if (normalizeFileName(it.name).startsWith(prefix)) {
+          it.name = normalizeFileName(it.name).drop(prefix.length)
           copyEntry(tar, extracted, it)
         }
       }
@@ -278,8 +278,8 @@ object TarUtil {
     createEntryInTar(name, outputStream, EntryType.FILE)
   }
 
-  fun normalizeFileName(name: String) = FileUtil.sanitizePath(name).withoutTrailingSlash()
-  fun normalizeDirectoryName(name: String) = FileUtil.sanitizePath(name).withTrailingSlash()
+  fun normalizeFileName(name: String) = FileUtil.sanitizePath(name, unixSeparator = true).withoutTrailingSlash()
+  fun normalizeDirectoryName(name: String) = FileUtil.sanitizePath(name, unixSeparator = true).withTrailingSlash()
 
   fun TarArchiveInputStream.entrySequence() = generateSequence { nextTarEntry }
 

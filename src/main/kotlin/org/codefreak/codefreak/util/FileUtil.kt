@@ -6,8 +6,11 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission
 import org.apache.commons.io.FilenameUtils
+import org.springframework.util.AntPathMatcher
 
 object FileUtil {
+
+  private val matcher = AntPathMatcher()
 
   /**
    * Remove leading dots and slashes from given path and normalizes patterns like `foo/../bar` to `bar`.
@@ -16,15 +19,15 @@ object FileUtil {
    * ../a will return a
    * /a/../../b/c will return b/c
    */
-  fun sanitizePath(vararg name: String): String {
+  fun sanitizePath(vararg name: String, unixSeparator: Boolean = false): String {
     var concated = name.joinToString(File.separator)
     // FilenameUtils.normalize returns null in case it has no parent directory left to work with
     // so "/../foo" will return null. We trick this by prepending fake directories to the original path
     // until we get a valid path from FilenameUtils.normalize.
-    while (FilenameUtils.normalize(concated) === null) {
+    while (FilenameUtils.normalize(concated, unixSeparator) === null) {
       concated = "a" + File.separatorChar + concated
     }
-    return FilenameUtils.normalizeNoEndSeparator(concated).trimStart(File.separatorChar)
+    return FilenameUtils.normalizeNoEndSeparator(concated, unixSeparator).trimStart(File.separatorChar)
   }
 
   /**
@@ -71,5 +74,9 @@ object FileUtil {
    */
   fun getParentDir(path: String): String {
     return Paths.get("/" + TarUtil.normalizeFileName(path)).parent?.toString() ?: "/"
+  }
+
+  fun matches(pattern: String, path: String): Boolean {
+    return matcher.match(pattern, sanitizePath(path, unixSeparator = true))
   }
 }

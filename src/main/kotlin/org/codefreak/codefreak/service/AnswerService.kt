@@ -24,7 +24,6 @@ import org.codefreak.codefreak.util.afterClose
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.AntPathMatcher
 
 @Service
 class AnswerService : BaseService() {
@@ -109,19 +108,15 @@ class AnswerService : BaseService() {
   }
 
   private fun Task.isHidden(entry: TarArchiveEntry): Boolean {
-    val path = FileUtil.sanitizePath(entry.name)
-    val matcher = AntPathMatcher()
     hiddenFiles.plus("codefreak.yml").forEach {
-      if (matcher.match(it, path)) return true
+      if (FileUtil.matches(it, entry.name)) return true
     }
     return false
   }
 
   private fun Task.isProtected(entry: TarArchiveEntry): Boolean {
-    val path = FileUtil.sanitizePath(entry.name)
-    val matcher = AntPathMatcher()
     protectedFiles.forEach {
-      if (matcher.match(it, path)) return true
+      if (FileUtil.matches(it, entry.name)) return true
     }
     return false
   }
