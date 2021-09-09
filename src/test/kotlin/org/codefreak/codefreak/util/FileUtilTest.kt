@@ -35,21 +35,23 @@ class FileUtilTest {
 
   @Test
   fun `returns parent path`() {
+    assertThat(FileUtil.getParentDir(""), `is`(File.separator))
     assertThat(FileUtil.getParentDir("foo/bar"), `is`("foo"))
-    assertThat(FileUtil.getParentDir("foo"), `is`("/"))
-    assertThat(FileUtil.getParentDir("/foo/bar"), `is`("/foo"))
-    assertThat(FileUtil.getParentDir("/foo"), `is`("/"))
-    assertThat(FileUtil.getParentDir("\\foo\\bar"), `is`("/foo"))
-    assertThat(FileUtil.getParentDir("\\foo"), `is`("\\"))
+    assertThat(FileUtil.getParentDir("foo"), `is`(File.separator))
+    assertThat(FileUtil.getParentDir("/foo/bar"), `is`(File.separator + "foo"))
+    assertThat(FileUtil.getParentDir("/foo"), `is`(File.separator))
   }
 
   @Test
   fun `returns parent paths`() {
-    assertThat(FileUtil.getParentDirs("foo/bar/baz"), contains("foo/bar", "foo"))
+    assertThat(FileUtil.getParentDirs("foo/bar/baz"), contains("foo" + File.separator + "bar", "foo"))
     assertThat(FileUtil.getParentDirs("foo/bar"), contains("foo"))
     assertThat(FileUtil.getParentDirs("foo"), empty())
-    assertThat(FileUtil.getParentDirs("/foo/bar/baz"), contains("/foo/bar", "/foo"))
-    assertThat(FileUtil.getParentDirs("/foo/bar"), contains("/foo"))
+    assertThat(
+      FileUtil.getParentDirs("/foo/bar/baz"),
+      contains(File.separator + "foo" + File.separator + "bar", File.separator + "foo")
+    )
+    assertThat(FileUtil.getParentDirs("/foo/bar"), contains(File.separator + "foo"))
     assertThat(FileUtil.getParentDirs("/foo"), empty())
   }
 }

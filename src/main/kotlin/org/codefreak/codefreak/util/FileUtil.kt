@@ -72,7 +72,9 @@ object FileUtil {
    * Returns the parent directory for a given path or `/` if there is no parent directory.
    */
   fun getParentDir(path: String): String {
-    return FilenameUtils.getFullPathNoEndSeparator(path).ifBlank { File.separator }
+    return FilenameUtils.getFullPathNoEndSeparator(path)
+      .ifBlank { "/" }
+      .apply(FilenameUtils::separatorsToSystem)
   }
 
   /**
