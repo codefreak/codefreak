@@ -251,10 +251,8 @@ abstract class FileServiceTest {
   fun `deleting multiple files does not delete any file when one of the files does not exist`() {
     fileService.createFiles(collectionId, setOf("file1.txt"))
 
-    try {
+    Assertions.assertThrows(IllegalArgumentException::class.java) {
       fileService.deleteFiles(collectionId, setOf("file1.txt", "file2.txt"))
-      Assertions.fail() // An IllegalArgumentException should be thrown
-    } catch (e: IllegalArgumentException) {
     }
 
     Assertions.assertTrue(fileService.containsFile(collectionId, "file1.txt"))
@@ -469,10 +467,8 @@ abstract class FileServiceTest {
     fileService.createFiles(collectionId, setOf("file1.txt"))
     fileService.createDirectories(collectionId, setOf("new"))
 
-    try {
+    Assertions.assertThrows(IllegalArgumentException::class.java) {
       fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
-      Assertions.fail() // An IllegalArgumentException should be thrown
-    } catch (e: IllegalArgumentException) {
     }
 
     Assertions.assertTrue(fileService.containsFile(collectionId, "file1.txt"))
