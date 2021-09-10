@@ -3,7 +3,8 @@ package org.codefreak.codefreak.entity
 import com.nhaarman.mockitokotlin2.whenever
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -30,20 +31,20 @@ class SubmissionTest {
 
   @Test
   fun `no deadline if neither assignment has deadline nor submission has time limit`() {
-    Assertions.assertNull(submission.deadline)
+    assertNull(submission.deadline)
   }
 
   @Test
   fun `use assignment deadline if no time limit is set`() {
     val deadline = Instant.now()
     whenever(assignment.deadline).thenReturn(deadline)
-    Assertions.assertEquals(deadline, submission.deadline)
+    assertEquals(deadline, submission.deadline)
   }
 
   @Test
   fun `use time limit if assignment has no deadline`() {
     whenever(assignment.timeLimit).thenReturn(30L)
-    Assertions.assertEquals(
+    assertEquals(
         submission.createdAt.plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
         submission.deadline?.truncatedTo(ChronoUnit.SECONDS)
     )
@@ -55,7 +56,7 @@ class SubmissionTest {
     val deadline = submission.createdAt.plusSeconds(60)
     whenever(assignment.deadline).thenReturn(deadline)
     whenever(assignment.timeLimit).thenReturn(30L)
-    Assertions.assertEquals(
+    assertEquals(
         submission.createdAt.plusSeconds(30).truncatedTo(ChronoUnit.SECONDS),
         submission.deadline?.truncatedTo(ChronoUnit.SECONDS)
     )
@@ -67,6 +68,6 @@ class SubmissionTest {
     val deadline = Instant.now().plusSeconds(20)
     whenever(assignment.deadline).thenReturn(deadline)
     whenever(assignment.timeLimit).thenReturn(30L)
-    Assertions.assertEquals(deadline, submission.deadline)
+    assertEquals(deadline, submission.deadline)
   }
 }

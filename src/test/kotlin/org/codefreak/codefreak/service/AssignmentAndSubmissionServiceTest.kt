@@ -14,7 +14,7 @@ import org.codefreak.codefreak.repository.SubmissionRepository
 import org.codefreak.codefreak.service.file.FileService
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -65,7 +65,7 @@ class AssignmentAndSubmissionServiceTest {
   @Test
   fun `findAssignment throws for no results`() {
     `when`(assignmentRepository.findById(any())).thenReturn(Optional.empty())
-    Assertions.assertThrows(EntityNotFoundException::class.java) {
+    assertThrows(EntityNotFoundException::class.java) {
       assignmentService.findAssignment(UUID(0, 0))
     }
   }
@@ -79,7 +79,7 @@ class AssignmentAndSubmissionServiceTest {
   @Test
   fun `findSubmission throws for no results`() {
     `when`(submissionRepository.findById(any())).thenReturn(Optional.empty())
-    Assertions.assertThrows(EntityNotFoundException::class.java) {
+    assertThrows(EntityNotFoundException::class.java) {
       submissionService.findSubmission(UUID(0, 0))
     }
   }

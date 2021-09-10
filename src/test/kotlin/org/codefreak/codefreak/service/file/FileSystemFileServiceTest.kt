@@ -3,7 +3,8 @@ package org.codefreak.codefreak.service.file
 import java.util.UUID
 import org.codefreak.codefreak.config.AppConfiguration
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
@@ -35,13 +36,13 @@ class FileSystemFileServiceTest : FileServiceTest() {
 
   @Test
   fun `cannot read files outside of the collection`() {
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.readFile(collectionId, "/../foo.txt")
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.readFile(collectionId, "foo/../../bar.txt")
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.readFile(collectionId, "foo/../../../../../etc/passwd")
     }
   }
@@ -50,43 +51,43 @@ class FileSystemFileServiceTest : FileServiceTest() {
   fun `files trying to escape the collection path are still created inside the collection`() {
     fileService.createFiles(collectionId, setOf("/../foo.txt", "foo/../../bar.txt"))
 
-    Assertions.assertTrue(fileService.containsFile(collectionId, "/foo.txt"))
-    Assertions.assertTrue(fileService.containsFile(collectionId, "/bar.txt"))
+    assertTrue(fileService.containsFile(collectionId, "/foo.txt"))
+    assertTrue(fileService.containsFile(collectionId, "/bar.txt"))
   }
 
   @Test
   fun `directories trying to escape the collection path are still created inside the collection`() {
     fileService.createDirectories(collectionId, setOf("/../foo", "foo/../../bar", "foo/../../../../../etc/passwd"))
 
-    Assertions.assertTrue(fileService.containsDirectory(collectionId, "/foo"))
-    Assertions.assertTrue(fileService.containsDirectory(collectionId, "/bar"))
-    Assertions.assertTrue(fileService.containsDirectory(collectionId, "/etc/passwd"))
+    assertTrue(fileService.containsDirectory(collectionId, "/foo"))
+    assertTrue(fileService.containsDirectory(collectionId, "/bar"))
+    assertTrue(fileService.containsDirectory(collectionId, "/etc/passwd"))
   }
 
   @Test
   fun `cannot create blacklisted files and directories`() {
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.createFiles(collectionId, setOf(".git"))
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.createFiles(collectionId, setOf(".git/foo"))
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.createFiles(collectionId, setOf(".gitignore"))
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.createFiles(collectionId, setOf(".gitattributes"))
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.createDirectories(collectionId, setOf(".git"))
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.createDirectories(collectionId, setOf(".git/foo"))
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.createDirectories(collectionId, setOf(".gitignore"))
     }
-    Assertions.assertThrows(IllegalArgumentException::class.java) {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.createDirectories(collectionId, setOf(".gitattributes"))
     }
   }

@@ -2,7 +2,7 @@ package org.codefreak.codefreak.init
 
 import org.codefreak.codefreak.SpringTest
 import org.codefreak.codefreak.repository.AssignmentRepository
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
@@ -17,6 +17,6 @@ internal class SeedDatabaseTest : SpringTest() {
 
   @Test
   fun `seed database is executed in dev profile`() {
-    Assertions.assertTrue(assignmentRepository.findAll().count() > 0)
+    assertTrue(assignmentRepository.findAll().count() > 0)
   }
 }

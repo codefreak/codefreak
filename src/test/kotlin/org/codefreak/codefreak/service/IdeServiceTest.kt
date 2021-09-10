@@ -15,7 +15,7 @@ import org.hamcrest.Matchers.greaterThan
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -69,7 +69,7 @@ internal class IdeServiceTest : SpringTest() {
   fun `New IDE container is started`() {
     ideService.startIdeContainer(answer)
     val container = getIdeContainer(answer) // throws if container is not present
-    Assertions.assertTrue(docker.inspectContainer(container.id()).state().running())
+    assertTrue(docker.inspectContainer(container.id()).state().running())
   }
 
   @Test

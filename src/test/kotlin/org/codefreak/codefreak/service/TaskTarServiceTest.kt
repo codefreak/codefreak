@@ -11,7 +11,7 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.service.file.FileService
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
@@ -64,7 +64,7 @@ class TaskTarServiceTest {
     task.evaluationStepDefinitions.values.forEach {
       val importedDefinition = importedTask.evaluationStepDefinitions[it.key]
           ?: fail("EvaluationStep does not exist after re-import")
-      Assertions.assertEquals(
+      assertEquals(
           it.position,
           importedDefinition.position,
         "Step ${it.title} has an incorrect position"
@@ -81,7 +81,7 @@ class TaskTarServiceTest {
     task.evaluationStepDefinitions.values.forEach {
       val importedDefinition = importedTask.evaluationStepDefinitions[it.key]
           ?: fail("EvaluationStep does not exist after re-import")
-      Assertions.assertEquals(
+      assertEquals(
           it.active,
           importedDefinition.active,
         "Step ${it.title} has an incorrect active state"
