@@ -27,19 +27,7 @@ const renderFeedbackPanel: (props: FeedbackPanelProps) => React.ReactElement =
           status={feedback.status || undefined}
           severity={feedback.severity || undefined}
         />
-        <Markdown
-          allowedElements={[
-            'inlineCode',
-            'text',
-            'strong',
-            'delete',
-            'emphasis',
-            'link'
-          ]}
-          unwrapDisallowed
-        >
-          {feedback.summary}
-        </Markdown>
+        {feedback.summary}
       </>
     )
     let body = null

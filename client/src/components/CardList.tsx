@@ -2,6 +2,7 @@ import { DragOutlined } from '@ant-design/icons'
 import Card, { CardProps } from 'antd/lib/card'
 import arrayMove from 'array-move'
 import React, {
+  Key,
   memo,
   PropsWithChildren,
   ReactNode,
@@ -18,6 +19,7 @@ import './CardList.less'
 
 interface CardListProps<T> {
   items: T[]
+  itemKey?: (v: T) => Key
   renderItem: (value: T) => CardProps
   sortable?: boolean
   handlePositionChange?: (item: T, newPosition: number) => Promise<unknown>
@@ -45,7 +47,10 @@ function CardList<T>(props: React.PropsWithChildren<CardListProps<T>>) {
   const renderCard = (item: T, index: number) => {
     const { children: cardChildren, title, ...cardProps } = renderItem(item)
     return (
-      <li className="card-list-item" key={index}>
+      <li
+        className="card-list-item"
+        key={props.itemKey ? props.itemKey(item) : index}
+      >
         <Card
           title={
             sortable ? (
@@ -88,7 +93,7 @@ function CardList<T>(props: React.PropsWithChildren<CardListProps<T>>) {
     >
       {items.map((item, index) => (
         <SortableElement
-          key={index}
+          key={props.itemKey ? props.itemKey(item) : index}
           index={index}
           value={renderCard(item, index)}
         />

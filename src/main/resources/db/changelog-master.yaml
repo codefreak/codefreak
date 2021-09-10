@@ -65,3 +65,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20210726162015-migrate-filecollections-to-file-system.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20210814110410-evaluation-definition-refactor.yaml
+    relativeToChangelogFile: true

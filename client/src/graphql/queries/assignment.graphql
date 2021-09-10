@@ -66,7 +66,7 @@ query GetAssignmentWithSubmissions($id: ID!) {
       position
       evaluationStepDefinitions {
         position
-        runnerName
+        key
         title
       }
     }

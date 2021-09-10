@@ -111,10 +111,9 @@ abstract class FileServiceTest {
   }
 
   @Test
-  fun `creating a file throws when the parent directory does not exist`() {
-    assertThrows<IllegalArgumentException> {
-      fileService.createFiles(collectionId, setOf("parent/file.txt"))
-    }
+  fun `creating a file doesn't throw when the parent directory does not exist`() {
+    fileService.createFiles(collectionId, setOf("parent/file.txt"))
+    Assert.assertTrue(fileService.containsFile(collectionId, "parent/file.txt"))
   }
 
   @Test

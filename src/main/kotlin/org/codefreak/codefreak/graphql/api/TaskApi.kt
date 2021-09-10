@@ -23,8 +23,7 @@ import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.TaskTarService
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
-import org.codefreak.codefreak.util.TaskTemplate
-import org.codefreak.codefreak.util.TaskTemplateUtil
+import org.codefreak.templates.TaskTemplate
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -62,7 +61,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   }
 
   val evaluationStepDefinitions by lazy {
-    entity.evaluationStepDefinitions.sortedBy { it.position }.map { EvaluationStepDefinitionDto(it, ctx) }
+    entity.evaluationStepDefinitions.map { (_, definition) -> EvaluationStepDefinitionDto(definition, ctx) }
   }
 
   fun answer(userId: UUID?): AnswerDto? {
@@ -96,8 +95,20 @@ class TaskDetailsInput(var id: UUID = UUID.randomUUID()) {
   var ideArguments: String? = null
 }
 
+@GraphQLName("TaskTemplate")
+class TaskTemplateDto(taskTemplate: TaskTemplate) {
+  val name: String = taskTemplate.name
+  val title: String = taskTemplate.title
+  val description: String = taskTemplate.description
+}
+
 @Component
 class TaskQuery : BaseResolver(), Query {
+
+  @Secured(Authority.ROLE_TEACHER)
+  fun taskTemplates(): List<TaskTemplateDto> {
+    return TaskTemplate.values().map { TaskTemplateDto(it) }
+  }
 
   @Transactional
   @Secured(Authority.ROLE_STUDENT)
@@ -124,16 +135,17 @@ class TaskQuery : BaseResolver(), Query {
 class TaskMutation : BaseResolver(), Mutation {
 
   @Secured(Authority.ROLE_TEACHER)
-  fun createTask(template: TaskTemplate?): TaskDto = context {
-    if (template != null) {
-      val templateTar = TaskTemplateUtil.readTemplateTar(template)
-      serviceAccess.getService(TaskTarService::class).createFromTar(templateTar, authorization.currentUser)
-          .let { TaskDto(it, this) }
+  fun createTask(templateName: String?): TaskDto = context {
+    val taskService = serviceAccess.getService(TaskTarService::class)
+    val task = if (templateName != null) {
+      taskService.createFromTemplateName(templateName, authorization.currentUser)
     } else {
-      serviceAccess.getService(TaskTarService::class).createEmptyTask(authorization.currentUser).let { TaskDto(it, this) }
+      taskService.createEmptyTask(authorization.currentUser)
     }
+    TaskDto(task, this)
   }
 
+  @Secured(Authority.ROLE_TEACHER)
   fun deleteTask(id: UUID): Boolean = context {
     val task = serviceAccess.getService(TaskService::class).findTask(id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
@@ -145,7 +157,10 @@ class TaskMutation : BaseResolver(), Mutation {
   fun uploadTask(files: Array<ApplicationPart>): TaskDto = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
-      val task = serviceAccess.getService(TaskTarService::class).createFromTar(it.toByteArray(), authorization.currentUser)
+      val task = serviceAccess.getService(TaskTarService::class).createFromTar(
+          it.toByteArray(),
+          authorization.currentUser
+      )
       TaskDto(task, this)
     }
   }
@@ -178,7 +193,10 @@ class TaskMutation : BaseResolver(), Mutation {
   fun importTask(url: String): TaskDto = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
-      val task = serviceAccess.getService(TaskTarService::class).createFromTar(it.toByteArray(), authorization.currentUser)
+      val task = serviceAccess.getService(TaskTarService::class).createFromTar(
+          it.toByteArray(),
+          authorization.currentUser
+      )
       TaskDto(task, this)
     }
   }

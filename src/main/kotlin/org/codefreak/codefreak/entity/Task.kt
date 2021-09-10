@@ -5,6 +5,7 @@ import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
+import javax.persistence.MapKey
 import javax.persistence.OneToMany
 import javax.persistence.OrderBy
 import org.hibernate.annotations.ColumnDefault
@@ -69,12 +70,27 @@ class Task(
   @UpdateTimestamp
   var updatedAt: Instant = Instant.now()
 
-  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE])
+  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE], orphanRemoval = true)
   @OrderBy("position ASC")
-  var evaluationStepDefinitions: MutableSet<EvaluationStepDefinition> = sortedSetOf()
-    set(evaluationStepDefinitions) {
-      field = evaluationStepDefinitions.toSortedSet()
+  @MapKey(name = "key")
+  var evaluationStepDefinitions: MutableMap<String, EvaluationStepDefinition> = linkedMapOf()
+    set(value) {
+      field = value.values.sorted().associateBy { it.key }.toMutableMap()
     }
+
+  fun addEvaluationStepDefinition(stepDefinition: EvaluationStepDefinition) {
+    if (evaluationStepDefinitions.putIfAbsent(stepDefinition.key, stepDefinition) != null) {
+      throw IllegalStateException(
+          "There is already an evaluation step with the name of '${stepDefinition.key} defined on this task."
+      )
+    }
+  }
+
+  fun deleteEvaluationStepDefinition(stepDefinition: EvaluationStepDefinition) {
+    evaluationStepDefinitions.remove(stepDefinition.key)
+    // update position of all following elements
+    evaluationStepDefinitions.values.filter { it.position > stepDefinition.position }.onEach { it.position-- }
+  }
 
   var evaluationSettingsChangedAt: Instant = Instant.now()
 

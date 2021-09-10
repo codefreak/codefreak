@@ -72,12 +72,12 @@ class SubmissionService : BaseService() {
   fun generateSubmissionCsv(assignmentId: UUID): String {
     val assignment = assignmentService.findAssignment(assignmentId)
     // store a list of (task -> evaluation steps) that represents each column in our table
-    val columnDefinitions = assignment.tasks.flatMap { task -> task.evaluationStepDefinitions.map { Pair(task, it) } }
+    val columnDefinitions = assignment.tasks.flatMap { task -> task.evaluationStepDefinitions.map { Pair(task, it.value) } }
     // generate the header columns. In CSV files we have no option to join columns so we have to create a flat
     // list of task-evaluation combinations
     // [EMPTY] | Task #1 Eval #1 | Task #1 Eval #2 | Task #2 Eval #1 | ...
     val resultTitles = columnDefinitions.map { (task, evaluationStepDefinition) ->
-      "${task.title} (${evaluationStepDefinition.runnerName})"
+      "${task.title} (${evaluationStepDefinition.key})"
     }
     val titleCols = mutableListOf("User").apply {
       addAll(resultTitles)

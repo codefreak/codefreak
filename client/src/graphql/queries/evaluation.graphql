@@ -1,3 +1,10 @@
+query GetSupportedEvaluationReportFormats {
+  evaluationReportFormats {
+    key
+    title
+  }
+}
+
 query GetEvaluationOverview($answerId: ID!) {
   answer(id: $answerId) {
     id
@@ -58,20 +65,14 @@ query GetEvaluationStepDefinitions($taskId: ID!) {
     }
     evaluationStepDefinitions {
       id
-      runnerName
+      script
+      key
       position
       title
-      options
       active
       timeout
+      reportFormat
+      reportPath
     }
-  }
-  evaluationRunners {
-    name
-    defaultTitle
-    builtIn
-    optionsSchema
-    documentationUrl
-    stoppable
   }
 }

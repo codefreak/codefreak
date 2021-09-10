@@ -22,7 +22,7 @@ codefreak:
   files:
     adapter: file_system
     fileSystem:
-      collectionStoragePath: "/tmp/codefreak-test"
+      collectionStoragePath: "${java.io.tmpdir}/codefreak-test"
 
 graphql:
   servlet:

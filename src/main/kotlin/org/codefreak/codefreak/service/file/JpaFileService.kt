@@ -92,6 +92,10 @@ class JpaFileService : FileService {
         val parentDir = TarUtil.normalizeDirectoryName(TarUtil.getParentDir(path))
         requireDirectoryDoesExist(collectionId, parentDir)
         require(!containsPath(collectionId, it))
+
+        if (!containsPath(collectionId, parentDir)) {
+          createDirectories(collectionId, setOf(parentDir))
+        }
       }
     }
 

@@ -72,12 +72,15 @@ object TarUtil {
     val tar = TarArchiveInputStream(`in`)
     val zip = ZipArchiveOutputStream(out)
     generateSequence { tar.nextTarEntry }.forEach { tarEntry ->
-      val zipEntry = ZipArchiveEntry(normalizeFileName(tarEntry.name))
       if (tarEntry.isFile) {
+        val zipEntry = ZipArchiveEntry(normalizeFileName(tarEntry.name))
         zipEntry.size = tarEntry.size
         zip.putArchiveEntry(zipEntry)
         IOUtils.copy(tar, zip)
       } else {
+        // A ZipArchiveEntry is interpreted as a directory "if and only if it ends with a forward slash"
+        val nameWithTrailingSlash = normalizeDirectoryName(tarEntry.name)
+        val zipEntry = ZipArchiveEntry(nameWithTrailingSlash)
         zip.putArchiveEntry(zipEntry)
       }
       zip.closeArchiveEntry()
