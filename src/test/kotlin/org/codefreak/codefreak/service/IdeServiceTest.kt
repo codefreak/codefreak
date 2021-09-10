@@ -14,16 +14,23 @@ import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.greaterThan
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.not
-import org.junit.After
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.EnabledOnOs
+import org.junit.jupiter.api.condition.OS
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ClassPathResource
 
+/**
+ * The Docker library does only work properly on Linux.
+ * You should not run these tests on Windows or Mac with Docker Desktop.
+ */
+@EnabledOnOs(OS.LINUX)
 internal class IdeServiceTest : SpringTest() {
 
   @MockBean
@@ -42,14 +49,14 @@ internal class IdeServiceTest : SpringTest() {
     TarUtil.createTarFromDirectory(ClassPathResource("tasks/c-simple").file, it); it.toByteArray()
   }
 
-  @Before
+  @BeforeEach
   fun setupEntities() = super.seedDatabase()
 
-  @After
+  @AfterEach
   fun removeEntities() = super.clearDatabase()
 
-  @Before
-  @After
+  @BeforeEach
+  @AfterEach
   fun tearDown() {
     // delete all containers before and after each run
     getAllIdeContainers().parallelStream().forEach {
@@ -62,7 +69,7 @@ internal class IdeServiceTest : SpringTest() {
   fun `New IDE container is started`() {
     ideService.startIdeContainer(answer)
     val container = getIdeContainer(answer) // throws if container is not present
-    assertTrue(docker.inspectContainer(container.id()).state().running())
+    Assertions.assertTrue(docker.inspectContainer(container.id()).state().running())
   }
 
   @Test
@@ -110,7 +117,7 @@ internal class IdeServiceTest : SpringTest() {
   }
 
   @Test
-  @Ignore("Disabled until #138 is fixed")
+  @Disabled("Disabled until #138 is fixed")
   fun `idle containers are shut down automatically`() {
     ideService.startIdeContainer(answer)
     Thread.sleep(10000)

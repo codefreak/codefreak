@@ -1,11 +1,8 @@
 package org.codefreak.codefreak.entity
 
 import java.util.UUID
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
 internal class BaseEntityTest {
   companion object {
@@ -19,31 +16,31 @@ internal class BaseEntityTest {
 
   @Test
   fun `entity and null are not equal`() {
-    assertFalse(entity.equals(null))
+    Assertions.assertFalse(entity.equals(null))
   }
 
   @Test
   fun `entity and other object are not equal`() {
-    assertFalse(entity.equals("foo"))
+    Assertions.assertFalse(entity.equals("foo"))
   }
 
   @Test
   fun `entity and itself are equal`() {
-    assertTrue(entity.equals(entity))
-    assertEquals(entity.hashCode(), entity.hashCode())
+    Assertions.assertTrue(entity.equals(entity))
+    Assertions.assertEquals(entity.hashCode(), entity.hashCode())
   }
 
   @Test
   fun `entities with different id are not equal`() {
     val other = StubEntity(ID2)
-    assertFalse(entity.equals(other))
-    assertNotEquals(entity.hashCode(), other.hashCode())
+    Assertions.assertFalse(entity.equals(other))
+    Assertions.assertNotEquals(entity.hashCode(), other.hashCode())
   }
 
   @Test
   fun `entities with same id are equal`() {
     val other = StubEntity(ID1)
-    assertTrue(entity.equals(other))
-    assertEquals(entity.hashCode(), other.hashCode())
+    Assertions.assertTrue(entity.equals(other))
+    Assertions.assertEquals(entity.hashCode(), other.hashCode())
   }
 }

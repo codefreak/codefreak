@@ -1,7 +1,7 @@
 package org.codefreak.codefreak.util
 
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
 class FileUtilTest {
   @Test
@@ -22,7 +22,7 @@ class FileUtilTest {
       "../.." to "",
       ".././foo" to "foo"
     ).forEach {
-      Assert.assertEquals(it.value, FileUtil.sanitizeName(it.key))
+      Assertions.assertEquals(it.value, FileUtil.sanitizeName(it.key))
     }
   }
 }

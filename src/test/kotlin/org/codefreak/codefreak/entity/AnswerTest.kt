@@ -1,15 +1,14 @@
 package org.codefreak.codefreak.entity
 
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.junit.jupiter.MockitoExtension
 
-@RunWith(MockitoJUnitRunner::class)
+@ExtendWith(MockitoExtension::class)
 class AnswerTest {
   @Mock
   lateinit var assignment: Assignment
@@ -25,28 +24,28 @@ class AnswerTest {
 
   @Test
   fun `answer is editable by default`() {
-    assertTrue(answer.isEditable)
+    Assertions.assertTrue(answer.isEditable)
   }
 
   @Test
   fun `answer is editable by default if task has no assignment`() {
-    assertTrue(answer.isEditable)
+    Assertions.assertTrue(answer.isEditable)
   }
 
   @Test
   fun `answer is editable only if assignment is open`() {
     whenever(assignment.status).thenReturn(AssignmentStatus.OPEN)
     whenever(task.assignment).thenReturn(assignment)
-    assertTrue(answer.isEditable)
+    Assertions.assertTrue(answer.isEditable)
     whenever(assignment.status).thenReturn(AssignmentStatus.CLOSED)
-    assertFalse(answer.isEditable)
+    Assertions.assertFalse(answer.isEditable)
   }
 
   @Test
   fun `answer is not editable if deadline has been reached`() {
     whenever(submission.deadlineReached).thenReturn(true)
-    assertFalse(answer.isEditable)
+    Assertions.assertFalse(answer.isEditable)
     whenever(submission.deadlineReached).thenReturn(false)
-    assertTrue(answer.isEditable)
+    Assertions.assertTrue(answer.isEditable)
   }
 }

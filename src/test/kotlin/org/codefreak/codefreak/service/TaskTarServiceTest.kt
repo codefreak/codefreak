@@ -11,9 +11,9 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.EvaluationStepDefinitionRepository
 import org.codefreak.codefreak.service.file.FileService
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -40,7 +40,7 @@ class TaskTarServiceTest {
   @Spy
   internal lateinit var yamlMapper: YAMLMapper
 
-  @Before
+  @BeforeEach
   fun setUp() {
     MockitoAnnotations.openMocks(this)
     yamlMapper.registerKotlinModule()
@@ -64,10 +64,10 @@ class TaskTarServiceTest {
     task.evaluationStepDefinitions.values.forEach {
       val importedDefinition = importedTask.evaluationStepDefinitions[it.key]
           ?: fail("EvaluationStep does not exist after re-import")
-      assertEquals(
-          "Step ${it.title} has an incorrect position",
+      Assertions.assertEquals(
           it.position,
-          importedDefinition.position
+          importedDefinition.position,
+        "Step ${it.title} has an incorrect position"
       )
     }
   }
@@ -81,10 +81,10 @@ class TaskTarServiceTest {
     task.evaluationStepDefinitions.values.forEach {
       val importedDefinition = importedTask.evaluationStepDefinitions[it.key]
           ?: fail("EvaluationStep does not exist after re-import")
-      assertEquals(
-          "Step ${it.title} has an incorrect active state",
+      Assertions.assertEquals(
           it.active,
-          importedDefinition.active
+          importedDefinition.active,
+        "Step ${it.title} has an incorrect active state"
       )
     }
   }
