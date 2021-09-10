@@ -9,7 +9,7 @@ import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.notNullValue
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockPart
 

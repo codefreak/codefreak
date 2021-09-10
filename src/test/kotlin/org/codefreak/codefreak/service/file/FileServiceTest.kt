@@ -1,8 +1,12 @@
 package org.codefreak.codefreak.service.file
 
 import java.util.UUID
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 abstract class FileServiceTest {
   abstract var collectionId: UUID
@@ -11,23 +15,25 @@ abstract class FileServiceTest {
   @Test
   fun `lists all existing files and directories`() {
     fileService.createDirectories(collectionId, setOf("some/path", "some/other/path"))
-    fileService.createFiles(collectionId,
-      setOf("file1.txt", "file2.txt", "some/file3.txt", "some/path/file4.txt", "some/other/path/file5.txt"))
+    fileService.createFiles(
+      collectionId,
+      setOf("file1.txt", "file2.txt", "some/file3.txt", "some/path/file4.txt", "some/other/path/file5.txt")
+    )
 
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some" })
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path" })
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other" })
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other/path" })
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/file1.txt" })
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/file2.txt" })
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/file3.txt" })
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path/file4.txt" })
-    Assert.assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other/path/file5.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other/path" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/file1.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/file2.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/file3.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/path/file4.txt" })
+    assertNotNull(fileService.walkFileTree(collectionId).find { it.path == "/some/other/path/file5.txt" })
   }
 
   @Test
   fun `root dir does always exist with no files`() {
-    Assert.assertTrue(fileService.listFiles(collectionId, "/").count() == 0)
+    assertTrue(fileService.listFiles(collectionId, "/").count() == 0)
   }
 
   @Test
@@ -35,9 +41,9 @@ abstract class FileServiceTest {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
 
-    Assert.assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/some" })
-    Assert.assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file1.txt" })
-    Assert.assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file2.txt" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/some" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file1.txt" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file2.txt" })
   }
 
   @Test
@@ -45,11 +51,11 @@ abstract class FileServiceTest {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt", "some/file3.txt"))
 
-    Assert.assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/some" })
-    Assert.assertNull(fileService.listFiles(collectionId, "/").find { it.path == "/some/path" })
-    Assert.assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file1.txt" })
-    Assert.assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file2.txt" })
-    Assert.assertNull(fileService.listFiles(collectionId, "/").find { it.path == "/some/file3.txt" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/some" })
+    assertNull(fileService.listFiles(collectionId, "/").find { it.path == "/some/path" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file1.txt" })
+    assertNotNull(fileService.listFiles(collectionId, "/").find { it.path == "/file2.txt" })
+    assertNull(fileService.listFiles(collectionId, "/").find { it.path == "/some/file3.txt" })
   }
 
   @Test
@@ -57,46 +63,52 @@ abstract class FileServiceTest {
     fileService.createDirectories(collectionId, setOf("some/path", "other"))
     fileService.createFiles(collectionId, setOf("file1.txt", "some/file2.txt"))
 
-    Assert.assertNull(fileService.listFiles(collectionId, "/some").find { it.path == "/other" })
-    Assert.assertNull(fileService.listFiles(collectionId, "/some").find { it.path == "/file1.txt" })
-    Assert.assertNotNull(fileService.listFiles(collectionId, "/some").find { it.path == "/some/path" })
-    Assert.assertNotNull(fileService.listFiles(collectionId, "/some").find { it.path == "/some/file2.txt" })
+    assertNull(fileService.listFiles(collectionId, "/some").find { it.path == "/other" })
+    assertNull(fileService.listFiles(collectionId, "/some").find { it.path == "/file1.txt" })
+    assertNotNull(fileService.listFiles(collectionId, "/some").find { it.path == "/some/path" })
+    assertNotNull(fileService.listFiles(collectionId, "/some").find { it.path == "/some/file2.txt" })
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `listing all files and directories in a path throws when the path does not exist`() {
-    fileService.listFiles(collectionId, "/some/path")
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.listFiles(collectionId, "/some/path")
+    }
   }
 
   @Test
   fun `creates an empty file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
   }
 
   @Test
   fun `creates multiple files`() {
     fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt", "file3.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "file1.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "file2.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "file3.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file2.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file3.txt"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `creating a file throws on empty path name`() {
-    fileService.createFiles(collectionId, setOf(""))
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.createFiles(collectionId, setOf(""))
+    }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `creating a file throws when path is a directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    fileService.createFiles(collectionId, setOf("some/path"))
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.createFiles(collectionId, setOf("some/path"))
+    }
   }
 
   @Test
   fun `creating a file doesn't throw when the parent directory does not exist`() {
     fileService.createFiles(collectionId, setOf("parent/file.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "parent/file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "parent/file.txt"))
   }
 
   @Test
@@ -105,9 +117,9 @@ abstract class FileServiceTest {
     fileService.createDirectories(collectionId, setOf("aDirectory"))
     fileService.createFiles(collectionId, setOf("file.txt"))
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "file.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "other.txt"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "other.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
   }
 
   @Test
@@ -116,42 +128,44 @@ abstract class FileServiceTest {
     fileService.createDirectories(collectionId, setOf("aDirectory"))
     fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "file1.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "file2.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "other.txt"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file2.txt"))
+    assertTrue(fileService.containsFile(collectionId, "other.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
   }
 
   @Test
   fun `creates an empty directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
   fun `creates a directory creates parent directories`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
   fun `creates multiple directories`() {
     fileService.createDirectories(collectionId, setOf("some/path", "some/other/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/other/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/other/path"))
   }
 
   @Test
   fun `creating a directory ignores silently when the directory already exists`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.createDirectories(collectionId, setOf("some/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `creating a directory throws on empty path name`() {
-    fileService.createFiles(collectionId, setOf(""))
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.createFiles(collectionId, setOf(""))
+    }
   }
 
   @Test
@@ -160,9 +174,9 @@ abstract class FileServiceTest {
     fileService.createDirectories(collectionId, setOf("aDirectory"))
     fileService.createDirectories(collectionId, setOf("some/path"))
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "other.txt"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsFile(collectionId, "other.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
@@ -171,44 +185,44 @@ abstract class FileServiceTest {
     fileService.createDirectories(collectionId, setOf("aDirectory"))
     fileService.createDirectories(collectionId, setOf("some/path", "some/other/path"))
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "other.txt"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/other/path"))
+    assertTrue(fileService.containsFile(collectionId, "other.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "aDirectory"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/other/path"))
   }
 
   @Test
   fun `finds an existing file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
   }
 
   @Test
   fun `does not find not-existing files`() {
-    Assert.assertFalse(fileService.containsFile(collectionId, "file.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file.txt"))
   }
 
   @Test
   fun `does not find file if the path is a directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "some/path"))
+    assertFalse(fileService.containsFile(collectionId, "some/path"))
   }
 
   @Test
   fun `finds an existing directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
   fun `does not find not-existing directories`() {
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
   fun `does not find directory if the path is a file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "file.txt"))
+    assertFalse(fileService.containsDirectory(collectionId, "file.txt"))
   }
 
   @Test
@@ -217,7 +231,7 @@ abstract class FileServiceTest {
 
     fileService.deleteFiles(collectionId, setOf("file.txt"))
 
-    Assert.assertFalse(fileService.containsFile(collectionId, "file.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file.txt"))
   }
 
   @Test
@@ -226,26 +240,26 @@ abstract class FileServiceTest {
 
     fileService.deleteFiles(collectionId, setOf("file1.txt", "file2.txt"))
 
-    Assert.assertFalse(fileService.containsFile(collectionId, "file1.txt"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "file2.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file1.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file2.txt"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `deleting a file throws when path does not exist`() {
-    fileService.deleteFiles(collectionId, setOf("file.txt"))
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.deleteFiles(collectionId, setOf("file.txt"))
+    }
   }
 
   @Test
   fun `deleting multiple files does not delete any file when one of the files does not exist`() {
     fileService.createFiles(collectionId, setOf("file1.txt"))
 
-    try {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.deleteFiles(collectionId, setOf("file1.txt", "file2.txt"))
-      Assert.fail() // An IllegalArgumentException should be thrown
-    } catch (e: IllegalArgumentException) {
     }
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
   }
 
   @Test
@@ -256,9 +270,9 @@ abstract class FileServiceTest {
 
     fileService.deleteFiles(collectionId, setOf("file.txt"))
 
-    Assert.assertFalse(fileService.containsFile(collectionId, "file.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "DO_NOT_DELETE.txt"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "DO_NOT_DELETE.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
@@ -267,7 +281,7 @@ abstract class FileServiceTest {
 
     fileService.deleteFiles(collectionId, setOf("some/path"))
 
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
@@ -276,8 +290,8 @@ abstract class FileServiceTest {
 
     fileService.deleteFiles(collectionId, setOf("some/path", "some/other/path"))
 
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/other/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/other/path"))
   }
 
   @Test
@@ -286,10 +300,10 @@ abstract class FileServiceTest {
 
     fileService.deleteFiles(collectionId, setOf("some/path", "some/other/path", "file1.txt", "file2.txt"))
 
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/other/path"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "file1.txt"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "file2.txt"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/other/path"))
+    assertFalse(fileService.containsFile(collectionId, "file1.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file2.txt"))
   }
 
   @Test
@@ -300,9 +314,9 @@ abstract class FileServiceTest {
 
     fileService.deleteFiles(collectionId, setOf("some/path"))
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "file.txt"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "DO_NOT_DELETE"))
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "DO_NOT_DELETE"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
   }
 
   @Test
@@ -319,10 +333,10 @@ abstract class FileServiceTest {
 
     fileService.deleteFiles(collectionId, setOf(directoryToDelete))
 
-    Assert.assertFalse(fileService.containsDirectory(collectionId, directoryToDelete))
-    Assert.assertFalse(fileService.containsFile(collectionId, fileToRecursivelyDelete))
-    Assert.assertFalse(fileService.containsDirectory(collectionId, directoryToRecursivelyDelete))
-    Assert.assertTrue(fileService.containsFile(collectionId, fileToBeUnaffected))
+    assertFalse(fileService.containsDirectory(collectionId, directoryToDelete))
+    assertFalse(fileService.containsFile(collectionId, fileToRecursivelyDelete))
+    assertFalse(fileService.containsDirectory(collectionId, directoryToRecursivelyDelete))
+    assertTrue(fileService.containsFile(collectionId, fileToBeUnaffected))
   }
 
   @Test
@@ -334,8 +348,8 @@ abstract class FileServiceTest {
       it.write(contents)
     }
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "file.txt"))
-    Assert.assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), contents))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), contents))
   }
 
   private fun equals(a: ByteArray, b: ByteArray): Boolean {
@@ -352,20 +366,24 @@ abstract class FileServiceTest {
     return true
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `writing file contents throws for directories`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
 
-    fileService.writeFile(collectionId, "some/path").use {
-      it.write(byteArrayOf(42))
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.writeFile(collectionId, "some/path").use {
+        it.write(byteArrayOf(42))
+      }
     }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `writing file contents throws when path is a directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-    fileService.writeFile(collectionId, "some/path").use {
-      it.write(byteArrayOf(42))
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.writeFile(collectionId, "some/path").use {
+        it.write(byteArrayOf(42))
+      }
     }
   }
 
@@ -375,8 +393,8 @@ abstract class FileServiceTest {
       it.write(byteArrayOf(42))
     }
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "file.txt"))
-    Assert.assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf(42)))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf(42)))
   }
 
   @Test
@@ -393,26 +411,29 @@ abstract class FileServiceTest {
       it.write(newContent)
     }
 
-    Assert.assertFalse(equals(fileService.readFile(collectionId, "file.txt").readBytes(), oldContent))
-    Assert.assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), newContent))
+    assertFalse(equals(fileService.readFile(collectionId, "file.txt").readBytes(), oldContent))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), newContent))
   }
 
   @Test
   fun `reads an existing empty file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
-    Assert.assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf()))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf()))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `reading file contents throws for directories`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
-
-    fileService.readFile(collectionId, "some/path")
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.readFile(collectionId, "some/path")
+    }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `reading file contents throws if path does not exist`() {
-    fileService.readFile(collectionId, "file.txt")
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.readFile(collectionId, "file.txt")
+    }
   }
 
   @Test
@@ -421,8 +442,8 @@ abstract class FileServiceTest {
 
     fileService.renameFile(collectionId, "file.txt", "new.txt")
 
-    Assert.assertFalse(fileService.containsFile(collectionId, "file.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "new.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "new.txt"))
   }
 
   @Test
@@ -432,15 +453,17 @@ abstract class FileServiceTest {
 
     fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "some/path")
 
-    Assert.assertFalse(fileService.containsFile(collectionId, "file1.txt"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "file2.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "some/path/file1.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "some/path/file2.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file1.txt"))
+    assertFalse(fileService.containsFile(collectionId, "file2.txt"))
+    assertTrue(fileService.containsFile(collectionId, "some/path/file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "some/path/file2.txt"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `moving a file throws when source path does not exist`() {
-    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    }
   }
 
   @Test
@@ -448,29 +471,31 @@ abstract class FileServiceTest {
     fileService.createFiles(collectionId, setOf("file1.txt"))
     fileService.createDirectories(collectionId, setOf("new"))
 
-    try {
+    assertThrows(IllegalArgumentException::class.java) {
       fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
-      Assert.fail() // An IllegalArgumentException should be thrown
-    } catch (e: IllegalArgumentException) {
     }
 
-    Assert.assertTrue(fileService.containsFile(collectionId, "file1.txt"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "new/file1.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file1.txt"))
+    assertFalse(fileService.containsFile(collectionId, "new/file1.txt"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `moving a file throws when target file path already exists`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.createFiles(collectionId, setOf("new.txt"))
 
-    fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.moveFile(collectionId, setOf("file.txt"), "new.txt")
+    }
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `moving multiple files throws when target file path does not exist`() {
     fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
 
-    fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "new")
+    }
   }
 
   @Test
@@ -483,7 +508,7 @@ abstract class FileServiceTest {
 
     fileService.renameFile(collectionId, "file.txt", "new.txt")
 
-    Assert.assertTrue(equals(contents, fileService.readFile(collectionId, "new.txt").readBytes()))
+    assertTrue(equals(contents, fileService.readFile(collectionId, "new.txt").readBytes()))
   }
 
   @Test
@@ -492,8 +517,8 @@ abstract class FileServiceTest {
 
     fileService.renameFile(collectionId, "some/path", "new")
 
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "new"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "new"))
   }
 
   @Test
@@ -502,18 +527,20 @@ abstract class FileServiceTest {
 
     fileService.moveFile(collectionId, setOf("some/path", "some/other"), "new")
 
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/other"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "new/path"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "new/other"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/other"))
+    assertTrue(fileService.containsDirectory(collectionId, "new/path"))
+    assertTrue(fileService.containsDirectory(collectionId, "new/other"))
   }
 
-  @Test(expected = IllegalArgumentException::class)
+  @Test
   fun `moving a directory throws when source directory is moved to itself`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.createDirectories(collectionId, setOf("some/path/inner"))
 
-    fileService.moveFile(collectionId, setOf("some/path"), "some/path/inner")
+    assertThrows(IllegalArgumentException::class.java) {
+      fileService.moveFile(collectionId, setOf("some/path"), "some/path/inner")
+    }
   }
 
   @Test
@@ -533,23 +560,23 @@ abstract class FileServiceTest {
 
     fileService.renameFile(collectionId, "some/path", "new")
 
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path"))
-    Assert.assertFalse(fileService.containsDirectory(collectionId, "some/path/inner"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "some/path/inner/file.txt"))
-    Assert.assertFalse(fileService.containsFile(collectionId, "some/path/file.txt"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "new"))
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "new/inner"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "new/inner/file.txt"))
-    Assert.assertTrue(equals(fileService.readFile(collectionId, "new/inner/file.txt").readBytes(), byteArrayOf(42)))
-    Assert.assertTrue(fileService.containsFile(collectionId, "new/file.txt"))
-    Assert.assertTrue(equals(fileService.readFile(collectionId, "new/file.txt").readBytes(), innerFile2Contents))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path"))
+    assertFalse(fileService.containsDirectory(collectionId, "some/path/inner"))
+    assertFalse(fileService.containsFile(collectionId, "some/path/inner/file.txt"))
+    assertFalse(fileService.containsFile(collectionId, "some/path/file.txt"))
+    assertTrue(fileService.containsDirectory(collectionId, "new"))
+    assertTrue(fileService.containsDirectory(collectionId, "new/inner"))
+    assertTrue(fileService.containsFile(collectionId, "new/inner/file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "new/inner/file.txt").readBytes(), byteArrayOf(42)))
+    assertTrue(fileService.containsFile(collectionId, "new/file.txt"))
+    assertTrue(equals(fileService.readFile(collectionId, "new/file.txt").readBytes(), innerFile2Contents))
   }
 
   @Test
   fun `moving from child to parent directory`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     fileService.moveFile(collectionId, setOf("some/path"), "/")
-    Assert.assertTrue(fileService.containsDirectory(collectionId, "path"))
+    assertTrue(fileService.containsDirectory(collectionId, "path"))
   }
 
   @Test
@@ -557,7 +584,7 @@ abstract class FileServiceTest {
     fileService.createDirectories(collectionId, setOf("some"))
     fileService.createFiles(collectionId, setOf("some/file.txt"))
     fileService.renameFile(collectionId, "some/file.txt", "some/file.txt")
-    Assert.assertTrue(fileService.containsFile(collectionId, "some/file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "some/file.txt"))
   }
 
   @Test
@@ -565,12 +592,12 @@ abstract class FileServiceTest {
     fileService.createFiles(collectionId, setOf("file.txt"))
     fileService.createFiles(collectionId, setOf("file2.txt"))
     fileService.moveFile(collectionId, setOf("file.txt", "file2.txt"), "/")
-    Assert.assertTrue(fileService.containsFile(collectionId, "file.txt"))
-    Assert.assertTrue(fileService.containsFile(collectionId, "file2.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "file2.txt"))
 
     fileService.createDirectories(collectionId, setOf("subdir"))
     fileService.createFiles(collectionId, setOf("subdir/file.txt"))
     fileService.moveFile(collectionId, setOf("subdir/file.txt"), "subdir")
-    Assert.assertTrue(fileService.containsFile(collectionId, "subdir/file.txt"))
+    assertTrue(fileService.containsFile(collectionId, "subdir/file.txt"))
   }
 }

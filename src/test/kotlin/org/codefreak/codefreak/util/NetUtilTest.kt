@@ -6,7 +6,7 @@ import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.hasProperty
 import org.hamcrest.Matchers.hasSize
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 internal class NetUtilTest {
   @Test

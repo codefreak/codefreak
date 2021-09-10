@@ -2,8 +2,8 @@ package org.codefreak.codefreak.init
 
 import org.codefreak.codefreak.SpringTest
 import org.codefreak.codefreak.repository.AssignmentRepository
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
