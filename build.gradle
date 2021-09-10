@@ -40,7 +40,7 @@ release {
 
 configurations {
   testImplementation {
-    // make sure we are not using jUnit 4 accidentally
+    // make sure we are not using JUnit 4 accidentally
     exclude group: 'junit', module: 'junit'
   }
 }
