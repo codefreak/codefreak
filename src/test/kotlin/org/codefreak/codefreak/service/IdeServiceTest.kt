@@ -19,7 +19,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnOs
+import org.junit.jupiter.api.condition.EnabledOnOs
 import org.junit.jupiter.api.condition.OS
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,7 +30,7 @@ import org.springframework.core.io.ClassPathResource
  * The Docker library has some issues on Windows so we skip
  * these tests on this platform.
  */
-@DisabledOnOs(OS.WINDOWS)
+@EnabledOnOs(OS.LINUX)
 internal class IdeServiceTest : SpringTest() {
 
   @MockBean

@@ -88,11 +88,9 @@ abstract class FileServiceTest {
   }
 
   @Test
-  fun `creating a file throws when the path already exists`() {
+  fun `creating a file does not throw when the path already exists`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
-    assertThrows<IllegalArgumentException> {
-      fileService.createFiles(collectionId, setOf("file.txt")) // Throws because file already exists
-    }
+    fileService.createFiles(collectionId, setOf("file.txt"))
   }
 
   @Test

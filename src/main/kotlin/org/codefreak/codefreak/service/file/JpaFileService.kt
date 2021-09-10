@@ -39,7 +39,7 @@ class JpaFileService : FileService {
   }
 
   protected fun getCollection(collectionId: UUID): FileCollection = fileCollectionRepository.findById(collectionId)
-      .orElseThrow { EntityNotFoundException("File not found") }
+    .orElseThrow { EntityNotFoundException("File not found") }
 
   override fun readCollectionTar(collectionId: UUID): InputStream {
     return ByteArrayInputStream(getCollection(collectionId).tar)
@@ -60,7 +60,7 @@ class JpaFileService : FileService {
   override fun walkFileTree(collectionId: UUID): Sequence<FileMetaData> {
     getTarInputStream(collectionId).use { stream ->
       return stream.entrySequence()
-          .map { tarEntryToFileMetaData(it) }
+        .map { tarEntryToFileMetaData(it) }
     }
   }
 
@@ -74,29 +74,32 @@ class JpaFileService : FileService {
 
   private fun tarEntryToFileMetaData(entry: TarArchiveEntry): FileMetaData {
     return FileMetaData(
-        path = "/" + TarUtil.normalizeFileName(entry.name),
-        lastModifiedDate = entry.modTime.toInstant(),
-        type = when {
-          entry.isDirectory -> FileType.DIRECTORY
-          else -> FileType.FILE
-        },
-        size = entry.size,
-        mode = entry.mode
+      path = "/" + TarUtil.normalizeFileName(entry.name),
+      lastModifiedDate = entry.modTime.toInstant(),
+      type = when {
+        entry.isDirectory -> FileType.DIRECTORY
+        else -> FileType.FILE
+      },
+      size = entry.size,
+      mode = entry.mode
     )
   }
 
   override fun createFiles(collectionId: UUID, paths: Set<String>) {
-    val normalizedPaths = paths.map { path ->
-      TarUtil.normalizeFileName(path).also {
-        requireValidPath(it)
-        val parentDir = TarUtil.normalizeDirectoryName(TarUtil.getParentDir(path))
-        requireDirectoryDoesExist(collectionId, parentDir)
-        require(!containsPath(collectionId, it))
-
-        if (!containsPath(collectionId, parentDir)) {
-          createDirectories(collectionId, setOf(parentDir))
+    val normalizedPaths = paths.mapNotNull { path ->
+      TarUtil.normalizeFileName(path)
+        .also {
+          requireValidPath(it)
+          requireDirectoryDoesNotExist(collectionId, path)
         }
-      }
+        // skip existing files
+        .takeIf { !containsFile(collectionId, path) }
+        ?.also {
+          val parentDir = TarUtil.normalizeDirectoryName(TarUtil.getParentDir(path))
+          if (!containsPath(collectionId, parentDir)) {
+            createDirectories(collectionId, setOf(parentDir))
+          }
+        }
     }
 
     getTarOutputStream(collectionId).use { output ->
@@ -109,13 +112,13 @@ class JpaFileService : FileService {
 
   private fun requireValidPath(path: String) = require(path.isNotBlank()) { "`$path` is not a valid path" }
   private fun requireFileDoesExist(collectionId: UUID, path: String) =
-      require(containsFile(collectionId, path)) { "File `$path` does not exist" }
+    require(containsFile(collectionId, path)) { "File `$path` does not exist" }
 
   private fun requireDirectoryDoesExist(collectionId: UUID, path: String) =
-      require(containsDirectory(collectionId, path)) { "Directory `$path` does not exist" }
+    require(containsDirectory(collectionId, path)) { "Directory `$path` does not exist" }
 
   private fun requireDirectoryDoesNotExist(collectionId: UUID, path: String) =
-      require(!containsDirectory(collectionId, path)) { "Directory `$path` already exists" }
+    require(!containsDirectory(collectionId, path)) { "Directory `$path` already exists" }
 
   override fun containsFile(collectionId: UUID, path: String): Boolean {
     return containsPath(collectionId, path) { it.isFile }
@@ -150,7 +153,8 @@ class JpaFileService : FileService {
 
   private fun getTarInputStream(collectionId: UUID) = TarArchiveInputStream(readCollectionTar(collectionId))
 
-  private fun getTarOutputStream(collectionId: UUID) = TarUtil.PosixTarArchiveOutputStream(writeCollectionTar(collectionId))
+  private fun getTarOutputStream(collectionId: UUID) =
+    TarUtil.PosixTarArchiveOutputStream(writeCollectionTar(collectionId))
 
   override fun createDirectories(collectionId: UUID, paths: Set<String>) {
     val allDirs = paths.flatMap { path ->
@@ -242,7 +246,7 @@ class JpaFileService : FileService {
     requireValidPath(source)
     requireValidPath(target)
     val sourceEntry = findEntry(collectionId, TarUtil.normalizeFileName(source))
-        ?: throw IllegalArgumentException("$source does not exist")
+      ?: throw IllegalArgumentException("$source does not exist")
     val targetEntry = findEntry(collectionId, TarUtil.normalizeFileName(target))
     when {
       targetEntry != null && targetEntry.name == sourceEntry.name -> return // renaming file to itself. done
@@ -251,13 +255,13 @@ class JpaFileService : FileService {
 
     val replaceMap: Map<String, String> = if (sourceEntry.isDirectory) {
       mapOf(
-          // Rename everything starting with /foo/bar/* to /foo/baz/*
-          TarUtil.normalizeDirectoryName(source) to TarUtil.normalizeDirectoryName(target)
+        // Rename everything starting with /foo/bar/* to /foo/baz/*
+        TarUtil.normalizeDirectoryName(source) to TarUtil.normalizeDirectoryName(target)
       )
     } else {
       mapOf(
-          // /foo/bar to /foo/baz
-          TarUtil.normalizeFileName(source) to TarUtil.normalizeFileName(target)
+        // /foo/bar to /foo/baz
+        TarUtil.normalizeFileName(source) to TarUtil.normalizeFileName(target)
       )
     }
     renameByPrefixInCollection(collectionId, replaceMap)
@@ -302,11 +306,11 @@ class JpaFileService : FileService {
         }
 
         listOf(
-            Pair(normalizedSource, TarUtil.normalizeDirectoryName(targetPrefix + sourceBasename))
+          Pair(normalizedSource, TarUtil.normalizeDirectoryName(targetPrefix + sourceBasename))
         )
       } else {
         listOf(
-            Pair(normalizedSource, TarUtil.normalizeFileName(targetPrefix + sourceBasename))
+          Pair(normalizedSource, TarUtil.normalizeFileName(targetPrefix + sourceBasename))
         )
       }
     }.toMap()
@@ -340,8 +344,8 @@ class JpaFileService : FileService {
             if (search.endsWith("/")) {
               // either match files inside the directory or the directory itself
               TarUtil.normalizeFileName(entry.name).startsWith(search) || (
-                TarUtil.normalizeFileName(entry.name) == TarUtil.normalizeFileName(search)
-              )
+                  TarUtil.normalizeFileName(entry.name) == TarUtil.normalizeFileName(search)
+                  )
             } else {
               // otherwise only a full match is valid
               search == TarUtil.normalizeFileName(entry.name)
