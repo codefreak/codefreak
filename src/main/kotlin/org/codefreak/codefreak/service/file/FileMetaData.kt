@@ -33,9 +33,10 @@ data class FileMetaData(
   val lastModifiedDate: Instant,
 
   /**
-   * Permissions of this file represented as UNIX mode
+   * Permissions of this file represented as UNIX mode.
+   * On non UNIX platforms this will be null.
    */
-  val mode: Int,
+  val mode: Int?,
 
   /**
    * Size of the file.

@@ -1,17 +1,22 @@
 package org.codefreak.codefreak.service.file
 
+import java.nio.file.Path
 import java.util.UUID
+import kotlin.io.path.absolutePathString
 import org.codefreak.codefreak.config.AppConfiguration
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import org.mockito.Mockito
 
 class FileSystemFileServiceTest : FileServiceTest() {
   override var collectionId: UUID = UUID(0, 0)
   override lateinit var fileService: FileService
+
+  @TempDir
+  lateinit var tmpTestDir: Path
 
   @BeforeEach
   fun init() {
@@ -23,27 +28,21 @@ class FileSystemFileServiceTest : FileServiceTest() {
     val fileSystemConfig = Mockito.mock(AppConfiguration.Files.FileSystem::class.java)
     Mockito.`when`(files.fileSystem).thenReturn(fileSystemConfig)
 
-    Mockito.`when`(fileSystemConfig.collectionStoragePath).thenReturn("/tmp/codefreak-test")
+    Mockito.`when`(fileSystemConfig.collectionStoragePath).thenReturn(tmpTestDir.absolutePathString())
 
     fileService = FileSystemFileService(config)
-  }
-
-  @AfterEach
-  fun tearDown() {
-    // Cleanup created files
-    fileService.deleteCollection(collectionId)
   }
 
   @Test
   fun `cannot read files outside of the collection`() {
     assertThrows(IllegalArgumentException::class.java) {
-      fileService.readFile(collectionId, "/../foo.txt")
+      fileService.readFile(collectionId, "/../foo.txt").close()
     }
     assertThrows(IllegalArgumentException::class.java) {
-      fileService.readFile(collectionId, "foo/../../bar.txt")
+      fileService.readFile(collectionId, "foo/../../bar.txt").close()
     }
     assertThrows(IllegalArgumentException::class.java) {
-      fileService.readFile(collectionId, "foo/../../../../../etc/passwd")
+      fileService.readFile(collectionId, "foo/../../../../../etc/passwd").close()
     }
   }
 

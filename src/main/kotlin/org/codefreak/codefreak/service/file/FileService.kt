@@ -3,7 +3,7 @@ package org.codefreak.codefreak.service.file
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
-import kotlin.jvm.Throws
+import java.util.stream.Stream
 import org.springframework.util.DigestUtils
 import org.springframework.util.StreamUtils
 
@@ -26,15 +26,21 @@ interface FileService {
   /**
    * Walk over every file or directory in the given collection.
    * Returns a sequence with ALL files from this collection.
+   *
+   * The returned stream MUST BE CLOSED properly to prevent leaking file descriptors!
+   * Kotlin's Sequences are not (Auto)Closable, so we are stuck with Java's Streams.
    */
-  fun walkFileTree(collectionId: UUID): Sequence<FileMetaData>
+  fun walkFileTree(collectionId: UUID): Stream<FileMetaData>
 
   /**
    * List all files and directories that are direct descendants of path
-   * Throws an IllegalArgumentException if path does not exist
+   * Throws an IllegalArgumentException if path does not exist.
+   *
+   * The returned stream MUST BE CLOSED properly to prevent leaking file descriptors!
+   * Kotlin's Sequences are not (Auto)Closable, so we are stuck with Java's Streams.
    */
   @Throws(IllegalArgumentException::class)
-  fun listFiles(collectionId: UUID, path: String): Sequence<FileMetaData>
+  fun listFiles(collectionId: UUID, path: String): Stream<FileMetaData>
 
   /**
    * Create empty files and their parent directories in places specified by path.
