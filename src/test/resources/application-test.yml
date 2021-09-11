@@ -19,10 +19,6 @@ codefreak:
         key-store-entry-name: codefreak
   docker:
     pull-policy: always
-  files:
-    adapter: file_system
-    fileSystem:
-      collectionStoragePath: "${java.io.tmpdir}/codefreak-test"
 
 graphql:
   servlet:
