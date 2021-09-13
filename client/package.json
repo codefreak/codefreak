@@ -3,7 +3,7 @@
   "version": "5.0.3",
   "private": true,
   "dependencies": {
-    "@ant-design/icons": "4.6.2",
+    "@ant-design/icons": "4.6.4",
     "@ant-design/pro-layout": "5.0.19",
     "@apollo/client": "3.3.21",
     "@codefreak/antd-file-manager": "0.3.4",
