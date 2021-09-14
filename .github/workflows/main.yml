@@ -49,11 +49,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Run unit tests
-        run: |
-          ./gradlew check jibDockerBuild -x bootJar
+      - name: Run Gradle checks
+        shell: bash
+        run: ./gradlew check
+
+      - name: Build Docker image
+        shell: bash
+        # Import of jib image into Windows Docker is currently not working on CI
+        if: runner.os != 'Windows'
+        run: ./gradlew jibDockerBuild -x bootJar
 
       - name: Run end-to-end tests
+        # Not possible due to missing image (see step above)
+        if: runner.os != 'Windows'
         uses: cypress-io/github-action@v2
         with:
           working-directory: client
@@ -64,7 +72,15 @@ jobs:
           wait-on-timeout: 180
           headless: true
 
-      - name: Prepare cache
+      - name: Prepare cache on Windows
+        if: runner.os == 'Windows'
+        run: |
+          ./gradlew --stop
+          Remove-Item -Force $HOME/.gradle/caches/modules-2/modules-2.lock
+          Remove-Item -Recurse -Force $HOME/.gradle/caches/*/plugin-resolution/
+
+      - name: Prepare cache on Linux
+        if: runner.os != 'Windows'
         run: |
           rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
           rm -fr $HOME/.gradle/caches/*/plugin-resolution/
