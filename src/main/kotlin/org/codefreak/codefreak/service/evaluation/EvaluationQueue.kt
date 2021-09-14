@@ -53,7 +53,7 @@ class EvaluationQueue : StepExecutionListener {
 
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   fun insert(step: EvaluationStep) {
-    log.debug("Queuing evaluation step ${step.definition.runnerName} of answer ${step.evaluation.answer.id}")
+    log.debug("Queuing evaluation step ${step.definition.key} of answer ${step.evaluation.answer.id}")
     val params = buildJobParameters(step)
     jobLauncher.run(job, params)
     // Warning: the step entity is detached because of Propagation.NOT_SUPPORTED (citation needed)

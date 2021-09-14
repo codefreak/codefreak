@@ -7,11 +7,8 @@ fragment evaluationStepBasics on EvaluationStep {
   finishedAt
   definition {
     position
-    runnerName
     title
-    runner {
-      stoppable
-    }
+    key
   }
 }
 

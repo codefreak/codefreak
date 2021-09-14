@@ -153,7 +153,7 @@ const AssignmentPage: React.FC = () => {
   const timeLimitInput = (
     <TimeIntervalInput
       onChange={debounce(onTimeLimitChange, 500)}
-      defaultValue={
+      value={
         assignment.timeLimit
           ? secondsToComponents(assignment.timeLimit)
           : undefined

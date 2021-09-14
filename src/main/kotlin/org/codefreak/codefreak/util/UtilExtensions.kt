@@ -24,13 +24,9 @@ fun OutputStream.afterClose(callback: () -> Any?) = object : ProxyOutputStream(t
   }
 }
 
-fun InputStream.afterClose(callback: () -> Any?) = object : ProxyInputStream(this) {
+fun InputStream.preventClose() = object : ProxyInputStream(this) {
   override fun close() {
-    try {
-      super.close()
-    } finally {
-      callback()
-    }
+    // nope
   }
 }
 

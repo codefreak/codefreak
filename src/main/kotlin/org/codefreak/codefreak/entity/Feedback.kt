@@ -38,7 +38,7 @@ class Feedback(
 
   /**
    * An identifier that allows grouping similar feedback together
-   * Useful for jUnit test suites or CodeClimate engine/check_name
+   * Useful for JUnit test suites or CodeClimate engine/check_name
    */
   var group: String? = null
 

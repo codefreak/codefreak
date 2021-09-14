@@ -11,6 +11,7 @@ import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.EntityListener
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.ContextRefreshedEvent
@@ -21,6 +22,7 @@ import org.springframework.scheduling.TaskScheduler
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnBean(TaskScheduler::class)
 @EntityListener(Assignment::class)
 class AssignmentStatusChangePublisher {
   @Autowired

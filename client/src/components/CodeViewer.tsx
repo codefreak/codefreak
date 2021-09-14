@@ -6,7 +6,6 @@ import { FileType, useGetAnswerFileQuery } from '../generated/graphql'
 import { isBinaryContent, numberOfLines, sliceLines } from '../services/file'
 import AsyncPlaceholder from './AsyncContainer'
 import Centered from './Centered'
-import ReviewEditor from './code/ReviewEditor'
 import SyntaxHighlighter from './code/SyntaxHighlighter'
 import './CodeViewer.less'
 
@@ -16,7 +15,6 @@ interface CodeViewerProps {
   lineStart?: number
   lineEnd?: number
   numContextRows?: number
-  review?: boolean
 }
 
 const codeViewerMessage = (message: React.ReactNode) => {
@@ -32,8 +30,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   path: queryPath,
   lineStart,
   lineEnd,
-  numContextRows = 3,
-  review
+  numContextRows = 3
 }) => {
   const result = useGetAnswerFileQuery({
     variables: { id: answerId, path: queryPath }
@@ -44,7 +41,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   }
 
   // use path from response or content and path can by out-of-sync
-  const { content, type, path, collectionDigest } = result.data.answerFile
+  const { content, type, path } = result.data.answerFile
 
   if (type !== FileType.File) {
     return codeViewerMessage(
@@ -76,26 +73,14 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
     value = sliceLines(value, firstLineNumber, end)
   }
 
-  if (review !== true) {
-    return (
-      <SyntaxHighlighter
-        firstLineNumber={firstLineNumber}
-        highlightLines={highlightLines}
-        language={extname(path)}
-      >
-        {value}
-      </SyntaxHighlighter>
-    )
-  }
-
   return (
-    <ReviewEditor
-      answerId={answerId}
-      path={path}
-      fileCollectionDigest={collectionDigest}
+    <SyntaxHighlighter
+      firstLineNumber={firstLineNumber}
+      highlightLines={highlightLines}
+      language={extname(path)}
     >
       {value}
-    </ReviewEditor>
+    </SyntaxHighlighter>
   )
 }
 

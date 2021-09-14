@@ -1,5 +1,7 @@
 codefreak:
   instanceId: test
+  scheduling:
+    enable: false
   ide:
     idle-check-rate: 1000
     idle-shutdown-threshold: 5000
@@ -20,7 +22,7 @@ codefreak:
   files:
     adapter: file_system
     fileSystem:
-      collectionStoragePath: "/tmp/codefreak-test"
+      collectionStoragePath: "${java.io.tmpdir}/codefreak-test"
 
 graphql:
   servlet:

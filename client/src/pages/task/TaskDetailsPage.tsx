@@ -19,12 +19,10 @@ import {
   Tooltip
 } from 'antd'
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
-import { JSONSchema6 } from 'json-schema'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
-import JsonSchemaEditButton from '../../components/JsonSchemaEditButton'
 import StartSubmissionEvaluationButton from '../../components/StartSubmissionEvaluationButton'
 import useIdParam from '../../hooks/useIdParam'
 import useSubPath from '../../hooks/useSubPath'
@@ -45,6 +43,7 @@ import IdeSettingsForm, {
 } from '../../components/IdeSettingsForm'
 import FileBrowser from '../../components/FileBrowser'
 import Markdown from '../../components/Markdown'
+import { EditStringArrayButton } from '../../components/EditStringArrayModal'
 
 const { TabPane } = Tabs
 
@@ -53,11 +52,6 @@ const renderFilePattern = (pattern: string) => (
     <code>{pattern}</code>
   </List.Item>
 )
-
-const filePatternSchema: JSONSchema6 = {
-  type: 'array',
-  items: { type: 'string' }
-}
 
 const filePatternHelp = (
   <Alert
@@ -287,12 +281,13 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                         <InfoCircleFilled />
                       </Tooltip>
                     </span>
-                    <JsonSchemaEditButton
-                      title="Edit hidden files"
+                    <EditStringArrayButton
+                      title="Edit hidden files pattern"
                       extraContent={filePatternHelp}
-                      schema={filePatternSchema}
-                      value={task.hiddenFiles}
-                      onSubmit={updater('hiddenFiles')}
+                      initialValues={task.hiddenFiles}
+                      onSave={updater('hiddenFiles')}
+                      icon={<EditOutlined />}
+                      type="link"
                     />
                   </div>
                 }
@@ -321,12 +316,13 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
                         <InfoCircleFilled />
                       </Tooltip>
                     </span>
-                    <JsonSchemaEditButton
-                      title="Edit protected files"
+                    <EditStringArrayButton
+                      title="Edit protected files pattern"
                       extraContent={filePatternHelp}
-                      schema={filePatternSchema}
-                      value={task.protectedFiles}
-                      onSubmit={updater('protectedFiles')}
+                      initialValues={task.protectedFiles}
+                      onSave={updater('protectedFiles')}
+                      icon={<EditOutlined />}
+                      type="link"
                     />
                   </div>
                 }

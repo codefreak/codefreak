@@ -127,6 +127,7 @@ const TaskList: React.FC<TaskListProps> = props => {
     <CardList
       sortable={props.sortable}
       items={props.tasks}
+      itemKey={task => task.id}
       renderItem={renderTask(renderProps)}
       handlePositionChange={handlePositionChange}
     />

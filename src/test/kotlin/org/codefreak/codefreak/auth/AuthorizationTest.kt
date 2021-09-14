@@ -4,7 +4,7 @@ import org.codefreak.codefreak.SpringFrontendTest
 import org.codefreak.codefreak.frontend.BaseController
 import org.codefreak.codefreak.service.SeedDummyUsersService
 import org.codefreak.codefreak.service.UserService
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService

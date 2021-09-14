@@ -7,10 +7,10 @@ import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.UserRepository
-import org.codefreak.codefreak.util.TaskTemplate
-import org.codefreak.codefreak.util.TaskTemplateUtil
+import org.codefreak.templates.TaskTemplate
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Profile
 import org.springframework.context.event.ContextRefreshedEvent
@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service
 @Service
 @Profile(Env.DEV)
 @Order(Ordered.LOWEST_PRECEDENCE)
+@ConditionalOnProperty("codefreak.seed-database", havingValue = "true", matchIfMissing = true)
 class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
 
   @Autowired
@@ -62,9 +63,7 @@ class SeedDatabaseService : ApplicationListener<ContextRefreshedEvent> {
     val tasks = mutableListOf<Task>()
 
     TaskTemplate.values().forEach {
-      val templateTar = TaskTemplateUtil.readTemplateTar(it)
-      val task = taskTarService.createFromTar(templateTar, teacher)
-
+      val task = taskTarService.createFromTemplate(it, teacher)
       val templateName = it.name.lowercase().replaceFirstChar { char -> char.uppercase() }
       task.title = "Program in $templateName"
       taskService.saveTask(task)

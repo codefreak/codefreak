@@ -42,8 +42,8 @@ you can only scale vertically.
 * One Docker instance for all. Teachers can not use their individual systems for evaluation.
 * No shell environment. Because commands are run via `exec` you cannot set environment variables or run commands that
 rely on a shell environment (`cd`, etc.).
-* No custom runners for feedback. At the moment a custom runner can only be created with the jUnit runner by creating
-some a valid jUnit XML file. Teachers should be able to introduce their own way of generating automated feedback.
+* No custom runners for feedback. At the moment a custom runner can only be created with the JUnit runner by creating
+some a valid JUnit XML file. Teachers should be able to introduce their own way of generating automated feedback.
 
 The solution to many of these problems is a standalone runner/agent/worker model like GitLab has. Beside the Code FREAK backend
 application there are 1-n workers that connect to the backend application via an API. The workers ask the backend
@@ -136,6 +136,6 @@ Students can give feedback to other students work after the deadline has been re
 This improves their review skills and shows them other solutions to problems.
 
 ### Peer Feedback/Grading
-Teachers can configure a set of students (e.g. Master students or higher semester students) for each assignment 
+Teachers can configure a set of students (e.g. Master students or higher semester students) for each assignment
 that will be responsible for grading the answers. The reviewer students receive a notification when grading is required
 and land in their own "review mode". The final grade will always be decided by the teacher.
