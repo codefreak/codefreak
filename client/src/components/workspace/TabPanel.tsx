@@ -8,25 +8,25 @@ export const LoadingTabPanelPlaceholder = () => (
 export interface TabPanelProps {
   loading?: boolean
   withPadding?: boolean
+  children?: React.ReactNode
 }
 
-const TabPanel = ({
-  loading,
-  withPadding = false,
-  children
-}: React.PropsWithChildren<TabPanelProps>) => {
-  if (loading) {
-    return <LoadingTabPanelPlaceholder />
+const TabPanel = React.forwardRef<HTMLDivElement, TabPanelProps>(
+  ({ loading, withPadding = false, children }, ref) => {
+    if (loading) {
+      return <LoadingTabPanelPlaceholder />
+    }
+
+    return (
+      <div
+        className="workspace-tab-panel"
+        ref={ref}
+        style={{ padding: withPadding ? 16 : 0 }}
+      >
+        {children}
+      </div>
+    )
   }
-
-  return (
-    <div
-      className="workspace-tab-panel"
-      style={{ padding: withPadding ? 16 : 0 }}
-    >
-      {children}
-    </div>
-  )
-}
+)
 
 export default TabPanel

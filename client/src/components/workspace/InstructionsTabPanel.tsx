@@ -1,19 +1,18 @@
 import TabPanel from './TabPanel'
 import { renderTaskInstructionsText } from '../../pages/task/TaskDetailsPage'
-import useGetWorkspaceFileQuery from '../../hooks/workspace/useGetWorkspaceFileQuery'
+import { useGetTaskDetailsQuery } from '../../generated/graphql'
+import useIdParam from '../../hooks/useIdParam'
 
-type InstructionsTabPanelProps = {
-  loading: boolean
-}
-
-const InstructionsTabPanel = ({ loading }: InstructionsTabPanelProps) => {
-  const { data: readme, isLoading: isLoadingFile } =
-    useGetWorkspaceFileQuery('/README.md')
+const InstructionsTabPanel = () => {
+  const { data } = useGetTaskDetailsQuery({
+    variables: { id: useIdParam(), teacher: false }
+  })
+  const instructions = data?.task.body ?? ''
+  // TODO use the whole panel from TaskDetailsPage (?)
+  // TODO max height for instructions (?)
 
   return (
-    <TabPanel withPadding loading={loading || isLoadingFile}>
-      {renderTaskInstructionsText(readme)}
-    </TabPanel>
+    <TabPanel withPadding>{renderTaskInstructionsText(instructions)}</TabPanel>
   )
 }
 

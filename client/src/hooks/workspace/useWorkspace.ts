@@ -1,8 +1,10 @@
 import { createContext, useContext } from 'react'
 import { useQuery } from 'react-query'
+import { Client } from 'graphql-ws'
 
 type WorkspaceContextType = {
   baseUrl: string
+  graphqlWebSocketClient?: Client
 }
 
 const initialWorkspaceContext: WorkspaceContextType = { baseUrl: '' }
@@ -12,7 +14,7 @@ export const WorkspaceContext = createContext<WorkspaceContextType>(
 )
 
 const useWorkspace = () => {
-  const { baseUrl } = useContext(WorkspaceContext)
+  const { baseUrl, graphqlWebSocketClient } = useContext(WorkspaceContext)
   const { data } = useQuery(
     'isWorkspaceAvailable',
     () => fetch(baseUrl).then(() => Promise.resolve(true)),
@@ -26,7 +28,8 @@ const useWorkspace = () => {
 
   return {
     isAvailable,
-    baseUrl
+    baseUrl,
+    graphqlWebSocketClient
   }
 }
 
