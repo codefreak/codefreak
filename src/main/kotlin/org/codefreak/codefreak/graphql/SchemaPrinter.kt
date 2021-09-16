@@ -1,4 +1,4 @@
-package org.codefreak.codefreak
+package org.codefreak.codefreak.graphql
 
 import com.expediagroup.graphql.extensions.print
 import com.expediagroup.graphql.spring.GraphQLAutoConfiguration
@@ -17,7 +17,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan
 
 @ImportAutoConfiguration(classes = [GraphQLAutoConfiguration::class, JacksonAutoConfiguration::class])
-@ComponentScan("org.codefreak.codefreak")
+@ComponentScan("org.codefreak.codefreak.graphql")
 @EnableConfigurationProperties(GraphQLConfigurationProperties::class)
 class SchemaPrinter : CommandLineRunner {
 

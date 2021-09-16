@@ -62,6 +62,14 @@ class WorkspaceClient(
   }
 
   fun <T> downloadFiles(filter: String? = null, consumer: (tarArchiveStream: TarArchiveInputStream) -> T): T {
+    return downloadTar(filter) {
+      TarArchiveInputStream(it).use { tarStream ->
+        consumer(tarStream)
+      }
+    }
+  }
+
+  fun <T> downloadTar(filter: String? = null, consumer: (tarStream: InputStream) -> T): T {
     val request = Request.Builder()
         .get()
         .url(buildWorkspaceUri(
@@ -73,7 +81,7 @@ class WorkspaceClient(
         .build()
     requestFactory.newCall(request).execute { response ->
       val body = response.body() ?: throw IllegalStateException("Downloading files returned no body")
-      return TarArchiveInputStream(body.byteStream()).use { tarStream ->
+      return body.byteStream().use { tarStream ->
         consumer(tarStream)
       }
     }
