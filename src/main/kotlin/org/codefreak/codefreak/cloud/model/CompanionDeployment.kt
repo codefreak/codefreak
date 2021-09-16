@@ -47,22 +47,22 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
             })
             resources {
               requests = mapOf(
-                  "cpu" to Quantity.parse("1"),
-                  "memory" to Quantity.parse("128Mi")
+                "cpu" to Quantity.parse("1"),
+                "memory" to Quantity.parse("128Mi")
               )
               limits = mapOf(
-                  "cpu" to Quantity.parse("4")
-                   "memory" to Quantity.parse("512Mi")
+                "cpu" to Quantity.parse("4"),
+                "memory" to Quantity.parse("512Mi")
               )
             }
             // disable environment variables with service links
             enableServiceLinks = false
             volumeMounts = listOf(
-                newVolumeMount {
-                  name = "scripts"
-                  mountPath = "/scripts"
-                  readOnly = true
-                }
+              newVolumeMount {
+                name = "scripts"
+                mountPath = "/scripts"
+                readOnly = true
+              }
             )
             livenessProbe {
               httpGet {
@@ -84,19 +84,19 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
             }
           })
           volumes = listOf(
-              newVolume {
-                name = "scripts"
-                configMap {
-                  name = wsConfig.companionScriptMapName
-                  defaultMode = 511 // equals 0777
-                  items = wsConfig.scripts.map { (scriptName) ->
-                    newKeyToPath {
-                      key = scriptName
-                      path = scriptName
-                    }
+            newVolume {
+              name = "scripts"
+              configMap {
+                name = wsConfig.companionScriptMapName
+                defaultMode = 511 // equals 0777
+                items = wsConfig.scripts.map { (scriptName) ->
+                  newKeyToPath {
+                    key = scriptName
+                    path = scriptName
                   }
                 }
               }
+            }
           )
         }
       }
