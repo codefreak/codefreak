@@ -1,9 +1,9 @@
 package org.codefreak.codefreak.cloud
 
+import java.net.URI
 import org.codefreak.codefreak.util.withoutLeadingSlash
 import org.codefreak.codefreak.util.withoutTrailingSlash
 import org.springframework.web.util.UriComponentsBuilder
-import java.net.URI
 
 fun buildWorkspaceUri(workspaceBaseUrl: String, path: String? = null, query: String? = null, websocket: Boolean = false): String {
   val baseUri = URI.create(workspaceBaseUrl)

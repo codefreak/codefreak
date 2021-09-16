@@ -4,6 +4,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.ws.DefaultWebSocketEngine
 import com.apollographql.apollo3.network.ws.GraphQLWsProtocol
 import com.apollographql.apollo3.network.ws.WebSocketNetworkTransport
+import java.io.InputStream
 import kotlinx.coroutines.flow.first
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -19,10 +20,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.cloud.workspace.StartProcessMutation
 import org.codefreak.codefreak.cloud.workspace.WaitForProcessSubscription
 import reactor.core.publisher.Flux
-import java.io.InputStream
 
 class WorkspaceClient(
-    private val reference: RemoteWorkspaceReference
+  private val reference: RemoteWorkspaceReference
 ) {
   private val requestFactory = OkHttpClient.Builder()
       // .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
@@ -62,6 +62,14 @@ class WorkspaceClient(
   }
 
   fun <T> downloadFiles(filter: String? = null, consumer: (tarArchiveStream: TarArchiveInputStream) -> T): T {
+    return downloadTar(filter) {
+      TarArchiveInputStream(it).use { tarStream ->
+        consumer(tarStream)
+      }
+    }
+  }
+
+  fun <T> downloadTar(filter: String? = null, consumer: (tarStream: InputStream) -> T): T {
     val request = Request.Builder()
         .get()
         .url(buildWorkspaceUri(
@@ -73,7 +81,7 @@ class WorkspaceClient(
         .build()
     requestFactory.newCall(request).execute { response ->
       val body = response.body() ?: throw IllegalStateException("Downloading files returned no body")
-      return TarArchiveInputStream(body.byteStream()).use { tarStream ->
+      return body.byteStream().use { tarStream ->
         consumer(tarStream)
       }
     }

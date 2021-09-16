@@ -13,7 +13,6 @@ import com.fkorotkov.kubernetes.newContainerPort
 import com.fkorotkov.kubernetes.newKeyToPath
 import com.fkorotkov.kubernetes.newVolume
 import com.fkorotkov.kubernetes.newVolumeMount
-import com.fkorotkov.kubernetes.persistentVolumeClaim
 import com.fkorotkov.kubernetes.readinessProbe
 import com.fkorotkov.kubernetes.resources
 import com.fkorotkov.kubernetes.spec
@@ -48,21 +47,17 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
             })
             resources {
               requests = mapOf(
-                  "cpu" to Quantity.parse("0.5"),
-                  "memory" to Quantity.parse("256Mi")
+                  "cpu" to Quantity.parse("1"),
+                  "memory" to Quantity.parse("128Mi")
               )
               limits = mapOf(
-                  "cpu" to Quantity.parse("2"),
-                  //"memory" to Quantity.parse("512Mi")
+                  "cpu" to Quantity.parse("4"),
+                  "memory" to Quantity.parse("512Mi")
               )
             }
             // disable environment variables with service links
             enableServiceLinks = false
             volumeMounts = listOf(
-                newVolumeMount {
-                  name = "workspace-data"
-                  mountPath = "/code"
-                },
                 newVolumeMount {
                   name = "scripts"
                   mountPath = "/scripts"
@@ -89,12 +84,6 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
             }
           })
           volumes = listOf(
-              newVolume {
-                name = "workspace-data"
-                persistentVolumeClaim {
-                  claimName = wsConfig.persistentVolumeClaimName
-                }
-              },
               newVolume {
                 name = "scripts"
                 configMap {

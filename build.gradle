@@ -190,7 +190,7 @@ task vagrantTest(type: Test) {
 
 task generateGraphqlSchema(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
-  main = "org.codefreak.codefreak.SchemaPrinterKt"
+  main = "org.codefreak.codefreak.graphql.SchemaPrinterKt"
   args 'build/generated/graphql/schema.graphqls'
 }
 

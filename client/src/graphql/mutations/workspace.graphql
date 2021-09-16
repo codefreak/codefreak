@@ -5,3 +5,9 @@ mutation StartWorkspace(
     baseUrl
   }
 }
+
+mutation DeleteWorkspace(
+  $context: FileContextInput!
+) {
+  deleteWorkspace(fileContext: $context)
+}

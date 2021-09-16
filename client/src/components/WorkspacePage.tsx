@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   FileContextType,
+  useDeleteWorkspaceMutation,
   useStartWorkspaceMutation
 } from '../generated/graphql'
+import { Button } from 'antd'
+import { DeleteFilled, RocketFilled } from '@ant-design/icons'
 
 export interface WorkspacePageProps {
   id: string
@@ -10,21 +13,51 @@ export interface WorkspacePageProps {
 }
 
 const WorkspacePage: React.FC<WorkspacePageProps> = props => {
-  const [startWorkspace, workspace] = useStartWorkspaceMutation({
-    variables: {
-      context: {
-        id: props.id,
-        type: props.type
-      }
+  const [workspaceUrl, setWorkspaceUrl] = useState<string | undefined>()
+  const variables = {
+    context: {
+      id: props.id,
+      type: props.type
     }
+  }
+  const [startWorkspace, startWorkspaceResult] = useStartWorkspaceMutation({
+    variables
   })
+  const [deleteWorkspace, deleteWorkspaceResult] = useDeleteWorkspaceMutation({
+    variables
+  })
+  useEffect(() => {
+    setWorkspaceUrl(startWorkspaceResult.data?.startWorkspace.baseUrl)
+  }, [startWorkspaceResult.data])
+  useEffect(() => {
+    if (deleteWorkspaceResult.data) {
+      setWorkspaceUrl(undefined)
+    }
+  }, [deleteWorkspaceResult.data])
+  if (workspaceUrl) {
+    return (
+      <>
+        <h1>{workspaceUrl}</h1>
+        <Button
+          danger
+          icon={<DeleteFilled />}
+          onClick={() => deleteWorkspace()}
+        >
+          Stop Workspace
+        </Button>
+      </>
+    )
+  }
+
   return (
-    <h1>
-      Moin {workspace.data?.startWorkspace.baseUrl}{' '}
-      {!workspace.data ? (
-        <button onClick={() => startWorkspace()}>Start</button>
-      ) : null}
-    </h1>
+    <Button
+      type="primary"
+      icon={<RocketFilled />}
+      loading={startWorkspaceResult.loading}
+      onClick={() => startWorkspace()}
+    >
+      Start Workspace
+    </Button>
   )
 }
 
