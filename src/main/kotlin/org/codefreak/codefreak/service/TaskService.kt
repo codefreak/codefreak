@@ -5,6 +5,7 @@ import java.util.UUID
 import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.codefreak.codefreak.repository.TaskRepository
+import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.PositionUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -20,6 +21,9 @@ TaskService : BaseService() {
   @Autowired
   private lateinit var assignmentRepository: AssignmentRepository
 
+  @Autowired
+  private lateinit var fileService: FileService
+
   @Transactional
   fun findTask(id: UUID): Task = taskRepository.findById(id)
       .orElseThrow { EntityNotFoundException("Task not found") }
@@ -31,6 +35,10 @@ TaskService : BaseService() {
       taskRepository.saveAll(tasks)
     }
     taskRepository.delete(task)
+
+    if (fileService.collectionExists(task.id)) {
+      fileService.deleteCollection(task.id)
+    }
   }
 
   @Transactional

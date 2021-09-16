@@ -11,6 +11,7 @@ import org.codefreak.codefreak.entity.Submission
 import org.codefreak.codefreak.repository.AssignmentRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.event.ContextRefreshedEvent
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
+@ConditionalOnBean(TaskScheduler::class)
 @EntityListener(Submission::class)
 class SubmissionDeadlinePublisher {
   companion object {

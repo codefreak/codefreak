@@ -1,0 +1,39 @@
+databaseChangeLog:
+- changeSet:
+    id: 1628931872034-1
+    author: hkasch
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: format
+            type: varchar(255)
+        - column:
+            name: key
+            type: varchar(255)
+        - column:
+            name: path
+            type: varchar(255)
+        - column:
+            name: script
+            type: text
+        tableName: evaluation_step_definition
+- changeSet:
+    id: 1628931872034-2
+    author: hkasch
+    changes:
+    - addUniqueConstraint:
+        columnNames: key, task_id
+        constraintName: UKany0tnarit0v12glm27o607t3
+        tableName: evaluation_step_definition
+- changeSet:
+    id: 1628931872034-3
+    author: hkasch
+    changes:
+    - dropColumn:
+        columnName: options
+        tableName: evaluation_step_definition
+    - dropColumn:
+        columnName: runner_name
+        tableName: evaluation_step_definition
+

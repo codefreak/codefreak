@@ -1,23 +1,32 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import { Alert, Button, Card, Col, Row } from 'antd'
 import { useHistory } from 'react-router-dom'
-import { TaskTemplate, useCreateTaskMutation } from '../../generated/graphql'
+import {
+  useCreateTaskMutation,
+  useGetAvailableTaskTemplatesQuery
+} from '../../generated/graphql'
 import { Entity, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
-import { getAllTemplates } from '../../services/templates'
+import LoadingIndicator from '../../components/LoadingIndicator'
+import React from 'react'
+import LanguageIcon from '../../components/LanguageIcon'
 
 const CreateTaskPage: React.FC = () => {
-  const taskTemplates = getAllTemplates()
+  const taskTemplates = useGetAvailableTaskTemplatesQuery().data?.taskTemplates
   const [createTaskMutation] = useCreateTaskMutation()
   const history = useHistory()
+
+  if (taskTemplates === undefined) {
+    return <LoadingIndicator />
+  }
 
   const onTaskCreated = (task: Entity) => {
     history.push(getEntityPath(task))
     messageService.success('Task created')
   }
 
-  const createTask = (template?: TaskTemplate) => async () => {
-    const result = await createTaskMutation({ variables: { template } })
+  const createTask = (templateName?: string) => async () => {
+    const result = await createTaskMutation({ variables: { templateName } })
     if (result.data) {
       onTaskCreated(result.data.createTask)
     }
@@ -44,16 +53,15 @@ const CreateTaskPage: React.FC = () => {
           callToActionTitle="Create empty task"
           onCallToAction={createTask()}
         />
-        {(Object.keys(taskTemplates) as TaskTemplate[]).map(templateKey => {
-          const template = taskTemplates[templateKey]
+        {taskTemplates.map(template => {
           return (
             <TaskTemplateCard
-              key={templateKey}
+              key={template.name}
               title={template.title}
               description={template.description}
-              logo={<template.logo className="language-logo" />}
+              logo={<LanguageIcon language={template.name} />}
               callToActionTitle="Use this template"
-              onCallToAction={createTask(templateKey)}
+              onCallToAction={createTask(template.name)}
             />
           )
         })}

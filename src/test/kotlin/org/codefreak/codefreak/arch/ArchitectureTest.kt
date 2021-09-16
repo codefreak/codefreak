@@ -3,17 +3,14 @@ package org.codefreak.codefreak.arch
 import com.tngtech.archunit.core.importer.ImportOption
 import com.tngtech.archunit.junit.AnalyzeClasses
 import com.tngtech.archunit.junit.ArchTest
-import com.tngtech.archunit.junit.ArchUnitRunner
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition
 import com.tngtech.archunit.library.Architectures
 import javax.inject.Named
 import javax.persistence.ManyToMany
 import javax.persistence.OneToMany
-import org.junit.runner.RunWith
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-@RunWith(ArchUnitRunner::class)
 @AnalyzeClasses(packages = ["org.codefreak.codefreak"], importOptions = [ImportOption.DoNotIncludeTests::class])
 internal class ArchitectureTest {
 

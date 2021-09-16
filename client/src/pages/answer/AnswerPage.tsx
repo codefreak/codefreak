@@ -187,13 +187,6 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
           </ArchiveDownload>
         }
       >
-        {differentUser && (
-          <Alert
-            showIcon
-            message="You can add comments inside code by clicking the + symbol next to the line numbers!"
-            style={{ marginBottom: 16 }}
-          />
-        )}
         <FileBrowser
           key={`answer-rev-${answerRevision}`}
           id={answer.id}

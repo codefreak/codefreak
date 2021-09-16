@@ -4,8 +4,8 @@ import com.nhaarman.mockitokotlin2.any
 import org.codefreak.codefreak.SpringFrontendTest
 import org.codefreak.codefreak.auth.lti.LtiAuthenticationFilter
 import org.hamcrest.Matchers
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mitre.jwt.signer.service.JWTSigningAndValidationService
 import org.mitre.jwt.signer.service.impl.JWKSetCacheService
 import org.mitre.openid.connect.client.service.ServerConfigurationService
@@ -24,7 +24,7 @@ class LtiAuthTest : SpringFrontendTest() {
   @Autowired
   lateinit var ltiAuthenticationFilter: LtiAuthenticationFilter
 
-  @Before
+  @BeforeEach
   fun before() {
     ltiAuthenticationFilter.restClient = Mockito.mock(RestTemplate::class.java)
     val mockValidator = Mockito.mock(JWTSigningAndValidationService::class.java)
