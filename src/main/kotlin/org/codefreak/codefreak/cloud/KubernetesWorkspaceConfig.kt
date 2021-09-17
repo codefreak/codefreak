@@ -1,8 +1,8 @@
 package org.codefreak.codefreak.cloud
 
+import java.io.InputStream
 import java.util.UUID
 import org.codefreak.codefreak.config.AppConfiguration
-import java.io.InputStream
 
 data class KubernetesWorkspaceConfig(
   private val appConfig: AppConfiguration,
@@ -11,7 +11,7 @@ data class KubernetesWorkspaceConfig(
    */
   private val reference: UUID,
   private val filesSupplier: () -> InputStream
-): WorkspaceConfig {
+) : WorkspaceConfig {
   override val externalId = reference.toString()
   override val user = ""
   override val files

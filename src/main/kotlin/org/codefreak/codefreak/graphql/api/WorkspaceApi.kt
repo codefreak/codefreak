@@ -2,7 +2,6 @@ package org.codefreak.codefreak.graphql.api
 
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
-import org.codefreak.codefreak.cloud.RemoteWorkspaceReference
 import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
 import org.codefreak.codefreak.cloud.KubernetesWorkspaceService
 import org.codefreak.codefreak.cloud.WorkspaceReference

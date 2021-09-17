@@ -48,7 +48,7 @@ interface WorkspaceReference {
 
 data class DefaultWorkspaceReference(override val id: String, override val baseUrl: String, override val authToken: String) : WorkspaceReference
 
-interface WorkspaceService<T: WorkspaceConfig> {
+interface WorkspaceService<T : WorkspaceConfig> {
   fun findWorkspace(config: T): WorkspaceReference?
   fun createWorkspace(config: T): WorkspaceReference
   fun deleteWorkspace(config: T)

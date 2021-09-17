@@ -1,20 +1,21 @@
 package org.codefreak.codefreak.cloud
 
-import java.net.URI
+import java.net.URL
 import org.codefreak.codefreak.util.withoutLeadingSlash
 import org.codefreak.codefreak.util.withoutTrailingSlash
 import org.springframework.web.util.UriComponentsBuilder
 
 fun buildWorkspaceUri(workspaceBaseUrl: String, path: String? = null, query: String? = null, websocket: Boolean = false): String {
-  val baseUri = URI.create(workspaceBaseUrl)
+  val baseUri = URL(workspaceBaseUrl)
   val scheme = if (websocket) {
-    if (baseUri.scheme == "https") "wss" else "ws"
+    if (baseUri.protocol == "https") "wss" else "ws"
   } else {
-    baseUri.scheme
+    baseUri.protocol
   }
   return UriComponentsBuilder.newInstance()
       .scheme(scheme)
-      .host(baseUri.authority)
+      .host(baseUri.host)
+      .port(baseUri.port)
       .joinPath(baseUri.path, path)
       .query(query)
       .build()
@@ -26,3 +27,6 @@ private fun UriComponentsBuilder.joinPath(vararg paths: String?): UriComponentsB
   path(paths.filterNotNull().joinToString(separator = "/") { it.withoutLeadingSlash().withoutTrailingSlash() })
   return this
 }
+
+val URL.isDefaultPort: Boolean
+  get() = port == defaultPort
