@@ -16,7 +16,9 @@ const useSubscribeToEvaluationFinished = () => {
       if (res.subscriptionData.data) {
         const { evaluation } = res.subscriptionData.data.evaluationStatusUpdated
         const openResults = () => {
-          history.push(getEntityPath(evaluation.answer.task) + '/evaluation')
+          history.push(
+            getEntityPath(evaluation.answer.task) + '/ide?rightTab=evaluation'
+          )
         }
         notification.success({
           message: `Evaluation for ${evaluation.answer.task.title} finished`,

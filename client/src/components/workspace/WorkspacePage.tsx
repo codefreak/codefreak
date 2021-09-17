@@ -9,18 +9,25 @@ import { Col, Row } from 'antd'
 import { WorkspaceContext } from '../../hooks/workspace/useWorkspace'
 import { Client, createClient } from 'graphql-ws'
 import { graphqlWebSocketPath, normalizePath } from '../../services/workspace'
-import { messageService } from '../../services/message'
+import { useMutableQueryParam } from '../../hooks/useQuery'
 
 export interface WorkspacePageProps {
-  id: string
+  taskId: string
+  answerId: string
   type: FileContextType
 }
 
-const WorkspacePage = ({ id, type }: WorkspacePageProps) => {
+const WorkspacePage = ({ taskId, answerId, type }: WorkspacePageProps) => {
+  const [leftTab, setLeftTab] = useMutableQueryParam('leftTab', 'main.py')
+  const [rightTab, setRightTab] = useMutableQueryParam(
+    'rightTab',
+    WorkspaceTabType.INSTRUCTIONS.toString()
+  )
+
   const [startWorkspace, { data, called }] = useStartWorkspaceMutation({
     variables: {
       context: {
-        id,
+        id: answerId,
         type
       }
     }
@@ -30,20 +37,13 @@ const WorkspacePage = ({ id, type }: WorkspacePageProps) => {
 
   useEffect(() => {
     if (!data && !called) {
-      startWorkspace().then(() => messageService.success('Workspace started'))
+      startWorkspace()
     }
   })
 
   useEffect(() => {
     if (data && baseUrl.length === 0) {
-      setBaseUrl(
-        normalizePath(
-          data.startWorkspace.baseUrl.replace(
-            'minikube.global',
-            'minikube.global:8081'
-          )
-        )
-      )
+      setBaseUrl(normalizePath(data.startWorkspace.baseUrl))
     }
   }, [data, baseUrl])
 
@@ -54,20 +54,30 @@ const WorkspacePage = ({ id, type }: WorkspacePageProps) => {
     }
   }, [baseUrl, graphqlWebSocketClient])
 
+  const handleLeftTabChange = (activeKey: string) => setLeftTab(activeKey)
+  const handleRightTabChange = (activeKey: string) => setRightTab(activeKey)
+
   return (
-    <WorkspaceContext.Provider value={{ baseUrl, graphqlWebSocketClient }}>
+    <WorkspaceContext.Provider
+      value={{ baseUrl, graphqlWebSocketClient, taskId, answerId }}
+    >
       <Row gutter={16} className="workspace-page">
         <Col span={12}>
           <WorkspaceTabsWrapper
             tabs={[{ type: WorkspaceTabType.EDITOR, path: 'main.py' }]}
+            activeTab={leftTab}
+            onTabChange={handleLeftTabChange}
           />
         </Col>
         <Col span={12}>
           <WorkspaceTabsWrapper
             tabs={[
               { type: WorkspaceTabType.INSTRUCTIONS },
-              { type: WorkspaceTabType.SHELL }
+              { type: WorkspaceTabType.SHELL },
+              { type: WorkspaceTabType.EVALUATION }
             ]}
+            activeTab={rightTab}
+            onTabChange={handleRightTabChange}
           />
         </Col>
       </Row>

@@ -5,7 +5,6 @@ import useSubPath from '../../hooks/useSubPath'
 import { shorten } from '../../services/short-id'
 import { DifferentUserContext } from '../task/TaskPage'
 import LatestEvaluation from '../../components/LatestEvaluation'
-import EvaluationStatusTracker from '../../components/EvaluationStatusTracker'
 
 const { TabPane } = Tabs
 
@@ -24,11 +23,6 @@ const EvaluationPage: React.FC<{
 
   return (
     <>
-      {!differentUser ? (
-        <div style={{ padding: '0 64px', marginBottom: 16 }}>
-          <EvaluationStatusTracker answerId={answerId} />
-        </div>
-      ) : null}
       <Tabs defaultActiveKey={subPath.get()} onChange={onTabChange}>
         <TabPane tab="Latest Evaluation" key="">
           <LatestEvaluation answerId={answerId} showTrigger={!differentUser} />

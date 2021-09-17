@@ -1,7 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import {
   CloudOutlined,
-  DashboardOutlined,
   FileTextOutlined,
   SolutionOutlined
 } from '@ant-design/icons'
@@ -23,7 +22,6 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
-import EvaluationIndicator from '../../components/EvaluationIndicator'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
@@ -49,7 +47,6 @@ import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
 import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
-import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
@@ -188,22 +185,7 @@ const TaskPage: React.FC = () => {
       tab: tab('Answer', <SolutionOutlined />),
       disabled: !answer
     },
-    ...ideTab,
-    {
-      key: '/evaluation',
-      disabled: !answer,
-      tab: (
-        <>
-          {tab('Evaluation', <DashboardOutlined />)}
-          {answer ? (
-            <EvaluationIndicator
-              style={{ marginLeft: 8 }}
-              answerId={answer.id}
-            />
-          ) : null}
-        </>
-      )
-    }
+    ...ideTab
   ]
 
   const assignment = task.assignment
@@ -311,9 +293,6 @@ const TaskPage: React.FC = () => {
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
-        <Route path={`${path}/evaluation`}>
-          {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
-        </Route>
         <Route path={`${path}/ide`}>
           {answer ? (
             <div className="no-padding">
@@ -322,7 +301,11 @@ const TaskPage: React.FC = () => {
                   submission?.deadline ? moment(submission.deadline) : undefined
                 }
               >
-                <WorkspacePage type={FileContextType.Answer} id={answer.id} />
+                <WorkspacePage
+                  type={FileContextType.Answer}
+                  answerId={answer.id}
+                  taskId={task.id}
+                />
               </AnswerBlocker>
             </div>
           ) : (

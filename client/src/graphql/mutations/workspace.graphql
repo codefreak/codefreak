@@ -4,8 +4,6 @@ mutation StartWorkspace($context: FileContextInput!) {
   }
 }
 
-mutation DeleteWorkspace(
-  $context: FileContextInput!
-) {
+mutation DeleteWorkspace($context: FileContextInput!) {
   deleteWorkspace(fileContext: $context)
 }

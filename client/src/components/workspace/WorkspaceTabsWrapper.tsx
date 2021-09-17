@@ -5,39 +5,73 @@ import EditorTabPanel from './EditorTabPanel'
 import EmptyTabPanel from './EmptyTabPanel'
 import InstructionsTabPanel from './InstructionsTabPanel'
 import ShellTabPanel from './ShellTabPanel'
+import EvaluationTabPanel from './EvaluationTabPanel'
+import { noop } from '../../services/util'
+import EvaluationIndicator from '../EvaluationIndicator'
+import {
+  CodeOutlined,
+  DashboardOutlined,
+  FileTextOutlined,
+  SolutionOutlined
+} from '@ant-design/icons'
 
 export enum WorkspaceTabType {
-  EDITOR,
-  EMPTY,
-  INSTRUCTIONS,
-  SHELL
+  EDITOR = 'editor',
+  EMPTY = 'empty',
+  INSTRUCTIONS = 'instructions',
+  SHELL = 'shell',
+  EVALUATION = 'evaluation'
 }
 
 const getTabTitle = (
   type: WorkspaceTabType,
   filePath = '',
-  loading = false
+  loading = false,
+  answerId = ''
 ) => {
   // TODO create a kind of interface for this thing so it is more customisable in the future?
+  // TODO what about icons?
 
   switch (type) {
-    case WorkspaceTabType.EMPTY:
-      return 'No files open'
     case WorkspaceTabType.EDITOR:
       if (loading) {
-        return 'Loading...'
+        return (
+          <>
+            <FileTextOutlined /> Loading...
+          </>
+        )
       }
       if (filePath.length > 0) {
-        return extractRelativeFilePath(filePath)
+        return (
+          <>
+            <FileTextOutlined /> {extractRelativeFilePath(filePath)}
+          </>
+        )
       }
 
       throw new Error('tab is set to type EDITOR but no filePath was given')
     case WorkspaceTabType.INSTRUCTIONS:
-      return 'Instructions'
+      return (
+        <>
+          <SolutionOutlined /> Instructions
+        </>
+      )
     case WorkspaceTabType.SHELL:
-      return 'Shell'
+      return (
+        <>
+          <CodeOutlined /> Shell
+        </>
+      )
+    case WorkspaceTabType.EVALUATION:
+      return (
+        <>
+          <DashboardOutlined /> Evaluation-Results{' '}
+          <EvaluationIndicator style={{ marginLeft: 8 }} answerId={answerId} />
+        </>
+      )
+    case WorkspaceTabType.EMPTY:
     default:
-      return ''
+      return 'No files open'
   }
 }
 
@@ -47,12 +81,13 @@ type WorkspaceTab = {
 }
 
 const renderTab =
-  (baseUrl: string, loading: boolean) =>
-  (tab: WorkspaceTab, index = 0) => {
+  (baseUrl: string, loading: boolean, answerId: string) =>
+  (tab: WorkspaceTab) => {
     const title = getTabTitle(
       tab.type,
       readFilePath(baseUrl, tab.path ?? ''),
-      loading
+      loading,
+      answerId
     )
 
     let content
@@ -67,16 +102,21 @@ const renderTab =
       case WorkspaceTabType.SHELL:
         content = <ShellTabPanel />
         break
+      case WorkspaceTabType.EVALUATION:
+        content = <EvaluationTabPanel />
+        break
       case WorkspaceTabType.EMPTY:
       default:
         content = <EmptyTabPanel loading={loading} />
         break
     }
 
+    const key = tab.path ?? tab.type
+
     return (
       <Tabs.TabPane
         tab={title}
-        key={`tab-${title}-${index}`}
+        key={key}
         style={{ height: '100%' }}
         disabled={loading}
         closable={tab.type === WorkspaceTabType.EDITOR}
@@ -86,23 +126,36 @@ const renderTab =
     )
   }
 
-type WorkspaceTabsWrapperProps = {
+interface WorkspaceTabsWrapperProps {
   tabs: WorkspaceTab[]
+  activeTab?: string | WorkspaceTabType
+  onTabChange?: (activeKey: string) => void
 }
 
-const WorkspaceTabsWrapper = ({ tabs }: WorkspaceTabsWrapperProps) => {
-  const { isAvailable, baseUrl } = useWorkspace()
+const WorkspaceTabsWrapper = ({
+  tabs,
+  activeTab,
+  onTabChange = noop
+}: WorkspaceTabsWrapperProps) => {
+  const { isAvailable, baseUrl, answerId } = useWorkspace()
 
-  const renderTabImpl = renderTab(baseUrl, !isAvailable)
+  const renderTabImpl = renderTab(baseUrl, !isAvailable, answerId)
 
   const renderedTabs =
     tabs.length > 0
       ? tabs.map(renderTabImpl)
       : renderTabImpl({ type: WorkspaceTabType.EMPTY })
 
+  // TODO RUN-Button zum Start-Eval Button packen
   return (
     <div className="workspace-tabs-wrapper">
-      <Tabs hideAdd type="editable-card" className="workspace-tabs">
+      <Tabs
+        hideAdd
+        type="editable-card"
+        className="workspace-tabs"
+        activeKey={activeTab}
+        onChange={onTabChange}
+      >
         {renderedTabs}
       </Tabs>
     </div>
