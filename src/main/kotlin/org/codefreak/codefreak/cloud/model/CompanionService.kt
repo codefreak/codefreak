@@ -5,9 +5,9 @@ import com.fkorotkov.kubernetes.newServicePort
 import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Service
-import org.codefreak.codefreak.cloud.WorkspaceConfiguration
+import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
 
-class CompanionService(wsConfig: WorkspaceConfiguration) : Service() {
+class CompanionService(wsConfig: KubernetesWorkspaceConfig) : Service() {
   init {
     metadata {
       name = wsConfig.companionServiceName

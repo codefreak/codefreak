@@ -5,9 +5,9 @@ import com.fkorotkov.kubernetes.resources
 import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim
 import io.fabric8.kubernetes.api.model.Quantity
-import org.codefreak.codefreak.cloud.WorkspaceConfiguration
+import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
 
-class WorkspacePersistentVolumeClaim(wsConfig: WorkspaceConfiguration) : PersistentVolumeClaim() {
+class WorkspacePersistentVolumeClaim(wsConfig: KubernetesWorkspaceConfig) : PersistentVolumeClaim() {
   init {
     metadata {
       name = wsConfig.persistentVolumeClaimName

@@ -22,7 +22,7 @@ import org.codefreak.codefreak.cloud.workspace.WaitForProcessSubscription
 import reactor.core.publisher.Flux
 
 class WorkspaceClient(
-  private val reference: RemoteWorkspaceReference
+  private val reference: WorkspaceReference
 ) {
   private val requestFactory = OkHttpClient.Builder()
       // .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
