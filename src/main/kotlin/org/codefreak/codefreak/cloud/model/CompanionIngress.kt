@@ -10,11 +10,11 @@ import com.fkorotkov.kubernetes.networking.v1.port
 import com.fkorotkov.kubernetes.networking.v1.service
 import com.fkorotkov.kubernetes.networking.v1.spec
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress
-import org.codefreak.codefreak.cloud.WorkspaceConfiguration
+import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
 import org.codefreak.codefreak.util.withoutLeadingSlash
 import org.codefreak.codefreak.util.withoutTrailingSlash
 
-class CompanionIngress(private val wsConfig: WorkspaceConfiguration) : Ingress() {
+class CompanionIngress(private val wsConfig: KubernetesWorkspaceConfig) : Ingress() {
   init {
     metadata {
       name = wsConfig.companionIngressName

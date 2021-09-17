@@ -3,14 +3,15 @@ package org.codefreak.codefreak.graphql.api
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import org.codefreak.codefreak.cloud.RemoteWorkspaceReference
-import org.codefreak.codefreak.cloud.WorkspaceConfiguration
-import org.codefreak.codefreak.cloud.WorkspaceService
+import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
+import org.codefreak.codefreak.cloud.KubernetesWorkspaceService
+import org.codefreak.codefreak.cloud.WorkspaceReference
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.springframework.stereotype.Component
 
 @GraphQLName("Workspace")
 class WorkspaceDto(val baseUrl: String, val authToken: String) {
-  constructor(reference: RemoteWorkspaceReference) : this(
+  constructor(reference: WorkspaceReference) : this(
       baseUrl = reference.baseUrl,
       authToken = reference.authToken
   )
@@ -31,8 +32,8 @@ class WorkspaceMutation : BaseResolver(), Mutation {
     return true
   }
 
-  private fun <T> withWorkspaceConfig(fileContext: FileContext, consume: (service: WorkspaceService, config: WorkspaceConfiguration) -> T): T = context {
-    val workspaceService = serviceAccess.getService(WorkspaceService::class)
+  private fun <T> withWorkspaceConfig(fileContext: FileContext, consume: (service: KubernetesWorkspaceService, config: KubernetesWorkspaceConfig) -> T): T = context {
+    val workspaceService = serviceAccess.getService(KubernetesWorkspaceService::class)
     val workspaceConfiguration = workspaceService.createWorkspaceConfigForCollection(fileContext.id)
     consume(workspaceService, workspaceConfiguration)
   }

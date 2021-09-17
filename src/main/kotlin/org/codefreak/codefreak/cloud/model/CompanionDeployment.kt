@@ -19,9 +19,9 @@ import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Quantity
 import io.fabric8.kubernetes.api.model.apps.Deployment
-import org.codefreak.codefreak.cloud.WorkspaceConfiguration
+import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
 
-class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
+class CompanionDeployment(wsConfig: KubernetesWorkspaceConfig) : Deployment() {
   init {
     metadata {
       name = wsConfig.companionDeploymentName
@@ -38,7 +38,7 @@ class CompanionDeployment(wsConfig: WorkspaceConfiguration) : Deployment() {
         spec {
           containers = listOf(newContainer {
             name = "companion"
-            image = wsConfig.companionImageName
+            image = wsConfig.imageName
             imagePullPolicy = "IfNotPresent"
             ports = listOf(newContainerPort {
               name = "http"

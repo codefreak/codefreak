@@ -4,5 +4,5 @@ import org.springframework.stereotype.Service
 
 @Service
 class WorkspaceClientFactory {
-  fun createClient(workspaceReference: RemoteWorkspaceReference) = WorkspaceClient(workspaceReference)
+  fun createClient(workspaceReference: WorkspaceReference) = WorkspaceClient(workspaceReference)
 }
