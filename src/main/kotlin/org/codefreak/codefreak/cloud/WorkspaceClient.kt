@@ -5,6 +5,9 @@ import com.apollographql.apollo3.network.ws.DefaultWebSocketEngine
 import com.apollographql.apollo3.network.ws.GraphQLWsProtocol
 import com.apollographql.apollo3.network.ws.WebSocketNetworkTransport
 import java.io.InputStream
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import kotlinx.coroutines.flow.first
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -84,6 +87,26 @@ class WorkspaceClient(
       return body.byteStream().use { tarStream ->
         consumer(tarStream)
       }
+    }
+  }
+
+  fun waitForWorkspaceToComeLive(timeout: Long, unit: TimeUnit, interval: Long = 500L): Boolean {
+    val latch = CountDownLatch(1)
+    val thread = thread(name = "wait-workspace-${reference.id}") {
+      try {
+        while (!isWorkspaceLive()) {
+          Thread.sleep(interval)
+        }
+        latch.countDown()
+      } catch (e: InterruptedException) {
+        // okay
+      }
+    }
+    return if (!latch.await(timeout, unit)) {
+      thread.interrupt()
+      false
+    } else {
+      true
     }
   }
 
