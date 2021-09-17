@@ -2,14 +2,15 @@ package org.codefreak.codefreak.cloud
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.fabric8.kubernetes.client.KubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClientTimeoutException
 import io.fabric8.kubernetes.client.dsl.CreateOrReplaceable
 import io.fabric8.kubernetes.client.dsl.MultiDeleteable
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import org.codefreak.codefreak.cloud.model.CompanionDeployment
 import org.codefreak.codefreak.cloud.model.CompanionIngress
 import org.codefreak.codefreak.cloud.model.CompanionScriptMap
 import org.codefreak.codefreak.cloud.model.CompanionService
-import org.codefreak.codefreak.cloud.model.WorkspacePersistentVolumeClaim
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.service.file.FileService
 import org.slf4j.LoggerFactory
@@ -45,17 +46,25 @@ class KubernetesWorkspaceService(
     kubernetesClient.configMaps().createOrReplaceWithLog(CompanionScriptMap(config))
     kubernetesClient.apps().deployments().createOrReplaceWithLog(CompanionDeployment(config))
     kubernetesClient.services().createOrReplaceWithLog(CompanionService(config))
-    kubernetesClient.network().v1().ingresses().createOrReplaceWithLog(CompanionIngress(config))
+    val ingress = CompanionIngress(config)
+    kubernetesClient.network().v1().ingresses().createOrReplaceWithLog(ingress)
+
+    // make sure the deployment is ready
+    val deployment = kubernetesClient.apps().deployments().withName(config.companionDeploymentName)
+    try {
+      deployment.waitUntilReady(20, TimeUnit.SECONDS)
+      log.debug("Workspace ${config.workspaceId} is ready.")
+    } catch (e: KubernetesClientTimeoutException) {
+      val currentStatus = deployment.get().status
+      throw IllegalStateException("Workspace ${config.workspaceId} is not ready after 20sec. Current status is $currentStatus")
+    }
 
     // deploy answer files
     val reference = createStaticReference(config)
     val wsClient = wsClientFactory.createClient(reference)
-    log.debug("Waiting for workspace ${config.workspaceId} to come live")
-    while (!wsClient.isWorkspaceLive()) {
-      log.debug("Workspace ${config.workspaceId} still not live...")
-      Thread.sleep(1000L)
+    if (!wsClient.isWorkspaceLive()) {
+      throw IllegalStateException("Workspace ${config.workspaceId} is not reachable at ${ingress.getBaseUrl()} even though the Pod is ready.")
     }
-    log.debug("Workspace ${config.workspaceId} is live!")
     log.debug("Deploying files to workspace ${config.workspaceId}...")
     fileService.readCollectionTar(UUID.fromString(config.workspaceId)).use {
       wsClient.deployFiles(it)
@@ -79,9 +88,6 @@ class KubernetesWorkspaceService(
     kubernetesClient.network().v1().ingresses().deleteWithLog(CompanionIngress(config))
     kubernetesClient.apps().deployments().deleteWithLog(CompanionDeployment(config))
     kubernetesClient.configMaps().deleteWithLog(CompanionScriptMap(config))
-
-    // delete the pvc
-    kubernetesClient.persistentVolumeClaims().deleteWithLog(WorkspacePersistentVolumeClaim(config))
   }
 
   fun createWorkspaceConfigForCollection(collectionId: UUID): KubernetesWorkspaceConfig {
@@ -100,9 +106,9 @@ class KubernetesWorkspaceService(
   private fun createStaticReference(config: KubernetesWorkspaceConfig): WorkspaceReference {
     val ingress = CompanionIngress(config)
     return DefaultWorkspaceReference(
-        id = config.externalId,
-        baseUrl = ingress.getBaseUrl(),
-        authToken = ""
+      id = config.externalId,
+      baseUrl = ingress.getBaseUrl(),
+      authToken = ""
     )
   }
 

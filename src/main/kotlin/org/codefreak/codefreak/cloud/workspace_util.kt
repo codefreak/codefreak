@@ -28,5 +28,8 @@ private fun UriComponentsBuilder.joinPath(vararg paths: String?): UriComponentsB
   return this
 }
 
-val URL.isDefaultPort: Boolean
-  get() = port == defaultPort
+/**
+ * Indicate if URL has a port set that is not the default for this protocol
+ */
+val URL.hasNonStandardPort: Boolean
+  get() = port != -1 && port != defaultPort
