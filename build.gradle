@@ -68,7 +68,7 @@ dependencies {
   implementation 'com.github.Open-MBEE:junit-xml-parser:1.0.0'
   implementation 'org.mitre:openid-connect-client:1.3.3'
   implementation 'org.eclipse.jgit:org.eclipse.jgit:5.13.0.202109080827-r'
-  implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:5.12.0.202106070339-r'
+  implementation 'org.eclipse.jgit:org.eclipse.jgit.archive:5.13.0.202109080827-r'
   implementation 'org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:5.12.0.202106070339-r'
   implementation 'org.liquibase:liquibase-core:4.4.3'
   implementation 'com.graphql-java-kickstart:graphql-spring-boot-starter:7.2.0'
