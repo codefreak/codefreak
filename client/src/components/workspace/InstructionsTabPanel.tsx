@@ -9,8 +9,6 @@ const InstructionsTabPanel = () => {
     variables: { id, teacher: false }
   })
   const instructions = data?.task.body ?? ''
-  // TODO use the whole panel from TaskDetailsPage (?)
-  // TODO max height for instructions (?)
 
   return (
     <TabPanel withPadding>{renderTaskInstructionsText(instructions)}</TabPanel>

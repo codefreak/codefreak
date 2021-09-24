@@ -29,9 +29,6 @@ const getTabTitle = (
   loading = false,
   answerId = ''
 ) => {
-  // TODO create a kind of interface for this thing so it is more customisable in the future?
-  // TODO what about icons?
-
   switch (type) {
     case WorkspaceTabType.EDITOR:
       if (loading) {
@@ -146,7 +143,6 @@ const WorkspaceTabsWrapper = ({
       ? tabs.map(renderTabImpl)
       : renderTabImpl({ type: WorkspaceTabType.EMPTY })
 
-  // TODO RUN-Button zum Start-Eval Button packen
   return (
     <div className="workspace-tabs-wrapper">
       <Tabs

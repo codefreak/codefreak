@@ -3,8 +3,6 @@ const GRAPHQL_API_ROUTE = 'graphql'
 const PROCESS_API_ROUTE = 'process'
 export const WRITE_FILE_FORM_KEY = 'files'
 
-// TODO document these functions
-
 export const extractRelativeFilePath = (path: string) => {
   const pattern = `/${FILES_API_ROUTE}/`
   return path.substr(path.indexOf(pattern) + pattern.length)

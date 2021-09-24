@@ -10,6 +10,7 @@ import { WorkspaceContext } from '../../hooks/workspace/useWorkspace'
 import { Client, createClient } from 'graphql-ws'
 import { graphqlWebSocketPath, normalizePath } from '../../services/workspace'
 import { useMutableQueryParam } from '../../hooks/useQuery'
+import FileTree from './FileTree'
 
 export interface WorkspacePageProps {
   taskId: string
@@ -61,15 +62,18 @@ const WorkspacePage = ({ taskId, answerId, type }: WorkspacePageProps) => {
     <WorkspaceContext.Provider
       value={{ baseUrl, graphqlWebSocketClient, taskId, answerId }}
     >
-      <Row gutter={16} className="workspace-page">
-        <Col span={12}>
+      <Row gutter={4} className="workspace-page">
+        <Col span={4}>
+          <FileTree />
+        </Col>
+        <Col span={10}>
           <WorkspaceTabsWrapper
             tabs={[{ type: WorkspaceTabType.EDITOR, path: 'main.py' }]}
             activeTab={leftTab}
             onTabChange={handleLeftTabChange}
           />
         </Col>
-        <Col span={12}>
+        <Col span={10}>
           <WorkspaceTabsWrapper
             tabs={[
               { type: WorkspaceTabType.INSTRUCTIONS },
