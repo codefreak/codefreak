@@ -1,0 +1,30 @@
+spring:
+  graphql:
+    graphiql:
+      path: /playground
+      enabled: false
+    websocket:
+      path: /graphql
+  profiles:
+    active: prod
+
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        include: health,prometheus,metrics
+  endpoint:
+    health:
+      enabled: true
+      # Make probes also work outside of kubernetes
+      probes:
+        enabled: true
+  # For kubernetes
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+
+

@@ -1,3 +1,9 @@
+buildscript {
+  dependencies {
+    classpath("com.google.cloud.tools:jib-spring-boot-extension-gradle:0.1.0")
+  }
+}
+
 plugins {
   id 'org.jetbrains.kotlin.jvm' version '1.5.31'
   id 'org.jetbrains.kotlin.plugin.jpa' version '1.5.31'
