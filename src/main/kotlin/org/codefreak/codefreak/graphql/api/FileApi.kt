@@ -99,8 +99,8 @@ class FileQuery : BaseResolver(), Query {
     authorize(fileContext, FileActionType.VIEW)
     val fileService = serviceAccess.getService(FileService::class)
     val digest = fileService.getCollectionMd5Digest(fileContext.id)
-    fileService.listFiles(fileContext.id, path).use {
-      it.map {
+    fileService.listFiles(fileContext.id, path).use { files ->
+      files.map {
         FileDto(fileContext.id, digest, it)
       }.toList()
     }

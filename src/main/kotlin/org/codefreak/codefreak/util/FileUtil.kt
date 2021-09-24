@@ -11,12 +11,23 @@ object FileUtil {
 
   private val matcher = AntPathMatcher()
 
+  /**
+   * Resolve an untrusted (user-input) path from the given base path.
+   * Use this method to prevent directory traversal attacks.
+   */
   fun resolveSecurely(basePath: Path, path: String): Path {
     return basePath.resolve(normalizePath(path))
   }
 
+  /**
+   * Get the last part of a given path including file extension.
+   * /foo/bar.txt -> bar.txt
+   * /foo/bar/ -> bar
+   * / -> <empty string>
+   * <empty string> -> <empty string>
+   */
   fun basename(path: String): String {
-    return FilenameUtils.getBaseName(normalizePath(path))
+    return FilenameUtils.getName(normalizePath(path))
   }
 
   /**

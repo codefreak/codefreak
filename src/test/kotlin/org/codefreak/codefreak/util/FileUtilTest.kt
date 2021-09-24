@@ -13,7 +13,7 @@ class FileUtilTest {
   fun `file name is normalized correctly`() {
     mapOf(
       "foo" to "foo",
-      // keep leading/trailing slashes as they are valid in filenames
+      // keep leading/trailing spaces as they are valid in filenames
       " foo " to " foo ",
       // resulting path will contain the correct directory separator
       "foo/bar" to "foo" + File.separatorChar + "bar",
@@ -31,6 +31,18 @@ class FileUtilTest {
     ).forEach {
       assertEquals(it.value, FileUtil.normalizePath(it.key))
     }
+  }
+
+  @Test
+  fun `that basename returns correct base`() {
+    assertThat(FileUtil.basename("/foo/bar"), `is`("bar"))
+    assertThat(FileUtil.basename("/foo/bar.txt"), `is`("bar.txt"))
+    assertThat(FileUtil.basename("/foo/.gitignore"), `is`(".gitignore"))
+    assertThat(FileUtil.basename("/foo/bar/"), `is`("bar"))
+    assertThat(FileUtil.basename("/foo/ bar "), `is`(" bar "))
+    assertThat(FileUtil.basename("/"), `is`(""))
+    assertThat(FileUtil.basename("/ "), `is`(" "))
+    assertThat(FileUtil.basename(""), `is`(""))
   }
 
   @Test

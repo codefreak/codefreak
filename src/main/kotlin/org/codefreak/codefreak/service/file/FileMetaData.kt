@@ -22,8 +22,9 @@ data class FileMetaData(
   val type: FileType,
 
   /**
-   * Absolute path of the file in the collection.
+   * Absolute path of the file within the collection.
    * Always starts with a leading slash and never has a trailing slash.
+   * The directory separator is always a UNIX forward slash.
    */
   val path: String,
 
