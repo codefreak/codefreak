@@ -5,7 +5,13 @@ export const WRITE_FILE_FORM_KEY = 'files'
 
 export const extractRelativeFilePath = (path: string) => {
   const pattern = `/${FILES_API_ROUTE}/`
-  return path.substr(path.indexOf(pattern) + pattern.length)
+  const index = path.indexOf(pattern)
+
+  if (index === -1) {
+    throw new Error('Invalid file path pattern')
+  }
+
+  return path.substr(index + pattern.length)
 }
 
 export const writeFilePath = (baseUrl: string) => {
