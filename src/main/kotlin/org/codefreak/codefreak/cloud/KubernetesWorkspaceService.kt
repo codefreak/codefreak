@@ -53,7 +53,7 @@ class KubernetesWorkspaceService(
       // make sure the deployment is ready
       val deployment = kubernetesClient.apps().deployments().withName(config.companionDeploymentName)
       try {
-        deployment.waitUntilReady(20, TimeUnit.SECONDS)
+        deployment.waitUntilReady(50, TimeUnit.SECONDS)
         log.debug("Workspace ${config.workspaceId} is ready.")
       } catch (e: KubernetesClientTimeoutException) {
         throw IllegalStateException("Workspace ${config.workspaceId} is not ready after 20sec.")
@@ -66,9 +66,7 @@ class KubernetesWorkspaceService(
         throw IllegalStateException("Workspace ${config.workspaceId} is not reachable at ${ingress.getBaseUrl()} after 10sec even though the Pod is ready.")
       }
       log.debug("Deploying files to workspace ${config.workspaceId}...")
-      fileService.readCollectionTar(UUID.fromString(config.workspaceId)).use {
-        wsClient.deployFiles(it)
-      }
+      config.files.use(wsClient::deployFiles)
       log.debug("Deployed files to workspace ${config.workspaceId}!")
       return reference
     } catch (e: Exception) {

@@ -14,10 +14,8 @@ import com.fkorotkov.kubernetes.newKeyToPath
 import com.fkorotkov.kubernetes.newVolume
 import com.fkorotkov.kubernetes.newVolumeMount
 import com.fkorotkov.kubernetes.readinessProbe
-import com.fkorotkov.kubernetes.resources
 import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
-import io.fabric8.kubernetes.api.model.Quantity
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
 
@@ -45,16 +43,16 @@ class CompanionDeployment(wsConfig: KubernetesWorkspaceConfig) : Deployment() {
               containerPort = 8080
               protocol = "TCP"
             })
-            resources {
-              requests = mapOf(
-                  "cpu" to Quantity.parse("1"),
-                  "memory" to Quantity.parse("128Mi")
-              )
-              limits = mapOf(
-                  "cpu" to Quantity.parse("4"),
-                  "memory" to Quantity.parse("512Mi")
-              )
-            }
+            // resources {
+            //  requests = mapOf(
+            //      "cpu" to Quantity.parse("1"),
+            //      "memory" to Quantity.parse("128Mi")
+            //  )
+            //  limits = mapOf(
+            //      "cpu" to Quantity.parse("4"),
+            //      "memory" to Quantity.parse("512Mi")
+            //  )
+            // }
             // disable environment variables with service links
             enableServiceLinks = false
             volumeMounts = listOf(

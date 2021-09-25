@@ -7,6 +7,9 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+/**
+ * Spring startup validator to ensure the K8s connection is working.
+ */
 @Component
 class KubernetesStartupValidator : InitializingBean {
   companion object {
