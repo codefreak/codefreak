@@ -274,7 +274,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
       require(Files.exists(sourcePath)) { "The source path `$it` does not exist" }
 
-      val mappedTargetPath = getCollectionFilePath(collectionId, FileUtil.basename(it))
+      val mappedTargetPath = getCollectionFilePath(collectionId, target, FileUtil.basename(it))
       val shouldMovePath =
         !arePathsEqual(sourcePath, targetPath) && !arePathsEqual(sourcePath, mappedTargetPath) || Files.isDirectory(
           sourcePath
@@ -339,7 +339,8 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
    * Convert a collection-relative path to an absolute path.
    * Path will be escaped properly
    */
-  private fun getCollectionFilePath(collectionId: UUID, path: String): Path {
+  private fun getCollectionFilePath(collectionId: UUID, vararg pathSegments: String): Path {
+    val path = pathSegments.joinToString(separator = "/")
     // join collection path and the relative file path to an absolute path
     return FileUtil.resolveSecurely(createCollectionPath(collectionId), path)
   }
