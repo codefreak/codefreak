@@ -17,7 +17,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Controller
-class FilesController {
+class GraphQLFilesController {
   @Autowired
   lateinit var fileService: FileService
 

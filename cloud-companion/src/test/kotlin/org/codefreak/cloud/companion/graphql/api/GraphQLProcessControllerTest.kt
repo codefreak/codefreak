@@ -19,7 +19,7 @@ private fun getBashPath(): String {
   return "/bin/bash"
 }
 
-internal class ProcessControllerTest(
+internal class GraphQLProcessControllerTest(
   @Autowired private val processManager: ProcessManager
 ) : BasicGraphqlTest() {
 

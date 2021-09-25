@@ -40,7 +40,7 @@ your `src/main/resources/application-dev.yml` correctly!
 The server accepts both `POST` and Websocket queries. The GQL websocket protocol is based
 on [`graphql-ws`](https://github.com/enisdenjo/graphql-ws)!
 
-### `POST /files`
+### `POST /upload`
 
 Expects a `multipart/form-data` request with one or multiple field with the name `files`. Each file will be stored
 inside the container in `/code` by default. The filename can also contain slashes to upload to sub-directories. If the
@@ -51,7 +51,7 @@ everything was uploaded properly.
 Example request:
 
 ```
-POST /files HTTP/1.1
+POST /upload HTTP/1.1
 Host: localhost:8080
 Content-Type: multipart/form-data; boundary=----random-string-generated-by-browser
 ...
