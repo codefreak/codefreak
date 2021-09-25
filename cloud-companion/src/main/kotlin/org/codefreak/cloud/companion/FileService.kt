@@ -1,9 +1,11 @@
 package org.codefreak.cloud.companion
 
 import java.io.File
+import java.io.IOException
 import java.io.OutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
+import java.nio.file.FileAlreadyExistsException
 import java.nio.file.FileSystem
 import java.nio.file.FileSystemException
 import java.nio.file.Files
@@ -15,6 +17,7 @@ import java.nio.file.WatchKey
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
 import kotlin.io.path.isSameFileAs
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -71,6 +74,30 @@ class FileService(
 
   fun relativePath(path: Path): String {
     return "/${basePath.relativize(path)}"
+  }
+
+  @Throws(IOException::class)
+  fun createEmptyDirectory(path: Path) {
+    try {
+      Files.createDirectory(path)
+    } catch (e: FileAlreadyExistsException) {
+      // that's okay if it is not an existing file
+      if (path.isRegularFile()) {
+        throw e
+      }
+    }
+  }
+
+  @Throws(IOException::class)
+  fun createEmptyFile(path: Path) {
+    try {
+      Files.createFile(path)
+    } catch (e: FileAlreadyExistsException) {
+      // that's okay if it is not an existing directory
+      if (path.isDirectory()) {
+        throw e
+      }
+    }
   }
 
   /**

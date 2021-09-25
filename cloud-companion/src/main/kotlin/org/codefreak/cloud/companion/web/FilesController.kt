@@ -1,5 +1,6 @@
 package org.codefreak.cloud.companion.web
 
+import java.io.IOException
 import java.net.URLDecoder
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
@@ -15,11 +16,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.HandlerMapping
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
+import reactor.core.publisher.Mono
 
 /**
  * URL route prefix for files
@@ -35,6 +39,34 @@ class FilesController {
 
   @Autowired
   private lateinit var fileService: FileService
+
+  @PostMapping("/{path}/**")
+  @ResponseStatus(HttpStatus.CREATED)
+  fun touchFile(@PathVariable path: String, exchange: ServerWebExchange): Mono<Void> {
+    val filePath = extractFilePath(exchange)
+    val shouldCreateDirectory = filePath.endsWith("/")
+    return Mono.just(filePath)
+      .map { fileService.resolve(it) }
+      .map { file ->
+        if (shouldCreateDirectory) {
+          fileService.createEmptyDirectory(file)
+        } else {
+          fileService.createEmptyFile(file)
+        }
+      }.onErrorMap(IOException::class.java) {
+        if (shouldCreateDirectory) {
+          ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Could not create directory $filePath: ${it.message}"
+          )
+        } else {
+          ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Could not create file $filePath: ${it.message}"
+          )
+        }
+      }.then()
+  }
 
   @GetMapping("/{path}/**")
   fun downloadFile(@PathVariable path: String, exchange: ServerWebExchange): ResponseEntity<Resource> {

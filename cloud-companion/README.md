@@ -77,6 +77,14 @@ exists) with the one of the following mime-types:
 * The proper mime type for images (mime starts with `image/*`)
 * `application/octet-stream` for everything else
 
+### `POST /files/{filepath}`
+Creates an empty directory or file with the following convention:
+* If `filepath` ends with a slash it will create an empty directory. If `filepath` is an existing file the operation will fail.
+* If `filepath` does not end with a slash it will create an empty file. If `filepath` is an existing directory the operation will fail.
+
+If `filepath` is an existing file or directory this will do nothing.
+A successful operation will return `201 CREATED`.
+
 ### `GET /files-tar`
 
 Download a tar archive that contains all project files. You can optionally specify a `?filter=` parameter which allows
