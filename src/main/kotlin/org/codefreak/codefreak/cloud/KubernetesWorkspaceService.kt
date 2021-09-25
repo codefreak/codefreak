@@ -42,35 +42,40 @@ class KubernetesWorkspaceService(
     }
     log.info("Creating new workspace ${config.workspaceId}")
 
-    // deploy the companion
-    kubernetesClient.configMaps().createOrReplaceWithLog(CompanionScriptMap(config))
-    kubernetesClient.apps().deployments().createOrReplaceWithLog(CompanionDeployment(config))
-    kubernetesClient.services().createOrReplaceWithLog(CompanionService(config))
-    val ingress = CompanionIngress(config)
-    kubernetesClient.network().v1().ingresses().createOrReplaceWithLog(ingress)
-
-    // make sure the deployment is ready
-    val deployment = kubernetesClient.apps().deployments().withName(config.companionDeploymentName)
+    // From this point on we will start creating the required K8s resources
     try {
-      deployment.waitUntilReady(20, TimeUnit.SECONDS)
-      log.debug("Workspace ${config.workspaceId} is ready.")
-    } catch (e: KubernetesClientTimeoutException) {
-      throw IllegalStateException("Workspace ${config.workspaceId} is not ready after 20sec.")
-    }
+      kubernetesClient.configMaps().createOrReplaceWithLog(CompanionScriptMap(config))
+      kubernetesClient.apps().deployments().createOrReplaceWithLog(CompanionDeployment(config))
+      kubernetesClient.services().createOrReplaceWithLog(CompanionService(config))
+      val ingress = CompanionIngress(config)
+      kubernetesClient.network().v1().ingresses().createOrReplaceWithLog(ingress)
 
-    // deploy answer files
-    val reference = createStaticReference(config)
-    val wsClient = wsClientFactory.createClient(reference)
-    if (!wsClient.waitForWorkspaceToComeLive(10L, TimeUnit.SECONDS)) {
-      throw IllegalStateException("Workspace ${config.workspaceId} is not reachable at ${ingress.getBaseUrl()} after 10sec even though the Pod is ready.")
-    }
-    log.debug("Deploying files to workspace ${config.workspaceId}...")
-    fileService.readCollectionTar(UUID.fromString(config.workspaceId)).use {
-      wsClient.deployFiles(it)
-    }
-    log.debug("Deployed files to workspace ${config.workspaceId}!")
+      // make sure the deployment is ready
+      val deployment = kubernetesClient.apps().deployments().withName(config.companionDeploymentName)
+      try {
+        deployment.waitUntilReady(20, TimeUnit.SECONDS)
+        log.debug("Workspace ${config.workspaceId} is ready.")
+      } catch (e: KubernetesClientTimeoutException) {
+        throw IllegalStateException("Workspace ${config.workspaceId} is not ready after 20sec.")
+      }
 
-    return reference
+      // deploy answer files
+      val reference = createStaticReference(config)
+      val wsClient = wsClientFactory.createClient(reference)
+      if (!wsClient.waitForWorkspaceToComeLive(10L, TimeUnit.SECONDS)) {
+        throw IllegalStateException("Workspace ${config.workspaceId} is not reachable at ${ingress.getBaseUrl()} after 10sec even though the Pod is ready.")
+      }
+      log.debug("Deploying files to workspace ${config.workspaceId}...")
+      fileService.readCollectionTar(UUID.fromString(config.workspaceId)).use {
+        wsClient.deployFiles(it)
+      }
+      log.debug("Deployed files to workspace ${config.workspaceId}!")
+      return reference
+    } catch (e: Exception) {
+      // make sure we tear down the workspace in case something went wrong during deployment
+      deleteWorkspaceResources(config)
+      throw e
+    }
   }
 
   override fun deleteWorkspace(config: KubernetesWorkspaceConfig) {
@@ -82,7 +87,10 @@ class KubernetesWorkspaceService(
         StreamUtils.copy(downloadedFiles, tarCollection)
       }
     }
-    // delete the companion deployment
+    deleteWorkspaceResources(config)
+  }
+
+  private fun deleteWorkspaceResources(config: KubernetesWorkspaceConfig) {
     kubernetesClient.services().deleteWithLog(CompanionService(config))
     kubernetesClient.network().v1().ingresses().deleteWithLog(CompanionIngress(config))
     kubernetesClient.apps().deployments().deleteWithLog(CompanionDeployment(config))
