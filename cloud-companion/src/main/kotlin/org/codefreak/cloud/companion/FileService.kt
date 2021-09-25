@@ -256,4 +256,17 @@ class FileService(
     return FilenameUtils.normalizeNoEndSeparator(joinedParts)?.trim(File.separatorChar)
       ?: throw IllegalArgumentException("Invalid path specified: $joinedParts")
   }
+
+  /**
+   * Delete a file or directory.
+   * If path is a directory it will be deleted recursively.
+   */
+  fun deleteFile(path: Path) {
+    val file = path.toFile()
+    if (file.isDirectory) {
+      file.deleteRecursively()
+    } else {
+      file.delete()
+    }
+  }
 }

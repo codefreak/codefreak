@@ -14,6 +14,7 @@ import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -93,6 +94,30 @@ class FilesController {
       // do not use filesystem based resources here as spring will be "smart"
       // and overrides our explicit content-type from above
       .body(InputStreamResource(file.inputStream()))
+  }
+
+  @DeleteMapping("/{path}/**")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  fun deleteFile(@PathVariable path: String, exchange: ServerWebExchange): Mono<Void> {
+    val filePath = extractFilePath(exchange)
+    return Mono.just(filePath)
+        .map { fileService.resolve(it) }
+        .map { file ->
+          when {
+            !file.exists() -> throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "File ${file.absolutePathString()} does not exist"
+            )
+            else -> {
+              fileService.deleteFile(file)
+            }
+          }
+        }.onErrorMap(IOException::class.java) {
+          ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Could not delete file/directory $filePath: ${it.message}"
+          )
+        }.then()
   }
 
   /**

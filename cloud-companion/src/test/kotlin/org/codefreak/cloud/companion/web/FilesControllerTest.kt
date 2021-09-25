@@ -4,8 +4,11 @@ import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
 import kotlin.io.path.writeBytes
 import kotlin.io.path.writeText
-import org.hamcrest.MatcherAssert
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.not
 import org.hamcrest.io.FileMatchers
+import org.hamcrest.io.FileMatchers.anExistingDirectory
+import org.hamcrest.io.FileMatchers.anExistingFile
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.test.web.reactive.server.expectBody
@@ -83,7 +86,7 @@ internal class FilesControllerTest : FileBasedTest() {
         .exchange()
         .expectStatus()
         .isCreated
-    MatcherAssert.assertThat(fileService.resolve("/foo").toFile(), FileMatchers.anExistingFile())
+    assertThat(fileService.resolve("/foo").toFile(), anExistingFile())
   }
 
   @Test
@@ -94,7 +97,7 @@ internal class FilesControllerTest : FileBasedTest() {
         .exchange()
         .expectStatus()
         .isCreated
-    MatcherAssert.assertThat(fileService.resolve("/foo").toFile(), FileMatchers.anExistingFile())
+    assertThat(fileService.resolve("/foo").toFile(), anExistingFile())
   }
 
   @Test
@@ -114,7 +117,7 @@ internal class FilesControllerTest : FileBasedTest() {
         .exchange()
         .expectStatus()
         .isCreated
-    MatcherAssert.assertThat(fileService.resolve("/foo").toFile(), FileMatchers.anExistingDirectory())
+    assertThat(fileService.resolve("/foo").toFile(), FileMatchers.anExistingDirectory())
   }
 
   @Test
@@ -125,7 +128,7 @@ internal class FilesControllerTest : FileBasedTest() {
         .exchange()
         .expectStatus()
         .isCreated
-    MatcherAssert.assertThat(fileService.resolve("/foo").toFile(), FileMatchers.anExistingDirectory())
+    assertThat(fileService.resolve("/foo").toFile(), FileMatchers.anExistingDirectory())
   }
 
   @Test
@@ -156,6 +159,50 @@ internal class FilesControllerTest : FileBasedTest() {
         .exchange()
         .expectStatus()
         .isCreated
-    MatcherAssert.assertThat(fileService.resolve("/foo/bar").toFile(), FileMatchers.anExistingFile())
+    assertThat(fileService.resolve("/foo/bar").toFile(), anExistingFile())
+  }
+
+  @Test
+  fun `deleting a regular file works`() {
+    fileService.resolve("/foo").createFile()
+    client.delete()
+        .uri("/files/foo")
+        .exchange()
+        .expectStatus()
+        .isNoContent
+    assertThat(fileService.resolve("/foo").toFile(), not(anExistingFile()))
+  }
+
+  @Test
+  fun `deleting a non-existing file will return 404`() {
+    client.delete()
+        .uri("/files/foo")
+        .exchange()
+        .expectStatus()
+        .isNotFound
+  }
+
+  @Test
+  fun `deleting an empty directory works`() {
+    fileService.resolve("/foo").createDirectory()
+    client.delete()
+        .uri("/files/foo")
+        .exchange()
+        .expectStatus()
+        .isNoContent
+    assertThat(fileService.resolve("/foo").toFile(), not(anExistingDirectory()))
+  }
+
+  @Test
+  fun `deleting a non-empty directory works`() {
+    fileService.resolve("/foo").createDirectory()
+    fileService.resolve("/foo/bar").createDirectory()
+    fileService.resolve("/foo/baz").createFile()
+    client.delete()
+        .uri("/files/foo")
+        .exchange()
+        .expectStatus()
+        .isNoContent
+    assertThat(fileService.resolve("/foo").toFile(), not(anExistingDirectory()))
   }
 }

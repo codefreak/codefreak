@@ -85,6 +85,10 @@ Creates an empty directory or file with the following convention:
 If `filepath` is an existing file or directory this will do nothing.
 A successful operation will return `201 CREATED`.
 
+### `DELETE /files/{filepath}`
+Deletes a file or directory specified by `filepath`. Directories will be deleted recursively!
+Returns `204 NO CONTENT` for successful operations or `404 in case
+
 ### `GET /files-tar`
 
 Download a tar archive that contains all project files. You can optionally specify a `?filter=` parameter which allows
