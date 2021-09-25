@@ -183,6 +183,15 @@ internal class FilesControllerTest : FileBasedTest() {
   }
 
   @Test
+  fun `delete root does not work`() {
+    client.delete()
+        .uri("/files/..")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+  }
+
+  @Test
   fun `deleting an empty directory works`() {
     fileService.resolve("/foo").createDirectory()
     client.delete()

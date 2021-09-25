@@ -112,6 +112,11 @@ class FilesController {
               fileService.deleteFile(file)
             }
           }
+        }.onErrorMap(IllegalArgumentException::class.java) {
+          ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Invalid path specified: $filePath"
+          )
         }.onErrorMap(IOException::class.java) {
           ResponseStatusException(
               HttpStatus.BAD_REQUEST,

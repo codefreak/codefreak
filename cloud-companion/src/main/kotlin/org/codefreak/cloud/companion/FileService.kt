@@ -262,6 +262,7 @@ class FileService(
    * If path is a directory it will be deleted recursively.
    */
   fun deleteFile(path: Path) {
+    require(!path.isSameFileAs(basePath)) { "Cannot delete base path" }
     val file = path.toFile()
     if (file.isDirectory) {
       file.deleteRecursively()
