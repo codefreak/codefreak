@@ -7,8 +7,8 @@ import io.fabric8.kubernetes.client.dsl.CreateOrReplaceable
 import io.fabric8.kubernetes.client.dsl.MultiDeleteable
 import java.util.UUID
 import java.util.concurrent.TimeUnit
-import org.codefreak.codefreak.cloud.model.CompanionDeployment
 import org.codefreak.codefreak.cloud.model.CompanionIngress
+import org.codefreak.codefreak.cloud.model.CompanionPod
 import org.codefreak.codefreak.cloud.model.CompanionScriptMap
 import org.codefreak.codefreak.cloud.model.CompanionService
 import org.codefreak.codefreak.config.AppConfiguration
@@ -45,15 +45,15 @@ class KubernetesWorkspaceService(
     // From this point on we will start creating the required K8s resources
     try {
       kubernetesClient.configMaps().createOrReplaceWithLog(CompanionScriptMap(config))
-      kubernetesClient.apps().deployments().createOrReplaceWithLog(CompanionDeployment(config))
+      kubernetesClient.pods().createOrReplaceWithLog(CompanionPod(config))
       kubernetesClient.services().createOrReplaceWithLog(CompanionService(config))
       val ingress = CompanionIngress(config)
       kubernetesClient.network().v1().ingresses().createOrReplaceWithLog(ingress)
 
       // make sure the deployment is ready
-      val deployment = kubernetesClient.apps().deployments().withName(config.companionDeploymentName)
+      val companionPod = kubernetesClient.pods().withName(config.companionDeploymentName)
       try {
-        deployment.waitUntilReady(50, TimeUnit.SECONDS)
+        companionPod.waitUntilReady(20, TimeUnit.SECONDS)
         log.debug("Workspace ${config.workspaceId} is ready.")
       } catch (e: KubernetesClientTimeoutException) {
         throw IllegalStateException("Workspace ${config.workspaceId} is not ready after 20sec.")
@@ -91,7 +91,7 @@ class KubernetesWorkspaceService(
   private fun deleteWorkspaceResources(config: KubernetesWorkspaceConfig) {
     kubernetesClient.services().deleteWithLog(CompanionService(config))
     kubernetesClient.network().v1().ingresses().deleteWithLog(CompanionIngress(config))
-    kubernetesClient.apps().deployments().deleteWithLog(CompanionDeployment(config))
+    kubernetesClient.pods().deleteWithLog(CompanionPod(config))
     kubernetesClient.configMaps().deleteWithLog(CompanionScriptMap(config))
   }
 
