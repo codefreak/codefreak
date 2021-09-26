@@ -11,6 +11,7 @@ data class KubernetesWorkspaceConfig(
    */
   private val reference: UUID,
   override val imageName: String = appConfig.workspaces.companionImage,
+  private val saveFilesFunction: ((files: InputStream) -> Unit)? = null,
   private val filesSupplier: () -> InputStream
 ) : WorkspaceConfig {
   override val externalId = reference.toString()
@@ -18,6 +19,14 @@ data class KubernetesWorkspaceConfig(
   override val files
     get() = filesSupplier()
   override val scripts: MutableMap<String, String> = mutableMapOf()
+  override fun saveFiles(files: InputStream) {
+    if (saveFilesFunction == null) {
+      throw UnsupportedOperationException("This config is read-only")
+    }
+    saveFilesFunction.invoke(files)
+  }
+
+  override val isReadOnly = saveFilesFunction == null
 
   val workspaceId = reference.toString().lowercase()
   val companionDeploymentName = workspaceId.lowercase() + "-companion"

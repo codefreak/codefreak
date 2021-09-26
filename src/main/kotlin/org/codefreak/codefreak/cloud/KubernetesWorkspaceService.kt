@@ -5,8 +5,7 @@ import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientTimeoutException
 import io.fabric8.kubernetes.client.dsl.CreateOrReplaceable
 import io.fabric8.kubernetes.client.dsl.MultiDeleteable
-import java.util.UUID
-import java.util.concurrent.TimeUnit
+import org.apache.commons.io.IOUtils
 import org.codefreak.codefreak.cloud.model.CompanionIngress
 import org.codefreak.codefreak.cloud.model.CompanionPod
 import org.codefreak.codefreak.cloud.model.CompanionScriptMap
@@ -17,14 +16,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import org.springframework.util.StreamUtils
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 @Service
 class KubernetesWorkspaceService(
-  private val kubernetesClient: KubernetesClient,
-  private val config: AppConfiguration,
-  private val fileService: FileService,
-  private val wsClientFactory: WorkspaceClientFactory
+    private val kubernetesClient: KubernetesClient,
+    private val config: AppConfiguration,
+    private val fileService: FileService,
+    private val wsClientFactory: WorkspaceClientFactory
 ) : WorkspaceService<KubernetesWorkspaceConfig> {
   companion object {
     private val log = LoggerFactory.getLogger(KubernetesWorkspaceService::class.java)
@@ -79,11 +79,11 @@ class KubernetesWorkspaceService(
   override fun deleteWorkspace(config: KubernetesWorkspaceConfig) {
     val reference = createStaticReference(config)
     val wsClient = wsClientFactory.createClient(reference)
-    log.debug("Saving files of workspace ${config.workspaceId}!")
-    wsClient.downloadTar { downloadedFiles ->
-      fileService.writeCollectionTar(UUID.fromString(config.workspaceId)).use { tarCollection ->
-        StreamUtils.copy(downloadedFiles, tarCollection)
-      }
+    if (!config.isReadOnly) {
+      log.debug("Saving files of workspace ${config.workspaceId}!")
+      wsClient.downloadTar(consumer = config::saveFiles)
+    } else {
+      log.debug("Not saving files of workspace ${config.workspaceId} because it is read-only")
     }
     deleteWorkspaceResources(config)
   }
@@ -96,9 +96,16 @@ class KubernetesWorkspaceService(
   }
 
   fun createWorkspaceConfigForCollection(collectionId: UUID): KubernetesWorkspaceConfig {
-    return KubernetesWorkspaceConfig(config, collectionId) {
-      fileService.readCollectionTar(collectionId)
-    }
+    return KubernetesWorkspaceConfig(
+        config,
+        collectionId,
+        saveFilesFunction = { newFiles ->
+          fileService.writeCollectionTar(collectionId).use {
+            IOUtils.copy(newFiles, it)
+          }
+        },
+        filesSupplier = { fileService.readCollectionTar(collectionId) }
+    )
   }
 
   override fun findWorkspace(config: KubernetesWorkspaceConfig): WorkspaceReference? {
@@ -111,9 +118,9 @@ class KubernetesWorkspaceService(
   private fun createStaticReference(config: KubernetesWorkspaceConfig): WorkspaceReference {
     val ingress = CompanionIngress(config)
     return DefaultWorkspaceReference(
-      id = config.externalId,
-      baseUrl = ingress.getBaseUrl(),
-      authToken = ""
+        id = config.externalId,
+        baseUrl = ingress.getBaseUrl(),
+        authToken = ""
     )
   }
 
