@@ -56,7 +56,16 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
   }
 
   override fun interruptEvaluation(id: UUID) {
-    TODO("Not yet implemented")
+    workspaceService.deleteWorkspace(
+        createMinimalWorkspaceConfig(id)
+    )
+  }
+
+  private fun createMinimalWorkspaceConfig(id: UUID): KubernetesWorkspaceConfig {
+    return KubernetesWorkspaceConfig(
+        appConfig = appConfiguration,
+        reference = id
+    ) { throw IllegalStateException("This config is read-only") }
   }
 
   private fun createWorkspaceConfig(runConfig: EvaluationRunConfig): KubernetesWorkspaceConfig {
