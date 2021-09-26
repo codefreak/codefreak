@@ -74,7 +74,7 @@ class CompanionPod(wsConfig: KubernetesWorkspaceConfig) : Pod() {
             name = "scripts"
             configMap {
               name = wsConfig.companionScriptMapName
-              defaultMode = 511 // equals 0777
+              defaultMode = 493 // equals 0755
               items = wsConfig.scripts.map { (scriptName) ->
                 newKeyToPath {
                   key = scriptName
