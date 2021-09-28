@@ -22,7 +22,7 @@
     "@types/jest": "26.0.24",
     "@types/loadable__component": "5.13.4",
     "@types/node": "12.20.19",
-    "@types/react": "17.0.20",
+    "@types/react": "17.0.24",
     "@types/react-dom": "17.0.9",
     "@types/react-helmet": "6.1.2",
     "@types/react-jsonschema-form": "1.7.6",
