@@ -1,6 +1,6 @@
 import { DragOutlined } from '@ant-design/icons'
 import Card, { CardProps } from 'antd/lib/card'
-import arrayMove from 'array-move'
+import { arrayMoveImmutable } from 'array-move'
 import React, {
   Key,
   memo,
@@ -74,7 +74,7 @@ function CardList<T>(props: React.PropsWithChildren<CardListProps<T>>) {
       return
     }
     const item = items[oldIndex]
-    setItems(arrayMove(items, oldIndex, newIndex))
+    setItems(arrayMoveImmutable(items, oldIndex, newIndex))
     if (handlePositionChange) {
       handlePositionChange(item, newIndex).catch(() => setItems(props.items))
     }

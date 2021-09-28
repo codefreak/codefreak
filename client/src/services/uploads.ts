@@ -75,12 +75,17 @@ const drainDirectoryReader = (
 const getFilesFromEntryRecursive = async (
   entry: FileSystemEntry
 ): Promise<File[]> => {
+  if (isDirectoryEntry(entry)) {
+    return drainDirectoryReader(entry.createReader()).then(entries => {
+      return Promise.all(entries.map(entry => entryFileAsPromise(entry)))
+    })
+  }
   if (isFileEntry(entry)) {
     return entryFileAsPromise(entry).then(entry => [entry])
   }
-  return drainDirectoryReader(entry.createReader()).then(entries => {
-    return Promise.all(entries.map(entry => entryFileAsPromise(entry)))
-  })
+  return Promise.reject(
+    'entry is neither FileSystemFileEntry nor FileSystemDirectoryEntry'
+  )
 }
 
 /**

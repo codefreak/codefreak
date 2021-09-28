@@ -7,6 +7,7 @@ import java.nio.charset.Charset
 import java.time.Instant
 import java.util.Base64
 import java.util.UUID
+import kotlin.streams.toList
 import org.apache.catalina.core.ApplicationPart
 import org.apache.commons.io.IOUtils
 import org.codefreak.codefreak.auth.Authority
@@ -37,31 +38,31 @@ class FileDto(
   val type: FileDtoType,
   val lastModified: Instant,
   val size: Long?,
-  val mode: Int
+  val mode: Int?
 ) {
   constructor(collectionId: UUID, collectionDigest: ByteArray, virtualFile: FileContentService.VirtualFile) : this(
-      collectionId,
-      Base64.getEncoder().encodeToString(collectionDigest),
-      path = virtualFile.path,
-      // should use base64 encoding to transfer non-textual data
-      // text is always treated as utf-8
-      content = virtualFile.content?.toString(Charset.forName("UTF-8")),
-      type = FileDtoType.valueOf(virtualFile.type.name),
-      lastModified = virtualFile.lastModifiedDate,
-      size = virtualFile.size,
-      mode = virtualFile.mode
+    collectionId,
+    Base64.getEncoder().encodeToString(collectionDigest),
+    path = virtualFile.path,
+    // should use base64 encoding to transfer non-textual data
+    // text is always treated as utf-8
+    content = virtualFile.content?.toString(Charset.forName("UTF-8")),
+    type = FileDtoType.valueOf(virtualFile.type.name),
+    lastModified = virtualFile.lastModifiedDate,
+    size = virtualFile.size,
+    mode = virtualFile.mode
   )
 
   constructor(collectionId: UUID, collectionDigest: ByteArray, file: FileMetaData) : this(
-      collectionId,
-      Base64.getEncoder().encodeToString(collectionDigest),
-      path = file.path,
-      // no transfer of file content over GraphQL. The property can be dropped once we migrated fully to the new api
-      content = null,
-      type = FileDtoType.valueOf(file.type.name),
-      lastModified = file.lastModifiedDate,
-      size = file.size,
-      mode = file.mode
+    collectionId,
+    Base64.getEncoder().encodeToString(collectionDigest),
+    path = file.path,
+    // no transfer of file content over GraphQL. The property can be dropped once we migrated fully to the new api
+    content = null,
+    type = FileDtoType.valueOf(file.type.name),
+    lastModified = file.lastModifiedDate,
+    size = file.size,
+    mode = file.mode
   )
 }
 
@@ -76,7 +77,8 @@ data class FileContext(var type: FileContextType, var id: UUID)
 class FileQuery : BaseResolver(), Query {
   fun answerFiles(answerId: UUID): List<FileDto> = context {
     val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
-    val forceSaveFiles = authorization.isCurrentUser(answer.task.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
+    val forceSaveFiles =
+      authorization.isCurrentUser(answer.task.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
     serviceAccess.getService(IdeService::class).saveAnswerFiles(answer, forceSaveFiles)
     authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
     val digest = serviceAccess.getService(FileService::class).getCollectionMd5Digest(answerId)
@@ -97,9 +99,11 @@ class FileQuery : BaseResolver(), Query {
     authorize(fileContext, FileActionType.VIEW)
     val fileService = serviceAccess.getService(FileService::class)
     val digest = fileService.getCollectionMd5Digest(fileContext.id)
-    fileService.listFiles(fileContext.id, path).map {
-      FileDto(fileContext.id, digest, it)
-    }.toList()
+    fileService.listFiles(fileContext.id, path).use { files ->
+      files.map {
+        FileDto(fileContext.id, digest, it)
+      }.toList()
+    }
   }
 }
 

@@ -1,6 +1,7 @@
 package org.codefreak.codefreak.service.file
 
 import java.util.UUID
+import java.util.stream.Stream
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -33,7 +34,7 @@ abstract class FileServiceTest {
 
   @Test
   fun `root dir does always exist with no files`() {
-    assertTrue(fileService.listFiles(collectionId, "/").count() == 0)
+    assertTrue(fileService.listFiles(collectionId, "/").use { it.count() } == 0L)
   }
 
   @Test
@@ -72,7 +73,7 @@ abstract class FileServiceTest {
   @Test
   fun `listing all files and directories in a path throws when the path does not exist`() {
     assertThrows(IllegalArgumentException::class.java) {
-      fileService.listFiles(collectionId, "/some/path")
+      fileService.listFiles(collectionId, "/some/path").close()
     }
   }
 
@@ -88,6 +89,12 @@ abstract class FileServiceTest {
     assertTrue(fileService.containsFile(collectionId, "file1.txt"))
     assertTrue(fileService.containsFile(collectionId, "file2.txt"))
     assertTrue(fileService.containsFile(collectionId, "file3.txt"))
+  }
+
+  @Test
+  fun `creating a file does not throw when the path already exists`() {
+    fileService.createFiles(collectionId, setOf("file.txt"))
+    fileService.createFiles(collectionId, setOf("file.txt"))
   }
 
   @Test
@@ -349,7 +356,7 @@ abstract class FileServiceTest {
     }
 
     assertTrue(fileService.containsFile(collectionId, "file.txt"))
-    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), contents))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").use { it.readBytes() }, contents))
   }
 
   private fun equals(a: ByteArray, b: ByteArray): Boolean {
@@ -394,7 +401,7 @@ abstract class FileServiceTest {
     }
 
     assertTrue(fileService.containsFile(collectionId, "file.txt"))
-    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf(42)))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").use { it.readBytes() }, byteArrayOf(42)))
   }
 
   @Test
@@ -411,28 +418,28 @@ abstract class FileServiceTest {
       it.write(newContent)
     }
 
-    assertFalse(equals(fileService.readFile(collectionId, "file.txt").readBytes(), oldContent))
-    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), newContent))
+    assertFalse(equals(fileService.readFile(collectionId, "file.txt").use { it.readBytes() }, oldContent))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").use { it.readBytes() }, newContent))
   }
 
   @Test
   fun `reads an existing empty file`() {
     fileService.createFiles(collectionId, setOf("file.txt"))
-    assertTrue(equals(fileService.readFile(collectionId, "file.txt").readBytes(), byteArrayOf()))
+    assertTrue(equals(fileService.readFile(collectionId, "file.txt").use { it.readBytes() }, byteArrayOf()))
   }
 
   @Test
   fun `reading file contents throws for directories`() {
     fileService.createDirectories(collectionId, setOf("some/path"))
     assertThrows(IllegalArgumentException::class.java) {
-      fileService.readFile(collectionId, "some/path")
+      fileService.readFile(collectionId, "some/path").close()
     }
   }
 
   @Test
   fun `reading file contents throws if path does not exist`() {
     assertThrows(IllegalArgumentException::class.java) {
-      fileService.readFile(collectionId, "file.txt")
+      fileService.readFile(collectionId, "file.txt").close()
     }
   }
 
@@ -448,15 +455,17 @@ abstract class FileServiceTest {
 
   @Test
   fun `moves existing files`() {
-    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt"))
-    fileService.createDirectories(collectionId, setOf("some/path"))
+    fileService.createDirectories(collectionId, setOf("some/path", "some/path/other"))
+    fileService.createFiles(collectionId, setOf("file1.txt", "file2.txt", "some/path/other/file3.txt"))
 
-    fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt"), "some/path")
+    fileService.moveFile(collectionId, setOf("file1.txt", "file2.txt", "some/path/other/file3.txt"), "some/path")
 
     assertFalse(fileService.containsFile(collectionId, "file1.txt"))
     assertFalse(fileService.containsFile(collectionId, "file2.txt"))
+    assertFalse(fileService.containsFile(collectionId, "some/path/other/file3.txt"))
     assertTrue(fileService.containsFile(collectionId, "some/path/file1.txt"))
     assertTrue(fileService.containsFile(collectionId, "some/path/file2.txt"))
+    assertTrue(fileService.containsFile(collectionId, "some/path/file3.txt"))
   }
 
   @Test
@@ -508,7 +517,7 @@ abstract class FileServiceTest {
 
     fileService.renameFile(collectionId, "file.txt", "new.txt")
 
-    assertTrue(equals(contents, fileService.readFile(collectionId, "new.txt").readBytes()))
+    assertTrue(equals(contents, fileService.readFile(collectionId, "new.txt").use { it.readBytes() }))
   }
 
   @Test
@@ -567,9 +576,9 @@ abstract class FileServiceTest {
     assertTrue(fileService.containsDirectory(collectionId, "new"))
     assertTrue(fileService.containsDirectory(collectionId, "new/inner"))
     assertTrue(fileService.containsFile(collectionId, "new/inner/file.txt"))
-    assertTrue(equals(fileService.readFile(collectionId, "new/inner/file.txt").readBytes(), byteArrayOf(42)))
+    assertTrue(equals(fileService.readFile(collectionId, "new/inner/file.txt").use { it.readBytes() }, byteArrayOf(42)))
     assertTrue(fileService.containsFile(collectionId, "new/file.txt"))
-    assertTrue(equals(fileService.readFile(collectionId, "new/file.txt").readBytes(), innerFile2Contents))
+    assertTrue(equals(fileService.readFile(collectionId, "new/file.txt").use { it.readBytes() }, innerFile2Contents))
   }
 
   @Test
@@ -599,5 +608,11 @@ abstract class FileServiceTest {
     fileService.createFiles(collectionId, setOf("subdir/file.txt"))
     fileService.moveFile(collectionId, setOf("subdir/file.txt"), "subdir")
     assertTrue(fileService.containsFile(collectionId, "subdir/file.txt"))
+  }
+
+  private fun <T> Stream<T>.find(criteria: (T) -> Boolean): T = use {
+    this.filter(criteria)
+      .findFirst()
+      .orElse(null)
   }
 }

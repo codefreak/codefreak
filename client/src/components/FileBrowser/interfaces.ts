@@ -3,6 +3,6 @@ export interface FileBrowserFile {
   path: string
   basename: string
   size?: number
-  mode: number
+  mode?: number | null
   lastModified: string
 }
