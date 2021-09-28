@@ -2,6 +2,7 @@ package org.codefreak.codefreak.service.file
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -14,11 +15,13 @@ import java.nio.file.Paths
 import java.nio.file.SimpleFileVisitor
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.UUID
+import java.util.stream.Stream
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.isSymbolicLink
-import kotlin.streams.asSequence
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.io.FileExistsException
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.io.IOUtils
 import org.apache.commons.io.file.PathUtils
 import org.codefreak.codefreak.config.AppConfiguration
@@ -58,7 +61,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     Files.walkFileTree(collectionPath, object : SimpleFileVisitor<Path>() {
       override fun preVisitDirectory(dir: Path?, attrs: BasicFileAttributes?): FileVisitResult {
         dir?.let {
-          val path = getFileRelativePath(collectionId, it).toString()
+          val path = getFileRelativePath(collectionId, it)
           TarUtil.mkdir(path, tarOutput)
         }
         return FileVisitResult.CONTINUE
@@ -66,7 +69,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
       override fun visitFile(file: Path?, attrs: BasicFileAttributes?): FileVisitResult {
         file?.let {
-          val path = getFileRelativePath(collectionId, it).toString()
+          val path = getFileRelativePath(collectionId, it)
           TarUtil.writeFileWithContent(path, Files.newInputStream(it), tarOutput)
         }
         return FileVisitResult.CONTINUE
@@ -78,12 +81,17 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     return ByteArrayInputStream(output.toByteArray())
   }
 
-  private fun getFileRelativePath(collectionId: UUID, path: Path): Path {
-    val collectionPath = getCollectionPath(collectionId)
-    val sanitizedPath = Paths.get("/", FileUtil.sanitizeName(path.toString()))
-    val relativePath = collectionPath.relativize(sanitizedPath).normalize().toString()
-    // `Path::relativize` returns the path prefixed with the parent, which we don't want here
-    return Paths.get("/", relativePath.replace("$collectionId/", ""))
+  /**
+   * Return the relative path of a file inside the specified collection.
+   * The returned path has no leading file separator.
+   */
+  private fun getFileRelativePath(collectionId: UUID, path: Path): String {
+    val fullPath = path.absolutePathString()
+    val collectionPath = getCollectionPath(collectionId).absolutePathString()
+    if (!fullPath.startsWith(collectionPath)) {
+      throw IllegalArgumentException("$fullPath is not a file of collection $collectionId")
+    }
+    return fullPath.removePrefix(collectionPath).trimStart(File.separatorChar)
   }
 
   override fun writeCollectionTar(collectionId: UUID): OutputStream {
@@ -98,7 +106,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
           // Extract the archive to a temporary location first so the current collection files are not lost if an error occurs whilst extraction
           TarArchiveInputStream(ByteArrayInputStream(toByteArray())).use { input ->
             input.entrySequence().forEach {
-              val tempPath = Paths.get(tempCollectionPath.toString(), FileUtil.sanitizeName(it.name))
+              val tempPath = FileUtil.resolveSecurely(tempCollectionPath, it.name)
 
               if (!isBlacklistedPath(tempPath)) {
                 if (it.isFile) {
@@ -129,7 +137,7 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
   }
 
   private fun isBlacklistedPath(path: Path) = blacklistedPaths.any {
-    path.toString().split("/").contains(it)
+    path.toString().split(path.fileSystem.separator).contains(it)
   }
 
   override fun collectionExists(collectionId: UUID): Boolean {
@@ -145,39 +153,34 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
     }
   }
 
-  override fun walkFileTree(collectionId: UUID): Sequence<FileMetaData> {
+  override fun walkFileTree(collectionId: UUID): Stream<FileMetaData> {
     val collectionPath = createCollectionPath(collectionId)
 
     return Files.walk(collectionPath)
       .filter { it != collectionPath && !isBlacklistedPath(it) && !it.isSymbolicLink() }
-      .map { filePathToFileMetaData(it, collectionPath) }
-      .asSequence()
+      .map { filePathToFileMetaData(collectionId, it) }
   }
 
-  private fun filePathToFileMetaData(path: Path, basePath: Path): FileMetaData {
-    val relativizedPath = basePath.relativize(path).normalize()
+  private fun filePathToFileMetaData(collectionId: UUID, path: Path): FileMetaData {
+    val relativePath = getFileRelativePath(collectionId, path)
     return FileMetaData(
-      path = "/$relativizedPath",
+      path = "/${FilenameUtils.normalize(relativePath, true)}",
       lastModifiedDate = Files.getLastModifiedTime(path).toInstant(),
       type = when {
         Files.isDirectory(path) -> FileType.DIRECTORY
         else -> FileType.FILE
       },
       size = Files.size(path),
-      mode = FileUtil.getFilePermissionsMode(Files.getPosixFilePermissions(path))
+      mode = FileUtil.getFileMode(path)
     )
   }
 
-  override fun listFiles(collectionId: UUID, path: String): Sequence<FileMetaData> {
-    val collectionPath = createCollectionPath(collectionId)
+  override fun listFiles(collectionId: UUID, path: String): Stream<FileMetaData> {
     val fileTreeBasePath = getCollectionFilePath(collectionId, path)
-
     require(Files.isDirectory(fileTreeBasePath)) { "`$path` does not exist" }
-
     return Files.walk(fileTreeBasePath, 1)
       .filter { it != fileTreeBasePath && !isBlacklistedPath(it) && !it.isSymbolicLink() }
-      .map { filePathToFileMetaData(it, collectionPath) }
-      .asSequence()
+      .map { filePathToFileMetaData(collectionId, it) }
   }
 
   override fun createFiles(collectionId: UUID, paths: Set<String>) {
@@ -271,8 +274,11 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
 
       require(Files.exists(sourcePath)) { "The source path `$it` does not exist" }
 
-      val mappedTargetPath = getCollectionFilePath(collectionId, targetPath.toString(), it)
-      val shouldMovePath = !arePathsEqual(sourcePath, targetPath) && !arePathsEqual(sourcePath, mappedTargetPath) || Files.isDirectory(sourcePath)
+      val mappedTargetPath = getCollectionFilePath(collectionId, target, FileUtil.basename(it))
+      val shouldMovePath =
+        !arePathsEqual(sourcePath, targetPath) && !arePathsEqual(sourcePath, mappedTargetPath) || Files.isDirectory(
+          sourcePath
+        )
 
       if (shouldMovePath) {
         Pair(it, sourcePath)
@@ -333,9 +339,10 @@ class FileSystemFileService(@Autowired val config: AppConfiguration) : FileServi
    * Convert a collection-relative path to an absolute path.
    * Path will be escaped properly
    */
-  private fun getCollectionFilePath(collectionId: UUID, vararg path: String): Path {
+  private fun getCollectionFilePath(collectionId: UUID, vararg pathSegments: String): Path {
+    val path = pathSegments.joinToString(separator = "/")
     // join collection path and the relative file path to an absolute path
-    return createCollectionPath(collectionId).resolve(FileUtil.sanitizeName(*path))
+    return FileUtil.resolveSecurely(createCollectionPath(collectionId), path)
   }
 
   /**

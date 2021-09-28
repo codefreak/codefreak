@@ -6,7 +6,9 @@ import java.nio.file.Files
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.containsInAnyOrder
+import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.notNullValue
 import org.junit.jupiter.api.Test
@@ -59,5 +61,19 @@ internal class TarUtilTest {
       val result = generateSequence { it.nextTarEntry }.filter { it.name == "main.c" }.firstOrNull()
       assertThat(result, notNullValue())
     }
+  }
+
+  @Test
+  fun `get parent dir correctly`() {
+    assertThat(TarUtil.getParentDir("/foo/bar"), `is`("foo"))
+    assertThat(TarUtil.getParentDir("/foo"), `is`(""))
+    assertThat(TarUtil.getParentDir(""), `is`(""))
+  }
+
+  @Test
+  fun `get parent dirs correctly`() {
+    assertThat(TarUtil.getParentDirs("/foo/bar/baz"), contains("foo/bar", "foo"))
+    assertThat(TarUtil.getParentDirs("foo/bar"), contains("foo"))
+    assertThat(TarUtil.getParentDirs(""), empty())
   }
 }
