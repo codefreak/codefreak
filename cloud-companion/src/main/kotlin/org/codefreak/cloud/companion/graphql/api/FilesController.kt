@@ -10,13 +10,13 @@ import org.codefreak.cloud.companion.graphql.model.FileSystemEventType
 import org.codefreak.cloud.companion.graphql.model.FileSystemNode
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.graphql.data.method.annotation.Argument
-import org.springframework.graphql.data.method.annotation.GraphQlController
 import org.springframework.graphql.data.method.annotation.QueryMapping
 import org.springframework.graphql.data.method.annotation.SubscriptionMapping
+import org.springframework.stereotype.Controller
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-@GraphQlController
+@Controller
 class FilesController {
   @Autowired
   lateinit var fileService: FileService
@@ -39,11 +39,11 @@ class FilesController {
       .collectList()
   }
 
+  /**
+   * Watch given directory for changes (new, deleted, modified files).
+   * For new files this will trigger "new" and "modified"
+   */
   @SubscriptionMapping
-      /**
-       * Watch given directory for changes (new, deleted, modified files).
-       * For new files this will trigger "new" and "modified"
-       */
   fun watchFiles(@Argument path: String): Flux<FileSystemEvent> {
     val dir = fileService.resolve(path)
     return fileService.watchDirectory(dir).map {

@@ -8,14 +8,14 @@ import org.codefreak.cloud.companion.graphql.model.Process as ProcessModel
 import org.codefreak.cloud.companion.waitForMono
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.graphql.data.method.annotation.Argument
-import org.springframework.graphql.data.method.annotation.GraphQlController
 import org.springframework.graphql.data.method.annotation.MutationMapping
 import org.springframework.graphql.data.method.annotation.SubscriptionMapping
+import org.springframework.stereotype.Controller
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
-@GraphQlController
+@Controller
 class ProcessController {
   @Autowired
   private lateinit var processManager: ProcessManager

@@ -54,7 +54,7 @@ internal class ProcessControllerTest(
       it.flush()
     }
     StepVerifier.create(processManager.getStdout(id)
-      .map { it.asInputStream().readAllBytes().decodeToString() }
+      .map { it.asInputStream().readBytes().decodeToString() }
       .filter { it.contains("111 111") }
     ).expectNextCount(1)
       .thenCancel()
@@ -71,7 +71,7 @@ internal class ProcessControllerTest(
     // This is here to drain stdout.
     // Otherwise, we cannot write to stdin (at least on Mac).
     processManager.getStdout(id)
-      .map { it.asInputStream().readAllBytes().decodeToString() }
+      .map { it.asInputStream().readBytes().decodeToString() }
       .subscribeOn(Schedulers.boundedElastic())
       .subscribe()
 
