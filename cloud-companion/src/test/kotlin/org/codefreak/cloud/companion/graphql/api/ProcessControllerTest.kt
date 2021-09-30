@@ -10,6 +10,13 @@ import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
 import reactor.test.StepVerifier
 
+private fun getBashPath(): String {
+  if (System.getProperty("os.name").lowercase().contains("win")) {
+    return "C:\\Program Files\\Git\\bin\\bash"
+  }
+  return "/bin/bash"
+}
+
 internal class ProcessControllerTest(
   @Autowired private val processManager: ProcessManager
 ) : BasicGraphqlTest() {
@@ -17,12 +24,14 @@ internal class ProcessControllerTest(
   @AfterEach
   fun beforeEach() {
     // kill all processes after each test
-    Flux.fromIterable(processManager.getProcesses()).flatMap { (id) -> processManager.purgeProcess(id) }.blockLast()
+    Flux.fromIterable(processManager.getProcesses())
+        .flatMap { (id) -> processManager.purgeProcess(id) }
+        .blockLast()
   }
 
   @Test
   fun `startProcess starts a new process`() {
-    graphQlTester.query("mutation { startProcess(cmd: [\"/bin/bash\"]){ id } }")
+    graphQlTester.query("mutation { startProcess(cmd: [\"${getBashPath().replace("\\", "\\\\")}\"]){ id } }")
       .execute()
       .path("startProcess.id")
       .pathExists()
@@ -31,18 +40,20 @@ internal class ProcessControllerTest(
 
   @Test
   fun killProcess() {
-    val id = processManager.createProcess(listOf("/bin/bash"))
+    val id = processManager.createProcess(listOf(getBashPath()))
     graphQlTester.query("mutation { killProcess(id: \"${id}\") }")
       .execute()
       .path("killProcess")
       .pathExists()
       .valueIsNotEmpty()
-      .matchesJson("137")
+    // Value-matching is difficult here:
+    // On *NIX Systems the exit code is 137
+    // On Windows it is the int of 0xC000013A
   }
 
   @Test
   fun resizeProcess() {
-    val id = processManager.createProcess(listOf("/bin/bash"))
+    val id = processManager.createProcess(listOf(getBashPath()))
     graphQlTester.query("mutation { resizeProcess(id: \"${id}\", cols: 111, rows: 111) }")
       .execute()
       .path("resizeProcess")
@@ -63,7 +74,7 @@ internal class ProcessControllerTest(
 
   @Test
   fun waitForProcess() {
-    val id = processManager.createProcess(listOf("/bin/bash"))
+    val id = processManager.createProcess(listOf(getBashPath()))
     val subFlux = graphQlTester.query("subscription { waitForProcess(id: \"${id}\") }")
       .executeSubscription()
       .toFlux()

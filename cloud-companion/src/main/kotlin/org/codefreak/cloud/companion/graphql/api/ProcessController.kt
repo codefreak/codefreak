@@ -32,7 +32,6 @@ class ProcessController {
     return processManager.getProcess(id)
       .destroyForcibly()
       .waitForMono()
-      .subscribeOn(Schedulers.boundedElastic())
   }
 
   @MutationMapping
@@ -51,7 +50,6 @@ class ProcessController {
   fun waitForProcess(@Argument id: UUID): Flux<Int> {
     return processManager.getProcess(id)
       .waitForMono()
-      .subscribeOn(Schedulers.boundedElastic())
       .flatMapMany { Flux.just(it) }
   }
 }

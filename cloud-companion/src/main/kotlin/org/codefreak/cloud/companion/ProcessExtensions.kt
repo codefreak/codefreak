@@ -7,6 +7,7 @@ import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 
 private fun fluxFromInputStream(inputStream: InputStream, factory: DataBufferFactory): Flux<DataBuffer> {
   return DataBufferUtils.readInputStream({ inputStream }, factory, 1024)
@@ -18,5 +19,5 @@ fun Process.getInputStreamFlux(factory: DataBufferFactory = DefaultDataBufferFac
 fun Process.waitForMono(): Mono<Int> {
   return Mono.fromCallable {
     waitFor()
-  }
+  }.subscribeOn(Schedulers.boundedElastic())
 }
