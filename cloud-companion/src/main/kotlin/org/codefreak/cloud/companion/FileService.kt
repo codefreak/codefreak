@@ -1,5 +1,6 @@
 package org.codefreak.cloud.companion
 
+import java.io.File
 import java.io.OutputStream
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
@@ -19,6 +20,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import org.apache.tika.Tika
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -57,7 +59,7 @@ class FileService(
   private val antPathMatcher = AntPathMatcher()
 
   fun resolve(path: String): Path {
-    return basePath.resolve(sanitizePath(path))
+    return basePath.resolve(normalizePath(path))
   }
 
   fun relativePath(path: Path): String {
@@ -213,7 +215,11 @@ class FileService(
   }
 
   /**
-   * Remove leading dots and slashes from given path and normalizes patterns like `foo/../bar`.
+   * Ensures path has correct file separator and does not escape any directory.
    */
-  private fun sanitizePath(vararg name: String) = Paths.get("/", *name).normalize().toString().trim().trim('/')
+  private fun normalizePath(vararg parts: String): String {
+    val joinedParts = parts.joinToString(separator = File.separator)
+    return FilenameUtils.normalizeNoEndSeparator(joinedParts)?.trim(File.separatorChar)
+        ?: throw IllegalArgumentException("Invalid path specified: $joinedParts")
+  }
 }
