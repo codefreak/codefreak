@@ -18,7 +18,15 @@ const convertToTreeData = (fileSystemNode: FileSystemNode) => ({
   isLeaf: fileSystemNode.size !== undefined ? true : undefined
 })
 
-const FileTree = () => {
+interface FileTreeProps {
+  onOpenFile: (path: string) => void
+}
+
+type Key = string | number
+
+type OnSelectInfo = { node: EventDataNode }
+
+const FileTree = ({ onOpenFile }: FileTreeProps) => {
   const { graphqlWebSocketClient, isAvailable } = useWorkspace()
   const { data } = useListWorkspaceFilesQuery()
   const [treeData, setTreeData] = useState<DataNode[]>()
@@ -51,11 +59,21 @@ const FileTree = () => {
       : Promise.reject('No graphql websocket client found')
   }
 
+  const handleSelect = (_: Key[], { node }: OnSelectInfo) => {
+    if (node.isLeaf) {
+      onOpenFile(node.key.toString())
+    }
+  }
+
   return (
     <Tabs type="card" className="workspace-tabs">
       <Tabs.TabPane tab="Files">
         <TabPanel withPadding loading={!isAvailable}>
-          <DirectoryTree treeData={treeData} loadData={loadData} />
+          <DirectoryTree
+            treeData={treeData}
+            loadData={loadData}
+            onSelect={handleSelect}
+          />
         </TabPanel>
       </Tabs.TabPane>
     </Tabs>

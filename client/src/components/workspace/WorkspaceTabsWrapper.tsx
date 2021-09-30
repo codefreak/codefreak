@@ -1,5 +1,11 @@
-import { Tabs } from 'antd'
-import { extractRelativeFilePath, readFilePath } from '../../services/workspace'
+import { Tabs, Tooltip } from 'antd'
+import {
+  extractRelativeFilePath,
+  readFilePath,
+  WorkspaceTab,
+  WorkspaceTabFactory,
+  WorkspaceTabType
+} from '../../services/workspace'
 import useWorkspace from '../../hooks/workspace/useWorkspace'
 import EditorTabPanel from './EditorTabPanel'
 import EmptyTabPanel from './EmptyTabPanel'
@@ -14,14 +20,6 @@ import {
   FileTextOutlined,
   SolutionOutlined
 } from '@ant-design/icons'
-
-export enum WorkspaceTabType {
-  EDITOR = 'editor',
-  EMPTY = 'empty',
-  INSTRUCTIONS = 'instructions',
-  SHELL = 'shell',
-  EVALUATION = 'evaluation'
-}
 
 const getTabTitle = (
   type: WorkspaceTabType,
@@ -72,26 +70,25 @@ const getTabTitle = (
   }
 }
 
-type WorkspaceTab = {
-  type: WorkspaceTabType
-  path?: string
-}
-
 const renderTab =
   (baseUrl: string, loading: boolean, answerId: string) =>
-  (tab: WorkspaceTab) => {
+  ({ path, type }: WorkspaceTab) => {
     const title = getTabTitle(
-      tab.type,
-      readFilePath(baseUrl, tab.path ?? ''),
+      type,
+      readFilePath(baseUrl, path ?? ''),
       loading,
       answerId
     )
 
     let content
 
-    switch (tab.type) {
+    switch (type) {
       case WorkspaceTabType.EDITOR:
-        content = <EditorTabPanel file={tab.path ?? ''} />
+        if (path === undefined) {
+          throw new Error('Editor tab must have a path specified!')
+        }
+
+        content = <EditorTabPanel file={path} />
         break
       case WorkspaceTabType.INSTRUCTIONS:
         content = <InstructionsTabPanel />
@@ -108,15 +105,20 @@ const renderTab =
         break
     }
 
-    const key = tab.path ?? tab.type
+    const key = path ?? type
+    const isEditorTab = type === WorkspaceTabType.EDITOR
 
     return (
       <Tabs.TabPane
-        tab={title}
+        tab={
+          <Tooltip title={title} placement="top" visible={false}>
+            <span>{title}</span>
+          </Tooltip>
+        }
         key={key}
         style={{ height: '100%' }}
         disabled={loading}
-        closable={tab.type === WorkspaceTabType.EDITOR}
+        closable={isEditorTab}
       >
         {content}
       </Tabs.TabPane>
@@ -127,12 +129,14 @@ interface WorkspaceTabsWrapperProps {
   tabs: WorkspaceTab[]
   activeTab?: string | WorkspaceTabType
   onTabChange?: (activeKey: string) => void
+  onTabClose?: (key: string) => void
 }
 
 const WorkspaceTabsWrapper = ({
   tabs,
   activeTab,
-  onTabChange = noop
+  onTabChange = noop,
+  onTabClose = noop
 }: WorkspaceTabsWrapperProps) => {
   const { isAvailable, baseUrl, answerId } = useWorkspace()
 
@@ -141,7 +145,16 @@ const WorkspaceTabsWrapper = ({
   const renderedTabs =
     tabs.length > 0
       ? tabs.map(renderTabImpl)
-      : renderTabImpl({ type: WorkspaceTabType.EMPTY })
+      : renderTabImpl(WorkspaceTabFactory.EmptyTab())
+
+  const handleEdit = (
+    e: React.MouseEvent | React.KeyboardEvent | string,
+    action: 'add' | 'remove'
+  ) => {
+    if (action === 'remove' && typeof e === 'string') {
+      onTabClose(e)
+    }
+  }
 
   return (
     <div className="workspace-tabs-wrapper">
@@ -149,8 +162,9 @@ const WorkspaceTabsWrapper = ({
         hideAdd
         type="editable-card"
         className="workspace-tabs"
-        activeKey={activeTab}
+        activeKey={activeTab && activeTab.length > 0 ? activeTab : undefined}
         onChange={onTabChange}
+        onEdit={handleEdit}
       >
         {renderedTabs}
       </Tabs>
