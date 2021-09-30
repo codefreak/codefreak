@@ -22,7 +22,7 @@ internal class ProcessControllerTest(
 ) : BasicGraphqlTest() {
 
   @AfterEach
-  fun beforeEach() {
+  fun afterEach() {
     // kill all processes after each test
     Flux.fromIterable(processManager.getProcesses())
         .flatMap { (id) -> processManager.purgeProcess(id) }
