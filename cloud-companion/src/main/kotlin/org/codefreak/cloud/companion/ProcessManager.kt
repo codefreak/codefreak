@@ -20,8 +20,11 @@ class ProcessManager {
   private lateinit var fileService: FileService
 
   fun createProcess(cmd: List<String>): UUID {
-    val uid = UUID.randomUUID()
-    processMap[uid] = generateProcess(cmd)
+    var uid: UUID
+    // handle rare UUID collisions properly instead of overwriting it
+    do {
+      uid = UUID.randomUUID()
+    } while (processMap.putIfAbsent(uid, generateProcess(cmd)) != null)
     return uid
   }
 
