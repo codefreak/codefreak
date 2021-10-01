@@ -55,7 +55,7 @@ The following is a example production configuration for Docker Compose that runs
 version: "3.7"
 services:
   app:
-    image: "cfreak/codefreak"
+    image: "ghcr.io/codefreak/codefreak"
     restart: "on-failure:10"
     ports:
       # you might want to use a reverse proxy that passes the traffic to Code FREAK

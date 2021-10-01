@@ -48,7 +48,7 @@ See the configuration below to improve the default settings.
 == Building Code FREAK
 
 Build Code FREAK by using `./gradlew jibDockerBuild`.
-This will generate the Docker image `cfreak/codefreak` on your local machine.
+This will generate the Docker image `ghcr.io/codefreak/codefreak` and `ghcr.io/codefreak/codefreak-cloud-companion` on your local machine.
 
 == Configuration
 
