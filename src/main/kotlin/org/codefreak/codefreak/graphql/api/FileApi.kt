@@ -20,6 +20,7 @@ import org.codefreak.codefreak.service.file.FileContentService
 import org.codefreak.codefreak.service.file.FileMetaData
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.exhaustive
+import org.codefreak.codefreak.util.withTrailingSlash
 import org.springframework.stereotype.Component
 
 @GraphQLName("FileType")
@@ -126,7 +127,7 @@ class FileMutation : BaseResolver(), Mutation {
     val fileService = serviceAccess.getService(FileService::class)
     files.forEach { file ->
       val filename = file.submittedFileName ?: "upload-${Instant.now()}-${file.name}"
-      val filePath = "$dir/$filename"
+      val filePath = "${dir.withTrailingSlash()}$filename"
       fileService.writeFile(fileContext.id, filePath).use {
         IOUtils.copy(file.inputStream, it)
       }

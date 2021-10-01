@@ -39,7 +39,10 @@ object FileUtil {
    * /a/../../b/c will return b/c
    */
   fun normalizePath(vararg name: String): String {
-    var concated = name.joinToString(File.separator)
+    // Trim slashes at the beginning because
+    // * a single slash would be trimmed in the end nonetheless
+    // * two slashes might be interpreted as a prefix by the FilenameUtils, which is not what we want
+    var concated = FilenameUtils.separatorsToSystem(name.joinToString(File.separator)).trimStart(File.separatorChar)
     // FilenameUtils.normalize returns null in case it has no parent directory left to work with
     // so "/../foo" will return null. We trick this by prepending fake directories to the original path
     // until we get a valid path from FilenameUtils.normalize.

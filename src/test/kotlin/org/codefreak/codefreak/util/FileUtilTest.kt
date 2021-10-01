@@ -15,6 +15,10 @@ class FileUtilTest {
       "foo" to "foo",
       // keep leading/trailing spaces as they are valid in filenames
       " foo " to " foo ",
+      "/foo" to "foo",
+      "//foo" to "foo",
+      "\\\\foo" to "foo",
+      ".//foo" to "foo",
       // resulting path will contain the correct directory separator
       "foo/bar" to "foo" + File.separatorChar + "bar",
       ".foo" to ".foo",
