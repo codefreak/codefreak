@@ -55,11 +55,21 @@ jobs:
         shell: bash
         run: ./gradlew check
 
-      - name: Build Docker image
-        shell: bash
+      - name: Build Server and Companion Images
         # Import of jib image into Windows Docker is currently not working on CI
         if: runner.os != 'Windows'
-        run: ./gradlew jibDockerBuild -x bootJar
+        # This will build the "server" image and the (minimal) companion image.
+        run: ./gradlew jibDockerBuild
+
+      # Build the companion aio (all-in-one) image only when on master or tags
+      # Because the image is huge (~15GB) we need to free up some space on GH Actions before we can build the image.
+      - name: Build Companion All-In-One Image
+        if: (runner.os != 'Windows') && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags'))
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          ./gradlew :cloud-companion:jibDockerBuild -P companion-build-aio
 
       - name: Run end-to-end tests
         # Not possible due to missing image (see step above)
@@ -80,7 +90,7 @@ jobs:
           pip3 install --upgrade pip
           pip3 install docker-ci-deploy
 
-      - name: Authenticate to GitHub Docker Registry
+      - name: Authenticate to GitHub Container Registry
         if: matrix.deploy && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags'))
         run: |
           docker logout
@@ -88,20 +98,32 @@ jobs:
           # See https://github.com/actions/starter-workflows/issues/66
           echo ${{ github.token }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Deploy master branch as latest
+      - name: Deploy master branch as canary
         if: matrix.deploy && github.ref == 'refs/heads/master'
         run: |
           python -m docker_ci_deploy --tag canary -- ghcr.io/codefreak/codefreak
-          python -m docker_ci_deploy --tag canary -- ghcr.io/codefreak/codefreak-cloud-companion
+          python -m docker_ci_deploy --tag minimal-canary -- ghcr.io/codefreak/codefreak-cloud-companion:minimal
+          python -m docker_ci_deploy --tag aio-canary -- ghcr.io/codefreak/codefreak-cloud-companion:aio
 
       # ${GITHUB_REF/refs\/tags\//} returns the tag name from 'refs/tags/TAG_NAME'
       # The following will only work with tags following semantic versioning!
+      # It will publish the following images:
+      # - ghcr.io/codefreak/codefreak as
+      #   - ghcr.io/codefreak/codefreak:latest
+      #   - ghcr.io/codefreak/codefreak:X.X.X (+ semver tags for minor and major)
+      # - ghcr.io/codefreak/codefreak-cloud-companion:minimal as
+      #   - ghcr.io/codefreak/codefreak-cloud-companion:minimal
+      #   - ghcr.io/codefreak/codefreak-cloud-companion:X.X.X-minimal (+ semver tags for minor and major)
+      # - ghcr.io/codefreak/codefreak-cloud-companion:aio as
+      #   - ghcr.io/codefreak/codefreak-cloud-companion:aio
+      #   - ghcr.io/codefreak/codefreak-cloud-companion:X.X.X-aio (+ semver tags for minor and major)
       - name: Deploy tags
         if: matrix.deploy && startsWith(github.ref, 'refs/tags')
         run: |
           export TAG_VERSION="${GITHUB_REF/refs\/tags\//}"
           python -m docker_ci_deploy --version-latest --version "$TAG_VERSION" --version-semver ghcr.io/codefreak/codefreak
-          python -m docker_ci_deploy --version-latest --version "$TAG_VERSION" --version-semver ghcr.io/codefreak/codefreak-cloud-companion
+          python -m docker_ci_deploy --version-latest --version "$TAG_VERSION" --version-semver ghcr.io/codefreak/codefreak-cloud-companion:minimal
+          python -m docker_ci_deploy --version-latest --version "$TAG_VERSION" --version-semver ghcr.io/codefreak/codefreak-cloud-companion:aio
 
       - name: Prepare cache on Windows
         if: runner.os == 'Windows'
