@@ -87,7 +87,7 @@ const TaskPage: React.FC = () => {
   const [deleteAnswer, { loading: deletingAnswer }] = useDeleteAnswerMutation()
 
   const onAnswerCreated = useCallback(() => {
-    subPath.set('/answer')
+    subPath.set('/ide')
     result.refetch()
   }, [result, subPath])
 
@@ -142,29 +142,22 @@ const TaskPage: React.FC = () => {
   }
 
   const testingModeSwitch =
-    editable && !differentUser
-      ? [
-          {
-            key: 'testing-mode',
-            tab: (
-              <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
-                Testing Mode{' '}
-                <Tooltip
-                  placement="right"
-                  title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
-                >
-                  <AntSwitch
-                    onChange={setTestingMode}
-                    style={{ marginLeft: 8 }}
-                    checked={answer !== null}
-                    loading={creatingAnswer || deletingAnswer}
-                  />
-                </Tooltip>
-              </span>
-            )
-          }
-        ]
-      : []
+    editable && !differentUser ? (
+      <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
+        Testing Mode{' '}
+        <Tooltip
+          placement="right"
+          title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
+        >
+          <AntSwitch
+            onChange={setTestingMode}
+            style={{ marginLeft: 8 }}
+            checked={answer !== null}
+            loading={creatingAnswer || deletingAnswer}
+          />
+        </Tooltip>
+      </span>
+    ) : null
 
   // show task configuration only to teachers and admins
   const configurationTab = editable
@@ -189,7 +182,6 @@ const TaskPage: React.FC = () => {
 
   const tabs = [
     ...configurationTab,
-    ...testingModeSwitch,
     {
       key: '/answer',
       tab: tab('Upload', <SolutionOutlined />),
@@ -202,9 +194,12 @@ const TaskPage: React.FC = () => {
   const submission = assignment?.submission
 
   const teacherControls =
-    editable && !differentUser ? (
-      <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
-    ) : null
+    editable && !differentUser
+      ? [
+          testingModeSwitch,
+          <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
+        ]
+      : null
 
   let buttons
   if (differentUser && assignment) {
