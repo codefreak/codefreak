@@ -5,6 +5,8 @@ on: [push, pull_request, release]
 jobs:
   main:
     strategy:
+      # do not stop other jobs in case a single matrix jobs fails
+      fail-fast: false
       matrix:
         include:
         - os: ubuntu-20.04
@@ -29,7 +31,7 @@ jobs:
       - name: Fetch Tags correctly
         run: git fetch --force --tags
 
-      - name: Cache gradle dependencies
+      - name: Restore Gradle cache
         uses: actions/cache@v2
         with:
           path: |
@@ -39,7 +41,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Cache node modules
+      - name: Restore npm cache
         uses: actions/cache@v2
         with:
           path: |
@@ -66,11 +68,40 @@ jobs:
         with:
           working-directory: client
           install: false
-          start: docker run -d -e CODEFREAK_REVERSE_PROXY_URL="http://$(docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}')" -v /var/run/docker.sock:/var/run/docker.sock -p8080:8080 --name=cfreak-cypress cfreak/codefreak
+          start: docker run -d -e CODEFREAK_REVERSE_PROXY_URL="http://$(docker network inspect bridge -f '{{ (index .IPAM.Config 0).Gateway }}')" -v /var/run/docker.sock:/var/run/docker.sock -p8080:8080 --name=cfreak-cypress ghcr.io/codefreak/codefreak
           config-file: cypress/cypress-ci.json
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 180
           headless: true
+
+      - name: Install docker-ci-deploy
+        if: matrix.deploy && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags'))
+        run: |
+          pip3 install --upgrade pip
+          pip3 install docker-ci-deploy
+
+      - name: Authenticate to GitHub Docker Registry
+        if: matrix.deploy && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags'))
+        run: |
+          docker logout
+          # "Username" can be anything as we are authenticating via the default workflow access token!
+          # See https://github.com/actions/starter-workflows/issues/66
+          echo ${{ github.token }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Deploy master branch as latest
+        if: matrix.deploy && github.ref == 'refs/heads/master'
+        run: |
+          python -m docker_ci_deploy --tag canary -- ghcr.io/codefreak/codefreak
+          python -m docker_ci_deploy --tag canary -- ghcr.io/codefreak/codefreak-cloud-companion
+
+      # ${GITHUB_REF/refs\/tags\//} returns the tag name from 'refs/tags/TAG_NAME'
+      # The following will only work with tags following semantic versioning!
+      - name: Deploy tags
+        if: matrix.deploy && startsWith(github.ref, 'refs/tags')
+        run: |
+          export TAG_VERSION="${GITHUB_REF/refs\/tags\//}"
+          python -m docker_ci_deploy --version-latest --version "$TAG_VERSION" --version-semver ghcr.io/codefreak/codefreak
+          python -m docker_ci_deploy --version-latest --version "$TAG_VERSION" --version-semver ghcr.io/codefreak/codefreak-cloud-companion
 
       - name: Prepare cache on Windows
         if: runner.os == 'Windows'
@@ -84,20 +115,3 @@ jobs:
         run: |
           rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
           rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-      - name: Before Deploy
-        if: matrix.deploy && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags'))
-        run: |
-          pip3 install --upgrade pip
-          pip3 install docker-ci-deploy
-          docker logout
-          docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
-
-      - name: Deploy master branch as latest
-        if: matrix.deploy && github.ref == 'refs/heads/master'
-        run: python -m docker_ci_deploy --tag canary -- cfreak/codefreak
-
-      # ${GITHUB_REF/refs\/tags\//} returns the tag name from 'refs/tags/TAG_NAME'
-      - name: Deploy tags
-        if: matrix.deploy && startsWith(github.ref, 'refs/tags')
-        run: python -m docker_ci_deploy --version-latest --version ${GITHUB_REF/refs\/tags\//} --version-semver cfreak/codefreak

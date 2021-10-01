@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 * ❗️ Removed `file_collection` table from database ([#1118](https://github.com/codefreak/codefreak/pull/1118))
+* ❗️ Removed `FileCollection` entity and corresponding services ([#1185](https://github.com/codefreak/codefreak/pull/1185))
 
 
 ## [6.0.0](https://github.com/codefreak/codefreak/releases/tag/6.0.0) - 2020-03-26
