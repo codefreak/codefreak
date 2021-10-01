@@ -48,7 +48,7 @@ import { displayName } from '../../services/user'
 import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
 import NotFoundPage from '../NotFoundPage'
-import TaskDetailsPage from './TaskDetailsPage'
+import TaskConfigurationPage from './TaskConfigurationPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import WorkspacePage from '../../components/workspace/WorkspacePage'
 
@@ -166,6 +166,16 @@ const TaskPage: React.FC = () => {
         ]
       : []
 
+  // show task configuration only to teachers and admins
+  const configurationTab = editable
+    ? [
+        {
+          key: '/configuration',
+          tab: tab('Configuration', <FileTextOutlined />)
+        }
+      ]
+    : []
+
   // insert online IDE before last element if enabled
   const ideTab = task.ideEnabled
     ? [
@@ -178,11 +188,11 @@ const TaskPage: React.FC = () => {
     : []
 
   const tabs = [
-    { key: '/details', tab: tab('Task', <FileTextOutlined />) },
+    ...configurationTab,
     ...testingModeSwitch,
     {
       key: '/answer',
-      tab: tab('Answer', <SolutionOutlined />),
+      tab: tab('Upload', <SolutionOutlined />),
       disabled: !answer
     },
     ...ideTab
@@ -285,10 +295,18 @@ const TaskPage: React.FC = () => {
       />
       <Switch>
         <Route exact path={path}>
-          <Redirect to={`${url}/details`} />
+          {editable ? (
+            <Redirect to={`${url}/configuration`} />
+          ) : (
+            <Redirect to={`${url}/ide`} />
+          )}
         </Route>
-        <Route path={`${path}/details`}>
-          <TaskDetailsPage editable={editable} />
+        <Route path={`${path}/configuration`}>
+          {editable ? (
+            <TaskConfigurationPage editable={editable} />
+          ) : (
+            <NotFoundPage />
+          )}
         </Route>
         <Route path={`${path}/answer`}>
           {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}

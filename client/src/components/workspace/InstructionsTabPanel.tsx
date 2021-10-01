@@ -1,5 +1,5 @@
 import TabPanel from './TabPanel'
-import { renderTaskInstructionsText } from '../../pages/task/TaskDetailsPage'
+import { renderTaskInstructionsText } from '../../pages/task/TaskConfigurationPage'
 import { useGetTaskDetailsQuery } from '../../generated/graphql'
 import useWorkspace from '../../hooks/workspace/useWorkspace'
 
