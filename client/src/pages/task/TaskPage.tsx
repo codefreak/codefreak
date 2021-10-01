@@ -1,9 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import {
-  CloudOutlined,
-  FileTextOutlined,
-  SolutionOutlined
-} from '@ant-design/icons'
+import { CloudOutlined, FileTextOutlined } from '@ant-design/icons'
 import { Switch as AntSwitch, Tooltip } from 'antd'
 import { TagType } from 'antd/es/tag'
 import moment from 'moment'
@@ -46,11 +42,11 @@ import { messageService } from '../../services/message'
 import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
 import { makeUpdater } from '../../services/util'
-import AnswerPage from '../answer/AnswerPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskConfigurationPage from './TaskConfigurationPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import WorkspacePage from '../../components/workspace/WorkspacePage'
+import UploadAnswerPageButton from '../../components/UploadAnswerPageButton'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
@@ -180,15 +176,7 @@ const TaskPage: React.FC = () => {
       ]
     : []
 
-  const tabs = [
-    ...configurationTab,
-    {
-      key: '/answer',
-      tab: tab('Upload', <SolutionOutlined />),
-      disabled: !answer
-    },
-    ...ideTab
-  ]
+  const tabs = editable ? [...configurationTab, ...ideTab] : []
 
   const assignment = task.assignment
   const submission = assignment?.submission
@@ -207,9 +195,10 @@ const TaskPage: React.FC = () => {
     buttons = null
   } else if (answer) {
     // regular buttons to work on task for students
-    buttons = (
+    buttons = [
+      <UploadAnswerPageButton answerId={answer.id} />,
       <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
-    )
+    ]
   } else if (!teacherControls) {
     // start working on task by default
     buttons = (
@@ -302,9 +291,6 @@ const TaskPage: React.FC = () => {
           ) : (
             <NotFoundPage />
           )}
-        </Route>
-        <Route path={`${path}/answer`}>
-          {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
         </Route>
         <Route path={`${path}/ide`}>
           {answer ? (
