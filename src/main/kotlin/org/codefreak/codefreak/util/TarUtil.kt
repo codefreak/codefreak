@@ -94,7 +94,7 @@ object TarUtil {
     return out.toByteArray()
   }
 
-  fun isRoot(path: String) = normalizeFileName(path).isBlank()
+  private fun isRoot(path: String) = normalizeFileName(path).isBlank()
   fun isRoot(entry: TarArchiveEntry) = isRoot(entry.name)
 
   private fun createTarRootDirectory(outputStream: TarArchiveOutputStream) {
@@ -287,10 +287,6 @@ object TarUtil {
     }
   }
 
-  fun touch(name: String, outputStream: TarArchiveOutputStream) {
-    createEntryInTar(name, outputStream, EntryType.FILE)
-  }
-
   /**
    * Behaves similar to FileUtil.normalizePath but returned path will
    * always have UNIX directory separators, NEVER a leading slash
@@ -304,7 +300,7 @@ object TarUtil {
    * always have UNIX directory separators, NEVER a leading slash
    * and ALWAYS a trailing slash.
    */
-  fun normalizeDirectoryName(name: String) =
+  private fun normalizeDirectoryName(name: String) =
     FilenameUtils.separatorsToUnix(FileUtil.normalizePath(name)).withTrailingSlash().trimStart('/')
 
   /**

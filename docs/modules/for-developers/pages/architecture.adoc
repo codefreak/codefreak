@@ -34,7 +34,7 @@ and toolchains (Java, Gradle, nodejs, npm, …) to execute and debug the code di
 can be limited in RAM and CPU-usage users cannot steal resources from other users.
 
 The files are synced between the browser and the container in real time. The backend application will monitor the IDE
-container and pull the files from it periodically to store it in a database.
+container and pull the files from it periodically to store it in the file system.
 
 == Docker Daemon
 The Docker daemon is currently used for starting IDE instances (and testing code in the near future). Docker containers
