@@ -1,0 +1,12 @@
+# Please rename this file to application-dev.yml and start the application with `dev` profile
+# to load this configuration in addition to the regular application.yml
+
+companion:
+  # Set this to an absolute path on your computer
+  projectFilesPath: tmp
+
+spring:
+  graphql:
+    graphiql:
+      # Enable the GraphQL playground (reachable at /playground)
+      enabled: true

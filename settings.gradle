@@ -5,3 +5,4 @@ pluginManagement {
 }
 rootProject.name = 'codefreak'
 include 'client'
+include 'cloud-companion'
