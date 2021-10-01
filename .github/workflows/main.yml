@@ -5,6 +5,8 @@ on: [push, pull_request, release]
 jobs:
   main:
     strategy:
+      # do not stop other jobs in case a single matrix jobs fails
+      fail-fast: false
       matrix:
         include:
         - os: ubuntu-20.04
