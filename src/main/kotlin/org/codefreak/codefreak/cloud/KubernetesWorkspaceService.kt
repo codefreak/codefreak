@@ -5,6 +5,8 @@ import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientTimeoutException
 import io.fabric8.kubernetes.client.dsl.CreateOrReplaceable
 import io.fabric8.kubernetes.client.dsl.MultiDeleteable
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 import org.apache.commons.io.IOUtils
 import org.codefreak.codefreak.cloud.model.CompanionIngress
 import org.codefreak.codefreak.cloud.model.CompanionPod
@@ -16,15 +18,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import java.util.UUID
-import java.util.concurrent.TimeUnit
 
 @Service
 class KubernetesWorkspaceService(
-    private val kubernetesClient: KubernetesClient,
-    private val config: AppConfiguration,
-    private val fileService: FileService,
-    private val wsClientFactory: WorkspaceClientFactory
+  private val kubernetesClient: KubernetesClient,
+  private val config: AppConfiguration,
+  private val fileService: FileService,
+  private val wsClientFactory: WorkspaceClientFactory
 ) : WorkspaceService<KubernetesWorkspaceConfig> {
   companion object {
     private val log = LoggerFactory.getLogger(KubernetesWorkspaceService::class.java)

@@ -5,7 +5,7 @@ import { FileContextType } from '../../services/codefreak-api'
 describe('<WorkspacePage />', () => {
   it('renders <WorkspaceTabsWrapper /> two times', () => {
     const { container } = render(
-      <WorkspacePage id="" type={FileContextType.Answer} />
+      <WorkspacePage taskId="" answerId="" type={FileContextType.Answer} />
     )
 
     expect(

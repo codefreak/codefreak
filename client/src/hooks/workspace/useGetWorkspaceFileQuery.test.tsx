@@ -21,7 +21,9 @@ describe('useGetWorkspaceFileQuery()', () => {
       children
     }: React.PropsWithChildren<P>) => (
       <QueryClientProvider client={queryClient}>
-        <WorkspaceContext.Provider value={{ baseUrl }}>
+        <WorkspaceContext.Provider
+          value={{ baseUrl, answerId: '', taskId: '' }}
+        >
           {children}
         </WorkspaceContext.Provider>
       </QueryClientProvider>

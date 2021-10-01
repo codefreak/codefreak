@@ -22,7 +22,9 @@ describe('<EditorTabPanel />', () => {
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <MockedProvider>
         <QueryClientProvider client={queryClient}>
-          <WorkspaceContext.Provider value={{ baseUrl }}>
+          <WorkspaceContext.Provider
+            value={{ baseUrl, answerId: '', taskId: '' }}
+          >
             {children}
           </WorkspaceContext.Provider>
         </QueryClientProvider>

@@ -159,6 +159,9 @@ bootJar {
 
 spotless {
   kotlin {
+    // So only our source files are linted (and not generated ones)
+    target 'src/*/kotlin/**/*.kt'
+
     ktlint().userData(['indent_size': '2'])
   }
 }
