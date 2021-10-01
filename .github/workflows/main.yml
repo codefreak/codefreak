@@ -20,6 +20,16 @@ jobs:
       NODE_OPTIONS: --max_old_space_size=4096
 
     steps:
+      # The companion image uses a lot of disk space
+      - name: Free disk space
+        if: runner.os != 'Windows'
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          df -h /
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
         with:
