@@ -15,6 +15,8 @@ management:
       exposure:
         include: health,prometheus,metrics
   endpoint:
+    metrics:
+      enabled: true
     health:
       enabled: true
       # Make probes also work outside of kubernetes
