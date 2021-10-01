@@ -89,7 +89,7 @@ jib {
     volumes = listOf(
       "/code"
     )
-    labels.put("org.opencontainers.image.source", "https://github.com/codefreak/codefreak-cloud-companion")
+    labels.put("org.opencontainers.image.source", "https://github.com/codefreak/codefreak")
   }
   pluginExtensions {
     pluginExtension {

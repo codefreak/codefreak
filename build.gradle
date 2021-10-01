@@ -199,7 +199,7 @@ task deployFrontend(type: Copy) {
 
 jib {
   to {
-    image = "cfreak/codefreak"
+    image = "ghcr.io/codefreak/codefreak"
   }
   container {
     mainClass = springBoot.mainClassName
@@ -214,6 +214,9 @@ jib {
     ]
     volumes = [
       "/var/lib/codefreak"
+    ]
+    labels = [
+      "org.opencontainers.image.source": "https://github.com/codefreak/codefreak"
     ]
   }
 }
