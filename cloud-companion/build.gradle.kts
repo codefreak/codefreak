@@ -81,7 +81,7 @@ tasks.withType<Test> {
 
 jib {
   from {
-    //image = "replco/polygott:c82c08a720ba1fd537d4fba17eed883ab87c0fd7"
+    image = "docker.io/replco/polygott:9180d8b24b181125577e98a8f5418781e863e852"
   }
   to {
     image = "ghcr.io/codefreak/codefreak-cloud-companion"
