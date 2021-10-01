@@ -53,7 +53,7 @@ class CheckstyleReportFormatParser(
       checkstyleRoot.files != null -> checkstyleRoot.files.flatMap { checkstyleFileToFeedback(it) }
       checkstyleRoot.errors != null -> checkstyleRoot.errors.map { checkstyleErrorToFeedback(it) }
       checkstyleRoot.exception != null -> listOf(checkstyleExceptionToFeedback(checkstyleRoot.exception))
-      else -> throw EvaluationReportParsingException("Empty checkstyle report")
+      else -> emptyList()
     }
   }
 
@@ -97,12 +97,12 @@ class CheckstyleReportFormatParser(
   data class CheckstyleXmlRoot(
     @JacksonXmlElementWrapper(useWrapping = false)
   @JsonProperty("file")
-  val files: List<CheckstyleFile>?,
+  val files: List<CheckstyleFile>? = null,
     @JacksonXmlElementWrapper(useWrapping = false)
   @JsonProperty("error")
-  val errors: List<CheckstyleError>?,
+  val errors: List<CheckstyleError>? = null,
     @JacksonXmlCData
-  val exception: String?
+  val exception: String? = null
   )
 
   data class CheckstyleFile(

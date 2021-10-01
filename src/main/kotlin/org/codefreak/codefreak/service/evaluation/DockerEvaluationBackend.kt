@@ -18,11 +18,13 @@ import org.codefreak.codefreak.util.preventClose
 import org.codefreak.codefreak.util.withTrailingSlash
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.util.AntPathMatcher
 import org.springframework.util.StreamUtils
 
 @Component
+@ConditionalOnProperty("codefreak.evaluation.backend", havingValue = "docker")
 class DockerEvaluationBackend : EvaluationBackend {
 
   @Autowired

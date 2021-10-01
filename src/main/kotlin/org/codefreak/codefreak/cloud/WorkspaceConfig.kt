@@ -35,6 +35,17 @@ interface WorkspaceConfig {
    * their own custom images in the future.
    */
   val imageName: String
+
+  /**
+   * Indicate if this workspace is read-only, meaning the files will not be saved
+   * back to the database.
+   */
+  val isReadOnly: Boolean
+
+  /**
+   * Save files back to the storage system. "files" must be a valid tar archive.
+   */
+  fun saveFiles(files: InputStream)
 }
 
 /**
