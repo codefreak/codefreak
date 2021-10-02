@@ -16,7 +16,7 @@ plugins {
   id 'net.researchgate.release' version '2.8.1'
   id 'org.liquibase.gradle' version '2.0.4'
   id 'com.google.cloud.tools.jib' version '3.1.4'
-  id 'com.apollographql.apollo3' version '3.0.0-alpha03'
+  id 'com.apollographql.apollo3' version '3.0.0-alpha07'
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -73,7 +73,7 @@ dependencies {
   implementation 'com.github.fkorotkov:k8s-kotlin-dsl:3.0.1'
 
   // For workspace communication
-  implementation 'com.apollographql.apollo3:apollo-runtime:3.0.0-alpha03'
+  implementation 'com.apollographql.apollo3:apollo-runtime:3.0.0-alpha07'
 
   implementation 'org.apache.commons:commons-compress:1.21'
   implementation 'org.apache.commons:commons-csv:1.9.0'
@@ -232,5 +232,6 @@ jib {
 tasks.jibDockerBuild.dependsOn deployFrontend
 
 apollo {
+  schemaFile.set(project(":cloud-companion").file("src/main/resources/graphql/schema.graphqls"))
   packageName.set("org.codefreak.codefreak.cloud.workspace")
 }
