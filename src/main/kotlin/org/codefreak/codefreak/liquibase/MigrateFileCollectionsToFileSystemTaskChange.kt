@@ -5,6 +5,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.sql.ResultSet
+import kotlin.io.path.exists
+import kotlin.io.path.isWritable
 import liquibase.change.custom.CustomTaskChange
 import liquibase.database.Database
 import liquibase.database.jvm.JdbcConnection
@@ -48,10 +50,15 @@ class MigrateFileCollectionsToFileSystemTaskChange : CustomTaskChange {
   override fun validate(database: Database?): ValidationErrors {
     val errors = ValidationErrors()
 
-    if (!Files.isDirectory(fileSystemPath)) {
-      errors.addError("`$fileSystemPath` does not exist or is not a directory")
-    } else if (!Files.isWritable(fileSystemPath)) {
-      errors.addError("`$fileSystemPath` is not writable")
+    // fileSystemPath and its parent dirs will be created on demand if it does not exist.
+    // We will not create them here, but we can check if we will be able to create the required directories.
+    val canWrite = generateSequence(fileSystemPath) { last ->
+      last.parent.takeUnless { it == last }
+    }
+      .any { it.exists() && it.isWritable() }
+
+    if (!canWrite) {
+      errors.addError("Will not be able to create $fileSystemPath")
     }
 
     return errors
@@ -59,8 +66,6 @@ class MigrateFileCollectionsToFileSystemTaskChange : CustomTaskChange {
 
   override fun execute(database: Database?) {
     database?.let {
-      Files.createDirectories(fileSystemPath)
-
       val resultSet = getFileCollectionsFromDatabase(it)
       exportFileCollectionsToFileSystem(resultSet)
     }

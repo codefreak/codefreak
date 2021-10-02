@@ -4,7 +4,6 @@
 <h1 align="center">Code FREAK</h1>
 
 [![CI](https://github.com/codefreak/codefreak/actions/workflows/main.yml/badge.svg)](https://github.com/codefreak/codefreak/actions/workflows/main.yml)
-[![Docker Image Version](https://img.shields.io/docker/v/cfreak/codefreak?sort=semver)](https://hub.docker.com/r/cfreak/codefreak)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-informational.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Join Discord Server](https://img.shields.io/discord/748856997105107025?color=7289da&label=discord&logo=discord&logoColor=ffffff)](https://discord.gg/HYDQEDt)
 
@@ -24,7 +23,9 @@ Code FREAK (Code Feedback, Review & Evaluation Kit) is an online programming pla
 
 ## Installation
 
-We currently only support installation via Docker. The image name is [`cfreak/codefreak`](https://hub.docker.com/r/cfreak/codefreak). Check out its [tags](https://hub.docker.com/r/cfreak/codefreak?tab=tags) for the latest version.
+We currently only support installation via Docker.
+The image name is [`ghcr.io/codefreak/codefreak`](https://github.com/codefreak/codefreak/pkgs/container/codefreak).
+Check out its [tags](https://github.com/codefreak/codefreak/pkgs/container/codefreak/versions) for the latest version.
 
 ### Try with Docker 🐋
 
@@ -36,7 +37,7 @@ docker run -it --rm \
     -e SPRING_PROFILES_ACTIVE=dev \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -p 8080:8080 \
-    cfreak/codefreak:canary
+    ghcr.io/codefreak/codefreak:canary
 ```
 
 The UI is accessible at http://localhost:8080.
@@ -50,7 +51,7 @@ This will use you local Docker daemon for evaluation and IDE instances.
 
 There are two major image versions on Docker Hub: `latest` and `canary`. `latest` always points to the latest stable release and `canary` is basically a snapshot release based on the `master` branch from GitHub.
 
-Our image tags follow semantic versioning. For example the tag `cfreak/codefreak:4` will always reference the latest v4 release.
+Our image tags follow semantic versioning. For example the tag `ghcr.io/codefreak/codefreak:4` will always reference the latest v4 release.
 
 ### Deployment & Configuration
 

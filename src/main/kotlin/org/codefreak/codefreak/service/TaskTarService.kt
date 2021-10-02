@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.UUID
-import liquibase.util.StreamUtil
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.StreamUtils
 
 @Service
 class TaskTarService : BaseService() {
@@ -119,7 +119,7 @@ class TaskTarService : BaseService() {
   @Transactional
   fun createEmptyTask(owner: User): Task {
     return ByteArrayOutputStream().use {
-      StreamUtil.copy(ClassPathResource("empty_task.tar").inputStream, it)
+      StreamUtils.copy(ClassPathResource("empty_task.tar").inputStream, it)
       createFromTar(it.toByteArray(), owner)
     }
   }

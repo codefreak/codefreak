@@ -1,0 +1,51 @@
+scalar UUID
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+interface FileSystemNode {
+  path: String!
+}
+
+type Directory implements FileSystemNode {
+  path: String!
+}
+
+type File implements FileSystemNode {
+  path: String!
+  size: Int!
+}
+
+type FileSystemEvent {
+  path: String!
+  type: FileSystemEventType!
+}
+
+type Mutation {
+  killProcess(id: UUID!): Int!
+  resizeProcess(cols: Int!, id: UUID!, rows: Int!): Boolean!
+  startProcess(cmd: [String!]!): Process!
+}
+
+type Process {
+  id: UUID!
+}
+
+type Query {
+  listFiles(path: String!): [FileSystemNode!]!
+}
+
+type Subscription {
+  waitForProcess(id: UUID!): Int!
+  watchFiles(path: String!): FileSystemEvent!
+}
+
+enum FileSystemEventType {
+  CREATED
+  DELETED
+  MODIFIED
+  UNKNOWN
+}
