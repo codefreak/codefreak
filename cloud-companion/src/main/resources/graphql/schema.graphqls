@@ -27,7 +27,7 @@ type FileSystemEvent {
 type Mutation {
   killProcess(id: UUID!): Int!
   resizeProcess(cols: Int!, id: UUID!, rows: Int!): Boolean!
-  startProcess(cmd: [String!]!): Process!
+  startProcess(cmd: [String!]!, env: [String!]): Process!
 }
 
 type Process {

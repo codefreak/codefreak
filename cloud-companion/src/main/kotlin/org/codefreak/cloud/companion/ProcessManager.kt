@@ -19,12 +19,12 @@ class ProcessManager {
   @Autowired
   private lateinit var fileService: FileService
 
-  fun createProcess(cmd: List<String>): UUID {
+  fun createProcess(cmd: List<String>, additionalEnv: Map<String, String> = emptyMap()): UUID {
     var uid: UUID
     // handle rare UUID collisions properly instead of overwriting it
     do {
       uid = UUID.randomUUID()
-    } while (processMap.putIfAbsent(uid, generateProcess(cmd)) != null)
+    } while (processMap.putIfAbsent(uid, generateProcess(cmd, additionalEnv)) != null)
     return uid
   }
 
@@ -60,10 +60,10 @@ class ProcessManager {
     return getProcess(uid).outputStream
   }
 
-  private fun generateProcess(cmd: List<String>): Process {
+  private fun generateProcess(cmd: List<String>, env: Map<String, String>): Process {
     return PtyProcessBuilder(cmd.toTypedArray())
       .setDirectory(fileService.resolve("/").absolutePathString())
-      .setEnvironment(getEnvironment())
+      .setEnvironment(getEnvironment(env))
       // redirect stderr to stdout, so we only have to subscribe to one stream
       .setRedirectErrorStream(true)
       .start()
@@ -73,8 +73,14 @@ class ProcessManager {
    * Inherit the parent environment variables but remove kubernetes master discovery variables
    * as they cannot be removed with enableServiceLinks=false.
    */
-  private fun getEnvironment(): Map<String, String> {
-    return System.getenv()
-      .filterKeys { !it.startsWith("KUBERNETES_") } + mapOf("TERM" to "xterm")
+  private fun getEnvironment(additionalEnv: Map<String, String>): Map<String, String> {
+    val defaultEnv = System.getenv()
+      .filterKeys {
+        !it.startsWith("KUBERNETES_")
+      }.toMutableMap()
+    defaultEnv.putAll(additionalEnv)
+    // Make the terminal non-color by default but this can be overridden via additionalEnv
+    defaultEnv.putIfAbsent("TERM", "xterm")
+    return defaultEnv
   }
 }
