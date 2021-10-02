@@ -42,7 +42,7 @@ dependencies {
 
   implementation("commons-io:commons-io:2.11.0")
   implementation("org.apache.commons:commons-compress:1.21")
-  implementation("org.apache.tika:tika-core:1.27")
+  implementation("org.apache.tika:tika-core:2.1.0")
   // https://packages.jetbrains.team/maven/p/ij/intellij-dependencies/org/jetbrains/pty4j/pty4j/
   implementation("org.jetbrains.pty4j:pty4j:0.11.5")
 
