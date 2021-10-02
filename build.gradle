@@ -159,6 +159,9 @@ bootJar {
 
 spotless {
   kotlin {
+    // Spotless cannot differentiate between generated (by Apollo) and regular sources
+    // so we have to specify the files to analyse explicitly.
+    target "src/*/kotlin/**/*.kt"
     ktlint().userData(['indent_size': '2'])
   }
 }
