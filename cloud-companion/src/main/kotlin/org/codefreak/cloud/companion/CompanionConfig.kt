@@ -6,5 +6,5 @@ import org.springframework.stereotype.Component
 @Component("config")
 @ConfigurationProperties(prefix = "companion")
 class CompanionConfig {
-  var projectFilesPath = "/code"
+  var projectFilesPath = "/home/runner/project"
 }
