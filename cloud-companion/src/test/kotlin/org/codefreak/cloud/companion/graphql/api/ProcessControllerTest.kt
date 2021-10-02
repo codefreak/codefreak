@@ -1,9 +1,11 @@
 package org.codefreak.cloud.companion.graphql.api
 
 import java.time.Duration
+import java.util.UUID
 import org.codefreak.cloud.companion.ProcessManager
 import org.codefreak.cloud.companion.graphql.BasicGraphqlTest
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.core.publisher.Flux
@@ -31,11 +33,42 @@ internal class ProcessControllerTest(
 
   @Test
   fun `startProcess starts a new process`() {
-    graphQlTester.query("mutation { startProcess(cmd: [\"${getBashPath().replace("\\", "\\\\")}\"]){ id } }")
+    val id = graphQlTester.query("mutation { startProcess(cmd: [\"${getBashPath().replace("\\", "\\\\")}\"]){ id } }")
       .execute()
       .path("startProcess.id")
       .pathExists()
       .valueIsNotEmpty()
+      .entity(UUID::class.java)
+      .get()
+    assertDoesNotThrow { processManager.getProcess(id) }
+  }
+
+  @Test
+  fun `accepts additional environment variables`() {
+    val id = graphQlTester.query(
+      "mutation { startProcess(cmd: [\"${
+        getBashPath().replace(
+          "\\",
+          "\\\\"
+        )
+      }\"], env: [\"CUSTOM=123foo123\"]){ id } }"
+    )
+      .execute()
+      .path("startProcess.id")
+      .pathExists()
+      .valueIsNotEmpty()
+      .entity(UUID::class.java)
+      .get()
+    processManager.getStdin(id).writer().let {
+      it.write("echo \$CUSTOM\r\n")
+      it.flush()
+    }
+    StepVerifier.create(processManager.getStdout(id)
+      .map { it.asInputStream().readBytes().decodeToString() }
+      .filter { it.contains("123foo123") }
+    ).expectNextCount(1)
+      .thenCancel()
+      .verify(Duration.ofSeconds(3))
   }
 
   @Test

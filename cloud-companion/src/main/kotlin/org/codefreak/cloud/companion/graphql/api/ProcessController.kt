@@ -21,9 +21,18 @@ class ProcessController {
   private lateinit var processManager: ProcessManager
 
   @MutationMapping
-  fun startProcess(@Argument cmd: List<String>): Mono<ProcessModel> {
+  fun startProcess(@Argument cmd: List<String>, @Argument env: List<String>?): Mono<ProcessModel> {
+    val additionalEnv = env?.map { it.split("=", limit = 2) }
+      ?.filter { it.isNotEmpty() }
+      ?.associate {
+        if (it.size == 1) {
+          Pair(it[0], "")
+        } else {
+          Pair(it[0], it[1])
+        }
+      }
     return Mono.fromCallable {
-      ProcessModel(processManager.createProcess(cmd))
+      ProcessModel(processManager.createProcess(cmd, additionalEnv ?: emptyMap()))
     }.subscribeOn(Schedulers.boundedElastic())
   }
 
