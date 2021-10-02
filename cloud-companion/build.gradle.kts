@@ -87,14 +87,35 @@ jib {
     image = "ghcr.io/codefreak/codefreak-cloud-companion"
   }
   container {
-    volumes = listOf(
-      "/code"
-    )
+    user = "1000:1000"
+    workingDirectory = "/home/runner/project"
     labels.put("org.opencontainers.image.source", "https://github.com/codefreak/codefreak")
+    environment = mapOf(
+      "HOME" to "" // this is set by the polygott base image but confuses the bash environment
+    )
+  }
+  // The files from src/main/jib are added by default.
+  // These files are there to harmonize the underlying image and ensure a user named "runner"
+  // is present with the uid:git 1000:1000; e.g. the user gets a default bash configuration.
+  extraDirectories {
+    permissions = mapOf(
+      "/etc/{passwd,group,shadow}" to "644"
+    )
   }
   pluginExtensions {
     pluginExtension {
       implementation = "com.google.cloud.tools.jib.gradle.extension.springboot.JibSpringBootExtension"
+    }
+    pluginExtension {
+      implementation = "com.google.cloud.tools.jib.gradle.extension.ownership.JibOwnershipExtension"
+      configuration( Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
+        rules {
+          rule {
+            glob = "{/home/runner,,/home/runner/*,/home/runner/**/*}"
+            ownership = "1000:1000"
+          }
+        }
+      })
     }
   }
 }
