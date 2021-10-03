@@ -132,7 +132,7 @@ jib {
       configuration( Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
         rules {
           rule {
-            glob = "{/home/runner,,/home/runner/*,/home/runner/**/*}"
+            glob = "/home/runner/**"
             ownership = "1000:1000"
           }
         }
