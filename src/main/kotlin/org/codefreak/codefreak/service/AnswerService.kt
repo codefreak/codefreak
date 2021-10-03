@@ -10,6 +10,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.hasAuthority
+import org.codefreak.codefreak.cloud.WorkspaceIdentifier
+import org.codefreak.codefreak.cloud.WorkspacePurpose
+import org.codefreak.codefreak.cloud.WorkspaceService
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.AssignmentStatus
 import org.codefreak.codefreak.entity.Submission
@@ -43,6 +46,9 @@ class AnswerService : BaseService() {
   @Autowired
   private lateinit var taskService: TaskService
 
+  @Autowired
+  private lateinit var workspaceService: WorkspaceService
+
   fun findAnswer(taskId: UUID, userId: UUID): Answer = answerRepository.findByTaskIdAndSubmissionUserId(taskId, userId)
       .orElseThrow { EntityNotFoundException("Answer not found.") }
 
@@ -57,6 +63,9 @@ class AnswerService : BaseService() {
 
   @Transactional
   fun deleteAnswer(answerId: UUID) {
+    workspaceService.deleteWorkspace(
+      WorkspaceIdentifier(purpose = WorkspacePurpose.ANSWER_IDE, reference = answerId.toString())
+    )
     ideService.removeAnswerIdeContainers(answerId)
     answerRepository.deleteById(answerId)
 

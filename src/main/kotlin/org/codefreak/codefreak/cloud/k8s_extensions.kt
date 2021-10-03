@@ -45,9 +45,9 @@ val Pod.collectionId: UUID
   get() = this.metadata.labels[WS_K8S_LABEL_COLLECTION_ID]?.let { UUID.fromString(it) }
     ?: throw IllegalStateException("Given pod ${this.metadata.name} does not look like a workspace pod")
 
-// Service names are limited to 63 characters...
+// Service names are limited to 63 characters and must be a valid DNS-1035 identifier...
 val WorkspaceIdentifier.workspaceServiceName: String
-  get() = hashString().substring(0..24)
+  get() = hashString().substring(0..32).trim('-')
 
 val WorkspaceIdentifier.workspaceScriptMapName: String
   get() = hashString()

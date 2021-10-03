@@ -82,7 +82,7 @@ class KubernetesWorkspaceService(
   override fun deleteWorkspace(identifier: WorkspaceIdentifier) {
     val pod = getWorkspacePod(identifier).get()
     if (pod == null) {
-      log.info("Attempted to delete workspace that is not existing: $identifier")
+      log.debug("Attempted to delete workspace that is not existing: $identifier")
       return
     }
     saveWorkspaceFiles(identifier)
@@ -115,6 +115,7 @@ class KubernetesWorkspaceService(
   }
 
   private fun deleteWorkspaceResources(identifier: WorkspaceIdentifier) {
+    log.debug("Deleting workspace resources of $identifier")
     kubernetesClient.services().withName(identifier.workspaceServiceName).delete()
     kubernetesClient.network().v1().ingresses().withName(identifier.workspaceIngressName).delete()
     kubernetesClient.pods().withName(identifier.workspacePodName).delete()
@@ -143,7 +144,7 @@ class KubernetesWorkspaceService(
       null, // user info
       globalBase.host,
       globalBase.port,
-      (globalBase.path.withTrailingSlash() + identifier.workspaceServiceName).withoutTrailingSlash(),
+      (globalBase.path.withTrailingSlash() + identifier.hashString()).withoutTrailingSlash(),
       null, // query string
       null // fragment
     )
