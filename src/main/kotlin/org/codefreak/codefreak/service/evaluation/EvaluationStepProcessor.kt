@@ -1,6 +1,5 @@
 package org.codefreak.codefreak.service.evaluation
 
-import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
@@ -91,12 +90,15 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     }
 
     log.debug(
-        "Evaluation step ${evaluationStep.definition.key} of answer ${answer.id} finished with status ${evaluationStep.result}: ${evaluationStep.summary}"
+      "Evaluation step ${evaluationStep.definition.key} of answer ${answer.id} finished with status ${evaluationStep.result}: ${evaluationStep.summary}"
     )
     return evaluationStep
   }
 
-  private fun runEvaluationWithTimeout(reportFormatParser: EvaluationReportFormatParser, step: EvaluationStep): List<Feedback> {
+  private fun runEvaluationWithTimeout(
+    reportFormatParser: EvaluationReportFormatParser,
+    step: EvaluationStep
+  ): List<Feedback> {
     val answer = step.evaluation.answer
     val timeout = step.definition.timeout ?: defaultTimeout
     try {
@@ -114,9 +116,9 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
       log.info("Timeout for evaluation step ${step.definition.key} of answer ${answer.id} occurred after ${timeout}sec")
       evaluationBackend.interruptEvaluation(step.id)
       throw EvaluationStepException(
-          "Evaluation timed out after $timeout seconds",
-          result = EvaluationStepResult.ERRORED,
-          status = EvaluationStepStatus.CANCELED
+        "Evaluation timed out after $timeout seconds",
+        result = EvaluationStepResult.ERRORED,
+        status = EvaluationStepStatus.CANCELED
       )
     } catch (e: ExecutionException) {
       // unwrap exceptions from EvaluationRunner#run() to catch them properly
@@ -141,7 +143,11 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     }
   }
 
-  private fun parseFeedbackFromEvaluationFiles(reportFormatParser: EvaluationReportFormatParser, evaluationResult: EvaluationResult, filePattern: String): List<Feedback> {
+  private fun parseFeedbackFromEvaluationFiles(
+    reportFormatParser: EvaluationReportFormatParser,
+    evaluationResult: EvaluationResult,
+    filePattern: String
+  ): List<Feedback> {
     // a map with fileName to extracted feedback from this file
     // Map<String, List<Feedback>>
     val feedbackFromFiles = evaluationResult.consumeFiles(filePattern) { fileName, fileContent ->
@@ -150,9 +156,9 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
         Pair(fileName, reportFormatParser.parse(fileContent))
       } catch (parsingException: EvaluationReportParsingException) {
         throw EvaluationStepException(
-            "Failed to parse report file $fileName with ${reportFormatParser.id}: ${parsingException.message}",
-            EvaluationStepResult.ERRORED,
-            cause = parsingException
+          "Failed to parse report file $fileName with ${reportFormatParser.id}: ${parsingException.message}",
+          EvaluationStepResult.ERRORED,
+          cause = parsingException
         )
       }
     }.toMap()
@@ -175,15 +181,15 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     val output = evaluationResult.output
     if (exitCode > 0) {
       throw EvaluationStepException(
-          "Process exited with $exitCode:\n$output",
-          EvaluationStepResult.FAILED,
-          EvaluationStepStatus.FINISHED
+        "Process exited with $exitCode:\n$output",
+        EvaluationStepResult.FAILED,
+        EvaluationStepStatus.FINISHED
       )
     } else {
       throw EvaluationStepException(
-          "Process exited with $exitCode:\n$output",
-          EvaluationStepResult.SUCCESS,
-          EvaluationStepStatus.FINISHED
+        "Process exited with $exitCode:\n$output",
+        EvaluationStepResult.SUCCESS,
+        EvaluationStepStatus.FINISHED
       )
     }
   }
@@ -191,12 +197,12 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
   private fun buildEvaluationRunConfig(step: EvaluationStep): DefaultEvaluationRunConfig {
     val stepDefinition = step.definition
     return DefaultEvaluationRunConfig(
-        id = step.id,
-        imageName = appConfig.evaluation.defaultImage,
-        workingDirectory = appConfig.evaluation.imageWorkdir,
-        script = createEvaluationScript(stepDefinition.script),
-        environment = buildEnvVariables(step),
-        filesSupplier = { answerService.copyFilesForEvaluation(step.evaluation.answer) }
+      id = step.id,
+      imageName = appConfig.evaluation.defaultImage,
+      workingDirectory = appConfig.evaluation.imageWorkdir,
+      script = createEvaluationScript(stepDefinition.script),
+      environment = buildEnvVariables(step),
+      collectionId = step.evaluation.answer.id
     )
   }
 
@@ -205,15 +211,15 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     val submission = answer.submission
     val user = submission.user
     return mapOf(
-        "CI" to "true",
-        "CODEFREAK_USER_USERNAME" to user.usernameCanonical,
-        "CODEFREAK_USER_FIRST_NAME" to (user.firstName ?: ""),
-        "CODEFREAK_USER_LAST_NAME" to (user.lastName ?: ""),
-        "CODEFREAK_USER_ID" to user.id.toString(),
-        "CODEFREAK_ANSWER_ID" to answer.id.toString(),
-        "CODEFREAK_TASK_ID" to answer.task.id.toString(),
-        "CODEFREAK_SUBMISSION_ID" to submission.id.toString(),
-        "CODEFREAK_ASSIGNMENT_ID" to (submission.assignment?.id?.toString() ?: "")
+      "CI" to "true",
+      "CODEFREAK_USER_USERNAME" to user.usernameCanonical,
+      "CODEFREAK_USER_FIRST_NAME" to (user.firstName ?: ""),
+      "CODEFREAK_USER_LAST_NAME" to (user.lastName ?: ""),
+      "CODEFREAK_USER_ID" to user.id.toString(),
+      "CODEFREAK_ANSWER_ID" to answer.id.toString(),
+      "CODEFREAK_TASK_ID" to answer.task.id.toString(),
+      "CODEFREAK_SUBMISSION_ID" to submission.id.toString(),
+      "CODEFREAK_ASSIGNMENT_ID" to (submission.assignment?.id?.toString() ?: "")
     )
   }
 
@@ -238,13 +244,6 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     override val environment: Map<String, String>,
     override val imageName: String,
     override val workingDirectory: String,
-    private val filesSupplier: () -> InputStream
-  ) : EvaluationRunConfig {
-    /**
-     * Invoke the supplier function lazy to generate the input stream.
-     * This will be called every time when files will be accessed!
-     */
-    override val files
-      get() = filesSupplier()
-  }
+    override val collectionId: UUID
+  ) : EvaluationRunConfig
 }

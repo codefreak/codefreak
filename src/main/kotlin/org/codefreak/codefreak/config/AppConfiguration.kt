@@ -1,6 +1,6 @@
 package org.codefreak.codefreak.config
 
-import java.net.URL
+import java.net.URI
 import java.time.ZoneId
 import java.util.Locale
 import javax.validation.constraints.NotBlank
@@ -96,14 +96,16 @@ class AppConfiguration {
 
   class Workspaces {
     /**
-     * Kubernetes namespace where new workspaces will be created in
+     * Kubernetes namespace where new workspaces will be created in.
+     * Running multiple instances of Code FREAK in the same namespace is NOT supported and might lead
+     * to data corruption or invalid states.
      */
     var namespace = "default"
 
     /**
      * Base URL where workspaces will be reachable
      */
-    var baseUrl: URL = URL("http://localhost/")
+    var baseUrl: URI = URI("http://localhost/")
 
     /**
      * Full image name that will be used for the workspace companion

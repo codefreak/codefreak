@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 @ConditionalOnProperty("codefreak.evaluation.backend", havingValue = "workspace", matchIfMissing = true)
 class WorkspaceEvaluationBackend : EvaluationBackend {
   @Autowired
-  private lateinit var workspaceService: WorkspaceService<KubernetesWorkspaceConfig>
+  private lateinit var workspaceService: WorkspaceService
 
   @Autowired
   private lateinit var workspaceClientFactory: WorkspaceClientFactory
@@ -28,14 +28,17 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
   private lateinit var appConfiguration: AppConfiguration
 
   override fun <T> runEvaluation(runConfig: EvaluationRunConfig, resultProcessor: EvaluationResultProcessor<T>): T {
-    val workspaceConfig = createWorkspaceConfig(runConfig)
-    return workspaceService.useWorkspace(workspaceConfig) { workspaceReference ->
-      val result = runBlocking { invokeEvaluation(workspaceReference) }
-      resultProcessor(result)
+    val identifier = createWorkspaceIdentifier(runConfig.id)
+    try {
+      val reference = workspaceService.createWorkspace(identifier, createWorkspaceConfig(runConfig))
+      val result = runBlocking { invokeEvaluation(reference) }
+      return resultProcessor(result)
+    } finally {
+      workspaceService.deleteWorkspace(identifier)
     }
   }
 
-  private suspend fun invokeEvaluation(reference: WorkspaceReference): EvaluationResult {
+  private suspend fun invokeEvaluation(reference: RemoteWorkspaceReference): EvaluationResult {
     val workspaceClient = workspaceClientFactory.createClient(reference)
     val evalProcessId = workspaceClient.startProcess(listOf("/scripts/run-evaluation"))
     val exitCode = workspaceClient.waitForProcess(evalProcessId)
@@ -45,11 +48,14 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
       override val exitCode = exitCode
       override val output = output
 
-      override fun <T> consumeFiles(pattern: String, consumer: (fileName: String, fileContent: InputStream) -> T): List<T> {
+      override fun <T> consumeFiles(
+        pattern: String,
+        consumer: (fileName: String, fileContent: InputStream) -> T
+      ): List<T> {
         return workspaceClient.downloadFiles(filter = pattern) { downloadedTarArchive ->
           downloadedTarArchive.entrySequence()
-              .map { consumer(it.name, downloadedTarArchive.preventClose()) }
-              .toList()
+            .map { consumer(it.name, downloadedTarArchive.preventClose()) }
+            .toList()
         }
       }
     }
@@ -57,33 +63,26 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
 
   override fun interruptEvaluation(id: UUID) {
     workspaceService.deleteWorkspace(
-        createMinimalWorkspaceConfig(id)
+      createWorkspaceIdentifier(id)
     )
   }
 
-  private fun createMinimalWorkspaceConfig(id: UUID): KubernetesWorkspaceConfig {
-    return KubernetesWorkspaceConfig(
-        appConfig = appConfiguration,
-        reference = id
-    ) { throw IllegalStateException("This config is read-only") }
+  private fun createWorkspaceIdentifier(id: UUID): WorkspaceIdentifier {
+    return WorkspaceIdentifier(
+      purpose = WorkspacePurpose.EVALUATION,
+      reference = id.toString()
+    )
   }
 
-  private fun createWorkspaceConfig(runConfig: EvaluationRunConfig): KubernetesWorkspaceConfig {
-    return KubernetesWorkspaceConfig(
-        appConfig = appConfiguration,
-        reference = runConfig.id
-        // imageName = runConfig.imageName
-    ) { runConfig.files }.also {
+  private fun createWorkspaceConfig(runConfig: EvaluationRunConfig): WorkspaceConfiguration {
+    return DefaultWorkspaceConfiguration(
+      reference = runConfig.id,
+      collectionId = runConfig.collectionId,
+      isReadOnly = true,
+      // TODO: Use image that might has been configured by the eval config
+      imageName = appConfiguration.workspaces.companionImage
+    ).also {
       it.addScript("run-evaluation", runConfig.script)
-    }
-  }
-
-  private fun <S, T : WorkspaceConfig> WorkspaceService<T>.useWorkspace(config: T, consumer: (config: WorkspaceReference) -> S): S {
-    try {
-      val reference = createWorkspace(config)
-      return consumer(reference)
-    } finally {
-      deleteWorkspace(config)
     }
   }
 }

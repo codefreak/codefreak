@@ -12,6 +12,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.ExecResult
+import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.codefreak.codefreak.util.preventClose
@@ -33,6 +34,9 @@ class DockerEvaluationBackend : EvaluationBackend {
   @Autowired
   private lateinit var containerService: ContainerService
 
+  @Autowired
+  private lateinit var fileService: FileService
+
   private val log = LoggerFactory.getLogger(this::class.java)
 
   override fun <T> runEvaluation(runConfig: EvaluationRunConfig, resultProcessor: EvaluationResultProcessor<T>): T {
@@ -49,7 +53,7 @@ class DockerEvaluationBackend : EvaluationBackend {
     }
     return containerService.useContainer(containerId) {
       // copy over project files that will be evaluated
-      runConfig.files.use {
+      fileService.readCollectionTar(runConfig.collectionId).use {
         containerService.copyToContainer(it, containerId, runConfig.workingDirectory)
       }
       // copy all scripts

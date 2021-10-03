@@ -27,9 +27,3 @@ private fun UriComponentsBuilder.joinPath(vararg paths: String?): UriComponentsB
   path(paths.filterNotNull().joinToString(separator = "/") { it.withoutLeadingSlash().withoutTrailingSlash() })
   return this
 }
-
-/**
- * Indicate if URL has a port set that is not the default for this protocol
- */
-val URL.hasNonStandardPort: Boolean
-  get() = port != -1 && port != defaultPort

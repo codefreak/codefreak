@@ -4,6 +4,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.ws.DefaultWebSocketEngine
 import com.apollographql.apollo3.network.ws.GraphQLWsProtocol
 import com.apollographql.apollo3.network.ws.WebSocketNetworkTransport
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -14,6 +15,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
+import okhttp3.ResponseBody
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.BufferedSink
@@ -25,7 +27,8 @@ import org.codefreak.codefreak.cloud.workspace.WaitForProcessSubscription
 import reactor.core.publisher.Flux
 
 class WorkspaceClient(
-  private val reference: WorkspaceReference
+  private val reference: RemoteWorkspaceReference,
+  private val objectMapper: ObjectMapper
 ) {
   private val requestFactory = OkHttpClient.Builder()
       // .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
@@ -92,7 +95,7 @@ class WorkspaceClient(
 
   fun waitForWorkspaceToComeLive(timeout: Long, unit: TimeUnit, interval: Long = 500L): Boolean {
     val latch = CountDownLatch(1)
-    val thread = thread(name = "wait-workspace-${reference.id}") {
+    val thread = thread(name = "wait-workspace-${reference.id.hashString()}") {
       try {
         while (!isWorkspaceLive()) {
           Thread.sleep(interval)
@@ -125,6 +128,38 @@ class WorkspaceClient(
         503, 404 -> false
         else -> throw IllegalStateException("Expected a status of 404 or 503 but received $code instead")
       }
+    }
+  }
+
+  /**
+   * Determine the number of websocket connections to a workspace by calling the dedicated metric endpoint
+   * exposed by the companion.
+   */
+  fun countWebsocketConnections(): Long {
+    val request = Request.Builder()
+      .get()
+      .url(buildWorkspaceUri(reference.baseUrl, path = "/actuator/metrics/http.websocket.connections"))
+      .header("Connection", "close")
+      .build()
+    requestFactory.newCall(request).execute { response ->
+      val body = response.body() ?: throw IllegalStateException("Metric response has no body")
+      return when (val code = response.code()) {
+        200 -> extractFirstMeasurementValue(body).toLong()
+        else -> throw IllegalStateException("Expected a status of 404 or 503 but received $code instead")
+      }
+    }
+  }
+
+  private fun extractFirstMeasurementValue(body: ResponseBody): Double {
+    try {
+      val bodyString = body.string()
+      // You cannot marshal to a MetricResponse object here because it is not meant for deserialization
+      val objectNode = objectMapper.readTree(bodyString)
+      return objectNode.get("measurements").get(0).get("value").doubleValue()
+    } catch (e: NoSuchElementException) {
+      throw IllegalArgumentException("Returned payload from workspace does not contain any measurements.")
+    } catch (e: IllegalArgumentException) {
+      throw IllegalArgumentException("Returned payload from workspace is no valid JSON.")
     }
   }
 

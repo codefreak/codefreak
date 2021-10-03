@@ -5,13 +5,16 @@ import com.fkorotkov.kubernetes.newServicePort
 import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Service
-import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
+import org.codefreak.codefreak.cloud.WorkspaceConfiguration
+import org.codefreak.codefreak.cloud.WorkspaceIdentifier
+import org.codefreak.codefreak.cloud.k8sLabels
+import org.codefreak.codefreak.cloud.workspaceServiceName
 
-class CompanionService(wsConfig: KubernetesWorkspaceConfig) : Service() {
+class WorkspaceServiceModel(identifier: WorkspaceIdentifier, wsConfig: WorkspaceConfiguration) : Service() {
   init {
     metadata {
-      name = wsConfig.companionServiceName
-      labels = wsConfig.getLabelsForComponent("companion")
+      name = identifier.workspaceServiceName
+      labels = identifier.k8sLabels
     }
     spec {
       ports = listOf(newServicePort {
@@ -20,7 +23,7 @@ class CompanionService(wsConfig: KubernetesWorkspaceConfig) : Service() {
         targetPort = IntOrString("http")
       })
       type = "ClusterIP"
-      selector = wsConfig.getLabelsForComponent("companion")
+      selector = identifier.k8sLabels
     }
   }
 }

@@ -13,13 +13,18 @@ import com.fkorotkov.kubernetes.readinessProbe
 import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Pod
-import org.codefreak.codefreak.cloud.KubernetesWorkspaceConfig
+import org.codefreak.codefreak.cloud.WorkspaceConfiguration
+import org.codefreak.codefreak.cloud.WorkspaceIdentifier
+import org.codefreak.codefreak.cloud.k8sLabels
+import org.codefreak.codefreak.cloud.workspacePodName
+import org.codefreak.codefreak.cloud.workspaceScriptMapName
 
-class CompanionPod(wsConfig: KubernetesWorkspaceConfig) : Pod() {
+class WorkspacePodModel(identifier: WorkspaceIdentifier, wsConfig: WorkspaceConfiguration) : Pod() {
   init {
     metadata {
-      name = wsConfig.companionDeploymentName
-      labels = wsConfig.getLabelsForComponent("companion")
+      name = identifier.workspacePodName
+      // TODO: Store configuration in secret
+      labels = identifier.k8sLabels + wsConfig.k8sLabels
     }
     spec {
       containers = listOf(newContainer {
@@ -73,7 +78,7 @@ class CompanionPod(wsConfig: KubernetesWorkspaceConfig) : Pod() {
           newVolume {
             name = "scripts"
             configMap {
-              name = wsConfig.companionScriptMapName
+              name = identifier.workspaceScriptMapName
               defaultMode = 493 // equals 0755
               items = wsConfig.scripts.map { (scriptName) ->
                 newKeyToPath {
