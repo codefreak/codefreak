@@ -1,20 +1,5 @@
 package org.codefreak.cloud.companion
 
-import java.io.File
-import java.io.OutputStream
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
-import java.nio.file.FileSystem
-import java.nio.file.FileSystemException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardWatchEventKinds
-import java.nio.file.WatchEvent
-import java.nio.file.WatchKey
-import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
-import kotlin.io.path.isSameFileAs
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
@@ -34,6 +19,22 @@ import org.springframework.util.AntPathMatcher
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import java.io.File
+import java.io.OutputStream
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
+import java.nio.file.FileSystem
+import java.nio.file.FileSystemException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardWatchEventKinds
+import java.nio.file.WatchEvent
+import java.nio.file.WatchKey
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isSameFileAs
 
 private val DEFAULT_WATCH_EVENT_KINDS = arrayOf(
   StandardWatchEventKinds.ENTRY_CREATE,
@@ -57,6 +58,12 @@ class FileService(
   val fileSystem: FileSystem = basePath.fileSystem
 
   private val antPathMatcher = AntPathMatcher()
+
+  init {
+    if (!basePath.exists()) {
+      basePath.createDirectories()
+    }
+  }
 
   fun resolve(path: String): Path {
     return basePath.resolve(normalizePath(path))
