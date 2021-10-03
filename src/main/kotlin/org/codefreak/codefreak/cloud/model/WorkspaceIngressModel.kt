@@ -10,14 +10,13 @@ import com.fkorotkov.kubernetes.networking.v1.service
 import com.fkorotkov.kubernetes.networking.v1.spec
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress
 import java.net.URI
-import org.codefreak.codefreak.cloud.WorkspaceConfiguration
 import org.codefreak.codefreak.cloud.WorkspaceIdentifier
 import org.codefreak.codefreak.cloud.k8sLabels
 import org.codefreak.codefreak.cloud.workspaceIngressName
 import org.codefreak.codefreak.cloud.workspaceServiceName
 import org.codefreak.codefreak.util.withoutTrailingSlash
 
-class WorkspaceIngressModel(identifier: WorkspaceIdentifier, wsConfig: WorkspaceConfiguration, baseUrl: URI) : Ingress() {
+class WorkspaceIngressModel(identifier: WorkspaceIdentifier, baseUrl: URI) : Ingress() {
   init {
     metadata {
       name = identifier.workspaceIngressName

@@ -109,4 +109,11 @@ interface WorkspaceService {
   fun createWorkspace(identifier: WorkspaceIdentifier, config: WorkspaceConfiguration): RemoteWorkspaceReference
   fun deleteWorkspace(identifier: WorkspaceIdentifier)
   fun findAllWorkspaces(): List<RemoteWorkspaceReference>
+
+  /**
+   * Trigger a file save on the given workspace. This will take the current file state from
+   * the workspace and update the collection this workspace is based on in the database.
+   * Implementations should not perform any updates if this workspace is marked as read-only.
+   */
+  fun saveWorkspaceFiles(identifier: WorkspaceIdentifier)
 }

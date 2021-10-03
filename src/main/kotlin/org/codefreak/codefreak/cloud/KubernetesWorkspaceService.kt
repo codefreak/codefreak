@@ -85,6 +85,12 @@ class KubernetesWorkspaceService(
       log.info("Attempted to delete workspace that is not existing: $identifier")
       return
     }
+    saveWorkspaceFiles(identifier)
+    deleteWorkspaceResources(identifier)
+  }
+
+  override fun saveWorkspaceFiles(identifier: WorkspaceIdentifier) {
+    val pod = getWorkspacePod(identifier).get() ?: return
 
     val reference = createReference(identifier)
     val wsClient = wsClientFactory.createClient(reference)
@@ -98,15 +104,14 @@ class KubernetesWorkspaceService(
     } else {
       log.debug("Not saving files of workspace $identifier because it is read-only")
     }
-    deleteWorkspaceResources(identifier)
   }
 
   private fun createWorkspaceResources(identifier: WorkspaceIdentifier, config: WorkspaceConfiguration) {
     kubernetesClient.configMaps().createOrReplaceWithLog(WorkspaceScriptMapModel(identifier, config))
     kubernetesClient.pods().createOrReplaceWithLog(WorkspacePodModel(identifier, config))
-    kubernetesClient.services().createOrReplaceWithLog(WorkspaceServiceModel(identifier, config))
+    kubernetesClient.services().createOrReplaceWithLog(WorkspaceServiceModel(identifier))
     kubernetesClient.network().v1().ingresses()
-      .createOrReplaceWithLog(WorkspaceIngressModel(identifier, config, buildWorkspaceBaseUrl(identifier)))
+      .createOrReplaceWithLog(WorkspaceIngressModel(identifier, buildWorkspaceBaseUrl(identifier)))
   }
 
   private fun deleteWorkspaceResources(identifier: WorkspaceIdentifier) {

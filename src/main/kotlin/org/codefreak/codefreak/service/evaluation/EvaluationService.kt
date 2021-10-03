@@ -2,6 +2,9 @@ package org.codefreak.codefreak.service.evaluation
 
 import java.time.Instant
 import java.util.UUID
+import org.codefreak.codefreak.cloud.WorkspaceIdentifier
+import org.codefreak.codefreak.cloud.WorkspacePurpose
+import org.codefreak.codefreak.cloud.WorkspaceService
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
 import org.codefreak.codefreak.entity.AssignmentStatus
@@ -46,6 +49,9 @@ class EvaluationService : BaseService() {
   private lateinit var evaluationQueue: EvaluationQueue
 
   @Autowired
+  private lateinit var workspaceService: WorkspaceService
+
+  @Autowired
   private lateinit var eventPublisher: ApplicationEventPublisher
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -65,9 +71,13 @@ class EvaluationService : BaseService() {
     }
   }
 
+  private val Answer.ideWorkspaceIdentifier
+    get() = WorkspaceIdentifier(WorkspacePurpose.ANSWER_IDE, id.toString())
+
   @Synchronized
   fun startEvaluation(answer: Answer, forceSaveFiles: Boolean = false): Evaluation {
     ideService.saveAnswerFiles(answer, forceSaveFiles)
+    workspaceService.saveWorkspaceFiles(answer.ideWorkspaceIdentifier)
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
     check(!isEvaluationScheduled(answer.id)) { "Evaluation is already scheduled." }
     val digest = fileService.getCollectionMd5Digest(answer.id)

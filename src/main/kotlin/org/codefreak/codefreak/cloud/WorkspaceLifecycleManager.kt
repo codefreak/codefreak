@@ -45,6 +45,7 @@ class WorkspaceLifecycleManager(
         client.countWebsocketConnections()
       } catch (e: IllegalStateException) {
         // ignore workspaces that are in an erroneous state (maybe just started or shutting down)
+        log.debug("Workspace $reference appears to be broken. Ignoring for idle check.")
         return@mapNotNull null
       }
       if (numWsConnections <= 0) {
