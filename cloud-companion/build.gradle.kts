@@ -109,7 +109,7 @@ jib {
   }
   container {
     user = "1000:1000"
-    workingDirectory = "/home/runner/project"
+    workingDirectory = "/home/runner"
     labels.put("org.opencontainers.image.source", "https://github.com/codefreak/codefreak")
     environment = mapOf(
       "HOME" to "" // this is set by the polygott base image but confuses the bash environment
@@ -132,7 +132,7 @@ jib {
       configuration( Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
         rules {
           rule {
-            glob = "/home/runner/**"
+            glob = "{/home/runner,/home/runner/**}"
             ownership = "1000:1000"
           }
         }
