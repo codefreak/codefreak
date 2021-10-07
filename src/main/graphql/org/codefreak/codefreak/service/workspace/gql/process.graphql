@@ -1,0 +1,13 @@
+mutation StartProcess($cmd: [String!]!, $env: [String!]) {
+  startProcess(cmd: $cmd, env: $env) {
+    id
+  }
+}
+
+subscription WaitForProcess($id: UUID!) {
+  waitForProcess(id: $id)
+}
+
+mutation KillProcess($id: UUID!) {
+  killProcess(id: $id)
+}
