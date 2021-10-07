@@ -7,13 +7,6 @@ import java.util.UUID
  */
 data class WorkspaceConfiguration(
   /**
-   * Identity of the user that will be authorized to access the workspace.
-   * This should be a unique identity of the user (id or username).
-   * Will be used for creating the JWT "sub" claim.
-   */
-  val user: String,
-
-  /**
    * Collection-ID that will be used for reading/writing files from/to a workspace.
    * If the workspace is marked as read-only the collection will only be extracted
    * and not stored back to the database.
@@ -36,5 +29,11 @@ data class WorkspaceConfiguration(
    * The default value will be the current companion image but teachers might be able to create
    * their own custom images in the future.
    */
-  val imageName: String
+  val imageName: String,
+
+  /**
+   * Optional map of additional environment variables that will be available
+   * in the workspace.
+   */
+  val environment: Map<String, String>? = null
 )

@@ -149,6 +149,7 @@ class AppConfiguration {
     var userSearchFilter = "(uid={0})"
     var groupSearchBase = "ou=groups"
     var groupSearchFilter = "member={0}"
+
     /** Manually set the roles for a specific username */
     var overrideRoles: Map<String, Role> = mapOf()
     var forceLdapRoles = true
@@ -188,6 +189,7 @@ class AppConfiguration {
   }
 
   class Evaluation {
+    var backend = "docker"
     var maxConcurrentExecutions = Runtime.getRuntime().availableProcessors()
     var maxQueueSize = 1000
     var defaultTimeout = 5L * 60L

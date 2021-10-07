@@ -1,8 +1,6 @@
 package org.codefreak.codefreak.service.workspace
 
 import com.nhaarman.mockitokotlin2.whenever
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.reactive.awaitLast
@@ -13,7 +11,7 @@ import org.awaitility.Awaitility.await
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.config.KubernetesConfiguration
 import org.codefreak.codefreak.service.file.FileService
-import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.TarUtil.createTarWithEntries
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
@@ -69,11 +67,10 @@ class WorkspaceClientTest {
     val remoteWorkspaceReference = workspaceService.createWorkspace(
       workspaceIdentifier,
       WorkspaceConfiguration(
-        user = "",
-        collectionId = collectionId,
-        isReadOnly = true,
-        scripts = emptyMap(),
-        imageName = appConfiguration.workspaces.companionImage
+          collectionId = collectionId,
+          isReadOnly = true,
+          scripts = emptyMap(),
+          imageName = appConfiguration.workspaces.companionImage
       )
     )
     workspaceClient = workspaceClientService.createClient(remoteWorkspaceReference)
@@ -134,16 +131,5 @@ class WorkspaceClientTest {
     await().atMost(10, TimeUnit.SECONDS).untilAsserted {
       Assertions.assertEquals(0, workspaceClient.countWebsocketConnections())
     }
-  }
-
-  private fun createTarWithEntries(entries: Map<String, String>): InputStream {
-    val tarOutput = ByteArrayOutputStream()
-    TarUtil.PosixTarArchiveOutputStream(tarOutput).use {
-      entries.forEach { (name, content) ->
-        TarUtil.writeFileWithContent(name, content.byteInputStream(), it)
-      }
-      it.finish()
-    }
-    return tarOutput.toByteArray().inputStream()
   }
 }

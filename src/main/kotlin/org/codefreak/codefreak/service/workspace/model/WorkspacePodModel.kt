@@ -6,6 +6,7 @@ import com.fkorotkov.kubernetes.livenessProbe
 import com.fkorotkov.kubernetes.metadata
 import com.fkorotkov.kubernetes.newContainer
 import com.fkorotkov.kubernetes.newContainerPort
+import com.fkorotkov.kubernetes.newEnvVar
 import com.fkorotkov.kubernetes.newKeyToPath
 import com.fkorotkov.kubernetes.newVolume
 import com.fkorotkov.kubernetes.newVolumeMount
@@ -39,6 +40,12 @@ class WorkspacePodModel(identifier: WorkspaceIdentifier, wsConfig: WorkspaceConf
 
         // disable environment variables with service links
         enableServiceLinks = false
+        env = wsConfig.environment?.map { (key, value) ->
+          newEnvVar {
+            name = key
+            this.value = value
+          }
+        }
         volumeMounts = listOf(
           newVolumeMount {
             name = "scripts"

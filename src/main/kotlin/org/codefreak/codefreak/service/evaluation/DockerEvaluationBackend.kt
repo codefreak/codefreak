@@ -12,17 +12,20 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.ExecResult
+import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.codefreak.codefreak.util.preventClose
 import org.codefreak.codefreak.util.withTrailingSlash
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.util.AntPathMatcher
 import org.springframework.util.StreamUtils
 
 @Component
+@ConditionalOnProperty("codefreak.evaluation.backend", havingValue = "docker", matchIfMissing = true)
 class DockerEvaluationBackend : EvaluationBackend {
 
   @Autowired
@@ -30,6 +33,9 @@ class DockerEvaluationBackend : EvaluationBackend {
 
   @Autowired
   private lateinit var containerService: ContainerService
+
+  @Autowired
+  private lateinit var fileService: FileService
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -47,7 +53,7 @@ class DockerEvaluationBackend : EvaluationBackend {
     }
     return containerService.useContainer(containerId) {
       // copy over project files that will be evaluated
-      runConfig.files.use {
+      fileService.readCollectionTar(runConfig.collectionId).use {
         containerService.copyToContainer(it, containerId, runConfig.workingDirectory)
       }
       // copy all scripts
