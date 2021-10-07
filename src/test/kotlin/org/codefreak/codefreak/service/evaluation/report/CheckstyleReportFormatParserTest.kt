@@ -19,7 +19,8 @@ class CheckstyleReportFormatParserTest {
 
   @Test
   fun parseStandard() {
-    val feedback = parser.parse("""
+    val feedback = parser.parse(
+        """
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="8.45.1">
     <file name="/home/coder/project/src/main/java/Calculator.java">
@@ -70,7 +71,8 @@ class CheckstyleReportFormatParserTest {
    */
   @Test
   fun `parse with exception in file`() {
-    val feedback = parser.parse("""
+    val feedback = parser.parse(
+        """
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="">
 <file name="Test.java">
@@ -101,7 +103,8 @@ example
    */
   @Test
   fun `parse with exception in root`() {
-    val feedback = parser.parse("""
+    val feedback = parser.parse(
+        """
 <?xml version="1.0" encoding="UTF-8"?>
 <checkstyle version="">
 <exception>
@@ -123,5 +126,16 @@ example
             )
         )
     )
+  }
+
+  @Test
+  fun `parse empty works correctly`() {
+    val feedback = parser.parse(
+        """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <checkstyle></checkstyle>
+    """.trimIndent()
+    )
+    MatcherAssert.assertThat(feedback, Matchers.hasSize(0))
   }
 }
