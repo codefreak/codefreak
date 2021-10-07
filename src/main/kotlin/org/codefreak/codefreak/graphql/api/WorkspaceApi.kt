@@ -13,7 +13,7 @@ import org.codefreak.codefreak.graphql.BaseResolver
 import org.springframework.stereotype.Component
 
 @GraphQLName("Workspace")
-class WorkspaceDto(val baseUrl: String, val authToken: String) {
+class WorkspaceDto(val baseUrl: String, val authToken: String?) {
   constructor(reference: RemoteWorkspaceReference) : this(
     baseUrl = reference.baseUrl,
     authToken = reference.authToken

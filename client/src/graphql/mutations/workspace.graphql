@@ -3,6 +3,7 @@ mutation StartWorkspace(
 ) {
   startWorkspace(fileContext: $context) {
     baseUrl
+    authToken
   }
 }
 

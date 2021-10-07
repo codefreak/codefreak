@@ -6,6 +6,7 @@ import com.fkorotkov.kubernetes.livenessProbe
 import com.fkorotkov.kubernetes.metadata
 import com.fkorotkov.kubernetes.newContainer
 import com.fkorotkov.kubernetes.newContainerPort
+import com.fkorotkov.kubernetes.newEnvVar
 import com.fkorotkov.kubernetes.newKeyToPath
 import com.fkorotkov.kubernetes.newVolume
 import com.fkorotkov.kubernetes.newVolumeMount
@@ -36,6 +37,12 @@ class WorkspacePodModel(identifier: WorkspaceIdentifier, wsConfig: WorkspaceConf
           containerPort = 8080
           protocol = "TCP"
         })
+        env = listOf(
+          newEnvVar {
+            name = "SPRING_APPLICATION_JSON"
+            value = "{\"spring.security.oauth2.resourceserver.jwt.jwk-set-uri\": \"http://host.minikube.internal:8080/.well-known/jwks.json\"}"
+          }
+        )
         // resources {
         //  requests = mapOf(
         //      "cpu" to Quantity.parse("1"),

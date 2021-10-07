@@ -27,15 +27,15 @@ class KubernetesWorkspaceService(
   private val kubernetesClient: KubernetesClient,
   private val appConfig: AppConfiguration,
   private val fileService: FileService,
-  private val wsClientFactory: WorkspaceClientFactory
+  private val wsClientFactory: WorkspaceClientFactory,
+  @Qualifier("yamlObjectMapper")
+  private val yamlMapper: ObjectMapper,
+  @Autowired(required = false)
+  private val authTokenService: WorkspaceAuthTokenService?
 ) : WorkspaceService {
   companion object {
     private val log = LoggerFactory.getLogger(KubernetesWorkspaceService::class.java)
   }
-
-  @Autowired
-  @Qualifier("yamlObjectMapper")
-  private lateinit var yamlMapper: ObjectMapper
 
   override fun createWorkspace(identifier: WorkspaceIdentifier, config: WorkspaceConfiguration): RemoteWorkspaceReference {
     if (getWorkspacePod(identifier).get() != null) {
@@ -133,7 +133,7 @@ class KubernetesWorkspaceService(
     return RemoteWorkspaceReference(
       id = identifier,
       baseUrl = buildWorkspaceBaseUrl(identifier).toString(),
-      authToken = ""
+      authToken = authTokenService?.createAuthToken(identifier)
     )
   }
 

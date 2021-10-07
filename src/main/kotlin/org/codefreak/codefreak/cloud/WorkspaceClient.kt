@@ -31,9 +31,22 @@ class WorkspaceClient(
   private val objectMapper: ObjectMapper
 ) {
   private val requestFactory = OkHttpClient.Builder()
-      // .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-      .retryOnConnectionFailure(false)
-      .build()
+    // .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+    .retryOnConnectionFailure(false)
+    .also {
+      // Provide authentication token if workspace requires authentication
+      if (reference.authToken != null) {
+        it.addInterceptor { chain ->
+          val authReq: Request = chain
+            .request()
+            .newBuilder()
+            .addHeader("Authorization", "Bearer " + reference.authToken)
+            .build()
+          chain.proceed(authReq)
+        }
+      }
+    }
+    .build()
 
   private val apolloClient = ApolloClient(
       networkTransport = WebSocketNetworkTransport(

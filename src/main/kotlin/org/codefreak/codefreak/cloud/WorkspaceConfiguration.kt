@@ -97,7 +97,7 @@ interface WorkspaceConfiguration {
 data class RemoteWorkspaceReference(
   val id: WorkspaceIdentifier,
   val baseUrl: String,
-  val authToken: String
+  val authToken: String?
 )
 
 interface WorkspaceService {

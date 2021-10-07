@@ -13,7 +13,7 @@ export interface WorkspacePageProps {
 }
 
 const WorkspacePage: React.FC<WorkspacePageProps> = props => {
-  const [workspaceUrl, setWorkspaceUrl] = useState<string | undefined>()
+  const [workspaceInfo, setWorkspaceInfo] = useState<{baseUrl: string, authToken: string | null} | undefined>()
   const variables = {
     context: {
       id: props.id,
@@ -27,17 +27,20 @@ const WorkspacePage: React.FC<WorkspacePageProps> = props => {
     variables
   })
   useEffect(() => {
-    setWorkspaceUrl(startWorkspaceResult.data?.startWorkspace.baseUrl)
+    setWorkspaceInfo(startWorkspaceResult.data?.startWorkspace)
   }, [startWorkspaceResult.data])
   useEffect(() => {
     if (deleteWorkspaceResult.data) {
-      setWorkspaceUrl(undefined)
+      setWorkspaceInfo(undefined)
     }
   }, [deleteWorkspaceResult.data])
-  if (workspaceUrl) {
+  if (workspaceInfo) {
     return (
       <>
-        <h1>{workspaceUrl}</h1>
+        <h1>{workspaceInfo.baseUrl}</h1>
+        <pre>
+          <code>{workspaceInfo.authToken}</code>
+        </pre>
         <Button
           danger
           icon={<DeleteFilled />}
