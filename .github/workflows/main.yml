@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request, release]
+on: [ push, pull_request, release ]
 
 jobs:
   main:
@@ -9,10 +9,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: ubuntu-20.04
-          deploy: true
-        - os: windows-2019
-          deploy: false
+          - os: ubuntu-20.04
+            deploy: true
+          - os: windows-2019
+            deploy: false
 
     runs-on: ${{ matrix.os }}
     env:
@@ -51,15 +51,38 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Run Gradle checks
+      # Run compilers and linters first to make the CI fail faster
+      - name: Run fast checks
         shell: bash
-        run: ./gradlew check
+        run: ./gradlew check -x test
 
-      - name: Build Server and Companion Images
-        # Import of jib image into Windows Docker is currently not working on CI
+      # Install minikube, enable ingress addon and make ingress available at http://minikube
+      - name: Setup minikube
         if: runner.os != 'Windows'
-        # This will build the "server" image and the (minimal) companion image.
-        run: ./gradlew jibDockerBuild
+        run: |
+          curl -Lo minikube https://github.com/kubernetes/minikube/releases/download/v1.23.2/minikube-linux-amd64 \
+            && chmod +x minikube
+          sudo mv minikube /usr/local/bin/minikube
+          minikube start --driver=docker
+          minikube addons enable ingress
+          echo "$(minikube ip) minikube" | sudo tee -a /etc/hosts
+
+      # Build the companion image first because we need it for integration tests with the server.
+      - name: Build Companion Image
+        if: runner.os != 'Windows'
+        run: ./gradlew :cloud-companion:jibDockerBuild
+
+      - name: Load Companion Image to Minikube
+        if: runner.os != 'Windows'
+        run: minikube image load ghcr.io/codefreak/codefreak-cloud-companion:minimal
+
+      - name: Run Unit Tests
+        shell: bash
+        run: ./gradlew test
+
+      - name: Build Server Image
+        if: runner.os != 'Windows'
+        run: ./gradlew :jibDockerBuild
 
       # Build the companion aio (all-in-one) image only when on master or tags
       # Because the image is huge (~15GB) we need to free up some space on GH Actions before we can build the image.

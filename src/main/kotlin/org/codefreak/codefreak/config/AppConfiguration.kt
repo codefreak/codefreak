@@ -23,6 +23,7 @@ class AppConfiguration {
 
   val l10n = L10N()
   val docker = Docker()
+  val workspaces = Workspaces()
   val ide = Ide()
   val reverseProxy = ReverseProxy()
   val ldap = Ldap()
@@ -90,6 +91,35 @@ class AppConfiguration {
     var dockerDaemonAllowlist = arrayListOf(
         "cfreak/breeze"
     )
+  }
+
+  class Workspaces {
+    /**
+     * Kubernetes namespace where new workspaces will be created in.
+     * Running multiple instances of Code FREAK in the same namespace is NOT supported and might lead
+     * to data corruption or invalid states.
+     */
+    var namespace = "default"
+
+    /**
+     * Base URL that will be used to create Ingress resources for workspaces.
+     * Must accept a single variable `{workspaceIdentifier}` that
+     * will be replaced by the actual random workspace id.
+     * Make sure the hostname points to your ingress LoadBalancer.
+     * The template can also be used to create hostname-based URLs.
+     * Make sure you do not exceed the max allowed characters per domain (RFC 1034).
+     *
+     * ```
+     * baseUrlTemplate: "http://{workspaceIdentifier}.ws.mydomain.com"
+     * baseUrlTemplate: "https://mydomain.com/ws/{workspaceIdentifier}"
+     * ```
+     */
+    var baseUrlTemplate = "http://localhost/{workspaceIdentifier}"
+
+    /**
+     * Full image name that will be used for the workspace companion
+     */
+    var companionImage = "ghcr.io/codefreak/codefreak-cloud-companion:minimal"
   }
 
   class Docker {

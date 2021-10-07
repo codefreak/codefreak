@@ -17,6 +17,9 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.service.workspace.WorkspaceIdentifier
+import org.codefreak.codefreak.service.workspace.WorkspacePurpose
+import org.codefreak.codefreak.service.workspace.WorkspaceService
 import org.codefreak.codefreak.util.DockerUtil
 import org.codefreak.codefreak.util.NetUtil
 import org.slf4j.LoggerFactory
@@ -61,6 +64,9 @@ class IdeService : BaseService() {
 
   @Autowired
   lateinit var httpClient: HttpClient
+
+  @Autowired
+  private lateinit var workspaceService: WorkspaceService
 
   private var idleContainers: Map<String, Long> = mapOf()
 
@@ -187,12 +193,18 @@ class IdeService : BaseService() {
     return containerService.getContainerWithLabel(label, answerId.toString())?.id()
   }
 
+  private fun buildAnswerIdeWorkspaceIdentifier(answerId: UUID): WorkspaceIdentifier {
+    return WorkspaceIdentifier(WorkspacePurpose.ANSWER_IDE, answerId.toString())
+  }
+
   @Transactional
   fun saveAnswerFiles(answer: Answer, force: Boolean = false): Answer {
     if (!force && !answer.isEditable) {
       log.info("Skipped saving of files from answer ${answer.id} because it's not editable anymore")
       return answer
     }
+    workspaceService.saveWorkspaceFiles(buildAnswerIdeWorkspaceIdentifier(answer.id))
+
     val containerId = getAnswerIdeContainer(answer.id)
     if (containerId === null) {
       log.debug("Not saving files of answer ${answer.id}: No write container found")
@@ -298,6 +310,7 @@ class IdeService : BaseService() {
    * Remove answer container and possible read-only containers
    */
   fun removeAnswerIdeContainers(answerId: UUID) {
+    workspaceService.deleteWorkspace(buildAnswerIdeWorkspaceIdentifier(answerId))
     arrayOf(
         getAnswerIdeContainer(answerId),
         getAnswerIdeContainer(answerId, readOnly = true)
