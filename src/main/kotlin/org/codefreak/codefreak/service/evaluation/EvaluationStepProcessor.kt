@@ -1,6 +1,5 @@
 package org.codefreak.codefreak.service.evaluation
 
-import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
@@ -11,7 +10,6 @@ import org.codefreak.codefreak.entity.EvaluationStep
 import org.codefreak.codefreak.entity.EvaluationStepResult
 import org.codefreak.codefreak.entity.EvaluationStepStatus
 import org.codefreak.codefreak.entity.Feedback
-import org.codefreak.codefreak.service.AnswerService
 import org.codefreak.codefreak.service.evaluation.report.EvaluationReportFormatParser
 import org.codefreak.codefreak.service.evaluation.report.EvaluationReportParsingException
 import org.codefreak.codefreak.service.evaluation.report.FormatParserRegistry
@@ -36,9 +34,6 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
 
   @Autowired
   private lateinit var formatParserRegistry: FormatParserRegistry
-
-  @Autowired
-  private lateinit var answerService: AnswerService
 
   @Autowired
   private lateinit var appConfig: AppConfiguration
@@ -196,7 +191,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
         workingDirectory = appConfig.evaluation.imageWorkdir,
         script = createEvaluationScript(stepDefinition.script),
         environment = buildEnvVariables(step),
-        filesSupplier = { answerService.copyFilesForEvaluation(step.evaluation.answer) }
+        collectionId = step.evaluation.answer.id
     )
   }
 
@@ -238,13 +233,6 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     override val environment: Map<String, String>,
     override val imageName: String,
     override val workingDirectory: String,
-    private val filesSupplier: () -> InputStream
-  ) : EvaluationRunConfig {
-    /**
-     * Invoke the supplier function lazy to generate the input stream.
-     * This will be called every time when files will be accessed!
-     */
-    override val files
-      get() = filesSupplier()
-  }
+    override val collectionId: UUID
+  ) : EvaluationRunConfig
 }

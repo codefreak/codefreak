@@ -76,7 +76,7 @@ interface EvaluationRunConfig {
   val workingDirectory: String
 
   /**
-   * A valid tar archive that will be extracted to the working directory before invoking the evaluation script.
+   * The collection that will be extracted to the working directory before invoking the evaluation script.
    */
-  val files: InputStream
+  val collectionId: UUID
 }
