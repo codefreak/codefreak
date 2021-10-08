@@ -2,7 +2,6 @@ package org.codefreak.codefreak.service.evaluation
 
 import java.io.InputStream
 import java.util.UUID
-import java.util.stream.Collectors
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -55,7 +54,7 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
     val workspaceClient = workspaceClientService.createClient(reference)
     val evalProcessId = workspaceClient.startProcess(listOf("/scripts/$EVALUATION_SCRIPT_NAME"))
     val output = try {
-      workspaceClient.getProcessOutput(evalProcessId).collect(Collectors.joining()).awaitLast()
+      workspaceClient.getAllProcessOutput(evalProcessId).awaitLast()
     } catch (e: NoSuchElementException) {
       ""
     }

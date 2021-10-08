@@ -9,43 +9,23 @@ import liquibase.util.StreamUtil
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.awaitility.Awaitility.await
 import org.codefreak.codefreak.config.AppConfiguration
-import org.codefreak.codefreak.config.KubernetesConfiguration
-import org.codefreak.codefreak.service.file.FileService
-import org.codefreak.codefreak.util.TarUtil.createTarWithEntries
+import org.codefreak.codefreak.service.WorkspaceBaseTest
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.hasEntry
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.Import
-import org.springframework.test.context.ActiveProfiles
 
-/**
- * For performance reasons all tests are run in the same workspace.
- * This is why this test is annotated with [Lifecycle.PER_CLASS]
- */
-@SpringBootTest
-@ActiveProfiles("test")
-@Import(KubernetesConfiguration::class, AppConfiguration::class)
-@TestInstance(Lifecycle.PER_CLASS)
 // Can be enabled once the Image building works on GitHub Actions
 @DisabledOnOs(OS.WINDOWS)
-class WorkspaceClientTest {
-  @MockBean
-  private lateinit var fileService: FileService
-
+class WorkspaceClientTest : WorkspaceBaseTest() {
   @Autowired
   private lateinit var appConfiguration: AppConfiguration
 
@@ -76,12 +56,6 @@ class WorkspaceClientTest {
     workspaceClient = workspaceClientService.createClient(remoteWorkspaceReference)
   }
 
-  @AfterAll
-  fun afterAll() {
-    val testWorkspace = workspaceService.findAllWorkspaces().find { it.identifier == workspaceIdentifier } ?: return
-    workspaceService.deleteWorkspace(testWorkspace.identifier)
-  }
-
   @Test
   fun workspaceComesLive() {
     Assertions.assertTrue(workspaceClient.waitForWorkspaceToComeLive(20, TimeUnit.SECONDS))
@@ -91,7 +65,7 @@ class WorkspaceClientTest {
   fun processLifecycle(): Unit = runBlocking {
     val processId =
       workspaceClient.startProcess(listOf("/bin/bash", "-c", "echo foo is not \$FOO && exit 12"), listOf("FOO=bar"))
-    Assertions.assertEquals("foo is not bar", workspaceClient.getProcessOutput(processId).awaitLast().trim())
+    Assertions.assertEquals("foo is not bar", workspaceClient.getAllProcessOutput(processId).awaitLast().trim())
     Assertions.assertEquals(12, workspaceClient.waitForProcess(processId))
   }
 

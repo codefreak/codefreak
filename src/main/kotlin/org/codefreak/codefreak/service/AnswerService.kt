@@ -17,6 +17,7 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.codefreak.codefreak.service.file.FileService
+import org.codefreak.codefreak.service.workspace.WorkspaceIdeService
 import org.codefreak.codefreak.util.FileUtil
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
@@ -38,26 +39,31 @@ class AnswerService : BaseService() {
   private lateinit var ideService: IdeService
 
   @Autowired
+  private lateinit var workspaceIdeService: WorkspaceIdeService
+
+  @Autowired
   private lateinit var submissionService: SubmissionService
 
   @Autowired
   private lateinit var taskService: TaskService
 
   fun findAnswer(taskId: UUID, userId: UUID): Answer = answerRepository.findByTaskIdAndSubmissionUserId(taskId, userId)
-      .orElseThrow { EntityNotFoundException("Answer not found.") }
+    .orElseThrow { EntityNotFoundException("Answer not found.") }
 
-  fun findAnswer(answerId: UUID): Answer = answerRepository.findById(answerId).orElseThrow { EntityNotFoundException("Answer not found.") }
+  fun findAnswer(answerId: UUID): Answer =
+    answerRepository.findById(answerId).orElseThrow { EntityNotFoundException("Answer not found.") }
 
   @Transactional
   fun findOrCreateAnswer(taskId: UUID, user: User): Answer {
     val assignmentId = taskService.findTask(taskId).assignment?.id
     return submissionService.findOrCreateSubmission(assignmentId, user)
-        .let { it.getAnswer(taskId) ?: createAnswer(it, taskId) }
+      .let { it.getAnswer(taskId) ?: createAnswer(it, taskId) }
   }
 
   @Transactional
   fun deleteAnswer(answerId: UUID) {
     ideService.removeAnswerIdeContainers(answerId)
+    workspaceIdeService.deleteAnswerIde(answerId)
     answerRepository.deleteById(answerId)
 
     if (fileService.collectionExists(answerId)) {
@@ -71,6 +77,7 @@ class AnswerService : BaseService() {
     return fileService.writeCollectionTar(answer.id).afterClose {
       answer.updatedAt = Instant.now()
       ideService.answerFilesUpdatedExternally(answer.id)
+      workspaceIdeService.redeployAnswerFiles(answer.id)
     }
   }
 
@@ -89,6 +96,7 @@ class AnswerService : BaseService() {
     require(answer.isEditable) { "The answer is not editable anymore" }
     copyFilesFromTask(answer)
     ideService.answerFilesUpdatedExternally(answer.id)
+    workspaceIdeService.redeployAnswerFiles(answer.id)
   }
 
   fun copyFilesForEvaluation(answer: Answer): InputStream {
@@ -133,5 +141,5 @@ class AnswerService : BaseService() {
   }
 
   private fun Task.isTesting() =
-      this.owner == FrontendUtil.getCurrentUser() || FrontendUtil.getCurrentUser().hasAuthority(Authority.ROLE_ADMIN)
+    this.owner == FrontendUtil.getCurrentUser() || FrontendUtil.getCurrentUser().hasAuthority(Authority.ROLE_ADMIN)
 }

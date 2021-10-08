@@ -37,7 +37,7 @@ class KubernetesWorkspaceService(
     identifier: WorkspaceIdentifier,
     config: WorkspaceConfiguration
   ): RemoteWorkspaceReference {
-    if (getWorkspacePod(identifier).get() != null) {
+    if (getWorkspacePodResource(identifier).get() != null) {
       log.debug("Workspace $identifier already exists.")
       return createReference(identifier)
     }
@@ -49,13 +49,14 @@ class KubernetesWorkspaceService(
       createWorkspaceResources(identifier, config)
 
       // make sure the deployment is ready
-      val companionPod = getWorkspacePod(identifier)
+      val podResource = getWorkspacePodResource(identifier)
       try {
-        companionPod.waitUntilReady(20, TimeUnit.SECONDS)
+        podResource.waitUntilReady(20, TimeUnit.SECONDS)
         log.debug("Workspace Pod $wsHash is ready")
       } catch (e: KubernetesClientTimeoutException) {
         throw IllegalStateException("Workspace $wsHash is not ready after 20sec.")
       }
+      val companionPod = podResource.get() ?: throw IllegalStateException("Pod not existing after creation")
 
       // deploy answer files
       val reference = createReference(identifier)
@@ -63,9 +64,7 @@ class KubernetesWorkspaceService(
       if (!wsClient.waitForWorkspaceToComeLive(10L, TimeUnit.SECONDS)) {
         throw IllegalStateException("Workspace $wsHash is not reachable at ${reference.baseUrl} after 10sec even though the Pod is ready.")
       }
-      log.debug("Deploying files to workspace $wsHash...")
-      fileService.readCollectionTar(config.collectionId).use(wsClient::deployFiles)
-      log.debug("Deployed files to workspace $wsHash!")
+      deployWorkspaceFiles(companionPod, wsClient)
       return reference
     } catch (e: Exception) {
       // make sure we tear down the workspace in case something went wrong during deployment
@@ -74,12 +73,18 @@ class KubernetesWorkspaceService(
     }
   }
 
-  private fun getWorkspacePod(identifier: WorkspaceIdentifier): PodResource<Pod?> {
+  private fun deployWorkspaceFiles(workspacePod: Pod, wsClient: WorkspaceClient) {
+    log.debug("Deploying files to workspace ${workspacePod.reference}...")
+    fileService.readCollectionTar(workspacePod.collectionId).use(wsClient::deployFiles)
+    log.debug("Deployed files to workspace ${workspacePod.reference}!")
+  }
+
+  private fun getWorkspacePodResource(identifier: WorkspaceIdentifier): PodResource<Pod?> {
     return kubernetesClient.pods().withName(identifier.workspacePodName)
   }
 
   override fun deleteWorkspace(identifier: WorkspaceIdentifier) {
-    val pod = getWorkspacePod(identifier).get()
+    val pod = getWorkspacePodResource(identifier).get()
     if (pod == null) {
       log.debug("Attempted to delete workspace that is not existing: $identifier")
       return
@@ -89,7 +94,11 @@ class KubernetesWorkspaceService(
   }
 
   override fun saveWorkspaceFiles(identifier: WorkspaceIdentifier) {
-    val pod = getWorkspacePod(identifier).get() ?: return
+    val pod = getWorkspacePodResource(identifier).get()
+    if (pod == null) {
+      log.debug("Not saving workspace files for identifier $identifier because workspace does not exist")
+      return
+    }
 
     val reference = createReference(identifier)
     val wsClient = workspaceClientService.createClient(reference)
@@ -103,6 +112,17 @@ class KubernetesWorkspaceService(
     } else {
       log.debug("Not saving files of workspace $identifier because it is read-only")
     }
+  }
+
+  override fun redeployWorkspaceFiles(identifier: WorkspaceIdentifier) {
+    val pod = getWorkspacePodResource(identifier).get()
+    if (pod == null) {
+      log.debug("Not refreshing workspace files for identifier $identifier because workspace does not exist")
+      return
+    }
+    val wsClient = workspaceClientService.createClient(createReference(identifier))
+    log.debug("Refreshing files of workspace $identifier!")
+    deployWorkspaceFiles(pod, wsClient)
   }
 
   private fun createWorkspaceResources(identifier: WorkspaceIdentifier, config: WorkspaceConfiguration) {

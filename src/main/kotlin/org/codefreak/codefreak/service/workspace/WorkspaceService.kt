@@ -16,4 +16,11 @@ interface WorkspaceService {
    * Implementations should not perform any updates if this workspace is marked as read-only.
    */
   fun saveWorkspaceFiles(identifier: WorkspaceIdentifier)
+
+  /**
+   * Deploy the files again from the collection the workspace is based on.
+   * This should be used in cases where the collection has been changed externally.
+   * The operation is destructive as it will override all files existing in the workspace.
+   */
+  fun redeployWorkspaceFiles(identifier: WorkspaceIdentifier)
 }
