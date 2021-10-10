@@ -37,20 +37,6 @@ object TarUtil {
     }
   }
 
-  /**
-   * Create a simple in-memory tar archive with the named entries as filename -> content map.
-   */
-  fun createTarWithEntries(entries: Map<String, String>): InputStream {
-    val tarOutput = ByteArrayOutputStream()
-    PosixTarArchiveOutputStream(tarOutput).use {
-      entries.forEach { (name, content) ->
-        writeFileWithContent(name, content.byteInputStream(), it)
-      }
-      it.finish()
-    }
-    return tarOutput.toByteArray().inputStream()
-  }
-
   fun createTarFromDirectory(file: File, out: OutputStream) {
     require(file.isDirectory) { "FileCollection must be a directory" }
 

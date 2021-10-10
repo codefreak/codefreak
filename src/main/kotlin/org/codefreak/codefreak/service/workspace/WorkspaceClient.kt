@@ -10,6 +10,7 @@ import java.io.InputStream
 import java.net.URI
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.stream.Collectors
 import kotlin.concurrent.thread
 import kotlinx.coroutines.flow.first
 import okhttp3.Call
@@ -29,6 +30,7 @@ import org.codefreak.codefreak.util.preventClose
 import org.slf4j.LoggerFactory
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 class WorkspaceClient(
   baseUrl: String,
@@ -187,6 +189,17 @@ class WorkspaceClient(
     }
   }
 
+  /**
+   * Collect the full process output as string. Keep in mind the mono will complete only once
+   * the process has finished.
+   */
+  fun getAllProcessOutput(processId: String): Mono<String> {
+    return getProcessOutput(processId).collect(Collectors.joining())
+  }
+
+  /**
+   * Stream the process output as it comes in
+   */
   fun getProcessOutput(processId: String): Flux<String> {
     val request = Request.Builder()
       .get()

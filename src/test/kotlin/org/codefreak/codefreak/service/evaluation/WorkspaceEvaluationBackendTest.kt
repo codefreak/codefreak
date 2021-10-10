@@ -8,10 +8,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.nio.charset.StandardCharsets
 import java.util.UUID
-import org.codefreak.codefreak.config.AppConfiguration
-import org.codefreak.codefreak.config.KubernetesConfiguration
-import org.codefreak.codefreak.service.file.FileService
-import org.codefreak.codefreak.util.TarUtil.createTarWithEntries
+import org.codefreak.codefreak.service.WorkspaceBaseTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
 import org.hamcrest.Matchers.allOf
@@ -21,30 +18,18 @@ import org.hamcrest.Matchers.hasEntry
 import org.hamcrest.Matchers.hasProperty
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestPropertySource
 import org.springframework.util.StreamUtils
 
-@SpringBootTest(
-  properties = [
-    "codefreak.evaluation.backend=workspace"
-  ]
-)
-@ActiveProfiles("test")
-@Import(KubernetesConfiguration::class, WorkspaceEvaluationBackend::class, AppConfiguration::class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestPropertySource(properties = ["codefreak.evaluation.backend=workspace"])
+@Import(WorkspaceEvaluationBackend::class)
 // Can be enabled once the Image building works on GitHub Actions
 @DisabledOnOs(OS.WINDOWS)
-internal class WorkspaceEvaluationBackendTest {
-  @MockBean
-  private lateinit var fileService: FileService
-
+internal class WorkspaceEvaluationBackendTest : WorkspaceBaseTest() {
   @Autowired
   private lateinit var evaluationBackend: WorkspaceEvaluationBackend
 
