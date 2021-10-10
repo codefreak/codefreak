@@ -8,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 import liquibase.util.StreamUtil
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.awaitility.Awaitility.await
-import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.service.WorkspaceBaseTest
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.hamcrest.MatcherAssert.assertThat
@@ -26,9 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired
 // Can be enabled once the Image building works on GitHub Actions
 @DisabledOnOs(OS.WINDOWS)
 class WorkspaceClientTest : WorkspaceBaseTest() {
-  @Autowired
-  private lateinit var appConfiguration: AppConfiguration
-
   @Autowired
   private lateinit var workspaceClientService: WorkspaceClientService
 

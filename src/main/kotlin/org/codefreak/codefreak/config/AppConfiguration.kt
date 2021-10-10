@@ -120,6 +120,17 @@ class AppConfiguration {
      * Full image name that will be used for the workspace companion
      */
     var companionImage = "ghcr.io/codefreak/codefreak-cloud-companion:minimal"
+
+    /**
+     * Threshold in seconds after which workspaces without any (websocket) connections
+     * are shut down.
+     */
+    var maxIdleThreshold = 60 * 5L
+
+    /**
+     * Interval in seconds how often workspaces are checked for idleness.
+     */
+    var idleCheckInterval = 20L
   }
 
   class Docker {
