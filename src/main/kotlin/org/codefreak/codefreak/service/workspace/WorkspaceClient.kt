@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono
 
 class WorkspaceClient(
   baseUrl: String,
+  authToken: String?,
   private val objectMapper: ObjectMapper
 ) {
   companion object {
@@ -43,6 +44,19 @@ class WorkspaceClient(
   private val baseUri = URI(baseUrl)
   private val requestFactory = OkHttpClient.Builder()
     .retryOnConnectionFailure(false)
+    .also {
+      // Provide authentication token via Authorization header
+      if (authToken != null) {
+        it.addInterceptor { chain ->
+          val authReq: Request = chain
+            .request()
+            .newBuilder()
+            .addHeader("Authorization", "Bearer $authToken")
+            .build()
+          chain.proceed(authReq)
+        }
+      }
+    }
     .build()
 
   val apolloClient = ApolloClient(

@@ -32,7 +32,7 @@ import org.springframework.web.reactive.function.BodyInserters
 
 @ExtendWith(SpringExtension::class)
 @WebFluxTest(controllers = [FilesTarController::class])
-@Import(FileService::class, CompanionConfig::class)
+@Import(FileService::class, CompanionConfig::class, SecurityConfiguration::class)
 @ActiveProfiles("test")
 internal class FilesTarControllerTest {
   @Autowired

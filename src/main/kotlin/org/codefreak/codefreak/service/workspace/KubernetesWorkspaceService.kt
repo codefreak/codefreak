@@ -27,7 +27,8 @@ class KubernetesWorkspaceService(
   private val fileService: FileService,
   private val workspaceClientService: WorkspaceClientService,
   @Qualifier("yamlObjectMapper")
-  private val yamlMapper: ObjectMapper
+  private val yamlMapper: ObjectMapper,
+  private val jsonMapper: ObjectMapper
 ) : WorkspaceService {
   companion object {
     private val log = LoggerFactory.getLogger(KubernetesWorkspaceService::class.java)
@@ -62,7 +63,8 @@ class KubernetesWorkspaceService(
       val reference = createReference(identifier)
       val wsClient = workspaceClientService.createClient(reference)
       if (!wsClient.waitForWorkspaceToComeLive(10L, TimeUnit.SECONDS)) {
-        throw IllegalStateException("Workspace $wsHash is not reachable at ${reference.baseUrl} after 10sec even though the Pod is ready.")
+        val podLog = kubernetesClient.pods().withName(identifier.workspacePodName).log
+        throw IllegalStateException("Workspace $wsHash is not reachable at ${reference.baseUrl} after 10sec even though the Pod is ready. Pods log: \n$podLog")
       }
       deployWorkspaceFiles(companionPod, wsClient)
       return reference
@@ -75,7 +77,11 @@ class KubernetesWorkspaceService(
 
   private fun deployWorkspaceFiles(workspacePod: Pod, wsClient: WorkspaceClient) {
     log.debug("Deploying files to workspace ${workspacePod.reference}...")
-    fileService.readCollectionTar(workspacePod.collectionId).use(wsClient::deployFiles)
+    try {
+      fileService.readCollectionTar(workspacePod.collectionId).use(wsClient::deployFiles)
+    } catch (e: RuntimeException) {
+      throw IllegalStateException("Could not deploy files to workspace ${workspacePod.reference}", e)
+    }
     log.debug("Deployed files to workspace ${workspacePod.reference}!")
   }
 
@@ -127,7 +133,9 @@ class KubernetesWorkspaceService(
 
   private fun createWorkspaceResources(identifier: WorkspaceIdentifier, config: WorkspaceConfiguration) {
     kubernetesClient.configMaps().createOrReplaceWithLog(WorkspaceScriptMapModel(identifier, config))
-    kubernetesClient.pods().createOrReplaceWithLog(WorkspacePodModel(identifier, config))
+    kubernetesClient.pods().createOrReplaceWithLog(
+      WorkspacePodModel(identifier, config, buildCompanionSpringConfig(identifier))
+    )
     kubernetesClient.services().createOrReplaceWithLog(WorkspaceServiceModel(identifier))
     kubernetesClient.network().v1().ingresses()
       .createOrReplaceWithLog(WorkspaceIngressModel(identifier, buildWorkspaceBaseUrl(identifier)))
@@ -167,5 +175,15 @@ class KubernetesWorkspaceService(
   private fun <T> CreateOrReplaceable<T>.createOrReplaceWithLog(vararg items: T): T {
     log.debug("Creating or replacing:\n${items.joinToString(separator = "\n---\n") { yamlMapper.writeValueAsString(it) }}")
     return createOrReplace(*items)
+  }
+
+  private fun buildCompanionSpringConfig(wsIdentifier: WorkspaceIdentifier): String {
+    val requiresAuth = workspaceClientService.requiresAuthentication()
+    val config = CompanionSpringConfig(
+      jwkSetUrl = appConfig.workspaces.jwkUrl.takeIf { requiresAuth },
+      jwtClaimIssuer = appConfig.instanceId.takeIf { requiresAuth },
+      jwtClaimAudience = wsIdentifier.hashString().takeIf { requiresAuth }
+    )
+    return jsonMapper.writeValueAsString(config)
   }
 }

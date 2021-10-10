@@ -131,6 +131,31 @@ class AppConfiguration {
      * Interval in seconds how often workspaces are checked for idleness.
      */
     var idleCheckInterval = 20L
+
+    /**
+     * Path to a file containing an RSA private key in PEM format.
+     * If this and the corresponding public key file is set authentication for workspaces
+     * is enabled.
+     */
+    var jwtPrivateKeyFile: String? = null
+
+    /**
+     * Path to a file containing an RSA public key in PEM format.
+     * If this and the corresponding private key file is set authentication for workspaces
+     * is enabled.
+     */
+    var jwtPublicKeyFile: String? = null
+
+    /**
+     * The public URL where Code FREAK will expose the JWK set for companions.
+     * You only have to adjust the base-url, the path should remain as is (except you do some URL-rewriting).
+     *
+     * Examples:
+     * ```yml
+     * jwk-url: https://codefreak.domain.org/.well-known/jwks.json
+     * ```
+     */
+    var jwkUrl = "http://localhost:8080/.well-known/jwks.json"
   }
 
   class Docker {

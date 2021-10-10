@@ -20,7 +20,11 @@ import org.codefreak.codefreak.service.workspace.k8sLabels
 import org.codefreak.codefreak.service.workspace.workspacePodName
 import org.codefreak.codefreak.service.workspace.workspaceScriptMapName
 
-class WorkspacePodModel(identifier: WorkspaceIdentifier, wsConfig: WorkspaceConfiguration) : Pod() {
+class WorkspacePodModel(
+  identifier: WorkspaceIdentifier,
+  wsConfig: WorkspaceConfiguration,
+  springApplicationConfig: String
+) : Pod() {
   init {
     metadata {
       name = identifier.workspacePodName
@@ -40,12 +44,20 @@ class WorkspacePodModel(identifier: WorkspaceIdentifier, wsConfig: WorkspaceConf
 
         // disable environment variables with service links
         enableServiceLinks = false
+        // apply custom environment variables first
         env = wsConfig.environment?.map { (key, value) ->
           newEnvVar {
             name = key
             this.value = value
           }
-        }
+        } ?: emptyList()
+        // override them with our necessary environment variables
+        env = env + listOf(
+          newEnvVar {
+            name = "SPRING_APPLICATION_JSON"
+            value = springApplicationConfig
+          }
+        )
         volumeMounts = listOf(
           newVolumeMount {
             name = "scripts"

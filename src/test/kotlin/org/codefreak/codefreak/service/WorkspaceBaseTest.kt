@@ -19,13 +19,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 
 /**
  * For performance reasons all tests are run in the same workspace.
- * This is why this test is annotated with [Lifecycle.PER_CLASS]
+ * This is why this test is annotated with [Lifecycle.PER_CLASS].
+ * We need an actual web environment so the companion pods will be able to reach
+ * the JWK over HTTP.
  */
-@SpringBootTest
+@SpringBootTest(
+  webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
+)
+@DirtiesContext
 @ActiveProfiles("test")
 @Import(KubernetesConfiguration::class, AppConfiguration::class)
 @TestInstance(Lifecycle.PER_CLASS)
