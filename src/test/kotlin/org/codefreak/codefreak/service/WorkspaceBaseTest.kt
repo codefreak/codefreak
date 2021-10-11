@@ -38,6 +38,9 @@ abstract class WorkspaceBaseTest {
   @MockBean
   protected lateinit var fileService: FileService
 
+  @Autowired
+  protected lateinit var appConfiguration: AppConfiguration
+
   protected fun createTarWithEntries(entries: Map<String, String>): InputStream {
     val tarOutput = ByteArrayOutputStream()
     TarUtil.PosixTarArchiveOutputStream(tarOutput).use {
