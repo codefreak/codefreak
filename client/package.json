@@ -13,7 +13,7 @@
     "@craco/craco": "6.3.0",
     "@graphql-codegen/cli": "2.2.0",
     "@graphql-codegen/typescript": "2.2.2",
-    "@graphql-codegen/typescript-operations": "2.1.4",
+    "@graphql-codegen/typescript-operations": "2.1.6",
     "@graphql-codegen/typescript-react-apollo": "3.1.4",
     "@loadable/component": "5.15.0",
     "@types/apollo-upload-client": "14.1.0",
