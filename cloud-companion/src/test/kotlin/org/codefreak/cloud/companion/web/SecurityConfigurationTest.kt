@@ -1,11 +1,22 @@
 package org.codefreak.cloud.companion.web
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import java.net.URI
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.web.reactive.socket.CloseStatus
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
+import reactor.core.publisher.Flux
 
 /**
  * This is a test token with the following claims:
@@ -24,7 +35,8 @@ const val TEST_JWT =
     "spring.security.oauth2.resourceserver.jwt.public-key-location=classpath:publickey.pem",
     "companion.jwt.claims.issuer=test-iss",
     "companion.jwt.claims.audience=test-aud"
-  ]
+  ],
+  webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
@@ -49,5 +61,92 @@ internal class SecurityConfigurationTest {
       .exchange()
       .expectStatus()
       .isNotFound
+  }
+
+  @Test
+  fun `that GraphQL WS auth works`(@LocalServerPort localServerPort: Int, @Autowired objectMapper: ObjectMapper) {
+    val ackReceived = AtomicBoolean(false)
+    val closeStatus = AtomicReference<CloseStatus>()
+    ReactorNettyWebSocketClient().execute(URI("http://localhost:$localServerPort/graphql")) { session ->
+      session.send(
+        Flux.just(
+          session.textMessage(
+            """
+{
+  "type": "connection_init",
+  "payload": {
+    "jwt": "$TEST_JWT"
+  }
+}
+    """.trimIndent()
+          )
+        )
+      )
+        .thenMany(
+          session.receive()
+            .take(1)
+            .map { objectMapper.readTree(it.payloadAsText) }
+            .map {
+              if (it.get("type").toString() == "\"connection_ack\"") {
+                ackReceived.compareAndSet(false, true)
+              }
+              session.close()
+            }
+        )
+        .then(session.closeStatus())
+        .map { closeStatus.set(it) }
+        .then()
+    }.block()
+
+    assertThat("Ack has not been received", ackReceived.get())
+    assertThat(closeStatus.get().code, equalTo(1006))
+  }
+
+  @Test
+  fun `that GraphQL WS connection is refused if no JWT is provided`(
+    @LocalServerPort localServerPort: Int,
+    @Autowired objectMapper: ObjectMapper
+  ) {
+    val ackReceived = AtomicBoolean(false)
+    val closeStatus = AtomicReference<CloseStatus>()
+    ReactorNettyWebSocketClient().execute(URI("http://localhost:$localServerPort/graphql")) { session ->
+      session.send(Flux.just(session.textMessage("""{"type": "connection_init"}""")))
+        .thenMany(
+          session.receive()
+            .take(1)
+            .map { objectMapper.readTree(it.payloadAsText) }
+            .map {
+              if (it.get("type").toString() == "\"connection_ack\"") {
+                ackReceived.compareAndSet(false, true)
+              }
+              session.close()
+            }
+        )
+        .then(session.closeStatus())
+        .map { closeStatus.set(it) }
+        .then()
+    }.block()
+
+    assertThat("Ack has been received", !ackReceived.get())
+    assertThat(closeStatus.get().code, equalTo(4401))
+  }
+
+  @Test
+  fun `that GQL endpoint is not reachable via regular HTTP POST requests`() {
+    client.post()
+      .uri("/graphql")
+      .contentType(MediaType.APPLICATION_JSON)
+      .exchange()
+      .expectStatus()
+      .isUnauthorized
+  }
+
+  @Test
+  fun `that GQL endpoint is not reachable via regular HTTP GET requests`() {
+    client.get()
+      .uri("/graphql")
+      .exchange()
+      .expectStatus()
+      .isUnauthorized
   }
 }

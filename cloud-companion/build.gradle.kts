@@ -95,7 +95,7 @@ jib {
     image = if (buildAio) {
       "docker.io/replco/polygott:9180d8b24b181125577e98a8f5418781e863e852"
     } else {
-        // adoptopenjdk:8-jre-hotspot
+      // adoptopenjdk:8-jre-hotspot
       "docker.io/library/adoptopenjdk@sha256:f89b4c0ee78145a575df40017b12003d86ed877c4a68bd063f7ca0221ff8643b"
     }
   }
@@ -131,7 +131,7 @@ jib {
     }
     pluginExtension {
       implementation = "com.google.cloud.tools.jib.gradle.extension.ownership.JibOwnershipExtension"
-      configuration( Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
+      configuration(Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
         rules {
           rule {
             glob = "{/home/runner,/home/runner/**}"
@@ -148,7 +148,7 @@ spotless {
     ktlint().userData(mapOf("indent_size" to "2"))
   }
   java {
-    prettier(mapOf("prettier" to "2.4.1", "prettier-plugin-java" to "1.4.0", "@codefreak/prettier-config" to "*"))
-      .configFile(file("build/spotless-node-modules-prettier-format/node_modules/@codefreak/prettier-config/index.js"))
+    prettier(mapOf("prettier" to "2.4.1", "prettier-plugin-java" to "1.4.0"))
+      .config(mapOf("parser" to "java", "tabWidth" to 2))
   }
 }
