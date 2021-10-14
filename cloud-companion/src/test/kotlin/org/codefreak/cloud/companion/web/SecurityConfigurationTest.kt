@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -127,8 +128,39 @@ internal class SecurityConfigurationTest {
         .then()
     }.block()
 
-    assertThat("Ack has been received", !ackReceived.get())
+    assertThat("Ack has been received but was unexpected", !ackReceived.get())
     assertThat(closeStatus.get().code, equalTo(4401))
+  }
+
+  @Test
+  fun `that GraphQL WS connection ack works if jwt is provided in header`(
+    @LocalServerPort localServerPort: Int,
+    @Autowired objectMapper: ObjectMapper
+  ) {
+    val ackReceived = AtomicBoolean(false)
+    val closeStatus = AtomicReference<CloseStatus>()
+    val headers = HttpHeaders()
+    headers.setBearerAuth(TEST_JWT)
+    ReactorNettyWebSocketClient().execute(URI("http://localhost:$localServerPort/graphql"), headers) { session ->
+      session.send(Flux.just(session.textMessage("""{"type": "connection_init"}""")))
+        .thenMany(
+          session.receive()
+            .take(1)
+            .map { objectMapper.readTree(it.payloadAsText) }
+            .map {
+              if (it.get("type").toString() == "\"connection_ack\"") {
+                ackReceived.compareAndSet(false, true)
+              }
+              session.close()
+            }
+        )
+        .then(session.closeStatus())
+        .map { closeStatus.set(it) }
+        .then()
+    }.block()
+
+    assertThat("Ack has not been received", ackReceived.get())
+    assertThat(closeStatus.get().code, equalTo(1006))
   }
 
   @Test

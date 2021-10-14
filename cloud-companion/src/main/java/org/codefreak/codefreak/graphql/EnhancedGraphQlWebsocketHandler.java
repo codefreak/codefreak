@@ -226,9 +226,9 @@ public class EnhancedGraphQlWebsocketHandler extends GraphQlWebSocketHandler {
               Map<String, Object> payload = (Map<String, Object>) map.get(
                 "payload"
               );
-              return handleInit(payload)
+              return handleInit(payload, session)
                 .flatMapMany(responsePayload ->
-                  Mono.just(
+                  Flux.just(
                     encode(
                       session,
                       null,
@@ -239,14 +239,14 @@ public class EnhancedGraphQlWebsocketHandler extends GraphQlWebSocketHandler {
                 )
                 .onErrorResume(e -> {
                   if (e instanceof GraphQlConnectionInitException) {
-                    return Mono.from(
+                    return Flux.from(
                       GraphQlStatus.close(
                         session,
                         ((GraphQlConnectionInitException) e).getCloseCode()
                       )
                     );
                   } else {
-                    return Mono.from(
+                    return Flux.from(
                       GraphQlStatus.close(
                         session,
                         GraphQlStatus.UNAUTHORIZED_STATUS
@@ -264,10 +264,13 @@ public class EnhancedGraphQlWebsocketHandler extends GraphQlWebSocketHandler {
     );
   }
 
-  protected Mono<Map<String, Object>> handleInit(Map<String, Object> payload) {
+  protected Mono<Map<String, Object>> handleInit(
+    Map<String, Object> payload,
+    WebSocketSession session
+  ) {
     if (connectionInitHandler != null) {
       try {
-        return connectionInitHandler.handleInit(payload);
+        return connectionInitHandler.handleInit(payload, session);
       } catch (GraphQlConnectionInitException e) {
         return Mono.error(e);
       }

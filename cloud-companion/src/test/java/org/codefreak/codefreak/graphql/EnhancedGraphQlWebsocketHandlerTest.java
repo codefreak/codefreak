@@ -67,7 +67,7 @@ public class EnhancedGraphQlWebsocketHandlerTest {
   void ackDeclined() {
     TestWebSocketSession session = handle(
       Flux.just(toWebSocketMessage("{\"type\":\"connection_init\"}")),
-      payload -> {
+      (payload, s) -> {
         throw GraphQlConnectionInitException.fromCode(4444, "Nope");
       }
     );
@@ -88,7 +88,7 @@ public class EnhancedGraphQlWebsocketHandlerTest {
           "{\"type\":\"connection_init\", \"payload\": {\"in\": \"foo\"}}"
         )
       ),
-      payload -> {
+      (payload, s) -> {
         Map<String, Object> ret = new HashMap<>();
         ret.put("out", payload.get("in"));
         return Mono.just(ret);
