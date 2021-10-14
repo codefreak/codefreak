@@ -147,4 +147,8 @@ spotless {
   kotlin {
     ktlint().userData(mapOf("indent_size" to "2"))
   }
+  java {
+    prettier(mapOf("prettier" to "2.4.1", "prettier-plugin-java" to "1.4.0", "@codefreak/prettier-config" to "*"))
+      .configFile(file("build/spotless-node-modules-prettier-format/node_modules/@codefreak/prettier-config/index.js"))
+  }
 }
