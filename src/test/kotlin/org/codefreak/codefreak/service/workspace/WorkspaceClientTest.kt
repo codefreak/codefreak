@@ -53,11 +53,13 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
   }
 
   @Test
+  @Order(1)
   fun workspaceComesLive() {
     Assertions.assertTrue(workspaceClient.waitForWorkspaceToComeLive(20, TimeUnit.SECONDS))
   }
 
   @Test
+  @Order(2)
   fun processLifecycle(): Unit = runBlocking {
     val processId =
       workspaceClient.startProcess(listOf("/bin/bash", "-c", "echo foo is not \$FOO && exit 12"), listOf("FOO=bar"))
@@ -66,6 +68,7 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
   }
 
   @Test
+  @Order(3)
   fun fileUploadAndDownload() {
     // deploy a tar archive file a single file named other.txt
     val testContent = "I am a Teapot"
