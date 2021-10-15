@@ -61,6 +61,8 @@ class WorkspaceClient(
 
   val apolloClient = ApolloClient(
     networkTransport = WebSocketNetworkTransport(
+      connectionAcknowledgeTimeoutMs = 60_000, // 1min
+      idleTimeoutMillis = 3600_000, // 1h
       serverUrl = buildWorkspaceUri(path = "/graphql"),
       protocol = GraphQLWsProtocol(),
       webSocketEngine = DefaultWebSocketEngine(

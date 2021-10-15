@@ -7,7 +7,8 @@ import io.fabric8.kubernetes.client.KubernetesClientTimeoutException
 import io.fabric8.kubernetes.client.dsl.CreateOrReplaceable
 import io.fabric8.kubernetes.client.dsl.PodResource
 import java.net.URI
-import java.util.concurrent.TimeUnit
+import java.util.Objects
+import java.util.concurrent.TimeUnit.SECONDS
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.service.workspace.model.WorkspaceIngressModel
@@ -52,7 +53,7 @@ class KubernetesWorkspaceService(
       // make sure the deployment is ready
       val podResource = getWorkspacePodResource(identifier)
       try {
-        podResource.waitUntilReady(20, TimeUnit.SECONDS)
+        podResource.waitUntilReady(20, SECONDS)
         log.debug("Workspace Pod $wsHash is ready")
       } catch (e: KubernetesClientTimeoutException) {
         throw IllegalStateException("Workspace $wsHash is not ready after 20sec.")
@@ -62,7 +63,7 @@ class KubernetesWorkspaceService(
       // deploy answer files
       val reference = createReference(identifier)
       val wsClient = workspaceClientService.getClient(reference)
-      if (!wsClient.waitForWorkspaceToComeLive(10L, TimeUnit.SECONDS)) {
+      if (!wsClient.waitForWorkspaceToComeLive(10L, SECONDS)) {
         val podLog = kubernetesClient.pods().withName(identifier.workspacePodName).log
         throw IllegalStateException("Workspace $wsHash is not reachable at ${reference.baseUrl} after 10sec even though the Pod is ready. Pods log: \n$podLog")
       }
@@ -147,6 +148,10 @@ class KubernetesWorkspaceService(
     kubernetesClient.network().v1().ingresses().withName(identifier.workspaceIngressName).delete()
     kubernetesClient.pods().withName(identifier.workspacePodName).delete()
     kubernetesClient.configMaps().withName(identifier.workspaceScriptMapName).delete()
+    // wait that pod is gone
+    kubernetesClient.pods()
+      .withName(identifier.workspacePodName)
+      .waitUntilCondition(Objects::isNull, 20, SECONDS)
   }
 
   override fun findAllWorkspaces(): List<RemoteWorkspaceReference> {
