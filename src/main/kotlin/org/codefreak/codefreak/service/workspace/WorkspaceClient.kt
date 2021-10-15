@@ -59,7 +59,7 @@ class WorkspaceClient(
     }
     .build()
 
-  private val apolloClient = ApolloClient(
+  val apolloClient = ApolloClient(
     networkTransport = WebSocketNetworkTransport(
       connectionAcknowledgeTimeoutMs = 60_000, // 1min
       idleTimeoutMillis = 3600_000, // 1h
@@ -70,10 +70,6 @@ class WorkspaceClient(
       )
     )
   )
-
-  fun dispose() {
-    apolloClient.dispose()
-  }
 
   /**
    * Starts a process in the workspace with the specified arguments.

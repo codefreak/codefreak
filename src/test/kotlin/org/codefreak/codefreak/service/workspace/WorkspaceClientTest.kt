@@ -31,12 +31,13 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
 
   private lateinit var workspaceClient: WorkspaceClient
 
+  private val workspaceIdentifier = WorkspaceIdentifier(WorkspacePurpose.EVALUATION, "test")
+
   @BeforeAll
   fun beforeAll() {
     val collectionId = UUID(0, 0)
     val tar = createTarWithEntries(mapOf("file.txt" to "foo"))
     whenever(fileService.readCollectionTar(collectionId)).thenReturn(tar)
-    val workspaceIdentifier = WorkspaceIdentifier(WorkspacePurpose.EVALUATION, "test")
     remoteWorkspaceReference = workspaceService.createWorkspace(
       workspaceIdentifier,
       WorkspaceConfiguration(
@@ -50,12 +51,15 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
 
   @BeforeEach
   fun setupWorkspaceClient() {
-    workspaceClient = WorkspaceClient(remoteWorkspaceReference.baseUrl, null, ObjectMapper().registerKotlinModule())
+    workspaceClient = createClient()
   }
+
+  private fun createClient() =
+    WorkspaceClient(remoteWorkspaceReference.baseUrl, null, ObjectMapper().registerKotlinModule())
 
   @AfterEach
   fun disconnectWorkspaceClient() {
-    workspaceClient.dispose()
+    workspaceClient.apolloClient.dispose()
   }
 
   @Test
@@ -96,15 +100,15 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
   fun countWebsocketConnections() = runBlocking {
     // make sure the client is actually connected via websocket
     workspaceClient.startProcess(listOf("/bin/bash", "-i"))
-    // may take some to settle
     await().atMost(10, TimeUnit.SECONDS).untilAsserted {
       Assertions.assertEquals(1, workspaceClient.countWebsocketConnections())
     }
 
-    // disconnect and wait till connection count settles
-    workspaceClient.dispose()
+    val secondClient = createClient()
+    secondClient.startProcess(listOf("/bin/bash", "-i"))
     await().atMost(10, TimeUnit.SECONDS).untilAsserted {
-      Assertions.assertEquals(0, workspaceClient.countWebsocketConnections())
+      Assertions.assertEquals(2, workspaceClient.countWebsocketConnections())
     }
+    secondClient.apolloClient.dispose()
   }
 }
