@@ -2,25 +2,21 @@ import {
   EditOutlined,
   InfoCircleFilled,
   InfoCircleTwoTone,
-  PoweroffOutlined,
   SyncOutlined
 } from '@ant-design/icons'
 import {
   Alert,
-  Button,
   Card,
   Checkbox,
   Col,
   Empty,
   List,
   Row,
-  Switch,
   Tabs,
   Tooltip
 } from 'antd'
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
 import StartSubmissionEvaluationButton from '../../components/StartSubmissionEvaluationButton'
@@ -35,15 +31,11 @@ import {
   useUpdateTaskDetailsMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
-import { shorten } from '../../services/short-id'
 import { makeUpdater } from '../../services/util'
-import EditEvaluationPage from '../evaluation/EditEvaluationPage'
-import IdeSettingsForm, {
-  IdeSettingsModel
-} from '../../components/IdeSettingsForm'
 import FileBrowser from '../../components/FileBrowser'
 import Markdown from '../../components/Markdown'
 import { EditStringArrayButton } from '../../components/EditStringArrayModal'
+import EditEvaluationPage from '../evaluation/EditEvaluationPage'
 
 const { TabPane } = Tabs
 
@@ -125,10 +117,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
     id: task.id,
     body: task.body,
     hiddenFiles: task.hiddenFiles,
-    protectedFiles: task.protectedFiles,
-    ideEnabled: task.ideEnabled,
-    ideImage: task.ideImage,
-    ideArguments: task.ideArguments
+    protectedFiles: task.protectedFiles
   }
 
   const updater = makeUpdater(taskDetailsInput, input =>
@@ -136,17 +125,6 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   )
 
   const assignmentOpen = task.assignment?.status === 'OPEN'
-
-  const onIdeSettingsChange = (values: IdeSettingsModel) => {
-    updateMutation({
-      variables: {
-        input: {
-          ...taskDetailsInput,
-          ...values
-        }
-      }
-    })
-  }
 
   return (
     <Tabs
@@ -182,28 +160,6 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
             <Empty description="This task has no extra instructions. Take a look at the provided files." />
           )}
         </Card>
-        <Card
-          title="Online IDE"
-          style={{ marginTop: 16 }}
-          extra={
-            <Switch
-              defaultChecked={task.ideEnabled}
-              unCheckedChildren={<PoweroffOutlined />}
-              onChange={updater('ideEnabled')}
-            />
-          }
-          bodyStyle={{
-            display: !task.ideEnabled ? 'none' : ''
-          }}
-        >
-          <IdeSettingsForm
-            defaultValue={{
-              ideImage: taskDetailsInput.ideImage || undefined,
-              ideArguments: taskDetailsInput.ideArguments || undefined
-            }}
-            onChange={onIdeSettingsChange}
-          />
-        </Card>
         <Card title="Files" style={{ marginTop: 16 }}>
           {assignmentOpen ? (
             <Alert
@@ -236,18 +192,6 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
           ) : null}
           <FileBrowser type={FileContextType.Task} id={task.id} />
           <p style={{ marginTop: '1em' }}>
-            <Link
-              to={'/ide/task/' + shorten(task.id)}
-              target={'task-ide-' + task.id}
-            >
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                disabled={assignmentOpen && !sureToEditFiles}
-              >
-                Edit task files in IDE
-              </Button>
-            </Link>{' '}
             {task.assignment?.id && (
               <StartSubmissionEvaluationButton
                 assignmentId={task.assignment.id}

@@ -26,7 +26,5 @@ class AdministrationService : BaseService() {
 
   fun getMaxUploadSize(): Long = multipartConfigElement.maxFileSize
 
-  fun getDefaultIdeDockerImageName(): String = config.ide.image
-
   fun getDefaultEvaluationTimeout(): Long = config.evaluation.defaultTimeout
 }

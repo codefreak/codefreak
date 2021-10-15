@@ -11,10 +11,8 @@ import kotlin.streams.toList
 import org.apache.catalina.core.ApplicationPart
 import org.apache.commons.io.IOUtils
 import org.codefreak.codefreak.auth.Authority
-import org.codefreak.codefreak.auth.hasAuthority
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.service.AnswerService
-import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.file.FileContentService
 import org.codefreak.codefreak.service.file.FileMetaData
@@ -78,9 +76,6 @@ data class FileContext(var type: FileContextType, var id: UUID)
 class FileQuery : BaseResolver(), Query {
   fun answerFiles(answerId: UUID): List<FileDto> = context {
     val answer = serviceAccess.getService(AnswerService::class).findAnswer(answerId)
-    val forceSaveFiles =
-      authorization.isCurrentUser(answer.task.owner) || authorization.currentUser.hasAuthority(Authority.ROLE_ADMIN)
-    serviceAccess.getService(IdeService::class).saveAnswerFiles(answer, forceSaveFiles)
     authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
     val digest = serviceAccess.getService(FileService::class).getCollectionMd5Digest(answerId)
     serviceAccess.getService(FileContentService::class).getFiles(answer.id).map {

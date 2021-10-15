@@ -9,7 +9,6 @@ mutation ImportAnswerSource($id: ID!, $url: String!) {
 mutation CreateAnswer($taskId: ID!) {
   createAnswer(taskId: $taskId) {
     id
-    ideRunning
   }
 }
 

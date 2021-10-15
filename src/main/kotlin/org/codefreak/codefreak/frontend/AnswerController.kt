@@ -3,7 +3,6 @@ package org.codefreak.codefreak.frontend
 import java.util.UUID
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
-import org.codefreak.codefreak.service.ContainerService
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.TarUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,9 +17,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 @Controller
 @RequestMapping("/api/answers")
 class AnswerController : BaseController() {
-
-  @Autowired
-  lateinit var containerService: ContainerService
 
   @Autowired
   lateinit var fileService: FileService

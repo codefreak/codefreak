@@ -12,9 +12,6 @@ codefreak:
   instanceId: test
   scheduling:
     enable: false
-  ide:
-    idle-check-rate: 1000
-    idle-shutdown-threshold: 5000
   lti:
     enabled: true
     key-store: classpath:jwt-store.jks
@@ -27,8 +24,6 @@ codefreak:
         token-url: "https://lms.example.org/token"
         jwk-url: "https://lms.example.org/certs"
         key-store-entry-name: codefreak
-  docker:
-    pull-policy: always
   workspaces:
     # Either create an entry in /etc/hosts pointing to the IP returned by `minikube ip` or change
     # this to your correct NGINX ingress entrypoint.

@@ -1,0 +1,15 @@
+databaseChangeLog:
+- changeSet:
+    id: 1635507266945
+    author: HenningCash
+    changes:
+    - dropColumn:
+        columnName: ide_arguments
+        tableName: task
+    - dropColumn:
+        columnName: ide_enabled
+        tableName: task
+    - dropColumn:
+        columnName: ide_image
+        tableName: task
+
