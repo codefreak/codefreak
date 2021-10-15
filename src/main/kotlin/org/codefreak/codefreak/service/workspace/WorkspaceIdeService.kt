@@ -2,6 +2,8 @@ package org.codefreak.codefreak.service.workspace
 
 import java.util.UUID
 import org.codefreak.codefreak.entity.Answer
+import org.codefreak.codefreak.entity.User
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -12,9 +14,27 @@ import org.springframework.stereotype.Service
 @Service
 class WorkspaceIdeService(
   private val workspaceService: WorkspaceService,
+  @Autowired(required = false)
+  private val workspaceAuthService: WorkspaceAuthService?,
   @Value("#{@config.workspaces.companionImage}")
   private val defaultWorkspaceImage: String
 ) {
+
+  data class AuthenticatedWorkspaceReference(
+    val remoteReference: RemoteWorkspaceReference,
+    val authToken: String?
+  )
+
+  /**
+   * Create an answer IDE for the given user. The returned reference will contain
+   * a proper authentication token for the user.
+   */
+  fun createAnswerIdeForUser(answer: Answer, user: User): AuthenticatedWorkspaceReference {
+    val identifier = createAnswerIdeWorkspaceIdentifier(answer.id)
+    val config = createAnswerIdeWorkspaceConfig(answer)
+    val remoteReference = workspaceService.createWorkspace(identifier, config)
+    return AuthenticatedWorkspaceReference(remoteReference, workspaceAuthService?.createUserAuthToken(identifier, user))
+  }
 
   /**
    * Create a new IDE for the given answer.

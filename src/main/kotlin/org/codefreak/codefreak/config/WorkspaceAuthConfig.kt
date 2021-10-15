@@ -7,6 +7,7 @@ import java.io.File
 import java.security.KeyFactory
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
+import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
 import org.springframework.beans.factory.annotation.Value
@@ -30,7 +31,7 @@ class WorkspaceAuthConfig {
     val publicKey = KeyFactory.getInstance("RSA")
       .generatePublic(X509EncodedKeySpec(loadKeyAsBytes(publicKeyPath))) as RSAPublicKey
     val privateKey = KeyFactory.getInstance("RSA")
-      .generatePrivate(X509EncodedKeySpec(loadKeyAsBytes(privateKeyPath))) as RSAPrivateKey
+      .generatePrivate(PKCS8EncodedKeySpec(loadKeyAsBytes(privateKeyPath))) as RSAPrivateKey
     return RSAKey.Builder(publicKey)
       .privateKey(privateKey)
       .build()
@@ -38,7 +39,7 @@ class WorkspaceAuthConfig {
 
   private fun loadKeyAsBytes(keyPath: String): ByteArray {
     val content = File(keyPath).readText()
-      .replace("/-----(:?BEGIN|END) (:?PUBLIC|PRIVATE) KEY-----/g".toRegex(), "")
+      .replace("-----(:?BEGIN|END) (:?PUBLIC|PRIVATE|RSA PRIVATE) KEY-----".toRegex(), "")
       .trim()
     return Base64.getMimeDecoder().decode(content)
   }

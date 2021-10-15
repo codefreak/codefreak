@@ -3,6 +3,7 @@ package org.codefreak.codefreak.service.workspace
 import java.time.Clock
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit.SECONDS
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
@@ -45,7 +46,8 @@ class WorkspaceLifecycleManager(
 
   @Scheduled(
     fixedRateString = "#{@config.workspaces.idleCheckInterval}",
-    initialDelayString = "#{@config.workspaces.idleCheckInterval}"
+    initialDelayString = "#{@config.workspaces.idleCheckInterval}",
+    timeUnit = SECONDS
   )
   fun removeIdleWorkspaces() {
     // keep a fixed "now" for further processing to ignore processing times

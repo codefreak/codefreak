@@ -135,7 +135,11 @@ class AppConfiguration {
     /**
      * Path to a file containing an RSA private key in PEM format.
      * If this and the corresponding public key file is set authentication for workspaces
-     * is enabled.
+     * is enabled. Make sure this is a PKCS8 private key. You can convert your existing key
+     * to PKCS8 with the following command:
+     * ```
+     * openssl pkcs8 -topk8 -nocrypt -in privatekey.pem -out privatekey8.pem
+     * ```
      */
     var jwtPrivateKeyFile: String? = null
 
