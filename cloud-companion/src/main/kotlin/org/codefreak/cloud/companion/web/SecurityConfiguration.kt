@@ -1,6 +1,7 @@
 package org.codefreak.cloud.companion.web
 
 import org.codefreak.cloud.companion.graphql.ConnectionInitAuthHandler
+import org.codefreak.cloud.companion.security.JwtWebsocketAuthenticationService
 import org.codefreak.codefreak.graphql.EnhancedGraphQlWebsocketHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.config.BeanPostProcessor
@@ -59,6 +60,11 @@ class SecurityConfiguration {
           // GQL has its own authentication when upgrading to a websocket connection via GET /graphql.
           // Regular authentication should kick in if a POST request with GQL payload is sent to /graphql.
           authorize(AndServerWebExchangeMatcher(isWebsocketUpgradeRequest(), pathMatchers(GET, "/graphql")), permitAll)
+          // Process IO has its own authentication when upgrading to a websocket connection via GET /process/{id}.
+          authorize(
+            AndServerWebExchangeMatcher(isWebsocketUpgradeRequest(), pathMatchers(GET, "/process/**")),
+            permitAll
+          )
           authorize(anyExchange, authenticated)
         }
         oauth2ResourceServer {
@@ -110,8 +116,13 @@ class SecurityConfiguration {
     }
 
     @Bean
-    fun connectionInitAuthHandler(jwtDecoder: ReactiveJwtDecoder): ConnectionInitAuthHandler {
-      return ConnectionInitAuthHandler(jwtDecoder)
+    fun jwtAuthService(jwtDecoder: ReactiveJwtDecoder): JwtWebsocketAuthenticationService {
+      return JwtWebsocketAuthenticationService(jwtDecoder)
+    }
+
+    @Bean
+    fun connectionInitAuthHandler(jwtWebsocketAuthenticationService: JwtWebsocketAuthenticationService): ConnectionInitAuthHandler {
+      return ConnectionInitAuthHandler(jwtWebsocketAuthenticationService)
     }
 
     /**
