@@ -43,13 +43,13 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
     val remoteWorkspaceReference = workspaceService.createWorkspace(
       workspaceIdentifier,
       WorkspaceConfiguration(
-          collectionId = collectionId,
-          isReadOnly = true,
-          scripts = emptyMap(),
-          imageName = appConfiguration.workspaces.companionImage
+        collectionId = collectionId,
+        isReadOnly = true,
+        scripts = emptyMap(),
+        imageName = appConfiguration.workspaces.companionImage
       )
     )
-    workspaceClient = workspaceClientService.createClient(remoteWorkspaceReference)
+    workspaceClient = workspaceClientService.getClient(remoteWorkspaceReference)
   }
 
   @Test

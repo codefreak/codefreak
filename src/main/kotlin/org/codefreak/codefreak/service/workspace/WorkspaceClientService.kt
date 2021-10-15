@@ -3,6 +3,7 @@ package org.codefreak.codefreak.service.workspace
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.util.ConcurrentReferenceHashMap
 
 @Service
 class WorkspaceClientService(
@@ -10,7 +11,20 @@ class WorkspaceClientService(
   @Autowired(required = false)
   private val authService: WorkspaceAuthService?
 ) {
-  fun createClient(remoteWorkspaceReference: RemoteWorkspaceReference): WorkspaceClient {
+  private val existingClients = ConcurrentReferenceHashMap<RemoteWorkspaceReference, WorkspaceClient>()
+
+  /**
+   * Get a workspace client for the given workspace.
+   * This will recycle existing clients.
+   */
+  fun getClient(remoteWorkspaceReference: RemoteWorkspaceReference): WorkspaceClient {
+    return existingClients.computeIfAbsent(remoteWorkspaceReference) { createClient(remoteWorkspaceReference) }
+  }
+
+  /**
+   * Create a fresh workspace client for the given workspace
+   */
+  private fun createClient(remoteWorkspaceReference: RemoteWorkspaceReference): WorkspaceClient {
     return WorkspaceClient(
       baseUrl = remoteWorkspaceReference.baseUrl,
       authToken = createAuthToken(remoteWorkspaceReference),

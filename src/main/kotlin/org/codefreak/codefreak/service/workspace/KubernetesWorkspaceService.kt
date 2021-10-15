@@ -61,7 +61,7 @@ class KubernetesWorkspaceService(
 
       // deploy answer files
       val reference = createReference(identifier)
-      val wsClient = workspaceClientService.createClient(reference)
+      val wsClient = workspaceClientService.getClient(reference)
       if (!wsClient.waitForWorkspaceToComeLive(10L, TimeUnit.SECONDS)) {
         val podLog = kubernetesClient.pods().withName(identifier.workspacePodName).log
         throw IllegalStateException("Workspace $wsHash is not reachable at ${reference.baseUrl} after 10sec even though the Pod is ready. Pods log: \n$podLog")
@@ -107,7 +107,7 @@ class KubernetesWorkspaceService(
     }
 
     val reference = createReference(identifier)
-    val wsClient = workspaceClientService.createClient(reference)
+    val wsClient = workspaceClientService.getClient(reference)
     if (!pod.isReadOnly) {
       log.debug("Saving files of workspace $identifier!")
       wsClient.downloadTar { newArchive ->
@@ -126,7 +126,7 @@ class KubernetesWorkspaceService(
       log.debug("Not refreshing workspace files for identifier $identifier because workspace does not exist")
       return
     }
-    val wsClient = workspaceClientService.createClient(createReference(identifier))
+    val wsClient = workspaceClientService.getClient(createReference(identifier))
     log.debug("Refreshing files of workspace $identifier!")
     deployWorkspaceFiles(pod, wsClient)
   }

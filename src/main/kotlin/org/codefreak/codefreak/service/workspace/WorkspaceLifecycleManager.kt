@@ -57,7 +57,7 @@ class WorkspaceLifecycleManager(
     val idleWorkspaces = workspaceService.findAllWorkspaces()
       .filter { watchedPurposes.contains(it.identifier.purpose) }
       .mapNotNull { reference ->
-        val client = clientService.createClient(reference)
+        val client = clientService.getClient(reference)
         val numWsConnections = try {
           client.countWebsocketConnections()
         } catch (e: IllegalStateException) {
