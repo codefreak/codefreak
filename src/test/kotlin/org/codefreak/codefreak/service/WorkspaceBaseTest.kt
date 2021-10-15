@@ -39,7 +39,7 @@ import org.springframework.test.context.ActiveProfiles
 abstract class WorkspaceBaseTest {
 
   @Autowired
-  private lateinit var workspaceService: KubernetesWorkspaceService
+  protected lateinit var workspaceService: KubernetesWorkspaceService
 
   @MockBean
   protected lateinit var fileService: FileService

@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.service.workspace
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -14,33 +16,28 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.hasEntry
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
-import org.springframework.beans.factory.annotation.Autowired
 
 // Can be enabled once the Image building works on GitHub Actions
 @DisabledOnOs(OS.WINDOWS)
 class WorkspaceClientTest : WorkspaceBaseTest() {
-  @Autowired
-  private lateinit var workspaceClientService: WorkspaceClientService
-
-  @Autowired
-  private lateinit var workspaceService: KubernetesWorkspaceService
+  private lateinit var remoteWorkspaceReference: RemoteWorkspaceReference
 
   private lateinit var workspaceClient: WorkspaceClient
-
-  private val workspaceIdentifier = WorkspaceIdentifier(WorkspacePurpose.EVALUATION, "test")
 
   @BeforeAll
   fun beforeAll() {
     val collectionId = UUID(0, 0)
     val tar = createTarWithEntries(mapOf("file.txt" to "foo"))
     whenever(fileService.readCollectionTar(collectionId)).thenReturn(tar)
-    val remoteWorkspaceReference = workspaceService.createWorkspace(
+    val workspaceIdentifier = WorkspaceIdentifier(WorkspacePurpose.EVALUATION, "test")
+    remoteWorkspaceReference = workspaceService.createWorkspace(
       workspaceIdentifier,
       WorkspaceConfiguration(
         collectionId = collectionId,
@@ -49,17 +46,24 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
         imageName = appConfiguration.workspaces.companionImage
       )
     )
-    workspaceClient = workspaceClientService.getClient(remoteWorkspaceReference)
+  }
+
+  @BeforeEach
+  fun setupWorkspaceClient() {
+    workspaceClient = WorkspaceClient(remoteWorkspaceReference.baseUrl, null, ObjectMapper().registerKotlinModule())
+  }
+
+  @AfterEach
+  fun disconnectWorkspaceClient() {
+    workspaceClient.dispose()
   }
 
   @Test
-  @Order(1)
   fun workspaceComesLive() {
     Assertions.assertTrue(workspaceClient.waitForWorkspaceToComeLive(20, TimeUnit.SECONDS))
   }
 
   @Test
-  @Order(2)
   fun processLifecycle(): Unit = runBlocking {
     val processId =
       workspaceClient.startProcess(listOf("/bin/bash", "-c", "echo foo is not \$FOO && exit 12"), listOf("FOO=bar"))
@@ -68,7 +72,6 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
   }
 
   @Test
-  @Order(3)
   fun fileUploadAndDownload() {
     // deploy a tar archive file a single file named other.txt
     val testContent = "I am a Teapot"
@@ -89,18 +92,17 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
     )
   }
 
-  /**
-   * This test should run last because it kills the websocket client
-   */
   @Test
-  @Order(Int.MAX_VALUE)
-  fun countWebsocketConnections() {
-    // make sure the client is actually connected
-    runBlocking { workspaceClient.startProcess(listOf("/bin/bash", "-i")) }
-    Assertions.assertEquals(1, workspaceClient.countWebsocketConnections())
+  fun countWebsocketConnections() = runBlocking {
+    // make sure the client is actually connected via websocket
+    workspaceClient.startProcess(listOf("/bin/bash", "-i"))
+    // may take some to settle
+    await().atMost(10, TimeUnit.SECONDS).untilAsserted {
+      Assertions.assertEquals(1, workspaceClient.countWebsocketConnections())
+    }
 
-    // disconnect and wait if the connection
-    workspaceClient.apolloClient.dispose()
+    // disconnect and wait till connection count settles
+    workspaceClient.dispose()
     await().atMost(10, TimeUnit.SECONDS).untilAsserted {
       Assertions.assertEquals(0, workspaceClient.countWebsocketConnections())
     }
