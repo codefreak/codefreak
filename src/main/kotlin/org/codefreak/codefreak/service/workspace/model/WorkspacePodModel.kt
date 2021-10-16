@@ -11,9 +11,11 @@ import com.fkorotkov.kubernetes.newKeyToPath
 import com.fkorotkov.kubernetes.newVolume
 import com.fkorotkov.kubernetes.newVolumeMount
 import com.fkorotkov.kubernetes.readinessProbe
+import com.fkorotkov.kubernetes.resources
 import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Pod
+import io.fabric8.kubernetes.api.model.Quantity
 import org.codefreak.codefreak.service.workspace.WorkspaceConfiguration
 import org.codefreak.codefreak.service.workspace.WorkspaceIdentifier
 import org.codefreak.codefreak.service.workspace.k8sLabels
@@ -42,6 +44,17 @@ class WorkspacePodModel(
           protocol = "TCP"
         })
 
+        resources {
+          requests = mapOf(
+            "cpu" to Quantity.parse("1"),
+            "memory" to Quantity.parse("128Mi")
+          )
+          limits = mapOf(
+            "cpu" to Quantity.parse("1"),
+            "memory" to Quantity.parse("512Mi")
+          )
+        }
+
         // disable environment variables with service links
         enableServiceLinks = false
         // apply custom environment variables first
@@ -53,6 +66,10 @@ class WorkspacePodModel(
         } ?: emptyList()
         // override them with our necessary environment variables
         env = env + listOf(
+          newEnvVar {
+            name = "JAVA_OPTS"
+            value = "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xshareclasses -Xquickstart"
+          },
           newEnvVar {
             name = "SPRING_APPLICATION_JSON"
             value = springApplicationConfig

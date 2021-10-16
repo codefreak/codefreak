@@ -16,5 +16,9 @@ data class CompanionSpringConfig(
   @JsonProperty("companion.jwt.claims.issuer")
   private val jwtClaimIssuer: String?,
   @JsonProperty("companion.jwt.claims.audience")
-  private val jwtClaimAudience: String?
+  private val jwtClaimAudience: String?,
+  @JsonProperty("server.tomcat.max-threads")
+  private val maxTomcatThreads: String = "5",
+  @JsonProperty("server.tomcat.max-connections")
+  private val maxTomcatConnections: String = "20"
 )

@@ -77,6 +77,7 @@ tasks.test {
   testLogging {
     events = setOf(TestLogEvent.FAILED)
     exceptionFormat = TestExceptionFormat.FULL
+    showStandardStreams = true
   }
 }
 
@@ -95,8 +96,7 @@ jib {
     image = if (buildAio) {
       "docker.io/replco/polygott:9180d8b24b181125577e98a8f5418781e863e852"
     } else {
-      // adoptopenjdk:8-jre-hotspot
-      "docker.io/library/adoptopenjdk@sha256:f89b4c0ee78145a575df40017b12003d86ed877c4a68bd063f7ca0221ff8643b"
+      "docker.io/adoptopenjdk/openjdk11-openj9:jdk-11.0.11_9_openj9-0.26.0"
     }
   }
 
