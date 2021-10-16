@@ -1,7 +1,6 @@
-package org.codefreak.cloud.companion.web
+package org.codefreak.cloud.companion.security
 
-import org.codefreak.cloud.companion.graphql.ConnectionInitAuthHandler
-import org.codefreak.cloud.companion.security.JwtWebsocketAuthenticationService
+import org.codefreak.cloud.companion.logger
 import org.codefreak.codefreak.graphql.EnhancedGraphQlWebsocketHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.config.BeanPostProcessor
@@ -20,6 +19,8 @@ import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.invoke
+import org.springframework.security.core.userdetails.MapReactiveUserDetailsService
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.Jwt
@@ -45,6 +46,7 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 @EnableWebFluxSecurity
 @Configuration
 class SecurityConfiguration {
+  private val log = logger()
 
   @Conditional(JwtAuthEnabled::class)
   class JwtSecurityConfig {
@@ -137,7 +139,6 @@ class SecurityConfiguration {
       webGraphQlHandler: WebGraphQlHandler,
       properties: GraphQlProperties,
       configurer: ServerCodecConfigurer,
-      jwtDecoder: ReactiveJwtDecoder,
       connectionInitAuthHandler: ConnectionInitAuthHandler
     ): GraphQlWebSocketHandler {
       return EnhancedGraphQlWebsocketHandler(
@@ -161,12 +162,33 @@ class SecurityConfiguration {
   }
 
   /**
+   * There is no user storage. Incoming requests are authenticated stateless
+   * via JWT. By default, Spring creates an in-memory user service with a single
+   * user. This Bean is here to prevent this behaviour.
+   */
+  @Bean
+  fun userDetailsService(): ReactiveUserDetailsService {
+    return MapReactiveUserDetailsService(emptyMap())
+  }
+
+  /**
    * Default web security that allows all requests without auth.
    * This should never be used in production but allows easier testing.
    */
   @Bean
   @ConditionalOnMissingBean(SecurityWebFilterChain::class)
   fun defaultSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+    log.warn(
+      """
+
+
+    ${"!".repeat(60)}
+    Companion is running without authentication!
+    This should only ever be used for testing!
+    ${"!".repeat(60)}
+
+    """.trimIndent()
+    )
     return http {
       httpBasic { disable() }
       formLogin { disable() }

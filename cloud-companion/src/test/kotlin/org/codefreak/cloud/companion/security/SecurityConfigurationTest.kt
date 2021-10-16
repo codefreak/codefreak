@@ -1,4 +1,4 @@
-package org.codefreak.cloud.companion.web
+package org.codefreak.cloud.companion.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.net.URI
@@ -48,7 +48,7 @@ internal class SecurityConfigurationTest {
   @Test
   fun testUnauthorizedIfNoJwtIsPassed() {
     client.get()
-      .uri("/not-there")
+      .uri("/")
       .exchange()
       .expectStatus()
       .isUnauthorized
@@ -57,7 +57,7 @@ internal class SecurityConfigurationTest {
   @Test
   fun testAuthorizedIfValidJwtIsPassed() {
     client.get()
-      .uri("/not-there")
+      .uri("/")
       .header("Authorization", "Bearer $TEST_JWT")
       .exchange()
       .expectStatus()

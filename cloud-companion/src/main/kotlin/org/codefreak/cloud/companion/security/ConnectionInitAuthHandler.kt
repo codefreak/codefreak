@@ -1,6 +1,5 @@
-package org.codefreak.cloud.companion.graphql
+package org.codefreak.cloud.companion.security
 
-import org.codefreak.cloud.companion.security.JwtWebsocketAuthenticationService
 import org.codefreak.codefreak.graphql.GraphQlConnectionInitException
 import org.codefreak.codefreak.graphql.GraphQlConnectionInitHandler
 import org.springframework.web.reactive.socket.WebSocketSession

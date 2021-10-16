@@ -8,6 +8,7 @@ import kotlin.io.path.writeText
 import org.apache.commons.io.FileUtils
 import org.codefreak.cloud.companion.CompanionConfig
 import org.codefreak.cloud.companion.FileService
+import org.codefreak.cloud.companion.security.SecurityConfiguration
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.AfterEach
