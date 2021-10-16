@@ -16,7 +16,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.hasEntry
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -56,11 +55,6 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
 
   private fun createClient() =
     WorkspaceClient(remoteWorkspaceReference.baseUrl, null, ObjectMapper().registerKotlinModule())
-
-  @AfterEach
-  fun disconnectWorkspaceClient() {
-    workspaceClient.apolloClient.dispose()
-  }
 
   @Test
   fun workspaceComesLive() {
@@ -109,6 +103,5 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
     await().atMost(10, TimeUnit.SECONDS).untilAsserted {
       Assertions.assertEquals(2, workspaceClient.countWebsocketConnections())
     }
-    secondClient.apolloClient.dispose()
   }
 }
