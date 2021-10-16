@@ -15,7 +15,9 @@ class JwtWebsocketAuthenticationService(private val jwtDecoder: ReactiveJwtDecod
   class JwtAuthenticationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 
   fun authenticateWebsocketSession(session: WebSocketSession, payload: Map<String, Any>?): Mono<Map<String, Any>> {
-    return getClaimsFromSession(session).switchIfEmpty(performPayloadAuth(payload))
+    return getClaimsFromSession(session)
+      .switchIfEmpty(performPayloadAuth(payload))
+      .switchIfEmpty(Mono.error(JwtAuthenticationException("Neither HTTP request nor payload contains a jwt auth token")))
   }
 
   private fun getClaimsFromSession(session: WebSocketSession): Mono<Map<String, Any>> {
@@ -29,15 +31,20 @@ class JwtWebsocketAuthenticationService(private val jwtDecoder: ReactiveJwtDecod
   }
 
   private fun performPayloadAuth(payload: Map<String, Any>?): Mono<Map<String, Any>> {
-    if (payload == null || payload["jwt"] == null) {
-      return Mono.error(JwtAuthenticationException("No jwt token provided"))
+    if (payload == null) {
+      return Mono.empty()
     }
-    val jwt = payload["jwt"]
-    if (jwt !is String) {
-      return Mono.error(JwtAuthenticationException("Provided jwt is not a string"))
+    return Mono.justOrEmpty(payload).flatMap {
+      if (it["jwt"] == null) {
+        return@flatMap Mono.error(JwtAuthenticationException("No jwt token provided"))
+      }
+      val jwt = it["jwt"]
+      if (jwt !is String) {
+        return@flatMap Mono.error(JwtAuthenticationException("Provided jwt is not a string"))
+      }
+      jwtDecoder.decode(jwt)
+        .map { decodedJwt -> decodedJwt.claims }
+        .onErrorMap(JwtException::class.java) { e -> JwtAuthenticationException("JWT Auth failed", e) }
     }
-    return jwtDecoder.decode(jwt)
-      .map { it.claims }
-      .onErrorMap(JwtException::class.java) { JwtAuthenticationException("JWT Auth failed", it) }
   }
 }
