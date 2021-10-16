@@ -1,5 +1,8 @@
 spring:
   graphql:
+    schema:
+      # location is set manually for native compatibility
+      locations: ""
     graphiql:
       path: /playground
       enabled: false

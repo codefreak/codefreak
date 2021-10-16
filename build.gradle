@@ -18,6 +18,9 @@ plugins {
   id 'org.liquibase.gradle' version '2.0.4'
   id 'com.google.cloud.tools.jib' version '3.1.4'
   id 'com.apollographql.apollo3' version '3.0.0-alpha07'
+
+  id("org.springframework.experimental.aot") version "0.10.4"
+  id("org.graalvm.buildtools.native") version "0.9.3"
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -31,10 +34,15 @@ project.autodiff.changeLogDiff = project.hasProperty('changeLogDiff')
 group = 'org.codefreak'
 sourceCompatibility = '1.8'
 
-repositories {
-  mavenCentral()
-  jcenter()
-  maven { url 'https://jitpack.io' }
+allprojects {
+  repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'https://jitpack.io' }
+    maven { url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies" }
+    maven { url = "https://repo.spring.io/snapshot" } // for graphql-spring-boot-starter until it's in stable
+    maven { url = "https://repo.spring.io/release" }
+  }
 }
 
 release {
@@ -152,11 +160,11 @@ compileTestKotlin {
   }
 }
 
-bootJar {
-  // you can still build a fat jar for testing but this is NOT used for building
-  // the Docker production image with jib!
-  dependsOn 'deployFrontend'
-}
+//bootJar {
+//  // you can still build a fat jar for testing but this is NOT used for building
+//  // the Docker production image with jib!
+//  dependsOn 'deployFrontend'
+//}
 
 apollo {
   schemaFile.set(project(":cloud-companion").file("src/main/resources/graphql/schema.graphqls"))

@@ -10,6 +10,8 @@ plugins {
   id("com.diffplug.spotless")
   kotlin("jvm")
   kotlin("plugin.spring")
+
+  id("org.springframework.experimental.aot")
 }
 
 group = "org.codefreak.cloud"
@@ -20,12 +22,6 @@ configurations {
   compileOnly {
     extendsFrom(configurations.annotationProcessor.get())
   }
-}
-
-repositories {
-  mavenCentral()
-  maven(url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
-  maven(url = "https://repo.spring.io/snapshot") // for graphql-spring-boot-starter until it's in stable
 }
 
 dependencies {
@@ -45,7 +41,7 @@ dependencies {
   // https://packages.jetbrains.team/maven/p/ij/intellij-dependencies/org/jetbrains/pty4j/pty4j/
   implementation("org.jetbrains.pty4j:pty4j:0.11.5")
 
-  developmentOnly("org.springframework.boot:spring-boot-devtools")
+  //developmentOnly("org.springframework.boot:spring-boot-devtools")
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
   testImplementation("org.springframework.boot:spring-boot-starter-test") {
     // we are using Hamcrest matchers and assertj's "assertThat" is annoying in autocompletion
@@ -62,6 +58,27 @@ tasks.compileKotlin {
     freeCompilerArgs = listOf("-Xjsr305=strict")
     jvmTarget = "1.8"
   }
+}
+
+/**
+ * Native image building works but will fail during runtime when starting processes because
+ * Jetbrains pty4j depends on JNI which has to be configured.
+ * Additionally, the following things do not work:
+ * - devtools (not important for production)
+ * - proxy hint for WebsocketConnectionMetricAdvice has to be added
+ * The following links may help to finish native support:
+ * - https://www.graalvm.org/reference-manual/native-image/JNI/
+ * - https://github.com/amahfouz1/jna-graalvm/
+ */
+tasks.bootBuildImage {
+  builder = "paketobuildpacks/builder:full"
+  environment = mapOf(
+    "BP_NATIVE_IMAGE" to "true",
+    "BP_NATIVE_IMAGE_BUILD_ARGUMENTS" to """
+      -H:+JNI -H:JNIConfigurationFiles=/workspace/BOOT-INF/classes/conf/jni-config.json
+      -H:+ReportExceptionStackTraces
+    """.trimIndent()
+  )
 }
 
 tasks.test {
@@ -93,7 +110,7 @@ jib {
     image = if (buildAio) {
       "docker.io/replco/polygott:9180d8b24b181125577e98a8f5418781e863e852"
     } else {
-        // adoptopenjdk:8-jre-hotspot
+      // adoptopenjdk:8-jre-hotspot
       "docker.io/library/adoptopenjdk@sha256:f89b4c0ee78145a575df40017b12003d86ed877c4a68bd063f7ca0221ff8643b"
     }
   }
@@ -129,7 +146,7 @@ jib {
     }
     pluginExtension {
       implementation = "com.google.cloud.tools.jib.gradle.extension.ownership.JibOwnershipExtension"
-      configuration( Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
+      configuration(Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
         rules {
           rule {
             glob = "{/home/runner,/home/runner/**}"
