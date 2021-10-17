@@ -1,0 +1,133 @@
+image:
+  repository: ghcr.io/codefreak/codefreak
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: [ ]
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: { }
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  roleName: ""
+
+podAnnotations: { }
+
+podSecurityContext: { }
+# fsGroup: 2000
+
+securityContext: { }
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+# runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: { }
+    # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: [ ]
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: { }
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+#   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: { }
+
+tolerations: [ ]
+
+affinity: { }
+
+# Public URL where Code FREAK will be reachable. If left blank the URL will be build either by the first ingress
+# rule or by the service. Value should start with http(s)://...
+publicUrl:
+
+database:
+  # Define the type of database to use. Valid values are "postgres" or "memory".
+  # When using "memory" ALL DATA WILL BE LOST BETWEEN POD RESTARTS!
+  type: memory
+  # Postgres-specific configuration options
+  postgres:
+    # The Postgres database host
+    host: "127.0.0.1"
+    # The port postgres is listening on. 5432 is the default port
+    port: "5432"
+    # Name of the dedicated database for Code FREAK
+    database: "codefreak"
+    # Username
+    username: postgres
+    # The password can be specified as plaintext value, but it's recommended to include it from a secret
+    password:
+    # Name of a K8s secret to obtain the database password from
+    passwordSecretName:
+    # Key within the password secret to obtain the password from. Must be used with `passwordSecretName`
+    passwordSecretKey:
+
+workspaces:
+  # Namespace where workspaces should be started in. If blank workspaces will be deployed in the same namespace as
+  # the Code FREAK server (which is not recommended)
+  namespace:
+  # If the above namespace is not empty the helm chart will create it
+  createNamespace: true
+  # Template that will be used to create workspace-URLs. If empty this will be "{{publicUrl}}/{workspaceIdentifier}"
+  baseUrlTemplate:
+  # CPU limit for workspaces. Must be a valid value for Pod's resource.limits[].cpu
+  cpuLimit: 1
+  # Memory limit for workspaces. Must be a valid value for Pod's resource.limits[].memory
+  memoryLimit: 1Gi
+  # Image that will be used for creating workspaces
+  companionImage: ghcr.io/codefreak/codefreak-cloud-companion:aio
+  # Maximum time in seconds after which IDE workspaces that have no connections will be removed
+  maxIdleThreshold: 300
+  # Interval in seconds how often workspaces are checked for idleness
+  idleCheckInterval: 30
+  # Name of the secret containing a private and public RSA key for creating signed JWT. Check out the chart README
+  # how to create this secret. If this is empty workspaces will run without authentication which is NOT recommended
+  # for production use!
+  jwtKeypairSecretName:
+  # Key inside the jwtKeypairSecretName containing the private key
+  jwtKeypairSecretPrivateKey: private
+  # Key inside the jwtKeypairSecretName containing the public key
+  jwtKeypairSecretPublicKey: public
+
+# Allows you to override values from the application.yml.
+# This should only be used if you know what you are doing and if there are no convenient values.
+applicationYmlOverrides: { }

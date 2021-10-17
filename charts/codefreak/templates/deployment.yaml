@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "codefreak.fullname" . }}
+  labels:
+    {{- include "codefreak.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "codefreak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "codefreak.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "codefreak.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 10
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{ if .Values.database.postgres.passwordSecretName }}
+          env:
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.postgres.passwordSecretName }}
+                  key: {{ .Values.database.postgres.passwordSecretKey }}
+          {{ end }}
+          volumeMounts:
+          - name: config
+            mountPath: /config/application.yml
+            subPath: application.yml
+            readOnly: true
+          {{- if .Values.workspaces.jwtKeypairSecretName }}
+          - name: jwtKeypair
+            mountPath: /config/secrets
+            readOnly: true
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "codefreak.fullname" . }}-config
+      {{- if .Values.workspaces.jwtKeypairSecretName }}
+        - name: jwtKeypair
+          secret:
+            secretName: {{ .Values.workspaces.jwtKeypairSecretName }}
+            items:
+              - key: {{ .Values.workspaces.jwtKeypairSecretPrivateKey }}
+                path: jwt-private.pem
+              - key: {{ .Values.workspaces.jwtKeypairSecretPublicKey }}
+                path: jwt-public.pem
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

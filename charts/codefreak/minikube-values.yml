@@ -1,0 +1,16 @@
+# This is a sample configuration how to run Code FREAK locally in Minikube for testing purposes.
+# Please set a static entry in your /etc/hosts file pointing to the IP returned by `minikube ip`
+# for the hosts "codefreak" and "codefreak-workspaces".
+# Example:
+#  192.168.49.2 codefreak codefreak-workspaces
+ingress:
+  enabled: true
+  hosts:
+    - host: codefreak
+      paths:
+        - path: /
+          pathType: Prefix
+
+workspaces:
+  baseUrlTemplate: http://codefreak-workspaces/{workspaceIdentifier}
+  namespace: my-workspace-namespace

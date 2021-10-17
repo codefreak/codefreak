@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "codefreak.fullname" . }}-config
+  labels:
+  {{- include "codefreak.labels" . | nindent 4 }}
+data:
+  application.yml: |-
+    # This file has been generated during Helm deployment, please do not modify it manually as it will be overridden
+    # by Helm upgrades. You can customize this file using Helm values.
+    {{- include "codefreak.applicationYmlContent" . | nindent 4 }}

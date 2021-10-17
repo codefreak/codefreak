@@ -1,0 +1,38 @@
+# This is a default application.yml for Code FREAK that is templated by Helm
+# A user may override settings using .Values.applicationYmlOverrides
+codefreak:
+  docker:
+    # Remove this when all Docker deps have been removed
+    optional: true
+  ide:
+    idle-check-rate: 2147483647
+  workspaces:
+    baseUrlTemplate: {{ .Values.workspaces.baseUrlTemplate | default (printf "%s%s" (include "codefreak.publicUrl" .) "/{workspaceIdentifier}") }}
+    namespace: {{ .Values.workspaces.namespace | default .Release.Namespace }}
+    cpuLimit: {{ .Values.workspaces.cpuLimit }}
+    memoryLimit: {{ .Values.workspaces.memoryLimit }}
+    companionImage: {{ .Values.workspaces.companionImage }}
+    maxIdleThreshold: {{ .Values.workspaces.maxIdleThreshold }}
+    idleCheckInterval: {{ .Values.workspaces.idleCheckInterval }}
+{{ if .Values.workspaces.jwtKeypairSecretName }}
+    jwkUrl: {{ .Values.workspaces.jwkUrl | default (printf "%s%s" (include "codefreak.publicUrl" .) "/.well-known/jwks.json") }}
+    jwtPrivateKeyFile: /config/secrets/jwt-private.pem
+    jwtPublicKeyFile: /config/secrets/jwt-public.pem
+{{ end }}
+
+{{ if eq .Values.database.type "postgres" }}
+{{ with .Values.database.postgres }}
+spring:
+  datasource:
+    url: jdbc:postgresql://{{ .host }}:{{ .port }}/{{ .database }}
+    username: {{ .username | toYaml }}
+    {{ if .password }}
+    password: {{ .password | toYaml }}
+    {{ end }}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+{{ end }}
+{{ end }}

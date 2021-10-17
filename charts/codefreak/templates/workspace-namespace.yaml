@@ -1,0 +1,6 @@
+{{ if (.Values.workspaces.createNamespace) and (ne .Values.workspaces.namespace .Release.Namespace) }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.workspaces.namespace }}
+{{- end }}
