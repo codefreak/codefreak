@@ -107,7 +107,7 @@ For stand-alone testing you can also set a static public key that will be used f
 You can create test-tokens by using the test-keys in the test/resources directory and the [jwt.io](https://jwt.io/) webservice by Auth0.
 
 If authentication is enabled all requests have to provide a valid JWT.
-This can either be done in the HTTP `Authorization` header as `Bearar` token or for the GraphQL over `graphql-ws` protocol in `payload.jwt` [of the `ConnectionInit` message](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#connectioninit).
+This can either be done in the HTTP `Authorization` header as `Bearer` token or for the GraphQL over `graphql-ws` protocol in `payload.jwt` [of the `ConnectionInit` message](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#connectioninit).
 Browser clients cannot provide a custom authorization header when establishing websocket connections, so they have to use the latter method for GQL requests and the `Authorization` header for REST requests.
 
 ### REST authentication example

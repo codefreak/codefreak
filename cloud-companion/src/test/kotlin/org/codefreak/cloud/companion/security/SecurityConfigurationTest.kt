@@ -46,7 +46,7 @@ internal class SecurityConfigurationTest {
   lateinit var client: WebTestClient
 
   @Test
-  fun testUnauthorizedIfNoJwtIsPassed() {
+  fun `regular requests are unauthorized when no token is provided`() {
     client.get()
       .uri("/")
       .exchange()
@@ -55,7 +55,7 @@ internal class SecurityConfigurationTest {
   }
 
   @Test
-  fun testAuthorizedIfValidJwtIsPassed() {
+  fun `valid JWT grants access to the companion`() {
     client.get()
       .uri("/")
       .header("Authorization", "Bearer $TEST_JWT")

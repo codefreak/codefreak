@@ -56,8 +56,8 @@ class WorkspaceAuthService(
   private fun buildWorkspaceClaimSet(identifier: WorkspaceIdentifier, subject: String): JWTClaimsSet {
     return JWTClaimsSet.Builder()
       .subject(subject)
-      .issuer(instanceId) // TODO: Valid uri/url?
-      .audience(identifier.hashString()) // TODO: Valid uri/url?
+      .issuer(instanceId)
+      .audience(identifier.hashString())
       .expirationTime(Date.from(Instant.now().plus(12, ChronoUnit.HOURS)))
       .build()
   }
