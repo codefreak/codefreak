@@ -83,11 +83,11 @@ Creates an empty directory or file with the following convention:
 * If `filepath` does not end with a slash it will create an empty file. If `filepath` is an existing directory the operation will fail.
 
 If `filepath` is an existing file or directory this will do nothing.
-A successful operation will return `201 CREATED`.
+A successful operation will return `201 CREATED`, everything else will return a `400 Bad Request`.
 
 ### `DELETE /files/{filepath}`
 Deletes a file or directory specified by `filepath`. Directories will be deleted recursively!
-Returns `204 NO CONTENT` for successful operations or `404 in case
+Returns `204 No Content` for successful operations or `404 Not Found` in case the file does not exist.
 
 ### `GET /files-tar`
 
