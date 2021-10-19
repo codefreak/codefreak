@@ -1,4 +1,4 @@
-import { render, wrap } from '../../services/testing'
+import { mockFetch, render, wrap } from '../../services/testing'
 import EditorTabPanel from './EditorTabPanel'
 import { QueryClient } from 'react-query'
 import { renderHook } from '@testing-library/react-hooks'
@@ -6,14 +6,13 @@ import useWorkspace from '../../hooks/workspace/useWorkspace'
 import React from 'react'
 
 describe('<EditorTabPanel />', () => {
+  const mockFileContents = 'Hello world!'
+
+  beforeEach(() => {
+    mockFetch(mockFileContents)
+  })
+
   it('renders a <TabPanel />', async () => {
-    const mockFileContents = 'Hello world!'
-
-    jest.spyOn(global, 'fetch').mockImplementation(() => {
-      const response = new Response(mockFileContents)
-      return Promise.resolve(response)
-    })
-
     const queryClient = new QueryClient()
     const baseUrl = 'https://codefreak.test'
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
@@ -40,13 +39,6 @@ describe('<EditorTabPanel />', () => {
   })
 
   it('shows a placeholder when still loading', () => {
-    const mockFileContents = 'Hello world!'
-
-    jest.spyOn(global, 'fetch').mockImplementation(() => {
-      const response = new Response(mockFileContents)
-      return Promise.resolve(response)
-    })
-
     const { container } = render(<EditorTabPanel file="file" />)
 
     expect(container.textContent).toBe('')

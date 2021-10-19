@@ -85,3 +85,12 @@ export const waitForTime = async (ms = 0) =>
   act(async () => {
     await new Promise(resolve => setTimeout(resolve, ms))
   })
+
+export const mockFetch = (
+  responseBody: BodyInit | null = null,
+  responseInit?: ResponseInit
+) =>
+  jest.spyOn(global, 'fetch').mockImplementation(() => {
+    const response = new Response(responseBody, responseInit)
+    return Promise.resolve(response)
+  })

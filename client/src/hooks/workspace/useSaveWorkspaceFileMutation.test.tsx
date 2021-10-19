@@ -3,17 +3,14 @@ import { act } from '@testing-library/react'
 import { renderHook } from '@testing-library/react-hooks'
 import { writeFilePath } from '../../services/workspace'
 import useSaveWorkspaceFileMutation from './useSaveWorkspaceFileMutation'
-import { wrap } from '../../services/testing'
+import { mockFetch, wrap } from '../../services/testing'
 
 describe('useSaveWorkspaceFileMutation()', () => {
   it('saves files to the correct endpoint', async () => {
     const mockFileContents = 'Hello world!'
     const baseUrl = 'https://codefreak.test/'
 
-    const mockGetFile = jest.spyOn(global, 'fetch').mockImplementation(() => {
-      const response = new Response()
-      return Promise.resolve(response)
-    })
+    const mockGetFile = mockFetch()
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {

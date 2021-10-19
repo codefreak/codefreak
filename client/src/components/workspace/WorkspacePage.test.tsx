@@ -1,4 +1,4 @@
-import { render, waitForTime } from '../../services/testing'
+import { mockFetch, render, waitForTime } from '../../services/testing'
 import WorkspacePage from './WorkspacePage'
 import {
   FileContextType,
@@ -41,7 +41,13 @@ const answerId = 'foo'
 const baseUrl = 'https://codefreak.test'
 
 describe('<WorkspacePage />', () => {
+  beforeEach(() => {
+    mockFetch()
+  })
+
   it('renders a <WorkspaceTabsWrapper />', () => {
+    mockFetch()
+
     const workspaceContext = { baseUrl, answerId }
 
     const mocks = [startWorkspaceMock(noop, baseUrl, answerId)]

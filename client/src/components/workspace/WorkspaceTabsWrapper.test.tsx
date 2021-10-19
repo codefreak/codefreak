@@ -1,4 +1,4 @@
-import { render, waitForTime, wrap } from '../../services/testing'
+import { mockFetch, render, waitForTime, wrap } from '../../services/testing'
 import WorkspaceTabsWrapper from './WorkspaceTabsWrapper'
 import { WorkspaceTab } from '../../services/workspace-tabs'
 import { QueryClient } from 'react-query'
@@ -8,6 +8,10 @@ import useWorkspace from '../../hooks/workspace/useWorkspace'
 import { EditorWorkspaceTab } from './EditorTabPanel'
 
 describe('<WorkspaceTabsWrapper />', () => {
+  beforeEach(() => {
+    mockFetch()
+  })
+
   it('renders an <EmptyTabPanel /> when no tabs are given', () => {
     const { container } = render(<WorkspaceTabsWrapper tabs={[]} />)
 
@@ -15,10 +19,6 @@ describe('<WorkspaceTabsWrapper />', () => {
   })
 
   it('renders given tabs', async () => {
-    jest
-      .spyOn(global, 'fetch')
-      .mockImplementation(() => Promise.resolve(new Response()))
-
     const queryClient = new QueryClient()
     const baseUrl = 'https://codefreak.test'
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>

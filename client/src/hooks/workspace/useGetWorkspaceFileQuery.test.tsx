@@ -3,17 +3,18 @@ import { readFilePath } from '../../services/workspace'
 import React from 'react'
 import { QueryClient, setLogger } from 'react-query'
 import useGetWorkspaceFileQuery from './useGetWorkspaceFileQuery'
-import { waitForTime, wrap } from '../../services/testing'
+import { mockFetch, waitForTime, wrap } from '../../services/testing'
 
 describe('useGetWorkspaceFileQuery()', () => {
-  it('gets file-contents from the correct endpoint', async () => {
-    const mockFileContents = 'Hello world!'
-    const baseUrl = 'https://codefreak.test/'
+  const mockFileContents = 'Hello world!'
+  let mockGetFile: jest.SpyInstance | null = null
 
-    const mockGetFile = jest.spyOn(global, 'fetch').mockImplementation(() => {
-      const response = new Response(mockFileContents)
-      return Promise.resolve(response)
-    })
+  beforeEach(() => {
+    mockGetFile = mockFetch(mockFileContents)
+  })
+
+  it('gets file-contents from the correct endpoint', async () => {
+    const baseUrl = 'https://codefreak.test/'
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
@@ -39,13 +40,7 @@ describe('useGetWorkspaceFileQuery()', () => {
   })
 
   it('does nothing when no base-url is set', async () => {
-    const mockFileContents = 'Hello world!'
     const baseUrl = ''
-
-    const mockGetFile = jest.spyOn(global, 'fetch').mockImplementation(() => {
-      const response = new Response(mockFileContents)
-      return Promise.resolve(response)
-    })
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
@@ -66,10 +61,7 @@ describe('useGetWorkspaceFileQuery()', () => {
   it('has an error if the file does not exist', async () => {
     const baseUrl = 'https://codefreak.test'
 
-    const mockGetFile = jest.spyOn(global, 'fetch').mockImplementation(() => {
-      const response = new Response(null, { status: 404 })
-      return Promise.resolve(response)
-    })
+    mockGetFile = mockFetch(null, { status: 404 })
 
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } }
