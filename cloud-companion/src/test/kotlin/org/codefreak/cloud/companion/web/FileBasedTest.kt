@@ -4,6 +4,7 @@ import kotlin.io.path.createDirectories
 import org.apache.commons.io.FileUtils
 import org.codefreak.cloud.companion.CompanionConfig
 import org.codefreak.cloud.companion.FileService
+import org.codefreak.cloud.companion.security.SecurityConfiguration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -14,7 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @ExtendWith(SpringExtension::class)
-@Import(FileService::class, CompanionConfig::class)
+@Import(FileService::class, CompanionConfig::class, SecurityConfiguration::class)
 @ActiveProfiles("test")
 abstract class FileBasedTest {
   @Autowired
