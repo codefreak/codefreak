@@ -20,11 +20,10 @@ task start(type: NpmTask) {
   dependsOn generate
 }
 
-// Disabled until someone fixes Jest
-//task test(type: NpmTask) {
-//  args = ['run', 'test']
-//  dependsOn npmInstall
-//}
+task test(type: NpmTask) {
+  args = ['test']
+  dependsOn npmInstall
+}
 
 task lint(type: NpmTask) {
   args = ['run', 'lint']
@@ -34,8 +33,7 @@ task lint(type: NpmTask) {
 
 task check {
   dependsOn lint
-  // Don't run tests for now because they are not configured correctly
-  // dependsOn test
+  dependsOn test
 }
 
 task assemble(type: NpmTask) {

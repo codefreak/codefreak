@@ -1,5 +1,4 @@
-import { render, unmountComponentAtNode } from 'react-dom'
-import { act } from 'react-dom/test-utils'
+import { render } from '@testing-library/react'
 import { GetAssignmentWithSubmissionsQueryResult } from '../services/codefreak-api'
 
 import SubmissionsTable from './SubmissionsTable'
@@ -9,32 +8,6 @@ type Assignment = NonNullable<
 >['assignment']
 type Submission = Assignment['submissions'][number]
 type User = Submission['user']
-
-let container: Element
-
-beforeEach(() => {
-  container = document.createElement('div')
-  document.body.appendChild(container)
-
-  Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: jest.fn().mockImplementation(query => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: jest.fn(), // deprecated, but antd uses it
-      removeListener: jest.fn(), // deprecated, but antd uses it
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn()
-    }))
-  })
-})
-
-afterEach(() => {
-  unmountComponentAtNode(container)
-  container?.remove()
-})
 
 it('renders user data', () => {
   const dummyUser: User = {
@@ -56,9 +29,9 @@ it('renders user data', () => {
     tasks: []
   }
 
-  act(() => {
-    render(<SubmissionsTable assignment={dummyAssignment} />, container)
-  })
+  const { container } = render(
+    <SubmissionsTable assignment={dummyAssignment} />
+  )
 
   expect(container.textContent).toContain(dummyUser.firstName)
   expect(container.textContent).toContain(dummyUser.lastName)

@@ -16,6 +16,7 @@
     "@graphql-codegen/typescript-operations": "2.1.4",
     "@graphql-codegen/typescript-react-apollo": "3.1.4",
     "@loadable/component": "5.15.0",
+    "@testing-library/react": "12.1.2",
     "@types/apollo-upload-client": "14.1.0",
     "@types/filesize": "5.0.0",
     "@types/highlight.js": "9.12.4",
@@ -97,6 +98,11 @@
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!antd)/"
+    ]
   },
   "browserslist": {
     "production": [
