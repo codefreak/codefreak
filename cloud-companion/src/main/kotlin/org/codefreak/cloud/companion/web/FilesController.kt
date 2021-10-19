@@ -1,5 +1,6 @@
 package org.codefreak.cloud.companion.web
 
+import java.io.IOException
 import java.net.URLDecoder
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
@@ -7,26 +8,22 @@ import kotlin.io.path.inputStream
 import kotlin.io.path.isReadable
 import kotlin.io.path.isRegularFile
 import org.codefreak.cloud.companion.FileService
-import org.codefreak.cloud.companion.FileServiceException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.codec.multipart.FilePart
-import org.springframework.http.codec.multipart.Part
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.reactive.HandlerMapping
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -36,38 +33,40 @@ const val FILES_PATH_PREFIX = "/files"
 
 @RestController
 @RequestMapping(FILES_PATH_PREFIX)
-class FileController {
+class FilesController {
   companion object {
-    private val log = LoggerFactory.getLogger(FileController::class.java)
+    private val log = LoggerFactory.getLogger(FilesController::class.java)
   }
 
   @Autowired
   private lateinit var fileService: FileService
 
-  @PostMapping
+  @PostMapping("/{path}/**")
   @ResponseStatus(HttpStatus.CREATED)
-  fun uploadFiles(@RequestPart files: Flux<Part>): Mono<Void> {
-    return files
-      .flatMap {
-        if (it !is FilePart) {
-          Flux.error(
-            ResponseStatusException(
+  fun touchFile(@PathVariable path: String, exchange: ServerWebExchange): Mono<Void> {
+    val filePath = extractFilePath(exchange)
+    val shouldCreateDirectory = filePath.endsWith("/")
+    return Mono.just(filePath)
+      .map { fileService.resolve(it) }
+      .map { file ->
+        if (shouldCreateDirectory) {
+          fileService.createEmptyDirectory(file)
+        } else {
+          fileService.createEmptyFile(file)
+        }
+      }.onErrorMap(IOException::class.java) {
+        if (shouldCreateDirectory) {
+          ResponseStatusException(
               HttpStatus.BAD_REQUEST,
-              "'files' form data should be a file upload with a proper filename specified"
-            )
+              "Could not create directory $filePath: ${it.message}"
           )
         } else {
-          log.debug("Saving uploaded file ${it.filename()}")
-          fileService.saveUpload(it)
+          ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Could not create file $filePath: ${it.message}"
+          )
         }
-      }
-      .doOnError(FileServiceException::class.java) { e ->
-        throw ResponseStatusException(
-          HttpStatus.BAD_REQUEST,
-          e.message
-        )
-      }
-      .then()
+      }.then()
   }
 
   @GetMapping("/{path}/**")
@@ -95,6 +94,35 @@ class FileController {
       // do not use filesystem based resources here as spring will be "smart"
       // and overrides our explicit content-type from above
       .body(InputStreamResource(file.inputStream()))
+  }
+
+  @DeleteMapping("/{path}/**")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  fun deleteFile(@PathVariable path: String, exchange: ServerWebExchange): Mono<Void> {
+    val filePath = extractFilePath(exchange)
+    return Mono.just(filePath)
+        .map { fileService.resolve(it) }
+        .map { file ->
+          when {
+            !file.exists() -> throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "File ${file.absolutePathString()} does not exist"
+            )
+            else -> {
+              fileService.deleteFile(file)
+            }
+          }
+        }.onErrorMap(IllegalArgumentException::class.java) {
+          ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Invalid path specified: $filePath"
+          )
+        }.onErrorMap(IOException::class.java) {
+          ResponseStatusException(
+              HttpStatus.BAD_REQUEST,
+              "Could not delete file/directory $filePath: ${it.message}"
+          )
+        }.then()
   }
 
   /**
