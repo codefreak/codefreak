@@ -45,7 +45,7 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
 
   return (
     <Row gutter={4} className="workspace-page">
-      <Col>
+      <Col span={24}>
         <WorkspaceTabsWrapper tabs={leftTabs} />
       </Col>
     </Row>
