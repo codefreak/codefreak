@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
 @Controller
-class ProcessController {
+class GraphQLProcessController {
   @Autowired
   private lateinit var processManager: ProcessManager
 

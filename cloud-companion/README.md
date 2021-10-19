@@ -40,7 +40,7 @@ your `src/main/resources/application-dev.yml` correctly!
 The server accepts both `POST` and Websocket queries. The GQL websocket protocol is based
 on [`graphql-ws`](https://github.com/enisdenjo/graphql-ws)!
 
-### `POST /files`
+### `POST /upload`
 
 Expects a `multipart/form-data` request with one or multiple field with the name `files`. Each file will be stored
 inside the container in `/code` by default. The filename can also contain slashes to upload to sub-directories. If the
@@ -51,7 +51,7 @@ everything was uploaded properly.
 Example request:
 
 ```
-POST /files HTTP/1.1
+POST /upload HTTP/1.1
 Host: localhost:8080
 Content-Type: multipart/form-data; boundary=----random-string-generated-by-browser
 ...
@@ -76,6 +76,18 @@ exists) with the one of the following mime-types:
 * `text/plain` for all textual files
 * The proper mime type for images (mime starts with `image/*`)
 * `application/octet-stream` for everything else
+
+### `POST /files/{filepath}`
+Creates an empty directory or file with the following convention:
+* If `filepath` ends with a slash it will create an empty directory. If `filepath` is an existing file the operation will fail.
+* If `filepath` does not end with a slash it will create an empty file. If `filepath` is an existing directory the operation will fail.
+
+If `filepath` is an existing file or directory this will do nothing.
+A successful operation will return `201 CREATED`, everything else will return a `400 Bad Request`.
+
+### `DELETE /files/{filepath}`
+Deletes a file or directory specified by `filepath`. Directories will be deleted recursively!
+Returns `204 No Content` for successful operations or `404 Not Found` in case the file does not exist.
 
 ### `GET /files-tar`
 

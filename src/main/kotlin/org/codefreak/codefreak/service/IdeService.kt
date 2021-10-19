@@ -17,9 +17,6 @@ import org.codefreak.codefreak.entity.Task
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.codefreak.codefreak.repository.TaskRepository
 import org.codefreak.codefreak.service.file.FileService
-import org.codefreak.codefreak.service.workspace.WorkspaceIdentifier
-import org.codefreak.codefreak.service.workspace.WorkspacePurpose
-import org.codefreak.codefreak.service.workspace.WorkspaceService
 import org.codefreak.codefreak.util.DockerUtil
 import org.codefreak.codefreak.util.NetUtil
 import org.slf4j.LoggerFactory
@@ -65,9 +62,6 @@ class IdeService : BaseService() {
   @Autowired
   lateinit var httpClient: HttpClient
 
-  @Autowired
-  private lateinit var workspaceService: WorkspaceService
-
   private var idleContainers: Map<String, Long> = mapOf()
 
   /**
@@ -89,10 +83,10 @@ class IdeService : BaseService() {
         if (shouldMountDockerDaemon(answer.task.ideImage)) {
           log.debug("Mounting Docker daemon to IDE for answer ${answer.id}")
           appendBinds(
-              HostConfig.Bind.builder()
-                  .from("/var/run/docker.sock")
-                  .to("/var/run/docker.sock")
-                  .build()
+            HostConfig.Bind.builder()
+              .from("/var/run/docker.sock")
+              .to("/var/run/docker.sock")
+              .build()
           )
         }
       }
@@ -103,7 +97,7 @@ class IdeService : BaseService() {
   private fun shouldMountDockerDaemon(customImage: String?): Boolean {
     val image = customImage ?: config.ide.image
     return config.ide.dockerDaemonAllowlist.contains(
-        DockerUtil.getImageNameWithoutTag(image)
+      DockerUtil.getImageNameWithoutTag(image)
     )
   }
 
@@ -114,7 +108,13 @@ class IdeService : BaseService() {
 
   @Synchronized
   @Throws(ResourceLimitException::class)
-  fun startIdeContainer(id: UUID, label: String, fileCollectionId: UUID, customImage: String? = null, customize: ContainerConfigurator = {}): String {
+  fun startIdeContainer(
+    id: UUID,
+    label: String,
+    fileCollectionId: UUID,
+    customImage: String? = null,
+    customize: ContainerConfigurator = {}
+  ): String {
     // either take existing container or create a new one
     val container = containerService.getContainerWithLabel(label, id.toString())
     if (container != null && containerService.isContainerRunning(container.id())) {
@@ -180,7 +180,7 @@ class IdeService : BaseService() {
    */
   fun getIdeUrl(containerId: String): String {
     return this.reverseProxy.getIdeUrl(
-        containerService.inspectContainer(containerId)
+      containerService.inspectContainer(containerId)
     )
   }
 
@@ -193,17 +193,12 @@ class IdeService : BaseService() {
     return containerService.getContainerWithLabel(label, answerId.toString())?.id()
   }
 
-  private fun buildAnswerIdeWorkspaceIdentifier(answerId: UUID): WorkspaceIdentifier {
-    return WorkspaceIdentifier(WorkspacePurpose.ANSWER_IDE, answerId.toString())
-  }
-
   @Transactional
   fun saveAnswerFiles(answer: Answer, force: Boolean = false): Answer {
     if (!force && !answer.isEditable) {
       log.info("Skipped saving of files from answer ${answer.id} because it's not editable anymore")
       return answer
     }
-    workspaceService.saveWorkspaceFiles(buildAnswerIdeWorkspaceIdentifier(answer.id))
 
     val containerId = getAnswerIdeContainer(answer.id)
     if (containerId === null) {
@@ -238,11 +233,16 @@ class IdeService : BaseService() {
    * Configure and create a new IDE container.
    * Returns the ID of the created container
    */
-  protected fun createIdeContainer(label: String, id: UUID, customImage: String? = null, customize: ContainerConfigurator = {}): String {
+  protected fun createIdeContainer(
+    label: String,
+    id: UUID,
+    customImage: String? = null,
+    customize: ContainerConfigurator = {}
+  ): String {
     val image = customImage ?: config.ide.image
     val containerId = containerService.createContainer(image) {
       labels = mapOf(
-          label to id.toString()
+        label to id.toString()
       )
       reverseProxy.configureContainer(this)
       hostConfig {
@@ -273,8 +273,8 @@ class IdeService : BaseService() {
       // use sh to make globbing work
       // two globs: one for regular files and one for hidden files/dirs except . and ..
       containerService.exec(
-          containerId,
-          arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]* && mkdir -p $PROJECT_PATH")
+        containerId,
+        arrayOf("sh", "-c", "rm -rf $PROJECT_PATH/* $PROJECT_PATH/.[!.]* && mkdir -p $PROJECT_PATH")
       )
 
       fileService.readCollectionTar(fileCollectionId).use {
@@ -310,10 +310,9 @@ class IdeService : BaseService() {
    * Remove answer container and possible read-only containers
    */
   fun removeAnswerIdeContainers(answerId: UUID) {
-    workspaceService.deleteWorkspace(buildAnswerIdeWorkspaceIdentifier(answerId))
     arrayOf(
-        getAnswerIdeContainer(answerId),
-        getAnswerIdeContainer(answerId, readOnly = true)
+      getAnswerIdeContainer(answerId),
+      getAnswerIdeContainer(answerId, readOnly = true)
     ).filterNotNull().forEach {
       stopIdeContainer(it)
       removeIdeContainer(it)
@@ -368,8 +367,8 @@ class IdeService : BaseService() {
   }
 
   @Scheduled(
-      fixedRateString = "\${codefreak.ide.idle-check-rate}",
-      initialDelayString = "\${codefreak.ide.idle-check-rate}"
+    fixedRateString = "\${codefreak.ide.idle-check-rate}",
+    initialDelayString = "\${codefreak.ide.idle-check-rate}"
   )
   protected fun shutdownIdleIdeContainers() {
     log.debug("Checking for idle containers")
@@ -398,8 +397,8 @@ class IdeService : BaseService() {
   }
 
   @Scheduled(
-      fixedRateString = "#{@config.ide.removeCheckRate}",
-      initialDelayString = "#{@config.ide.removeCheckRate}"
+    fixedRateString = "#{@config.ide.removeCheckRate}",
+    initialDelayString = "#{@config.ide.removeCheckRate}"
   )
   protected fun removeShutdownContainers() {
     val thresholdDate = Date.from(Instant.now().minusMillis(config.ide.removeThreshold))

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.test.StepVerifier
 
-internal class FilesControllerTest(
+internal class GraphQLFilesControllerTest(
   @Autowired private val fileService: FileService
 ) : BasicGraphqlTest() {
 
