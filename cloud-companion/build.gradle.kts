@@ -32,6 +32,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-aop")
+  implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.experimental:graphql-spring-boot-starter:1.0.0-SNAPSHOT")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
@@ -75,6 +77,7 @@ tasks.test {
   testLogging {
     events = setOf(TestLogEvent.FAILED)
     exceptionFormat = TestExceptionFormat.FULL
+    showStandardStreams = true
   }
 }
 
@@ -93,8 +96,7 @@ jib {
     image = if (buildAio) {
       "docker.io/replco/polygott:9180d8b24b181125577e98a8f5418781e863e852"
     } else {
-        // adoptopenjdk:8-jre-hotspot
-      "docker.io/library/adoptopenjdk@sha256:f89b4c0ee78145a575df40017b12003d86ed877c4a68bd063f7ca0221ff8643b"
+      "docker.io/adoptopenjdk/openjdk11-openj9:jdk-11.0.11_9_openj9-0.26.0"
     }
   }
 
@@ -129,7 +131,7 @@ jib {
     }
     pluginExtension {
       implementation = "com.google.cloud.tools.jib.gradle.extension.ownership.JibOwnershipExtension"
-      configuration( Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
+      configuration(Action<com.google.cloud.tools.jib.gradle.extension.ownership.Configuration> {
         rules {
           rule {
             glob = "{/home/runner,/home/runner/**}"
@@ -144,5 +146,9 @@ jib {
 spotless {
   kotlin {
     ktlint().userData(mapOf("indent_size" to "2"))
+  }
+  java {
+    prettier(mapOf("prettier" to "2.4.1", "prettier-plugin-java" to "1.4.0"))
+      .config(mapOf("parser" to "java", "tabWidth" to 2))
   }
 }

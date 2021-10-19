@@ -111,6 +111,43 @@ The request will be upgraded to Websocket!
 After starting a process using the GraphQL `startProcess` mutation you can attach to the process via this endpoint.
 Please supply the process-id returned from the start mutation.
 
+## Authentication
+The companion can authenticate incoming connections via signed JWT (JWS, RS256 algorithm).
+In regular deployments the Code FREAK backend acts as JWK server and hosts its JWK-Set at `/.well-known/jwks.json`.
+This URL will be injected as a [property into the companion](https://docs.spring.io/spring-security-oauth2-boot/docs/current/reference/html5/#specifying-a-token-verification-strategy) and the regular Spring Security OAuth2 kicks in.
+For stand-alone testing you can also set a static public key that will be used for validating tokens (check the security integration tests over [here](./src/test/kotlin/org/codefreak/cloud/companion/web/SecurityConfigurationTest.kt)).
+You can create test-tokens by using the test-keys in the test/resources directory and the [jwt.io](https://jwt.io/) webservice by Auth0.
+
+If authentication is enabled all requests have to provide a valid JWT.
+This can either be done in the HTTP `Authorization` header as `Bearer` token or for the GraphQL over `graphql-ws` protocol in `payload.jwt` [of the `ConnectionInit` message](https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md#connectioninit).
+Browser clients cannot provide a custom authorization header when establishing websocket connections, so they have to use the latter method for GQL requests and the `Authorization` header for REST requests.
+
+### REST authentication example
+Perform a regular HTTP request but always add a `Authorization: Bearer ...` header containing a valid JWT.
+```
+POST /files HTTP/1.1
+Host: localhost:8080
+Authorization: Bearer eyJhbGciO[...]
+
+```
+
+### GraphQL authentication example
+Establish a Websocket connection and then perform the regular `connection_init` request with `payload.jwt`:
+
+```json
+{
+  "type": "connection_init",
+  "payload": {
+    "jwt": "eyJhbGciO[...]"
+  }
+}
+```
+
+If the JWT is valid the server will respond with a `connection_ack` message.
+Otherwise, the websocket connection will be closed immediately with a `4401` close status.
+
+Edge case: If you provide a valid `Authorization: Bearer ...` header in the Websocket initialization requests you can omit `payload.jwt` in the `connection_init` message.
+
 ## Testing
 
 ```shell

@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono
 
 class WorkspaceClient(
   baseUrl: String,
+  authToken: String?,
   private val objectMapper: ObjectMapper
 ) {
   companion object {
@@ -42,7 +43,19 @@ class WorkspaceClient(
 
   private val baseUri = URI(baseUrl)
   private val requestFactory = OkHttpClient.Builder()
-    .retryOnConnectionFailure(false)
+    .also {
+      // Provide authentication token via Authorization header
+      if (authToken != null) {
+        it.addInterceptor { chain ->
+          val authReq: Request = chain
+            .request()
+            .newBuilder()
+            .addHeader("Authorization", "Bearer $authToken")
+            .build()
+          chain.proceed(authReq)
+        }
+      }
+    }
     .build()
 
   val apolloClient = ApolloClient(
@@ -80,7 +93,6 @@ class WorkspaceClient(
     val request = Request.Builder()
       .post(body)
       .url(buildWorkspaceUri(path = "/files-tar"))
-      .header("Connection", "close")
       .build()
     requestFactory.newCall(request).execute { response ->
       if (response.code() != 201) {
@@ -100,7 +112,6 @@ class WorkspaceClient(
         path = "/files-tar",
         query = filter?.run { "filter=$filter" }
       ))
-      .header("Connection", "close")
       .build()
     requestFactory.newCall(request).execute { response ->
       val body = response.body() ?: throw IllegalStateException("Downloading files returned no body")
@@ -138,7 +149,6 @@ class WorkspaceClient(
     val request = Request.Builder()
       .get()
       .url(buildWorkspaceUri(path = "/actuator/health/readiness"))
-      .header("Connection", "close")
       .build()
     try {
       requestFactory.newCall(request).execute { response ->
@@ -165,7 +175,6 @@ class WorkspaceClient(
     val request = Request.Builder()
       .get()
       .url(buildWorkspaceUri(path = "/actuator/metrics/http.websocket.connections"))
-      .header("Connection", "close")
       .build()
     requestFactory.newCall(request).execute { response ->
       val body = response.body() ?: throw IllegalStateException("Metric response has no body")
@@ -252,7 +261,6 @@ class WorkspaceClient(
 
   /**
    * Automatically closes the body after consuming the response
-   * TODO: This is only working when "Connection close" header is sent.
    */
   private inline fun <T> Call.execute(responseConsumer: (response: Response) -> T): T = execute().use(responseConsumer)
 

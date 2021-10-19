@@ -51,7 +51,7 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
   }
 
   private suspend fun invokeEvaluation(reference: RemoteWorkspaceReference): EvaluationResult {
-    val workspaceClient = workspaceClientService.createClient(reference)
+    val workspaceClient = workspaceClientService.getClient(reference)
     val evalProcessId = workspaceClient.startProcess(listOf("/scripts/$EVALUATION_SCRIPT_NAME"))
     val output = try {
       workspaceClient.getAllProcessOutput(evalProcessId).awaitLast()

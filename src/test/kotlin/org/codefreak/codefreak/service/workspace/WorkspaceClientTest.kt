@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.service.workspace
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.whenever
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -14,22 +16,18 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.hasEntry
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.DisabledOnOs
 import org.junit.jupiter.api.condition.OS
-import org.springframework.beans.factory.annotation.Autowired
 
 // Can be enabled once the Image building works on GitHub Actions
 @DisabledOnOs(OS.WINDOWS)
 class WorkspaceClientTest : WorkspaceBaseTest() {
-  @Autowired
-  private lateinit var workspaceClientService: WorkspaceClientService
-
-  @Autowired
-  private lateinit var workspaceService: KubernetesWorkspaceService
+  private lateinit var remoteWorkspaceReference: RemoteWorkspaceReference
 
   private lateinit var workspaceClient: WorkspaceClient
 
@@ -40,16 +38,28 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
     val collectionId = UUID(0, 0)
     val tar = createTarWithEntries(mapOf("file.txt" to "foo"))
     whenever(fileService.readCollectionTar(collectionId)).thenReturn(tar)
-    val remoteWorkspaceReference = workspaceService.createWorkspace(
+    remoteWorkspaceReference = workspaceService.createWorkspace(
       workspaceIdentifier,
       WorkspaceConfiguration(
-          collectionId = collectionId,
-          isReadOnly = true,
-          scripts = emptyMap(),
-          imageName = appConfiguration.workspaces.companionImage
+        collectionId = collectionId,
+        isReadOnly = true,
+        scripts = emptyMap(),
+        imageName = appConfiguration.workspaces.companionImage
       )
     )
-    workspaceClient = workspaceClientService.createClient(remoteWorkspaceReference)
+  }
+
+  @BeforeEach
+  fun setupWorkspaceClient() {
+    workspaceClient = createClient()
+  }
+
+  private fun createClient() =
+    WorkspaceClient(remoteWorkspaceReference.baseUrl, null, ObjectMapper().registerKotlinModule())
+
+  @AfterEach
+  fun closeConnection() {
+    workspaceClient.apolloClient.dispose()
   }
 
   @Test
@@ -86,20 +96,18 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
     )
   }
 
-  /**
-   * This test should run last because it kills the websocket client
-   */
   @Test
-  @Order(Int.MAX_VALUE)
-  fun countWebsocketConnections() {
-    // make sure the client is actually connected
-    runBlocking { workspaceClient.startProcess(listOf("/bin/bash", "-i")) }
-    Assertions.assertEquals(1, workspaceClient.countWebsocketConnections())
-
-    // disconnect and wait if the connection
-    workspaceClient.apolloClient.dispose()
+  fun countWebsocketConnections() = runBlocking {
+    // make sure the client is actually connected via websocket
+    workspaceClient.startProcess(listOf("/bin/bash", "-i"))
     await().atMost(10, TimeUnit.SECONDS).untilAsserted {
-      Assertions.assertEquals(0, workspaceClient.countWebsocketConnections())
+      Assertions.assertEquals(1, workspaceClient.countWebsocketConnections())
+    }
+
+    val secondClient = createClient()
+    secondClient.startProcess(listOf("/bin/bash", "-i"))
+    await().atMost(10, TimeUnit.SECONDS).untilAsserted {
+      Assertions.assertEquals(2, workspaceClient.countWebsocketConnections())
     }
   }
 }
