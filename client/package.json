@@ -101,7 +101,7 @@
   },
   "jest": {
     "transformIgnorePatterns": [
-      "/node_modules/(?!antd|@ant-design|rc-.+?|@babel/runtime).+(js|jsx)$"
+      "/node_modules/(?!antd|@ant-design|rc-.+?|@babel/runtime|array-move).+(js|jsx)$"
     ]
   },
   "browserslist": {
