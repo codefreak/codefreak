@@ -56,25 +56,10 @@ jobs:
         shell: bash
         run: ./gradlew check -x test
 
-      # Install minikube, enable ingress addon and make ingress available at http://minikube
-      - name: Setup minikube
-        if: runner.os != 'Windows'
-        run: |
-          curl -Lo minikube https://github.com/kubernetes/minikube/releases/download/v1.23.2/minikube-linux-amd64 \
-            && chmod +x minikube
-          sudo mv minikube /usr/local/bin/minikube
-          minikube start --driver=docker
-          minikube addons enable ingress
-          echo "$(minikube ip) minikube" | sudo tee -a /etc/hosts
-
       # Build the companion image first because we need it for integration tests with the server.
       - name: Build Companion Image
         if: runner.os != 'Windows'
         run: ./gradlew :cloud-companion:jibDockerBuild
-
-      - name: Load Companion Image to Minikube
-        if: runner.os != 'Windows'
-        run: minikube image load ghcr.io/codefreak/codefreak-cloud-companion:minimal
 
       - name: Run Unit Tests
         shell: bash
