@@ -1,7 +1,6 @@
 package org.codefreak.cloud.companion.security
 
 import org.codefreak.cloud.companion.logger
-import org.codefreak.codefreak.graphql.EnhancedGraphQlWebsocketHandler
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.config.BeanPostProcessor
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition
@@ -11,11 +10,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.ConfigurationCondition
-import org.springframework.graphql.boot.GraphQlProperties
-import org.springframework.graphql.web.WebGraphQlHandler
-import org.springframework.graphql.web.webflux.GraphQlWebSocketHandler
+import org.springframework.graphql.web.WebSocketInterceptor
 import org.springframework.http.HttpMethod.GET
-import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.config.web.server.invoke
@@ -122,11 +118,6 @@ class SecurityConfiguration {
       return JwtWebsocketAuthenticationService(jwtDecoder)
     }
 
-    @Bean
-    fun connectionInitAuthHandler(jwtWebsocketAuthenticationService: JwtWebsocketAuthenticationService): ConnectionInitAuthHandler {
-      return ConnectionInitAuthHandler(jwtWebsocketAuthenticationService)
-    }
-
     /**
      * Add authentication to GraphQL websockets. Browsers do not support
      * providing custom Headers when initializing a websocket connection.
@@ -135,18 +126,8 @@ class SecurityConfiguration {
      * any requests.
      */
     @Bean
-    fun authedGraphQlWebSocketHandler(
-      webGraphQlHandler: WebGraphQlHandler,
-      properties: GraphQlProperties,
-      configurer: ServerCodecConfigurer,
-      connectionInitAuthHandler: ConnectionInitAuthHandler
-    ): GraphQlWebSocketHandler {
-      return EnhancedGraphQlWebsocketHandler(
-        webGraphQlHandler,
-        configurer,
-        properties.websocket.connectionInitTimeout,
-        connectionInitAuthHandler
-      )
+    fun graphqlWebsocketAuthInterceptor(jwtWebsocketAuthenticationService: JwtWebsocketAuthenticationService): WebSocketInterceptor {
+      return ConnectionInitAuthInterceptor(jwtWebsocketAuthenticationService)
     }
 
     private fun jwtClaimValueValidator(claimName: String, expectedValue: String): JwtClaimValidator<Any?> {

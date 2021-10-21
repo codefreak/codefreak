@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -132,6 +133,10 @@ internal class SecurityConfigurationTest {
     assertThat(closeStatus.get().code, equalTo(4401))
   }
 
+  /**
+   * This is disabled because there is no extension point in the spring-graphql package, currently.
+   */
+  @Disabled
   @Test
   fun `that GraphQL WS connection ack works if jwt is provided in header`(
     @LocalServerPort localServerPort: Int,
