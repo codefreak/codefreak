@@ -188,7 +188,24 @@ springBoot {
 }
 
 test {
-  useJUnitPlatform()
+  useJUnitPlatform {
+    excludeTags "external-integration-test"
+  }
+  testLogging {
+    events "failed"
+    exceptionFormat "full"
+  }
+}
+
+/**
+ * Run tests that require external dependencies like a working
+ * database, Docker, etc.
+ */
+task externalIntegrationTest(type: Test) {
+  group "verification"
+  useJUnitPlatform {
+    includeTags "external-integration-test"
+  }
   testLogging {
     events "failed"
     exceptionFormat "full"
@@ -196,6 +213,7 @@ test {
 }
 
 task vagrantTest(type: Test) {
+  group "verification"
   systemProperty "codefreak.docker.host", "http://localhost:2375"
   testLogging {
     events "failed"
@@ -227,8 +245,8 @@ jib {
     environment = [
       // default active profile is "dev"
       SPRING_PROFILES_ACTIVE: "prod",
-      SENTRY_ENVIRONMENT: "prod",
-      SENTRY_RELEASE: project.version.toString()
+      SENTRY_ENVIRONMENT    : "prod",
+      SENTRY_RELEASE        : project.version.toString()
     ]
     volumes = [
       "/var/lib/codefreak"
