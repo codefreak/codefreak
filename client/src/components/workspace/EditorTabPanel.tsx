@@ -32,6 +32,10 @@ export class EditorWorkspaceTab extends WorkspaceTab {
   renderContent(): React.ReactNode {
     return <EditorTabPanel file={this.path} />
   }
+
+  toActiveTabQueryParam(): string {
+    return this.path
+  }
 }
 
 type EditorTabPanelProps = {
@@ -88,7 +92,7 @@ const EditorTabPanel = ({ file }: EditorTabPanelProps) => {
 
   if (file.length === 0) {
     messageService.error('No file path given')
-    return <EmptyTabPanel loading={loading} />
+    return <EmptyTabPanel />
   }
 
   return (

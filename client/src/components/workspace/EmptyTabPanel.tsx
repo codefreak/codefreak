@@ -1,6 +1,7 @@
-import TabPanel, { TabPanelProps } from './TabPanel'
+import TabPanel from './TabPanel'
 import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
 import React from 'react'
+import useWorkspace from '../../hooks/workspace/useWorkspace'
 
 export class EmptyWorkspaceTab extends WorkspaceTab {
   constructor() {
@@ -11,13 +12,15 @@ export class EmptyWorkspaceTab extends WorkspaceTab {
     return 'No files open'
   }
 
-  renderContent(loading: boolean): React.ReactNode {
-    return <EmptyTabPanel loading={loading} />
+  renderContent(): React.ReactNode {
+    return <EmptyTabPanel />
   }
 }
 
-const EmptyTabPanel = ({ loading }: TabPanelProps) => (
-  <TabPanel loading={loading} />
-)
+const EmptyTabPanel = () => {
+  const { isAvailable } = useWorkspace()
+
+  return <TabPanel loading={!isAvailable} />
+}
 
 export default EmptyTabPanel

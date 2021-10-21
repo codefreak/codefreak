@@ -10,14 +10,21 @@ import useWorkspace, {
   NO_AUTH_TOKEN,
   NO_BASE_URL
 } from '../../hooks/workspace/useWorkspace'
-import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
-import { EditorWorkspaceTab } from './EditorTabPanel'
+import {
+  indexOf,
+  removeEditorTab,
+  WorkspaceTab,
+  WorkspaceTabType
+} from '../../services/workspace-tabs'
 import { useMutableQueryParam } from '../../hooks/useQuery'
 import { InstructionsWorkspaceTab } from './InstructionsTabPanel'
 import { ShellWorkspaceTab } from './ShellTabPanel'
 import { EvaluationWorkspaceTab } from './EvaluationTabPanel'
 import { ConsoleWorkspaceTab } from './ConsoleTabPanel'
+import FileTree from './FileTree'
+import { EditorWorkspaceTab } from './EditorTabPanel'
 
+export const LEFT_TAB_QUERY_PARAM = 'leftTab'
 export const RIGHT_TAB_QUERY_PARAM = 'rightTab'
 
 const NO_ACTIVE_TAB = ''
@@ -28,14 +35,16 @@ export interface WorkspacePageProps {
 }
 
 const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
+  const [activeLeftTab, setActiveLeftTab] = useMutableQueryParam(
+    LEFT_TAB_QUERY_PARAM,
+    NO_ACTIVE_TAB
+  )
   const [activeRightTab, setActiveRightTab] = useMutableQueryParam(
     RIGHT_TAB_QUERY_PARAM,
-    ''
+    NO_ACTIVE_TAB
   )
 
-  const [leftTabs] = useState<WorkspaceTab[]>([
-    new EditorWorkspaceTab('main.py')
-  ])
+  const [leftTabs, setLeftTabs] = useState<WorkspaceTab[]>([])
 
   const { baseUrl, answerId } = useWorkspace()
 
@@ -75,15 +84,78 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
     }
   }, [data, baseUrl, onBaseUrlChange])
 
+  useEffect(() => {
+    const isNotEmpty =
+      activeLeftTab !== WorkspaceTabType.EMPTY &&
+      activeLeftTab !== NO_ACTIVE_TAB
+    const isNotOpen =
+      indexOf(leftTabs, new EditorWorkspaceTab(activeLeftTab)) === -1
+    if (isNotEmpty && isNotOpen) {
+      setLeftTabs(prevState => [
+        ...prevState,
+        new EditorWorkspaceTab(activeLeftTab)
+      ])
+    }
+  }, [leftTabs, activeLeftTab, setActiveLeftTab])
+
+  const handleLeftTabChange = (activeKey: string) => setActiveLeftTab(activeKey)
   const handleRightTabChange = (activeKey: string) =>
     setActiveRightTab(activeKey)
 
+  const handleOpenFile = (path: string) => {
+    setLeftTabs(prevState => {
+      const isTabOpen = indexOf(prevState, new EditorWorkspaceTab(path)) !== -1
+
+      if (!isTabOpen) {
+        return [...prevState, new EditorWorkspaceTab(path)]
+      }
+
+      return prevState
+    })
+
+    setActiveLeftTab(path)
+  }
+
+  const handleCloseLeftTab = (path: string) => {
+    setLeftTabs(prevState => {
+      const newState = removeEditorTab(path, prevState)
+
+      const closedTabIndex = indexOf(prevState, new EditorWorkspaceTab(path))
+
+      const hasClosedTab = closedTabIndex !== -1
+      const hasNewTabs = newState.length > 0
+      const shouldChangeActiveTab = activeLeftTab === path
+
+      if (hasClosedTab && hasNewTabs && shouldChangeActiveTab) {
+        const newActiveLeftTabIndex =
+          closedTabIndex !== 0 ? closedTabIndex - 1 : 0
+        const newActiveLeftWorkspaceTab = newState[newActiveLeftTabIndex]
+
+        setActiveLeftTab(newActiveLeftWorkspaceTab.toActiveTabQueryParam())
+      }
+
+      if (newState.length === 0) {
+        setActiveLeftTab(WorkspaceTabType.EMPTY)
+      }
+
+      return newState
+    })
+  }
+
   return (
     <Row gutter={4} className="workspace-page">
-      <Col span={12}>
-        <WorkspaceTabsWrapper tabs={leftTabs} />
+      <Col span={4}>
+        <FileTree onOpenFile={handleOpenFile} />
       </Col>
-      <Col span={12}>
+      <Col span={10}>
+        <WorkspaceTabsWrapper
+          tabs={leftTabs}
+          activeTab={activeLeftTab}
+          onTabChange={handleLeftTabChange}
+          onTabClose={handleCloseLeftTab}
+        />
+      </Col>
+      <Col span={10}>
         <WorkspaceTabsWrapper
           tabs={rightTabs}
           activeTab={activeRightTab}
