@@ -1,8 +1,9 @@
 package org.codefreak.cloud.companion.web
 
 import java.net.URI
-import java.time.Duration
 import java.util.concurrent.atomic.AtomicReference
+import org.awaitility.Awaitility.await
+import org.awaitility.Durations
 import org.codefreak.cloud.companion.ProcessManager
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers.containsString
@@ -32,21 +33,20 @@ internal class ProcessWebsocketHandlerTest {
     val receivedOutput = StringBuilder()
 
     val closeStatus = AtomicReference<CloseStatus>()
-    ReactorNettyWebSocketClient().execute(URI("ws://localhost:$localServerPort/process/$testProcessId")) { session ->
-      session.send(Flux.just(session.textMessage("echo hello \$TERM\n")))
-        // concat incoming messages into a string for three seconds
-        .thenMany(
-          session.receive()
-            .take(Duration.ofSeconds(3))
-            .map { receivedOutput.append(it.payloadAsText) }
-        )
-        // close the session and store the close status
-        .then(session.closeMono().map { closeStatus.set(it) })
-        // make it Mono<Void>
-        .then()
-    }.block()
-
-    MatcherAssert.assertThat(receivedOutput.toString(), containsString("hello term"))
+    val subscription =
+      ReactorNettyWebSocketClient().execute(URI("ws://localhost:$localServerPort/process/$testProcessId")) { session ->
+        session.send(Flux.just("echo hello \$TERM\n", "exit\n").map(session::textMessage))
+          .then(session.receive().doOnEach { receivedOutput.append(it.get()?.payloadAsText) }.then())
+          .then(session.closeMono().map { closeStatus.set(it) })
+          .then()
+      }.subscribe()
+    try {
+      await().atMost(Durations.TEN_SECONDS).untilAsserted {
+        MatcherAssert.assertThat(receivedOutput.toString(), containsString("hello term"))
+      }
+    } finally {
+      subscription.dispose()
+    }
   }
 
   /**

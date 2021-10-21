@@ -57,6 +57,7 @@ dependencies {
   testImplementation("org.springframework.graphql:spring-graphql-test:1.0.0-SNAPSHOT")
   testImplementation("junit:junit:4.13.2")
   testImplementation("io.projectreactor:reactor-test")
+  testImplementation("org.awaitility:awaitility")
 }
 
 tasks.compileKotlin {
