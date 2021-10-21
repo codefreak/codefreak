@@ -6,16 +6,15 @@ import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.graphql.BaseResolver
 import org.codefreak.codefreak.service.AnswerService
-import org.codefreak.codefreak.service.workspace.RemoteWorkspaceReference
 import org.codefreak.codefreak.service.workspace.WorkspaceIdeService
 import org.springframework.security.access.annotation.Secured
 import org.springframework.stereotype.Component
 
 @GraphQLName("Workspace")
 class WorkspaceDto(val baseUrl: String, val authToken: String?) {
-  constructor(reference: RemoteWorkspaceReference) : this(
-    baseUrl = reference.baseUrl,
-    authToken = null
+  constructor(authedReference: WorkspaceIdeService.AuthenticatedWorkspaceReference) : this(
+    baseUrl = authedReference.remoteReference.baseUrl,
+    authToken = authedReference.authToken
   )
 }
 
@@ -25,7 +24,8 @@ class WorkspaceMutation : BaseResolver(), Mutation {
   @Secured(Authority.ROLE_STUDENT)
   fun startWorkspace(fileContext: FileContext): WorkspaceDto = context {
     val answer = resolveFileContext(fileContext)
-    val workspaceReference = serviceAccess.getService(WorkspaceIdeService::class).createAnswerIde(answer)
+    val workspaceReference = serviceAccess.getService(WorkspaceIdeService::class)
+      .createAnswerIdeForUser(answer, this.authorization.currentUser)
     WorkspaceDto(workspaceReference)
   }
 

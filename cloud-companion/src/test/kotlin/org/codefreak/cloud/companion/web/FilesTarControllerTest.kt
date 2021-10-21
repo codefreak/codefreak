@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils
 import org.codefreak.cloud.companion.CompanionConfig
 import org.codefreak.cloud.companion.FileService
 import org.codefreak.cloud.companion.PosixTarArchiveOutputStream
+import org.codefreak.cloud.companion.security.SecurityConfiguration
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
@@ -32,7 +33,7 @@ import org.springframework.web.reactive.function.BodyInserters
 
 @ExtendWith(SpringExtension::class)
 @WebFluxTest(controllers = [FilesTarController::class])
-@Import(FileService::class, CompanionConfig::class)
+@Import(FileService::class, CompanionConfig::class, SecurityConfiguration::class)
 @ActiveProfiles("test")
 internal class FilesTarControllerTest {
   @Autowired

@@ -30,9 +30,6 @@ class WorkspaceLifecycleManagerTest : WorkspaceBaseTest() {
   private lateinit var clock: Clock
 
   @Autowired
-  private lateinit var workspaceService: WorkspaceService
-
-  @Autowired
   private lateinit var clientService: WorkspaceClientService
 
   private lateinit var lifecycleManager: WorkspaceLifecycleManager
