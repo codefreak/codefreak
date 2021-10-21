@@ -1,9 +1,11 @@
-import { mockFetch, render, wrap } from '../../services/testing'
+import {
+  mockFetch,
+  render,
+  waitUntilWorkspaceIsAvailable
+} from '../../services/testing'
 import EditorTabPanel from './EditorTabPanel'
 import { QueryClient } from 'react-query'
-import { renderHook } from '@testing-library/react-hooks'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
-import React from 'react'
+import { NO_ANSWER_ID, NO_AUTH_TOKEN } from '../../hooks/workspace/useWorkspace'
 
 describe('<EditorTabPanel />', () => {
   const mockFileContents = 'Hello world!'
@@ -15,15 +17,15 @@ describe('<EditorTabPanel />', () => {
   it('renders a <TabPanel />', async () => {
     const queryClient = new QueryClient()
     const baseUrl = 'https://codefreak.test'
-    const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
-      wrap(<>{children}</>, {
-        queryClient,
-        workspaceContext: { baseUrl, answerId: '' },
-        withWorkspaceContext: true
-      })
+    const authToken = NO_AUTH_TOKEN
+    const answerId = NO_ANSWER_ID
 
-    const { waitFor, result } = renderHook(() => useWorkspace(), { wrapper })
-    await waitFor(() => result.current.isAvailable)
+    await waitUntilWorkspaceIsAvailable({
+      queryClient,
+      baseUrl,
+      authToken,
+      answerId
+    })
 
     const { container } = render(
       <EditorTabPanel file="file" />,

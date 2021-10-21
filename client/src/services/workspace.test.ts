@@ -1,9 +1,10 @@
 import {
   extractRelativeFilePath,
+  fetchWithAuthentication,
   readFilePath,
-  withTrailingSlash,
-  writeFilePath
+  uploadFilePath
 } from './workspace'
+import { mockFetch } from './testing'
 
 test('extractRelativeFilePath', () => {
   new Map([
@@ -23,23 +24,12 @@ test('extractRelativeFilePath', () => {
   })
 })
 
-test('writeFilePath', () => {
+test('uploadFilePath', () => {
   new Map([
-    ['https://codefreak.test/', 'https://codefreak.test/files'],
-    ['https://codefreak.test', 'https://codefreak.test/files']
+    ['https://codefreak.test/', 'https://codefreak.test/upload'],
+    ['https://codefreak.test', 'https://codefreak.test/upload']
   ]).forEach((expected, input) => {
-    expect(writeFilePath(input)).toBe(expected)
-  })
-})
-
-test('withTrailingSlash', () => {
-  new Map([
-    ['https://codefreak.test/', 'https://codefreak.test/'],
-    ['https://codefreak.test', 'https://codefreak.test/'],
-    ['', '/'],
-    ['/', '/']
-  ]).forEach((expected, input) => {
-    expect(withTrailingSlash(input)).toBe(expected)
+    expect(uploadFilePath(input)).toBe(expected)
   })
 })
 
@@ -54,4 +44,24 @@ test('readFilePath', () => {
   ]).forEach((expected, input) => {
     expect(readFilePath('https://codefreak.test', input)).toBe(expected)
   })
+})
+
+test('fetchWithAuthentication', async () => {
+  const authToken = 'auth'
+
+  let fetchAuthToken = ''
+
+  mockFetch(null, undefined, (_, init) => {
+    if (
+      init !== undefined &&
+      init.headers !== undefined &&
+      'Authorization' in init.headers
+    ) {
+      fetchAuthToken = init.headers.Authorization
+    }
+  })
+
+  await fetchWithAuthentication('https://codefreak.test/', { authToken })
+
+  expect(fetchAuthToken).toContain(authToken)
 })

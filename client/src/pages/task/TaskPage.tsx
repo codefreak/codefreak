@@ -53,8 +53,11 @@ import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
-import { withTrailingSlash } from '../../services/workspace'
+import { withTrailingSlash } from '../../services/strings'
 import {
+  NO_ANSWER_ID,
+  NO_AUTH_TOKEN,
+  NO_BASE_URL,
   WorkspaceContext,
   WorkspaceContextType
 } from '../../hooks/workspace/useWorkspace'
@@ -77,7 +80,8 @@ const TaskPage: React.FC = () => {
   const history = useHistory()
   const createRoutes = useCreateRoutes()
 
-  const [baseUrl, setBaseUrl] = useState('')
+  const [baseUrl, setBaseUrl] = useState(NO_BASE_URL)
+  const [authToken, setAuthToken] = useState(NO_AUTH_TOKEN)
 
   const result = useGetTaskQuery({
     variables: {
@@ -287,13 +291,15 @@ const TaskPage: React.FC = () => {
     history.push(previousPath)
   }
 
-  const handleBaseUrlChange = (newBaseUrl: string) => {
+  const handleBaseUrlChange = (newBaseUrl: string, newAuthToken: string) => {
     setBaseUrl(withTrailingSlash(newBaseUrl))
+    setAuthToken(newAuthToken)
   }
 
   const workspaceContext: WorkspaceContextType = {
     baseUrl,
-    answerId: answer?.id ?? ''
+    authToken,
+    answerId: answer?.id ?? NO_ANSWER_ID
   }
 
   return (

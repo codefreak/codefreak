@@ -4,6 +4,7 @@ import React from 'react'
 import { QueryClient, setLogger } from 'react-query'
 import useGetWorkspaceFileQuery from './useGetWorkspaceFileQuery'
 import { mockFetch, waitForTime, wrap } from '../../services/testing'
+import { NO_ANSWER_ID, NO_AUTH_TOKEN, NO_BASE_URL } from './useWorkspace'
 
 describe('useGetWorkspaceFileQuery()', () => {
   const mockFileContents = 'Hello world!'
@@ -15,11 +16,13 @@ describe('useGetWorkspaceFileQuery()', () => {
 
   it('gets file-contents from the correct endpoint', async () => {
     const baseUrl = 'https://codefreak.test/'
+    const authToken = NO_AUTH_TOKEN
+    const answerId = NO_ANSWER_ID
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, answerId: '' },
-        withWorkspaceContext: true
+        workspaceContext: { baseUrl, authToken, answerId },
+        withWorkspaceContextProvider: true
       })
 
     const { result, waitFor } = renderHook(
@@ -40,12 +43,14 @@ describe('useGetWorkspaceFileQuery()', () => {
   })
 
   it('does nothing when no base-url is set', async () => {
-    const baseUrl = ''
+    const baseUrl = NO_BASE_URL
+    const authToken = NO_AUTH_TOKEN
+    const answerId = NO_ANSWER_ID
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, answerId: '' },
-        withWorkspaceContext: true
+        workspaceContext: { baseUrl, authToken, answerId },
+        withWorkspaceContextProvider: true
       })
 
     const { result } = renderHook(() => useGetWorkspaceFileQuery('file.txt'), {
@@ -60,6 +65,8 @@ describe('useGetWorkspaceFileQuery()', () => {
 
   it('has an error if the file does not exist', async () => {
     const baseUrl = 'https://codefreak.test'
+    const authToken = NO_AUTH_TOKEN
+    const answerId = NO_ANSWER_ID
 
     mockGetFile = mockFetch(null, { status: 404 })
 
@@ -68,9 +75,9 @@ describe('useGetWorkspaceFileQuery()', () => {
     })
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, answerId: '' },
+        workspaceContext: { baseUrl, authToken, answerId },
         queryClient,
-        withWorkspaceContext: true
+        withWorkspaceContextProvider: true
       })
 
     setLogger({

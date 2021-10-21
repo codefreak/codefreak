@@ -1,10 +1,13 @@
-import { mockFetch, render, waitForTime, wrap } from '../../services/testing'
+import {
+  mockFetch,
+  render,
+  waitForTime,
+  waitUntilWorkspaceIsAvailable
+} from '../../services/testing'
 import WorkspaceTabsWrapper from './WorkspaceTabsWrapper'
 import { WorkspaceTab } from '../../services/workspace-tabs'
 import { QueryClient } from 'react-query'
-import React from 'react'
-import { renderHook } from '@testing-library/react-hooks'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
+import { NO_ANSWER_ID, NO_AUTH_TOKEN } from '../../hooks/workspace/useWorkspace'
 import { EditorWorkspaceTab } from './EditorTabPanel'
 
 describe('<WorkspaceTabsWrapper />', () => {
@@ -21,15 +24,15 @@ describe('<WorkspaceTabsWrapper />', () => {
   it('renders given tabs', async () => {
     const queryClient = new QueryClient()
     const baseUrl = 'https://codefreak.test'
-    const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
-      wrap(<>{children}</>, {
-        queryClient,
-        workspaceContext: { baseUrl, answerId: '' },
-        withWorkspaceContext: true
-      })
+    const authToken = NO_AUTH_TOKEN
+    const answerId = NO_ANSWER_ID
 
-    const { waitFor, result } = renderHook(() => useWorkspace(), { wrapper })
-    await waitFor(() => result.current.isAvailable)
+    await waitUntilWorkspaceIsAvailable({
+      queryClient,
+      baseUrl,
+      authToken,
+      answerId
+    })
 
     const tabs: WorkspaceTab[] = [new EditorWorkspaceTab('foo.txt')]
 
@@ -37,9 +40,9 @@ describe('<WorkspaceTabsWrapper />', () => {
       <WorkspaceTabsWrapper tabs={tabs} />,
       {},
       {
-        withWorkspaceContext: true,
+        withWorkspaceContextProvider: true,
         queryClient,
-        workspaceContext: { baseUrl, answerId: '' }
+        workspaceContext: { baseUrl, authToken, answerId }
       }
     )
 

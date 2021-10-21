@@ -6,6 +6,7 @@ import {
 } from '../../services/codefreak-api'
 import { noop } from '../../services/util'
 import { MockedResponse } from '@apollo/client/testing'
+import { NO_AUTH_TOKEN } from '../../hooks/workspace/useWorkspace'
 
 const startWorkspaceMock: (
   onResult: () => void,
@@ -38,6 +39,7 @@ const startWorkspaceMock: (
 })
 
 const answerId = 'foo'
+const authToken = NO_AUTH_TOKEN
 const baseUrl = 'https://codefreak.test'
 
 describe('<WorkspacePage />', () => {
@@ -48,14 +50,18 @@ describe('<WorkspacePage />', () => {
   it('renders a <WorkspaceTabsWrapper />', () => {
     mockFetch()
 
-    const workspaceContext = { baseUrl, answerId }
+    const workspaceContext = { baseUrl, authToken, answerId }
 
     const mocks = [startWorkspaceMock(noop, baseUrl, answerId)]
 
     const { container } = render(
       <WorkspacePage onBaseUrlChange={noop} type={FileContextType.Answer} />,
       {},
-      { workspaceContext, graphqlMocks: mocks, withWorkspaceContext: true }
+      {
+        workspaceContext,
+        graphqlMocks: mocks,
+        withWorkspaceContextProvider: true
+      }
     )
 
     expect(
@@ -69,6 +75,7 @@ describe('<WorkspacePage />', () => {
 
     const workspaceContext = {
       baseUrl: baseUrlFromProvider,
+      authToken,
       answerId
     }
 
@@ -86,7 +93,11 @@ describe('<WorkspacePage />', () => {
         type={FileContextType.Answer}
       />,
       {},
-      { workspaceContext, graphqlMocks: mocks, withWorkspaceContext: true }
+      {
+        workspaceContext,
+        graphqlMocks: mocks,
+        withWorkspaceContextProvider: true
+      }
     )
 
     await waitForTime()

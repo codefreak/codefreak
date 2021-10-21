@@ -41,8 +41,35 @@ export const capitalize = (s: string) => {
 /**
  * Remove one or more trailing slashes from a string
  *
- * @param str
+ * @param str the string to remove trailing slashes from
  */
 export const trimTrailingSlashes = (str: string): string => {
   return str.replace(/\/+$/, '')
+}
+
+/**
+ * Add a trailing slash to a string if it has none
+ *
+ * @param str the string to add a trailing slash to
+ */
+export const withTrailingSlash = (str: string): string => {
+  return str.endsWith('/') ? str : `${str}/`
+}
+
+/**
+ * Add a leading slash to a string if it has none
+ *
+ * @param str the string to add a leading slash to
+ */
+export const withLeadingSlash = (str: string): string => {
+  return str.startsWith('/') ? str : `/${str}`
+}
+
+/**
+ * Remove one or more leading slashes from a string
+ *
+ * @param str the string to remove leading slashes from
+ */
+export const trimLeadingSlashes = (str: string): string => {
+  return str.replace(/^\/+/, '')
 }

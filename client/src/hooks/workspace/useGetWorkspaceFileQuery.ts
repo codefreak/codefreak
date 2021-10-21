@@ -1,14 +1,17 @@
-import useWorkspace from './useWorkspace'
+import useWorkspace, { NO_BASE_URL } from './useWorkspace'
 import { useQuery } from 'react-query'
-import { readFilePath } from '../../services/workspace'
+import { fetchWithAuthentication, readFilePath } from '../../services/workspace'
 
 const useGetWorkspaceFileQuery = (path: string) => {
-  const { baseUrl } = useWorkspace()
+  const { baseUrl, authToken } = useWorkspace()
   const fullPath = readFilePath(baseUrl, path)
   return useQuery(
     ['get-workspace-file', fullPath],
     async () => {
-      const response = await fetch(fullPath, { method: 'GET' })
+      const response = await fetchWithAuthentication(fullPath, {
+        method: 'GET',
+        authToken
+      })
 
       if (!response.ok) {
         throw new Error('File does not exist')
@@ -16,7 +19,7 @@ const useGetWorkspaceFileQuery = (path: string) => {
 
       return response.text()
     },
-    { enabled: baseUrl.length > 0 }
+    { enabled: baseUrl !== NO_BASE_URL }
   )
 }
 

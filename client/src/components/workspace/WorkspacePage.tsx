@@ -6,13 +6,16 @@ import './WorkspacePage.less'
 import WorkspaceTabsWrapper from './WorkspaceTabsWrapper'
 import { useEffect, useState } from 'react'
 import { Col, Row } from 'antd'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
+import useWorkspace, {
+  NO_AUTH_TOKEN,
+  NO_BASE_URL
+} from '../../hooks/workspace/useWorkspace'
 import { WorkspaceTab } from '../../services/workspace-tabs'
 import { EditorWorkspaceTab } from './EditorTabPanel'
 
 export interface WorkspacePageProps {
   type: FileContextType
-  onBaseUrlChange: (newBaseUrl: string) => void
+  onBaseUrlChange: (newBaseUrl: string, newAuthToken: string) => void
 }
 
 const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
@@ -38,8 +41,11 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
   })
 
   useEffect(() => {
-    if (data && baseUrl.length === 0) {
-      onBaseUrlChange(data.startWorkspace.baseUrl)
+    if (data && baseUrl === NO_BASE_URL) {
+      onBaseUrlChange(
+        data.startWorkspace.baseUrl,
+        data.startWorkspace.authToken ?? NO_AUTH_TOKEN
+      )
     }
   }, [data, baseUrl, onBaseUrlChange])
 
