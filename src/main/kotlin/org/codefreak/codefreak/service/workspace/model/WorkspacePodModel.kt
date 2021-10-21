@@ -47,11 +47,11 @@ class WorkspacePodModel(
         resources {
           requests = mapOf(
             "cpu" to Quantity.parse("1"),
-            "memory" to Quantity.parse("128Mi")
+            "memory" to Quantity.parse("768Mi")
           )
           limits = mapOf(
             "cpu" to Quantity.parse("1"),
-            "memory" to Quantity.parse("512Mi")
+            "memory" to Quantity.parse("768Mi")
           )
         }
 

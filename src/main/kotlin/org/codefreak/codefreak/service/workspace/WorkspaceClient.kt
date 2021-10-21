@@ -61,7 +61,10 @@ class WorkspaceClient(
   val apolloClient = ApolloClient(
     networkTransport = WebSocketNetworkTransport(
       serverUrl = buildWorkspaceUri(path = "/graphql"),
-      protocol = GraphQLWsProtocol(),
+      protocol = GraphQLWsProtocol(
+        // this can be omitted once spring-graphql supports evaluating the HTTP session during ConnectionInit
+        connectionPayload = if (authToken != null) mapOf("jwt" to authToken) else null
+      ),
       webSocketEngine = DefaultWebSocketEngine(
         webSocketFactory = requestFactory
       )
