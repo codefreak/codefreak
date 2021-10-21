@@ -14,6 +14,18 @@ import reactor.core.publisher.Mono
 class JwtWebsocketAuthenticationService(private val jwtDecoder: ReactiveJwtDecoder) {
   class JwtAuthenticationException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 
+  /**
+   * Authenticate only via the given key-value pairs. The payload must contain a "jwt" key.
+   */
+  fun authenticateByPayload(payload: Map<String, Any>?): Mono<Map<String, Any>> {
+    return performPayloadAuth(payload)
+      .switchIfEmpty(Mono.error(JwtAuthenticationException("Payload does not contain a jwt auth token")))
+  }
+
+  /**
+   * Authenticate either via principal from websocket session or via "jwt" from payload.
+   * The payload must contain a "jwt" key.
+   */
   fun authenticateWebsocketSession(session: WebSocketSession, payload: Map<String, Any>?): Mono<Map<String, Any>> {
     return getClaimsFromSession(session)
       .switchIfEmpty(performPayloadAuth(payload))
