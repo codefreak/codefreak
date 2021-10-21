@@ -1,6 +1,9 @@
 import {
   extractRelativeFilePath,
   fetchWithAuthentication,
+  graphqlWebSocketPath,
+  httpToWs,
+  processWebSocketPath,
   readFilePath,
   uploadFilePath
 } from './workspace'
@@ -43,6 +46,57 @@ test('readFilePath', () => {
     ['/', 'https://codefreak.test/files/']
   ]).forEach((expected, input) => {
     expect(readFilePath('https://codefreak.test', input)).toBe(expected)
+  })
+})
+
+test('httpToWs', () => {
+  new Map([
+    ['http://codefreak.test', 'ws://codefreak.test'],
+    ['https://codefreak.test', 'wss://codefreak.test'],
+    ['', null],
+    ['file:///home/codefreak/foo.txt', null]
+  ]).forEach((expected, input) => {
+    if (expected === null) {
+      expect(() => httpToWs(input)).toThrow()
+    } else {
+      expect(httpToWs(input)).toBe(expected)
+    }
+  })
+})
+
+test('graphqlWebSocketPath', () => {
+  new Map([
+    ['http://codefreak.test', 'ws://codefreak.test/graphql'],
+    ['https://codefreak.test', 'wss://codefreak.test/graphql'],
+    ['', null],
+    ['foo', null]
+  ]).forEach((expected, input) => {
+    if (expected === null) {
+      // TODO custom error types
+      expect(() => graphqlWebSocketPath(input)).toThrow()
+    } else {
+      expect(graphqlWebSocketPath(input)).toBe(expected)
+    }
+  })
+})
+
+test('processWebSocketPath', () => {
+  new Map([
+    [
+      '00000000-0000-0000-0000-000000000000',
+      'wss://codefreak.test/process/00000000-0000-0000-0000-000000000000'
+    ],
+    ['', null]
+  ]).forEach((expected, input) => {
+    if (expected === null) {
+      expect(() =>
+        processWebSocketPath('https://codefreak.test', input)
+      ).toThrow()
+    } else {
+      expect(processWebSocketPath('https://codefreak.test', input)).toBe(
+        expected
+      )
+    }
   })
 })
 

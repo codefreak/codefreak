@@ -12,6 +12,7 @@ import useWorkspace, {
   NO_ANSWER_ID,
   NO_AUTH_TOKEN,
   NO_BASE_URL,
+  NO_TASK_ID,
   WorkspaceContext,
   WorkspaceContextType
 } from '../hooks/workspace/useWorkspace'
@@ -49,7 +50,8 @@ export const wrap = (
     workspaceContext = {
       baseUrl: NO_BASE_URL,
       authToken: NO_AUTH_TOKEN,
-      answerId: NO_ANSWER_ID
+      answerId: NO_ANSWER_ID,
+      taskId: NO_TASK_ID
     },
     withRouter = true,
     withMockedProvider = true,
@@ -151,6 +153,7 @@ type WaitUntilWorkspaceIsAvailableProps = {
   baseUrl?: string
   authToken?: string
   answerId?: string
+  taskId?: string
 }
 
 /**
@@ -160,17 +163,19 @@ type WaitUntilWorkspaceIsAvailableProps = {
  * @param baseUrl an optional base-url to use for the workspace-context
  * @param authToken an optional auth-token to use for the workspace-context
  * @param answerId an optional answer-id to use for the workspace-context
+ * @param taskId an optional task-id to use for the workspace-context
  */
 export const waitUntilWorkspaceIsAvailable = ({
   queryClient = new QueryClient(),
   baseUrl = NO_BASE_URL,
   authToken = NO_AUTH_TOKEN,
-  answerId = NO_ANSWER_ID
+  answerId = NO_ANSWER_ID,
+  taskId = NO_TASK_ID
 }: WaitUntilWorkspaceIsAvailableProps) => {
   const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
     wrap(<>{children}</>, {
       queryClient,
-      workspaceContext: { baseUrl, authToken, answerId },
+      workspaceContext: { baseUrl, authToken, answerId, taskId },
       withWorkspaceContextProvider: true
     })
 

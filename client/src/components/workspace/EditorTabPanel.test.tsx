@@ -5,7 +5,11 @@ import {
 } from '../../services/testing'
 import EditorTabPanel from './EditorTabPanel'
 import { QueryClient } from 'react-query'
-import { NO_ANSWER_ID, NO_AUTH_TOKEN } from '../../hooks/workspace/useWorkspace'
+import {
+  NO_ANSWER_ID,
+  NO_AUTH_TOKEN,
+  NO_TASK_ID
+} from '../../hooks/workspace/useWorkspace'
 
 describe('<EditorTabPanel />', () => {
   const mockFileContents = 'Hello world!'
@@ -19,12 +23,14 @@ describe('<EditorTabPanel />', () => {
     const baseUrl = 'https://codefreak.test'
     const authToken = NO_AUTH_TOKEN
     const answerId = NO_ANSWER_ID
+    const taskId = NO_TASK_ID
 
     await waitUntilWorkspaceIsAvailable({
       queryClient,
       baseUrl,
       authToken,
-      answerId
+      answerId,
+      taskId
     })
 
     const { container } = render(

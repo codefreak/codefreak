@@ -9,7 +9,7 @@ const renderTab = (loading: boolean) => (tab: WorkspaceTab) => {
   const title = tab.renderTitle()
   const content = tab.renderContent(loading)
 
-  const key = tab.path ?? tab.type
+  const key = tab.path.length > 0 ? tab.path : tab.type
   const isEditorTab = tab.type === WorkspaceTabType.EDITOR
 
   return (

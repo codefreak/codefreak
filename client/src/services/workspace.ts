@@ -17,6 +17,16 @@ export const UPLOAD_API_ROUTE = 'upload'
 export const UPLOAD_FILE_FORM_KEY = 'files'
 
 /**
+ * The api-route to be appended to the base-rul when accessing the graphql-api in workspaces
+ */
+const GRAPHQL_API_ROUTE = 'graphql'
+
+/**
+ * The api-route to be appended to the base-url when accessing processes
+ */
+const PROCESS_API_ROUTE = 'process'
+
+/**
  * Extracts the relative file path from a url to read files from
  *
  * Throws an error if the path is not a valid url to read files from
@@ -61,6 +71,50 @@ export const readFilePath = (baseUrl: string, filePath: string) => {
   return (
     withTrailingSlash(baseUrl) + FILES_API_ROUTE + withLeadingSlash(filePath)
   )
+}
+
+/**
+ * Replaces a `http` or `https` protocol with `ws` or `wss` respectively
+ *
+ * Throws an error when the given url does not contain `http`
+ *
+ * @param url the url to convert
+ */
+export const httpToWs = (url: string) => {
+  if (!url.includes('http')) {
+    throw new Error(
+      'The url could not be converted because it does not contain http'
+    )
+  }
+
+  return url.replace('http', 'ws')
+}
+
+/**
+ * Returns an url for accessing the graphql-api in a workspace built on the given base-url
+ *
+ * @param baseUrl the base-url for the workspace
+ */
+export const graphqlWebSocketPath = (baseUrl: string) => {
+  const url = withTrailingSlash(baseUrl) + GRAPHQL_API_ROUTE
+  return httpToWs(url)
+}
+
+/**
+ * Returns an url for accessing a process in a workspace built on the given base-url
+ *
+ * @param baseUrl the base-url for the workspace
+ * @param processId the id of the process to access
+ */
+export const processWebSocketPath = (baseUrl: string, processId: string) => {
+  if (processId.length === 0) {
+    throw new Error('No valid process-id was given')
+  }
+
+  const url =
+    withTrailingSlash(baseUrl) + PROCESS_API_ROUTE + withLeadingSlash(processId)
+
+  return httpToWs(url)
 }
 
 export interface RequestInitWithAuthentication extends RequestInit {

@@ -10,8 +10,16 @@ import useWorkspace, {
   NO_AUTH_TOKEN,
   NO_BASE_URL
 } from '../../hooks/workspace/useWorkspace'
-import { WorkspaceTab } from '../../services/workspace-tabs'
+import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
 import { EditorWorkspaceTab } from './EditorTabPanel'
+import { useMutableQueryParam } from '../../hooks/useQuery'
+import { InstructionsWorkspaceTab } from './InstructionsTabPanel'
+import { ShellWorkspaceTab } from './ShellTabPanel'
+import { EvaluationWorkspaceTab } from './EvaluationTabPanel'
+
+export const RIGHT_TAB_QUERY_PARAM = 'rightTab'
+
+const NO_ACTIVE_TAB = ''
 
 export interface WorkspacePageProps {
   type: FileContextType
@@ -19,11 +27,23 @@ export interface WorkspacePageProps {
 }
 
 const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
+  const [activeRightTab, setActiveRightTab] = useMutableQueryParam(
+    RIGHT_TAB_QUERY_PARAM,
+    ''
+  )
+
   const [leftTabs] = useState<WorkspaceTab[]>([
     new EditorWorkspaceTab('main.py')
   ])
 
   const { baseUrl, answerId } = useWorkspace()
+
+  // These are not changeable for now
+  const rightTabs = [
+    new InstructionsWorkspaceTab(),
+    new ShellWorkspaceTab(),
+    new EvaluationWorkspaceTab(answerId)
+  ]
 
   const [startWorkspace, { data, called }] = useStartWorkspaceMutation({
     variables: {
@@ -38,6 +58,10 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
     if (!data && !called) {
       startWorkspace()
     }
+
+    if (activeRightTab === NO_ACTIVE_TAB) {
+      setActiveRightTab(WorkspaceTabType.INSTRUCTIONS)
+    }
   })
 
   useEffect(() => {
@@ -49,10 +73,20 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
     }
   }, [data, baseUrl, onBaseUrlChange])
 
+  const handleRightTabChange = (activeKey: string) =>
+    setActiveRightTab(activeKey)
+
   return (
     <Row gutter={4} className="workspace-page">
-      <Col span={24}>
+      <Col span={12}>
         <WorkspaceTabsWrapper tabs={leftTabs} />
+      </Col>
+      <Col span={12}>
+        <WorkspaceTabsWrapper
+          tabs={rightTabs}
+          activeTab={activeRightTab}
+          onTabChange={handleRightTabChange}
+        />
       </Col>
     </Row>
   )

@@ -6,7 +6,7 @@ import {
 } from '../../services/codefreak-api'
 import { noop } from '../../services/util'
 import { MockedResponse } from '@apollo/client/testing'
-import { NO_AUTH_TOKEN } from '../../hooks/workspace/useWorkspace'
+import { NO_AUTH_TOKEN, NO_TASK_ID } from '../../hooks/workspace/useWorkspace'
 
 const startWorkspaceMock: (
   onResult: () => void,
@@ -38,19 +38,20 @@ const startWorkspaceMock: (
   }
 })
 
-const answerId = 'foo'
-const authToken = NO_AUTH_TOKEN
 const baseUrl = 'https://codefreak.test'
+const authToken = NO_AUTH_TOKEN
+const answerId = 'foo'
+const taskId = NO_TASK_ID
 
 describe('<WorkspacePage />', () => {
   beforeEach(() => {
     mockFetch()
   })
 
-  it('renders a <WorkspaceTabsWrapper />', () => {
+  it('renders two <WorkspaceTabsWrapper /> areas', () => {
     mockFetch()
 
-    const workspaceContext = { baseUrl, authToken, answerId }
+    const workspaceContext = { baseUrl, authToken, answerId, taskId }
 
     const mocks = [startWorkspaceMock(noop, baseUrl, answerId)]
 
@@ -66,7 +67,7 @@ describe('<WorkspacePage />', () => {
 
     expect(
       container.getElementsByClassName('workspace-tabs-wrapper')
-    ).toHaveLength(1)
+    ).toHaveLength(2)
   })
 
   it('starts a workspace and the correct baseUrl is set', async () => {
@@ -76,7 +77,8 @@ describe('<WorkspacePage />', () => {
     const workspaceContext = {
       baseUrl: baseUrlFromProvider,
       authToken,
-      answerId
+      answerId,
+      taskId
     }
 
     const mocks = [
