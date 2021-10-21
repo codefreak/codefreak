@@ -14,6 +14,7 @@ import org.springframework.graphql.web.WebSocketInterceptor
 import org.springframework.http.HttpMethod.GET
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.config.web.server.ServerHttpSecurityDsl
 import org.springframework.security.config.web.server.invoke
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
@@ -30,6 +31,9 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.util.matcher.AndServerWebExchangeMatcher
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatcher
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.reactive.CorsConfigurationSource
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 
 /**
  * Security is enabled when either a JWK url is set or a static public key is provided via one of the
@@ -44,15 +48,29 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 class SecurityConfiguration {
   private val log = logger()
 
+  companion object {
+    /**
+     * HTTP Security options that will be applied regardless if JWT auth
+     * is enabled or not.
+     */
+    private fun ServerHttpSecurityDsl.applyCommonHttpSecurity(corsConfigurationSource: CorsConfigurationSource) {
+      cors { configurationSource = corsConfigurationSource }
+      httpBasic { disable() }
+      formLogin { disable() }
+      logout { disable() }
+      csrf { disable() }
+    }
+  }
+
   @Conditional(JwtAuthEnabled::class)
   class JwtSecurityConfig {
     @Bean
-    fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+    fun springSecurityFilterChain(
+      http: ServerHttpSecurity,
+      corsConfigurationSource: CorsConfigurationSource
+    ): SecurityWebFilterChain {
       return http {
-        httpBasic { disable() }
-        formLogin { disable() }
-        logout { disable() }
-        csrf { disable() }
+        applyCommonHttpSecurity(corsConfigurationSource)
         authorizeExchange {
           authorize("/actuator/**", permitAll)
           // GQL has its own authentication when upgrading to a websocket connection via GET /graphql.
@@ -153,12 +171,29 @@ class SecurityConfiguration {
   }
 
   /**
+   * By default, allow requests from all Origins for the standard methods HEAD, GET and POST.
+   */
+  @Bean
+  fun corsConfigurationSource(): CorsConfigurationSource {
+    val corsConfig = CorsConfiguration().apply {
+      // Allows HEAD, POST, GET from all Origins
+      applyPermitDefaultValues()
+    }
+    return UrlBasedCorsConfigurationSource().apply {
+      registerCorsConfiguration("/**", corsConfig)
+    }
+  }
+
+  /**
    * Default web security that allows all requests without auth.
    * This should never be used in production but allows easier testing.
    */
   @Bean
   @ConditionalOnMissingBean(SecurityWebFilterChain::class)
-  fun defaultSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+  fun defaultSecurityFilterChain(
+    http: ServerHttpSecurity,
+    corsConfigurationSource: CorsConfigurationSource
+  ): SecurityWebFilterChain {
     log.warn(
       """
 
@@ -171,10 +206,7 @@ class SecurityConfiguration {
     """.trimIndent()
     )
     return http {
-      httpBasic { disable() }
-      formLogin { disable() }
-      logout { disable() }
-      csrf { disable() }
+      applyCommonHttpSecurity(corsConfigurationSource)
       authorizeExchange {
         authorize(anyExchange, permitAll)
       }

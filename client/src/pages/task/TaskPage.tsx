@@ -8,7 +8,7 @@ import {
 import { Switch as AntSwitch, Tooltip } from 'antd'
 import { TagType } from 'antd/es/tag'
 import moment from 'moment'
-import { createContext, useCallback } from 'react'
+import { createContext, useCallback, useState } from 'react'
 import {
   Redirect,
   Route,
@@ -24,7 +24,6 @@ import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import EvaluationIndicator from '../../components/EvaluationIndicator'
-import IdeIframe from '../../components/IdeIframe'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
@@ -34,9 +33,9 @@ import useIdParam from '../../hooks/useIdParam'
 import { useQueryParam } from '../../hooks/useQuery'
 import useSubPath from '../../hooks/useSubPath'
 import {
+  FileContextType,
   GetTaskListDocument,
   GetTaskPoolDocument,
-  IdeType,
   PublicUserFieldsFragment,
   TaskInput,
   useCreateAnswerMutation,
@@ -54,6 +53,15 @@ import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
+import { withTrailingSlash } from '../../services/strings'
+import {
+  NO_ANSWER_ID,
+  NO_AUTH_TOKEN,
+  NO_BASE_URL,
+  WorkspaceContext,
+  WorkspaceContextType
+} from '../../hooks/workspace/useWorkspace'
+import WorkspacePage from '../../components/workspace/WorkspacePage'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
@@ -71,6 +79,9 @@ const TaskPage: React.FC = () => {
   const userId = useQueryParam('user')
   const history = useHistory()
   const createRoutes = useCreateRoutes()
+
+  const [baseUrl, setBaseUrl] = useState(NO_BASE_URL)
+  const [authToken, setAuthToken] = useState(NO_AUTH_TOKEN)
 
   const result = useGetTaskQuery({
     variables: {
@@ -248,13 +259,15 @@ const TaskPage: React.FC = () => {
     }
   }
 
+  const submissionDeadline = submission?.deadline
+    ? moment(submission.deadline)
+    : undefined
+
   const renderTimeLimit = () => {
     return assignment?.timeLimit ? (
       <TimeLimitTag
         timeLimit={assignment.timeLimit}
-        deadline={
-          submission?.deadline ? moment(submission.deadline) : undefined
-        }
+        deadline={submissionDeadline}
       />
     ) : undefined
   }
@@ -278,59 +291,75 @@ const TaskPage: React.FC = () => {
     history.push(previousPath)
   }
 
+  const handleBaseUrlChange = (newBaseUrl: string, newAuthToken: string) => {
+    setBaseUrl(withTrailingSlash(newBaseUrl))
+    setAuthToken(newAuthToken)
+  }
+
+  const workspaceContext: WorkspaceContextType = {
+    baseUrl,
+    authToken,
+    answerId: answer?.id ?? NO_ANSWER_ID
+  }
+
   return (
     <DifferentUserContext.Provider value={differentUser}>
-      <SetTitle>{task.title}</SetTitle>
-      <PageHeaderWrapper
-        title={
-          <EditableTitle
-            editable={editable}
-            title={title}
-            onChange={updater('title')}
-          />
-        }
-        tags={tags}
-        breadcrumb={createBreadcrumb(createRoutes.forTask(task))}
-        tabList={tabs}
-        tabActiveKey={subPath.get()}
-        onTabChange={onTabChange}
-        extra={
-          <>
-            {teacherControls} {buttons}
-          </>
-        }
-        onBack={goToAssignment}
-      />
-      <Switch>
-        <Route exact path={path}>
-          <Redirect to={`${url}/details`} />
-        </Route>
-        <Route path={`${path}/details`}>
-          <TaskDetailsPage editable={editable} />
-        </Route>
-        <Route path={`${path}/answer`}>
-          {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
-        </Route>
-        <Route path={`${path}/evaluation`}>
-          {answer ? <EvaluationPage answerId={answer.id} /> : <NotFoundPage />}
-        </Route>
-        <Route path={`${path}/ide`}>
-          {answer ? (
-            <div className="no-padding">
-              <AnswerBlocker
-                deadline={
-                  submission?.deadline ? moment(submission.deadline) : undefined
-                }
-              >
-                <IdeIframe type={IdeType.Answer} id={answer.id} />
-              </AnswerBlocker>
-            </div>
-          ) : (
-            <NotFoundPage />
-          )}
-        </Route>
-        <Route component={NotFoundPage} />
-      </Switch>
+      <WorkspaceContext.Provider value={workspaceContext}>
+        <SetTitle>{task.title}</SetTitle>
+        <PageHeaderWrapper
+          title={
+            <EditableTitle
+              editable={editable}
+              title={title}
+              onChange={updater('title')}
+            />
+          }
+          tags={tags}
+          breadcrumb={createBreadcrumb(createRoutes.forTask(task))}
+          tabList={tabs}
+          tabActiveKey={subPath.get()}
+          onTabChange={onTabChange}
+          extra={
+            <>
+              {teacherControls} {buttons}
+            </>
+          }
+          onBack={goToAssignment}
+        />
+        <Switch>
+          <Route exact path={path}>
+            <Redirect to={`${url}/details`} />
+          </Route>
+          <Route path={`${path}/details`}>
+            <TaskDetailsPage editable={editable} />
+          </Route>
+          <Route path={`${path}/answer`}>
+            {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
+          </Route>
+          <Route path={`${path}/evaluation`}>
+            {answer ? (
+              <EvaluationPage answerId={answer.id} />
+            ) : (
+              <NotFoundPage />
+            )}
+          </Route>
+          <Route path={`${path}/ide`}>
+            {answer ? (
+              <div className="no-padding">
+                <AnswerBlocker deadline={submissionDeadline}>
+                  <WorkspacePage
+                    type={FileContextType.Answer}
+                    onBaseUrlChange={handleBaseUrlChange}
+                  />
+                </AnswerBlocker>
+              </div>
+            ) : (
+              <NotFoundPage />
+            )}
+          </Route>
+          <Route component={NotFoundPage} />
+        </Switch>
+      </WorkspaceContext.Provider>
     </DifferentUserContext.Provider>
   )
 }

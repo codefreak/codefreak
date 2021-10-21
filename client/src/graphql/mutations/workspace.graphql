@@ -1,0 +1,10 @@
+mutation StartWorkspace($context: FileContextInput!) {
+  startWorkspace(fileContext: $context) {
+    baseUrl
+    authToken
+  }
+}
+
+mutation DeleteWorkspace($context: FileContextInput!) {
+  deleteWorkspace(fileContext: $context)
+}
