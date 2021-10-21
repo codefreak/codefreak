@@ -51,6 +51,11 @@ const AbstractProcessTabPanel = ({
   const terminalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    setProcessWebSocket(undefined)
+    setInitialized(false)
+  }, [processId])
+
+  useEffect(() => {
     if (terminalRef.current && !terminal) {
       const newTerminal = new Terminal({ theme: XTermThemeLight })
       newTerminal.open(terminalRef.current)

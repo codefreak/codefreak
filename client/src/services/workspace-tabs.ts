@@ -5,7 +5,8 @@ export enum WorkspaceTabType {
   EMPTY = 'empty',
   INSTRUCTIONS = 'instructions',
   SHELL = 'shell',
-  EVALUATION = 'evaluation'
+  EVALUATION = 'evaluation',
+  CONSOLE = 'console'
 }
 
 export abstract class WorkspaceTab {

@@ -3,7 +3,8 @@ import { useMutation } from 'react-query'
 import { noop } from '../../services/util'
 
 export enum ProcessType {
-  SHELL
+  SHELL,
+  CONSOLE
 }
 
 const RESIZE_PROCESS = (processId: string, cols: number, rows: number) => `

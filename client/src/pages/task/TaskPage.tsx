@@ -61,6 +61,7 @@ import {
 import WorkspacePage from '../../components/workspace/WorkspacePage'
 import { Client, createClient } from 'graphql-ws'
 import { graphqlWebSocketPath } from '../../services/workspace'
+import WorkspaceRunButton from '../../components/workspace/WorkspaceRunButton'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
@@ -82,6 +83,7 @@ const TaskPage: React.FC = () => {
   const [baseUrl, setBaseUrl] = useState(NO_BASE_URL)
   const [authToken, setAuthToken] = useState(NO_AUTH_TOKEN)
   const [graphqlWebSocketClient, setGraphqlWebSocketClient] = useState<Client>()
+  const [runProcessId, setRunProcessId] = useState<string>()
 
   const result = useGetTaskQuery({
     variables: {
@@ -216,9 +218,14 @@ const TaskPage: React.FC = () => {
     buttons = null
   } else if (answer) {
     // regular buttons to work on task for students
-    buttons = (
-      <StartEvaluationButton answerId={answer.id} type="primary" size="large" />
-    )
+    buttons = [
+      <StartEvaluationButton
+        answerId={answer.id}
+        type="primary"
+        size="large"
+      />,
+      <WorkspaceRunButton onRunProcessStarted={setRunProcessId} />
+    ]
   } else if (!teacherControls) {
     // start working on task by default
     buttons = (
@@ -294,7 +301,8 @@ const TaskPage: React.FC = () => {
     authToken,
     answerId: answer?.id ?? NO_ANSWER_ID,
     taskId: task.id,
-    graphqlWebSocketClient
+    graphqlWebSocketClient,
+    runProcessId
   }
 
   return (

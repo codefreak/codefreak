@@ -14,6 +14,7 @@ export type WorkspaceContextType = {
   answerId: string
   taskId: string
   graphqlWebSocketClient?: Client
+  runProcessId?: string
 }
 
 const initialWorkspaceContext: WorkspaceContextType = {
