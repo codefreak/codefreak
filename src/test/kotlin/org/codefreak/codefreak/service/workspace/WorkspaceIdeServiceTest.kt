@@ -6,20 +6,19 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayOutputStream
 import java.util.UUID
+import org.codefreak.codefreak.EXTERNAL_INTEGRATION_TEST
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.service.WorkspaceBaseTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnOs
-import org.junit.jupiter.api.condition.OS
 import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
 
 private val ANSWER_ID = UUID(0, 0)
 
-// Can be enabled once the Image building works on GitHub Actions
-@DisabledOnOs(OS.WINDOWS)
+@Tag(EXTERNAL_INTEGRATION_TEST)
 class WorkspaceIdeServiceTest : WorkspaceBaseTest() {
 
   @Autowired

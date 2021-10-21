@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.eq
 import com.spotify.docker.client.DockerClient
 import com.spotify.docker.client.DockerClient.ListContainersParam
 import java.io.ByteArrayOutputStream
+import org.codefreak.codefreak.EXTERNAL_INTEGRATION_TEST
 import org.codefreak.codefreak.SpringTest
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.service.file.FileService
@@ -18,19 +19,14 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.EnabledOnOs
-import org.junit.jupiter.api.condition.OS
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.ClassPathResource
 
-/**
- * The Docker library does only work properly on Linux.
- * You should not run these tests on Windows or Mac with Docker Desktop.
- */
-@EnabledOnOs(OS.LINUX)
+@Tag(EXTERNAL_INTEGRATION_TEST)
 internal class IdeServiceTest : SpringTest() {
 
   @MockBean

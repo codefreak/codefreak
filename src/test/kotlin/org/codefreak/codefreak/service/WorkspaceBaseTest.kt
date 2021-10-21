@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import org.apache.commons.io.output.NullOutputStream.NULL_OUTPUT_STREAM
+import org.codefreak.codefreak.EXTERNAL_INTEGRATION_TEST
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.config.KubernetesConfiguration
 import org.codefreak.codefreak.service.file.FileService
@@ -12,6 +13,7 @@ import org.codefreak.codefreak.service.workspace.KubernetesWorkspaceService
 import org.codefreak.codefreak.util.TarUtil
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.MethodOrderer
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.TestMethodOrder
@@ -36,6 +38,7 @@ import org.springframework.test.context.ActiveProfiles
 @Import(KubernetesConfiguration::class, AppConfiguration::class)
 @TestInstance(Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
+@Tag(EXTERNAL_INTEGRATION_TEST)
 abstract class WorkspaceBaseTest {
 
   @Autowired

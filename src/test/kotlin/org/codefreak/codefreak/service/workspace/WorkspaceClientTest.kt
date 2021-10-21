@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import liquibase.util.StreamUtil
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.awaitility.Awaitility.await
+import org.codefreak.codefreak.EXTERNAL_INTEGRATION_TEST
 import org.codefreak.codefreak.service.WorkspaceBaseTest
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.hamcrest.MatcherAssert.assertThat
@@ -20,12 +21,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnOs
-import org.junit.jupiter.api.condition.OS
 
-// Can be enabled once the Image building works on GitHub Actions
-@DisabledOnOs(OS.WINDOWS)
+@Tag(EXTERNAL_INTEGRATION_TEST)
 class WorkspaceClientTest : WorkspaceBaseTest() {
   private lateinit var remoteWorkspaceReference: RemoteWorkspaceReference
 
