@@ -290,6 +290,7 @@ const TaskPage: React.FC = () => {
       createClient({
         url: graphqlWebSocketPath(newBaseUrl),
         lazy: false,
+        connectionParams: newAuthToken ? { jwt: newAuthToken } : undefined,
         // Close the connection after one hour of inactivity
         lazyCloseTimeout: 3_600_000
       })
