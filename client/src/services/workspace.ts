@@ -1,5 +1,9 @@
 import { NO_AUTH_TOKEN } from '../hooks/workspace/useWorkspace'
-import { withLeadingSlash, withTrailingSlash } from './strings'
+import {
+  trimTrailingSlashes,
+  withLeadingSlash,
+  withTrailingSlash
+} from './strings'
 
 /**
  * The api-route to be appended to the base-url when reading and creating files
@@ -72,6 +76,41 @@ export const readFilePath = (baseUrl: string, filePath: string) => {
     withTrailingSlash(baseUrl) + FILES_API_ROUTE + withLeadingSlash(filePath)
   )
 }
+
+/**
+ * Returns an url for creating an empty file in a workspace built on the given base-url
+ *
+ * @param baseUrl the base-url for the workspace
+ * @param filePath the path of the file to create
+ */
+export const createFilePath = (baseUrl: string, filePath: string) =>
+  trimTrailingSlashes(
+    withTrailingSlash(baseUrl) + FILES_API_ROUTE + withLeadingSlash(filePath)
+  )
+
+/**
+ * Returns an url for creating an empty directory in a workspace built on the given base-url
+ *
+ * @param baseUrl the base-url for the workspace
+ * @param directoryPath the path of the directory to create
+ */
+export const createDirectoryPath = (baseUrl: string, directoryPath: string) =>
+  withTrailingSlash(
+    withTrailingSlash(baseUrl) +
+      FILES_API_ROUTE +
+      withLeadingSlash(directoryPath)
+  )
+
+/**
+ * Returns an url for deleting a file or directory in a workspace built on the given base-url
+ *
+ * @param baseUrl the base-url for the workspace
+ * @param path the path of the file or directory to delete
+ */
+export const deletePath = (baseUrl: string, path: string) =>
+  trimTrailingSlashes(
+    withTrailingSlash(baseUrl) + FILES_API_ROUTE + withLeadingSlash(path)
+  )
 
 /**
  * Replaces a `http` or `https` protocol with `ws` or `wss` respectively
