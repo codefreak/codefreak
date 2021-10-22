@@ -83,8 +83,11 @@ const EditorTabPanel = ({ file }: EditorTabPanelProps) => {
         if (model) {
           const path = extractRelativeFilePath(model.uri.path)
           const contents = model.getValue()
+
           saveFile({ path, contents })
-          messageService.success(`${path} saved`)
+
+          const fileName = basename(path)
+          messageService.success(`${fileName} saved`)
         }
       }
     })
