@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react'
 import EmptyTabPanel from './EmptyTabPanel'
 import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
 import { FileTextOutlined } from '@ant-design/icons'
+import { basename } from 'path'
 
 export class EditorWorkspaceTab extends WorkspaceTab {
   constructor(path: string) {
@@ -19,9 +20,10 @@ export class EditorWorkspaceTab extends WorkspaceTab {
 
   renderTitle(): React.ReactNode {
     if (this.path.length > 0) {
+      const fileName = basename(this.path)
       return (
         <>
-          <FileTextOutlined /> {this.path}
+          <FileTextOutlined /> {fileName}
         </>
       )
     }
