@@ -10,21 +10,17 @@ import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import org.awaitility.Awaitility.await
+import org.codefreak.codefreak.EXTERNAL_INTEGRATION_TEST
 import org.codefreak.codefreak.service.WorkspaceBaseTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnOs
-import org.junit.jupiter.api.condition.OS
 import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
 
-/**
- * Test that a workspace will be removed after 15sec
- */
-// Can be enabled once the Image building works on GitHub Actions
-@DisabledOnOs(OS.WINDOWS)
+@Tag(EXTERNAL_INTEGRATION_TEST)
 class WorkspaceLifecycleManagerTest : WorkspaceBaseTest() {
   @Mock
   private lateinit var clock: Clock

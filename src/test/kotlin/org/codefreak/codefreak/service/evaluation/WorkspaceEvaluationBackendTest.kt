@@ -8,6 +8,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import java.nio.charset.StandardCharsets
 import java.util.UUID
+import org.codefreak.codefreak.EXTERNAL_INTEGRATION_TEST
 import org.codefreak.codefreak.service.WorkspaceBaseTest
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.aMapWithSize
@@ -17,9 +18,8 @@ import org.hamcrest.Matchers.equalToCompressingWhiteSpace
 import org.hamcrest.Matchers.hasEntry
 import org.hamcrest.Matchers.hasProperty
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledOnOs
-import org.junit.jupiter.api.condition.OS
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.TestPropertySource
@@ -27,8 +27,7 @@ import org.springframework.util.StreamUtils
 
 @TestPropertySource(properties = ["codefreak.evaluation.backend=workspace"])
 @Import(WorkspaceEvaluationBackend::class)
-// Can be enabled once the Image building works on GitHub Actions
-@DisabledOnOs(OS.WINDOWS)
+@Tag(EXTERNAL_INTEGRATION_TEST)
 internal class WorkspaceEvaluationBackendTest : WorkspaceBaseTest() {
   @Autowired
   private lateinit var evaluationBackend: WorkspaceEvaluationBackend
