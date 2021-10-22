@@ -16,6 +16,7 @@ import { useMutableQueryParam } from '../../hooks/useQuery'
 import { InstructionsWorkspaceTab } from './InstructionsTabPanel'
 import { ShellWorkspaceTab } from './ShellTabPanel'
 import { EvaluationWorkspaceTab } from './EvaluationTabPanel'
+import { ConsoleWorkspaceTab } from './ConsoleTabPanel'
 
 export const RIGHT_TAB_QUERY_PARAM = 'rightTab'
 
@@ -42,6 +43,7 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
   const rightTabs = [
     new InstructionsWorkspaceTab(),
     new ShellWorkspaceTab(),
+    new ConsoleWorkspaceTab(),
     new EvaluationWorkspaceTab(answerId)
   ]
 

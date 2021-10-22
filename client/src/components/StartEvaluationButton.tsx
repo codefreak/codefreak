@@ -35,7 +35,7 @@ const StartEvaluationButton: React.FC<StartEvaluationButtonProps> = props => {
       disabled={isEvaluationInProgress(status)}
       {...restProps}
     >
-      Start Evaluation
+      Evaluate
     </Button>
   )
 }
