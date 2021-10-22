@@ -7,7 +7,11 @@ import {
 import WorkspaceTabsWrapper from './WorkspaceTabsWrapper'
 import { WorkspaceTab } from '../../services/workspace-tabs'
 import { QueryClient } from 'react-query'
-import { NO_ANSWER_ID, NO_AUTH_TOKEN } from '../../hooks/workspace/useWorkspace'
+import {
+  NO_ANSWER_ID,
+  NO_AUTH_TOKEN,
+  NO_TASK_ID
+} from '../../hooks/workspace/useWorkspace'
 import { EditorWorkspaceTab } from './EditorTabPanel'
 
 describe('<WorkspaceTabsWrapper />', () => {
@@ -26,12 +30,14 @@ describe('<WorkspaceTabsWrapper />', () => {
     const baseUrl = 'https://codefreak.test'
     const authToken = NO_AUTH_TOKEN
     const answerId = NO_ANSWER_ID
+    const taskId = NO_TASK_ID
 
     await waitUntilWorkspaceIsAvailable({
       queryClient,
       baseUrl,
       authToken,
-      answerId
+      answerId,
+      taskId
     })
 
     const tabs: WorkspaceTab[] = [new EditorWorkspaceTab('foo.txt')]
@@ -42,7 +48,7 @@ describe('<WorkspaceTabsWrapper />', () => {
       {
         withWorkspaceContextProvider: true,
         queryClient,
-        workspaceContext: { baseUrl, authToken, answerId }
+        workspaceContext: { baseUrl, authToken, answerId, taskId }
       }
     )
 

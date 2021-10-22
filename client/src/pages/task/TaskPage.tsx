@@ -1,7 +1,6 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
 import {
   CloudOutlined,
-  DashboardOutlined,
   FileTextOutlined,
   SolutionOutlined
 } from '@ant-design/icons'
@@ -23,7 +22,6 @@ import AsyncPlaceholder from '../../components/AsyncContainer'
 import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
-import EvaluationIndicator from '../../components/EvaluationIndicator'
 import SetTitle from '../../components/SetTitle'
 import StartEvaluationButton from '../../components/StartEvaluationButton'
 import TimeLimitTag from '../../components/time-limit/TimeLimitTag'
@@ -49,7 +47,6 @@ import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
 import { makeUpdater } from '../../services/util'
 import AnswerPage from '../answer/AnswerPage'
-import EvaluationPage from '../evaluation/EvaluationOverviewPage'
 import NotFoundPage from '../NotFoundPage'
 import TaskDetailsPage from './TaskDetailsPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
@@ -62,6 +59,8 @@ import {
   WorkspaceContextType
 } from '../../hooks/workspace/useWorkspace'
 import WorkspacePage from '../../components/workspace/WorkspacePage'
+import { Client, createClient } from 'graphql-ws'
+import { graphqlWebSocketPath } from '../../services/workspace'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
@@ -82,6 +81,7 @@ const TaskPage: React.FC = () => {
 
   const [baseUrl, setBaseUrl] = useState(NO_BASE_URL)
   const [authToken, setAuthToken] = useState(NO_AUTH_TOKEN)
+  const [graphqlWebSocketClient, setGraphqlWebSocketClient] = useState<Client>()
 
   const result = useGetTaskQuery({
     variables: {
@@ -180,7 +180,7 @@ const TaskPage: React.FC = () => {
         ]
       : []
 
-  // insert online IDE before last element if enabled
+  // insert online IDE as last element if enabled
   const ideTab = task.ideEnabled
     ? [
         {
@@ -199,22 +199,7 @@ const TaskPage: React.FC = () => {
       tab: tab('Answer', <SolutionOutlined />),
       disabled: !answer
     },
-    ...ideTab,
-    {
-      key: '/evaluation',
-      disabled: !answer,
-      tab: (
-        <>
-          {tab('Evaluation', <DashboardOutlined />)}
-          {answer ? (
-            <EvaluationIndicator
-              style={{ marginLeft: 8 }}
-              answerId={answer.id}
-            />
-          ) : null}
-        </>
-      )
-    }
+    ...ideTab
   ]
 
   const assignment = task.assignment
@@ -294,12 +279,23 @@ const TaskPage: React.FC = () => {
   const handleBaseUrlChange = (newBaseUrl: string, newAuthToken: string) => {
     setBaseUrl(withTrailingSlash(newBaseUrl))
     setAuthToken(newAuthToken)
+    setGraphqlWebSocketClient(
+      createClient({
+        url: graphqlWebSocketPath(newBaseUrl),
+        lazy: false,
+        connectionParams: newAuthToken ? { jwt: newAuthToken } : undefined,
+        // Close the connection after one hour of inactivity
+        lazyCloseTimeout: 3_600_000
+      })
+    )
   }
 
   const workspaceContext: WorkspaceContextType = {
     baseUrl,
     authToken,
-    answerId: answer?.id ?? NO_ANSWER_ID
+    answerId: answer?.id ?? NO_ANSWER_ID,
+    taskId: task.id,
+    graphqlWebSocketClient
   }
 
   return (
@@ -335,13 +331,6 @@ const TaskPage: React.FC = () => {
           </Route>
           <Route path={`${path}/answer`}>
             {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
-          </Route>
-          <Route path={`${path}/evaluation`}>
-            {answer ? (
-              <EvaluationPage answerId={answer.id} />
-            ) : (
-              <NotFoundPage />
-            )}
           </Route>
           <Route path={`${path}/ide`}>
             {answer ? (

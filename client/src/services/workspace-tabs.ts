@@ -2,7 +2,10 @@ import React from 'react'
 
 export enum WorkspaceTabType {
   EDITOR = 'editor',
-  EMPTY = 'empty'
+  EMPTY = 'empty',
+  INSTRUCTIONS = 'instructions',
+  SHELL = 'shell',
+  EVALUATION = 'evaluation'
 }
 
 export abstract class WorkspaceTab {

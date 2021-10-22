@@ -29,6 +29,7 @@ import useSubPath from '../../hooks/useSubPath'
 import {
   FileContextType,
   GetTaskDetailsDocument,
+  Maybe,
   TaskDetailsInput,
   useGetTaskDetailsQuery,
   useUpdateTaskDetailsMutation
@@ -73,6 +74,16 @@ const filePatternHelp = (
   />
 )
 
+export const renderTaskInstructionsText = (
+  instructions: Maybe<string> | undefined
+) => {
+  return instructions ? (
+    <Markdown>{instructions}</Markdown>
+  ) : (
+    <Empty description="This task has no extra instructions. Take a look at the provided files." />
+  )
+}
+
 const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const subPath = useSubPath()
   const result = useGetTaskDetailsQuery({
@@ -102,13 +113,7 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   const { task } = result.data
 
   const details = (
-    <Card title="Instructions">
-      {task.body ? (
-        <Markdown>{task.body}</Markdown>
-      ) : (
-        <Empty description="This task has no extra instructions. Take a look at the provided files." />
-      )}
-    </Card>
+    <Card title="Instructions">{renderTaskInstructionsText(task.body)}</Card>
   )
 
   // hiddenFiles and protectedFiles are null if task is not editable

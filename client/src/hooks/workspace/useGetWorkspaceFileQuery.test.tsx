@@ -4,7 +4,12 @@ import React from 'react'
 import { QueryClient, setLogger } from 'react-query'
 import useGetWorkspaceFileQuery from './useGetWorkspaceFileQuery'
 import { mockFetch, waitForTime, wrap } from '../../services/testing'
-import { NO_ANSWER_ID, NO_AUTH_TOKEN, NO_BASE_URL } from './useWorkspace'
+import {
+  NO_ANSWER_ID,
+  NO_AUTH_TOKEN,
+  NO_BASE_URL,
+  NO_TASK_ID
+} from './useWorkspace'
 
 describe('useGetWorkspaceFileQuery()', () => {
   const mockFileContents = 'Hello world!'
@@ -18,10 +23,11 @@ describe('useGetWorkspaceFileQuery()', () => {
     const baseUrl = 'https://codefreak.test/'
     const authToken = NO_AUTH_TOKEN
     const answerId = NO_ANSWER_ID
+    const taskId = NO_TASK_ID
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, authToken, answerId },
+        workspaceContext: { baseUrl, authToken, answerId, taskId },
         withWorkspaceContextProvider: true
       })
 
@@ -46,10 +52,11 @@ describe('useGetWorkspaceFileQuery()', () => {
     const baseUrl = NO_BASE_URL
     const authToken = NO_AUTH_TOKEN
     const answerId = NO_ANSWER_ID
+    const taskId = NO_TASK_ID
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, authToken, answerId },
+        workspaceContext: { baseUrl, authToken, answerId, taskId },
         withWorkspaceContextProvider: true
       })
 
@@ -67,6 +74,7 @@ describe('useGetWorkspaceFileQuery()', () => {
     const baseUrl = 'https://codefreak.test'
     const authToken = NO_AUTH_TOKEN
     const answerId = NO_ANSWER_ID
+    const taskId = NO_TASK_ID
 
     mockGetFile = mockFetch(null, { status: 404 })
 
@@ -75,7 +83,7 @@ describe('useGetWorkspaceFileQuery()', () => {
     })
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, authToken, answerId },
+        workspaceContext: { baseUrl, authToken, answerId, taskId },
         queryClient,
         withWorkspaceContextProvider: true
       })
