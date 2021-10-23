@@ -21,7 +21,7 @@ import { InstructionsWorkspaceTab } from './InstructionsTabPanel'
 import { ShellWorkspaceTab } from './ShellTabPanel'
 import { EvaluationWorkspaceTab } from './EvaluationTabPanel'
 import { ConsoleWorkspaceTab } from './ConsoleTabPanel'
-import FileTree from './FileTree'
+import { FileTreeWorkspaceTab } from './FileTree'
 import { EditorWorkspaceTab } from './EditorTabPanel'
 
 export const LEFT_TAB_QUERY_PARAM = 'leftTab'
@@ -142,10 +142,12 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
     })
   }
 
+  const fileTree = new FileTreeWorkspaceTab(handleOpenFile)
+
   return (
     <Row gutter={4} className="workspace-page">
       <Col span={4}>
-        <FileTree onOpenFile={handleOpenFile} />
+        <WorkspaceTabsWrapper tabs={[fileTree]} />
       </Col>
       <Col span={10}>
         <WorkspaceTabsWrapper

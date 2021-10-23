@@ -72,7 +72,6 @@ test('graphqlWebSocketPath', () => {
     ['foo', null]
   ]).forEach((expected, input) => {
     if (expected === null) {
-      // TODO custom error types
       expect(() => graphqlWebSocketPath(input)).toThrow()
     } else {
       expect(graphqlWebSocketPath(input)).toBe(expected)

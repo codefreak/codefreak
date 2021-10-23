@@ -9,7 +9,8 @@ export enum WorkspaceTabType {
   INSTRUCTIONS = 'instructions',
   SHELL = 'shell',
   EVALUATION = 'evaluation',
-  CONSOLE = 'console'
+  CONSOLE = 'console',
+  FILE_TREE = 'file-tree'
 }
 
 /**
