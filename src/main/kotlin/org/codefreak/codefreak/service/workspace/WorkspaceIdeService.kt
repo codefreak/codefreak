@@ -1,10 +1,10 @@
 package org.codefreak.codefreak.service.workspace
 
 import java.util.UUID
+import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.User
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 /**
@@ -16,8 +16,7 @@ class WorkspaceIdeService(
   private val workspaceService: WorkspaceService,
   @Autowired(required = false)
   private val workspaceAuthService: WorkspaceAuthService?,
-  @Value("#{@config.workspaces.companionImage}")
-  private val defaultWorkspaceImage: String
+  private val appConfig: AppConfiguration
 ) {
 
   data class AuthenticatedWorkspaceReference(
@@ -82,7 +81,9 @@ class WorkspaceIdeService(
       collectionId = answer.id,
       isReadOnly = false,
       scripts = emptyMap(),
-      imageName = defaultWorkspaceImage
+      imageName = appConfig.workspaces.companionImage,
+      cpuLimit = appConfig.workspaces.cpuLimit,
+      memoryLimit = appConfig.workspaces.memoryLimit
     )
   }
 }
