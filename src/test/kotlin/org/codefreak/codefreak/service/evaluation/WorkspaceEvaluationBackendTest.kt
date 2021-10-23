@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.TestPropertySource
 import org.springframework.util.StreamUtils
@@ -32,17 +33,21 @@ internal class WorkspaceEvaluationBackendTest : WorkspaceBaseTest() {
   @Autowired
   private lateinit var evaluationBackend: WorkspaceEvaluationBackend
 
+  private val evaluationStepId = UUID(0, 0)
+
+  @MockBean
+  private lateinit var evaluationStepService: EvaluationStepService
+
   @BeforeAll
   fun beforeAll() {
-    val collectionId = UUID(0, 0)
     val tar = createTarWithEntries(mapOf("file.txt" to "foo"))
-    whenever(fileService.readCollectionTar(collectionId)).thenReturn(tar)
+    whenever(evaluationStepService.getFilesForEvaluation(evaluationStepId)).thenReturn(tar)
   }
 
   @Test
   fun runEvaluation() {
     val runConfig = object : EvaluationRunConfig {
-      override val id = UUID.randomUUID()
+      override val id = evaluationStepId
       override val script = """
         #!/bin/bash
         echo "Hello ${'$'}FOO"
@@ -52,7 +57,6 @@ internal class WorkspaceEvaluationBackendTest : WorkspaceBaseTest() {
       override val environment: Map<String, String> = mapOf("FOO" to "World")
       override val imageName: String = "" // currently not used
       override val workingDirectory: String = "" // not used by workspace backend
-      override val collectionId: UUID = UUID(0, 0)
     }
     val capturedFiles = mutableMapOf<String, String>()
     val resultProcessor = mock<EvaluationResultProcessor<String>> {

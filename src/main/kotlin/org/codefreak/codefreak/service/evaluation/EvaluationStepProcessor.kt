@@ -190,8 +190,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
         imageName = appConfig.evaluation.defaultImage,
         workingDirectory = appConfig.evaluation.imageWorkdir,
         script = createEvaluationScript(stepDefinition.script),
-        environment = buildEnvVariables(step),
-        collectionId = step.evaluation.answer.id
+        environment = buildEnvVariables(step)
     )
   }
 
@@ -232,7 +231,6 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     override val script: String,
     override val environment: Map<String, String>,
     override val imageName: String,
-    override val workingDirectory: String,
-    override val collectionId: UUID
+    override val workingDirectory: String
   ) : EvaluationRunConfig
 }
