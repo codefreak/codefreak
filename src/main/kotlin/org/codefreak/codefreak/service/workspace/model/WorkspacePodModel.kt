@@ -46,12 +46,12 @@ class WorkspacePodModel(
 
         resources {
           requests = mapOf(
-            "cpu" to Quantity.parse("1"),
-            "memory" to Quantity.parse("768Mi")
+            "cpu" to Quantity.parse(wsConfig.cpuLimit),
+            "memory" to Quantity.parse(wsConfig.memoryLimit)
           )
           limits = mapOf(
-            "cpu" to Quantity.parse("1"),
-            "memory" to Quantity.parse("768Mi")
+            "cpu" to Quantity.parse(wsConfig.cpuLimit),
+            "memory" to Quantity.parse(wsConfig.memoryLimit)
           )
         }
 

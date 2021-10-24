@@ -101,7 +101,9 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
       scripts = mapOf(
         EVALUATION_SCRIPT_NAME to runConfig.script
       ),
-      environment = runConfig.environment
+      environment = runConfig.environment,
+      cpuLimit = appConfiguration.workspaces.cpuLimit,
+      memoryLimit = appConfiguration.workspaces.memoryLimit
     )
   }
 }

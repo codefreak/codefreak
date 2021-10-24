@@ -35,5 +35,19 @@ data class WorkspaceConfiguration(
    * Optional map of additional environment variables that will be available
    * in the workspace.
    */
-  val environment: Map<String, String>? = null
+  val environment: Map<String, String>? = null,
+
+  /**
+   * CPU limit of the workspace. Must be a valid value for Kubernetes `spec.containers[].resources.limits.cpu`.
+   *
+   * @see <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers">Kubernetes | Managing Resources for Containers</a>
+   */
+  val cpuLimit: String = "1",
+
+  /**
+   * Memory limit of the workspace. Must be a valid value for Kubernetes `spec.containers[].resources.limits.memory`.
+   *
+   * @see <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers">Kubernetes | Managing Resources for Containers</a>
+   */
+  val memoryLimit: String = "1Gi"
 )

@@ -160,6 +160,21 @@ class AppConfiguration {
      * ```
      */
     var jwkUrl = "http://localhost:8080/.well-known/jwks.json"
+
+    /**
+     * CPU limit of the workspace. Must be a valid value for Kubernetes `spec.containers[].resources.limits.cpu`.
+     *
+     * @see <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers">Kubernetes | Managing Resources for Containers</a>
+     */
+    var cpuLimit = "1"
+
+    /**
+     * Memory limit of the workspace. Must be a valid value for Kubernetes `spec.containers[].resources.limits.memory`.
+     * Currently, no value below 1Gi is recommended. Otherwise, workspaces may crash unexpectedly.
+     *
+     * @see <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers">Kubernetes | Managing Resources for Containers</a>
+     */
+    var memoryLimit = "1Gi"
   }
 
   class Docker {
