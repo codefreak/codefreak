@@ -1,6 +1,5 @@
 import {
   DeleteOutlined,
-  EditOutlined,
   FileAddOutlined,
   FolderAddOutlined
 } from '@ant-design/icons'
@@ -17,7 +16,6 @@ interface FileTreeRightClickMenuProps {
 
 const FileTreeRightClickMenu = ({
   rightClickedItem,
-  onRename,
   onDelete,
   onAddFile,
   onAddDirectory
@@ -25,9 +23,10 @@ const FileTreeRightClickMenu = ({
   const fileBasedMenuItems =
     rightClickedItem !== undefined
       ? [
-          <Menu.Item icon={<EditOutlined />} onClick={onRename} disabled>
-            Rename
-          </Menu.Item>,
+          // TODO enable once the api-endpoint is ready
+          // <Menu.Item icon={<EditOutlined />} onClick={onRename}>
+          //   Rename
+          // </Menu.Item>,
           <Menu.Item
             icon={<DeleteOutlined />}
             style={{ color: 'red' }}
