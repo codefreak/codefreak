@@ -50,8 +50,7 @@ typealias EvaluationResultProcessor<T> = (result: EvaluationResult) -> T
  */
 interface EvaluationRunConfig {
   /**
-   * The unique identified for each running evaluation.
-   * Currently, this is the id of the evaluation step, but this might change in the future.
+   * The ID of the EvaluationStep
    */
   val id: UUID
 
@@ -74,9 +73,4 @@ interface EvaluationRunConfig {
    * The name of a directory which should be the working directory when executing the evaluation script.
    */
   val workingDirectory: String
-
-  /**
-   * The collection that will be extracted to the working directory before invoking the evaluation script.
-   */
-  val collectionId: UUID
 }

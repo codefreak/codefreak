@@ -10,7 +10,6 @@ import java.net.URI
 import java.util.Objects
 import java.util.concurrent.TimeUnit.SECONDS
 import org.codefreak.codefreak.config.AppConfiguration
-import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.service.workspace.model.WorkspaceIngressModel
 import org.codefreak.codefreak.service.workspace.model.WorkspacePodModel
 import org.codefreak.codefreak.service.workspace.model.WorkspaceScriptMapModel
@@ -18,14 +17,13 @@ import org.codefreak.codefreak.service.workspace.model.WorkspaceServiceModel
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import org.springframework.util.StreamUtils
 import org.springframework.web.util.UriComponentsBuilder
 
 @Service
 class KubernetesWorkspaceService(
   private val kubernetesClient: KubernetesClient,
   private val appConfig: AppConfiguration,
-  private val fileService: FileService,
+  private val fileService: WorkspaceFileService,
   private val workspaceClientService: WorkspaceClientService,
   @Qualifier("yamlObjectMapper")
   private val yamlMapper: ObjectMapper,
@@ -79,7 +77,7 @@ class KubernetesWorkspaceService(
   private fun deployWorkspaceFiles(workspacePod: Pod, wsClient: WorkspaceClient) {
     log.debug("Deploying files to workspace ${workspacePod.reference}...")
     try {
-      fileService.readCollectionTar(workspacePod.collectionId).use(wsClient::deployFiles)
+      fileService.loadFiles(workspacePod.toWorkspaceIdentifier, wsClient::deployFiles)
     } catch (e: RuntimeException) {
       throw IllegalStateException("Could not deploy files to workspace ${workspacePod.reference}", e)
     }
@@ -109,15 +107,9 @@ class KubernetesWorkspaceService(
 
     val reference = createReference(identifier)
     val wsClient = workspaceClientService.getClient(reference)
-    if (!pod.isReadOnly) {
-      log.debug("Saving files of workspace $identifier!")
-      wsClient.downloadTar { newArchive ->
-        fileService.writeCollectionTar(pod.collectionId).use {
-          StreamUtils.copy(newArchive, it)
-        }
-      }
-    } else {
-      log.debug("Not saving files of workspace $identifier because it is read-only")
+    log.debug("Delegating file save of workspace $identifier!")
+    wsClient.downloadTar { newArchive ->
+      fileService.saveFiles(identifier) { newArchive }
     }
   }
 

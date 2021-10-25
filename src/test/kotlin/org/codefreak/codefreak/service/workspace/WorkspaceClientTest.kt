@@ -40,8 +40,6 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
     remoteWorkspaceReference = workspaceService.createWorkspace(
       workspaceIdentifier,
       WorkspaceConfiguration(
-        collectionId = collectionId,
-        isReadOnly = true,
         scripts = emptyMap(),
         imageName = appConfiguration.workspaces.companionImage
       )

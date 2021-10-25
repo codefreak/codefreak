@@ -30,8 +30,7 @@ class WorkspacePodModel(
   init {
     metadata {
       name = identifier.workspacePodName
-      // TODO: Store configuration in secret
-      labels = identifier.k8sLabels + wsConfig.k8sLabels
+      labels = identifier.k8sLabels
     }
     spec {
       containers = listOf(newContainer {

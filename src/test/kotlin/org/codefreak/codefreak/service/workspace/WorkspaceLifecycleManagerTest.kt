@@ -33,9 +33,9 @@ class WorkspaceLifecycleManagerTest : WorkspaceBaseTest() {
   private val now = Instant.parse("2021-01-01T01:01:01Z")
 
   private val identifier = WorkspaceIdentifier(
-      purpose = WorkspacePurpose.TASK_IDE,
-      reference = "test-lifecycle-manager"
-    )
+    purpose = WorkspacePurpose.TASK_IDE,
+    reference = UUID(0, 0).toString()
+  )
 
   @BeforeEach
   fun setUp() {
@@ -44,8 +44,6 @@ class WorkspaceLifecycleManagerTest : WorkspaceBaseTest() {
     workspaceService.createWorkspace(
       identifier,
       WorkspaceConfiguration(
-        collectionId = UUID(0, 0),
-        isReadOnly = false,
         scripts = emptyMap(),
         imageName = appConfiguration.workspaces.companionImage
       )
