@@ -1,11 +1,22 @@
-import { FileAddOutlined, FolderAddOutlined } from '@ant-design/icons'
+import {
+  FileAddOutlined,
+  FileOutlined,
+  FolderAddOutlined,
+  FolderOutlined
+} from '@ant-design/icons'
 import { Input, InputProps } from 'antd'
 import { DataNode } from 'antd/lib/tree'
 import { dirname } from 'path'
 import { KeyboardEventHandler } from 'react'
-import { PathType } from '../../hooks/workspace/useCreateWorkspacePathMutation'
 import { noop } from '../../services/util'
 import { findNode, insertDataNodes, isRoot, RightClickedItem } from './FileTree'
+
+export enum InputType {
+  ADD_FILE,
+  ADD_DIRECTORY,
+  RENAME_FILE,
+  RENAME_DIRECTORY
+}
 
 /**
  * Unique key for file-name inputs in the file-tree
@@ -32,17 +43,21 @@ export const getParentPathForNameInput = (
 }
 
 /**
- * Returns an add-icon for a PathType.
+ * Returns an icon for an InputType.
  *
- * @param type the PathType
+ * @param type the type of input
  * @returns the corresponding add-icon
  */
-const getAddIconForPathType = (type: PathType): React.ReactNode => {
+const getInputIcon = (type: InputType): React.ReactNode => {
   switch (type) {
-    case PathType.FILE:
+    case InputType.ADD_FILE:
       return <FileAddOutlined />
-    case PathType.DIRECTORY:
+    case InputType.ADD_DIRECTORY:
       return <FolderAddOutlined />
+    case InputType.RENAME_FILE:
+      return <FileOutlined />
+    case InputType.RENAME_DIRECTORY:
+      return <FolderOutlined />
   }
 }
 
@@ -51,19 +66,18 @@ const getAddIconForPathType = (type: PathType): React.ReactNode => {
  *
  * @param onConfirm called when the input is confirmed
  * @param onCancel called when the input is cancelled
- * @param type the type of path to name with the input
+ * @param type the type of input to create
  * @returns a DataNode for the name-input with the given callbacks
  */
 const createNameInputNode = (
   onConfirm: (name: string) => void,
   onCancel: () => void,
-  type: PathType
+  type: InputType
 ): DataNode => {
   return {
     key: TREE_INPUT_KEY,
     title: <FileTreeNameInput onConfirm={onConfirm} onCancel={onCancel} />,
-    icon: getAddIconForPathType(type),
-    isLeaf: type === PathType.FILE
+    icon: getInputIcon(type)
   }
 }
 
@@ -95,7 +109,7 @@ const insertNameInputNodeIntoTree = (
  *
  * @param onConfirm triggered when the input is confirmed
  * @param onCancel triggered when the input is cancelled
- * @param type the type of path to create an input for
+ * @param type the type of input to create
  * @param treeData the tree to create the input in
  * @param path the path to create the input in
  * @returns a Promise that resolves to the tree with the name-input-node inserted
@@ -103,7 +117,7 @@ const insertNameInputNodeIntoTree = (
 export const openNameInput = async (
   onConfirm: (name: string) => void,
   onCancel: () => void,
-  type: PathType,
+  type: InputType,
   treeData: DataNode[] = [],
   path = '/'
 ): Promise<DataNode[]> => {

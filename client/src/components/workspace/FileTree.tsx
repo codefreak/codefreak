@@ -17,11 +17,13 @@ import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
 import FileTreeRightClickMenu from './FileTreeRightClickMenu'
 import {
   getParentPathForNameInput,
+  InputType,
   openNameInput,
   TREE_INPUT_KEY
 } from './FileTreeNameInput'
 import TabPanel from './TabPanel'
 import { messageService } from '../../services/message'
+import useRenameWorkspacePathMutation from '../../hooks/workspace/useRenameWorkspacePathMutation'
 
 const { DirectoryTree } = Tree
 const { confirm } = Modal
@@ -202,6 +204,7 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
   const { data } = useListWorkspaceFilesQuery()
   const { mutate: createPath } = useCreateWorkspacePathMutation()
   const { mutate: deletePath } = useDeleteWorkspacePathMutation()
+  const { mutate: renamePath } = useRenameWorkspacePathMutation()
   const [treeData, setTreeData] = useState<DataNode[]>()
   const [isRightClickMenuOpen, setIsRightClickMenuOpen] = useState(false)
   const [rightClickedItem, setRightClickedItem] = useState<RightClickedItem>()
@@ -259,20 +262,6 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
     }
   }
 
-  const renameRightClickedItem = () => {
-    setIsRightClickMenuOpen(false)
-
-    if (!rightClickedItem) {
-      return
-    }
-
-    // TODO open name-input in path
-    // TODO rename file with name from input
-    // TODO inside rename (for now): Error("Not implemented yet")
-    // TODO error when name already exists
-    throw new Error('Unsupported operation')
-  }
-
   const deleteRightClickedItem = () => {
     setIsRightClickMenuOpen(false)
 
@@ -297,51 +286,81 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
     })
   }
 
-  const openNameInputForType = (type: PathType) => async () => {
+  const openNameInputForType =
+    (
+      type: InputType,
+      onNameConfirmed: (path: string, type: PathType) => void
+    ) =>
+    async () => {
+      setIsRightClickMenuOpen(false)
+
+      const parentPath = getParentPathForNameInput(rightClickedItem)
+
+      const handleConfirm = async (fileName: string) => {
+        if (!graphqlWebSocketClient) {
+          return
+        }
+
+        const path =
+          withTrailingSlash(parentPath) + trimLeadingSlashes(fileName)
+
+        const tree = isRoot(parentPath)
+          ? treeData ?? []
+          : await loadData(parentPath)
+
+        if (findNode(tree, path) === undefined) {
+          const pathType =
+            type === InputType.ADD_FILE ? PathType.FILE : PathType.DIRECTORY
+
+          onNameConfirmed(path, pathType)
+        } else {
+          messageService.error(
+            `${basename(path)} already exists in ${dirname(path)}`
+          )
+        }
+      }
+
+      const handleCancel = () => loadDataAndUpdateTree(parentPath)
+
+      if (!expandedKeys.includes(parentPath) && !isRoot(parentPath)) {
+        setExpandedKeys(prevState => [parentPath, ...prevState])
+      }
+
+      const newTreeData = await openNameInput(
+        handleConfirm,
+        handleCancel,
+        type,
+        treeData,
+        parentPath
+      )
+
+      setTreeData(newTreeData)
+    }
+
+  const addPath = (path: string, type: PathType) => {
+    const parentPath = dirname(path)
+    createPath(
+      { path, type },
+      {
+        onSuccess: () => loadDataAndUpdateTree(parentPath)
+      }
+    )
+  }
+
+  const renameRightClickedItem = () => {
     setIsRightClickMenuOpen(false)
 
-    const parentPath = getParentPathForNameInput(rightClickedItem)
-
-    const handleConfirm = async (fileName: string) => {
-      if (!graphqlWebSocketClient) {
-        return
-      }
-
-      const path = withTrailingSlash(parentPath) + trimLeadingSlashes(fileName)
-
-      const tree = isRoot(parentPath)
-        ? treeData ?? []
-        : await loadData(parentPath)
-
-      if (findNode(tree, path) === undefined) {
-        createPath(
-          { path, type },
-          {
-            onSuccess: () => loadDataAndUpdateTree(parentPath)
-          }
-        )
-      } else {
-        messageService.error(
-          `${basename(path)} already exists in ${dirname(path)}`
-        )
-      }
+    if (!rightClickedItem) {
+      return
     }
 
-    const handleCancel = () => loadDataAndUpdateTree(parentPath)
-
-    if (!expandedKeys.includes(parentPath) && !isRoot(parentPath)) {
-      setExpandedKeys(prevState => [parentPath, ...prevState])
+    const handleNameConfirmed = (path: string) => {
+      renamePath({ sourcePath: rightClickedItem.path, targetPath: path })
     }
 
-    const newTreeData = await openNameInput(
-      handleConfirm,
-      handleCancel,
-      type,
-      treeData,
-      parentPath
-    )
-
-    setTreeData(newTreeData)
+    return rightClickedItem.isFile
+      ? openNameInputForType(InputType.RENAME_FILE, handleNameConfirmed)
+      : openNameInputForType(InputType.RENAME_DIRECTORY, handleNameConfirmed)
   }
 
   const rightClickMenu = (
@@ -349,8 +368,8 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
       rightClickedItem={rightClickedItem}
       onRename={renameRightClickedItem}
       onDelete={deleteRightClickedItem}
-      onAddFile={openNameInputForType(PathType.FILE)}
-      onAddDirectory={openNameInputForType(PathType.DIRECTORY)}
+      onAddFile={openNameInputForType(InputType.ADD_FILE, addPath)}
+      onAddDirectory={openNameInputForType(InputType.ADD_DIRECTORY, addPath)}
     />
   )
 
