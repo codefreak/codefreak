@@ -3,17 +3,23 @@ import { DataNode, EventDataNode } from 'antd/lib/tree'
 import useListWorkspaceFilesQuery, {
   FileSystemNode,
   listFiles
-} from '../../hooks/workspace/useListWorkspaceFilesQuery'
+} from '../../../hooks/workspace/useListWorkspaceFilesQuery'
 import { useEffect, useState } from 'react'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
+import useWorkspace from '../../../hooks/workspace/useWorkspace'
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { basename, dirname } from 'path'
 import useCreateWorkspacePathMutation, {
   PathType
-} from '../../hooks/workspace/useCreateWorkspacePathMutation'
-import { trimLeadingSlashes, withTrailingSlash } from '../../services/strings'
-import useDeleteWorkspacePathMutation from '../../hooks/workspace/useDeleteWorkspacePathMutation'
-import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
+} from '../../../hooks/workspace/useCreateWorkspacePathMutation'
+import {
+  trimLeadingSlashes,
+  withTrailingSlash
+} from '../../../services/strings'
+import useDeleteWorkspacePathMutation from '../../../hooks/workspace/useDeleteWorkspacePathMutation'
+import {
+  WorkspaceTab,
+  WorkspaceTabType
+} from '../../../services/workspace-tabs'
 import FileTreeRightClickMenu from './FileTreeRightClickMenu'
 import {
   getParentPathForNameInput,
@@ -21,9 +27,9 @@ import {
   openNameInput,
   TREE_INPUT_KEY
 } from './FileTreeNameInput'
-import TabPanel from './TabPanel'
-import { messageService } from '../../services/message'
-import useRenameWorkspacePathMutation from '../../hooks/workspace/useRenameWorkspacePathMutation'
+import TabPanel from '../tab-panel/TabPanel'
+import { messageService } from '../../../services/message'
+import useRenameWorkspacePathMutation from '../../../hooks/workspace/useRenameWorkspacePathMutation'
 
 const { DirectoryTree } = Tree
 const { confirm } = Modal

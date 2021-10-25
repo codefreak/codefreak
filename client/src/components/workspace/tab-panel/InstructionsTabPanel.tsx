@@ -1,8 +1,11 @@
 import TabPanel from './TabPanel'
-import { renderTaskInstructionsText } from '../../pages/task/TaskDetailsPage'
-import { useGetTaskDetailsQuery } from '../../generated/graphql'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
-import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
+import { renderTaskInstructionsText } from '../../../pages/task/TaskDetailsPage'
+import { useGetTaskDetailsQuery } from '../../../services/codefreak-api'
+import useWorkspace from '../../../hooks/workspace/useWorkspace'
+import {
+  WorkspaceTab,
+  WorkspaceTabType
+} from '../../../services/workspace-tabs'
 import { SolutionOutlined } from '@ant-design/icons'
 import React from 'react'
 

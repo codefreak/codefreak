@@ -3,7 +3,7 @@ import { Tabs, Tooltip } from 'antd'
 import { WorkspaceTabType, WorkspaceTab } from '../../services/workspace-tabs'
 import useWorkspace from '../../hooks/workspace/useWorkspace'
 import { noop } from '../../services/util'
-import { EmptyWorkspaceTab } from './EmptyTabPanel'
+import { EmptyWorkspaceTab } from './tab-panel/EmptyTabPanel'
 
 const renderTab = (loading: boolean) => (tab: WorkspaceTab) => {
   const title = tab.renderTitle()

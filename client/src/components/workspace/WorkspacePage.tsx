@@ -17,12 +17,12 @@ import {
   WorkspaceTabType
 } from '../../services/workspace-tabs'
 import { useMutableQueryParam } from '../../hooks/useQuery'
-import { InstructionsWorkspaceTab } from './InstructionsTabPanel'
-import { ShellWorkspaceTab } from './ShellTabPanel'
-import { EvaluationWorkspaceTab } from './EvaluationTabPanel'
-import { ConsoleWorkspaceTab } from './ConsoleTabPanel'
-import { FileTreeWorkspaceTab } from './FileTree'
-import { EditorWorkspaceTab } from './EditorTabPanel'
+import { InstructionsWorkspaceTab } from './tab-panel/InstructionsTabPanel'
+import { ShellWorkspaceTab } from './tab-panel/ShellTabPanel'
+import { EvaluationWorkspaceTab } from './tab-panel/EvaluationTabPanel'
+import { ConsoleWorkspaceTab } from './tab-panel/ConsoleTabPanel'
+import { FileTreeWorkspaceTab } from './file-tree/FileTree'
+import { EditorWorkspaceTab } from './tab-panel/EditorTabPanel'
 
 export const LEFT_TAB_QUERY_PARAM = 'leftTab'
 export const RIGHT_TAB_QUERY_PARAM = 'rightTab'

@@ -2,14 +2,14 @@ import {
   mockFetch,
   render,
   waitUntilWorkspaceIsAvailable
-} from '../../services/testing'
+} from '../../../services/testing'
 import EditorTabPanel from './EditorTabPanel'
 import { QueryClient } from 'react-query'
 import {
   NO_ANSWER_ID,
   NO_AUTH_TOKEN,
   NO_TASK_ID
-} from '../../hooks/workspace/useWorkspace'
+} from '../../../hooks/workspace/useWorkspace'
 
 describe('<EditorTabPanel />', () => {
   const mockFileContents = 'Hello world!'

@@ -12,7 +12,7 @@ import {
   NO_AUTH_TOKEN,
   NO_TASK_ID
 } from '../../hooks/workspace/useWorkspace'
-import { EditorWorkspaceTab } from './EditorTabPanel'
+import { EditorWorkspaceTab } from './tab-panel/EditorTabPanel'
 
 describe('<WorkspaceTabsWrapper />', () => {
   beforeEach(() => {

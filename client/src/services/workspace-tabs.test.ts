@@ -1,6 +1,6 @@
 import { indexOf, removeEditorTab, WorkspaceTab } from './workspace-tabs'
-import { InstructionsWorkspaceTab } from '../components/workspace/InstructionsTabPanel'
-import { EditorWorkspaceTab } from '../components/workspace/EditorTabPanel'
+import { InstructionsWorkspaceTab } from '../components/workspace/tab-panel/InstructionsTabPanel'
+import { EditorWorkspaceTab } from '../components/workspace/tab-panel/EditorTabPanel'
 
 test('removeEditorTab', () => {
   const tabToRemove = new EditorWorkspaceTab('foo.txt')

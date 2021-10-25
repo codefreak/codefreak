@@ -1,15 +1,21 @@
 import Editor, { Monaco } from '@monaco-editor/react'
 import TabPanel, { LoadingTabPanelPlaceholder } from './TabPanel'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
-import { extractRelativeFilePath, readFilePath } from '../../services/workspace'
+import useWorkspace from '../../../hooks/workspace/useWorkspace'
+import {
+  extractRelativeFilePath,
+  readFilePath
+} from '../../../services/workspace'
 import { debounce } from 'ts-debounce'
 import { editor } from 'monaco-editor'
-import { messageService } from '../../services/message'
-import useGetWorkspaceFileQuery from '../../hooks/workspace/useGetWorkspaceFileQuery'
-import useSaveWorkspaceFileMutation from '../../hooks/workspace/useSaveWorkspaceFileMutation'
+import { messageService } from '../../../services/message'
+import useGetWorkspaceFileQuery from '../../../hooks/workspace/useGetWorkspaceFileQuery'
+import useSaveWorkspaceFileMutation from '../../../hooks/workspace/useSaveWorkspaceFileMutation'
 import React, { useEffect, useState } from 'react'
 import EmptyTabPanel from './EmptyTabPanel'
-import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
+import {
+  WorkspaceTab,
+  WorkspaceTabType
+} from '../../../services/workspace-tabs'
 import { FileTextOutlined } from '@ant-design/icons'
 import { basename } from 'path'
 

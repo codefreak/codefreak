@@ -8,7 +8,7 @@ import { Input, InputProps } from 'antd'
 import { DataNode } from 'antd/lib/tree'
 import { dirname } from 'path'
 import { KeyboardEventHandler } from 'react'
-import { noop } from '../../services/util'
+import { noop } from '../../../services/util'
 import { findNode, insertDataNodes, isRoot, RightClickedItem } from './FileTree'
 
 export enum InputType {

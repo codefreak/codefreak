@@ -1,5 +1,8 @@
 import TabPanel from './TabPanel'
-import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
+import {
+  WorkspaceTab,
+  WorkspaceTabType
+} from '../../../services/workspace-tabs'
 import React from 'react'
 
 export class EmptyWorkspaceTab extends WorkspaceTab {
