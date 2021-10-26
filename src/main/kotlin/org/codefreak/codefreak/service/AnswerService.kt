@@ -1,12 +1,8 @@
 package org.codefreak.codefreak.service
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.io.OutputStream
 import java.time.Instant
 import java.util.UUID
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.hasAuthority
@@ -18,9 +14,9 @@ import org.codefreak.codefreak.entity.User
 import org.codefreak.codefreak.repository.AnswerRepository
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.service.workspace.WorkspaceIdeService
-import org.codefreak.codefreak.util.FileUtil
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
+import org.codefreak.codefreak.util.TaskUtil.isHidden
 import org.codefreak.codefreak.util.afterClose
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -97,36 +93,6 @@ class AnswerService : BaseService() {
     copyFilesFromTask(answer)
     ideService.answerFilesUpdatedExternally(answer.id)
     workspaceIdeService.redeployAnswerFiles(answer.id)
-  }
-
-  fun copyFilesForEvaluation(answer: Answer): InputStream {
-    val out = ByteArrayOutputStream()
-    val outTar = TarUtil.PosixTarArchiveOutputStream(out)
-    fileService.readCollectionTar(answer.id).use { answerFiles ->
-      TarUtil.copyEntries(TarArchiveInputStream(answerFiles), outTar, filter = {
-        !answer.task.isHidden(it) && !answer.task.isProtected(it)
-      })
-    }
-    fileService.readCollectionTar(answer.task.id).use { taskFiles ->
-      TarUtil.copyEntries(TarArchiveInputStream(taskFiles), outTar, filter = {
-        answer.task.isHidden(it) || answer.task.isProtected(it)
-      })
-    }
-    return ByteArrayInputStream(out.toByteArray())
-  }
-
-  private fun Task.isHidden(entry: TarArchiveEntry): Boolean {
-    hiddenFiles.plus("codefreak.yml").forEach {
-      if (FileUtil.matches(it, entry.name)) return true
-    }
-    return false
-  }
-
-  private fun Task.isProtected(entry: TarArchiveEntry): Boolean {
-    protectedFiles.forEach {
-      if (FileUtil.matches(it, entry.name)) return true
-    }
-    return false
   }
 
   @Transactional

@@ -96,12 +96,12 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
     return WorkspaceConfiguration(
       // TODO: Use image that might has been configured by the eval config
       imageName = appConfiguration.workspaces.companionImage,
-      collectionId = runConfig.collectionId,
-      isReadOnly = true,
       scripts = mapOf(
         EVALUATION_SCRIPT_NAME to runConfig.script
       ),
-      environment = runConfig.environment
+      environment = runConfig.environment,
+      cpuLimit = appConfiguration.workspaces.cpuLimit,
+      memoryLimit = appConfiguration.workspaces.memoryLimit
     )
   }
 }

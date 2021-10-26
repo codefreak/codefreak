@@ -30,8 +30,7 @@ class WorkspacePodModel(
   init {
     metadata {
       name = identifier.workspacePodName
-      // TODO: Store configuration in secret
-      labels = identifier.k8sLabels + wsConfig.k8sLabels
+      labels = identifier.k8sLabels
     }
     spec {
       containers = listOf(newContainer {
@@ -46,12 +45,12 @@ class WorkspacePodModel(
 
         resources {
           requests = mapOf(
-            "cpu" to Quantity.parse("1"),
-            "memory" to Quantity.parse("768Mi")
+            "cpu" to Quantity.parse(wsConfig.cpuLimit),
+            "memory" to Quantity.parse(wsConfig.memoryLimit)
           )
           limits = mapOf(
-            "cpu" to Quantity.parse("1"),
-            "memory" to Quantity.parse("768Mi")
+            "cpu" to Quantity.parse(wsConfig.cpuLimit),
+            "memory" to Quantity.parse(wsConfig.memoryLimit)
           )
         }
 

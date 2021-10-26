@@ -1,10 +1,10 @@
 package org.codefreak.codefreak.service.workspace
 
 import java.util.UUID
+import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.User
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 /**
@@ -16,8 +16,7 @@ class WorkspaceIdeService(
   private val workspaceService: WorkspaceService,
   @Autowired(required = false)
   private val workspaceAuthService: WorkspaceAuthService?,
-  @Value("#{@config.workspaces.companionImage}")
-  private val defaultWorkspaceImage: String
+  private val appConfig: AppConfiguration
 ) {
 
   data class AuthenticatedWorkspaceReference(
@@ -31,7 +30,7 @@ class WorkspaceIdeService(
    */
   fun createAnswerIdeForUser(answer: Answer, user: User): AuthenticatedWorkspaceReference {
     val identifier = createAnswerIdeWorkspaceIdentifier(answer.id)
-    val config = createAnswerIdeWorkspaceConfig(answer)
+    val config = createAnswerIdeWorkspaceConfig()
     val remoteReference = workspaceService.createWorkspace(identifier, config)
     return AuthenticatedWorkspaceReference(remoteReference, workspaceAuthService?.createUserAuthToken(identifier, user))
   }
@@ -41,7 +40,7 @@ class WorkspaceIdeService(
    */
   fun createAnswerIde(answer: Answer): RemoteWorkspaceReference {
     val identifier = createAnswerIdeWorkspaceIdentifier(answer.id)
-    val config = createAnswerIdeWorkspaceConfig(answer)
+    val config = createAnswerIdeWorkspaceConfig()
     return workspaceService.createWorkspace(identifier, config)
   }
 
@@ -77,12 +76,12 @@ class WorkspaceIdeService(
     )
   }
 
-  private fun createAnswerIdeWorkspaceConfig(answer: Answer): WorkspaceConfiguration {
+  private fun createAnswerIdeWorkspaceConfig(): WorkspaceConfiguration {
     return WorkspaceConfiguration(
-      collectionId = answer.id,
-      isReadOnly = false,
       scripts = emptyMap(),
-      imageName = defaultWorkspaceImage
+      imageName = appConfig.workspaces.companionImage,
+      cpuLimit = appConfig.workspaces.cpuLimit,
+      memoryLimit = appConfig.workspaces.memoryLimit
     )
   }
 }
