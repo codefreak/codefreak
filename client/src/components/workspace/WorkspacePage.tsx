@@ -17,6 +17,7 @@ import { InstructionsWorkspaceTab } from './InstructionsTabPanel'
 import { ShellWorkspaceTab } from './ShellTabPanel'
 import { EvaluationWorkspaceTab } from './EvaluationTabPanel'
 import { ConsoleWorkspaceTab } from './ConsoleTabPanel'
+import Centered from '../Centered'
 
 export const RIGHT_TAB_QUERY_PARAM = 'rightTab'
 
@@ -25,9 +26,14 @@ const NO_ACTIVE_TAB = ''
 export interface WorkspacePageProps {
   type: FileContextType
   onBaseUrlChange: (newBaseUrl: string, newAuthToken: string) => void
+  createAnswerButton: React.ReactNode
 }
 
-const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
+const WorkspacePage = ({
+  type,
+  onBaseUrlChange,
+  createAnswerButton
+}: WorkspacePageProps) => {
   const [activeRightTab, setActiveRightTab] = useMutableQueryParam(
     RIGHT_TAB_QUERY_PARAM,
     ''
@@ -47,24 +53,26 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
     new EvaluationWorkspaceTab(answerId)
   ]
 
-  const [startWorkspace, { data, called }] = useStartWorkspaceMutation({
-    variables: {
-      context: {
-        id: answerId,
-        type
-      }
+  const [startWorkspace, { data, called }] = useStartWorkspaceMutation()
+
+  useEffect(() => {
+    if (!data && !called && answerId.length > 0) {
+      startWorkspace({
+        variables: {
+          context: {
+            id: answerId,
+            type
+          }
+        }
+      })
     }
   })
 
   useEffect(() => {
-    if (!data && !called) {
-      startWorkspace()
-    }
-
     if (activeRightTab === NO_ACTIVE_TAB) {
       setActiveRightTab(WorkspaceTabType.INSTRUCTIONS)
     }
-  })
+  }, [activeRightTab, setActiveRightTab])
 
   useEffect(() => {
     if (data && baseUrl === NO_BASE_URL) {
@@ -81,7 +89,11 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
   return (
     <Row gutter={4} className="workspace-page">
       <Col span={12}>
-        <WorkspaceTabsWrapper tabs={leftTabs} />
+        {answerId.length > 0 ? (
+          <WorkspaceTabsWrapper tabs={leftTabs} />
+        ) : (
+          <Centered>{createAnswerButton}</Centered>
+        )}
       </Col>
       <Col span={12}>
         <WorkspaceTabsWrapper

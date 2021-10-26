@@ -151,9 +151,13 @@ const UploadAnswer: React.FC<UploadAnswerProps> = props => {
   )
 }
 
-const AnswerPage: React.FC<{ answerId: string }> = props => {
+export type UploadAnswerPageProps = {
+  answerId: string
+}
+
+const UploadAnswerPage = ({ answerId }: UploadAnswerPageProps) => {
   const result = useGetAnswerQuery({
-    variables: { id: props.answerId }
+    variables: { id: answerId }
   })
   const differentUser = useContext(DifferentUserContext)
 
@@ -203,4 +207,4 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
   )
 }
 
-export default AnswerPage
+export default UploadAnswerPage
