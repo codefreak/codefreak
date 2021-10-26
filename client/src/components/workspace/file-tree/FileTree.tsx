@@ -13,6 +13,8 @@ import useCreateWorkspacePathMutation, {
 } from '../../../hooks/workspace/useCreateWorkspacePathMutation'
 import {
   trimLeadingSlashes,
+  trimTrailingSlashes,
+  withLeadingSlash,
   withTrailingSlash
 } from '../../../services/strings'
 import useDeleteWorkspacePathMutation from '../../../hooks/workspace/useDeleteWorkspacePathMutation'
@@ -40,9 +42,9 @@ const { confirm } = Modal
  * @param fileSystemNode the node to convert
  * @returns the converted DataNode
  */
-const toDataNode = (fileSystemNode: FileSystemNode): DataNode => ({
+export const toDataNode = (fileSystemNode: FileSystemNode): DataNode => ({
   title: basename(fileSystemNode.path),
-  key: fileSystemNode.path,
+  key: withLeadingSlash(fileSystemNode.path),
   isLeaf: fileSystemNode.size !== undefined
 })
 
@@ -63,7 +65,7 @@ const toDataNode = (fileSystemNode: FileSystemNode): DataNode => ({
 const includeExistingChildrenToNewlyLoadedDataNodes = (
   newlyLoadedNodes: DataNode[],
   existingNodes: DataNode[] = []
-) =>
+): DataNode[] =>
   newlyLoadedNodes.map(node => {
     const children = existingNodes.find(
       existingNode => existingNode.key === node.key
@@ -84,22 +86,28 @@ const includeExistingChildrenToNewlyLoadedDataNodes = (
  * @param startingPath the path to start creatign parent-directies as DataNodes
  * @returns a hierarchy of DataNodes bound through their children property
  */
-const createDataNodesForDirectory = (path: string, startingPath = '/') => {
-  let node: DataNode = {
-    key: path,
-    isLeaf: false
-  }
+export const createDataNodesForDirectory = (
+  path: string,
+  startingPath = '/'
+): DataNode | undefined => {
+  const normalizedPath = withLeadingSlash(trimTrailingSlashes(path))
+  const normalizedStartingPath = withLeadingSlash(
+    trimTrailingSlashes(startingPath)
+  )
 
-  let currentPath = path
+  let node: DataNode | undefined = undefined
 
-  while (currentPath !== startingPath) {
-    currentPath = dirname(currentPath)
+  let currentPath = normalizedPath
 
+  while (currentPath !== normalizedStartingPath && !isRoot(currentPath)) {
     node = {
       key: currentPath,
+      title: basename(currentPath),
       isLeaf: false,
-      children: [node]
+      children: node ? [node] : undefined
     }
+
+    currentPath = dirname(currentPath)
   }
 
   return node
@@ -117,10 +125,50 @@ const createDataNodesForDirectory = (path: string, startingPath = '/') => {
 export const insertDataNodes = (
   path: string,
   existingNodes: DataNode[],
-  newNodes: DataNode[]
-): DataNode[] =>
-  existingNodes.map(node => {
-    if (node.key === path) {
+  newNodes: DataNode[],
+  rootPath = '/'
+): DataNode[] => {
+  const normalizedPath = withLeadingSlash(trimTrailingSlashes(path))
+  const normalizedRootPath = withLeadingSlash(trimTrailingSlashes(rootPath))
+
+  let nodes = existingNodes
+
+  if (normalizedPath === normalizedRootPath) {
+    return [
+      ...existingNodes,
+      ...includeExistingChildrenToNewlyLoadedDataNodes(newNodes, existingNodes)
+    ]
+  }
+
+  if (
+    normalizedPath.startsWith(normalizedRootPath) &&
+    existingNodes.filter(node => {
+      const normalizedKey = withLeadingSlash(
+        trimTrailingSlashes(node.key.toString())
+      )
+
+      return (
+        normalizedPath.startsWith(normalizedKey) &&
+        normalizedKey !== normalizedRootPath
+      )
+    }).length === 0
+  ) {
+    const nodesForPath = createDataNodesForDirectory(
+      normalizedPath,
+      normalizedRootPath
+    )
+
+    if (nodesForPath) {
+      nodes = [...existingNodes, nodesForPath]
+    }
+  }
+
+  return nodes.map(node => {
+    const normalizedKey = withLeadingSlash(
+      trimTrailingSlashes(node.key.toString())
+    )
+
+    if (normalizedKey === normalizedPath) {
       // Don't overwrite existing children of the nodes
       return {
         ...node,
@@ -129,19 +177,32 @@ export const insertDataNodes = (
           node.children
         )
       }
-    } else if (path.includes(node.key.toString())) {
-      const parentNodes = node.children ?? [
-        createDataNodesForDirectory(path, node.key.toString())
-      ]
+    } else if (normalizedPath.includes(normalizedKey)) {
+      let parentNodes = node.children
+
+      if (!parentNodes) {
+        const nodesForPath = createDataNodesForDirectory(
+          normalizedPath,
+          normalizedKey
+        )
+
+        parentNodes = nodesForPath ? [nodesForPath] : []
+      }
 
       return {
         ...node,
-        children: insertDataNodes(path, parentNodes, newNodes)
+        children: insertDataNodes(
+          normalizedPath,
+          parentNodes,
+          newNodes,
+          normalizedKey
+        )
       }
     }
 
     return node
   })
+}
 
 /**
  * Returns whether the given path can be interpreted as the root-directory '/'
@@ -157,7 +218,7 @@ export const isRoot = (path: string) => path === '/' || path === ''
  * @param nodes the tree of nodes to flatten
  * @returns the flattened tree
  */
-const flattenNodes = (nodes: DataNode[]): DataNode[] => {
+export const flattenNodes = (nodes: DataNode[]): DataNode[] => {
   return nodes.flatMap(node => {
     const children = flattenNodes(node.children ?? [])
     return [...children, node].flat()

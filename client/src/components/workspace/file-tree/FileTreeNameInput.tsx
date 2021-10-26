@@ -69,7 +69,7 @@ const getInputIcon = (type: InputType): React.ReactNode => {
  * @param type the type of input to create
  * @returns a DataNode for the name-input with the given callbacks
  */
-const createNameInputNode = (
+export const createNameInputNode = (
   onConfirm: (name: string) => void,
   onCancel: () => void,
   type: InputType
@@ -89,7 +89,7 @@ const createNameInputNode = (
  * @param parentPath the path which will be the parent of the node
  * @returns the new tree with the node inserted
  */
-const insertNameInputNodeIntoTree = (
+export const insertNameInputNodeIntoTree = (
   treeData: DataNode[],
   nameInputNode: DataNode,
   parentPath: string

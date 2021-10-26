@@ -1,4 +1,7 @@
 import {
+  createDirectoryPath,
+  createFilePath,
+  deletePath,
   extractRelativeFilePath,
   fetchWithAuthentication,
   graphqlWebSocketPath,
@@ -46,6 +49,45 @@ test('readFilePath', () => {
     ['/', 'https://codefreak.test/files/']
   ]).forEach((expected, input) => {
     expect(readFilePath('https://codefreak.test', input)).toBe(expected)
+  })
+})
+
+test('createFilePath', () => {
+  new Map([
+    ['foo.txt', 'https://codefreak.test/files/foo.txt'],
+    ['bar/foo.txt', 'https://codefreak.test/files/bar/foo.txt'],
+    ['/foo.txt', 'https://codefreak.test/files/foo.txt'],
+    ['/bar/foo.txt', 'https://codefreak.test/files/bar/foo.txt'],
+    ['', 'https://codefreak.test/files'],
+    ['/', 'https://codefreak.test/files']
+  ]).forEach((expected, input) => {
+    expect(createFilePath('https://codefreak.test', input)).toBe(expected)
+  })
+})
+
+test('createDirectoryPath', () => {
+  new Map([
+    ['foo', 'https://codefreak.test/files/foo/'],
+    ['bar/foo', 'https://codefreak.test/files/bar/foo/'],
+    ['/foo', 'https://codefreak.test/files/foo/'],
+    ['/bar/foo', 'https://codefreak.test/files/bar/foo/'],
+    ['', 'https://codefreak.test/files/'],
+    ['/', 'https://codefreak.test/files/']
+  ]).forEach((expected, input) => {
+    expect(createDirectoryPath('https://codefreak.test', input)).toBe(expected)
+  })
+})
+
+test('deletePath', () => {
+  new Map([
+    ['foo.txt', 'https://codefreak.test/files/foo.txt'],
+    ['bar/foo.txt', 'https://codefreak.test/files/bar/foo.txt'],
+    ['/foo.txt', 'https://codefreak.test/files/foo.txt'],
+    ['/bar/foo.txt', 'https://codefreak.test/files/bar/foo.txt'],
+    ['', 'https://codefreak.test/files'],
+    ['/', 'https://codefreak.test/files']
+  ]).forEach((expected, input) => {
+    expect(deletePath('https://codefreak.test', input)).toBe(expected)
   })
 })
 

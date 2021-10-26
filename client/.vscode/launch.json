@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "env": { "CI": "true" },
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/craco",
+      "args": [
+        "test",
+        "--runInBand",
+        "--no-cache",
+        "${fileBasenameNoExtension}"
+      ],
+      "cwd": "${workspaceRoot}",
+      "console": "externalTerminal",
+      "protocol": "inspector",
+      "internalConsoleOptions": "neverOpen",
+      "port": 9229
+    }
+  ]
+}

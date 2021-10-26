@@ -5,14 +5,24 @@ import { deletePath, fetchWithAuthentication } from '../../services/workspace'
 const useDeleteWorkspacePathMutation = () => {
   const { baseUrl, authToken } = useWorkspace()
 
-  return useMutation(({ path }: { path: string }) => {
+  return useMutation(async ({ path }: { path: string }) => {
     if (baseUrl === NO_BASE_URL) {
       return Promise.reject('No base-url for the workspace given')
     }
 
     const fullPath = deletePath(baseUrl, path)
 
-    return fetchWithAuthentication(fullPath, { method: 'DELETE', authToken })
+    const response = await fetchWithAuthentication(fullPath, {
+      method: 'DELETE',
+      authToken
+    })
+
+    if (!response.ok) {
+      const message = await response.text()
+      return Promise.reject(message)
+    }
+
+    return Promise.resolve()
   })
 }
 
