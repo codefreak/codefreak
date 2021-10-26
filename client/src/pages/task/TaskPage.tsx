@@ -40,7 +40,7 @@ import { BASE_PATHS, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
-import { makeUpdater } from '../../services/util'
+import { makeUpdater, noop } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
 import TaskConfigurationPage from './TaskConfigurationPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
@@ -56,8 +56,9 @@ import WorkspacePage from '../../components/workspace/WorkspacePage'
 import { Client, createClient } from 'graphql-ws'
 import { graphqlWebSocketPath } from '../../services/workspace'
 import WorkspaceRunButton from '../../components/workspace/WorkspaceRunButton'
-import UploadAnswerPageButton from '../../components/UploadAnswerPageButton'
+import { UploadAnswerPageButton } from '../answer/UploadAnswerPage'
 import CreateAnswerButton from '../../components/CreateAnswerButton'
+import { DangerZoneButton } from '../answer/DangerZone'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
@@ -212,6 +213,7 @@ const TaskPage: React.FC = () => {
   } else if (answer) {
     // regular buttons to work on task for students
     buttons = [
+      <DangerZoneButton answer={answer} onReset={noop} />,
       <UploadAnswerPageButton answerId={answer.id} />,
       <StartEvaluationButton
         answerId={answer.id}
