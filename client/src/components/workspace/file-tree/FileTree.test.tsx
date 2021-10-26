@@ -1,4 +1,14 @@
-import { render } from '../../../services/testing'
+import {
+  NO_ANSWER_ID,
+  NO_AUTH_TOKEN,
+  NO_TASK_ID
+} from '../../../hooks/workspace/useWorkspace'
+import {
+  mockFetch,
+  render,
+  waitForTime,
+  waitUntilWorkspaceIsAvailable
+} from '../../../services/testing'
 import { noop } from '../../../services/util'
 import FileTree, {
   createDataNodesForDirectory,
@@ -326,8 +336,27 @@ describe('<FileTree />', () => {
     expect(findNode(nodes, '/baz')).toBeUndefined()
   })
 
-  it('renders a workspace-file-tree', () => {
-    const { container } = render(<FileTree onOpenFile={noop} />)
+  it('renders a workspace-file-tree', async () => {
+    mockFetch()
+
+    const baseUrl = 'https://codefreak.test'
+
+    const workspaceContext = {
+      baseUrl,
+      answerId: NO_ANSWER_ID,
+      authToken: NO_AUTH_TOKEN,
+      taskId: NO_TASK_ID
+    }
+
+    const { container } = render(
+      <FileTree onOpenFile={noop} />,
+      {},
+      { withWorkspaceContextProvider: true, workspaceContext }
+    )
+
+    await waitUntilWorkspaceIsAvailable(workspaceContext)
+
+    await waitForTime()
 
     expect(
       container.getElementsByClassName('workspace-file-tree')
