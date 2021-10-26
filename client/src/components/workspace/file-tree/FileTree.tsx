@@ -267,8 +267,8 @@ interface FileTreeProps {
  * Renders the files and directories of the workspace in a tree format
  */
 const FileTree = ({ onOpenFile }: FileTreeProps) => {
-  const { graphqlWebSocketClient } = useWorkspace()
-  const { data } = useListWorkspaceFilesQuery()
+  const { graphqlWebSocketClient, isAvailable } = useWorkspace()
+  const { data, isLoading } = useListWorkspaceFilesQuery()
   const { mutate: createPath } = useCreateWorkspacePathMutation()
   const { mutate: deletePath } = useDeleteWorkspacePathMutation()
   const { mutate: renamePath } = useRenameWorkspacePathMutation()
@@ -453,7 +453,7 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
   }
 
   return (
-    <TabPanel withPadding>
+    <TabPanel withPadding loading={!isAvailable || isLoading}>
       <Dropdown
         overlay={rightClickMenu}
         trigger={['contextMenu']}
