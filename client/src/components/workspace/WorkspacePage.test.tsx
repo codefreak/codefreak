@@ -56,7 +56,11 @@ describe('<WorkspacePage />', () => {
     const mocks = [startWorkspaceMock(noop, baseUrl, answerId)]
 
     const { container } = render(
-      <WorkspacePage onBaseUrlChange={noop} type={FileContextType.Answer} />,
+      <WorkspacePage
+        onBaseUrlChange={noop}
+        type={FileContextType.Answer}
+        createAnswerButton={null}
+      />,
       {},
       {
         workspaceContext,
@@ -93,6 +97,7 @@ describe('<WorkspacePage />', () => {
       <WorkspacePage
         onBaseUrlChange={newBaseUrl => (baseUrlFromProvider = newBaseUrl)}
         type={FileContextType.Answer}
+        createAnswerButton={null}
       />,
       {},
       {
