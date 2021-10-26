@@ -7,37 +7,39 @@ import { Menu, MenuProps } from 'antd'
 import { RightClickedItem } from './FileTree'
 
 /**
- * TODO document
+ * Extends the default MenuProps with the right-clicked-item and callbacks for the menu-items.
  */
 interface FileTreeRightClickMenuProps extends MenuProps {
   /**
-   * TODO document
+   * The tree-item that was right-clicked. Undefined is interpreted as the file-tree root.
    */
   rightClickedItem?: RightClickedItem
 
   /**
-   * TODO document
+   * Called when the rename item is clicked
    */
   onRename?: () => void
 
   /**
-   * TODO document
+   * Called when the delete item is clicked
    */
   onDelete?: () => void
 
   /**
-   * TODO document
+   * Called when the add-file item is clicked
    */
   onAddFile?: () => void
 
   /**
-   * TODO document
+   * Called when the add-directory item is clicked
    */
   onAddDirectory?: () => void
 }
 
 /**
- * TODO document
+ * Opens a context-menu for when an item in a file-tree was right-clicked.
+ * It consists of four actions: add-file and add-directory and when the right-clicked-item
+ * was a file or directory also rename and delete.
  */
 const FileTreeRightClickMenu = ({
   rightClickedItem,
