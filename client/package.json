@@ -23,7 +23,7 @@
     "@types/loadable__component": "5.13.4",
     "@types/node": "12.20.33",
     "@types/react": "17.0.24",
-    "@types/react-dom": "17.0.9",
+    "@types/react-dom": "17.0.10",
     "@types/react-helmet": "6.1.4",
     "@types/react-jsonschema-form": "1.7.7",
     "@types/react-router-dom": "5.3.1",
