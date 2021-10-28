@@ -48,7 +48,7 @@ describe('<WorkspacePage />', () => {
     mockFetch()
   })
 
-  it('renders two <WorkspaceTabsWrapper /> areas', () => {
+  it('renders three <WorkspaceTabsWrapper /> areas', () => {
     mockFetch()
 
     const workspaceContext = { baseUrl, authToken, answerId, taskId }
@@ -71,7 +71,7 @@ describe('<WorkspacePage />', () => {
 
     expect(
       container.getElementsByClassName('workspace-tabs-wrapper')
-    ).toHaveLength(2)
+    ).toHaveLength(3)
   })
 
   it('starts a workspace and the correct baseUrl is set', async () => {

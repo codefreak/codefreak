@@ -1,16 +1,23 @@
 import Editor, { Monaco } from '@monaco-editor/react'
 import TabPanel, { LoadingTabPanelPlaceholder } from './TabPanel'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
-import { extractRelativeFilePath, readFilePath } from '../../services/workspace'
+import useWorkspace from '../../../hooks/workspace/useWorkspace'
+import {
+  extractRelativeFilePath,
+  readFilePath
+} from '../../../services/workspace'
 import { debounce } from 'ts-debounce'
 import { editor } from 'monaco-editor'
-import { messageService } from '../../services/message'
-import useGetWorkspaceFileQuery from '../../hooks/workspace/useGetWorkspaceFileQuery'
-import useSaveWorkspaceFileMutation from '../../hooks/workspace/useSaveWorkspaceFileMutation'
+import { messageService } from '../../../services/message'
+import useGetWorkspaceFileQuery from '../../../hooks/workspace/useGetWorkspaceFileQuery'
+import useSaveWorkspaceFileMutation from '../../../hooks/workspace/useSaveWorkspaceFileMutation'
 import React, { useEffect, useState } from 'react'
 import EmptyTabPanel from './EmptyTabPanel'
-import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
+import {
+  WorkspaceTab,
+  WorkspaceTabType
+} from '../../../services/workspace-tabs'
 import { FileTextOutlined } from '@ant-design/icons'
+import { basename } from 'path'
 
 export class EditorWorkspaceTab extends WorkspaceTab {
   constructor(path: string) {
@@ -19,9 +26,10 @@ export class EditorWorkspaceTab extends WorkspaceTab {
 
   renderTitle(): React.ReactNode {
     if (this.path.length > 0) {
+      const fileName = basename(this.path)
       return (
         <>
-          <FileTextOutlined /> {this.path}
+          <FileTextOutlined /> {fileName}
         </>
       )
     }
@@ -31,6 +39,10 @@ export class EditorWorkspaceTab extends WorkspaceTab {
 
   renderContent(): React.ReactNode {
     return <EditorTabPanel file={this.path} />
+  }
+
+  toActiveTabQueryParam(): string {
+    return this.path
   }
 }
 
@@ -77,8 +89,11 @@ const EditorTabPanel = ({ file }: EditorTabPanelProps) => {
         if (model) {
           const path = extractRelativeFilePath(model.uri.path)
           const contents = model.getValue()
+
           saveFile({ path, contents })
-          messageService.success(`${path} saved`)
+
+          const fileName = basename(path)
+          messageService.success(`${fileName} saved`)
         }
       }
     })
@@ -88,7 +103,7 @@ const EditorTabPanel = ({ file }: EditorTabPanelProps) => {
 
   if (file.length === 0) {
     messageService.error('No file path given')
-    return <EmptyTabPanel loading={loading} />
+    return <EmptyTabPanel />
   }
 
   return (
