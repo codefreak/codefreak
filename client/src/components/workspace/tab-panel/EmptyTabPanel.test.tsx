@@ -1,4 +1,4 @@
-import { render } from '../../services/testing'
+import { render } from '../../../services/testing'
 import EmptyTabPanel from './EmptyTabPanel'
 
 describe('<EmptyTabPanel />', () => {

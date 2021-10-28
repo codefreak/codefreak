@@ -1,12 +1,12 @@
-import useWorkspace from '../../hooks/workspace/useWorkspace'
+import useWorkspace from '../../../hooks/workspace/useWorkspace'
 import { useEffect, useRef, useState } from 'react'
 import { ITheme, Terminal } from 'xterm'
 import useResizeProcessMutation, {
   ProcessType
-} from '../../hooks/workspace/useResizeProcessMutation'
+} from '../../../hooks/workspace/useResizeProcessMutation'
 import { FitAddon } from 'xterm-addon-fit'
 import { debounce } from 'ts-debounce'
-import { processWebSocketPath } from '../../services/workspace'
+import { processWebSocketPath } from '../../../services/workspace'
 import { AttachAddon } from 'xterm-addon-attach'
 import TabPanel from './TabPanel'
 

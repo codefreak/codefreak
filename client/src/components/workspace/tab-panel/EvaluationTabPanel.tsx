@@ -1,9 +1,12 @@
 import TabPanel from './TabPanel'
-import EvaluationPage from '../../pages/evaluation/EvaluationOverviewPage'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
-import { WorkspaceTab, WorkspaceTabType } from '../../services/workspace-tabs'
+import EvaluationPage from '../../../pages/evaluation/EvaluationOverviewPage'
+import useWorkspace from '../../../hooks/workspace/useWorkspace'
+import {
+  WorkspaceTab,
+  WorkspaceTabType
+} from '../../../services/workspace-tabs'
 import { DashboardOutlined } from '@ant-design/icons'
-import EvaluationIndicator from '../EvaluationIndicator'
+import EvaluationIndicator from '../../EvaluationIndicator'
 import React from 'react'
 
 export class EvaluationWorkspaceTab extends WorkspaceTab {
