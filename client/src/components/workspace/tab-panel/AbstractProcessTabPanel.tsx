@@ -61,10 +61,10 @@ const AbstractProcessTabPanel = ({
       newTerminal.open(terminalRef.current)
       setTerminal(newTerminal)
     }
-  }, [processId, terminalRef, terminal, baseUrl])
+  }, [terminalRef, terminal])
 
   useEffect(() => {
-    if (terminal && !processWebSocket) {
+    if (terminal) {
       const fitAddon = new FitAddon()
       terminal.loadAddon(fitAddon)
       fitAddon.fit()
@@ -74,12 +74,20 @@ const AbstractProcessTabPanel = ({
       }, 100)
       window.addEventListener('resize', resizeHandler)
 
+      return () => {
+        window.removeEventListener('resize', resizeHandler)
+      }
+    }
+  }, [baseUrl, terminal])
+
+  useEffect(() => {
+    if (terminal && !processWebSocket) {
       const url = processWebSocketPath(baseUrl, processId)
       const webSocket = new WebSocket(url)
 
       setProcessWebSocket(webSocket)
     }
-  }, [baseUrl, processId, terminal, processWebSocket])
+  }, [baseUrl, processId, processWebSocket, terminal])
 
   useEffect(() => {
     if (
