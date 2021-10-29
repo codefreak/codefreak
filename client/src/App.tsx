@@ -17,7 +17,6 @@ import {
   ServerTimeOffsetProvider,
   useCalculatedServerTimeOffset
 } from './hooks/useServerTimeOffset'
-import IdePage from './pages/IdePage'
 import LoginPage from './pages/LoginPage'
 import LtiPage from './pages/LtiPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -103,7 +102,6 @@ const App: React.FC<AppProps> = props => {
               <Route exact path="/">
                 <Redirect to="/assignments" />
               </Route>
-              <Route path="/ide/:type/:id" component={IdePage} />
               <Route path="/lti" component={LtiPage} />
               <Route>
                 <HideNavigationProvider>

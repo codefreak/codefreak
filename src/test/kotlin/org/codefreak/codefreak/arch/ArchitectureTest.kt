@@ -5,7 +5,6 @@ import com.tngtech.archunit.junit.AnalyzeClasses
 import com.tngtech.archunit.junit.ArchTest
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition
 import com.tngtech.archunit.library.Architectures
-import javax.inject.Named
 import javax.persistence.ManyToMany
 import javax.persistence.OneToMany
 import org.springframework.stereotype.Service
@@ -48,8 +47,6 @@ internal class ArchitectureTest {
       .noMethods()
       .should()
       .beAnnotatedWith(javax.transaction.Transactional::class.java)
-      .orShould()
-      .beAnnotatedWith(Named::class.java)
 
   @ArchTest
   val `List is not used as type for entity relations` = ArchRuleDefinition

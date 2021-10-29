@@ -15,7 +15,6 @@ import org.codefreak.codefreak.service.workspace.WorkspaceService
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.codefreak.codefreak.util.preventClose
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 /**
@@ -28,7 +27,6 @@ const val EVALUATION_SCRIPT_NAME = "run-evaluation"
  * Evaluation backend that creates a workspace for evaluating code.
  */
 @Component
-@ConditionalOnProperty("codefreak.evaluation.backend", havingValue = "workspace")
 class WorkspaceEvaluationBackend : EvaluationBackend {
   @Autowired
   private lateinit var workspaceService: WorkspaceService

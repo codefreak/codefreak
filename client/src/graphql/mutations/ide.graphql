@@ -1,3 +1,0 @@
-mutation StartIde($type: IdeType!, $id: ID!) {
-  startIde(type: $type, id: $id)
-}

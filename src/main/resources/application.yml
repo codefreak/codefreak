@@ -27,8 +27,6 @@ logging:
   level:
     # Hides HHH000424: Disabling contextual LOB creation as createClob() method threw error
     org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: WARN
-    # Hide log spam of docker pull progress
-    com.spotify.docker.client.LoggingPullHandler: WARN
     notprivacysafe.graphql.execution.SimpleDataFetcherExceptionHandler: ERROR
 
 graphql:
@@ -56,27 +54,6 @@ codefreak:
       # The path where all file collections will be stored in sub-directories
       # Please make sure that the user running the server has read+write permissions on this directory
       collectionStoragePath: "${user.home}/.codefreak/${codefreak.instanceId}/collections"
-  docker:
-    # All of the docker settings below will fall back to a system-depended default value if unset
-    host: ~
-    certPath: ~
-    caCertPath: ~
-    clientKeyPath: ~
-    clientCertPath: ~
-    # Define how (and if) images will be pulled on application startup
-    pull-policy: always
-  ide:
-    image: "cfreak/ide:1"
-    # Interval for checking for idle containers in ms. Default 30 seconds.
-    idle-check-rate: 30000
-    # Time span after which an idle container is shut down. Default 1 minute.
-    idle-shutdown-threshold: 60000
-    # Memory limit in bytes (2GiB)
-    memory: 2147483648
-    # Number of CPUs per container (0 means no limit)
-    cpus: 0
-    # Name of the network the container will be attached to
-    network: bridge
 
 # Enable actuator health checks if needed in production
 # https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#actuator-properties

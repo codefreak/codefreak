@@ -42,15 +42,6 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val inPool = entity.assignment == null
   val editable by lazy { entity.isEditable(authorization) }
   val exportUrl by lazy { FrontendUtil.getUriBuilder().path("/api/tasks/$id/export").build().toUriString() }
-  val ideEnabled = entity.ideEnabled
-  val ideImage by lazy {
-    authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
-    entity.ideImage
-  }
-  val ideArguments by lazy {
-    authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
-    entity.ideArguments
-  }
   val hiddenFiles by lazy {
     authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
     entity.hiddenFiles.toTypedArray()
@@ -90,9 +81,6 @@ class TaskDetailsInput(var id: UUID = UUID.randomUUID()) {
   var body: String? = null
   var hiddenFiles: Array<String> = arrayOf()
   var protectedFiles: Array<String> = arrayOf()
-  var ideEnabled: Boolean = true
-  var ideImage: String? = null
-  var ideArguments: String? = null
 }
 
 @GraphQLName("TaskTemplate")
@@ -227,9 +215,6 @@ class TaskMutation : BaseResolver(), Mutation {
     val task = serviceAccess.getService(TaskService::class).findTask(input.id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     task.body = input.body
-    task.ideEnabled = input.ideEnabled
-    task.ideImage = input.ideImage?.takeIf { it.isNotBlank() }
-    task.ideArguments = input.ideArguments?.takeIf { it.isNotBlank() }
     task.hiddenFiles = input.hiddenFiles.filter { it.isNotBlank() }
     task.protectedFiles = input.protectedFiles.filter { it.isNotBlank() }
     serviceAccess.getService(TaskService::class).saveTask(task)
