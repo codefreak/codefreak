@@ -34,7 +34,7 @@ class MigrateFileCollectionsToFileSystemTaskChange : CustomTaskChange {
   override fun getConfirmationMessage(): String {
     return when (numberOfMigratedFileCollections) {
       0 -> "No file-collections migrated to the filesystem"
-      1 -> "$numberOfMigratedFileCollections file-collections migrated to `$fileSystemPath`"
+      1 -> "$numberOfMigratedFileCollections file-collection migrated to `$fileSystemPath`"
       else -> "$numberOfMigratedFileCollections file-collections migrated to `$fileSystemPath`"
     }
   }
