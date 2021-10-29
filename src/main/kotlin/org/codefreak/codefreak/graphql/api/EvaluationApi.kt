@@ -26,7 +26,6 @@ import org.codefreak.codefreak.service.AssignmentService
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
 import org.codefreak.codefreak.service.EvaluationStepDefinitionService
 import org.codefreak.codefreak.service.EvaluationStepStatusUpdatedEvent
-import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.evaluation.EvaluationService
 import org.codefreak.codefreak.service.evaluation.EvaluationStepService
@@ -236,7 +235,6 @@ class EvaluationMutation : BaseResolver(), Mutation {
       invalidateTask != null -> assignment.tasks.find { it.id == invalidateTask }
           ?.let {
             evaluationService.invalidateEvaluations(it)
-            serviceAccess.getService(IdeService::class).saveTaskFiles(it)
           }
     }
 

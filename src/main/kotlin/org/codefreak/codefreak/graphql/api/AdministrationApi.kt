@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component
 class SystemConfigDto(
   val motd: String?,
   val maxFileUploadSize: Long,
-  val defaultIdeImage: String,
   val defaultEvaluationTimeout: Long
 )
 
@@ -33,7 +32,6 @@ class AdministrationQuery : BaseResolver(), Query {
     return SystemConfigDto(
         motd = adminService.getMotd(),
         maxFileUploadSize = adminService.getMaxUploadSize(),
-        defaultIdeImage = adminService.getDefaultIdeDockerImageName(),
         defaultEvaluationTimeout = adminService.getDefaultEvaluationTimeout()
     )
   }

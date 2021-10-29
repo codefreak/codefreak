@@ -13,7 +13,6 @@ import org.codefreak.codefreak.service.AssignmentStatusChangedEvent
 import org.codefreak.codefreak.service.BaseService
 import org.codefreak.codefreak.service.EntityNotFoundException
 import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
-import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionDeadlineReachedEvent
 import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.file.FileService
@@ -33,9 +32,6 @@ class EvaluationService : BaseService() {
 
   @Autowired
   private lateinit var evaluationRepository: EvaluationRepository
-
-  @Autowired
-  private lateinit var ideService: IdeService
 
   @Autowired
   private lateinit var workspaceIdeService: WorkspaceIdeService
@@ -74,7 +70,6 @@ class EvaluationService : BaseService() {
     if (!forceSaveFiles && !answer.isEditable) {
       log.info("Skipped saving of files from answer ${answer.id} because it's not editable anymore")
     } else {
-      ideService.saveAnswerFiles(answer)
       workspaceIdeService.saveAnswerFiles(answer.id)
     }
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }

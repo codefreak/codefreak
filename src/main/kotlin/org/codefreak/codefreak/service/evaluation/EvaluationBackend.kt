@@ -65,7 +65,7 @@ interface EvaluationRunConfig {
   val environment: Map<String, String>
 
   /**
-   * The full name of a Docker image which should be used for evaluation.
+   * The full name of a container image which should be used for evaluation.
    */
   val imageName: String
 

@@ -33,7 +33,6 @@ sourceCompatibility = '1.8'
 
 repositories {
   mavenCentral()
-  jcenter()
   maven { url 'https://jitpack.io' }
 }
 
@@ -67,7 +66,6 @@ dependencies {
   implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.5'
   implementation 'org.jetbrains.kotlin:kotlin-reflect:1.5.31'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31'
-  implementation 'com.spotify:docker-client:8.16.0'
   implementation 'org.apache.commons:commons-compress:1.21'
   implementation 'org.apache.commons:commons-csv:1.9.0'
   implementation 'commons-io:commons-io:2.11.0'
@@ -105,26 +103,6 @@ dependencies {
 
   // For workspace communication
   implementation 'com.apollographql.apollo3:apollo-runtime:3.0.0-alpha07'
-
-  // workaround for https://github.com/spotify/docker-client/issues/1030
-  implementation 'org.glassfish.jersey.inject:jersey-hk2:2.35'
-
-  // Docker Client doesn't work with jersey-common >=2.29 because of missing Base64 class
-  implementation('org.glassfish.jersey.core:jersey-common') {
-    version {
-      strictly '2.28'
-    }
-  }
-  implementation('org.glassfish.jersey.core:jersey-client') {
-    version {
-      strictly '2.28'
-    }
-  }
-  implementation('org.glassfish.jersey.connectors:jersey-apache-connector') {
-    version {
-      strictly '2.28'
-    }
-  }
 
   // workaround for https://github.com/mitreid-connect/OpenID-Connect-Java-Spring-Server/issues/1468
   implementation 'org.springframework.security.oauth:spring-security-oauth2:2.5.1.RELEASE'

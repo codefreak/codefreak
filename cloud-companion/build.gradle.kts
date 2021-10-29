@@ -25,7 +25,7 @@ configurations {
 repositories {
   mavenCentral()
   maven(url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
-  maven(url = "https://repo.spring.io/snapshot") // for graphql-spring-boot-starter until it's in stable
+  maven(url = "https://repo.spring.io/milestone") // for graphql-spring-boot-starter until it's in stable
 }
 
 dependencies {
@@ -34,7 +34,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-aop")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-  implementation("org.springframework.experimental:graphql-spring-boot-starter:1.0.0-SNAPSHOT")
+  implementation("org.springframework.experimental:graphql-spring-boot-starter:1.0.0-M3")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -54,7 +54,7 @@ dependencies {
     exclude(group = "org.assertj", module = "assertj-core")
   }
   testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-  testImplementation("org.springframework.graphql:spring-graphql-test:1.0.0-SNAPSHOT")
+  testImplementation("org.springframework.graphql:spring-graphql-test:1.0.0-M3")
   testImplementation("junit:junit:4.13.2")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("org.awaitility:awaitility")

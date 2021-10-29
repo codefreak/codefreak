@@ -6,7 +6,6 @@ import org.codefreak.codefreak.auth.Authority
 import org.codefreak.codefreak.auth.Authorization
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.service.EntityNotFoundException
-import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.TaskService
 import org.codefreak.codefreak.service.TaskTarService
 import org.codefreak.codefreak.service.file.FileService
@@ -30,9 +29,6 @@ class TaskController : BaseController() {
 
   @Autowired
   lateinit var taskTarService: TaskTarService
-
-  @Autowired
-  lateinit var ideService: IdeService
 
   @Autowired
   lateinit var workspaceIdeService: WorkspaceIdeService
@@ -75,7 +71,6 @@ class TaskController : BaseController() {
       ?: throw EntityNotFoundException("Submissions does not contain an answer for task $taskId")
     // ensure files we are downloading are up-to-date
     if (answer.isEditable) {
-      ideService.saveAnswerFiles(answer)
       workspaceIdeService.saveAnswerFiles(answer.id)
     }
     return answer
