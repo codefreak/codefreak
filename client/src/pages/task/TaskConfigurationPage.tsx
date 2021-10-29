@@ -1,9 +1,4 @@
-import {
-  EditOutlined,
-  InfoCircleFilled,
-  InfoCircleTwoTone,
-  SyncOutlined
-} from '@ant-design/icons'
+import { EditOutlined, InfoCircleFilled, SyncOutlined } from '@ant-design/icons'
 import {
   Alert,
   Card,
