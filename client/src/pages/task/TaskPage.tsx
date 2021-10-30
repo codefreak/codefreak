@@ -172,19 +172,12 @@ const TaskPage: React.FC = () => {
       </span>
     ) : null
 
-  // show task configuration only to teachers and admins
-  const configurationTab = editable
+  const tabs = editable
     ? [
         {
           key: '/configuration',
           tab: tab('Configuration', <FileTextOutlined />)
-        }
-      ]
-    : []
-
-  // insert online IDE as last element if enabled
-  const ideTab = task.ideEnabled
-    ? [
+        },
         {
           key: '/ide',
           tab: tab('Online IDE', <CloudOutlined />),
@@ -192,8 +185,6 @@ const TaskPage: React.FC = () => {
         }
       ]
     : []
-
-  const tabs = editable ? [...configurationTab, ...ideTab] : []
 
   const assignment = task.assignment
   const submission = assignment?.submission
