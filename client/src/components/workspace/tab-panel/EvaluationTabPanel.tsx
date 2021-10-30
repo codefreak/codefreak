@@ -18,13 +18,18 @@ export class EvaluationWorkspaceTab extends WorkspaceTab {
   }
 
   renderTitle(): React.ReactNode {
-    return (
-      <>
-        <DashboardOutlined /> Evaluation-Results{' '}
+    // Don't query for the evaluation status while there is no answer-id
+    const indicator =
+      this.answerId.length > 0 ? (
         <EvaluationIndicator
           answerId={this.answerId}
           style={{ marginLeft: 8 }}
         />
+      ) : null
+
+    return (
+      <>
+        <DashboardOutlined /> Evaluation-Results {indicator}
       </>
     )
   }
@@ -37,7 +42,7 @@ export class EvaluationWorkspaceTab extends WorkspaceTab {
 const EvaluationTabPanel = () => {
   const { answerId } = useWorkspace()
   return (
-    <TabPanel withPadding>
+    <TabPanel withPadding loading={answerId.length === 0}>
       <EvaluationPage answerId={answerId} />
     </TabPanel>
   )

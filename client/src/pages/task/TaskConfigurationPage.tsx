@@ -1,9 +1,4 @@
-import {
-  EditOutlined,
-  InfoCircleFilled,
-  InfoCircleTwoTone,
-  SyncOutlined
-} from '@ant-design/icons'
+import { EditOutlined, InfoCircleFilled, SyncOutlined } from '@ant-design/icons'
 import {
   Alert,
   Card,
@@ -76,7 +71,9 @@ export const renderTaskInstructionsText = (
   )
 }
 
-const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
+const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
+  editable
+}) => {
   const subPath = useSubPath()
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
@@ -132,22 +129,6 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
       onChange={subPath.set}
       style={{ marginTop: -16 }}
     >
-      <TabPane tab="Details" key="">
-        <Alert
-          type="info"
-          message={
-            <>
-              This is what your students will see when they open the task. Check
-              out the "edit" tabs that are only visible to you.
-              <br />
-              <InfoCircleTwoTone /> To try out what your students see when they
-              start working on this task, enable <i>testing mode</i>.
-            </>
-          }
-          style={{ marginBottom: 16 }}
-        />
-        {details}
-      </TabPane>
       <TabPane tab="Edit Details" key="/edit">
         <Card title="Instructions">
           {task.body || editable ? (
@@ -285,4 +266,4 @@ const TaskDetailsPage: React.FC<{ editable: boolean }> = ({ editable }) => {
   )
 }
 
-export default TaskDetailsPage
+export default TaskConfigurationPage

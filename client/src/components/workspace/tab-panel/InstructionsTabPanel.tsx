@@ -1,5 +1,5 @@
 import TabPanel from './TabPanel'
-import { renderTaskInstructionsText } from '../../../pages/task/TaskDetailsPage'
+import { renderTaskInstructionsText } from '../../../pages/task/TaskConfigurationPage'
 import { useGetTaskDetailsQuery } from '../../../services/codefreak-api'
 import useWorkspace from '../../../hooks/workspace/useWorkspace'
 import {

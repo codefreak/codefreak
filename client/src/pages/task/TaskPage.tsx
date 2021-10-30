@@ -1,9 +1,5 @@
 import { PageHeaderWrapper } from '@ant-design/pro-layout'
-import {
-  CloudOutlined,
-  FileTextOutlined,
-  SolutionOutlined
-} from '@ant-design/icons'
+import { CloudOutlined, FileTextOutlined } from '@ant-design/icons'
 import { Switch as AntSwitch, Tooltip } from 'antd'
 import { TagType } from 'antd/es/tag'
 import moment from 'moment'
@@ -19,7 +15,6 @@ import AnswerBlocker from '../../components/AnswerBlocker'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AssignmentStatusTag from '../../components/AssignmentStatusTag'
 import AsyncPlaceholder from '../../components/AsyncContainer'
-import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { createBreadcrumb } from '../../components/DefaultLayout'
 import EditableTitle from '../../components/EditableTitle'
 import SetTitle from '../../components/SetTitle'
@@ -45,10 +40,9 @@ import { BASE_PATHS, getEntityPath } from '../../services/entity-path'
 import { messageService } from '../../services/message'
 import { unshorten } from '../../services/short-id'
 import { displayName } from '../../services/user'
-import { makeUpdater } from '../../services/util'
-import AnswerPage from '../answer/AnswerPage'
+import { makeUpdater, noop } from '../../services/util'
 import NotFoundPage from '../NotFoundPage'
-import TaskDetailsPage from './TaskDetailsPage'
+import TaskConfigurationPage from './TaskConfigurationPage'
 import { useCreateRoutes } from '../../hooks/useCreateRoutes'
 import { withTrailingSlash } from '../../services/strings'
 import {
@@ -62,6 +56,9 @@ import WorkspacePage from '../../components/workspace/WorkspacePage'
 import { Client, createClient } from 'graphql-ws'
 import { graphqlWebSocketPath } from '../../services/workspace'
 import WorkspaceRunButton from '../../components/workspace/WorkspaceRunButton'
+import { UploadAnswerPageButton } from '../answer/UploadAnswerPage'
+import CreateAnswerButton from '../../components/CreateAnswerButton'
+import { DangerZoneButton } from '../answer/DangerZone'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
@@ -103,7 +100,7 @@ const TaskPage: React.FC = () => {
   const [deleteAnswer, { loading: deletingAnswer }] = useDeleteAnswerMutation()
 
   const onAnswerCreated = useCallback(() => {
-    subPath.set('/answer')
+    subPath.set('/ide')
     result.refetch()
   }, [result, subPath])
 
@@ -158,60 +155,57 @@ const TaskPage: React.FC = () => {
   }
 
   const testingModeSwitch =
-    editable && !differentUser
-      ? [
-          {
-            key: 'testing-mode',
-            tab: (
-              <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
-                Testing Mode{' '}
-                <Tooltip
-                  placement="right"
-                  title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
-                >
-                  <AntSwitch
-                    onChange={setTestingMode}
-                    style={{ marginLeft: 8 }}
-                    checked={answer !== null}
-                    loading={creatingAnswer || deletingAnswer}
-                  />
-                </Tooltip>
-              </span>
-            )
-          }
-        ]
-      : []
+    editable && !differentUser ? (
+      <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
+        Testing Mode{' '}
+        <Tooltip
+          placement="right"
+          title="Enable this for testing the automatic evaluation. This will create an answer like students would do. Disabling deletes the answer."
+        >
+          <AntSwitch
+            onChange={setTestingMode}
+            style={{ marginLeft: 8 }}
+            checked={answer !== null}
+            loading={creatingAnswer || deletingAnswer}
+          />
+        </Tooltip>
+      </span>
+    ) : null
 
-  const tabs = [
-    { key: '/details', tab: tab('Task', <FileTextOutlined />) },
-    ...testingModeSwitch,
-    {
-      key: '/answer',
-      tab: tab('Answer', <SolutionOutlined />),
-      disabled: !answer
-    },
-    {
-      key: '/ide',
-      tab: tab('Online IDE', <CloudOutlined />),
-      disabled: !answer
-    }
-  ]
+  const tabs = editable
+    ? [
+        {
+          key: '/configuration',
+          tab: tab('Configuration', <FileTextOutlined />)
+        },
+        {
+          key: '/ide',
+          tab: tab('Online IDE', <CloudOutlined />),
+          disabled: !answer
+        }
+      ]
+    : []
 
   const assignment = task.assignment
   const submission = assignment?.submission
 
-  const teacherControls =
-    editable && !differentUser ? (
-      <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
-    ) : null
+  const teacherControls: React.ReactNode[] =
+    editable && !differentUser
+      ? [
+          testingModeSwitch,
+          <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
+        ]
+      : []
 
-  let buttons
+  let buttons: React.ReactNode[] = []
   if (differentUser && assignment) {
     // no buttons in the teacher's submission view
-    buttons = null
+    buttons = []
   } else if (answer) {
     // regular buttons to work on task for students
     buttons = [
+      <DangerZoneButton answer={answer} onReset={noop} />,
+      <UploadAnswerPageButton answerId={answer.id} />,
       <StartEvaluationButton
         answerId={answer.id}
         type="primary"
@@ -219,19 +213,6 @@ const TaskPage: React.FC = () => {
       />,
       <WorkspaceRunButton onRunProcessStarted={setRunProcessId} />
     ]
-  } else if (!teacherControls) {
-    // start working on task by default
-    buttons = (
-      <CreateAnswerButton
-        size="large"
-        task={task}
-        assignment={assignment || undefined}
-        submission={submission || undefined}
-        onAnswerCreated={onAnswerCreated}
-      >
-        Start working on this task!
-      </CreateAnswerButton>
-    )
   }
 
   const title = differentUser
@@ -239,9 +220,7 @@ const TaskPage: React.FC = () => {
     : task.title
 
   const onTabChange = (activeKey: string) => {
-    if (activeKey !== 'testing-mode') {
-      subPath.set(activeKey, userId ? { user: userId } : undefined)
-    }
+    subPath.set(activeKey, userId ? { user: userId } : undefined)
   }
 
   const submissionDeadline = submission?.deadline
@@ -299,6 +278,18 @@ const TaskPage: React.FC = () => {
     runProcessId
   }
 
+  const createAnswerButton = (
+    <CreateAnswerButton
+      size="large"
+      task={task}
+      assignment={assignment || undefined}
+      submission={submission || undefined}
+      onAnswerCreated={onAnswerCreated}
+    >
+      Start working on this task!
+    </CreateAnswerButton>
+  )
+
   return (
     <DifferentUserContext.Provider value={differentUser}>
       <WorkspaceContext.Provider value={workspaceContext}>
@@ -316,30 +307,32 @@ const TaskPage: React.FC = () => {
           tabList={tabs}
           tabActiveKey={subPath.get()}
           onTabChange={onTabChange}
-          extra={
-            <>
-              {teacherControls} {buttons}
-            </>
-          }
+          extra={[...teacherControls, ...buttons]}
           onBack={goToAssignment}
         />
         <Switch>
           <Route exact path={path}>
-            <Redirect to={`${url}/details`} />
+            {editable ? (
+              <Redirect to={`${url}/configuration`} />
+            ) : (
+              <Redirect to={`${url}/ide`} />
+            )}
           </Route>
-          <Route path={`${path}/details`}>
-            <TaskDetailsPage editable={editable} />
-          </Route>
-          <Route path={`${path}/answer`}>
-            {answer ? <AnswerPage answerId={answer.id} /> : <NotFoundPage />}
+          <Route path={`${path}/configuration`}>
+            {editable ? (
+              <TaskConfigurationPage editable={editable} />
+            ) : (
+              <NotFoundPage />
+            )}
           </Route>
           <Route path={`${path}/ide`}>
-            {answer ? (
+            {answer || teacherControls.length === 0 ? (
               <div className="no-padding">
                 <AnswerBlocker deadline={submissionDeadline}>
                   <WorkspacePage
                     type={FileContextType.Answer}
                     onBaseUrlChange={handleBaseUrlChange}
+                    createAnswerButton={createAnswerButton}
                   />
                 </AnswerBlocker>
               </div>

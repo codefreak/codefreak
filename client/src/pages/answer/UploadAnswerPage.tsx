@@ -1,123 +1,58 @@
-import {
-  DownCircleOutlined,
-  ExclamationCircleTwoTone,
-  UpCircleOutlined
-} from '@ant-design/icons'
-import { Alert, Button, Card, Col, Modal, Row } from 'antd'
+import { Button, Card, Modal } from 'antd'
 import moment from 'moment'
-import { useCallback, useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import AnswerBlocker from '../../components/AnswerBlocker'
 import ArchiveDownload from '../../components/ArchiveDownload'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import FileImport from '../../components/FileImport'
-import useMomentReached from '../../hooks/useMomentReached'
-import { useServerNow } from '../../hooks/useServerTimeOffset'
 import {
   Answer,
   FileContextType,
   Submission,
   useGetAnswerQuery,
   useImportAnswerSourceMutation,
-  useResetAnswerMutation,
   useUploadAnswerSourceMutation
 } from '../../services/codefreak-api'
 import { messageService } from '../../services/message'
 import { displayName } from '../../services/user'
 import { DifferentUserContext } from '../task/TaskPage'
 import FileBrowser from '../../components/FileBrowser'
+import { UploadOutlined } from '@ant-design/icons'
 
-type AnswerWithSubmissionDeadline = Pick<Answer, 'id'> & {
+export type AnswerWithSubmissionDeadline = Pick<Answer, 'id'> & {
   submission: Pick<Submission, 'deadline'>
-}
-
-interface DangerZoneProps {
-  answer: AnswerWithSubmissionDeadline
-  onReset: () => void
-}
-
-const DangerZone: React.FC<DangerZoneProps> = props => {
-  const { id } = props.answer
-  const { deadline } = props.answer.submission
-  const [resetAnswer, { loading: resetLoading }] = useResetAnswerMutation({
-    variables: { id }
-  })
-  const [showDangerZone, setShowDangerZone] = useState<boolean>(false)
-  const toggleDangerZone = useCallback(() => {
-    setShowDangerZone(!showDangerZone)
-  }, [showDangerZone, setShowDangerZone])
-  const serverNow = useServerNow()
-  const deadlineReached = useMomentReached(
-    deadline ? moment(deadline) : undefined,
-    serverNow
-  )
-
-  if (deadlineReached === true) {
-    return null
-  }
-
-  const onResetClick = () => {
-    Modal.confirm({
-      title: 'Really reset files?',
-      icon: <ExclamationCircleTwoTone twoToneColor="#ff4d4f" />,
-      okType: 'danger',
-      content: (
-        <>
-          This will REMOVE all modifications you made!
-          <br />
-          Are you sure?
-        </>
-      ),
-      onOk: () =>
-        resetAnswer().then(() => {
-          messageService.success('Answer has been reset to initial files!')
-          props.onReset()
-        })
-    })
-  }
-
-  const upCircle = <UpCircleOutlined />
-  const downCircle = <DownCircleOutlined />
-
-  return (
-    <Card
-      title="Danger Zone"
-      extra={
-        <Button
-          icon={showDangerZone ? upCircle : downCircle}
-          onClick={toggleDangerZone}
-        >
-          {showDangerZone ? 'Hide' : 'Show'}
-        </Button>
-      }
-      bodyStyle={{ display: `${showDangerZone ? '' : 'none'}` }}
-    >
-      <Row>
-        <Col xl={12}>
-          <h3>Reset answer</h3>
-          <Alert
-            type="error"
-            style={{ marginBottom: 16 }}
-            message={
-              <>
-                This will remove all your work on this task and replace
-                everything with the initial files from your teacher!
-                <br />
-                <strong>You cannot revert this action!</strong>
-              </>
-            }
-          />
-          <Button danger onClick={onResetClick} loading={resetLoading}>
-            Reset all files
-          </Button>
-        </Col>
-      </Row>
-    </Card>
-  )
 }
 
 interface UploadAnswerProps {
   answer: AnswerWithSubmissionDeadline
   onUpload: () => unknown
+}
+
+export const UploadAnswerPageButton = ({ answerId }: UploadAnswerPageProps) => {
+  const [modalVisible, setModalVisible] = useState(false)
+  const showModal = () => setModalVisible(true)
+  const hideModal = () => setModalVisible(false)
+
+  return (
+    <>
+      <Button icon={<UploadOutlined />} type="default" onClick={showModal}>
+        Upload Answer
+      </Button>
+      <Modal
+        visible={modalVisible}
+        onCancel={hideModal}
+        title="Upload Answer"
+        footer={[
+          <Button type="default" onClick={hideModal} key="cancel">
+            Cancel
+          </Button>
+        ]}
+        width="80%"
+      >
+        <UploadAnswerPage answerId={answerId} />
+      </Modal>
+    </>
+  )
 }
 
 const UploadAnswer: React.FC<UploadAnswerProps> = props => {
@@ -151,9 +86,13 @@ const UploadAnswer: React.FC<UploadAnswerProps> = props => {
   )
 }
 
-const AnswerPage: React.FC<{ answerId: string }> = props => {
+export type UploadAnswerPageProps = {
+  answerId: string
+}
+
+const UploadAnswerPage = ({ answerId }: UploadAnswerPageProps) => {
   const result = useGetAnswerQuery({
-    variables: { id: props.answerId }
+    variables: { id: answerId }
   })
   const differentUser = useContext(DifferentUserContext)
 
@@ -196,11 +135,10 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
       {!differentUser && (
         <>
           <UploadAnswer answer={answer} onUpload={incrementAnswerRevision} />
-          <DangerZone answer={answer} onReset={incrementAnswerRevision} />
         </>
       )}
     </>
   )
 }
 
-export default AnswerPage
+export default UploadAnswerPage

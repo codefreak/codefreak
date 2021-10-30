@@ -23,6 +23,7 @@ import { EvaluationWorkspaceTab } from './tab-panel/EvaluationTabPanel'
 import { ConsoleWorkspaceTab } from './tab-panel/ConsoleTabPanel'
 import { FileTreeWorkspaceTab } from './file-tree/FileTree'
 import { EditorWorkspaceTab } from './tab-panel/EditorTabPanel'
+import Centered from '../Centered'
 
 export const LEFT_TAB_QUERY_PARAM = 'leftTab'
 export const RIGHT_TAB_QUERY_PARAM = 'rightTab'
@@ -32,9 +33,14 @@ const NO_ACTIVE_TAB = ''
 export interface WorkspacePageProps {
   type: FileContextType
   onBaseUrlChange: (newBaseUrl: string, newAuthToken: string) => void
+  createAnswerButton: React.ReactNode
 }
 
-const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
+const WorkspacePage = ({
+  type,
+  onBaseUrlChange,
+  createAnswerButton
+}: WorkspacePageProps) => {
   const [activeLeftTab, setActiveLeftTab] = useMutableQueryParam(
     LEFT_TAB_QUERY_PARAM,
     NO_ACTIVE_TAB
@@ -56,24 +62,26 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
     new EvaluationWorkspaceTab(answerId)
   ]
 
-  const [startWorkspace, { data, called }] = useStartWorkspaceMutation({
-    variables: {
-      context: {
-        id: answerId,
-        type
-      }
+  const [startWorkspace, { data, called }] = useStartWorkspaceMutation()
+
+  useEffect(() => {
+    if (!data && !called && answerId.length > 0) {
+      startWorkspace({
+        variables: {
+          context: {
+            id: answerId,
+            type
+          }
+        }
+      })
     }
   })
 
   useEffect(() => {
-    if (!data && !called) {
-      startWorkspace()
-    }
-
     if (activeRightTab === NO_ACTIVE_TAB) {
       setActiveRightTab(WorkspaceTabType.INSTRUCTIONS)
     }
-  })
+  }, [activeRightTab, setActiveRightTab])
 
   useEffect(() => {
     if (data && baseUrl === NO_BASE_URL) {
@@ -147,7 +155,11 @@ const WorkspacePage = ({ type, onBaseUrlChange }: WorkspacePageProps) => {
   return (
     <Row gutter={4} className="workspace-page">
       <Col span={4}>
-        <WorkspaceTabsWrapper tabs={[fileTree]} />
+        {answerId.length > 0 ? (
+          <WorkspaceTabsWrapper tabs={[fileTree]} />
+        ) : (
+          <Centered>{createAnswerButton}</Centered>
+        )}
       </Col>
       <Col span={10}>
         <WorkspaceTabsWrapper

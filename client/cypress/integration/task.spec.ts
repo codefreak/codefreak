@@ -12,7 +12,7 @@ describe('Task', () => {
 
     cy.contains('Task created').should('exist')
 
-    cy.url().should('not.contain', '/pool').should('contain', '/details')
+    cy.url().should('not.contain', '/pool').should('contain', '/configuration')
   })
 })
 
