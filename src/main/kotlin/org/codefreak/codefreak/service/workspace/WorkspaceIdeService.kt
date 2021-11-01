@@ -78,10 +78,10 @@ class WorkspaceIdeService(
 
   private fun createAnswerIdeWorkspaceConfig(): WorkspaceConfiguration {
     return WorkspaceConfiguration(
-      scripts = emptyMap(),
       imageName = appConfig.workspaces.companionImage,
       cpuLimit = appConfig.workspaces.cpuLimit,
-      memoryLimit = appConfig.workspaces.memoryLimit
+      memoryLimit = appConfig.workspaces.memoryLimit,
+      diskLimit = appConfig.workspaces.diskLimit
     )
   }
 }

@@ -108,6 +108,13 @@ class AppConfiguration {
      * @see <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers">Kubernetes | Managing Resources for Containers</a>
      */
     var memoryLimit = "1Gi"
+
+    /**
+     * Limit for ephemeral storage of the workspace. Must be a valid value for Kubernetes `spec.containers[].resources.limits.ephemeral-storage`.
+     *
+     * @see <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers">Kubernetes | Managing Resources for Containers</a>
+     */
+    var diskLimit = "5Gi"
   }
 
   class Ldap {

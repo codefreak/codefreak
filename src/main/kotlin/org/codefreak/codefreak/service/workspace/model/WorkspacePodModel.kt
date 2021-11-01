@@ -1,6 +1,7 @@
 package org.codefreak.codefreak.service.workspace.model
 
 import com.fkorotkov.kubernetes.configMap
+import com.fkorotkov.kubernetes.emptyDir
 import com.fkorotkov.kubernetes.httpGet
 import com.fkorotkov.kubernetes.livenessProbe
 import com.fkorotkov.kubernetes.metadata
@@ -21,6 +22,7 @@ import org.codefreak.codefreak.service.workspace.WorkspaceIdentifier
 import org.codefreak.codefreak.service.workspace.k8sLabels
 import org.codefreak.codefreak.service.workspace.workspacePodName
 import org.codefreak.codefreak.service.workspace.workspaceScriptMapName
+import java.util.Objects
 
 class WorkspacePodModel(
   identifier: WorkspaceIdentifier,
@@ -45,13 +47,15 @@ class WorkspacePodModel(
 
         resources {
           requests = mapOf(
-            "cpu" to Quantity.parse(wsConfig.cpuLimit),
-            "memory" to Quantity.parse(wsConfig.memoryLimit)
-          )
+            "cpu" to wsConfig.cpuLimit?.let(Quantity::parse),
+            "memory" to wsConfig.memoryLimit?.let(Quantity::parse),
+            "ephemeral-storage" to wsConfig.diskLimit?.let(Quantity::parse)
+          ).filterValues(Objects::nonNull)
           limits = mapOf(
-            "cpu" to Quantity.parse(wsConfig.cpuLimit),
-            "memory" to Quantity.parse(wsConfig.memoryLimit)
-          )
+            "cpu" to wsConfig.cpuLimit?.let(Quantity::parse),
+            "memory" to wsConfig.memoryLimit?.let(Quantity::parse),
+            "ephemeral-storage" to wsConfig.diskLimit?.let(Quantity::parse)
+          ).filterValues(Objects::nonNull)
         }
 
         // disable environment variables with service links
@@ -75,6 +79,10 @@ class WorkspacePodModel(
           }
         )
         volumeMounts = listOf(
+          newVolumeMount {
+            name = "project-files"
+            mountPath = "/home/runner/project"
+          },
           newVolumeMount {
             name = "scripts"
             mountPath = "/scripts"
@@ -101,6 +109,12 @@ class WorkspacePodModel(
         }
       })
       volumes = listOf(
+        newVolume {
+          name = "project-files"
+          emptyDir {
+            // sizeLimit is set via spec.containers[].resources.limits.ephemeral-storage
+          }
+        },
         newVolume {
           name = "scripts"
           configMap {

@@ -99,7 +99,8 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
       ),
       environment = runConfig.environment,
       cpuLimit = appConfiguration.workspaces.cpuLimit,
-      memoryLimit = appConfiguration.workspaces.memoryLimit
+      memoryLimit = appConfiguration.workspaces.memoryLimit,
+      diskLimit = appConfiguration.workspaces.diskLimit
     )
   }
 }
