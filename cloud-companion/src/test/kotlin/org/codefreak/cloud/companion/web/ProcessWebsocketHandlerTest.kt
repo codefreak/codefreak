@@ -1,7 +1,5 @@
 package org.codefreak.cloud.companion.web
 
-import java.net.URI
-import java.util.concurrent.atomic.AtomicReference
 import org.awaitility.Awaitility.await
 import org.awaitility.Durations
 import org.codefreak.cloud.companion.ProcessManager
@@ -12,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.web.reactive.socket.CloseStatus
-import org.springframework.web.reactive.socket.WebSocketSession
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
+import java.net.URI
+import java.util.concurrent.CountDownLatch
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -32,12 +30,27 @@ internal class ProcessWebsocketHandlerTest {
     val testProcessId = processManager.createProcess(listOf("/bin/bash", "-i"), mapOf("TERM" to "term"))
     val receivedOutput = StringBuilder()
 
-    val closeStatus = AtomicReference<CloseStatus>()
-    val subscription =
-      ReactorNettyWebSocketClient().execute(URI("ws://localhost:$localServerPort/process/$testProcessId")) { session ->
-        session.send(Flux.just("echo hello \$TERM\n", "exit\n").map(session::textMessage))
-          .then(session.receive().doOnEach { receivedOutput.append(it.get()?.payloadAsText) }.then())
-          .then(session.closeMono().map { closeStatus.set(it) })
+    val outputReceivedLatch = CountDownLatch(1)
+    val uri = URI("ws://localhost:$localServerPort/process/$testProcessId")
+    val subscription = ReactorNettyWebSocketClient().execute(uri) { session ->
+        Flux.zip(
+          // store incoming messages in a string. Use .doOnEach() and not .map() because it's a side effect
+          session.receive().log().doOnEach {
+            // notify that some output has been received
+            outputReceivedLatch.countDown()
+            receivedOutput.append(it.get()?.payloadAsText)
+          }
+            // schedule receive and send on different threads or there will be a deadlock
+            .subscribeOn(Schedulers.newSingle("ws-receive")),
+          // the sender flux never completes on purpose. Otherwise, the WS connection will be closed (?)
+          session.send(Flux.create {
+            // wait until stdout has emitted something so we can be sure the console is open
+            outputReceivedLatch.await()
+            it.next(session.textMessage("echo hello \$TERM\nexit\n"))
+          }).log()
+            // schedule receive and send on different threads or there will be a deadlock
+            .subscribeOn(Schedulers.newSingle("ws-send"))
+        )
           .then()
       }.subscribe()
     try {
@@ -47,12 +60,5 @@ internal class ProcessWebsocketHandlerTest {
     } finally {
       subscription.dispose()
     }
-  }
-
-  /**
-   * Closes a websocket session and returns a mono with the CloseStatus
-   */
-  private fun WebSocketSession.closeMono(): Mono<CloseStatus> {
-    return Mono.fromCallable { this.close() }.then(this.closeStatus())
   }
 }

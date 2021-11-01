@@ -1,9 +1,9 @@
 package org.codefreak.cloud.companion.web
 
 import java.util.UUID
-import org.apache.commons.io.IOUtils
 import org.codefreak.cloud.companion.ProcessManager
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.CloseStatus
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -27,9 +27,7 @@ class ProcessWebsocketHandler : WebSocketHandler {
     val processInput = Mono.fromCallable {
       processManager.getStdin(processId)
     }.flatMapMany { stdinOutputStream ->
-      session.receive().map {
-        IOUtils.copy(it.payload.asInputStream(), stdinOutputStream)
-      }
+      DataBufferUtils.write(session.receive().map { it.payload }, stdinOutputStream)
     }.then()
 
     // send process output
