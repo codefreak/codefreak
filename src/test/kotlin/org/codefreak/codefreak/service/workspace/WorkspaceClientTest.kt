@@ -2,9 +2,12 @@ package org.codefreak.codefreak.service.workspace
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
+import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import java.util.function.Consumer
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.runBlocking
 import liquibase.util.StreamUtil
@@ -23,6 +26,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.mock.mockito.MockBean
 
 @Tag(EXTERNAL_INTEGRATION_TEST)
 class WorkspaceClientTest : WorkspaceBaseTest() {
@@ -30,13 +34,18 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
 
   private lateinit var workspaceClient: WorkspaceClient
 
-  private val workspaceIdentifier = WorkspaceIdentifier(WorkspacePurpose.EVALUATION, "test")
+  private val collectionId = UUID(0, 0)
+  private val workspaceIdentifier = WorkspaceIdentifier(WorkspacePurpose.EVALUATION, collectionId.toString())
+
+  @MockBean
+  private lateinit var workspaceFileService: WorkspaceFileService
 
   @BeforeAll
   fun beforeAll() {
-    val collectionId = UUID(0, 0)
     val tar = createTarWithEntries(mapOf("file.txt" to "foo"))
-    whenever(fileService.readCollectionTar(collectionId)).thenReturn(tar)
+    whenever(workspaceFileService.loadFiles(workspaceIdentifier, any())).then {
+      it.getArgument<Consumer<InputStream>>(1).accept(tar)
+    }
     remoteWorkspaceReference = workspaceService.createWorkspace(
       workspaceIdentifier,
       WorkspaceConfiguration(

@@ -44,7 +44,6 @@ class WorkspaceLifecycleManagerTest : WorkspaceBaseTest() {
     workspaceService.createWorkspace(
       identifier,
       WorkspaceConfiguration(
-        scripts = emptyMap(),
         imageName = appConfiguration.workspaces.companionImage
       )
     )

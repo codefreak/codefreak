@@ -17,12 +17,12 @@ import com.fkorotkov.kubernetes.spec
 import io.fabric8.kubernetes.api.model.IntOrString
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.api.model.Quantity
+import java.util.Objects
 import org.codefreak.codefreak.service.workspace.WorkspaceConfiguration
 import org.codefreak.codefreak.service.workspace.WorkspaceIdentifier
 import org.codefreak.codefreak.service.workspace.k8sLabels
 import org.codefreak.codefreak.service.workspace.workspacePodName
 import org.codefreak.codefreak.service.workspace.workspaceScriptMapName
-import java.util.Objects
 
 class WorkspacePodModel(
   identifier: WorkspaceIdentifier,
