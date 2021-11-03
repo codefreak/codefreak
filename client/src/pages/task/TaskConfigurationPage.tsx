@@ -166,7 +166,7 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
             <Col span={8}>
               <EditableStringList
                 dataSource={task.defaultFiles ?? []}
-                onChangeValue={updater('protectedFiles')}
+                onChangeValue={updater('defaultFiles')}
                 title="Default editor files"
                 tooltipHelp="List of files that will be initially opened in the editor"
                 editHelp="List of files that will be initially opened in the editor"
