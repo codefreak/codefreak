@@ -24,6 +24,7 @@ import { ConsoleWorkspaceTab } from './tab-panel/ConsoleTabPanel'
 import { FileTreeWorkspaceTab } from './file-tree/FileTree'
 import { EditorWorkspaceTab } from './tab-panel/EditorTabPanel'
 import Centered from '../Centered'
+import { trimTrailingSlashes, withLeadingSlash } from '../../services/strings'
 
 export const LEFT_TAB_QUERY_PARAM = 'leftTab'
 export const RIGHT_TAB_QUERY_PARAM = 'rightTab'
@@ -34,23 +35,37 @@ export interface WorkspacePageProps {
   type: FileContextType
   onBaseUrlChange: (newBaseUrl: string, newAuthToken: string) => void
   createAnswerButton: React.ReactNode
+  initialOpenFiles?: string[]
 }
 
 const WorkspacePage = ({
   type,
   onBaseUrlChange,
-  createAnswerButton
+  createAnswerButton,
+  initialOpenFiles = []
 }: WorkspacePageProps) => {
+  const normalizedInitialOpenFiles = initialOpenFiles.map(file =>
+    withLeadingSlash(trimTrailingSlashes(file))
+  )
+
   const [activeLeftTab, setActiveLeftTab] = useMutableQueryParam(
     LEFT_TAB_QUERY_PARAM,
-    NO_ACTIVE_TAB
+    normalizedInitialOpenFiles.length > 0
+      ? normalizedInitialOpenFiles[0]
+      : NO_ACTIVE_TAB
   )
   const [activeRightTab, setActiveRightTab] = useMutableQueryParam(
     RIGHT_TAB_QUERY_PARAM,
     NO_ACTIVE_TAB
   )
 
-  const [leftTabs, setLeftTabs] = useState<WorkspaceTab[]>([])
+  const initialOpenEditorTabs = normalizedInitialOpenFiles.map(
+    file => new EditorWorkspaceTab(file)
+  )
+
+  const [leftTabs, setLeftTabs] = useState<WorkspaceTab[]>(
+    initialOpenEditorTabs
+  )
 
   const { baseUrl, answerId } = useWorkspace()
 

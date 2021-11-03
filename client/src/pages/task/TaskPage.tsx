@@ -333,6 +333,7 @@ const TaskPage: React.FC = () => {
                     type={FileContextType.Answer}
                     onBaseUrlChange={handleBaseUrlChange}
                     createAnswerButton={createAnswerButton}
+                    initialOpenFiles={task.defaultFiles ?? []}
                   />
                 </AnswerBlocker>
               </div>
