@@ -187,7 +187,7 @@ class EvaluationStepProcessor : ItemProcessor<EvaluationStep, EvaluationStep?> {
     val stepDefinition = step.definition
     return DefaultEvaluationRunConfig(
         id = step.id,
-        imageName = appConfig.workspaces.companionImage,
+        imageName = step.definition.task.customWorkspaceImage ?: appConfig.workspaces.companionImage,
         workingDirectory = appConfig.evaluation.imageWorkdir,
         script = createEvaluationScript(stepDefinition.script),
         environment = buildEnvVariables(step)

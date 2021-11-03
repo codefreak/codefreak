@@ -38,6 +38,7 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val body = entity.body
   val createdAt = entity.createdAt
   val updatedAt = entity.updatedAt
+  val defaultFiles = entity.defaultFiles
   val assignment by lazy { entity.assignment?.let { AssignmentDto(it, ctx) } }
   val inPool = entity.assignment == null
   val editable by lazy { entity.isEditable(authorization) }
@@ -49,6 +50,14 @@ class TaskDto(@GraphQLIgnore val entity: Task, ctx: ResolverContext) : BaseDto(c
   val protectedFiles by lazy {
     authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
     entity.protectedFiles.toTypedArray()
+  }
+  val customWorkspaceImage by lazy {
+    authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
+    entity.customWorkspaceImage
+  }
+  val runCommand by lazy {
+    authorization.requireAuthorityIfNotCurrentUser(entity.owner, Authority.ROLE_ADMIN)
+    entity.runCommand
   }
 
   val evaluationStepDefinitions by lazy {
@@ -81,6 +90,9 @@ class TaskDetailsInput(var id: UUID = UUID.randomUUID()) {
   var body: String? = null
   var hiddenFiles: Array<String> = arrayOf()
   var protectedFiles: Array<String> = arrayOf()
+  var runCommand: String? = null
+  var defaultFiles: List<String>? = null
+  var customWorkspaceImage: String? = null
 }
 
 @GraphQLName("TaskTemplate")
@@ -142,18 +154,6 @@ class TaskMutation : BaseResolver(), Mutation {
   }
 
   @Secured(Authority.ROLE_TEACHER)
-  fun uploadTask(files: Array<ApplicationPart>): TaskDto = context {
-    ByteArrayOutputStream().use {
-      TarUtil.writeUploadAsTar(files, it)
-      val task = serviceAccess.getService(TaskTarService::class).createFromTar(
-          it.toByteArray(),
-          authorization.currentUser
-      )
-      TaskDto(task, this)
-    }
-  }
-
-  @Secured(Authority.ROLE_TEACHER)
   fun uploadTasks(files: Array<ApplicationPart>): List<TaskDto> = context {
     ByteArrayOutputStream().use {
       TarUtil.writeUploadAsTar(files, it)
@@ -178,18 +178,6 @@ class TaskMutation : BaseResolver(), Mutation {
   }
 
   @Secured(Authority.ROLE_TEACHER)
-  fun importTask(url: String): TaskDto = context {
-    ByteArrayOutputStream().use {
-      serviceAccess.getService(GitImportService::class).importFiles(url, it)
-      val task = serviceAccess.getService(TaskTarService::class).createFromTar(
-          it.toByteArray(),
-          authorization.currentUser
-      )
-      TaskDto(task, this)
-    }
-  }
-
-  @Secured(Authority.ROLE_TEACHER)
   fun importTasks(url: String): List<TaskDto> = context {
     ByteArrayOutputStream().use {
       serviceAccess.getService(GitImportService::class).importFiles(url, it)
@@ -203,6 +191,7 @@ class TaskMutation : BaseResolver(), Mutation {
     }
   }
 
+  @Secured(Authority.ROLE_TEACHER)
   fun updateTask(input: TaskInput): Boolean = context {
     val task = serviceAccess.getService(TaskService::class).findTask(input.id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
@@ -211,16 +200,21 @@ class TaskMutation : BaseResolver(), Mutation {
     true
   }
 
+  @Secured(Authority.ROLE_TEACHER)
   fun updateTaskDetails(input: TaskDetailsInput): Boolean = context {
     val task = serviceAccess.getService(TaskService::class).findTask(input.id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)
     task.body = input.body
     task.hiddenFiles = input.hiddenFiles.filter { it.isNotBlank() }
     task.protectedFiles = input.protectedFiles.filter { it.isNotBlank() }
+    task.runCommand = input.runCommand
+    task.defaultFiles = input.defaultFiles?.filter { it.isNotBlank() }
+    task.customWorkspaceImage = input.customWorkspaceImage?.trim()
     serviceAccess.getService(TaskService::class).saveTask(task)
     true
   }
 
+  @Secured(Authority.ROLE_TEACHER)
   fun setTaskPosition(id: UUID, position: Long): Boolean = context {
     val task = serviceAccess.getService(TaskService::class).findTask(id)
     authorization.requireAuthorityIfNotCurrentUser(task.owner, Authority.ROLE_ADMIN)

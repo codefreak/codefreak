@@ -1,0 +1,17 @@
+databaseChangeLog:
+- changeSet:
+    id: 1635783966369-1
+    author: HenningCash
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: custom_workspace_image
+            type: varchar(255)
+        - column:
+            name: default_files
+            type: text
+        - column:
+            name: run_command
+            type: text
+        tableName: task

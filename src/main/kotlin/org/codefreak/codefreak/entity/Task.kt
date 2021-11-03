@@ -4,6 +4,7 @@ import java.time.Instant
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.Lob
 import javax.persistence.ManyToOne
 import javax.persistence.MapKey
 import javax.persistence.OneToMany
@@ -70,7 +71,11 @@ class Task(
   @UpdateTimestamp
   var updatedAt: Instant = Instant.now()
 
-  @OneToMany(mappedBy = "task", cascade = [CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE], orphanRemoval = true)
+  @OneToMany(
+    mappedBy = "task",
+    cascade = [CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE],
+    orphanRemoval = true
+  )
   @OrderBy("position ASC")
   @MapKey(name = "key")
   var evaluationStepDefinitions: MutableMap<String, EvaluationStepDefinition> = linkedMapOf()
@@ -78,10 +83,30 @@ class Task(
       field = value.values.sorted().associateBy { it.key }.toMutableMap()
     }
 
+  /**
+   * One or more files that should be initially opened in the editor
+   */
+  @Type(type = "json")
+  @Column(length = 1024)
+  @ColumnDefault("'[]'")
+  var defaultFiles: List<String>? = null
+
+  /**
+   * Command that should be used to execute the source code
+   */
+  @Column(length = 1048576)
+  @Lob
+  var runCommand: String? = null
+
+  /**
+   * Full qualified name of a custom workspace image
+   */
+  var customWorkspaceImage: String? = null
+
   fun addEvaluationStepDefinition(stepDefinition: EvaluationStepDefinition) {
     if (evaluationStepDefinitions.putIfAbsent(stepDefinition.key, stepDefinition) != null) {
       throw IllegalStateException(
-          "There is already an evaluation step with the name of '${stepDefinition.key} defined on this task."
+        "There is already an evaluation step with the name of '${stepDefinition.key} defined on this task."
       )
     }
   }

@@ -49,7 +49,7 @@ class WorkspaceAuthService(
     val jwt = SignedJWT(jwtHeader, buildWorkspaceClaimSet(identifier, subject))
     jwt.sign(jwsSigner)
     return jwt.also {
-      log.debug("Created a JWT for $identifier: ${it.serialize()}")
+      log.debug("Created a JWT for $subject@$identifier: ${it.serialize()}")
     }
   }
 

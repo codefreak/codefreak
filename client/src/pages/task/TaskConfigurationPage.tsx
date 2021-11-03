@@ -1,17 +1,17 @@
-import { EditOutlined, InfoCircleFilled, SyncOutlined } from '@ant-design/icons'
+import { SaveFilled, SyncOutlined } from '@ant-design/icons'
 import {
   Alert,
+  Button,
   Card,
   Checkbox,
   Col,
   Empty,
-  List,
+  Input,
   Row,
-  Tabs,
-  Tooltip
+  Tabs
 } from 'antd'
 import { CheckboxChangeEvent } from 'antd/lib/checkbox'
-import { useState } from 'react'
+import { createRef, useState } from 'react'
 import AsyncPlaceholder from '../../components/AsyncContainer'
 import EditableMarkdown from '../../components/EditableMarkdown'
 import StartSubmissionEvaluationButton from '../../components/StartSubmissionEvaluationButton'
@@ -29,16 +29,11 @@ import { messageService } from '../../services/message'
 import { makeUpdater } from '../../services/util'
 import FileBrowser from '../../components/FileBrowser'
 import Markdown from '../../components/Markdown'
-import { EditStringArrayButton } from '../../components/EditStringArrayModal'
 import EditEvaluationPage from '../evaluation/EditEvaluationPage'
+import EditableStringList from '../../components/EditableStringList'
+import { TextAreaRef } from 'antd/es/input/TextArea'
 
 const { TabPane } = Tabs
-
-const renderFilePattern = (pattern: string) => (
-  <List.Item>
-    <code>{pattern}</code>
-  </List.Item>
-)
 
 const filePatternHelp = (
   <Alert
@@ -78,6 +73,7 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
   const result = useGetTaskDetailsQuery({
     variables: { id: useIdParam(), teacher: editable }
   })
+  const runCommandRef = createRef<TextAreaRef>()
 
   const [updateMutation] = useUpdateTaskDetailsMutation({
     onCompleted: () => {
@@ -114,7 +110,10 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
     id: task.id,
     body: task.body,
     hiddenFiles: task.hiddenFiles,
-    protectedFiles: task.protectedFiles
+    protectedFiles: task.protectedFiles,
+    defaultFiles: task.defaultFiles,
+    customWorkspaceImage: task.customWorkspaceImage,
+    runCommand: task.runCommand
   }
 
   const updater = makeUpdater(taskDetailsInput, input =>
@@ -140,6 +139,55 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
           ) : (
             <Empty description="This task has no extra instructions. Take a look at the provided files." />
           )}
+        </Card>
+        <Card title="Workspace Settings" style={{ marginTop: 16 }}>
+          <Row gutter={16}>
+            <Col span={8}>
+              <h3>Run Command</h3>
+              <Input.TextArea
+                ref={runCommandRef}
+                placeholder={`#!/bin/bash\necho "Running main.py..."\npython main.py`}
+                defaultValue={task.runCommand ?? ''}
+                rows={5}
+                style={{ marginBottom: 8 }}
+              />
+              <Button
+                icon={<SaveFilled />}
+                onClick={() => {
+                  updater('runCommand')(
+                    runCommandRef.current?.resizableTextArea?.textArea?.value
+                  )
+                }}
+                type="primary"
+              >
+                Save Run Command
+              </Button>
+            </Col>
+            <Col span={8}>
+              <EditableStringList
+                dataSource={task.defaultFiles ?? []}
+                onChangeValue={updater('protectedFiles')}
+                title="Default editor files"
+                tooltipHelp="List of files that will be initially opened in the editor"
+                editHelp="List of files that will be initially opened in the editor"
+              />
+            </Col>
+            <Col span={8}>
+              <h3>Custom Workspace Image</h3>
+              <Alert
+                style={{ marginBottom: 16 }}
+                type="warning"
+                message="Warning: This is an advanced feature and should be used rarely."
+              />
+              <Input.Search
+                defaultValue={task.customWorkspaceImage || ''}
+                placeholder="Leave this blank to use the default image (recommended)"
+                allowClear
+                onSearch={updater('customWorkspaceImage')}
+                enterButton={<SaveFilled />}
+              />
+            </Col>
+          </Row>
         </Card>
         <Card title="Files" style={{ marginTop: 16 }}>
           {assignmentOpen ? (
@@ -187,73 +235,21 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
           </p>
           <Row gutter={16}>
             <Col span={12}>
-              <List
-                size="small"
-                header={
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <span>
-                      <b>Hidden files</b>{' '}
-                      <Tooltip
-                        title="Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation."
-                        placement="bottom"
-                      >
-                        <InfoCircleFilled />
-                      </Tooltip>
-                    </span>
-                    <EditStringArrayButton
-                      title="Edit hidden files pattern"
-                      extraContent={filePatternHelp}
-                      initialValues={task.hiddenFiles}
-                      onSave={updater('hiddenFiles')}
-                      icon={<EditOutlined />}
-                      type="link"
-                    />
-                  </div>
-                }
-                bordered
+              <EditableStringList
                 dataSource={task.hiddenFiles}
-                renderItem={renderFilePattern}
+                onChangeValue={updater('hiddenFiles')}
+                title="Hidden files"
+                tooltipHelp="Patterns of files that should be hidden from students. Matching files are only included for evaluation. If matching files are created by students, they are ignored for evaluation."
+                editHelp={filePatternHelp}
               />
             </Col>
             <Col span={12}>
-              <List
-                size="small"
-                header={
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <span>
-                      <b>Protected files</b>{' '}
-                      <Tooltip
-                        title="Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation."
-                        placement="bottom"
-                      >
-                        <InfoCircleFilled />
-                      </Tooltip>
-                    </span>
-                    <EditStringArrayButton
-                      title="Edit protected files pattern"
-                      extraContent={filePatternHelp}
-                      initialValues={task.protectedFiles}
-                      onSave={updater('protectedFiles')}
-                      icon={<EditOutlined />}
-                      type="link"
-                    />
-                  </div>
-                }
-                bordered
+              <EditableStringList
                 dataSource={task.protectedFiles}
-                renderItem={renderFilePattern}
+                onChangeValue={updater('protectedFiles')}
+                title="Protected files"
+                tooltipHelp="Patterns of files that should be read-only. Students will be able to see matching files but modifications are ignored for evaluation. Non-existent files can be protected to prevent their creation."
+                editHelp={filePatternHelp}
               />
             </Col>
           </Row>

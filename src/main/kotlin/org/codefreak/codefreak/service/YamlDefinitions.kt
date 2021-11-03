@@ -13,7 +13,10 @@ data class TaskDefinition(
   val description: String? = null,
   val hidden: List<String> = emptyList(),
   val protected: List<String> = emptyList(),
-  val evaluation: Map<String, EvaluationDefinition> = emptyMap()
+  val evaluation: Map<String, EvaluationDefinition> = emptyMap(),
+  val defaultFiles: List<String>? = null,
+  val runCommand: String? = null,
+  val customWorkspaceImage: String? = null
 ) {
   fun toEntity(assignment: Assignment?, owner: User, position: Long) = Task(
       assignment = assignment,
@@ -23,6 +26,9 @@ data class TaskDefinition(
       body = description,
       weight = 100
   ).also { task ->
+    task.defaultFiles = defaultFiles
+    task.runCommand = runCommand
+    task.customWorkspaceImage = customWorkspaceImage
     task.hiddenFiles = hidden
     task.protectedFiles = protected
     task.evaluationStepDefinitions = evaluation.toList().mapIndexed { index, (key, definition) ->
