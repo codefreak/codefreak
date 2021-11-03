@@ -22,6 +22,7 @@ spring:
     change-log: classpath:db/changelog-master.yaml
     parameters:
       collectionStoragePath: ${codefreak.files.fileSystem.collectionStoragePath}
+      gitVersioningCollectionStoragePath: ${codefreak.files.fileSystem.gitVersioningCollectionStoragePath}
 
 logging:
   level:
@@ -56,6 +57,7 @@ codefreak:
       # The path where all file collections will be stored in sub-directories
       # Please make sure that the user running the server has read+write permissions on this directory
       collectionStoragePath: "${user.home}/.codefreak/${codefreak.instanceId}/collections"
+      gitVersioningCollectionStoragePath: "${user.home}/.codefreak/${codefreak.instanceId}/collections-git-directory"
   docker:
     # All of the docker settings below will fall back to a system-depended default value if unset
     host: ~

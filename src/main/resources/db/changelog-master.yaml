@@ -68,3 +68,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20210814110410-evaluation-definition-refactor.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20210927162749-add-commitid.yaml
+    relativeToChangelogFile: true

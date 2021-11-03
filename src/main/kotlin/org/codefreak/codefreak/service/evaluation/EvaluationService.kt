@@ -1,6 +1,8 @@
 package org.codefreak.codefreak.service.evaluation
 
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import org.codefreak.codefreak.entity.Answer
 import org.codefreak.codefreak.entity.Assignment
@@ -16,6 +18,7 @@ import org.codefreak.codefreak.service.EvaluationStatusUpdatedEvent
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionDeadlineReachedEvent
 import org.codefreak.codefreak.service.SubmissionService
+import org.codefreak.codefreak.service.file.FileCollectionRepositoryService
 import org.codefreak.codefreak.service.file.FileService
 import org.codefreak.codefreak.util.orNull
 import org.slf4j.LoggerFactory
@@ -48,6 +51,8 @@ class EvaluationService : BaseService() {
   @Autowired
   private lateinit var eventPublisher: ApplicationEventPublisher
 
+  @Autowired lateinit var fileCollectionRepositoryService: FileCollectionRepositoryService
+
   private val log = LoggerFactory.getLogger(this::class.java)
 
   @Transactional
@@ -70,16 +75,19 @@ class EvaluationService : BaseService() {
     ideService.saveAnswerFiles(answer, forceSaveFiles)
     check(!isEvaluationUpToDate(answer)) { "Evaluation is up to date." }
     check(!isEvaluationScheduled(answer.id)) { "Evaluation is already scheduled." }
+    val currentDateTime = LocalDateTime.now()
+    val formatedDateTime = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    fileCollectionRepositoryService.saveChanges(answer.id, "Evaluation commit $formatedDateTime", false)
     val digest = fileService.getCollectionMd5Digest(answer.id)
     val evaluation = getOrCreateEvaluationByDigest(answer, digest)
 
     // schedule all non-finished steps for automated evaluation
     evaluation.evaluationSteps
-        .filter { stepService.stepNeedsExecution(it) }
-        .forEach {
-          it.reset()
-          evaluationQueue.insert(it)
-        }
+      .filter { stepService.stepNeedsExecution(it) }
+      .forEach {
+        it.reset()
+        evaluationQueue.insert(it)
+      }
     return evaluation
   }
 
@@ -99,13 +107,13 @@ class EvaluationService : BaseService() {
 
   fun getOrCreateEvaluationByDigest(answer: Answer, digest: ByteArray): Evaluation {
     return evaluationRepository.findFirstByAnswerIdAndFilesDigestOrderByCreatedAtDesc(answer.id, digest)
-        .map {
-          if (it.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) createEvaluation(
-              answer,
-              digest
-          ) else it
-        }
-        .orElseGet { createEvaluation(answer, digest) }
+      .map {
+        if (it.evaluationSettingsFrom != answer.task.evaluationSettingsChangedAt) createEvaluation(
+          answer,
+          digest
+        ) else it
+      }
+      .orElseGet { createEvaluation(answer, digest) }
   }
 
   @Transactional
@@ -129,14 +137,14 @@ class EvaluationService : BaseService() {
    */
   fun createEvaluation(answer: Answer, filesDigest: ByteArray): Evaluation = withNewTransaction {
     val evaluation = Evaluation(
-        answer,
-        filesDigest,
-        answer.task.evaluationSettingsChangedAt
+      answer,
+      filesDigest,
+      answer.task.evaluationSettingsChangedAt
     )
     // add all steps as "pending" to the evaluation
     answer.task.evaluationStepDefinitions.values
-        .filter { it.active }
-        .forEach { stepService.addStepToEvaluation(evaluation, it) }
+      .filter { it.active }
+      .forEach { stepService.addStepToEvaluation(evaluation, it) }
     saveEvaluation(evaluation).also {
       eventPublisher.publishEvent(EvaluationStatusUpdatedEvent(it, it.stepStatusSummary))
     }

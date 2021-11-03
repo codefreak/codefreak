@@ -41,6 +41,8 @@ class Answer(
   @UpdateTimestamp
   var updatedAt: Instant = Instant.now()
 
+  var commitId: String = ""
+
   val isEditable
     get() = when {
       // only editable if the assignment is explicitly open
