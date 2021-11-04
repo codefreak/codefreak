@@ -140,7 +140,7 @@ const TaskConfigurationPage: React.FC<{ editable: boolean }> = ({
             <Empty description="This task has no extra instructions. Take a look at the provided files." />
           )}
         </Card>
-        <Card title="Workspace Settings" style={{ marginTop: 16 }}>
+        <Card title="Online IDE" style={{ marginTop: 16 }}>
           <Row gutter={16}>
             <Col span={8}>
               <h3>Run Command</h3>
