@@ -5,6 +5,12 @@ query GetAnswer($id: ID!) {
     submission {
       deadline
     }
+    currentVersionId
+    currentVersionName
+    versions {
+      versionKey
+      commitMessage
+    }
   }
 }
 

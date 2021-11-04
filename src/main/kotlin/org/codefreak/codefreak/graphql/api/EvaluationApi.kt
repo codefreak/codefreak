@@ -80,9 +80,9 @@ class EvaluationDto(entity: Evaluation, ctx: ResolverContext) : BaseDto(ctx) {
   val createdAt = entity.createdAt
   val steps by lazy {
     entity.evaluationSteps
-        .filter { it.definition.active }
-        .map { EvaluationStepDto(it, ctx) }
-        .sortedBy { it.definition.position }
+      .filter { it.definition.active }
+      .map { EvaluationStepDto(it, ctx) }
+      .sortedBy { it.definition.position }
   }
   val stepsResultSummary by lazy { EvaluationStepResultDto(entity.stepsResultSummary) }
   val stepsStatusSummary by lazy { EvaluationStepStatusDto(entity.stepStatusSummary) }
@@ -234,10 +234,10 @@ class EvaluationMutation : BaseResolver(), Mutation {
       // find task in assignment and invalidate their evaluations + save modified task files from IDE
       // this also prevents passing IDs of foreign tasks
       invalidateTask != null -> assignment.tasks.find { it.id == invalidateTask }
-          ?.let {
-            evaluationService.invalidateEvaluations(it)
-            serviceAccess.getService(IdeService::class).saveTaskFiles(it)
-          }
+        ?.let {
+          evaluationService.invalidateEvaluations(it)
+          serviceAccess.getService(IdeService::class).saveTaskFiles(it)
+        }
     }
 
     evaluationService.startAssignmentEvaluation(assignmentId).map {
@@ -253,7 +253,7 @@ class EvaluationMutation : BaseResolver(), Mutation {
     }
     val definitionService = serviceAccess.getService(EvaluationStepDefinitionService::class)
     task.addEvaluationStepDefinition(
-        definitionService.createNewStepDefinition(task)
+      definitionService.createNewStepDefinition(task)
     )
     taskService.saveTask(task)
     taskService.invalidateLatestEvaluations(task)
@@ -323,23 +323,23 @@ class EvaluationSubscription : BaseResolver(), Subscription {
   private lateinit var evaluationStepStatusUpdatedEventPublisher: EvaluationStepStatusUpdatedEventPublisher
 
   fun evaluationStatusUpdated(answerId: UUID?, status: EvaluationStepStatusDto?, env: DataFetchingEnvironment): Flux<EvaluationStatusUpdatedEventDto> =
-      context(env) {
-        val eventFilter = when {
-          answerId != null -> buildAnswerFilter(env, answerId)
-          else -> buildCurrentUserFilter(env)
-        }
-        evaluationStatusUpdatedEventPublisher.eventStream
-            .filter(eventFilter)
-            .filter(buildStatusFilter(status))
-            .map { EvaluationStatusUpdatedEventDto(it, this) }
+    context(env) {
+      val eventFilter = when {
+        answerId != null -> buildAnswerFilter(env, answerId)
+        else -> buildCurrentUserFilter(env)
       }
+      evaluationStatusUpdatedEventPublisher.eventStream
+        .filter(eventFilter)
+        .filter(buildStatusFilter(status))
+        .map { EvaluationStatusUpdatedEventDto(it, this) }
+    }
 
   fun evaluationStepStatusUpdated(stepId: UUID, env: DataFetchingEnvironment): Flux<EvaluationStepDto> = context(env) {
     val evaluationStep = serviceAccess.getService(EvaluationStepService::class).getEvaluationStep(stepId)
     authorization.requireAuthorityIfNotCurrentUser(evaluationStep.evaluation.answer.submission.user, Authority.ROLE_TEACHER)
     evaluationStepStatusUpdatedEventPublisher.eventStream
-        .filter { it.evaluationStep.id == stepId }
-        .map { EvaluationStepDto(it.evaluationStep, this) }
+      .filter { it.evaluationStep.id == stepId }
+      .map { EvaluationStepDto(it.evaluationStep, this) }
   }
 
   private fun buildAnswerFilter(env: DataFetchingEnvironment, answerId: UUID): (event: EvaluationStatusUpdatedEvent) -> Boolean = context(env) {

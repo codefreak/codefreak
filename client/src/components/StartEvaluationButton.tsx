@@ -1,6 +1,7 @@
 import Button, { ButtonProps } from 'antd/lib/button'
 import React from 'react'
 import {
+  GetAnswerDocument,
   GetLatestEvaluationDocument,
   useStartEvaluationMutation
 } from '../services/codefreak-api'
@@ -23,6 +24,12 @@ const StartEvaluationButton: React.FC<StartEvaluationButtonProps> = props => {
       {
         query: GetLatestEvaluationDocument,
         variables: { answerId }
+      },
+      {
+        query: GetAnswerDocument,
+        variables: {
+          id: answerId
+        }
       }
     ]
   })

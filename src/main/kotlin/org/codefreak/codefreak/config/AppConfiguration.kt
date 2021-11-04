@@ -135,6 +135,7 @@ class AppConfiguration {
 
     class FileSystem {
       lateinit var collectionStoragePath: String
+      lateinit var gitVersioningCollectionStoragePath: String
     }
   }
 

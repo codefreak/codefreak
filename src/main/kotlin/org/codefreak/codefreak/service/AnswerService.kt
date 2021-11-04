@@ -44,7 +44,7 @@ class AnswerService : BaseService() {
   private lateinit var taskService: TaskService
 
   fun findAnswer(taskId: UUID, userId: UUID): Answer = answerRepository.findByTaskIdAndSubmissionUserId(taskId, userId)
-      .orElseThrow { EntityNotFoundException("Answer not found.") }
+    .orElseThrow { EntityNotFoundException("Answer not found.") }
 
   fun findAnswer(answerId: UUID): Answer = answerRepository.findById(answerId).orElseThrow { EntityNotFoundException("Answer not found.") }
 
@@ -52,7 +52,7 @@ class AnswerService : BaseService() {
   fun findOrCreateAnswer(taskId: UUID, user: User): Answer {
     val assignmentId = taskService.findTask(taskId).assignment?.id
     return submissionService.findOrCreateSubmission(assignmentId, user)
-        .let { it.getAnswer(taskId) ?: createAnswer(it, taskId) }
+      .let { it.getAnswer(taskId) ?: createAnswer(it, taskId) }
   }
 
   @Transactional
@@ -133,5 +133,19 @@ class AnswerService : BaseService() {
   }
 
   private fun Task.isTesting() =
-      this.owner == FrontendUtil.getCurrentUser() || FrontendUtil.getCurrentUser().hasAuthority(Authority.ROLE_ADMIN)
+    this.owner == FrontendUtil.getCurrentUser() || FrontendUtil.getCurrentUser().hasAuthority(Authority.ROLE_ADMIN)
+
+  fun saveCommitId(answerId: UUID, commitID: String): Answer {
+    val answer = findAnswer(answerId)
+    answer.commitId = commitID
+    return answerRepository.save(answer)
+  }
+
+  fun getCommitId(answerId: UUID): String {
+    return try {
+      findAnswer(answerId).commitId
+    } catch (err: EntityNotFoundException) {
+      ""
+    }
+  }
 }

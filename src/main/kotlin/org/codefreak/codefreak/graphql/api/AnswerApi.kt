@@ -5,6 +5,8 @@ import com.expediagroup.graphql.annotations.GraphQLIgnore
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.spring.operations.Mutation
 import com.expediagroup.graphql.spring.operations.Query
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import org.apache.catalina.core.ApplicationPart
 import org.codefreak.codefreak.auth.Authority
@@ -18,6 +20,8 @@ import org.codefreak.codefreak.service.GitImportService
 import org.codefreak.codefreak.service.IdeService
 import org.codefreak.codefreak.service.SubmissionService
 import org.codefreak.codefreak.service.evaluation.EvaluationService
+import org.codefreak.codefreak.service.file.FileCollectionRepositoryService
+import org.codefreak.codefreak.service.file.IFileCollectionRepository
 import org.codefreak.codefreak.util.FrontendUtil
 import org.codefreak.codefreak.util.TarUtil
 import org.codefreak.codefreak.util.orNull
@@ -35,12 +39,23 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseD
   val sourceUrl by lazy { FrontendUtil.getUriBuilder().path("/api/answers/$id/source").build().toUriString() }
   val createdAt = entity.createdAt
   val updatedAt = entity.updatedAt
+  val currentVersionId by lazy { serviceAccess.getService(AnswerService::class).getCommitId(id) }
+
+  val currentVersionName by lazy {
+    serviceAccess.getService(IFileCollectionRepository::class)
+      .getCommitMessage(id, currentVersionId)
+  }
+
+  val versions by lazy {
+    serviceAccess.getService(IFileCollectionRepository::class)
+      .getCommits(id).map { entry -> CommitDto(entry.key, entry.value) }
+  }
 
   val latestEvaluation by lazy {
     serviceAccess.getService(EvaluationService::class)
-        .getLatestEvaluation(id)
-        .map { EvaluationDto(it, ctx) }
-        .orNull()
+      .getLatestEvaluation(id)
+      .map { EvaluationDto(it, ctx) }
+      .orNull()
   }
 
   val evaluations by lazy {
@@ -51,6 +66,9 @@ class AnswerDto(@GraphQLIgnore val entity: Answer, ctx: ResolverContext) : BaseD
     serviceAccess.getService(IdeService::class).isIdeContainerRunning(id)
   }
 }
+
+@GraphQLName("CommitEntry")
+class CommitDto(val versionKey: String, val commitMessage: String)
 
 @Component
 class AnswerMutation : BaseResolver(), Mutation {
@@ -80,9 +98,40 @@ class AnswerMutation : BaseResolver(), Mutation {
   @Secured(Authority.ROLE_STUDENT)
   @Transactional
   fun createAnswer(taskId: UUID): AnswerDto = context {
-    serviceAccess.getService(AnswerService::class)
-        .findOrCreateAnswer(taskId, FrontendUtil.getCurrentUser())
-        .let { AnswerDto(it, this) }
+    val answer = serviceAccess.getService(AnswerService::class)
+      .findOrCreateAnswer(taskId, FrontendUtil.getCurrentUser())
+      .let { AnswerDto(it, this) }
+    serviceAccess.getService(IFileCollectionRepository::class).saveChanges(answer.id, "Init", true)
+    answer
+  }
+
+  @Transactional
+  @Secured(Authority.ROLE_STUDENT)
+  fun changeVersion(collectionID: UUID, versionID: String): Boolean = context {
+    val answerService = serviceAccess.getService(AnswerService::class)
+    val answer = answerService.findAnswer(collectionID)
+    authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
+    val currentDateTime = LocalDateTime.now()
+    val formatedDateTime = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    serviceAccess.getService(IFileCollectionRepository::class)
+      .resetAndLoadVersion(collectionID, versionID, "VersionChange $formatedDateTime")
+  }
+
+  @Transactional
+  @Secured(Authority.ROLE_STUDENT)
+  fun saveVersion(collectionID: UUID, commitMessage: String): Boolean = context {
+    val answerService = serviceAccess.getService(AnswerService::class)
+    val answer = answerService.findAnswer(collectionID)
+    var versionChanged: Boolean
+    authorization.requireAuthorityIfNotCurrentUser(answer.submission.user, Authority.ROLE_TEACHER)
+    if (commitMessage.isNotBlank()) {
+      versionChanged = serviceAccess.getService(FileCollectionRepositoryService::class).saveChanges(collectionID, commitMessage, false)
+    } else {
+      val currentDateTime = LocalDateTime.now()
+      val formatedDateTime = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+      versionChanged = serviceAccess.getService(IFileCollectionRepository::class).saveChanges(collectionID, "Manual Save $formatedDateTime", false)
+    }
+    versionChanged
   }
 
   @Secured(Authority.ROLE_TEACHER)

@@ -7,15 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 ### Added
 * Add support for CodeClimate `location.positions` format
+* Git versioning of collections in the filesystem
+* Add dropdown to change between different Versions, which also represents the current version
+* Add textbox with save button to make a manual save of a version
 
 ### Changed
 * ❗️ Migrated file-collections from the database to the filesystem and set it as the default file storage ([#1118](https://github.com/codefreak/codefreak/pull/1118))
 * ❗️ Introduced a new definition format for evaluations and how the are executed/processes ([#1145](https://github.com/codefreak/codefreak/pull/1145))
+* Added the information about the currently selected git commit to the answer table
 
 ### Removed
 * ❗️ Removed `file_collection` table from database ([#1118](https://github.com/codefreak/codefreak/pull/1118))
 * ❗️ Removed `FileCollection` entity and corresponding services ([#1185](https://github.com/codefreak/codefreak/pull/1185))
-
 
 ## [6.0.0](https://github.com/codefreak/codefreak/releases/tag/6.0.0) - 2020-03-26
 

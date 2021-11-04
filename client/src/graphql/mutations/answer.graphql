@@ -20,3 +20,11 @@ mutation DeleteAnswer($id: ID!) {
 mutation ResetAnswer($id: ID!) {
   resetAnswer(id: $id)
 }
+
+mutation ChangeVersion($id: ID!, $versionID: String!) {
+  changeVersion(collectionID: $id, versionID: $versionID)
+}
+
+mutation SaveVersion($id: ID!, $commitMessage: String!) {
+  saveVersion(collectionID: $id, commitMessage: $commitMessage)
+}

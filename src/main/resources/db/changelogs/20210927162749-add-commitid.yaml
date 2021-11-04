@@ -1,0 +1,12 @@
+databaseChangeLog:
+- changeSet:
+    id: 1632752980690-2
+    author: root (generated)
+    changes:
+    - addColumn:
+        columns:
+        - column:
+            name: commit_id
+            type: varchar(255)
+        tableName: answer
+
