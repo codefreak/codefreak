@@ -142,10 +142,6 @@ class AnswerService : BaseService() {
   }
 
   fun getCommitId(answerId: UUID): String {
-    return try {
-      findAnswer(answerId).commitId
-    } catch (err: EntityNotFoundException) {
-      ""
-    }
+    return findAnswer(answerId).commitId
   }
 }
