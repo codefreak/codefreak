@@ -16,7 +16,7 @@ import org.codefreak.codefreak.service.workspace.workspaceIngressName
 import org.codefreak.codefreak.service.workspace.workspaceServiceName
 import org.codefreak.codefreak.util.withoutTrailingSlash
 
-class WorkspaceIngressModel(identifier: WorkspaceIdentifier, baseUrl: URI) : Ingress() {
+class WorkspaceNginxIngressModel(identifier: WorkspaceIdentifier, baseUrl: URI) : Ingress() {
   init {
     metadata {
       name = identifier.workspaceIngressName

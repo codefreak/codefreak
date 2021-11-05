@@ -4,20 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.fabric8.kubernetes.api.model.Pod
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.KubernetesClientTimeoutException
-import io.fabric8.kubernetes.client.dsl.CreateOrReplaceable
 import io.fabric8.kubernetes.client.dsl.PodResource
-import java.net.URI
 import java.util.Objects
 import java.util.concurrent.TimeUnit.SECONDS
 import org.codefreak.codefreak.config.AppConfiguration
-import org.codefreak.codefreak.service.workspace.model.WorkspaceIngressModel
 import org.codefreak.codefreak.service.workspace.model.WorkspacePodModel
 import org.codefreak.codefreak.service.workspace.model.WorkspaceScriptMapModel
 import org.codefreak.codefreak.service.workspace.model.WorkspaceServiceModel
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import org.springframework.web.util.UriComponentsBuilder
 
 @Service
 class KubernetesWorkspaceService(
@@ -25,9 +20,8 @@ class KubernetesWorkspaceService(
   private val appConfig: AppConfiguration,
   private val fileService: WorkspaceFileService,
   private val workspaceClientService: WorkspaceClientService,
-  @Qualifier("yamlObjectMapper")
-  private val yamlMapper: ObjectMapper,
-  private val jsonMapper: ObjectMapper
+  private val jsonMapper: ObjectMapper,
+  private val workspaceExposingService: WorkspaceExposingService
 ) : WorkspaceService {
   companion object {
     private val log = LoggerFactory.getLogger(KubernetesWorkspaceService::class.java)
@@ -125,21 +119,20 @@ class KubernetesWorkspaceService(
   }
 
   private fun createWorkspaceResources(identifier: WorkspaceIdentifier, config: WorkspaceConfiguration) {
+    workspaceExposingService.exposeWorkspace(identifier)
     kubernetesClient.configMaps().createOrReplaceWithLog(WorkspaceScriptMapModel(identifier, config))
     kubernetesClient.pods().createOrReplaceWithLog(
       WorkspacePodModel(identifier, config, buildCompanionSpringConfig(identifier))
     )
     kubernetesClient.services().createOrReplaceWithLog(WorkspaceServiceModel(identifier))
-    kubernetesClient.network().v1().ingresses()
-      .createOrReplaceWithLog(WorkspaceIngressModel(identifier, buildWorkspaceBaseUrl(identifier)))
   }
 
   private fun deleteWorkspaceResources(identifier: WorkspaceIdentifier) {
     log.debug("Deleting workspace resources of $identifier")
     kubernetesClient.services().withName(identifier.workspaceServiceName).delete()
-    kubernetesClient.network().v1().ingresses().withName(identifier.workspaceIngressName).delete()
     kubernetesClient.pods().withName(identifier.workspacePodName).delete()
     kubernetesClient.configMaps().withName(identifier.workspaceScriptMapName).delete()
+    workspaceExposingService.unexposeWorkspace(identifier)
     // wait that pod is gone
     kubernetesClient.pods()
       .withName(identifier.workspacePodName)
@@ -156,22 +149,8 @@ class KubernetesWorkspaceService(
   private fun createReference(identifier: WorkspaceIdentifier): RemoteWorkspaceReference {
     return RemoteWorkspaceReference(
       identifier = identifier,
-      baseUrl = buildWorkspaceBaseUrl(identifier).toString()
+      baseUrl = workspaceExposingService.createWorkspaceUrl(identifier).toString()
     )
-  }
-
-  private fun buildWorkspaceBaseUrl(identifier: WorkspaceIdentifier): URI {
-    val urlVariables = mapOf(
-      "workspaceIdentifier" to identifier.hashString()
-    )
-    return UriComponentsBuilder.fromUriString(appConfig.workspaces.baseUrlTemplate)
-      .buildAndExpand(urlVariables)
-      .toUri()
-  }
-
-  private fun <T> CreateOrReplaceable<T>.createOrReplaceWithLog(vararg items: T): T {
-    log.debug("Creating or replacing:\n${items.joinToString(separator = "\n---\n") { yamlMapper.writeValueAsString(it) }}")
-    return createOrReplace(*items)
   }
 
   private fun buildCompanionSpringConfig(wsIdentifier: WorkspaceIdentifier): String {
