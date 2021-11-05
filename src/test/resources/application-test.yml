@@ -25,9 +25,10 @@ codefreak:
         jwk-url: "https://lms.example.org/certs"
         key-store-entry-name: codefreak
   workspaces:
-    # Either create an entry in /etc/hosts pointing to the IP returned by `minikube ip` or change
-    # this to your correct NGINX ingress entrypoint.
-    baseUrlTemplate: http://minikube/{workspaceIdentifier}
+    ingress:
+      # Either create an entry in /etc/hosts pointing to the IP returned by `minikube ip` or change
+      # this to your correct NGINX ingress entrypoint.
+      baseUrlTemplate: http://minikube/{workspaceIdentifier}
     # The following assumes workspaces are running in minikube and the host has the CF backend
     # running on port 8080
     # https://minikube.sigs.k8s.io/docs/handbook/host-access/

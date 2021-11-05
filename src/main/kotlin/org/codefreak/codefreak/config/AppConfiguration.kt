@@ -35,21 +35,6 @@ class AppConfiguration {
     var namespace = "default"
 
     /**
-     * Base URL that will be used to create Ingress resources for workspaces.
-     * Must accept a single variable `{workspaceIdentifier}` that
-     * will be replaced by the actual random workspace id.
-     * Make sure the hostname points to your ingress LoadBalancer.
-     * The template can also be used to create hostname-based URLs.
-     * Make sure you do not exceed the max allowed characters per domain (RFC 1034).
-     *
-     * ```
-     * baseUrlTemplate: "http://{workspaceIdentifier}.ws.mydomain.com"
-     * baseUrlTemplate: "https://mydomain.com/ws/{workspaceIdentifier}"
-     * ```
-     */
-    var baseUrlTemplate = "http://localhost/{workspaceIdentifier}"
-
-    /**
      * Full image name that will be used for the workspace companion
      */
     var companionImage = "ghcr.io/codefreak/codefreak-cloud-companion:minimal"
@@ -115,6 +100,46 @@ class AppConfiguration {
      * @see <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers">Kubernetes | Managing Resources for Containers</a>
      */
     var diskLimit = "5Gi"
+
+    var ingress = Ingress()
+
+    class Ingress {
+      /**
+       * Base URL that will be used to create Ingress resources for workspaces.
+       * Must accept a single variable `{workspaceIdentifier}` that
+       * will be replaced by the actual random workspace id.
+       * Make sure the hostname points to your ingress LoadBalancer.
+       * The template can also be used to create hostname-based URLs.
+       * Make sure you do not exceed the max allowed characters per domain (RFC 1034).
+       *
+       * ```
+       * baseUrlTemplate: "http://{workspaceIdentifier}.ws.mydomain.com"
+       * baseUrlTemplate: "https://mydomain.com/ws/{workspaceIdentifier}"
+       * ```
+       */
+      var baseUrlTemplate = "http://localhost/{workspaceIdentifier}"
+
+      /**
+       * Enable TLS on the ingress object. To generate https workspace URLs you should
+       * also adjust the `baseUrlTemplate` to start with `https://...`. If you have
+       * a valid (wildcard) certificate for the workspace hosts please store it in a secret
+       * and point `tlsSecretName` to the proper secret.
+       */
+      var tlsEnabled = false
+
+      /**
+       * Name of the tls secret object that should be attached to workspace ingresses.
+       * Will only be used if `tlsEnabled` is set to `true`.
+       */
+      var tlsSecretName: String? = null
+
+      /**
+       * Disable certificate validation when the backend is connecting to a workspace.
+       * This should only ever be used for testing and is highly insecure in production environments
+       * as it allows MITM attacks!!
+       */
+      var disableTlsVerification = false
+    }
   }
 
   class Ldap {

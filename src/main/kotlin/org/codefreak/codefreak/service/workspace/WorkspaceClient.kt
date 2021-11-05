@@ -1,16 +1,19 @@
 package org.codefreak.codefreak.service.workspace
 
+import addHeader
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.ws.DefaultWebSocketEngine
 import com.apollographql.apollo3.network.ws.GraphQLWsProtocol
 import com.apollographql.apollo3.network.ws.WebSocketNetworkTransport
 import com.fasterxml.jackson.databind.ObjectMapper
+import enableInsecureTls
 import java.io.IOException
 import java.io.InputStream
 import java.net.URI
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
+import javax.net.ssl.SSLHandshakeException
 import kotlin.concurrent.thread
 import kotlinx.coroutines.flow.first
 import okhttp3.Call
@@ -35,7 +38,8 @@ import reactor.core.publisher.Mono
 class WorkspaceClient(
   baseUrl: String,
   authToken: String?,
-  private val objectMapper: ObjectMapper
+  private val objectMapper: ObjectMapper,
+  insecureTls: Boolean = false
 ) {
   companion object {
     private val log = LoggerFactory.getLogger(WorkspaceClient::class.java)
@@ -46,14 +50,11 @@ class WorkspaceClient(
     .also {
       // Provide authentication token via Authorization header
       if (authToken != null) {
-        it.addInterceptor { chain ->
-          val authReq: Request = chain
-            .request()
-            .newBuilder()
-            .addHeader("Authorization", "Bearer $authToken")
-            .build()
-          chain.proceed(authReq)
-        }
+        it.addHeader("Authorization", "Bearer $authToken")
+      }
+      // disable verification tls certificates and hostnames
+      if (insecureTls) {
+        it.enableInsecureTls()
       }
     }
     .build()
@@ -164,6 +165,12 @@ class WorkspaceClient(
           else -> throw IllegalStateException("Expected a status of 404 or 503 but received $code instead")
         }
       }
+    } catch (e: SSLHandshakeException) {
+      log.warn(
+        "Could not perform an SSL handshake with $baseUri. If you are using a self-signed certificate please disable SSL validation.",
+        e
+      )
+      return false
     } catch (e: IOException) {
       log.debug("IOException occurred when trying to connect to workspace at $baseUri", e)
       return false
