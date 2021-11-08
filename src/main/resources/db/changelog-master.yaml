@@ -71,3 +71,6 @@ databaseChangeLog:
 - include:
     file: changelogs/20211029133407-remove-ide-settings.yaml
     relativeToChangelogFile: true
+- include:
+    file: changelogs/20211101172556-add-workspace-settings.yaml
+    relativeToChangelogFile: true

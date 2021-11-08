@@ -1,5 +1,7 @@
 package org.codefreak.codefreak.service.workspace
 
+import org.codefreak.codefreak.config.AppConfiguration
+
 /**
  * Interface for describing the demand for a Workspace
  */
@@ -42,4 +44,20 @@ data class WorkspaceConfiguration(
    * @see <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers">Kubernetes | Managing Resources for Containers</a>
    */
   val diskLimit: String? = null
+)
+
+/**
+ * Convenient method to create a new WorkspaceConfiguration based on default values defined in
+ * the AppConfiguration. If imageName is null or blank the default image from the AppConfiguration will be used
+ */
+fun AppConfiguration.Workspaces.createWorkspaceConfiguration(
+  imageName: String?,
+  scripts: Map<String, String> = emptyMap(),
+  environment: Map<String, String>? = null
+) = WorkspaceConfiguration(
+  // use the default image from AppConfiguration.Workspaces if the given image name is blank or null
+  imageName?.takeIf { it.isNotBlank() } ?: companionImage,
+  scripts, environment,
+  // the following values are properties from AppConfiguration.Workspaces
+  cpuLimit, memoryLimit, diskLimit
 )

@@ -46,6 +46,7 @@ query GetTask($id: ID!, $userId: ID) {
     updatedAt
     editable
     exportUrl
+    defaultFiles
     assignment {
       id
       title
@@ -73,8 +74,11 @@ query GetTaskDetails($id: ID!, $teacher: Boolean = false) {
   task(id: $id) {
     id
     body
+    defaultFiles
     hiddenFiles @include(if: $teacher)
     protectedFiles @include(if: $teacher)
+    runCommand @include(if: $teacher)
+    customWorkspaceImage @include(if: $teacher)
     assignment {
       id
       status

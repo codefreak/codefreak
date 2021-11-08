@@ -30,7 +30,7 @@ class WorkspaceIdeService(
    */
   fun createAnswerIdeForUser(answer: Answer, user: User): AuthenticatedWorkspaceReference {
     val identifier = createAnswerIdeWorkspaceIdentifier(answer.id)
-    val config = createAnswerIdeWorkspaceConfig()
+    val config = createAnswerIdeWorkspaceConfig(answer)
     val remoteReference = workspaceService.createWorkspace(identifier, config)
     return AuthenticatedWorkspaceReference(remoteReference, workspaceAuthService?.createUserAuthToken(identifier, user))
   }
@@ -40,7 +40,7 @@ class WorkspaceIdeService(
    */
   fun createAnswerIde(answer: Answer): RemoteWorkspaceReference {
     val identifier = createAnswerIdeWorkspaceIdentifier(answer.id)
-    val config = createAnswerIdeWorkspaceConfig()
+    val config = createAnswerIdeWorkspaceConfig(answer)
     return workspaceService.createWorkspace(identifier, config)
   }
 
@@ -76,12 +76,23 @@ class WorkspaceIdeService(
     )
   }
 
-  private fun createAnswerIdeWorkspaceConfig(): WorkspaceConfiguration {
-    return WorkspaceConfiguration(
-      imageName = appConfig.workspaces.companionImage,
-      cpuLimit = appConfig.workspaces.cpuLimit,
-      memoryLimit = appConfig.workspaces.memoryLimit,
-      diskLimit = appConfig.workspaces.diskLimit
+  private fun createAnswerIdeWorkspaceConfig(answer: Answer): WorkspaceConfiguration {
+    return appConfig.workspaces.createWorkspaceConfiguration(
+      imageName = answer.task.customWorkspaceImage,
+      scripts = mapOf(
+        "run" to buildRunCommand(answer.task.runCommand)
+      )
     )
+  }
+
+  private fun buildRunCommand(runCommand: String?): String {
+    if (runCommand?.isNotBlank() == true) {
+      return runCommand
+    }
+    return """
+#!/bin/env bash
+echo "No run command specified!"
+exit 1
+    """.trimIndent()
   }
 }

@@ -17,7 +17,7 @@ const WorkspaceRunButton = ({
     mutate: run,
     isLoading,
     data
-  } = useStartProcessMutation(['bash', '-c', 'python main.py'])
+  } = useStartProcessMutation(['bash', '-c', '/scripts/run'])
   const [activeRightTab, setActiveRightTab] = useMutableQueryParam(
     RIGHT_TAB_QUERY_PARAM,
     ''

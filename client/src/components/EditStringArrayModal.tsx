@@ -86,7 +86,7 @@ const EditStringArrayModal: React.FC<EditStringArrayModalProps> = props => {
                   {...(index === 0
                     ? formItemLayout
                     : formItemLayoutWithOutLabel)}
-                  label={index === 0 ? 'Patterns' : ''}
+                  label={index === 0 ? 'Items' : ''}
                   required={false}
                   key={field.key}
                 >
@@ -98,16 +98,12 @@ const EditStringArrayModal: React.FC<EditStringArrayModalProps> = props => {
                         required: true,
                         whitespace: true,
                         message:
-                          'Please enter a valid pattern or remove this entry.'
+                          'Please enter a valid value or remove this entry.'
                       }
                     ]}
                     noStyle
                   >
-                    <Input
-                      placeholder="pattern"
-                      autoFocus
-                      style={{ width: '90%' }}
-                    />
+                    <Input autoFocus style={{ width: '90%' }} />
                   </Form.Item>
                   <span style={{ width: '10%' }}>
                     <MinusCircleOutlined
@@ -121,11 +117,11 @@ const EditStringArrayModal: React.FC<EditStringArrayModalProps> = props => {
               <Form.Item {...formItemLayoutWithOutLabel}>
                 <Button
                   type="dashed"
-                  onClick={add}
+                  onClick={() => add()}
                   style={{ width: '90%' }}
                   icon={<PlusOutlined />}
                 >
-                  Add pattern
+                  Add item
                 </Button>
                 <Form.ErrorList errors={errors} />
               </Form.Item>
@@ -169,6 +165,7 @@ export const EditStringArrayButton: React.FC<EditStringArrayButtonProps> =
     return (
       <>
         <EditStringArrayModal
+          extraContent={extraContent}
           initialValues={initialValues}
           onSave={onSave}
           onCancel={onCancel}

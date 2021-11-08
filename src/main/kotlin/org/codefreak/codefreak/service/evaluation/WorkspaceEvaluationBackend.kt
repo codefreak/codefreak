@@ -12,6 +12,7 @@ import org.codefreak.codefreak.service.workspace.WorkspaceConfiguration
 import org.codefreak.codefreak.service.workspace.WorkspaceIdentifier
 import org.codefreak.codefreak.service.workspace.WorkspacePurpose
 import org.codefreak.codefreak.service.workspace.WorkspaceService
+import org.codefreak.codefreak.service.workspace.createWorkspaceConfiguration
 import org.codefreak.codefreak.util.TarUtil.entrySequence
 import org.codefreak.codefreak.util.preventClose
 import org.springframework.beans.factory.annotation.Autowired
@@ -91,16 +92,12 @@ class WorkspaceEvaluationBackend : EvaluationBackend {
   }
 
   private fun createEvaluationWorkspaceConfig(runConfig: EvaluationRunConfig): WorkspaceConfiguration {
-    return WorkspaceConfiguration(
-      // TODO: Use image that might has been configured by the eval config
-      imageName = appConfiguration.workspaces.companionImage,
+    return appConfiguration.workspaces.createWorkspaceConfiguration(
+      imageName = runConfig.imageName,
       scripts = mapOf(
         EVALUATION_SCRIPT_NAME to runConfig.script
       ),
-      environment = runConfig.environment,
-      cpuLimit = appConfiguration.workspaces.cpuLimit,
-      memoryLimit = appConfiguration.workspaces.memoryLimit,
-      diskLimit = appConfiguration.workspaces.diskLimit
+      environment = runConfig.environment
     )
   }
 }
