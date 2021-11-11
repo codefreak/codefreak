@@ -10,7 +10,8 @@ jobs:
       matrix:
         include:
           - os: ubuntu-20.04
-            deploy: true
+            # Run container image deployment on master and cloud-workspaces branch
+            deploy: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/cloud-workspaces' }}
           - os: windows-2019
             deploy: false
 
@@ -18,6 +19,8 @@ jobs:
     env:
       # webpack build needs a lot of memory
       NODE_OPTIONS: --max_old_space_size=4096
+      # Deploy images from cloud-workspaces branch as ':cloud-workspaces' and on other branches (master) as ':canary'
+      LATEST_IMAGE_TAG: ${{ github.ref == 'refs/heads/cloud-workspaces' && 'cloud-workspaces' || 'canary' }}
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -56,23 +59,18 @@ jobs:
         shell: bash
         run: ./gradlew check -x test
 
-      # Build the companion image first because we need it for integration tests with the server.
-      - name: Build Companion Image
-        if: runner.os != 'Windows'
-        run: ./gradlew :cloud-companion:jibDockerBuild
-
       - name: Run Unit Tests
         shell: bash
         run: ./gradlew test
 
-      - name: Build Server Image
+      - name: Build Server and Companion Image
         if: runner.os != 'Windows'
-        run: ./gradlew :jibDockerBuild
+        run: ./gradlew jibDockerBuild
 
       # Build the companion aio (all-in-one) image only when on master or tags
       # Because the image is huge (~15GB) we need to free up some space on GH Actions before we can build the image.
       - name: Build Companion All-In-One Image
-        if: (runner.os != 'Windows') && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags'))
+        if: matrix.deploy
         run: |
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
@@ -93,25 +91,25 @@ jobs:
           headless: true
 
       - name: Install docker-ci-deploy
-        if: matrix.deploy && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags'))
+        if: matrix.deploy
         run: |
           pip3 install --upgrade pip
           pip3 install docker-ci-deploy
 
       - name: Authenticate to GitHub Container Registry
-        if: matrix.deploy && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags'))
+        if: matrix.deploy
         run: |
           docker logout
           # "Username" can be anything as we are authenticating via the default workflow access token!
           # See https://github.com/actions/starter-workflows/issues/66
           echo ${{ github.token }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Deploy master branch as canary
-        if: matrix.deploy && github.ref == 'refs/heads/master'
+      - name: Deploy Server and Companion Container Images
+        if: matrix.deploy
         run: |
-          python -m docker_ci_deploy --tag canary -- ghcr.io/codefreak/codefreak
-          python -m docker_ci_deploy --tag minimal-canary -- ghcr.io/codefreak/codefreak-cloud-companion:minimal
-          python -m docker_ci_deploy --tag aio-canary -- ghcr.io/codefreak/codefreak-cloud-companion:aio
+          python -m docker_ci_deploy --tag $LATEST_IMAGE_TAG -- ghcr.io/codefreak/codefreak
+          python -m docker_ci_deploy --tag minimal-$LATEST_IMAGE_TAG -- ghcr.io/codefreak/codefreak-cloud-companion:minimal
+          python -m docker_ci_deploy --tag aio-$LATEST_IMAGE_TAG -- ghcr.io/codefreak/codefreak-cloud-companion:aio
 
       # ${GITHUB_REF/refs\/tags\//} returns the tag name from 'refs/tags/TAG_NAME'
       # The following will only work with tags following semantic versioning!
