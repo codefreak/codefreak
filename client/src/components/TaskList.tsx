@@ -87,7 +87,7 @@ const renderTask = (props: RenderProps) => (task: Task) => {
             <Markdown>{task.body}</Markdown>
           </CropContainer>
         ) : null}
-        <EntityLink to={task} sub={task.answer ? '/answer' : undefined}>
+        <EntityLink to={task}>
           <Button icon={<FolderOpenOutlined />} type="primary">
             Details
           </Button>
