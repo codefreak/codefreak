@@ -7,6 +7,9 @@ import {
   uploadFilePath
 } from '../../services/workspace'
 
+/**
+ * Returns a function to upload file-contents to the workspace
+ */
 const useSaveWorkspaceFileMutation = () => {
   const { baseUrl, authToken } = useWorkspace()
   const queryClient = useQueryClient()

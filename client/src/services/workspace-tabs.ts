@@ -4,12 +4,39 @@ import React from 'react'
  * The different types for workspace-tabs with their string-representations.
  */
 export enum WorkspaceTabType {
+  /**
+   * A tab with an editor
+   */
   EDITOR = 'editor',
+
+  /**
+   * An empty tab
+   */
   EMPTY = 'empty',
+
+  /**
+   * A tab with the task instructions
+   */
   INSTRUCTIONS = 'instructions',
+
+  /**
+   * A tab with a terminal
+   */
   SHELL = 'shell',
+
+  /**
+   * A tab with the evaluation results
+   */
   EVALUATION = 'evaluation',
+
+  /**
+   * A tab with a terminal for the run-process
+   */
   CONSOLE = 'console',
+
+  /**
+   * A file-tree
+   */
   FILE_TREE = 'file-tree'
 }
 

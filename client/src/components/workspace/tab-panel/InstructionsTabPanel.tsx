@@ -9,6 +9,9 @@ import {
 import { SolutionOutlined } from '@ant-design/icons'
 import React from 'react'
 
+/**
+ * Renders an InstructionsTabPanel
+ */
 export class InstructionsWorkspaceTab extends WorkspaceTab {
   constructor() {
     super(WorkspaceTabType.INSTRUCTIONS, '')
@@ -27,6 +30,9 @@ export class InstructionsWorkspaceTab extends WorkspaceTab {
   }
 }
 
+/**
+ * Renders the instructions of the current task
+ */
 const InstructionsTabPanel = () => {
   const { taskId: id } = useWorkspace()
   const { data } = useGetTaskDetailsQuery({

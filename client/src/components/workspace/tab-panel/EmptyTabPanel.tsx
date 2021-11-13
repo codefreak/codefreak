@@ -5,6 +5,9 @@ import {
 } from '../../../services/workspace-tabs'
 import React from 'react'
 
+/**
+ * Renders an EmptyTabPanel. The title will be 'No files open'
+ */
 export class EmptyWorkspaceTab extends WorkspaceTab {
   constructor() {
     super(WorkspaceTabType.EMPTY, '')
@@ -19,6 +22,9 @@ export class EmptyWorkspaceTab extends WorkspaceTab {
   }
 }
 
+/**
+ * Renders a tab panel with no content
+ */
 const EmptyTabPanel = () => {
   return <TabPanel />
 }

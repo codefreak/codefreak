@@ -56,6 +56,12 @@ const filePatternHelp = (
   />
 )
 
+/**
+ * Renders the given instructions for a task as markdown
+ *
+ * @param instructions
+ * @returns
+ */
 export const renderTaskInstructionsText = (
   instructions: Maybe<string> | undefined
 ) => {

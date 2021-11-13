@@ -10,6 +10,9 @@ import { processWebSocketPath } from '../../../services/workspace'
 import { AttachAddon } from 'xterm-addon-attach'
 import TabPanel from './TabPanel'
 
+/**
+ * A light theme for the xterm terminal
+ */
 const XTermThemeLight: ITheme = {
   foreground: '#303030',
   background: '#ffffff',
@@ -34,11 +37,24 @@ const XTermThemeLight: ITheme = {
   brightWhite: '#f5f5f5'
 }
 
+/**
+ * Provides the process id and type of the process to be displayed in the tab panel
+ */
 type AbstractProcessTabPanelProps = {
+  /**
+   * The process id
+   */
   processId: string
+
+  /**
+   * The type of the process
+   */
   type: ProcessType
 }
 
+/**
+ * A base class for the tab panels of the process tabs
+ */
 const AbstractProcessTabPanel = ({
   processId,
   type

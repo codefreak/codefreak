@@ -26,18 +26,46 @@ import { EditorWorkspaceTab } from './tab-panel/EditorTabPanel'
 import Centered from '../Centered'
 import { trimTrailingSlashes, withLeadingSlash } from '../../services/strings'
 
+/**
+ * The query parameter fo the active left tab
+ */
 export const LEFT_TAB_QUERY_PARAM = 'leftTab'
+
+/**
+ * The query parameter fo the active right tab
+ */
 export const RIGHT_TAB_QUERY_PARAM = 'rightTab'
 
+/**
+ * Indicates that no tab is active
+ */
 const NO_ACTIVE_TAB = ''
 
+/**
+ * Provides the type of workspace, a callback for when the base-url changes
+ * and a button create an answer for the current task
+ */
 export interface WorkspacePageProps {
+  /**
+   * The type of workspace
+   */
   type: FileContextType
+
+  /**
+   * A callback for when the base-url changes
+   */
   onBaseUrlChange: (newBaseUrl: string, newAuthToken: string) => void
+
+  /**
+   * A button create an answer for the current task
+   */
   createAnswerButton: React.ReactNode
   initialOpenFiles?: string[]
 }
 
+/**
+ * Renders a workspace ide for the current task/answer
+ */
 const WorkspacePage = ({
   type,
   onBaseUrlChange,

@@ -11,10 +11,28 @@ import { KeyboardEventHandler } from 'react'
 import { noop } from '../../../services/util'
 import { findNode, insertDataNodes, isRoot, RightClickedItem } from './FileTree'
 
+/**
+ * Types of inputs which can be used in the FileTreeNameInput
+ */
 export enum InputType {
+  /**
+   * Adds a new file to the current directory
+   */
   ADD_FILE,
+
+  /**
+   * Adds a new directory to the current directory
+   */
   ADD_DIRECTORY,
+
+  /**
+   * Renames the current file
+   */
   RENAME_FILE,
+
+  /**
+   * Renames the current directory
+   */
   RENAME_DIRECTORY
 }
 

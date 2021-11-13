@@ -6,10 +6,19 @@ import { useMutableQueryParam } from '../../hooks/useQuery'
 import { WorkspaceTabType } from '../../services/workspace-tabs'
 import { RIGHT_TAB_QUERY_PARAM } from './WorkspacePage'
 
+/**
+ * Provides a callback for when the run-process in the current workspace is started
+ */
 interface WorkspaceRunButtonProps {
+  /**
+   * A callback for when the run-process in the current workspace is started
+   */
   onRunProcessStarted: (runProcessId: string) => void
 }
 
+/**
+ * A button that starts the run-process in the current workspace and switches to the ConsoleTabPanel in the WorkspacePage
+ */
 const WorkspaceRunButton = ({
   onRunProcessStarted
 }: WorkspaceRunButtonProps) => {

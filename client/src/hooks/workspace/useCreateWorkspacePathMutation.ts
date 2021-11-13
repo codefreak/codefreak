@@ -6,11 +6,24 @@ import {
   fetchWithAuthentication
 } from '../../services/workspace'
 
+/**
+ * A type of path
+ */
 export enum PathType {
+  /**
+   * A file
+   */
   FILE,
+
+  /**
+   * A directory
+   */
   DIRECTORY
 }
 
+/**
+ * Provides a function to create a path in the workspace
+ */
 const useCreateWorkspacePathMutation = () => {
   const { baseUrl, authToken } = useWorkspace()
 

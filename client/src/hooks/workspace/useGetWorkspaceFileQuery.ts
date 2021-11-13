@@ -2,6 +2,9 @@ import useWorkspace, { NO_BASE_URL } from './useWorkspace'
 import { useQuery } from 'react-query'
 import { fetchWithAuthentication, readFilePath } from '../../services/workspace'
 
+/**
+ * Loads the contents of a file from the workspace
+ */
 const useGetWorkspaceFileQuery = (path: string) => {
   const { baseUrl, authToken } = useWorkspace()
   const fullPath = readFilePath(baseUrl, path)

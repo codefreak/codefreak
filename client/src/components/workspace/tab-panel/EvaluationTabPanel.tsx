@@ -9,6 +9,9 @@ import { DashboardOutlined } from '@ant-design/icons'
 import EvaluationIndicator from '../../EvaluationIndicator'
 import React from 'react'
 
+/**
+ * Renders an EvaluationTabPanel
+ */
 export class EvaluationWorkspaceTab extends WorkspaceTab {
   private readonly answerId: string
 
@@ -39,6 +42,9 @@ export class EvaluationWorkspaceTab extends WorkspaceTab {
   }
 }
 
+/**
+ * Renders the EvaluationPage in a tab panel
+ */
 const EvaluationTabPanel = () => {
   const { answerId } = useWorkspace()
   return (
