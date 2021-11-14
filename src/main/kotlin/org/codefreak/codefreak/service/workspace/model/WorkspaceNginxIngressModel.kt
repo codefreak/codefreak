@@ -5,18 +5,24 @@ import com.fkorotkov.kubernetes.networking.v1.http
 import com.fkorotkov.kubernetes.networking.v1.metadata
 import com.fkorotkov.kubernetes.networking.v1.newHTTPIngressPath
 import com.fkorotkov.kubernetes.networking.v1.newIngressRule
+import com.fkorotkov.kubernetes.networking.v1.newIngressTLS
 import com.fkorotkov.kubernetes.networking.v1.port
 import com.fkorotkov.kubernetes.networking.v1.service
 import com.fkorotkov.kubernetes.networking.v1.spec
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress
 import java.net.URI
+import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.service.workspace.WorkspaceIdentifier
 import org.codefreak.codefreak.service.workspace.k8sLabels
 import org.codefreak.codefreak.service.workspace.workspaceIngressName
 import org.codefreak.codefreak.service.workspace.workspaceServiceName
 import org.codefreak.codefreak.util.withoutTrailingSlash
 
-class WorkspaceIngressModel(identifier: WorkspaceIdentifier, baseUrl: URI) : Ingress() {
+class WorkspaceNginxIngressModel(
+  identifier: WorkspaceIdentifier,
+  baseUrl: URI,
+  ingressConfig: AppConfiguration.Workspaces.Ingress
+) : Ingress() {
   init {
     metadata {
       name = identifier.workspaceIngressName
@@ -44,6 +50,13 @@ class WorkspaceIngressModel(identifier: WorkspaceIdentifier, baseUrl: URI) : Ing
           })
         }
       })
+
+      if (ingressConfig.tlsEnabled) {
+        tls = listOf(newIngressTLS {
+          hosts = listOf(baseUrl.host)
+          secretName = ingressConfig.tlsSecretName
+        })
+      }
     }
   }
 }

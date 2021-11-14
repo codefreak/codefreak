@@ -2,6 +2,7 @@ package org.codefreak.codefreak.service.workspace
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.util.ConcurrentReferenceHashMap
 
@@ -9,7 +10,9 @@ import org.springframework.util.ConcurrentReferenceHashMap
 class WorkspaceClientService(
   private val objectMapper: ObjectMapper,
   @Autowired(required = false)
-  private val authService: WorkspaceAuthService?
+  private val authService: WorkspaceAuthService?,
+  @Value("#{@config.workspaces.ingress.disableTlsVerification}")
+  private val disableTlsVerification: Boolean = false
 ) {
   private val existingClients = ConcurrentReferenceHashMap<RemoteWorkspaceReference, WorkspaceClient>()
 
@@ -28,7 +31,8 @@ class WorkspaceClientService(
     return WorkspaceClient(
       baseUrl = remoteWorkspaceReference.baseUrl,
       authToken = createAuthToken(remoteWorkspaceReference),
-      objectMapper
+      objectMapper,
+      disableTlsVerification
     )
   }
 

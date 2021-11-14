@@ -68,7 +68,6 @@ tasks.compileKotlin {
 }
 
 tasks.test {
-
   // The tests are somehow broken on Windows. Especially the file-related
   // tests tend to fail deleting files. Maybe somewhere are leaking file
   // descriptors...?

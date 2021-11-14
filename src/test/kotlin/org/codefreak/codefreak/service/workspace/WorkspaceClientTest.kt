@@ -3,6 +3,7 @@ package org.codefreak.codefreak.service.workspace
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever
 import java.io.InputStream
 import java.util.UUID
@@ -43,7 +44,7 @@ class WorkspaceClientTest : WorkspaceBaseTest() {
   @BeforeAll
   fun beforeAll() {
     val tar = createTarWithEntries(mapOf("file.txt" to "foo"))
-    whenever(workspaceFileService.loadFiles(workspaceIdentifier, any())).then {
+    whenever(workspaceFileService.loadFiles(eq(workspaceIdentifier), any())).then {
       it.getArgument<Consumer<InputStream>>(1).accept(tar)
     }
     remoteWorkspaceReference = workspaceService.createWorkspace(

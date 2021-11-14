@@ -1,6 +1,10 @@
 package org.codefreak.codefreak.service.workspace
 
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.fabric8.kubernetes.api.model.Pod
+import io.fabric8.kubernetes.client.dsl.CreateOrReplaceable
+import org.slf4j.LoggerFactory
 
 const val WS_K8S_LABEL_REFERENCE = "org.codefreak.reference"
 const val WS_K8S_LABEL_PURPOSE = "org.codefreak.purpose"
@@ -43,3 +47,16 @@ val WorkspaceIdentifier.workspacePodName: String
 
 val WorkspaceIdentifier.workspaceIngressName: String
   get() = hashString()
+
+private val yamlMapper = YAMLMapper().registerKotlinModule()
+fun <T> CreateOrReplaceable<T>.createOrReplaceWithLog(vararg items: T): T {
+  val log = LoggerFactory.getLogger(this::class.java)
+  log.debug(
+    "Creating or replacing:\n${
+      items.joinToString(separator = "\n---\n") {
+        yamlMapper.writeValueAsString(it)
+      }
+    }"
+  )
+  return createOrReplace(*items)
+}
