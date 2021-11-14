@@ -19,7 +19,13 @@ import {
 import { FileTextOutlined } from '@ant-design/icons'
 import { basename } from 'path'
 
+/**
+ * Renders an EditorTabPanel
+ */
 export class EditorWorkspaceTab extends WorkspaceTab {
+  /**
+   * @param path The path of the file to be rendered
+   */
   constructor(path: string) {
     super(WorkspaceTabType.EDITOR, path)
   }
@@ -46,10 +52,19 @@ export class EditorWorkspaceTab extends WorkspaceTab {
   }
 }
 
+/**
+ * Provides the file path for the editor
+ */
 type EditorTabPanelProps = {
+  /**
+   * The path of the file to be rendered
+   */
   file: string
 }
 
+/**
+ * Renders an editor for the given file
+ */
 const EditorTabPanel = ({ file }: EditorTabPanelProps) => {
   const { isAvailable, baseUrl } = useWorkspace()
   const { data, isLoading } = useGetWorkspaceFileQuery(file)

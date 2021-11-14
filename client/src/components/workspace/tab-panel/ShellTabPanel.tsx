@@ -11,6 +11,9 @@ import {
 } from '../../../services/workspace-tabs'
 import { CodeOutlined } from '@ant-design/icons'
 
+/**
+ * Renders a ShellTabPanel
+ */
 export class ShellWorkspaceTab extends WorkspaceTab {
   constructor() {
     super(WorkspaceTabType.SHELL, '')
@@ -29,6 +32,9 @@ export class ShellWorkspaceTab extends WorkspaceTab {
   }
 }
 
+/**
+ * Starts and renders a terminal for the current workspace
+ */
 const ShellTabPanel = () => {
   const { baseUrl } = useWorkspace()
   const {

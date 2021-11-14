@@ -2,17 +2,33 @@ import useWorkspace from './useWorkspace'
 import { useMutation } from 'react-query'
 import { noop } from '../../services/util'
 
+/**
+ * A type of process
+ */
 export enum ProcessType {
+  /**
+   * A generic shell process
+   */
   SHELL,
+
+  /**
+   * A shell process for the run-process
+   */
   CONSOLE
 }
 
+/**
+ * The GraphQL query to resize a process with the given id, columns and rows
+ */
 const RESIZE_PROCESS = (processId: string, cols: number, rows: number) => `
 mutation ResizeProcess {
   resizeProcess(cols: ${cols}, id: "${processId}", rows: ${rows})
 }
 `
 
+/**
+ * Returns a function to resize a process in the workspace
+ */
 const useResizeProcessMutation = (processType: ProcessType) => {
   const { graphqlWebSocketClient, baseUrl } = useWorkspace()
 

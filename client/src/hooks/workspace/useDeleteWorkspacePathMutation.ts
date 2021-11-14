@@ -2,6 +2,9 @@ import useWorkspace, { NO_BASE_URL } from './useWorkspace'
 import { useMutation } from 'react-query'
 import { deletePath, fetchWithAuthentication } from '../../services/workspace'
 
+/**
+ * Provides a function to delete a path from the workspace
+ */
 const useDeleteWorkspacePathMutation = () => {
   const { baseUrl, authToken } = useWorkspace()
 
