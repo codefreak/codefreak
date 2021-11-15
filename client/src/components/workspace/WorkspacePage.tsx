@@ -1,15 +1,13 @@
 import {
   FileContextType,
+  Maybe,
   useStartWorkspaceMutation
 } from '../../services/codefreak-api'
 import './WorkspacePage.less'
 import WorkspaceTabsWrapper from './WorkspaceTabsWrapper'
 import { useEffect, useState } from 'react'
 import { Col, Row } from 'antd'
-import useWorkspace, {
-  NO_AUTH_TOKEN,
-  NO_BASE_URL
-} from '../../hooks/workspace/useWorkspace'
+import useWorkspace from '../../hooks/workspace/useWorkspace'
 import {
   indexOf,
   removeEditorTab,
@@ -54,7 +52,7 @@ export interface WorkspacePageProps {
   /**
    * A callback for when the base-url changes
    */
-  onBaseUrlChange: (newBaseUrl: string, newAuthToken: string) => void
+  onBaseUrlChange: (newBaseUrl: string, newAuthToken?: Maybe<string>) => void
 
   /**
    * A button create an answer for the current task
@@ -95,7 +93,7 @@ const WorkspacePage = ({
     initialOpenEditorTabs
   )
 
-  const { baseUrl, answerId } = useWorkspace()
+  const { answerId } = useWorkspace()
 
   // These are not changeable for now
   const rightTabs = [
@@ -117,6 +115,17 @@ const WorkspacePage = ({
           }
         }
       })
+        .then(result => {
+          if (result.data) {
+            onBaseUrlChange(
+              result.data.startWorkspace.baseUrl,
+              result.data?.startWorkspace.authToken
+            )
+          }
+        })
+        .catch(() => {
+          // Error is caught globally
+        })
     }
   })
 
@@ -125,15 +134,6 @@ const WorkspacePage = ({
       setActiveRightTab(WorkspaceTabType.INSTRUCTIONS)
     }
   }, [activeRightTab, setActiveRightTab])
-
-  useEffect(() => {
-    if (data && baseUrl === NO_BASE_URL) {
-      onBaseUrlChange(
-        data.startWorkspace.baseUrl,
-        data.startWorkspace.authToken ?? NO_AUTH_TOKEN
-      )
-    }
-  }, [data, baseUrl, onBaseUrlChange])
 
   useEffect(() => {
     const isNotEmpty =

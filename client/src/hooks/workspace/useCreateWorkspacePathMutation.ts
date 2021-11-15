@@ -1,10 +1,10 @@
 import useWorkspace, { NO_BASE_URL } from './useWorkspace'
-import { useMutation } from 'react-query'
 import {
   createDirectoryPath,
   createFilePath,
   fetchWithAuthentication
 } from '../../services/workspace'
+import useWorkspaceBaseMutation from './useWorkspaceBaseMutation'
 
 /**
  * A type of path
@@ -27,10 +27,10 @@ export enum PathType {
 const useCreateWorkspacePathMutation = () => {
   const { baseUrl, authToken } = useWorkspace()
 
-  return useMutation(
+  return useWorkspaceBaseMutation(
     async ({ path, type }: { path: string; type: PathType }) => {
       if (baseUrl === NO_BASE_URL) {
-        return Promise.reject('No base-url for the workspace given')
+        throw new Error('No base-url for the workspace given')
       }
 
       let fullPath
@@ -50,7 +50,14 @@ const useCreateWorkspacePathMutation = () => {
       })
 
       if (!response.ok) {
-        const message = await response.text()
+        const error = await response.json()
+
+        let message = `Could not create ${path}`
+
+        if ('message' in error && typeof error.message === 'string') {
+          message = error.message
+        }
+
         return Promise.reject(message)
       }
 

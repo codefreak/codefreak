@@ -1,8 +1,4 @@
-import {
-  mockFetch,
-  render,
-  waitUntilWorkspaceIsAvailable
-} from '../../../services/testing'
+import { mockFetch, render } from '../../../services/testing'
 import EditorTabPanel from './EditorTabPanel'
 import { QueryClient } from 'react-query'
 import {
@@ -25,19 +21,19 @@ describe('<EditorTabPanel />', () => {
     const answerId = NO_ANSWER_ID
     const taskId = NO_TASK_ID
 
-    await waitUntilWorkspaceIsAvailable({
-      queryClient,
-      baseUrl,
-      authToken,
-      answerId,
-      taskId
-    })
-
     const { container } = render(
       <EditorTabPanel file="file" />,
       {},
       {
-        queryClient
+        queryClient,
+        withWorkspaceContextProvider: true,
+        workspaceContext: {
+          isAvailable: true,
+          baseUrl,
+          authToken,
+          answerId,
+          taskId
+        }
       }
     )
 

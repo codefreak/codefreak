@@ -15,6 +15,7 @@ describe('useWorkspace()', () => {
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
         workspaceContext: {
+          isAvailable: true,
           baseUrl,
           authToken,
           answerId,
@@ -23,11 +24,9 @@ describe('useWorkspace()', () => {
         withWorkspaceContextProvider: true
       })
 
-    const { result, waitForValueToChange } = renderHook(() => useWorkspace(), {
+    const { result } = renderHook(() => useWorkspace(), {
       wrapper
     })
-
-    await waitForValueToChange(() => result.current.isAvailable)
 
     // The second object is needed in case a authorization header is sent
     expect(fetchMock).toHaveBeenCalledWith(baseUrl, expect.objectContaining({}))

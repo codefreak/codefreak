@@ -1,6 +1,7 @@
-import { useQuery } from 'react-query'
 import useWorkspace from './useWorkspace'
 import { Client } from 'graphql-ws'
+import useWorkspaceBaseQuery from './useWorkspaceBaseQuery'
+import GraphqlWsErrorType from '../../errors/GraphqlWsErrorType'
 
 /**
  * Returns the GraphQL query for listing the files of a given path as a string
@@ -60,7 +61,20 @@ export const listFiles = (path: string, graphqlWebSocketClient: Client) =>
           }
         },
         complete: () => resolve(result),
-        error: reject
+        error: error => {
+          if ((error as GraphqlWsErrorType).reason !== undefined) {
+            let reason = (error as GraphqlWsErrorType).reason
+
+            if (reason === 'Invalid message') {
+              // graphql-ws cannot parse the error message
+              reason = `Could not list contents of directory ${path}`
+            }
+
+            return reject(reason)
+          }
+
+          return reject()
+        }
       }
     )
   })
@@ -72,12 +86,14 @@ export const listFiles = (path: string, graphqlWebSocketClient: Client) =>
  */
 const useListWorkspaceFilesQuery = () => {
   const { baseUrl, graphqlWebSocketClient } = useWorkspace()
-  return useQuery(
+  return useWorkspaceBaseQuery(
     ['workspace-list-files', baseUrl],
     () => {
-      return graphqlWebSocketClient
-        ? listFiles('/', graphqlWebSocketClient)
-        : Promise.reject('No graphql websocket client found')
+      if (!graphqlWebSocketClient) {
+        throw new Error('No graphql websocket client found')
+      }
+
+      return listFiles('/', graphqlWebSocketClient)
     },
     { enabled: baseUrl.length > 0 && graphqlWebSocketClient !== undefined }
   )

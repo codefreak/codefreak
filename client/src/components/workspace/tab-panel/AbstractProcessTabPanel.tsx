@@ -1,9 +1,7 @@
 import useWorkspace from '../../../hooks/workspace/useWorkspace'
 import { useEffect, useRef, useState } from 'react'
 import { ITheme, Terminal } from 'xterm'
-import useResizeProcessMutation, {
-  ProcessType
-} from '../../../hooks/workspace/useResizeProcessMutation'
+import useResizeProcessMutation from '../../../hooks/workspace/useResizeProcessMutation'
 import { FitAddon } from 'xterm-addon-fit'
 import { debounce } from 'ts-debounce'
 import { processWebSocketPath } from '../../../services/workspace'
@@ -38,31 +36,25 @@ const XTermThemeLight: ITheme = {
 }
 
 /**
- * Provides the process id and type of the process to be displayed in the tab panel
+ * Provides the process id of the process to be displayed in the tab panel
  */
 type AbstractProcessTabPanelProps = {
   /**
    * The process id
    */
   processId: string
-
-  /**
-   * The type of the process
-   */
-  type: ProcessType
 }
 
 /**
  * A base class for the tab panels of the process tabs
  */
 const AbstractProcessTabPanel = ({
-  processId,
-  type
+  processId
 }: AbstractProcessTabPanelProps) => {
   const { baseUrl, graphqlWebSocketClient } = useWorkspace()
   const [terminal, setTerminal] = useState<Terminal>()
   const [processWebSocket, setProcessWebSocket] = useState<WebSocket>()
-  const { mutate: resizeProcess } = useResizeProcessMutation(type)
+  const { mutate: resizeProcess } = useResizeProcessMutation()
   const [initialized, setInitialized] = useState(false)
   const terminalRef = useRef<HTMLDivElement>(null)
 

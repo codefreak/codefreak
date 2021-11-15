@@ -4,6 +4,7 @@ import {
   withLeadingSlash,
   withTrailingSlash
 } from './strings'
+import { messageService } from './message'
 
 /**
  * The api-route to be appended to the base-url when reading and creating files
@@ -167,7 +168,7 @@ export interface RequestInitWithAuthentication extends RequestInit {
  * @param input see `fetch`
  * @param init see `fetch`, extended with an authorization token
  */
-export const fetchWithAuthentication = (
+export const fetchWithAuthentication = async (
   input: RequestInfo,
   init: RequestInitWithAuthentication
 ) => {
@@ -181,8 +182,15 @@ export const fetchWithAuthentication = (
         }
       : otherInit.headers
 
-  return fetch(input, {
+  const response = await fetch(input, {
     ...otherInit,
     headers
   })
+
+  if (response.status === 401) {
+    messageService.error('Your workspace session token is invalid')
+    throw new Error('Your workspace session token is invalid')
+  }
+
+  return response
 }

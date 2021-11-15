@@ -1,7 +1,6 @@
 import useWorkspace from '../../../hooks/workspace/useWorkspace'
 import TabPanel from './TabPanel'
 import AbstractProcessTabPanel from './AbstractProcessTabPanel'
-import { ProcessType } from '../../../hooks/workspace/useResizeProcessMutation'
 import {
   WorkspaceTab,
   WorkspaceTabType
@@ -39,12 +38,7 @@ const ConsoleTabPanel = () => {
     return <TabPanel withPadding loading />
   }
 
-  return (
-    <AbstractProcessTabPanel
-      processId={runProcessId}
-      type={ProcessType.CONSOLE}
-    />
-  )
+  return <AbstractProcessTabPanel processId={runProcessId} />
 }
 
 export default ConsoleTabPanel

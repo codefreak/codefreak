@@ -1,6 +1,4 @@
 import { createContext, useContext } from 'react'
-import { useQuery } from 'react-query'
-import { fetchWithAuthentication } from '../../services/workspace'
 import { Client } from 'graphql-ws'
 
 /**
@@ -25,9 +23,14 @@ export const NO_TASK_ID = ''
 
 /**
  * Provides the base-url and auth-token of the current workspace, the id of the run-process and the current answer-id and task-id.
- * Also a Client for the GraphQL over WebSockets API is provided.
+ * Also a Client for the GraphQL over WebSockets API and the availability status of the workspace is provided.
  */
 export type WorkspaceContextType = {
+  /**
+   * Whether the workspace specified by the base-url is available
+   */
+  isAvailable: boolean
+
   /**
    * The base-url of the current workspace
    */
@@ -63,6 +66,7 @@ export type WorkspaceContextType = {
  * An initial context with no values set
  */
 const initialWorkspaceContext: WorkspaceContextType = {
+  isAvailable: false,
   baseUrl: NO_BASE_URL,
   authToken: NO_AUTH_TOKEN,
   answerId: NO_ANSWER_ID,
@@ -80,26 +84,7 @@ export const WorkspaceContext = createContext<WorkspaceContextType>(
  * Returns the current workspace context and checks whether the workspace is available
  */
 const useWorkspace = () => {
-  const context = useContext(WorkspaceContext)
-  const { data } = useQuery(
-    'isWorkspaceAvailable',
-    () =>
-      fetchWithAuthentication(context.baseUrl, {
-        authToken: context.authToken
-      }).then(() => Promise.resolve(true)),
-    {
-      enabled: context.baseUrl !== NO_BASE_URL,
-      // Retry indefinitely because the workspace might take some time to start
-      retry: true
-    }
-  )
-
-  const isAvailable = data !== undefined && data
-
-  return {
-    isAvailable,
-    ...context
-  }
+  return useContext(WorkspaceContext)
 }
 
 export default useWorkspace

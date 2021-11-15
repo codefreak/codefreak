@@ -276,6 +276,7 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
   const [isRightClickMenuOpen, setIsRightClickMenuOpen] = useState(false)
   const [rightClickedItem, setRightClickedItem] = useState<RightClickedItem>()
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
+  const [loadedKeys, setLoadedKeys] = useState<string[]>([])
 
   useEffect(() => {
     if (!treeData && data) {
@@ -295,9 +296,21 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
       throw new Error('No graphql websocked client was found')
     }
 
-    const treeNodes = await listFiles(path, graphqlWebSocketClient)
+    try {
+      const treeNodes = await listFiles(path, graphqlWebSocketClient)
+      return treeNodes.map(toDataNode)
+    } catch (error) {
+      let message = 'An error occurred'
 
-    return treeNodes.map(toDataNode)
+      if (error instanceof Error) {
+        message = error.message
+      } else if (typeof error === 'string') {
+        message = error
+      }
+
+      messageService.error(message)
+      throw new Error(message)
+    }
   }
 
   const loadDataAndUpdateTree = async (path: string): Promise<void> => {
@@ -319,9 +332,21 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
     )
   }
 
-  const loadDataAndUpdateTreeFromTreeNode = async (
+  const loadDataAndUpdateTreeFromTreeNode = (
     treeNode: EventDataNode
-  ): Promise<void> => loadDataAndUpdateTree(treeNode.key.toString())
+  ): Promise<void> =>
+    new Promise<void>(async resolve => {
+      try {
+        if (!loadedKeys.includes(treeNode.key.toString())) {
+          await loadDataAndUpdateTree(treeNode.key.toString())
+          setLoadedKeys([...loadedKeys, treeNode.key.toString()])
+        }
+      } catch (error) {
+        // Message is already sent by query
+      } finally {
+        resolve()
+      }
+    })
 
   const openIfFile: TreeProps['onSelect'] = (_, { node }) => {
     if (node.isLeaf && node.key !== TREE_INPUT_KEY) {
@@ -347,7 +372,15 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
       onOk() {
         deletePath(
           { path },
-          { onSuccess: () => loadDataAndUpdateTree(parentPath) }
+          {
+            onSuccess: async () => {
+              try {
+                await loadDataAndUpdateTree(parentPath)
+              } catch {
+                // Message is already shown
+              }
+            }
+          }
         )
       }
     })
@@ -387,7 +420,13 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
         }
       }
 
-      const handleCancel = () => loadDataAndUpdateTree(parentPath)
+      const handleCancel = async () => {
+        try {
+          await loadDataAndUpdateTree(parentPath)
+        } catch {
+          // Message is already shown
+        }
+      }
 
       if (!expandedKeys.includes(parentPath) && !isRoot(parentPath)) {
         setExpandedKeys(prevState => [parentPath, ...prevState])
@@ -409,7 +448,13 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
     createPath(
       { path, type },
       {
-        onSuccess: () => loadDataAndUpdateTree(parentPath)
+        onSuccess: async () => {
+          try {
+            await loadDataAndUpdateTree(parentPath)
+          } catch {
+            // Message is already shown
+          }
+        }
       }
     )
   }
@@ -468,6 +513,7 @@ const FileTree = ({ onOpenFile }: FileTreeProps) => {
             onRightClick={handleRightClick}
             expandedKeys={expandedKeys}
             onExpand={handleExpand}
+            loadedKeys={loadedKeys}
           />
         </div>
       </Dropdown>

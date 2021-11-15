@@ -8,7 +8,7 @@ import { MockedProvider, MockedResponse } from '@apollo/client/testing'
 import React from 'react'
 import { createMemoryHistory, History } from 'history'
 import { Router } from 'react-router-dom'
-import useWorkspace, {
+import {
   NO_ANSWER_ID,
   NO_AUTH_TOKEN,
   NO_BASE_URL,
@@ -16,7 +16,6 @@ import useWorkspace, {
   WorkspaceContext,
   WorkspaceContextType
 } from '../hooks/workspace/useWorkspace'
-import { renderHook } from '@testing-library/react-hooks'
 import { noop } from './util'
 import { RequestInitWithAuthentication } from './workspace'
 
@@ -48,6 +47,7 @@ export const wrap = (
     queryClient = new QueryClient(),
     graphqlMocks = [],
     workspaceContext = {
+      isAvailable: false,
       baseUrl: NO_BASE_URL,
       authToken: NO_AUTH_TOKEN,
       answerId: NO_ANSWER_ID,
@@ -147,38 +147,3 @@ export const mockFetch = (
         return Promise.resolve(response)
       }
     )
-
-type WaitUntilWorkspaceIsAvailableProps = {
-  queryClient?: QueryClient
-  baseUrl?: string
-  authToken?: string
-  answerId?: string
-  taskId?: string
-}
-
-/**
- * Ensures that the `useWorkspace` hook returns `isAvailable = true`
- *
- * @param queryClient an optional QueryClient to use
- * @param baseUrl an optional base-url to use for the workspace-context
- * @param authToken an optional auth-token to use for the workspace-context
- * @param answerId an optional answer-id to use for the workspace-context
- * @param taskId an optional task-id to use for the workspace-context
- */
-export const waitUntilWorkspaceIsAvailable = ({
-  queryClient = new QueryClient(),
-  baseUrl = NO_BASE_URL,
-  authToken = NO_AUTH_TOKEN,
-  answerId = NO_ANSWER_ID,
-  taskId = NO_TASK_ID
-}: WaitUntilWorkspaceIsAvailableProps) => {
-  const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
-    wrap(<>{children}</>, {
-      queryClient,
-      workspaceContext: { baseUrl, authToken, answerId, taskId },
-      withWorkspaceContextProvider: true
-    })
-
-  const { waitFor, result } = renderHook(() => useWorkspace(), { wrapper })
-  return waitFor(() => result.current.isAvailable)
-}

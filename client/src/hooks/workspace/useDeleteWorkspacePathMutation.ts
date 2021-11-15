@@ -1,6 +1,6 @@
 import useWorkspace, { NO_BASE_URL } from './useWorkspace'
-import { useMutation } from 'react-query'
 import { deletePath, fetchWithAuthentication } from '../../services/workspace'
+import useWorkspaceBaseMutation from './useWorkspaceBaseMutation'
 
 /**
  * Provides a function to delete a path from the workspace
@@ -8,9 +8,9 @@ import { deletePath, fetchWithAuthentication } from '../../services/workspace'
 const useDeleteWorkspacePathMutation = () => {
   const { baseUrl, authToken } = useWorkspace()
 
-  return useMutation(async ({ path }: { path: string }) => {
+  return useWorkspaceBaseMutation(async ({ path }: { path: string }) => {
     if (baseUrl === NO_BASE_URL) {
-      return Promise.reject('No base-url for the workspace given')
+      throw new Error('No base-url for the workspace given')
     }
 
     const fullPath = deletePath(baseUrl, path)
@@ -21,7 +21,14 @@ const useDeleteWorkspacePathMutation = () => {
     })
 
     if (!response.ok) {
-      const message = await response.text()
+      const error = await response.json()
+
+      let message = `Could not delete ${path}`
+
+      if ('message' in error && typeof error.message === 'string') {
+        message = error.message
+      }
+
       return Promise.reject(message)
     }
 
