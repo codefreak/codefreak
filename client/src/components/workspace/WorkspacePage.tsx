@@ -7,7 +7,7 @@ import './WorkspacePage.less'
 import WorkspaceTabsWrapper from './WorkspaceTabsWrapper'
 import { useEffect, useState } from 'react'
 import { Col, Row } from 'antd'
-import useWorkspace from '../../hooks/workspace/useWorkspace'
+import useWorkspace, { NO_ANSWER_ID } from '../../hooks/workspace/useWorkspace'
 import {
   indexOf,
   removeEditorTab,
@@ -199,14 +199,27 @@ const WorkspacePage = ({
 
   const fileTree = new FileTreeWorkspaceTab(handleOpenFile)
 
+  if (answerId === NO_ANSWER_ID) {
+    return (
+      <Row gutter={4} className="workspace-page">
+        <Col span={14}>
+          <Centered>{createAnswerButton}</Centered>
+        </Col>
+        <Col span={10}>
+          <WorkspaceTabsWrapper
+            tabs={[new InstructionsWorkspaceTab()]}
+            activeTab={activeRightTab}
+            onTabChange={handleRightTabChange}
+          />
+        </Col>
+      </Row>
+    )
+  }
+
   return (
     <Row gutter={4} className="workspace-page">
       <Col span={4}>
-        {answerId.length > 0 ? (
-          <WorkspaceTabsWrapper tabs={[fileTree]} />
-        ) : (
-          <Centered>{createAnswerButton}</Centered>
-        )}
+        <WorkspaceTabsWrapper tabs={[fileTree]} />
       </Col>
       <Col span={10}>
         <WorkspaceTabsWrapper
