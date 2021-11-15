@@ -58,6 +58,10 @@ export interface WorkspacePageProps {
    * A button create an answer for the current task
    */
   createAnswerButton: React.ReactNode
+
+  /**
+   * Optional list of files to open initially in editor tabs
+   */
   initialOpenFiles?: string[]
 }
 

@@ -157,7 +157,13 @@ export const processWebSocketPath = (baseUrl: string, processId: string) => {
   return httpToWs(url)
 }
 
+/**
+ * Extends the default fetch-options with an auth-token
+ */
 export interface RequestInitWithAuthentication extends RequestInit {
+  /**
+   * The token to authenticate the request
+   */
   authToken: string
 }
 
