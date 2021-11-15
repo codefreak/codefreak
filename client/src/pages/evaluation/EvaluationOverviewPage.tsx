@@ -1,8 +1,6 @@
 import { Tabs } from 'antd'
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import EvaluationHistory from '../../components/EvaluationHistory'
-import useSubPath from '../../hooks/useSubPath'
-import { shorten } from '../../services/short-id'
 import { DifferentUserContext } from '../task/TaskPage'
 import LatestEvaluation from '../../components/LatestEvaluation'
 
@@ -11,19 +9,14 @@ const { TabPane } = Tabs
 const EvaluationPage: React.FC<{
   answerId: string
 }> = ({ answerId }) => {
-  const subPath = useSubPath()
+  const [activeTab, setActiveTab] = useState('')
   const differentUser = useContext(DifferentUserContext)
 
-  const onTabChange = (activeKey: string) => {
-    subPath.set(
-      activeKey,
-      differentUser ? { user: shorten(differentUser.id) } : undefined
-    )
-  }
+  const onTabChange = (activeKey: string) => setActiveTab(activeKey)
 
   return (
     <>
-      <Tabs defaultActiveKey={subPath.get()} onChange={onTabChange}>
+      <Tabs defaultActiveKey={activeTab} onChange={onTabChange}>
         <TabPane tab="Latest Evaluation" key="">
           <LatestEvaluation answerId={answerId} showTrigger={!differentUser} />
         </TabPane>
