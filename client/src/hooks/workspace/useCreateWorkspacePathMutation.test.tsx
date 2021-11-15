@@ -91,7 +91,12 @@ describe('useCreateWorkspacePathMutation()', () => {
     const answerId = NO_ANSWER_ID
     const taskId = NO_TASK_ID
 
-    const mockCreateFile = mockFetch('File already exists', { status: 400 })
+    const mockCreateFile = mockFetch(
+      JSON.stringify({ message: 'File already exists' }),
+      {
+        status: 400
+      }
+    )
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {

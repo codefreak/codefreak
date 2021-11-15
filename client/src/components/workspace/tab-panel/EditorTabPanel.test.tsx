@@ -1,6 +1,5 @@
-import { mockFetch, render } from '../../../services/testing'
+import { mockFetch, render, waitForTime } from '../../../services/testing'
 import EditorTabPanel from './EditorTabPanel'
-import { QueryClient } from 'react-query'
 import {
   NO_ANSWER_ID,
   NO_AUTH_TOKEN,
@@ -15,7 +14,6 @@ describe('<EditorTabPanel />', () => {
   })
 
   it('renders a <TabPanel />', async () => {
-    const queryClient = new QueryClient()
     const baseUrl = 'https://codefreak.test'
     const authToken = NO_AUTH_TOKEN
     const answerId = NO_ANSWER_ID
@@ -25,7 +23,6 @@ describe('<EditorTabPanel />', () => {
       <EditorTabPanel file="file" />,
       {},
       {
-        queryClient,
         withWorkspaceContextProvider: true,
         workspaceContext: {
           isAvailable: true,
@@ -36,6 +33,8 @@ describe('<EditorTabPanel />', () => {
         }
       }
     )
+
+    await waitForTime()
 
     expect(
       container.getElementsByClassName('workspace-tab-panel')

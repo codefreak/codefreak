@@ -10,7 +10,7 @@ const useDeleteWorkspacePathMutation = () => {
 
   return useWorkspaceBaseMutation(async ({ path }: { path: string }) => {
     if (baseUrl === NO_BASE_URL) {
-      throw new Error('No base-url for the workspace given')
+      return Promise.reject('No base-url for the workspace given')
     }
 
     const fullPath = deletePath(baseUrl, path)
