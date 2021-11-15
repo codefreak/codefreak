@@ -32,10 +32,14 @@ export class ConsoleWorkspaceTab extends WorkspaceTab {
  * Renders a terminal for the current run process
  */
 const ConsoleTabPanel = () => {
-  const { runProcessId } = useWorkspace()
+  const { runProcessId, isAvailable } = useWorkspace()
 
   if (!runProcessId) {
-    return <TabPanel withPadding loading />
+    return (
+      <TabPanel withPadding loading={isAvailable}>
+        Press "Run" to start the program!
+      </TabPanel>
+    )
   }
 
   return <AbstractProcessTabPanel processId={runProcessId} />
