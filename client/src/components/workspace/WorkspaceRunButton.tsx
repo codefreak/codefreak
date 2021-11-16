@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import { useMutableQueryParam } from '../../hooks/useQuery'
 import { WorkspaceTabType } from '../../services/workspace-tabs'
 import { RIGHT_TAB_QUERY_PARAM } from './WorkspacePage'
+import useWorkspace from '../../hooks/workspace/useWorkspace'
 
 /**
  * Provides a callback for when the run-process in the current workspace is started
@@ -22,6 +23,7 @@ interface WorkspaceRunButtonProps {
 const WorkspaceRunButton = ({
   onRunProcessStarted
 }: WorkspaceRunButtonProps) => {
+  const { isAvailable } = useWorkspace()
   const {
     mutate: run,
     isLoading,
@@ -54,7 +56,7 @@ const WorkspaceRunButton = ({
       type="primary"
       size="large"
       shape="round"
-      loading={isLoading}
+      loading={!isAvailable || isLoading}
       onClick={handleClick}
     >
       Run
