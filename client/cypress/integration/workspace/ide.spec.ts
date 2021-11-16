@@ -1,24 +1,46 @@
 describe('Online IDE', () => {
+  beforeEach(() => {
+    cy.loginTeacher()
+    cy.createAndVisitTaskInNewAssignment('python')
+    cy.logout()
+
+    cy.loginStudent()
+    cy.reload()
+    cy.url().should('include', '/ide')
+    cy.contains('Start working on this task').click()
+  })
+
   it('opens successfully', () => {
-    // TODO login as student
-    // TODO open assignment (or task directly?)
-    // TODO open task
-    // TODO expect to go to /ide path
-    // TODO expect to see tab-panels, run-button
+    cy.get('.workspace-page')
+      .find('.workspace-tabs-wrapper')
+      .should('have.length', 3)
   })
 
   it('switches between tabs', () => {
-    // TODO login as student
-    // TODO open assignment (or task directly?)
-    // TODO open task
-    // TODO expect to go to /ide path
-    // TODO expect to have rightTab=instructions + correct tab
-    // TODO click on shell
-    // TODO expect to have rightTab=shell + correct tab
-    // TODO click on console
-    // TODO expect to have rightTab=console + correct tab
-    // TODO click on evaluation
-    // TODO expect to have rightTab=evaluation + correct tab
+    cy.get('.ant-tabs-tab')
+      // Wait until the workspace is ready
+      .not('.ant-tabs-tab-disabled', { timeout: 20000 })
+      .contains('Instructions')
+      .click()
+    cy.url().should('contain', 'rightTab=instructions')
+
+    cy.get('.ant-tabs-tab')
+      .not('.ant-tabs-tab-disabled', { timeout: 20000 })
+      .contains('Shell')
+      .click()
+    cy.url().should('contain', 'rightTab=shell')
+
+    cy.get('.ant-tabs-tab')
+      .not('.ant-tabs-tab-disabled', { timeout: 20000 })
+      .contains('Console')
+      .click()
+    cy.url().should('contain', 'rightTab=console')
+
+    cy.get('.ant-tabs-tab')
+      .not('.ant-tabs-tab-disabled', { timeout: 20000 })
+      .contains('Evaluation-Results')
+      .click()
+    cy.url().should('contain', 'rightTab=evaluation')
   })
 })
 
