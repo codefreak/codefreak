@@ -10,9 +10,10 @@ interface IFileCollectionRepository {
    * @param collectionID is the Id of the collection. The id is the same as the answer id
    * @param commitMessage the string representing the commit/version
    * @param force flag to force a version/save
+   * @param requireFileSave indicates if the online ide files needs to be saved during the process
    * @return true if the version got saved
    */
-  fun saveChanges(collectionID: UUID, commitMessage: String, force: Boolean): Boolean
+  fun saveChanges(collectionID: UUID, commitMessage: String, force: Boolean, requireFileSave: Boolean = true): Boolean
   /**
    * Resets (clears) the working tree and updates the files with the given Version.
    * @param collectionID is the Id of the collection. The id is the same as the answer id

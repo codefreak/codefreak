@@ -8,6 +8,7 @@ import java.util.UUID
 import org.apache.tomcat.util.http.fileupload.FileUtils
 import org.codefreak.codefreak.config.AppConfiguration
 import org.codefreak.codefreak.service.AnswerService
+import org.codefreak.codefreak.service.IdeService
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.InitCommand
 import org.eclipse.jgit.api.errors.CanceledException
@@ -19,9 +20,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class FileCollectionRepositoryService(val config: AppConfiguration, val answerService: AnswerService) : IFileCollectionRepository {
+class FileCollectionRepositoryService(val config: AppConfiguration, val answerService: AnswerService, val ideService: IdeService) : IFileCollectionRepository {
 
-  override fun saveChanges(collectionID: UUID, commitMessage: String, force: Boolean): Boolean {
+  override fun saveChanges(collectionID: UUID, commitMessage: String, force: Boolean, requireFileSave: Boolean): Boolean {
+    if (requireFileSave) {
+      val answer = answerService.findAnswer(collectionID)
+      ideService.saveAnswerFiles(answer)
+    }
     val workingTreePath = createCollectionPath(collectionID)
     val gitDir = getGitDir(collectionID)
     if (!Files.exists(Paths.get(gitDir))) {
@@ -48,10 +53,15 @@ class FileCollectionRepositoryService(val config: AppConfiguration, val answerSe
         git.add().addFilepattern(".").call()
         git.commit().setMessage(commitMessage).call()
         setCurrentHeadCommitId(git, collectionID)
+        updateIde(collectionID)
         return true
       }
       return false
     }
+  }
+
+  private fun updateIde(collectionID: UUID) {
+    ideService.answerFilesUpdatedExternally(collectionID)
   }
 
   /**
@@ -139,13 +149,15 @@ class FileCollectionRepositoryService(val config: AppConfiguration, val answerSe
   }
 
   override fun resetAndLoadVersion(collectionID: UUID, changeToCommitId: String, commitMessage: String): Boolean {
+    val answer = answerService.findAnswer(collectionID)
+    ideService.saveAnswerFiles(answer)
     val workingTreePath = createCollectionPath(collectionID)
     try {
       val git = getGit(collectionID)
       val commitId = answerService.getCommitId(collectionID)
       if (commitId != changeToCommitId) {
         if (gotTouchedForReset(git)) {
-          saveChanges(collectionID, "$commitMessage autosave", true)
+          saveChanges(collectionID, commitMessage, true, false)
         }
         FileUtils.cleanDirectory(workingTreePath.toFile())
         git.checkout().setStartPoint(changeToCommitId).setAllPaths(true).call()
@@ -155,6 +167,7 @@ class FileCollectionRepositoryService(val config: AppConfiguration, val answerSe
         }
         git.add().addFilepattern(".").call()
         answerService.saveCommitId(collectionID, changeToCommitId)
+        updateIde(collectionID)
         return true
       }
       return false

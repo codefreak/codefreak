@@ -5,8 +5,6 @@ import { messageService } from '../services/message'
 
 const VersionSaveComponent: React.FC<{
   answerId: string
-  commitMessage: string
-  versionId: string
 }> = props => {
   const [inputState, setInputState] = useState('')
 

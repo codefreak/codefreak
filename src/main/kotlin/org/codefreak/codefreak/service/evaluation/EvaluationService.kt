@@ -77,7 +77,7 @@ class EvaluationService : BaseService() {
     check(!isEvaluationScheduled(answer.id)) { "Evaluation is already scheduled." }
     val currentDateTime = LocalDateTime.now()
     val formatedDateTime = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-    fileCollectionRepositoryService.saveChanges(answer.id, "Evaluation commit $formatedDateTime", false)
+    fileCollectionRepositoryService.saveChanges(answer.id, "Evaluation Save $formatedDateTime", false, false)
     val digest = fileService.getCollectionMd5Digest(answer.id)
     val evaluation = getOrCreateEvaluationByDigest(answer, digest)
 

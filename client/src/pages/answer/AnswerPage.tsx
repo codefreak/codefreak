@@ -232,11 +232,7 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
     <Row justify="space-between" align="middle" gutter={16}>
       <Col>{versioning}</Col>
       <Col>
-        <VersionSaveComponent
-          answerId={props.answerId}
-          commitMessage={answer.currentVersionName}
-          versionId={answer.currentVersionId}
-        />
+        <VersionSaveComponent answerId={props.answerId} />
       </Col>
       <Col>
         <ArchiveDownload url={answer.sourceUrl}>
