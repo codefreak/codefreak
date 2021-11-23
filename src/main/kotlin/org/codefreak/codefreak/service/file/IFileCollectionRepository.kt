@@ -2,9 +2,13 @@ package org.codefreak.codefreak.service.file
 
 import java.util.UUID
 
+/**
+ * Provides functionality to save and load versions (commits of a git repository) and their data.
+ * This interface should be used for interaction with the git repositories of the file collections.
+ */
 interface IFileCollectionRepository {
   /**
-   * Function to save a version to the filesystem within the backend.
+   * Saving a version to the filesystem within the backend.
    * Creates a new repository if the collectionID does not exist. Only adds a new version
    * if changes where made unless it's getting forced.
    * @param collectionID is the Id of the collection. The id is the same as the answer id
@@ -23,7 +27,7 @@ interface IFileCollectionRepository {
    */
   fun resetAndLoadVersion(collectionID: UUID, changeToCommitId: String, commitMessage: String): Boolean
   /**
-   * Function to retrieve all commit sha and their message.
+   * Retrieves all hashes and their messages.
    * @param collectionID is the Id of the collection. The id is the same as the answer id
    * @return map of commit sha and commit message
    */

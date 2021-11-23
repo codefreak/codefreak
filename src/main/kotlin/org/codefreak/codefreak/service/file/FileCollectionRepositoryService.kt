@@ -215,7 +215,7 @@ class FileCollectionRepositoryService(val config: AppConfiguration, val answerSe
   }
 
   /**
-   * @returns Git instance of Jgit
+   * @returns Get instance of Jgit
    * @param collectionID the id which specifies, which git repository shall be loaded
    */
   private fun getGit(collectionID: UUID): Git {

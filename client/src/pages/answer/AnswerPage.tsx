@@ -3,7 +3,7 @@ import {
   ExclamationCircleTwoTone,
   UpCircleOutlined
 } from '@ant-design/icons'
-import { Alert, Button, Card, Col, Dropdown, Menu, Modal, Row } from 'antd'
+import { Alert, Button, Card, Col, Modal, Row } from 'antd'
 import moment from 'moment'
 import { useCallback, useContext, useState } from 'react'
 import AnswerBlocker from '../../components/AnswerBlocker'
@@ -15,9 +15,7 @@ import { useServerNow } from '../../hooks/useServerTimeOffset'
 import {
   Answer,
   FileContextType,
-  ListFilesDocument,
   Submission,
-  useChangeVersionMutation,
   useGetAnswerQuery,
   useImportAnswerSourceMutation,
   useResetAnswerMutation,
@@ -160,28 +158,6 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
   })
 
   const differentUser = useContext(DifferentUserContext)
-  const [changeVersion] = useChangeVersionMutation({
-    onCompleted: ({ changeVersion: didVersionChange }) => {
-      if (didVersionChange) {
-        messageService.success('Version got changed')
-      } else {
-        messageService.error('Selected version is the current version')
-      }
-      result.refetch()
-    },
-    refetchQueries: [
-      {
-        query: ListFilesDocument,
-        variables: {
-          context: {
-            id: props.answerId,
-            type: FileContextType.Answer
-          },
-          path: '/'
-        }
-      }
-    ]
-  })
   // This fake "revision" is a dirty hack to force a full reload of the file-browser
   // after files have been modified externally via upload/import or reset button.
   // We cannot invalidate Apollo caches for all paths of the file-browser easily
@@ -201,36 +177,8 @@ const AnswerPage: React.FC<{ answerId: string }> = props => {
     ? `Files uploaded by ${displayName(differentUser)}`
     : 'Your current submission'
 
-  const menuItemList = answer.versions.map(commit => (
-    <Menu.Item
-      key={commit.versionKey}
-      onClick={() =>
-        changeVersion({
-          variables: { id: props.answerId, versionID: commit.versionKey }
-        }).then(() => result.refetch())
-      }
-    >
-      {commit.commitMessage}
-    </Menu.Item>
-  ))
-  const menu = <Menu>{menuItemList}</Menu>
-
-  const dropdown = (
-    <Dropdown overlay={menu}>
-      <Button>{answer.currentVersionName}</Button>
-    </Dropdown>
-  )
-
-  const versioning = (
-    <Row gutter={16} align="middle">
-      <Col>Submission version:</Col>
-      <Col style={{ minWidth: '20px' }}>{dropdown}</Col>
-    </Row>
-  )
-
   const filesExtra = (
     <Row justify="space-between" align="middle" gutter={16}>
-      <Col>{versioning}</Col>
       <Col>
         <VersionSaveComponent answerId={props.answerId} />
       </Col>
