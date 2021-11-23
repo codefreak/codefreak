@@ -9,6 +9,8 @@ import {
   useSaveVersionMutation
 } from '../generated/graphql'
 import { messageService } from '../services/message'
+import useEvaluationStatus from '../hooks/useEvaluationStatus'
+import { isEvaluationInProgress } from '../services/evaluation'
 
 const VersionSaveComponent: React.FC<{
   answerId: string
@@ -16,6 +18,8 @@ const VersionSaveComponent: React.FC<{
   const result = useGetAnswerQuery({
     variables: { id: props.answerId }
   })
+
+  const status = useEvaluationStatus(props.answerId)
 
   const [changeVersion] = useChangeVersionMutation({
     onCompleted: ({ changeVersion: didVersionChange }) => {
@@ -36,6 +40,12 @@ const VersionSaveComponent: React.FC<{
           },
           path: '/'
         }
+      },
+      {
+        query: GetAnswerDocument,
+        variables: {
+          id: props.answerId
+        }
       }
     ]
   })
@@ -46,19 +56,19 @@ const VersionSaveComponent: React.FC<{
       onClick={() =>
         changeVersion({
           variables: { id: props.answerId, versionID: commit.versionKey }
-        }).then(() => result.refetch())
+        })
       }
     >
       {commit.commitMessage}
     </Menu.Item>
-  ))
+  )) ?? <Menu.Item>loading...</Menu.Item>
 
   const menu = <Menu>{menuItemList}</Menu>
 
   const dropdown = (
-    <Dropdown overlay={menu}>
+    <Dropdown overlay={menu} disabled={isEvaluationInProgress(status)}>
       <Button>
-        {result.data ? result.data.answer.currentVersionName : 'undefined'}
+        {result.data?.answer.currentVersionName ?? 'Current version'}
       </Button>
     </Dropdown>
   )
@@ -109,6 +119,7 @@ const VersionSaveComponent: React.FC<{
           </Col>
           <Col>
             <Button
+              disabled={isEvaluationInProgress(status)}
               type="primary"
               onClick={() => {
                 saveVersion({
