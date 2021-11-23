@@ -8,7 +8,7 @@ import java.util.UUID
  */
 interface IFileCollectionRepository {
   /**
-   * Saving a version to the filesystem within the backend.
+   * Saves a version to the filesystem within the backend.
    * Creates a new repository if the collectionID does not exist. Only adds a new version
    * if changes where made unless it's getting forced.
    * @param collectionID is the Id of the collection. The id is the same as the answer id

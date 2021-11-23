@@ -57,7 +57,9 @@ const VersionSaveComponent: React.FC<{
 
   const dropdown = (
     <Dropdown overlay={menu}>
-      <Button>{result.data?.answer.currentVersionName}</Button>
+      <Button>
+        {result.data ? result.data.answer.currentVersionName : 'undefined'}
+      </Button>
     </Dropdown>
   )
 
@@ -88,7 +90,7 @@ const VersionSaveComponent: React.FC<{
   return (
     <Row justify="end" align="middle" gutter={24}>
       <Col>Submission version:</Col>
-      <Col style={{ minWidth: '20px' }}>{dropdown}</Col>
+      <Col>{dropdown}</Col>
       <Col>
         <Row gutter={8}>
           <Col>
