@@ -114,7 +114,7 @@ class AnswerMutation : BaseResolver(), Mutation {
     val currentDateTime = LocalDateTime.now()
     val formatedDateTime = currentDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
     serviceAccess.getService(IFileCollectionRepository::class)
-      .resetAndLoadVersion(collectionID, versionID, "VersionChange $formatedDateTime")
+      .resetAndLoadVersion(collectionID, versionID, "Version Change Save $formatedDateTime")
   }
 
   @Transactional
