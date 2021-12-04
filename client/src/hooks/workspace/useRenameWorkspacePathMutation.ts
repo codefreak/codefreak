@@ -22,7 +22,7 @@ const useRenameWorkspacePathMutation = () => {
   return useMutation<void, void, RenameWorkspacePathProps>(
     ({ sourcePath, targetPath }) => {
       if (baseUrl === NO_BASE_URL) {
-        return Promise.reject('No base-url for the workspace given')
+        throw new Error('No base-url for the workspace given')
       }
 
       // TODO replace when api for this operation is set

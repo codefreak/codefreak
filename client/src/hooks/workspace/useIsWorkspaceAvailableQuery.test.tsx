@@ -1,10 +1,12 @@
 import { renderHook } from '@testing-library/react-hooks'
-import useWorkspace from './useWorkspace'
+import { mockFetch, waitForTime, wrap } from '../../services/testing'
+import useIsWorkspaceAvailableQuery from './useIsWorkspaceAvailableQuery'
 import React from 'react'
-import { wrap } from '../../services/testing'
 
-describe('useWorkspace()', () => {
-  it('returns the workspace-context', async () => {
+describe('useIsWorkspaceAvailable()', () => {
+  it('checks whether the workspace is available', async () => {
+    const fetchMock = mockFetch()
+
     const baseUrl = 'https://codefreak.test'
     const authToken = 'authToken'
     const answerId = 'answerId'
@@ -22,15 +24,15 @@ describe('useWorkspace()', () => {
         withWorkspaceContextProvider: true
       })
 
-    const { result } = renderHook(() => useWorkspace(), {
-      wrapper
-    })
+    const { result } = renderHook(
+      () => useIsWorkspaceAvailableQuery(baseUrl, authToken),
+      { wrapper }
+    )
+
+    await waitForTime()
 
     // The second object is needed in case a authorization header is sent
-    expect(result.current.isAvailable).toBe(true)
-    expect(result.current.baseUrl).toStrictEqual(baseUrl)
-    expect(result.current.authToken).toStrictEqual(authToken)
-    expect(result.current.answerId).toStrictEqual(answerId)
-    expect(result.current.taskId).toStrictEqual(taskId)
+    expect(fetchMock).toHaveBeenCalledWith(baseUrl, expect.objectContaining({}))
+    expect(result.current).toBe(true)
   })
 })

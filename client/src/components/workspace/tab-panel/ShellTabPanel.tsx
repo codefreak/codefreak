@@ -4,7 +4,6 @@ import TabPanel from './TabPanel'
 import 'xterm/css/xterm.css'
 import useStartProcessMutation from '../../../hooks/workspace/useStartProcessMutation'
 import AbstractProcessTabPanel from './AbstractProcessTabPanel'
-import { ProcessType } from '../../../hooks/workspace/useResizeProcessMutation'
 import {
   WorkspaceTab,
   WorkspaceTabType
@@ -53,9 +52,7 @@ const ShellTabPanel = () => {
     return <TabPanel withPadding loading />
   }
 
-  return (
-    <AbstractProcessTabPanel processId={processId} type={ProcessType.SHELL} />
-  )
+  return <AbstractProcessTabPanel processId={processId} />
 }
 
 export default ShellTabPanel

@@ -1,21 +1,7 @@
 import useWorkspace from './useWorkspace'
-import { useMutation } from 'react-query'
 import { noop } from '../../services/util'
-
-/**
- * A type of process
- */
-export enum ProcessType {
-  /**
-   * A generic shell process
-   */
-  SHELL,
-
-  /**
-   * A shell process for the run-process
-   */
-  CONSOLE
-}
+import useWorkspaceBaseMutation from './useWorkspaceBaseMutation'
+import GraphqlWsErrorType from '../../errors/GraphqlWsErrorType'
 
 /**
  * The GraphQL query to resize a process with the given id, columns and rows
@@ -29,11 +15,10 @@ mutation ResizeProcess {
 /**
  * Returns a function to resize a process in the workspace
  */
-const useResizeProcessMutation = (processType: ProcessType) => {
-  const { graphqlWebSocketClient, baseUrl } = useWorkspace()
+const useResizeProcessMutation = () => {
+  const { graphqlWebSocketClient } = useWorkspace()
 
-  return useMutation(
-    ['workspace-resize-process', baseUrl, processType],
+  return useWorkspaceBaseMutation(
     ({
       processId,
       cols,
@@ -54,7 +39,20 @@ const useResizeProcessMutation = (processType: ProcessType) => {
           },
           {
             next: noop,
-            error: reject,
+            error: error => {
+              if ((error as GraphqlWsErrorType).reason !== undefined) {
+                let reason = (error as GraphqlWsErrorType).reason
+
+                if (reason === 'Invalid message') {
+                  // graphql-ws cannot parse the error message
+                  reason = 'Could not resize process'
+                }
+
+                return reject(reason)
+              }
+
+              return reject()
+            },
             complete: () => {
               onComplete()
               resolve(null)

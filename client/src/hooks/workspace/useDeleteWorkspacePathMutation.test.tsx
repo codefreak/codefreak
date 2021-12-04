@@ -16,7 +16,13 @@ describe('useCreateWorkspacePathMutation()', () => {
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, authToken, answerId, taskId },
+        workspaceContext: {
+          isAvailable: true,
+          baseUrl,
+          authToken,
+          answerId,
+          taskId
+        },
         withWorkspaceContextProvider: true
       })
 
@@ -46,7 +52,13 @@ describe('useCreateWorkspacePathMutation()', () => {
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, authToken, answerId, taskId },
+        workspaceContext: {
+          isAvailable: true,
+          baseUrl,
+          authToken,
+          answerId,
+          taskId
+        },
         withWorkspaceContextProvider: true
       })
 
@@ -77,11 +89,20 @@ describe('useCreateWorkspacePathMutation()', () => {
     const answerId = NO_ANSWER_ID
     const taskId = NO_TASK_ID
 
-    const mockCreateFile = mockFetch('File does not exist', { status: 404 })
+    const mockCreateFile = mockFetch(
+      JSON.stringify({ message: 'File does not exist' }),
+      { status: 404 }
+    )
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, authToken, answerId, taskId },
+        workspaceContext: {
+          isAvailable: true,
+          baseUrl,
+          authToken,
+          answerId,
+          taskId
+        },
         withWorkspaceContextProvider: true
       })
 

@@ -18,7 +18,13 @@ describe('useSaveWorkspaceFileMutation()', () => {
 
     const wrapper = ({ children }: React.PropsWithChildren<unknown>) =>
       wrap(<>{children}</>, {
-        workspaceContext: { baseUrl, authToken, answerId, taskId },
+        workspaceContext: {
+          isAvailable: true,
+          baseUrl,
+          authToken,
+          answerId,
+          taskId
+        },
         withWorkspaceContextProvider: true
       })
 
