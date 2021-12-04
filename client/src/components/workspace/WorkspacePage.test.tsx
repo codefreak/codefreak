@@ -51,7 +51,13 @@ describe('<WorkspacePage />', () => {
   it('renders three <WorkspaceTabsWrapper /> areas', () => {
     mockFetch()
 
-    const workspaceContext = { baseUrl, authToken, answerId, taskId }
+    const workspaceContext = {
+      isAvailable: true,
+      baseUrl,
+      authToken,
+      answerId,
+      taskId
+    }
 
     const mocks = [startWorkspaceMock(noop, baseUrl, answerId)]
 
@@ -79,6 +85,7 @@ describe('<WorkspacePage />', () => {
     let baseUrlFromProvider = ''
 
     const workspaceContext = {
+      isAvailable: false,
       baseUrl: baseUrlFromProvider,
       authToken,
       answerId,

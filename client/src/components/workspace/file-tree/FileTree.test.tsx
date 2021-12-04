@@ -3,12 +3,7 @@ import {
   NO_AUTH_TOKEN,
   NO_TASK_ID
 } from '../../../hooks/workspace/useWorkspace'
-import {
-  mockFetch,
-  render,
-  waitForTime,
-  waitUntilWorkspaceIsAvailable
-} from '../../../services/testing'
+import { mockFetch, render, waitForTime } from '../../../services/testing'
 import { noop } from '../../../services/util'
 import FileTree, {
   createDataNodesForDirectory,
@@ -342,6 +337,7 @@ describe('<FileTree />', () => {
     const baseUrl = 'https://codefreak.test'
 
     const workspaceContext = {
+      isAvailable: true,
       baseUrl,
       answerId: NO_ANSWER_ID,
       authToken: NO_AUTH_TOKEN,
@@ -353,8 +349,6 @@ describe('<FileTree />', () => {
       {},
       { withWorkspaceContextProvider: true, workspaceContext }
     )
-
-    await waitUntilWorkspaceIsAvailable(workspaceContext)
 
     await waitForTime()
 

@@ -29,6 +29,7 @@ import {
   FileContextType,
   GetTaskListDocument,
   GetTaskPoolDocument,
+  Maybe,
   PublicUserFieldsFragment,
   TaskInput,
   useCreateAnswerMutation,
@@ -59,6 +60,7 @@ import WorkspaceRunButton from '../../components/workspace/WorkspaceRunButton'
 import { UploadAnswerPageButton } from '../answer/UploadAnswerPage'
 import CreateAnswerButton from '../../components/CreateAnswerButton'
 import { DangerZoneButton } from '../answer/DangerZone'
+import useIsWorkspaceAvailableQuery from '../../hooks/workspace/useIsWorkspaceAvailableQuery'
 
 export const DifferentUserContext =
   createContext<PublicUserFieldsFragment | undefined>(undefined)
@@ -78,9 +80,10 @@ const TaskPage: React.FC = () => {
   const createRoutes = useCreateRoutes()
 
   const [baseUrl, setBaseUrl] = useState(NO_BASE_URL)
-  const [authToken, setAuthToken] = useState(NO_AUTH_TOKEN)
+  const [authToken, setAuthToken] = useState<string>()
   const [graphqlWebSocketClient, setGraphqlWebSocketClient] = useState<Client>()
   const [runProcessId, setRunProcessId] = useState<string>()
+  const isWorkspaceAvailable = useIsWorkspaceAvailableQuery(baseUrl, authToken)
 
   const result = useGetTaskQuery({
     variables: {
@@ -134,6 +137,14 @@ const TaskPage: React.FC = () => {
       createAnswer({ variables: { taskId: task.id } }).then(onAnswerCreated)
     } else {
       if (!answer) return
+
+      setBaseUrl(NO_BASE_URL)
+      setAuthToken(undefined)
+      setRunProcessId(undefined)
+      // Don't error when active connections are closed
+      graphqlWebSocketClient?.on('closed', noop)
+      graphqlWebSocketClient?.dispose()
+      setGraphqlWebSocketClient(undefined)
 
       deleteAnswer({
         variables: { id: answer.id },
@@ -277,9 +288,16 @@ const TaskPage: React.FC = () => {
     history.push(previousPath)
   }
 
-  const handleBaseUrlChange = (newBaseUrl: string, newAuthToken: string) => {
+  const handleBaseUrlChange = (
+    newBaseUrl: string,
+    newAuthToken?: Maybe<string>
+  ) => {
+    if (newBaseUrl === NO_BASE_URL) {
+      return
+    }
+
     setBaseUrl(withTrailingSlash(newBaseUrl))
-    setAuthToken(newAuthToken)
+    setAuthToken(newAuthToken ?? NO_AUTH_TOKEN)
     setGraphqlWebSocketClient(
       createClient({
         url: graphqlWebSocketPath(newBaseUrl),
@@ -292,8 +310,9 @@ const TaskPage: React.FC = () => {
   }
 
   const workspaceContext: WorkspaceContextType = {
+    isAvailable: isWorkspaceAvailable,
     baseUrl,
-    authToken,
+    authToken: authToken ?? NO_AUTH_TOKEN,
     answerId: answer?.id ?? NO_ANSWER_ID,
     taskId: task.id,
     graphqlWebSocketClient,

@@ -1,7 +1,6 @@
 import useWorkspace from '../../../hooks/workspace/useWorkspace'
 import TabPanel from './TabPanel'
 import AbstractProcessTabPanel from './AbstractProcessTabPanel'
-import { ProcessType } from '../../../hooks/workspace/useResizeProcessMutation'
 import {
   WorkspaceTab,
   WorkspaceTabType
@@ -33,18 +32,17 @@ export class ConsoleWorkspaceTab extends WorkspaceTab {
  * Renders a terminal for the current run process
  */
 const ConsoleTabPanel = () => {
-  const { runProcessId } = useWorkspace()
+  const { runProcessId, isAvailable } = useWorkspace()
 
   if (!runProcessId) {
-    return <TabPanel withPadding loading />
+    return (
+      <TabPanel withPadding loading={isAvailable}>
+        Press "Run" to start the program!
+      </TabPanel>
+    )
   }
 
-  return (
-    <AbstractProcessTabPanel
-      processId={runProcessId}
-      type={ProcessType.CONSOLE}
-    />
-  )
+  return <AbstractProcessTabPanel processId={runProcessId} />
 }
 
 export default ConsoleTabPanel

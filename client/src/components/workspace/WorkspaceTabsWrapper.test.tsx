@@ -1,9 +1,4 @@
-import {
-  mockFetch,
-  render,
-  waitForTime,
-  waitUntilWorkspaceIsAvailable
-} from '../../services/testing'
+import { mockFetch, render, waitForTime } from '../../services/testing'
 import WorkspaceTabsWrapper from './WorkspaceTabsWrapper'
 import { WorkspaceTab } from '../../services/workspace-tabs'
 import { QueryClient } from 'react-query'
@@ -32,14 +27,6 @@ describe('<WorkspaceTabsWrapper />', () => {
     const answerId = NO_ANSWER_ID
     const taskId = NO_TASK_ID
 
-    await waitUntilWorkspaceIsAvailable({
-      queryClient,
-      baseUrl,
-      authToken,
-      answerId,
-      taskId
-    })
-
     const tabs: WorkspaceTab[] = [new EditorWorkspaceTab('foo.txt')]
 
     const { container } = render(
@@ -48,7 +35,13 @@ describe('<WorkspaceTabsWrapper />', () => {
       {
         withWorkspaceContextProvider: true,
         queryClient,
-        workspaceContext: { baseUrl, authToken, answerId, taskId }
+        workspaceContext: {
+          isAvailable: true,
+          baseUrl,
+          authToken,
+          answerId,
+          taskId
+        }
       }
     )
 
