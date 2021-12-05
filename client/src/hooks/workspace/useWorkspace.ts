@@ -37,9 +37,11 @@ export type WorkspaceContextType = {
   baseUrl: string
 
   /**
-   * The auth-token of the current workspace
+   * The auth-token of the current workspace.
+   * If it is an empty string, no auth-token is required.
+   * If it is undefined, no auth-token was set by the system yet.
    */
-  authToken: string
+  authToken?: string
 
   /**
    * The current answer-id

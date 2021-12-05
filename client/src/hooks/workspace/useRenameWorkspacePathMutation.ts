@@ -17,11 +17,11 @@ type RenameWorkspacePathProps = {
  * Returns a mutation to rename a path in a workspace.
  */
 const useRenameWorkspacePathMutation = () => {
-  const { baseUrl } = useWorkspace()
+  const { baseUrl, authToken } = useWorkspace()
 
   return useMutation<void, void, RenameWorkspacePathProps>(
     ({ sourcePath, targetPath }) => {
-      if (baseUrl === NO_BASE_URL) {
+      if (baseUrl === NO_BASE_URL || authToken === undefined) {
         throw new Error('No base-url for the workspace given')
       }
 

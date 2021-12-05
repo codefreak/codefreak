@@ -167,7 +167,10 @@ const TaskPage: React.FC = () => {
 
   const testingModeSwitch =
     editable && !differentUser ? (
-      <span style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}>
+      <span
+        style={{ cursor: 'default', color: 'rgba(0, 0, 0, 0.65)' }}
+        key="testing-mode-switch"
+      >
         Testing Mode{' '}
         <Tooltip
           placement="right"
@@ -204,7 +207,9 @@ const TaskPage: React.FC = () => {
     editable && !differentUser
       ? [
           testingModeSwitch,
-          <ArchiveDownload url={task.exportUrl}>Export Task</ArchiveDownload>
+          <ArchiveDownload url={task.exportUrl} key="export-task-button">
+            Export Task
+          </ArchiveDownload>
         ]
       : []
 
@@ -215,14 +220,25 @@ const TaskPage: React.FC = () => {
   } else if (answer) {
     // regular buttons to work on task for students
     buttons = [
-      <DangerZoneButton answer={answer} onReset={noop} />,
-      <UploadAnswerPageButton answerId={answer.id} />,
+      <DangerZoneButton
+        answer={answer}
+        onReset={noop}
+        key="danger-zone-button"
+      />,
+      <UploadAnswerPageButton
+        answerId={answer.id}
+        key="upload-answer-button"
+      />,
       <StartEvaluationButton
         answerId={answer.id}
         type="primary"
         size="large"
+        key="start-evaluation-button"
       />,
-      <WorkspaceRunButton onRunProcessStarted={setRunProcessId} />
+      <WorkspaceRunButton
+        onRunProcessStarted={setRunProcessId}
+        key="workspace-run-button"
+      />
     ]
   }
 
@@ -243,12 +259,18 @@ const TaskPage: React.FC = () => {
       <TimeLimitTag
         timeLimit={assignment.timeLimit}
         deadline={submissionDeadline}
+        key="time-limit-tag"
       />
     ) : undefined
   }
 
   const tags = [
-    assignment ? <AssignmentStatusTag status={assignment.status} /> : undefined,
+    assignment ? (
+      <AssignmentStatusTag
+        status={assignment.status}
+        key="assignment-status-tag"
+      />
+    ) : undefined,
     renderTimeLimit()
   ].filter((it): it is React.ReactElement<TagType> => it !== undefined)
 
@@ -290,7 +312,7 @@ const TaskPage: React.FC = () => {
   const workspaceContext: WorkspaceContextType = {
     isAvailable: isWorkspaceAvailable,
     baseUrl,
-    authToken: authToken ?? NO_AUTH_TOKEN,
+    authToken,
     answerId: answer?.id ?? NO_ANSWER_ID,
     taskId: task.id,
     graphqlWebSocketClient,

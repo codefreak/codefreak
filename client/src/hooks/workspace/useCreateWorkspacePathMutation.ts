@@ -29,7 +29,7 @@ const useCreateWorkspacePathMutation = () => {
 
   return useWorkspaceBaseMutation(
     async ({ path, type }: { path: string; type: PathType }) => {
-      if (baseUrl === NO_BASE_URL) {
+      if (baseUrl === NO_BASE_URL || authToken === undefined) {
         return Promise.reject('No base-url for the workspace given')
       }
 

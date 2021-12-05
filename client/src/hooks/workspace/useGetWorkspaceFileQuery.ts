@@ -1,4 +1,4 @@
-import useWorkspace, { NO_BASE_URL } from './useWorkspace'
+import useWorkspace, { NO_AUTH_TOKEN, NO_BASE_URL } from './useWorkspace'
 import { fetchWithAuthentication, readFilePath } from '../../services/workspace'
 import useWorkspaceBaseQuery from './useWorkspaceBaseQuery'
 
@@ -13,7 +13,7 @@ const useGetWorkspaceFileQuery = (path: string) => {
     async () => {
       const response = await fetchWithAuthentication(fullPath, {
         method: 'GET',
-        authToken
+        authToken: authToken ?? NO_AUTH_TOKEN
       })
 
       if (!response.ok) {
@@ -30,7 +30,7 @@ const useGetWorkspaceFileQuery = (path: string) => {
 
       return response.text()
     },
-    { enabled: baseUrl !== NO_BASE_URL }
+    { enabled: baseUrl !== NO_BASE_URL && authToken !== undefined }
   )
 }
 

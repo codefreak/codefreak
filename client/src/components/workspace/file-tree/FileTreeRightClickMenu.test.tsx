@@ -43,6 +43,6 @@ describe('<FileTreeRightClickMenu />', () => {
     expect(textContent).toContain('Add file')
     expect(textContent).toContain('Add directory')
     expect(textContent).toContain('Delete')
-    expect(textContent).not.toContain('Rename')
+    expect(textContent).toContain('Rename')
   })
 })

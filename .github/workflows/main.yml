@@ -89,6 +89,8 @@ jobs:
           wait-on: 'http://localhost:8080'
           wait-on-timeout: 180
           headless: true
+          # Tests that require Kubernetes are not possible on CI right now, so these tests have to be disabled
+          env: skipKubernetesTests=true
 
       - name: Install docker-ci-deploy
         if: matrix.deploy

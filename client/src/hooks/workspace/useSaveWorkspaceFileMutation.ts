@@ -17,7 +17,7 @@ const useSaveWorkspaceFileMutation = () => {
   const fullPath = uploadFilePath(baseUrl)
   return useWorkspaceBaseMutation(
     async ({ path, contents }: { path: string; contents: string }) => {
-      if (baseUrl === NO_BASE_URL) {
+      if (baseUrl === NO_BASE_URL || authToken === undefined) {
         throw new Error('No base-url for the workspace given')
       }
 
