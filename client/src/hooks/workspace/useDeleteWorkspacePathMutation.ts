@@ -9,7 +9,7 @@ const useDeleteWorkspacePathMutation = () => {
   const { baseUrl, authToken } = useWorkspace()
 
   return useWorkspaceBaseMutation(async ({ path }: { path: string }) => {
-    if (baseUrl === NO_BASE_URL) {
+    if (baseUrl === NO_BASE_URL || authToken === undefined) {
       return Promise.reject('No base-url for the workspace given')
     }
 

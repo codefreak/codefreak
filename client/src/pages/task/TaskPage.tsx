@@ -312,7 +312,7 @@ const TaskPage: React.FC = () => {
   const workspaceContext: WorkspaceContextType = {
     isAvailable: isWorkspaceAvailable,
     baseUrl,
-    authToken: authToken ?? NO_AUTH_TOKEN,
+    authToken,
     answerId: answer?.id ?? NO_ANSWER_ID,
     taskId: task.id,
     graphqlWebSocketClient,

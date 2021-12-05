@@ -1,4 +1,4 @@
-import useWorkspace from './useWorkspace'
+import useWorkspace, { NO_BASE_URL } from './useWorkspace'
 import { Client } from 'graphql-ws'
 import useWorkspaceBaseQuery from './useWorkspaceBaseQuery'
 import GraphqlWsErrorType from '../../errors/GraphqlWsErrorType'
@@ -95,7 +95,7 @@ const useListWorkspaceFilesQuery = () => {
 
       return listFiles('/', graphqlWebSocketClient)
     },
-    { enabled: baseUrl.length > 0 && graphqlWebSocketClient !== undefined }
+    { enabled: baseUrl !== NO_BASE_URL && graphqlWebSocketClient !== undefined }
   )
 }
 
