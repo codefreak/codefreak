@@ -33,6 +33,7 @@ class WorkspaceNginxIngressModel(
       )
     }
     spec {
+      ingressClassName = "nginx"
       rules = listOf(newIngressRule {
         host = baseUrl.host
         http {
