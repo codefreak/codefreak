@@ -99,6 +99,7 @@ dependencies {
 
   // For creating workspaces
   implementation 'io.fabric8:kubernetes-client:5.8.0'
+  implementation 'org.bouncycastle:bcpkix-jdk15on:1.69'
   implementation 'com.github.fkorotkov:k8s-kotlin-dsl:3.0.1'
 
   // For workspace communication
