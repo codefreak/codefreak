@@ -45,9 +45,10 @@ class WorkspacePodModel(
           protocol = "TCP"
         })
 
+        terminationGracePeriodSeconds = 3L
         resources {
           requests = mapOf(
-            "cpu" to wsConfig.cpuLimit?.let(Quantity::parse),
+            "cpu" to Quantity.parse("0.25"),
             "memory" to wsConfig.memoryLimit?.let(Quantity::parse),
             "ephemeral-storage" to wsConfig.diskLimit?.let(Quantity::parse)
           ).filterValues(Objects::nonNull)
@@ -70,8 +71,8 @@ class WorkspacePodModel(
         // override them with our necessary environment variables
         env = env + listOf(
           newEnvVar {
-            name = "JAVA_OPTS"
-            value = "-XX:MaxRAMPercentage=70 -XX:+UseSerialGC -Xshareclasses -Xquickstart"
+            name = "JAVA_TOOL_OPTIONS"
+            value = "-XX:+UseContainerSupport -XX:MaxRAMPercentage=70 -XX:+UseSerialGC"
           },
           newEnvVar {
             name = "SPRING_APPLICATION_JSON"
@@ -94,18 +95,18 @@ class WorkspacePodModel(
             path = "/actuator/health/liveness"
             port = IntOrString("http")
           }
-          failureThreshold = 10
-          initialDelaySeconds = 1
-          periodSeconds = 1
+          failureThreshold = 30
+          initialDelaySeconds = 30
+          periodSeconds = 2
         }
         readinessProbe {
           httpGet {
             path = "/actuator/health/readiness"
             port = IntOrString("http")
           }
-          failureThreshold = 20
-          initialDelaySeconds = 1
-          periodSeconds = 1
+          failureThreshold = 30
+          initialDelaySeconds = 5
+          periodSeconds = 2
         }
       })
       volumes = listOf(
