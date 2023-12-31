@@ -62,7 +62,7 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-batch'
   implementation 'org.springframework.security:spring-security-ldap'
   implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
-  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.5'
+  implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.1'
   implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.5'
   implementation 'org.jetbrains.kotlin:kotlin-reflect:1.5.31'
   implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31'
