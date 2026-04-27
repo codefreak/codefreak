@@ -3,14 +3,6 @@
 
 version: "3"
 services:
-  proxy:
-    image: traefik:v1.7
-    ports:
-      - "8081:80"
-    command: "--docker --docker.exposedbydefault=false --docker.watch=true"
-    network_mode: bridge
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
   frontend:
     depends_on:
       - backend
@@ -44,6 +36,8 @@ services:
     working_dir: /home/gradle/project
     networks:
       - private
+    ports:
+      - "8080:8080"
     volumes:
       - ".:/home/gradle/project"
       - "/var/run/docker.sock:/var/run/docker.sock"
